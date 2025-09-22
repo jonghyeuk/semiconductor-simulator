@@ -42,12 +42,6 @@ module.exports = {
     },
   },
   plugins: [
-    // Form styles
-    require('@tailwindcss/forms')({
-      strategy: 'class',
-    }),
-    // Typography
-    require('@tailwindcss/typography'),
     // Custom plugin for simulator themes
     function({ addUtilities, theme }) {
       const simulatorUtilities = {
