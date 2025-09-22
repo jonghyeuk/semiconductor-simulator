@@ -1,0 +1,18 @@
+{
+  "projects": {
+    "default": "semiconductor-edu-simul"
+  },
+  "targets": {
+    "semiconductor-edu-simul": {
+      "hosting": {
+        "production": [
+          "semiconductor-edu-simul"
+        ],
+        "staging": [
+          "semiconductor-edu-simul-dev"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
