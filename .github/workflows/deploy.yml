@@ -2,9 +2,7 @@ name: Deploy to Firebase Hosting
 
 on:
   push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   build_and_deploy:
@@ -18,74 +16,23 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+        cache: 'npm'
         
     - name: Install dependencies
       run: npm install
+      
+    - name: Run tests
+      run: npm test -- --coverage --ci --runInBand --watchAll=false
          
     - name: Build project
       run: npm run build
       env:
-        CI: false # React 빌드 시 warning을 error로 처리하지 않음
+        CI: false
         
-    - name: Deploy to Firebase Hosting (Preview)
-      if: github.event_name == 'pull_request'
-      uses: FirebaseExtended/action-hosting-deploy@v0
-      with:
-        repoToken: '${{ secrets.GITHUB_TOKEN }}'
-        firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-        projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
-        
-    - name: Deploy to Firebase Hosting (Production)
-      if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    - name: Deploy to Firebase Hosting
       uses: FirebaseExtended/action-hosting-deploy@v0
       with:
         repoToken: '${{ secrets.GITHUB_TOKEN }}'
         firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
         projectId: '${{ secrets.FIREBASE_PROJECT_ID }}'
         channelId: live
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-files
-        path: build/
-        retention-days: 30
-
-  # 선택적: 브라우저 테스트 (Cypress, Playwright 등)
-  e2e_tests:
-    runs-on: ubuntu-latest
-    needs: build_and_deploy
-    if: github.event_name == 'pull_request'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm ci
-      
-    # E2E 테스트는 나중에 추가 가능
-    # - name: Run E2E tests
-    #   run: npm run test:e2e
-
-  # 선택적: Lighthouse 성능 검사
-  lighthouse:
-    runs-on: ubuntu-latest
-    needs: build_and_deploy
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Run Lighthouse CI
-      uses: treosh/lighthouse-ci-action@v10
-      with:
-        configPath: './lighthouserc.json'
-        temporaryPublicStorage: true
