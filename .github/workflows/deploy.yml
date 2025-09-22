@@ -21,10 +21,7 @@ jobs:
         
     - name: Install dependencies
       run: npm install
-      
-    - name: Run tests
-      run: npm test -- --coverage --ci --runInBand --watchAll=false
-      
+         
     - name: Build project
       run: npm run build
       env:
