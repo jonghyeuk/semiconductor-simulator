@@ -6,27 +6,26 @@
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.15.0",
     "recharts": "^2.8.0",
-    "web-vitals": "^3.4.0"
+    "web-vitals": "^3.4.0",
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0"
   },
   "devDependencies": {
     "react-scripts": "5.0.1",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
     "tailwindcss": "^3.3.0",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
-    "firebase-tools": "^12.0.0"
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "build:tailwind": "tailwindcss build src/styles/tailwind.css -o src/styles/output.css",
-    "predeploy": "npm run build",
-    "deploy": "firebase deploy",
-    "deploy:hosting": "firebase deploy --only hosting"
+    "test": "react-scripts test --passWithNoTests",
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -56,12 +55,5 @@
     "React"
   ],
   "author": "Semiconductor Simulator Team",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/your-username/semiconductor-simulator.git"
-  },
-  "bugs": {
-    "url": "https://github.com/your-username/semiconductor-simulator/issues"
-  }
+  "license": "MIT"
 }
