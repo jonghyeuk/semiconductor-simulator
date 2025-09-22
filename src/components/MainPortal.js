@@ -3,7 +3,7 @@ import { simulatorRegistry } from '../utils/simulatorRegistry';
 
 const MainPortal = ({ activeSimulator, onSimulatorChange }) => {
   const simulators = simulatorRegistry.getAllSimulators();
-
+  
   return (
     <div className="w-64 bg-white shadow-lg border-r border-gray-200">
       {/* 헤더 */}
@@ -47,18 +47,6 @@ const MainPortal = ({ activeSimulator, onSimulatorChange }) => {
           </div>
         ))}
       </nav>
-
-      {/* 푸터 정보 */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
-        <div className="text-xs text-gray-500 space-y-1">
-          <p className="font-medium">개발 정보</p>
-          <p>GitHub: semiconductor-simulators</p>
-          <p>Firebase 자동배포</p>
-          <p className="pt-2 text-gray-400">
-            © 2025 교육용 시뮬레이터
-          </p>
-        </div>
-      </div>
     </div>
   );
 };
