@@ -810,7 +810,10 @@ const VacuumSimulator = () => {
                       step="10"
                       value={chamberVolume}
                       onChange={handleChamberVolumeChange}
-                      className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                      className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                      style={{
+                        background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(chamberVolume - 10) / (1000 - 10) * 100}%, #e5e7eb ${(chamberVolume - 10) / (1000 - 10) * 100}%, #e5e7eb 100%)`
+                      }}
                     />
                     <div className="flex justify-between text-xs text-gray-500 mt-1">
                       <span>10L</span>
@@ -1002,7 +1005,10 @@ const VacuumSimulator = () => {
                           step="0.5"
                           value={pressureToSliderValue(targetPressure)}
                           onChange={handleTargetPressureChange}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${pressureToSliderValue(targetPressure)}%, #e5e7eb ${pressureToSliderValue(targetPressure)}%, #e5e7eb 100%)`
+                          }}
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                           <span>20mT</span>
@@ -1026,7 +1032,10 @@ const VacuumSimulator = () => {
                           step="10"
                           value={chamberVolume}
                           onChange={handleChamberVolumeChange}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #6366f1 0%, #6366f1 ${(chamberVolume - 10) / (1000 - 10) * 100}%, #e5e7eb ${(chamberVolume - 10) / (1000 - 10) * 100}%, #e5e7eb 100%)`
+                          }}
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                           <span>10L</span>
@@ -1046,7 +1055,10 @@ const VacuumSimulator = () => {
                           step="0.1"
                           value={selectedModel}
                           onChange={handleModelChange}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${(selectedModel - 1) / (4 - 1) * 100}%, #e5e7eb ${(selectedModel - 1) / (4 - 1) * 100}%, #e5e7eb 100%)`
+                          }}
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                           <span>모델1</span>
@@ -1403,7 +1415,10 @@ const VacuumSimulator = () => {
                           step="1"
                           value={gateValveOpening}
                           onChange={handleGateValveChange}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${gateValveOpening}%, #e5e7eb ${gateValveOpening}%, #e5e7eb 100%)`
+                          }}
                         />
                         <div className="text-center mt-2">
                           <span className="font-bold text-purple-600">{gateValveOpening}% 개방</span>
@@ -1647,7 +1662,10 @@ const VacuumSimulator = () => {
                           step="50"
                           value={Math.round(gasLoad / 0.00950)}
                           onChange={(e) => setGasLoad(parseFloat(e.target.value) * 0.00950)}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #10b981 0%, #10b981 ${(Math.round(gasLoad / 0.00950) - 100) / (8000 - 100) * 100}%, #e5e7eb ${(Math.round(gasLoad / 0.00950) - 100) / (8000 - 100) * 100}%, #e5e7eb 100%)`
+                          }}
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                           <span>100</span>
@@ -1669,7 +1687,10 @@ const VacuumSimulator = () => {
                           step="50"
                           value={systemPumpingSpeed}
                           onChange={handleSystemPumpingSpeedChange}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                          className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
+                          style={{
+                            background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${(systemPumpingSpeed - 100) / (2000 - 100) * 100}%, #e5e7eb ${(systemPumpingSpeed - 100) / (2000 - 100) * 100}%, #e5e7eb 100%)`
+                          }}
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                           <span>100</span>
@@ -1802,497 +1823,4 @@ const VacuumSimulator = () => {
                 <div className="lg:col-span-2 space-y-6">
                   {/* 배관 시각화 */}
                   <div className="bg-white p-6 rounded-lg border">
-                    <h3 className="text-lg font-semibold mb-4">배관 설계 및 Conductance 분석</h3>
-                    
-                    <div className="flex justify-center mb-6">
-                      <svg width="700" height="400" viewBox="0 0 700 400" className="border border-gray-300 bg-gray-50 rounded">
-                        {/* 챔버 */}
-                        <rect x="50" y="150" width="120" height="100" fill="#e3f2fd" stroke="#1976d2" strokeWidth="3" rx="10"/>
-                        <text x="110" y="140" textAnchor="middle" className="text-sm font-semibold">Chamber</text>
-                        <text x="110" y="195" textAnchor="middle" className="text-sm font-bold">P₁</text>
-                        <text x="110" y="210" textAnchor="middle" className="text-xs">1×10⁻⁵ mbar</text>
-                        
-                        {/* 배관 렌더링 - 직경에 따라 두께 변경 */}
-                        {pipeType === 'straight' && (
-                          <g>
-                            <rect 
-                              x="170" 
-                              y={200 - (pipeDiameter / 2)} 
-                              width="320" 
-                              height={pipeDiameter} 
-                              fill="#e0e0e0" rx="2"
-                            />
-                            <text x="330" y="130" textAnchor="middle" className="text-sm font-semibold">직관형 배관</text>
-                            <text x="330" y="270" textAnchor="middle" className="text-sm font-bold text-blue-600">
-                              길이: {pipeLength} cm, 직경: {pipeDiameter} cm
-                            </text>
-                          </g>
-                        )}
-                        
-                        {pipeType === 'elbow' && (
-                          <g>
-                            {/* 엘보형 배관 - 곡선으로 부드럽게 연결 */}
-                            <path
-                              d={`M 170 200 
-                                 L 270 200 
-                                 Q 290 200 290 180 
-                                 L 290 170 
-                                 Q 290 150 310 150 
-                                 L 390 150 
-                                 Q 410 150 410 170 
-                                 L 410 180 
-                                 Q 410 200 430 200 
-                                 L 490 200`}
-                              stroke="#e0e0e0"
-                              fill="none"
-                              strokeWidth={pipeDiameter}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <text x="330" y="130" textAnchor="middle" className="text-sm font-semibold">엘보형 배관</text>
-                            <text x="330" y="270" textAnchor="middle" className="text-sm font-bold text-blue-600">
-                              길이: {pipeLength} cm, 직경: {pipeDiameter} cm
-                            </text>
-                          </g>
-                        )}
-                        
-                        {pipeType === 'spiral' && (
-                          <g>
-                            {/* 스파이럴형 배관 - 사각형 루프 형태로 곡선 처리 */}
-                            <path
-                              d={`M 170 200 
-                                 L 250 200 
-                                 Q 270 200 270 180 
-                                 L 270 140 
-                                 Q 270 120 290 120 
-                                 L 370 120 
-                                 Q 390 120 390 140 
-                                 L 390 220 
-                                 Q 390 240 370 240 
-                                 L 330 240 
-                                 Q 310 240 310 220 
-                                 L 310 160 
-                                 Q 310 140 330 140 
-                                 L 350 140 
-                                 Q 370 140 370 160 
-                                 L 370 200 
-                                 L 490 200`}
-                              stroke="#e0e0e0"
-                              fill="none"
-                              strokeWidth={pipeDiameter}
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            
-                            <text x="330" y="110" textAnchor="middle" className="text-sm font-semibold">스파이럴형 배관</text>
-                            <text x="330" y="290" textAnchor="middle" className="text-sm font-bold text-blue-600">
-                              길이: 고정, 직경: {pipeDiameter} cm
-                            </text>
-                          </g>
-                        )}
-                        
-                        {/* 펌프 */}
-                        <rect x="500" y="160" width="100" height="80" fill="#fff3e0" stroke="#f57c00" strokeWidth="3" rx="10"/>
-                        <circle cx="550" cy="200" r="20" fill="none" stroke="#f57c00" strokeWidth="2"/>
-                        <text x="550" y="150" textAnchor="middle" className="text-sm font-semibold">Pump</text>
-                        <text x="550" y="195" textAnchor="middle" className="text-sm font-bold">S₀</text>
-                        <text x="550" y="210" textAnchor="middle" className="text-xs">1000 L/s</text>
-                        <text x="550" y="260" textAnchor="middle" className="text-xs">효과적 속도:</text>
-                        <text x="550" y="275" textAnchor="middle" className="text-xs font-bold text-green-600">
-                          {effectivePumpingSpeed.toFixed(0)} L/s
-                        </text>
-                        
-                        {/* 배관 정보 박스 */}
-                        <rect x="200" y="20" width="300" height="70" fill="white" stroke="#666" strokeWidth="1" rx="5"/>
-                        <text x="350" y="40" textAnchor="middle" className="text-sm font-semibold">배관 정보</text>
-                        <text x="220" y="60" className="text-xs">길이: {pipeLength} cm</text>
-                        <text x="320" y="60" className="text-xs">직경: {pipeDiameter} cm</text>
-                        <text x="420" y="60" className="text-xs">타입: {getPipeTypeDescription(pipeType)}</text>
-                        <text x="220" y="75" className="text-xs font-bold text-blue-600">
-                          Conductance: {calculatedConductance.toFixed(0)} L/s
-                        </text>
-                        
-                        {/* 공식 표시 */}
-                        <text x="350" y="340" textAnchor="middle" className="text-sm font-bold">
-                          1/S_eff = 1/S₀ + 1/C
-                        </text>
-                        <text x="350" y="360" textAnchor="middle" className="text-xs">
-                          S_eff: 효과적 펌핑속도, S₀: 펌프 속도, C: Conductance
-                        </text>
-                        
-                        {/* 화살표 */}
-                        <polygon points="170,195 180,200 170,205" fill="#666"/>
-                        <polygon points="490,195 500,200 490,205" fill="#666"/>
-                      </svg>
-                    </div>
-                  </div>
-
-                  {/* 배관 설계 설정 - 시각화 바로 아래 */}
-                  <div className="bg-white p-4 rounded-lg border">
-                    <h3 className="font-semibold mb-3">배관 설계 설정</h3>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium mb-2">배관 길이 (cm)</label>
-                        <input
-                          type="range"
-                          min="50"
-                          max="300"
-                          step="10"
-                          value={pipeLength}
-                          onChange={handlePipeLengthChange}
-                          disabled={pipeType !== 'straight'}
-                          className={`w-full h-2 rounded-lg appearance-none cursor-pointer ${
-                            pipeType !== 'straight' 
-                              ? 'bg-gray-100 cursor-not-allowed' 
-                              : 'bg-gray-200'
-                          }`}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>50cm</span>
-                          <span>300cm</span>
-                        </div>
-                        <div className="text-center mt-2">
-                          <span className={`font-bold ${
-                            pipeType !== 'straight' ? 'text-gray-400' : 'text-blue-600'
-                          }`}>
-                            {pipeType === 'straight' ? `${pipeLength} cm` : '고정길이'}
-                          </span>
-                        </div>
-                        {pipeType !== 'straight' && (
-                          <p className="text-xs text-gray-500 mt-1 text-center">
-                            {pipeType === 'elbow' ? '엘보형' : '스파이럴형'}은 길이 고정
-                          </p>
-                        )}
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium mb-2">배관 직경 (cm)</label>
-                        <input
-                          type="range"
-                          min="2"
-                          max="20"
-                          step="1"
-                          value={pipeDiameter}
-                          onChange={handlePipeDiameterChange}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>2cm</span>
-                          <span>20cm</span>
-                        </div>
-                        <div className="text-center mt-2">
-                          <span className="font-bold text-green-600">{pipeDiameter} cm</span>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <label className="block text-sm font-medium mb-2">배관 형태</label>
-                        <select
-                          value={pipeType}
-                          onChange={handlePipeTypeChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          <option value="straight">직관형 (Straight)</option>
-                          <option value="elbow">엘보형 (Elbow)</option>
-                          <option value="spiral">스파이럴형 (Spiral)</option>
-                        </select>
-                        <div className="text-center mt-2">
-                          <span className="font-bold text-purple-600">{getPipeTypeDescription(pipeType)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 배관 형태 비교 */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                    <div className="bg-blue-50 p-3 rounded border border-blue-200">
-                      <h4 className="font-semibold text-blue-800 mb-1">직관형 배관</h4>
-                      <p className="text-blue-700">• 가장 높은 Conductance</p>
-                      <p className="text-blue-700">• 설치 공간 많이 필요</p>
-                      <p className="text-blue-700">• 성능 손실 최소</p>
-                    </div>
-                    <div className="bg-orange-50 p-3 rounded border border-orange-200">
-                      <h4 className="font-semibold text-orange-800 mb-1">엘보형 배관</h4>
-                      <p className="text-orange-700">• 중간 수준의 Conductance</p>
-                      <p className="text-orange-700">• 공간 활용 효율적</p>
-                      <p className="text-orange-700">• 적당한 성능 손실</p>
-                    </div>
-                    <div className="bg-red-50 p-3 rounded border border-red-200">
-                      <h4 className="font-semibold text-red-800 mb-1">스파이럴형 배관</h4>
-                      <p className="text-red-700">• 가장 낮은 Conductance</p>
-                      <p className="text-red-700">• 공간 절약 극대화</p>
-                      <p className="text-red-700">• 성능 손실 최대</p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* 오른쪽: 성능 분석과 가이드 */}
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded border-2 border-cyan-200">
-                    <h4 className="font-semibold mb-3 text-cyan-800">성능 분석</h4>
-                    <div className="space-y-2 text-sm">
-                      <p><span className="font-medium">배관 길이:</span> 
-                        <span className="ml-2 font-bold text-blue-600">{pipeLength} cm</span></p>
-                      <p><span className="font-medium">배관 직경:</span> 
-                        <span className="ml-2 font-bold text-green-600">{pipeDiameter} cm</span></p>
-                      <p><span className="font-medium">배관 형태:</span> 
-                        <span className="ml-2 font-bold text-purple-600">{getPipeTypeDescription(pipeType)}</span></p>
-                      <p><span className="font-medium">Conductance:</span> 
-                        <span className="ml-2 font-bold text-orange-600">{calculatedConductance.toFixed(0)} L/s</span></p>
-                      <p><span className="font-medium">효과적 펌핑속도:</span> 
-                        <span className="ml-2 font-bold text-red-600">{effectivePumpingSpeed.toFixed(0)} L/s</span></p>
-                      <p><span className="font-medium">성능 손실:</span> 
-                        <span className="ml-2 font-bold text-gray-600">
-                          {((1000 - effectivePumpingSpeed) / 1000 * 100).toFixed(1)}%
-                        </span></p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-green-50 p-4 rounded border border-green-200">
-                    <h4 className="font-semibold text-green-800 mb-2">설계 가이드라인</h4>
-                    <div className="text-sm text-green-700 space-y-1">
-                      <p>• 직경 2배 → Conductance 16배↑</p>
-                      <p>• 길이 2배 → Conductance 2배↓</p>
-                      <p>• 직관 > 엘보 > 스파이럴</p>
-                      <p>• 짧고 굵게 설계하자!</p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-yellow-50 p-4 rounded border border-yellow-200">
-                    <h4 className="font-semibold text-yellow-800 mb-2">최적화 팁</h4>
-                    <div className="text-sm text-yellow-700 space-y-1">
-                      <p>• 성능 손실 20% 이하 목표</p>
-                      <p>• 공간 제약 고려</p>
-                      <p>• 청소 및 유지보수 용이성</p>
-                      <p>• 진동 및 열팽창 고려</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              {/* 더 생각해보기 섹션 */}
-              <div className="lg:col-span-3 mt-8 bg-cyan-50 p-6 rounded-lg border border-cyan-200">
-                <h3 className="text-lg font-semibold text-cyan-800 mb-4">더 생각해보기</h3>
-                <div className="space-y-4 text-sm">
-                  <div className="bg-white p-4 rounded-lg">
-                    <h4 className="font-medium text-cyan-700 mb-2">토론 주제 1: 설계 제약조건과 최적화 트레이드오프</h4>
-                    <p className="text-cyan-600 mb-2">
-                      신축 건물의 3층에서 지하 1층으로 이어지는 진공 배관을 설계해야 합니다. 
-                      건축 구조상 배관 경로에 제약이 있고, 유지보수용 접근성, 진동 차단, 열팽창 보상, 
-                      그리고 Conductance 최적화를 모두 고려해야 할 때 어떤 우선순위와 타협점을 설정하시겠습니까?
-                    </p>
-                    <p className="text-xs text-cyan-500">
-                      힌트: 안전성, 경제성, 성능, 유지보수성의 균형을 고려해보세요.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-white p-4 rounded-lg">
-                    <h4 className="font-medium text-cyan-700 mb-2">토론 주제 2: 생산 현장 배관 업그레이드 전략</h4>
-                    <p className="text-cyan-600 mb-2">
-                      기존 생산라인에서 스파이럴형 배관(성능 손실 60%)을 직관형으로 교체하여 
-                      성능을 향상시키려고 합니다. 하지만 생산 중단 비용이 시간당 1억원이고, 
-                      배관 교체에 3일이 필요합니다. 이런 상황에서 업그레이드 결정을 위한 
-                      경제성 분석 방법과 대안을 제시해보세요.
-                    </p>
-                    <p className="text-xs text-cyan-500">
-                      힌트: ROI 계산, 단계적 교체, 임시 우회 배관, 예비 시스템 등을 고려해보세요.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 테마 6: 진공 기술 퀴즈 */}
-          {activeTab === 'quiz' && (
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border border-purple-200 mb-8">
-                <h2 className="text-2xl font-bold mb-4 text-purple-800">진공 기술 퀴즈</h2>
-                <div className="bg-white p-4 rounded-lg">
-                  <h4 className="font-semibold text-purple-800 mb-2">학습 성과 확인</h4>
-                  <p className="text-purple-700 text-sm leading-relaxed">
-                    5개 테마에서 학습한 내용을 바탕으로 한 퀴즈입니다. 
-                    실무에서 활용할 수 있는 진공 기술 지식을 점검해보세요.
-                  </p>
-                </div>
-              </div>
-
-              {!quizCompleted ? (
-                <div className="bg-white p-8 rounded-lg border shadow-lg">
-                  {/* 진행률 표시 */}
-                  <div className="mb-6">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-600">
-                        문제 {currentQuestion + 1} / {quizQuestions.length}
-                      </span>
-                      <span className="text-sm font-medium text-gray-600">
-                        점수: {score} / {quizQuestions.length}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                        style={{ width: `${((currentQuestion + 1) / quizQuestions.length) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* 카테고리 표시 */}
-                  <div className="mb-4">
-                    <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-full">
-                      {quizQuestions[currentQuestion].category}
-                    </span>
-                  </div>
-
-                  {/* 문제 */}
-                  <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
-                      {quizQuestions[currentQuestion].question}
-                    </h3>
-                    
-                    {/* 선택지 */}
-                    <div className="space-y-3">
-                      {quizQuestions[currentQuestion].options.map((option, index) => (
-                        <button
-                          key={index}
-                          onClick={() => handleAnswerSelect(index)}
-                          disabled={showResult}
-                          className={`w-full p-4 text-left rounded-lg border-2 transition-all ${
-                            showResult
-                              ? index === quizQuestions[currentQuestion].correct
-                                ? 'border-green-500 bg-green-50 text-green-800'
-                                : index === selectedAnswer && selectedAnswer !== quizQuestions[currentQuestion].correct
-                                ? 'border-red-500 bg-red-50 text-red-800'
-                                : 'border-gray-200 bg-gray-50 text-gray-600'
-                              : selectedAnswer === index
-                              ? 'border-purple-500 bg-purple-50 text-purple-800'
-                              : 'border-gray-200 hover:border-purple-300 hover:bg-purple-25'
-                          }`}
-                        >
-                          <span className="font-medium mr-3">
-                            {String.fromCharCode(65 + index)}.
-                          </span>
-                          {option}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* 결과 표시 */}
-                  {showResult && (
-                    <div className={`p-4 rounded-lg border-l-4 mb-6 ${
-                      selectedAnswer === quizQuestions[currentQuestion].correct
-                        ? 'border-green-500 bg-green-50'
-                        : 'border-red-500 bg-red-50'
-                    }`}>
-                      <div className="flex items-center mb-2">
-                        <span className={`text-lg font-bold ${
-                          selectedAnswer === quizQuestions[currentQuestion].correct
-                            ? 'text-green-600'
-                            : 'text-red-600'
-                        }`}>
-                          {selectedAnswer === quizQuestions[currentQuestion].correct ? '정답!' : '오답!'}
-                        </span>
-                      </div>
-                      <p className={`text-sm ${
-                        selectedAnswer === quizQuestions[currentQuestion].correct
-                          ? 'text-green-700'
-                          : 'text-red-700'
-                      }`}>
-                        {quizQuestions[currentQuestion].explanation}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* 다음 버튼 */}
-                  <div className="flex justify-center">
-                    {!showResult ? (
-                      <button
-                        onClick={handleNextQuestion}
-                        disabled={selectedAnswer === null}
-                        className={`px-8 py-3 rounded-lg font-semibold transition-all ${
-                          selectedAnswer !== null
-                            ? 'bg-purple-600 hover:bg-purple-700 text-white'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        }`}
-                      >
-                        {currentQuestion === quizQuestions.length - 1 ? '결과 보기' : '다음 문제'}
-                      </button>
-                    ) : (
-                      <div className="text-center">
-                        <p className="text-gray-600 mb-2">
-                          {currentQuestion === quizQuestions.length - 1 ? '결과를 확인하는 중...' : '다음 문제로 넘어갑니다...'}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                /* 퀴즈 완료 화면 */
-                <div className="bg-white p-8 rounded-lg border shadow-lg text-center">
-                  <div className="mb-6">
-                    <div className="text-6xl mb-4">
-                      {score >= 8 ? '🏆' : score >= 6 ? '👍' : '📚'}
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-800 mb-2">퀴즈 완료!</h3>
-                    <p className={`text-xl font-semibold ${getScoreColor()}`}>
-                      {score} / {quizQuestions.length} 점 ({((score / quizQuestions.length) * 100).toFixed(0)}%)
-                    </p>
-                    <p className="text-gray-600 mt-2">
-                      {getScoreMessage()}
-                    </p>
-                  </div>
-
-                  {/* 상세 결과 */}
-                  <div className="mb-8">
-                    <h4 className="text-lg font-semibold text-gray-800 mb-4">카테고리별 결과</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {['펌핑 시뮬레이션', '성능 분석', '공정 제어', 'Conductance'].map((category) => {
-                        const categoryQuestions = quizQuestions.filter(q => q.category.includes(category) || 
-                          (category === '공정 제어' && q.category.includes('공정')) ||
-                          (category === 'Conductance' && (q.category.includes('Conductance') || q.category.includes('배관')))
-                        );
-                        const categoryScore = userAnswers.filter(answer => {
-                          const question = quizQuestions.find(q => q.id === answer.questionId);
-                          return question && (question.category.includes(category) || 
-                            (category === '공정 제어' && question.category.includes('공정')) ||
-                            (category === 'Conductance' && (question.category.includes('Conductance') || question.category.includes('배관')))
-                          ) && answer.correct;
-                        }).length;
-                        
-                        return (
-                          <div key={category} className="bg-gray-50 p-3 rounded-lg">
-                            <p className="font-medium text-gray-800">{category}</p>
-                            <p className="text-sm text-gray-600">
-                              {categoryScore} / {categoryQuestions.length} 정답
-                            </p>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* 다시 시작 버튼 */}
-                  <div className="space-y-4">
-                    <button
-                      onClick={resetQuiz}
-                      className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg font-semibold transition-all"
-                    >
-                      다시 도전하기
-                    </button>
-                    <p className="text-sm text-gray-500">
-                      틀린 문제가 있다면 해당 시뮬레이션 탭에서 다시 학습해보세요!
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default VacuumSimulator;
+                    <h3 className="text-lg font-semibold mb-4">배관 설계
