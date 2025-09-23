@@ -574,7 +574,7 @@ const CleaningSimulator = () => {
                 max="20"
                 value={wetCleaningParams.concentration}
                 onChange={(e) => setWetCleaningParams({...wetCleaningParams, concentration: parseInt(e.target.value)})}
-                className="w-full"
+                className="w-full border border-gray-300 rounded"
                 disabled={isProcessing}
               />
             </div>
@@ -589,7 +589,7 @@ const CleaningSimulator = () => {
                 max="150"
                 value={wetCleaningParams.temperature}
                 onChange={(e) => setWetCleaningParams({...wetCleaningParams, temperature: parseInt(e.target.value)})}
-                className="w-full"
+                className="w-full border border-gray-300 rounded"
                 disabled={isProcessing}
               />
               <div className="text-xs text-gray-500 mt-1">
@@ -607,7 +607,7 @@ const CleaningSimulator = () => {
                 max="30"
                 value={wetCleaningParams.time}
                 onChange={(e) => setWetCleaningParams({...wetCleaningParams, time: parseInt(e.target.value)})}
-                className="w-full"
+                className="w-full border border-gray-300 rounded"
                 disabled={isProcessing}
               />
             </div>
@@ -660,7 +660,7 @@ const CleaningSimulator = () => {
           </div>
           
           <div className="space-y-4">
-            <h4 className="font-semibold mb-3">웨이퍼 단면 - 산화막 제거 과정</h4>
+            <h4 className="font-semibold mb-3">웨이퍼 단면 - {getCurrentSolution()?.layerName} 제거 과정</h4>
             <WaferCrossSectionVisualization 
               solution={wetCleaningParams.solution} 
               isProcessing={isProcessing}
@@ -668,7 +668,7 @@ const CleaningSimulator = () => {
             />
             
             <div className="mt-4">
-              <h5 className="font-semibold mb-2">시간에 따른 산화막 제거 효율</h5>
+              <h5 className="font-semibold mb-2">시간에 따른 제거 효율</h5>
               <ResponsiveContainer width="100%" height={200}>
                 <LineChart data={timeData}>
                   <CartesianGrid strokeDasharray="3 3" />
@@ -1328,37 +1328,35 @@ const CleaningSimulator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="flex flex-col h-screen">
-        {/* 상단 탭 네비게이션 */}
-        <div className="bg-white shadow-sm border-b border-gray-200">
-          <div className="flex space-x-1 p-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
-                  activeTab === tab.id
-                    ? 'bg-green-100 text-green-800 font-medium'
-                    : 'text-gray-600 hover:bg-gray-100'
-                }`}
-              >
-                <span className="text-lg">{tab.icon}</span>
-                <span className="text-sm font-medium">{tab.name}</span>
-              </button>
-            ))}
-          </div>
+    <div className="flex-1 flex flex-col">
+      {/* 상단 탭 네비게이션 */}
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="flex space-x-1 p-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+                activeTab === tab.id
+                  ? 'bg-green-100 text-green-800 font-medium'
+                  : 'text-gray-600 hover:bg-gray-100'
+              }`}
+            >
+              <span className="text-lg">{tab.icon}</span>
+              <span className="text-sm font-medium">{tab.name}</span>
+            </button>
+          ))}
         </div>
-        
-        {/* 컨텐츠 영역 */}
-        <div className="flex-1 overflow-auto">
-          <div className="p-6">
-            {activeTab === 'overview' && <OverviewTab />}
-            {activeTab === 'wet-cleaning' && <WetCleaningTab />}
-            {activeTab === 'dry-cleaning' && <DryCleaningTab />}
-            {activeTab === 'ultrasonic' && <UltrasonicTab />}
-            {activeTab === 'quiz' && <QuizTab />}
-          </div>
+      </div>
+      
+      {/* 컨텐츠 영역 */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          {activeTab === 'overview' && <OverviewTab />}
+          {activeTab === 'wet-cleaning' && <WetCleaningTab />}
+          {activeTab === 'dry-cleaning' && <DryCleaningTab />}
+          {activeTab === 'ultrasonic' && <UltrasonicTab />}
+          {activeTab === 'quiz' && <QuizTab />}
         </div>
       </div>
     </div>
