@@ -38,24 +38,27 @@ class SimulatorRegistry {
       }
     });
 
-    // 웨이퍼 세정 시뮬레이터 (준비중)
+    // 웨이퍼 세정 시뮬레이터 (완성됨)
     this.register({
       id: 'cleaning',
       name: '웨이퍼 세정',
       icon: '🧽',
       description: 'RCA 세정 및 표면 처리',
-      component: null,
-      available: false,
+      component: CleaningSimulator,
+      available: true,
       category: 'process',
       order: 2,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-02-01',
+        version: '1.0.0',
+        lastUpdated: '2025-01-23',
+        author: 'Semiconductor Simulator Team',
         features: [
-          'RCA-1/RCA-2 공정',
-          '화학적 세정 메커니즘',
-          '오염물질 제거 효과',
-          '세정액 농도 최적화'
+          '세정 공정 개요 및 전략',
+          '습식 세정 실시간 시뮬레이션',
+          '건식 세정 방법 비교',
+          '초음파 세정 캐비테이션 효과',
+          '웨이퍼 단면 제거 과정 시각화',
+          '중급 수준 세정 평가 퀴즈'
         ]
       }
     });
