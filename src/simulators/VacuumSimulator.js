@@ -14,11 +14,19 @@ const VacuumSimulator = () => {
   const [gateValveOpening, setGateValveOpening] = useState(100);
   const [chamberVolume, setChamberVolume] = useState(100);
   
-  // 애니메이션 상태
+  // 새로운 TMP 시뮬레이션 상태들
   const [isPlaying, setIsPlaying] = useState(false);
   const [animationPressure, setAnimationPressure] = useState(760);
   const [animationSpeed, setAnimationSpeed] = useState(250);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [apcValveOpen, setApcValveOpen] = useState(false);
+  const [forelineValveOpen, setForelineValveOpen] = useState(false);
+  const [roughingValveOpen, setRoughingValveOpen] = useState(false);
+  const [turboSpeed, setTurboSpeed] = useState(0);
+  const [forelinePressure, setForelinePressure] = useState(760);
+  const [currentPhase, setCurrentPhase] = useState('준비');
+  const [turboStartTime, setTurboStartTime] = useState(null);
+  const [valveSwitchTime, setValveSwitchTime] = useState(null);
   
   // 새 탭용 상태들
   const [gasLoad, setGasLoad] = useState(7.5); // Q (Torr·L/s) - mbar에서 변환
@@ -438,7 +446,8 @@ const VacuumSimulator = () => {
     const newPressure = gasLoadRate / Math.max(effectiveSpeed, 1);
     setFixedPressure(newPressure);
   }, [gasFlowRate, gateValveOpening]);
-  
+
+  // TMP 시뮬레이션 useEffect
   useEffect(() => {
     let interval;
     if (isPlaying) {
@@ -446,33 +455,104 @@ const VacuumSimulator = () => {
         setElapsedTime(prevTime => {
           const newTime = prevTime + 0.1;
           const scaleFactor = chamberVolume / 100;
-          const totalTime = 300 * scaleFactor;
-          const phase1Time = 30 * scaleFactor;
-          const phase2Time = 120 * scaleFactor;
           
-          let newPressure;
-          if (newTime < phase1Time) {
-            newPressure = 760 * Math.exp(-newTime / (8 * scaleFactor)) + 1;
-          } else if (newTime < phase2Time) {
-            newPressure = 1 * Math.exp(-(newTime - phase1Time) / (25 * scaleFactor)) + 0.01;
-          } else {
-            const targetPressure = 0.02;
-            newPressure = Math.max(targetPressure, 0.01 * Math.exp(-(newTime - phase2Time) / (60 * scaleFactor)) + targetPressure);
+          let newPressure = animationPressure;
+          let newTurboSpeed = turboSpeed;
+          let newForelinePressure = forelinePressure;
+          let phase = currentPhase;
+          
+          // 자동 모드 시퀀스
+          // Phase 1: 준비 단계
+          if (newTime < 5) {
+            phase = '준비 중...';
+            setRoughingValveOpen(false);
+            setApcValveOpen(false);
+            setForelineValveOpen(false);
+            newTurboSpeed = 0;
+          } 
+          // Phase 2: 러핑 밸브 개방
+          else if (newTime < 5.5) {
+            phase = '러핑 밸브 개방';
+            setRoughingValveOpen(true);
+            setApcValveOpen(false);
+            setForelineValveOpen(false);
+          } 
+          // Phase 3: 러핑 펌프로 저진공 생성 (0.05 Torr까지)
+          else if (animationPressure > 0.05) {
+            phase = '저진공 생성 중 (러핑 펌프)';
+            // 러핑 펌프로 압력 감소 - 0.05에 도달할 수 있도록 수정
+            const roughingTime = newTime - 5.5;
+            newPressure = Math.max(0.05, 760 * Math.exp(-(roughingTime) / (3 * scaleFactor)));
+            newForelinePressure = newPressure;
+            
+            // 러핑 밸브만 열려있는 상태 유지
+            setRoughingValveOpen(true);
+            setApcValveOpen(false);
+            setForelineValveOpen(false);
+            newTurboSpeed = 0;
+          }
+          // Phase 4: 0.05 Torr 도달 후 즉시 밸브 전환 및 TMP 시작
+          else if (animationPressure <= 0.05) {
+            // 밸브 전환 시작 시간 기록 (한 번만)
+            if (valveSwitchTime === null) {
+              setValveSwitchTime(newTime);
+            }
+            
+            const switchDuration = newTime - (valveSwitchTime || newTime);
+            
+            // 매우 짧은 전환 시간 (0.5초)
+            if (switchDuration < 0.5) {
+              phase = '밸브 전환 중... (러핑→TMP)';
+              setRoughingValveOpen(false);
+              setApcValveOpen(false);
+              setForelineValveOpen(false);
+              newTurboSpeed = 0;
+              // 전환 중에는 압력 유지
+              newPressure = animationPressure;
+              newForelinePressure = animationPressure;
+            }
+            // 즉시 TMP 운전 시작
+            else {
+              phase = '터보 펌프 운전 중';
+              setRoughingValveOpen(false);
+              setApcValveOpen(true);
+              setForelineValveOpen(true);
+              
+              // TMP 시작 시간 기록 (한 번만)
+              if (turboStartTime === null) {
+                setTurboStartTime(newTime);
+              }
+              
+              const turboTime = newTime - (turboStartTime || newTime);
+              
+              // TMP 즉시 가속 시작 - 빠른 응답
+              newTurboSpeed = Math.min(300, turboTime * 25); // 12초에 300 L/s 도달
+              
+              // 고진공 생성 시작
+              if (newTurboSpeed > 20) { // TMP가 조금만 가속되어도 시작
+                newPressure = Math.max(1e-6, 0.05 * Math.exp(-turboTime / (8 * scaleFactor)));
+              } else {
+                // TMP 초기 가속 중에도 압력 감소 시작
+                newPressure = Math.max(0.01, animationPressure * 0.995);
+              }
+              
+              // 포라인 압력은 TMP 배출부 압력
+              newForelinePressure = Math.max(0.05, newPressure * 30);
+            }
           }
           
           setAnimationPressure(newPressure);
-          setAnimationSpeed(Math.round(calculatePumpingSpeed(newPressure, 2)));
+          setAnimationSpeed(Math.round(calculatePumpingSpeed(newPressure)));
+          setTurboSpeed(newTurboSpeed);
+          setForelinePressure(newForelinePressure);
+          setCurrentPhase(phase);
           
-          if (newTime >= totalTime) {
-            setIsPlaying(false);
-            return totalTime;
-          }
           return newTime;
         });
       }, 100);
     }
     return () => clearInterval(interval);
-  }, [isPlaying, chamberVolume]);
+  }, [isPlaying, chamberVolume, animationPressure, currentPhase, turboSpeed, forelinePressure, valveSwitchTime, turboStartTime]);
   
   // Q=P×S 관계 계산
   useEffect(() => {
@@ -527,6 +607,14 @@ const VacuumSimulator = () => {
     setAnimationPressure(760);
     setAnimationSpeed(250);
     setElapsedTime(0);
+    setTurboSpeed(0);
+    setForelinePressure(760);
+    setApcValveOpen(false);
+    setForelineValveOpen(false);
+    setRoughingValveOpen(false);
+    setCurrentPhase('준비');
+    setTurboStartTime(null);
+    setValveSwitchTime(null);
   };
   
   // 새로운 이벤트 핸들러들
@@ -640,103 +728,217 @@ const VacuumSimulator = () => {
               {/* 왼쪽: 제목과 시뮬레이션 */}
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
-                  <h2 className="text-2xl font-bold mb-4 text-indigo-800">실시간 펌핑 시뮬레이션</h2>
+                  <h2 className="text-2xl font-bold mb-4 text-indigo-800">DRY PUMP WITH TMP 시뮬레이션</h2>
                   <div className="bg-white p-4 rounded-lg">
                     <h4 className="font-semibold text-indigo-800 mb-2">목적과 이유</h4>
                     <p className="text-indigo-700 text-sm leading-relaxed">
-                      <strong>왜 이 시뮬레이션이 필요한가?</strong><br/>
-                      진공펌프의 펌핑 과정은 실제로는 수 분에서 수 시간에 걸쳐 일어나는 현상입니다. 
-                      이론적으로만 배우기 어려운 "시간에 따른 압력 변화", "펌프 성능 변화", "포화점 도달" 등의 
-                      개념을 시각적으로 체험할 수 있게 합니다.
+                      <strong>실제 산업용 진공 시스템을 체험해보세요!</strong><br/>
+                      현실적인 러핑 펌프(Roughing) → 터보분자펌프(TMP) 전환 과정을 통해 
+                      다단계 진공 생성의 필요성과 각 구간별 펌프의 역할을 직관적으로 이해할 수 있습니다.
                     </p>
                   </div>
                 </div>
                 
-                {/* 시뮬레이션 개략도 */}
+                {/* DRY PUMP WITH TMP 시뮬레이션 개략도 */}
                 <div className="bg-white p-6 rounded-lg border">
-                  <div className="flex justify-center mb-4">
-                    <svg width="700" height="220" viewBox="0 0 700 220" className="border border-gray-300 bg-white rounded">
-                      <rect 
-                        x="50" y="80" width="150" height="80" 
-                        fill={animationPressure > 100 ? "#ffcdd2" : animationPressure > 1 ? "#fff3e0" : animationPressure > 1e-3 ? "#e8f5e8" : "#e3f2fd"} 
-                        stroke="#1976d2" strokeWidth="3" rx="10"
-                      />
-                      
-                      <text x="125" y="70" textAnchor="middle" className="text-sm font-semibold">진공 챔버</text>
-                      <text x="125" y="185" textAnchor="middle" className="text-xs">체적: {chamberVolume}L</text>
-                      <text x="125" y="200" textAnchor="middle" className="text-xs">압력:</text>
-                      <text x="125" y="215" textAnchor="middle" className="text-xs text-blue-600 font-bold">
-                        {animationPressure >= 1 ? animationPressure.toFixed(1) : animationPressure.toExponential(2)} Torr
-                      </text>
-                      
-                      {/* 분자 시각화 */}
-                      {Array.from({length: Math.min(25, Math.max(2, Math.floor(animationPressure / 5)))}).map((_, i) => {
-                        const baseCount = animationPressure <= 0.1 ? 2 : 0;
-                        const dynamicCount = animationPressure > 0.1 ? Math.floor(animationPressure / 5) : 0;
+                  <div className="relative w-full max-w-2xl mx-auto">
+                    <div className="relative w-full border border-gray-300 rounded-lg bg-gray-50" style={{ maxWidth: '800px', margin: '0 auto' }}>
+                      <svg width="100%" height="500" viewBox="0 0 400 500" className="w-full">
+                        {/* CHAMBER */}
+                        <rect x="75" y="30" width="250" height="100" fill="#90EE90" stroke="none"/>
+                        <text x="200" y="60" textAnchor="middle" fontSize="20" fontWeight="bold">CHAMBER</text>
+                        <text x="200" y="85" textAnchor="middle" fontSize="14" fontWeight="bold">Process chamber</text>
                         
-                        if (i >= baseCount + dynamicCount) return null;
+                        {/* APC (Adaptive Pressure Control) */}
+                        <rect x="160" y="140" width="80" height="40" fill="#333" stroke="none"/>
+                        <text x="200" y="155" textAnchor="middle" fontSize="14" fontWeight="bold" fill="white">APC</text>
+                        <text x="200" y="170" textAnchor="middle" fontSize="10" fontWeight="bold" fill="white">
+                          {apcValveOpen ? "100% OPEN" : "0% OPEN"}
+                        </text>
+                        <text x="340" y="155" textAnchor="middle" fontSize="14" fontWeight="bold">Adaptive Pressure</text>
+                        <text x="340" y="170" textAnchor="middle" fontSize="14" fontWeight="bold">Control</text>
                         
-                        const isStuckMolecule = i < baseCount && animationPressure <= 0.1;
-                        const animationClass = isStuckMolecule ? "" : (isPlaying ? "animate-pulse" : "");
+                        {/* TMP */}
+                        <rect x="140" y="190" width="120" height="80" fill="#90EE90" stroke="none"/>
+                        <text x="200" y="220" textAnchor="middle" fontSize="18" fontWeight="bold">TMP</text>
                         
-                        return (
-                          <circle 
-                            key={i}
-                            cx={70 + (i % 6) * 20} 
-                            cy={100 + Math.floor(i / 6) * 15} 
-                            r={isStuckMolecule ? "2.5" : "2"} 
-                            fill={isStuckMolecule ? "#d32f2f" : "#666"}
-                            className={animationClass}
-                            style={{ opacity: isStuckMolecule ? 0.8 : 1 }}
-                          />
-                        );
-                      })}
-                      
-                      {/* 배관 */}
-                      <line x1="200" y1="120" x2="280" y2="120" stroke="#666" strokeWidth="8"/>
-                      {isPlaying && (
-                        <line x1="200" y1="120" x2="280" y2="120" stroke="#4fc3f7" strokeWidth="4">
-                          <animate attributeName="stroke-dasharray" values="0,20;20,0;0,20" dur="1s" repeatCount="indefinite"/>
-                        </line>
-                      )}
-                      
-                      {/* 진공펌프 */}
-                      <rect x="280" y="90" width="100" height="60" fill="#fff3e0" stroke="#f57c00" strokeWidth="3" rx="5"/>
-                      <circle cx="330" cy="120" r="15" fill="none" stroke="#f57c00" strokeWidth="2">
-                        {isPlaying && (
-                          <animateTransform 
-                            attributeName="transform" 
-                            type="rotate" 
-                            values="0 330 120;360 330 120" 
-                            dur={`${Math.max(0.5, 2 - animationSpeed / 1000)}s`} 
-                            repeatCount="indefinite"
-                          />
+                        {/* DRYPUMP */}
+                        <rect x="120" y="380" width="160" height="100" fill="#90EE90" stroke="none"/>
+                        <text x="200" y="440" textAnchor="middle" fontSize="20" fontWeight="bold">DRYPUMP</text>
+                        
+                        {/* Connections with rounded corners */}
+                        {/* Chamber to APC (direct vertical connection) */}
+                        <line x1="200" y1="130" x2="200" y2="140" stroke="#666" strokeWidth="10"/>
+                        
+                        {/* APC to TMP (direct vertical connection) */}
+                        <line x1="200" y1="180" x2="200" y2="190" stroke="#666" strokeWidth="10"/>
+                        
+                        {/* TMP to Foreline (direct vertical connection) */}
+                        <line x1="200" y1="270" x2="200" y2="280" stroke="#666" strokeWidth="10"/>
+                        
+                        {/* Foreline to Dry Pump (direct vertical connection) */}
+                        <line x1="200" y1="320" x2="200" y2="380" stroke="#666" strokeWidth="10"/>
+                        
+                        {/* Chamber to Roughing (rounded) */}
+                        <path d="M 75 80 Q 55 80 55 100 L 55 180" stroke="#666" strokeWidth="10" fill="none"/>
+                        
+                        {/* Roughing to Dry Pump (rounded) */}
+                        <line x1="55" y1="260" x2="55" y2="350" stroke="#666" strokeWidth="10"/>
+                        <path d="M 55 350 Q 55 370 75 370 L 170 370" stroke="#666" strokeWidth="10" fill="none"/>
+                        <path d="M 170 370 Q 185 370 185 375 L 185 380" stroke="#666" strokeWidth="10" fill="none"/>
+                        
+                        {/* 플로우 애니메이션 오버레이 */}
+                        {/* Chamber to APC to TMP to Foreline to Dry Pump flow (vertical) */}
+                        {apcValveOpen && forelineValveOpen && isPlaying && (
+                          <g>
+                            <line x1="200" y1="130" x2="200" y2="140" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="0.6s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="200" y1="180" x2="200" y2="190" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="0.6s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="200" y1="270" x2="200" y2="280" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="0.8s" repeatCount="indefinite"/>
+                            </line>
+                            <line x1="200" y1="320" x2="200" y2="380" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="1.0s" repeatCount="indefinite"/>
+                            </line>
+                          </g>
                         )}
-                      </circle>
-                      <text x="330" y="80" textAnchor="middle" className="text-sm font-semibold">진공펌프</text>
-                      <text x="330" y="175" textAnchor="middle" className="text-xs">
-                        배기속도: {animationSpeed} m³/h
-                      </text>
+                        
+                        {/* Roughing flow (rounded) - 러핑 밸브가 열리고 APC가 닫혔을 때만 */}
+                        {roughingValveOpen && !apcValveOpen && isPlaying && (
+                          <g>
+                            <path d="M 75 80 Q 55 80 55 100 L 55 180" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10" fill="none">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="1.0s" repeatCount="indefinite"/>
+                            </path>
+                            <line x1="55" y1="260" x2="55" y2="350" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="1.2s" repeatCount="indefinite"/>
+                            </line>
+                            <path d="M 55 350 Q 55 370 75 370 L 170 370" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10" fill="none">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="1.4s" repeatCount="indefinite"/>
+                            </path>
+                            <path d="M 170 370 Q 185 370 185 375 L 185 380" stroke="#4fc3f7" strokeWidth="8" strokeDasharray="10,10" fill="none">
+                              <animate attributeName="stroke-dashoffset" values="20;0" dur="0.8s" repeatCount="indefinite"/>
+                            </path>
+                          </g>
+                        )}
+                        
+                        {/* Exhaust animation - 실제 펌프 작동 중일 때만 */}
+                        {isPlaying && ((forelineValveOpen && apcValveOpen) || (roughingValveOpen && !apcValveOpen)) && (
+                          <g>
+                            <circle cx="200" cy="490" r="3" fill="#4fc3f7" opacity="0.7">
+                              <animate attributeName="r" values="3;8;3" dur="1s" repeatCount="indefinite"/>
+                              <animate attributeName="opacity" values="0.7;0;0.7" dur="1s" repeatCount="indefinite"/>
+                            </circle>
+                          </g>
+                        )}
+                        
+                        {/* 새로운 밸브들 (가장 마지막에 렌더링) */}
+                        {/* ROUGHING VALVE - 완전히 새로운 디자인 */}
+                        <g>
+                          {/* 위쪽 삼각형 (아래로 뾰족) */}
+                          <polygon points="45,205 65,205 55,220" fill="#4169E1" stroke="#000" strokeWidth="2"/>
+                          {/* 아래쪽 삼각형 (위로 뾰족) */}
+                          <polygon points="45,235 65,235 55,220" fill="#4169E1" stroke="#000" strokeWidth="2"/>
+                          {/* 중앙 연결점 */}
+                          <circle cx="55" cy="220" r="5" fill="#FFD700" stroke="#000" strokeWidth="2"/>
+                          {/* 밸브 라벨 */}
+                          <text x="55" y="195" textAnchor="middle" fontSize="10" fontWeight="bold" fill="black">ROUGHING</text>
+                          <text x="55" y="250" textAnchor="middle" fontSize="10" fontWeight="bold" fill="black">VALVE</text>
+                          {/* 상태 표시 */}
+                          <text x="80" y="225" fontSize="12" fontWeight="bold" fill={roughingValveOpen ? "#0066ff" : "#ff0000"}>
+                            {roughingValveOpen ? "ON" : "OFF"}
+                          </text>
+                        </g>
+                        
+                        {/* FORELINE VALVE - 90도 회전된 디자인 */}
+                        <g>
+                          {/* 위쪽 삼각형 (아래쪽으로 뾰족) */}
+                          <polygon points="190,285 210,285 200,300" fill="#4169E1" stroke="#000" strokeWidth="2"/>
+                          {/* 아래쪽 삼각형 (위쪽으로 뾰족) */}
+                          <polygon points="190,315 210,315 200,300" fill="#4169E1" stroke="#000" strokeWidth="2"/>
+                          {/* 중앙 연결점 */}
+                          <circle cx="200" cy="300" r="5" fill="#FFD700" stroke="#000" strokeWidth="2"/>
+                          {/* 밸브 라벨 */}
+                          <text x="200" y="280" textAnchor="middle" fontSize="10" fontWeight="bold" fill="black">FORELINE</text>
+                          {/* 상태 표시 */}
+                          <text x="225" y="305" fontSize="12" fontWeight="bold" fill={forelineValveOpen ? "#0066ff" : "#ff0000"}>
+                            {forelineValveOpen ? "ON" : "OFF"}
+                          </text>
+                        </g>
+                        
+                        {/* TMP 블레이드 - 항상 표시, 작동시에만 회전 (최상단 렌더링) */}
+                        <g>
+                          {/* 회전하는 블레이드들 - TMP 중앙에 배치 */}
+                          <g transform="translate(200, 235)">
+                            <g>
+                              {isPlaying && apcValveOpen && turboSpeed > 0 && (
+                                <animateTransform
+                                  attributeName="transform"
+                                  type="rotate"
+                                  values="0;360"
+                                  dur="0.1s"
+                                  repeatCount="indefinite"/>
+                              )}
+                              {/* 블레이드 1 */}
+                              <line x1="-18" y1="0" x2="18" y2="0" stroke="#ff0000" strokeWidth="4"/>
+                              {/* 블레이드 2 */}
+                              <line x1="0" y1="-18" x2="0" y2="18" stroke="#ff0000" strokeWidth="4"/>
+                              {/* 블레이드 3 */}
+                              <line x1="-12" y1="-12" x2="12" y2="12" stroke="#ff0000" strokeWidth="3"/>
+                              {/* 블레이드 4 */}
+                              <line x1="-12" y1="12" x2="12" y2="-12" stroke="#ff0000" strokeWidth="3"/>
+                            </g>
+                          </g>
+                          {/* 중심점 */}
+                          <circle cx="200" cy="235" r="4" fill="#000"/>
+                        </g>
+                      </svg>
                       
-                      {/* 배기 */}
-                      <line x1="380" y1="120" x2="430" y2="120" stroke="#666" strokeWidth="8"/>
-                      <polygon points="430,110 450,120 430,130" fill="#666"/>
-                      {isPlaying && (
-                        <circle cx="460" cy="120" r="3" fill="#4fc3f7" opacity="0.7">
-                          <animate attributeName="cx" values="460;500;460" dur="0.8s" repeatCount="indefinite"/>
-                          <animate attributeName="opacity" values="0.7;0;0.7" dur="0.8s" repeatCount="indefinite"/>
-                        </circle>
-                      )}
+                      {/* 챔버 압력 표시 (챔버 내부) */}
+                      <div className="absolute top-8 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white px-3 py-1 rounded font-bold text-sm">
+                        {animationPressure >= 1 ? animationPressure.toFixed(1) : animationPressure.toExponential(2)} Torr
+                      </div>
                       
-                      {/* 시간 표시 */}
-                      <text x="350" y="30" textAnchor="middle" className="text-lg font-bold text-purple-600">
-                        {formatTime(elapsedTime)}
-                      </text>
-                    </svg>
+                      {/* 시간과 상태 표시 (상단) */}
+                      <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-indigo-600 text-white px-4 py-2 rounded-lg">
+                        <div className="text-center">
+                          <div className="font-bold">{formatTime(elapsedTime)}</div>
+                          <div className="text-xs">{currentPhase}</div>
+                        </div>
+                      </div>
+                      
+                      {/* TMP 속도 표시 */}
+                      <div className="absolute top-36 right-8 bg-orange-100 px-2 py-1 rounded border text-center">
+                        <div className="text-xs font-semibold text-orange-800">TMP</div>
+                        <div className="text-sm font-bold text-orange-600">{Math.round(turboSpeed)} L/s</div>
+                        {isPlaying && apcValveOpen && turboSpeed > 0 && (
+                          <div className="w-4 h-4 mx-auto mt-1 border-2 border-orange-500 rounded-full animate-spin border-t-transparent"></div>
+                        )}
+                      </div>
+                      
+                      {/* 포라인 압력 표시 */}
+                      <div className="absolute top-52 right-32 bg-purple-100 px-2 py-1 rounded border text-center">
+                        <div className="text-xs font-semibold text-purple-800">Foreline</div>
+                        <div className="text-sm font-bold text-purple-600">
+                          {forelinePressure >= 1 ? forelinePressure.toFixed(1) : forelinePressure.toFixed(3)} Torr
+                        </div>
+                      </div>
+                      
+                      {/* DRYPUMP 상태 */}
+                      <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-pink-100 px-3 py-2 rounded border text-center">
+                        <div className="text-sm font-semibold text-pink-800">DRYPUMP</div>
+                        <div className="text-lg font-bold text-pink-600">{animationSpeed} m³/h</div>
+                        {isPlaying && ((forelineValveOpen && apcValveOpen) || (roughingValveOpen && !apcValveOpen)) && (
+                          <div className="w-6 h-6 mx-auto mt-1 border-2 border-pink-500 rounded-full animate-spin border-t-transparent"></div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   
                   {/* 컨트롤 버튼 */}
-                  <div className="flex justify-center gap-4">
+                  <div className="flex justify-center gap-4 mt-6">
                     <button
                       onClick={handlePlayPause}
                       className={`px-6 py-2 rounded-md font-semibold ${
@@ -764,38 +966,31 @@ const VacuumSimulator = () => {
                   <div className="space-y-2 text-sm">
                     <p><span className="font-medium">경과 시간:</span>
                       <span className="ml-2 font-bold text-purple-600">{formatTime(elapsedTime)}</span></p>
-                    <p><span className="font-medium">현재 압력:</span>
+                    <p><span className="font-medium">챔버 압력:</span>
                       <span className="ml-2 font-bold text-blue-600">
                         {animationPressure >= 1 ? animationPressure.toFixed(1) : animationPressure.toExponential(2)} Torr
                       </span></p>
-                    <p><span className="font-medium">배기속도:</span>
-                      <span className="ml-2 font-bold text-green-600">{animationSpeed} m³/h</span></p>
+                    <p><span className="font-medium">포라인 압력:</span>
+                      <span className="ml-2 font-bold text-purple-600">
+                        {forelinePressure >= 1 ? forelinePressure.toFixed(1) : forelinePressure.toFixed(3)} Torr
+                      </span></p>
+                    <p><span className="font-medium">TMP 속도:</span>
+                      <span className="ml-2 font-bold text-orange-600">{Math.round(turboSpeed)} L/s</span></p>
+                    <p><span className="font-medium">드라이펌프:</span>
+                      <span className="ml-2 font-bold text-pink-600">{animationSpeed} m³/h</span></p>
                     <p><span className="font-medium">진공단계:</span>
-                      <span className="ml-2 font-bold text-orange-600">{getVacuumStage(animationPressure)}</span></p>
-                    <p><span className="font-medium">챔버 크기:</span>
-                      <span className="ml-2 font-bold text-indigo-600">{chamberVolume}L</span></p>
-                    <p><span className="font-medium">예상 완료시간:</span>
-                      <span className="ml-2 font-bold text-red-600">{Math.round(300 * chamberVolume / 100 / 60)}분</span></p>
-                  </div>
-                </div>
-                
-                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                  <h4 className="font-semibold text-yellow-800 mb-2">펌핑 특성 ({chamberVolume}L 챔버)</h4>
-                  <div className="text-sm text-yellow-700 space-y-1">
-                    <p>• <strong>0-{Math.round(30 * chamberVolume / 100)}초:</strong> 빠른 초기 배기 (760→1 Torr)</p>
-                    <p>• <strong>{Math.round(30 * chamberVolume / 100)}-{Math.round(120 * chamberVolume / 100)}초:</strong> 중진공 형성 (1→0.01 Torr)</p>
-                    <p>• <strong>{Math.round(120 * chamberVolume / 100)}초+:</strong> 포화점 접근 (→20 mTorr)</p>
-                    <p>• <strong>{Math.round(300 * chamberVolume / 100 / 60)}분:</strong> 시뮬레이션 완료</p>
+                      <span className="ml-2 font-bold text-green-600">{getVacuumStage(animationPressure)}</span></p>
                   </div>
                 </div>
                 
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-                  <h4 className="font-semibold text-blue-800 mb-2">관찰 포인트</h4>
+                  <h4 className="font-semibold text-blue-800 mb-2">밸브 상태</h4>
                   <div className="text-sm text-blue-700 space-y-1">
-                    <p>• 초기: 빠른 압력 감소</p>
-                    <p>• 중간: 배기속도 변화</p>
-                    <p>• 후반: 20 mTorr 포화점 도달</p>
-                    <p>• 챔버 색상 변화 주목!</p>
+                    <p>• <strong>APC 밸브:</strong> {apcValveOpen ? "열림" : "닫힘"}</p>
+                    <p>• <strong>Foreline 밸브:</strong> {forelineValveOpen ? "열림" : "닫힘"}</p>
+                    <p>• <strong>Roughing 밸브:</strong> {roughingValveOpen ? "열림" : "닫힘"}</p>
+                    <p>• <strong>TMP 상태:</strong> {apcValveOpen && isPlaying ? "가동중" : "정지"}</p>
+                    <p>• <strong>드라이펌프:</strong> {((forelineValveOpen && apcValveOpen) || (roughingValveOpen && !apcValveOpen)) && isPlaying ? "가동중" : "정지"}</p>
                   </div>
                 </div>
                 
@@ -825,6 +1020,28 @@ const VacuumSimulator = () => {
                     </div>
                   </div>
                 </div>
+                
+                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                  <h4 className="font-semibold text-emerald-800 mb-2">시스템 특징</h4>
+                  <div className="text-sm text-emerald-700 space-y-1">
+                    <p>• APC: 적응형 압력 제어 밸브</p>
+                    <p>• TMP: 터보분자펌프로 고진공 생성</p>
+                    <p>• 드라이펌프: 백킹 펌프 역할</p>
+                    <p>• 러핑: 초기 저진공 생성용</p>
+                    <p>• 포라인: TMP 배출라인 제어</p>
+                  </div>
+                </div>
+                
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <h4 className="font-semibold text-yellow-800 mb-2">자동 시퀀스</h4>
+                  <div className="text-sm text-yellow-700 space-y-1">
+                    <p><strong>1단계:</strong> 준비 (0-5초)</p>
+                    <p><strong>2단계:</strong> 러핑 밸브 개방</p>
+                    <p><strong>3단계:</strong> 러핑 펌프로 0.05 Torr (약 30초)</p>
+                    <p><strong>4단계:</strong> 밸브 전환 (0.5초)</p>
+                    <p><strong>5단계:</strong> TMP 가동 → 10⁻⁶ Torr (약 1분)</p>
+                  </div>
+                </div>
               </div>
               
               {/* 더 생각해보기 섹션 */}
@@ -832,24 +1049,26 @@ const VacuumSimulator = () => {
                 <h3 className="text-lg font-semibold text-emerald-800 mb-4">더 생각해보기</h3>
                 <div className="space-y-4 text-sm">
                   <div className="bg-white p-4 rounded-lg">
-                    <h4 className="font-medium text-emerald-700 mb-2">토론 주제 1: 펌핑 시간 최적화 전략</h4>
+                    <h4 className="font-medium text-emerald-700 mb-2">토론 주제 1: 다단계 펌핑의 필요성</h4>
                     <p className="text-emerald-600 mb-2">
-                      1000L 대형 챔버에서 760 Torr → 1 Torr 도달시간이 30분이 걸린다면, 
-                      시간을 15분으로 단축하기 위한 현실적인 방법들을 제시하고 각각의 장단점을 분석해보세요.
+                      왜 단일 펌프로는 760 Torr에서 바로 10⁻⁶ Torr까지 갈 수 없을까요? 
+                      러핑 펌프와 터보분자펌프가 각각 담당하는 압력 범위와 물리적 한계를 분석하고, 
+                      만약 단일 펌프로 모든 압력 구간을 담당한다면 어떤 문제가 발생할지 토론해보세요.
                     </p>
                     <p className="text-xs text-emerald-500">
-                      힌트: 펌프 교체, 병렬 연결, 예열, 배관 최적화 등을 고려해보세요.
+                      힌트: 각 펌프의 작동 원리, 가스 분자의 평균 자유 행정, 펌프 효율 등을 고려해보세요.
                     </p>
                   </div>
                   
                   <div className="bg-white p-4 rounded-lg">
-                    <h4 className="font-medium text-emerald-700 mb-2">토론 주제 2: 포화점 문제 해결</h4>
+                    <h4 className="font-medium text-emerald-700 mb-2">토론 주제 2: 밸브 전환 타이밍 최적화</h4>
                     <p className="text-emerald-600 mb-2">
-                      시뮬레이션에서 20 mTorr 포화점에 도달한 후 더 이상 압력이 내려가지 않습니다. 
-                      실제 산업 현장에서 이런 상황이 발생했을 때 원인을 찾고 해결하는 체계적인 접근 방법을 설명해보세요.
+                      현재 시뮬레이션에서는 0.05 Torr에서 러핑 펌프에서 TMP로 전환합니다. 
+                      만약 이 전환 압력을 0.1 Torr 또는 0.01 Torr로 바꾼다면 어떤 장단점이 있을까요? 
+                      전체 펌핑 시간, 에너지 효율, 시스템 안정성을 종합적으로 고려하여 최적 전환점을 제시해보세요.
                     </p>
                     <p className="text-xs text-emerald-500">
-                      힌트: 가스 방출원, 누설, 펌프 한계, 측정 오차 등을 고려해보세요.
+                      힌트: TMP 시작 조건, 러핑 펌프 한계, 백킹 압력 등을 고려해보세요.
                     </p>
                   </div>
                 </div>
