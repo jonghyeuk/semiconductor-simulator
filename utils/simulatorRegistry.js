@@ -1,8 +1,8 @@
 // 시뮬레이터 등록 및 관리 시스템
 import VacuumSimulator from '../simulators/VacuumSimulator';
+import CleaningSimulator from '../simulators/CleaningSimulator';
 import OxidationSimulator from '../simulators/Oxidation';
 // 미래에 추가될 시뮬레이터들
-// import CleaningSimulator from '../simulators/CleaningSimulator';
 // import EtchingSimulator from '../simulators/EtchingSimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
 
@@ -39,19 +39,20 @@ class SimulatorRegistry {
       }
     });
 
-    // 웨이퍼 세정 시뮬레이터 (준비중)
+    // 웨이퍼 세정 시뮬레이터 (완성됨)
     this.register({
       id: 'cleaning',
       name: '웨이퍼 세정',
       icon: '🧽',
       description: 'RCA 세정 및 표면 처리',
-      component: cleaningSimulator,
+      component: CleaningSimulator,
       available: true,
       category: 'process',
       order: 2,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-02-01',
+        version: '1.0.0',
+        lastUpdated: '2025-01-29',
+        author: 'Semiconductor Simulator Team',
         features: [
           'RCA-1/RCA-2 공정',
           '화학적 세정 메커니즘',
