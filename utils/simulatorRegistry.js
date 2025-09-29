@@ -1,6 +1,6 @@
 // 시뮬레이터 등록 및 관리 시스템
 import VacuumSimulator from '../simulators/VacuumSimulator';
-import OxidationSimulator from '../simulators/OxidationSimulator';
+import OxidationSimulator from '../simulators/oxidation';
 // 미래에 추가될 시뮬레이터들
 // import CleaningSimulator from '../simulators/CleaningSimulator';
 // import EtchingSimulator from '../simulators/EtchingSimulator';
