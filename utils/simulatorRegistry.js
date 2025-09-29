@@ -1,5 +1,6 @@
 // 시뮬레이터 등록 및 관리 시스템
 import VacuumSimulator from '../simulators/VacuumSimulator';
+import OxidationSimulator from '../simulators/OxidationSimulator';
 // 미래에 추가될 시뮬레이터들
 // import CleaningSimulator from '../simulators/CleaningSimulator';
 // import EtchingSimulator from '../simulators/EtchingSimulator';
@@ -60,19 +61,20 @@ class SimulatorRegistry {
       }
     });
 
-    // Oxidation 시뮬레이터 (준비중)
+    // Oxidation 시뮬레이터 (완성됨)
     this.register({
       id: 'oxidation',
       name: 'Oxidation',
       icon: '🔥',
       description: '열산화 및 게이트 절연막',
-      component: null,
-      available: false,
+      component: OxidationSimulator,
+      available: true,
       category: 'process',
       order: 3,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-02-15',
+        version: '1.0.0',
+        lastUpdated: '2025-01-29',
+        author: 'Semiconductor Simulator Team',
         features: [
           '건식/습식 산화',
           'Deal-Grove 모델',
