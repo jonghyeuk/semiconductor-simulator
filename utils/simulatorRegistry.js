@@ -45,8 +45,8 @@ class SimulatorRegistry {
       name: '웨이퍼 세정',
       icon: '🧽',
       description: 'RCA 세정 및 표면 처리',
-      component: null,
-      available: false,
+      component: cleaningSimulator,
+      available: true,
       category: 'process',
       order: 2,
       metadata: {
