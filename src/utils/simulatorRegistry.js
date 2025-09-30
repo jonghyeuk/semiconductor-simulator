@@ -2,6 +2,7 @@
 import VacuumSimulator from '../simulators/VacuumSimulator';
 // 미래에 추가될 시뮬레이터들
 import CleaningSimulator from '../simulators/CleaningSimulator';
+import Oxidation from '../simulators/Oxidation';
 // import EtchingSimulator from '../simulators/EtchingSimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
 
@@ -69,7 +70,7 @@ class SimulatorRegistry {
       name: 'Oxidation',
       icon: '🔥',
       description: '열산화 및 게이트 절연막',
-      component: null,
+      component: Oxidation,
       available: false,
       category: 'process',
       order: 3,
