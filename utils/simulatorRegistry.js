@@ -1,7 +1,7 @@
 // 시뮬레이터 등록 및 관리 시스템
 import VacuumSimulator from '../simulators/VacuumSimulator';
 import CleaningSimulator from '../simulators/CleaningSimulator';
-import OxidationSimulator from '../simulators/Oxidation';
+import Oxidation from '../simulators/Oxidation'; // ← 수정: OxidationSimulator → Oxidation
 // 미래에 추가될 시뮬레이터들
 // import EtchingSimulator from '../simulators/EtchingSimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
@@ -68,7 +68,7 @@ class SimulatorRegistry {
       name: 'Oxidation',
       icon: '🔥',
       description: '열산화 및 게이트 절연막',
-      component: OxidationSimulator,
+      component: Oxidation, // ← 수정: OxidationSimulator → Oxidation
       available: true,
       category: 'process',
       order: 3,
