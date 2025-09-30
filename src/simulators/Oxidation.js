@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
-const Oxidation = () => {
+const OxidationSimulator = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [temperature, setTemperature] = useState(1000);
   const [time, setTime] = useState(60);
@@ -1521,4 +1521,4 @@ const Oxidation = () => {
   );
 };
 
-export default Oxidation;
+export default OxidationSimulator;
