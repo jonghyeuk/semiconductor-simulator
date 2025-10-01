@@ -44,7 +44,6 @@ const OxidationSimulator = () => {
     { id: 'overview', name: '산화 공정 개요', icon: '🔥' },
     { id: 'thermal', name: '열산화 실험', icon: '🌡️' },
     { id: 'analysis', name: '산화 영향 인자', icon: '📊' },
-    { id: 'optimization', name: '공정 최적화', icon: '⚙️' },
     { id: 'quiz', name: '산화 평가', icon: '📝' }
   ];
 
@@ -1356,30 +1355,6 @@ const OxidationSimulator = () => {
                 <p>• <strong>고품질 막</strong>: {'{100}'} 면 + 저농도 도핑 + 중온</p>
                 <p>• <strong>균일성 중시</strong>: 초기 산화막 최소화 + 안정적 온도 제어</p>
                 <p>• <strong>소자 보호</strong>: 온도 낮추고 압력으로 보완</p>
-              </div>
-            </div>
-          </div>
-        );
-
-      case 'optimization':
-        return (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-r from-green-50 to-teal-50 p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-green-800 mb-4">⚙️ 산화 공정 최적화</h3>
-              <p className="text-gray-700">
-                공정 최적화 내용은 준비 중입니다.
-              </p>
-            </div>
-            
-            <div className="bg-white p-12 rounded-lg shadow-md border-2 border-dashed border-gray-300">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🔧</div>
-                <h4 className="text-xl font-semibold text-gray-700 mb-2">
-                  공정 최적화 도구
-                </h4>
-                <p className="text-gray-500">
-                  이 섹션은 추후 업데이트될 예정입니다.
-                </p>
               </div>
             </div>
           </div>
