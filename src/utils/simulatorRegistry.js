@@ -3,7 +3,8 @@ import VacuumSimulator from '../simulators/VacuumSimulator';
 // 미래에 추가될 시뮬레이터들
 import CleaningSimulator from '../simulators/CleaningSimulator';
 import OxidationSimulator from '../simulators/Oxidation';
-import PlasmaSimulator from '../simulators/PlasmaSimulator'; // ← 추가
+import PlasmaSimulator from '../simulators/PlasmaSimulator';
+import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII'; // ← 새로 추가
 // import EtchingSimulator from '../simulators/EtchingSimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
 
@@ -96,7 +97,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 4, // ← 수정: 5 → 4 (플라즈마보다 먼저)
+      order: 4,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-03-01',
@@ -109,7 +110,7 @@ class SimulatorRegistry {
       }
     });
 
-    // Plasma Simulation I 시뮬레이터 (완성됨) ← 리소그라피 다음, 에칭 이전
+    // Plasma Simulation I 시뮬레이터 (완성됨)
     this.register({
       id: 'plasma',
       name: 'Plasma Simulation I',
@@ -118,7 +119,7 @@ class SimulatorRegistry {
       component: PlasmaSimulator,
       available: true,
       category: 'process',
-      order: 5, // ← 수정: 4 → 5 (리소그라피 다음)
+      order: 5,
       metadata: {
         version: '1.0.0',
         lastUpdated: '2025-01-29',
@@ -133,6 +134,31 @@ class SimulatorRegistry {
       }
     });
 
+    // Plasma Simulation II 시뮬레이터 (완성됨) ← 새로 추가
+    this.register({
+      id: 'plasma-ii',
+      name: 'Plasma Simulation II',
+      icon: '🔬',
+      description: 'ICP 시스템 및 고급 식각 공정',
+      component: PlasmaSimulatorII,
+      available: true,
+      category: 'process',
+      order: 6, // ← Plasma I 바로 다음
+      metadata: {
+        version: '1.0.0',
+        lastUpdated: '2025-01-30',
+        author: 'Semiconductor Simulator Team',
+        features: [
+          'ICP 유도결합 원리 4단계 프로세스',
+          'Synergy Effect 실험 시뮬레이션',
+          '식각 메커니즘 상세 분석',
+          '산업별 플라즈마 응용 분야',
+          '난이도별 개념 확인 퀴즈 (30문제)',
+          '실시간 애니메이션 및 타이핑 효과'
+        ]
+      }
+    });
+
     // Etching 시뮬레이터 (준비중)
     this.register({
       id: 'etching',
@@ -142,7 +168,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 6, // ← 플라즈마 다음 위치 유지
+      order: 7, // ← 순서 조정: 6 → 7
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-03-15',
@@ -164,7 +190,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 7,
+      order: 8, // ← 순서 조정: 7 → 8
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-04-01',
@@ -186,7 +212,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 8,
+      order: 9, // ← 순서 조정: 8 → 9
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-04-15',
@@ -208,7 +234,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'metrology',
-      order: 9,
+      order: 10, // ← 순서 조정: 9 → 10
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-01',
@@ -230,7 +256,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'backend',
-      order: 10,
+      order: 11, // ← 순서 조정: 10 → 11
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-15',
