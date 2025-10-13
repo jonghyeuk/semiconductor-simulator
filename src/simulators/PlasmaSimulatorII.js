@@ -24,7 +24,7 @@ const PlasmaSimulatorII = () => {
   const [userAnswers, setUserAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [quizStarted, setQuizStarted] = useState(false);
-  const [difficulty, setDifficulty] = useState('상'); // 난이도 상태 추가
+  const [difficulty, setDifficulty] = useState('상');
 
   const themes = [
     { id: 'system-structure-icp', name: '시스템 구조(ICP)', icon: '🔬', color: 'indigo' },
@@ -64,7 +64,6 @@ const PlasmaSimulatorII = () => {
   // 퀴즈 문제 데이터 - 난이도별로 구분
   const quizQuestions = {
     하: [
-      // 하급 난이도 - 하드웨어 문제 (7문제)
       {
         id: 1,
         category: "하드웨어",
@@ -156,7 +155,6 @@ const PlasmaSimulatorII = () => {
         correct: 1,
         explanation: "ECR(Electron Cyclotron Resonance) 플라즈마는 2.45GHz 마이크로파를 사용하여 전자 사이클로트론 공명을 일으킵니다."
       },
-      // 하급 난이도 - 공정 문제 (3문제)
       {
         id: 8,
         category: "공정",
@@ -198,7 +196,6 @@ const PlasmaSimulatorII = () => {
       }
     ],
     중: [
-      // 중급 난이도 - 하드웨어 문제 (7문제)
       {
         id: 11,
         category: "하드웨어",
@@ -290,7 +287,6 @@ const PlasmaSimulatorII = () => {
         correct: 0,
         explanation: "RIE lag는 좁은 패턴에서 반응 생성물의 배출이 어려워 식각률이 감소하는 현상으로, 고종횡비 구조에서 주요 문제가 됩니다."
       },
-      // 중급 난이도 - 공정 문제 (3문제)
       {
         id: 18,
         category: "공정",
@@ -332,7 +328,6 @@ const PlasmaSimulatorII = () => {
       }
     ],
     상: [
-      // 상급 난이도 - 하드웨어 문제 (7문제) - 기존 코드의 문제들 사용
       {
         id: 21,
         category: "하드웨어",
@@ -424,7 +419,6 @@ const PlasmaSimulatorII = () => {
         correct: 1,
         explanation: "원자층 정밀도를 위해서는 ALE(Atomic Layer Etching) 기술이 필요하며, 이는 펄스 플라즈마를 이용해 표면을 화학적으로 개질한 후 물리적으로 제거하는 자기제한적(self-limiting) 반응을 활용합니다."
       },
-      // 상급 난이도 - 공정 문제 (3문제)
       {
         id: 28,
         category: "공정",
@@ -1057,100 +1051,6 @@ const PlasmaSimulatorII = () => {
               </div>
             </div>
 
-            {/* 플라즈마 밀도와 바이어스의 관계 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border">
-              <h3 className="text-lg font-semibold text-indigo-800 mb-4">플라즈마 밀도와 바이어스의 반비례 관계</h3>
-              
-              <div className="grid lg:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-lg border-l-4 border-blue-500">
-                    <h4 className="font-semibold text-blue-800 mb-3">물리적 메커니즘</h4>
-                    <div className="space-y-2 text-blue-700 text-sm">
-                      <div className="flex items-center">
-                        <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                        <span>플라즈마 밀도 ↑ → 전자 온도 ↓</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                        <span>전자 온도 ↓ → 플라즈마 전위 ↓</span>
-                      </div>
-                      <div className="flex items-center">
-                        <span className="w-3 h-3 bg-blue-500 rounded-full mr-2"></span>
-                        <span>플라즈마 전위 ↓ → 바이어스 전압 ↓</span>
-                      </div>
-                    </div>
-                    <div className="mt-3 p-2 bg-blue-100 rounded text-xs text-blue-800">
-                      <strong>핵심:</strong> 같은 에너지를 더 많은 입자가 나눠가지면 개별 입자의 에너지가 감소
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-lg border-l-4 border-green-500">
-                    <h4 className="font-semibold text-green-800 mb-3">쉬운 비유: 물의 압력과 분산</h4>
-                    <div className="space-y-3">
-                      <div className="bg-white p-3 rounded border-l-2 border-red-400">
-                        <div className="font-medium text-red-700 mb-1">CCP (낮은 밀도)</div>
-                        <div className="text-red-600 text-sm">좁은 호스 → 높은 압력 → 강한 충격</div>
-                      </div>
-                      <div className="bg-white p-3 rounded border-l-2 border-green-400">
-                        <div className="font-medium text-green-700 mb-1">ICP (높은 밀도)</div>
-                        <div className="text-green-600 text-sm">넓은 샤워헤드 → 분산된 압력 → 부드러운 충격</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-6">
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border-l-4 border-purple-500">
-                    <h4 className="font-semibold text-purple-800 mb-3">실제 공정에서의 장점</h4>
-                    <div className="space-y-3">
-                      <div className="bg-white p-3 rounded">
-                        <div className="font-medium text-purple-700 mb-1">데미지 최소화</div>
-                        <div className="text-purple-600 text-sm">이온 에너지 감소로 기판 손상 방지</div>
-                      </div>
-                      <div className="bg-white p-3 rounded">
-                        <div className="font-medium text-purple-700 mb-1">선택적 식각</div>
-                        <div className="text-purple-600 text-sm">원하지 않는 물질의 손상 최소화</div>
-                      </div>
-                      <div className="bg-white p-3 rounded">
-                        <div className="font-medium text-purple-700 mb-1">표면 품질</div>
-                        <div className="text-purple-600 text-sm">매끄럽고 정밀한 식각면 확보</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-orange-50 to-red-50 p-4 rounded-lg border-l-4 border-orange-500">
-                    <h4 className="font-semibold text-orange-800 mb-3">CCP vs ICP 비교</h4>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center bg-white p-2 rounded">
-                        <span className="text-orange-700 font-medium">압력</span>
-                        <span className="text-orange-600">CCP: 높음 → ICP: 낮음</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-white p-2 rounded">
-                        <span className="text-orange-700 font-medium">밀도</span>
-                        <span className="text-orange-600">CCP: 낮음 → ICP: 높음</span>
-                      </div>
-                      <div className="flex justify-between items-center bg-white p-2 rounded">
-                        <span className="text-orange-700 font-medium">이온 충격</span>
-                        <span className="text-orange-600">CCP: 강함 → ICP: 부드러움</span>
-                      </div>
-                    </div>
-                    <div className="mt-3 p-2 bg-orange-100 rounded text-xs text-orange-800">
-                      <strong>결론:</strong> ICP는 "강하면서도 부드러운" 공정 구현
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg border-2 border-indigo-300">
-                <h4 className="font-semibold text-indigo-800 mb-2">시뮬레이터에서 확인해보세요!</h4>
-                <p className="text-indigo-700 text-sm">
-                  Source RF를 450W 이상으로 올려서 고밀도 플라즈마를 만들어보세요. 
-                  같은 Bias RF에서도 상대적으로 낮은 Self Bias Voltage와 이온 에너지를 확인할 수 있습니다.
-                  이것이 바로 ICP가 정밀한 반도체 공정에서 선호되는 이유입니다.
-                </p>
-              </div>
-            </div>
-
             {/* 비교 표 */}
             <div className="bg-white rounded-xl shadow-lg p-6 border">
               <h3 className="text-lg font-semibold text-indigo-800 mb-4">CCP vs ICP 시스템 비교</h3>
@@ -1198,56 +1098,6 @@ const PlasmaSimulatorII = () => {
                 </table>
               </div>
             </div>
-
-            {/* 추가로 생각해보기 */}
-            <div className="bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl p-6 border border-gray-200">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">🤔 추가로 생각해보기</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
-                  <h4 className="font-semibold text-blue-800 mb-2">토의 주제 1</h4>
-                  <p className="text-blue-700 text-sm">
-                    <strong>ICP의 독립적 제어가 완벽할까?</strong><br/>
-                    Source RF와 Bias RF가 정말 완전히 독립적일까요? 실제로는 어떤 상호작용이 있을 수 있는지, 
-                    그리고 이런 상호작용이 공정에 미치는 영향을 토의해보세요.
-                  </p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
-                  <h4 className="font-semibold text-green-800 mb-2">토의 주제 2</h4>
-                  <p className="text-green-700 text-sm">
-                    <strong>고밀도 플라즈마의 양면성</strong><br/>
-                    ICP의 고밀도 플라즈마는 장점만 있을까요? 높은 플라즈마 밀도로 인해 발생할 수 있는 
-                    부작용이나 한계점은 무엇인지 생각해보세요.
-                  </p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-purple-500">
-                  <h4 className="font-semibold text-purple-800 mb-2">토의 주제 3</h4>
-                  <p className="text-purple-700 text-sm">
-                    <strong>비용 대비 효과 분석</strong><br/>
-                    ICP 장비는 CCP보다 비싸고 복잡합니다. 어떤 상황에서 ICP의 고성능이 
-                    추가 비용을 정당화할 수 있는지 구체적인 예를 들어 토의해보세요.
-                  </p>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow-sm border-l-4 border-orange-500">
-                  <h4 className="font-semibold text-orange-800 mb-2">토의 주제 4</h4>
-                  <p className="text-orange-700 text-sm">
-                    <strong>차세대 플라즈마 기술</strong><br/>
-                    ICP 기술이 계속 발전한다면, 10년 후에는 어떤 모습일까요? 
-                    원자층 식각(ALE)이나 AI 제어 같은 신기술과 어떻게 융합될 수 있을지 상상해보세요.
-                  </p>
-                </div>
-              </div>
-              
-              <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
-                <p className="text-yellow-800 text-sm">
-                  <strong>💡 토의 팁:</strong> 각 주제에 대해 찬반 의견을 나누어 토론하거나, 
-                  실제 산업 현장의 사례를 조사해서 발표해보세요. 이론과 실무의 차이점을 
-                  찾아보는 것도 좋은 학습 방법입니다.
-                </p>
-              </div>
-            </div>
           </div>
         )}
 
@@ -1292,60 +1142,6 @@ const PlasmaSimulatorII = () => {
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-2">하드웨어 문제 (7문제)</h4>
-                    <ul className="text-blue-700 text-sm text-left space-y-1">
-                      {difficulty === '하' && (
-                        <>
-                          <li>• ICP, CCP, ECR 기본 개념</li>
-                          <li>• 플라즈마 기본 용어</li>
-                          <li>• 장비별 특징</li>
-                        </>
-                      )}
-                      {difficulty === '중' && (
-                        <>
-                          <li>• ICP vs CCP 차이점</li>
-                          <li>• 플라즈마 밀도와 이온 에너지</li>
-                          <li>• 자이로모션과 임피던스 매칭</li>
-                        </>
-                      )}
-                      {difficulty === '상' && (
-                        <>
-                          <li>• 복합적 현상 분석</li>
-                          <li>• 웨이퍼 크기 변화 영향</li>
-                          <li>• HAR Via 문제 해결</li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-orange-800 mb-2">공정 문제 (3문제)</h4>
-                    <ul className="text-orange-700 text-sm text-left space-y-1">
-                      {difficulty === '하' && (
-                        <>
-                          <li>• 드라이 에칭 기본 개념</li>
-                          <li>• 기본 가스 종류</li>
-                          <li>• 애싱 공정</li>
-                        </>
-                      )}
-                      {difficulty === '중' && (
-                        <>
-                          <li>• 가스 혼합 효과</li>
-                          <li>• Synergy Effect</li>
-                          <li>• 재료별 식각 특성</li>
-                        </>
-                      )}
-                      {difficulty === '상' && (
-                        <>
-                          <li>• 복합 가스 상호작용</li>
-                          <li>• Low-k 재료 손상</li>
-                          <li>• 공정 최적화 전략</li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
-                </div>
                 <button
                   onClick={startQuiz}
                   className="px-8 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors"
@@ -1549,24 +1345,21 @@ const PlasmaSimulatorII = () => {
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart 
-                        data={(() => {
-                          const baseData = [
-                            {time: 0, rate: 0.5},
-                            {time: 100, rate: 0.5},
-                            {time: 150, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 7.0 : 0.1},
-                            {time: 200, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 7.0 : 3.0},
-                            {time: 300, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 6.5 : 3.0},
-                            {time: 400, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 6.2 : 2.8},
-                            {time: 500, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 6.0 : 2.5},
-                            {time: 600, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 5.8 : 2.2},
-                            {time: 650, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 3.0 : 2.0},
-                            {time: 700, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 2.0 : 1.5},
-                            {time: 750, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 0.8 : 0.8},
-                            {time: 800, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 0.5 : 0.5},
-                            {time: 900, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 0.5 : 0.5}
-                          ];
-                          return baseData;
-                        })()}
+                        data={[
+                          {time: 0, rate: 0.5},
+                          {time: 100, rate: 0.5},
+                          {time: 150, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 7.0 : 0.1},
+                          {time: 200, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 7.0 : 3.0},
+                          {time: 300, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 6.5 : 3.0},
+                          {time: 400, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 6.2 : 2.8},
+                          {time: 500, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 6.0 : 2.5},
+                          {time: 600, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 5.8 : 2.2},
+                          {time: 650, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 3.0 : 2.0},
+                          {time: 700, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 2.0 : 1.5},
+                          {time: 750, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 0.8 : 0.8},
+                          {time: 800, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 0.5 : 0.5},
+                          {time: 900, rate: etchGasType === 'XeF2' ? 0.5 : etchGasType === 'Synergy' ? 0.5 : 0.5}
+                        ]}
                         margin={{ top: 30, right: 30, left: 20, bottom: 20 }}
                       >
                         <CartesianGrid strokeDasharray="3 3" />
@@ -1596,22 +1389,6 @@ const PlasmaSimulatorII = () => {
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                  
-                  {/* 단계 표시 */}
-                  <div className="grid grid-cols-3 gap-2 mt-4 text-xs">
-                    <div className="bg-blue-50 p-2 rounded text-center">
-                      <div className="font-bold text-blue-800">0-150s</div>
-                      <div className="text-blue-600">XeF₂ gas only</div>
-                    </div>
-                    <div className="bg-green-50 p-2 rounded text-center">
-                      <div className="font-bold text-green-800">150-650s</div>
-                      <div className="text-green-600">Ar⁺ + XeF₂</div>
-                    </div>
-                    <div className="bg-purple-50 p-2 rounded text-center">
-                      <div className="font-bold text-purple-800">650-900s</div>
-                      <div className="text-purple-600">Ar⁺ ion only</div>
-                    </div>
-                  </div>
                 </div>
 
                 <div>
@@ -1638,6 +1415,21 @@ const PlasmaSimulatorII = () => {
                         etchGasType === 'Synergy' ? 'text-green-700' : 
                         'text-purple-700'
                       }`}>
+                        {etchGasType === 'XeF2' && '순수 화학반응 - 낮은 속도, 높은 선택비'}
+                        {etchGasType === 'Synergy' && '상승효과 - 최고 속도, 균형잡힌 특성'}
+                        {etchGasType === 'Ar' && '순수 물리반응 - 중간 속도, 높은 이방성'}
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 p-4 rounded-lg">
+                      <h5 className="font-semibold text-gray-800 mb-2">메커니즘 설명</h5>
+                      <div className="text-sm text-gray-700">
+                        {etchGasType === 'XeF2' && (
+                          <div>
+                            <strong>화학 반응:</strong> XeF₂ 라디칼이 Si와 화학적으로 결합하여 SiF₄를 형성합니다. 
+                            선택비는 우수하지만 속도가 느리고 등방성 식각이 발생합니다.
+                          </div>
+                        )}
                         {etchGasType === 'Synergy' && (
                           <div>
                             <strong>상승 효과:</strong> Ar⁺ 이온이 Si 표면의 결합을 약화시키고, XeF₂가 이를 
@@ -1652,73 +1444,15 @@ const PlasmaSimulatorII = () => {
                         )}
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-white p-3 rounded border">
-                        <div className="text-xs text-gray-600">Profile</div>
-                        <div className="font-bold text-gray-800">
-                          {etchGasType === 'XeF2' ? 'Isotropic' : 
-                           etchGasType === 'Synergy' ? 'Anisotropic' : 
-                           'Highly Anisotropic'}
-                        </div>
-                      </div>
-                      <div className="bg-white p-3 rounded border">
-                        <div className="text-xs text-gray-600">Selectivity</div>
-                        <div className="font-bold text-gray-800">
-                          {etchGasType === 'XeF2' ? 'Excellent' : 
-                           etchGasType === 'Synergy' ? 'Good' : 
-                           'Poor'}
-                        </div>
-                      </div>
-                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 식각 메커니즘 비교 */}
+            {/* 공정 조건 최적화 */}
             <div className="bg-white rounded-xl shadow-lg p-6 border">
-              <h3 className="text-lg font-semibold text-orange-800 mb-4">식각 메커니즘 상세 비교</h3>
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                  <h4 className="font-semibold text-blue-800 mb-3">화학 식각 (Chemical)</h4>
-                  <div className="space-y-2 text-blue-700 text-sm">
-                    <div><strong>메커니즘:</strong> 라디칼 + 표면 → 휘발성 화합물</div>
-                    <div><strong>특징:</strong> 높은 선택비, 등방성</div>
-                    <div><strong>장점:</strong> 표면 손상 최소화</div>
-                    <div><strong>단점:</strong> 낮은 식각률, 패턴 왜곡</div>
-                    <div><strong>예시:</strong> XeF₂ + Si → SiF₄ + Xe</div>
-                  </div>
-                </div>
-                
-                <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
-                  <h4 className="font-semibold text-green-800 mb-3">상승 효과 (Synergy)</h4>
-                  <div className="space-y-2 text-green-700 text-sm">
-                    <div><strong>메커니즘:</strong> 이온이 결합 약화 → 라디칼이 제거</div>
-                    <div><strong>특징:</strong> 매우 높은 식각률</div>
-                    <div><strong>장점:</strong> 속도↑, 이방성↑, 선택비 양호</div>
-                    <div><strong>단점:</strong> 복잡한 제어 필요</div>
-                    <div><strong>효과:</strong> 1 + 1 = 14 (상승효과!)</div>
-                  </div>
-                </div>
-                
-                <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
-                  <h4 className="font-semibold text-purple-800 mb-3">물리 식각 (Physical)</h4>
-                  <div className="space-y-2 text-purple-700 text-sm">
-                    <div><strong>메커니즘:</strong> 이온 충돌로 원자 방출</div>
-                    <div><strong>특징:</strong> 높은 이방성, 낮은 선택비</div>
-                    <div><strong>장점:</strong> 방향성 우수</div>
-                    <div><strong>단점:</strong> 표면 손상, 재증착</div>
-                    <div><strong>예시:</strong> Ar⁺ + Si → Si + Ar</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 실제 공정 조건 시뮬레이션 */}
-            <div className="grid lg:grid-cols-2 gap-8">
-              <div className="bg-white rounded-xl shadow-lg p-6 border">
-                <h3 className="text-lg font-semibold text-orange-800 mb-4">공정 조건 최적화</h3>
+              <h3 className="text-lg font-semibold text-orange-800 mb-4">공정 조건 최적화</h3>
+              <div className="grid lg:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">RF 파워: {etchPower} W</label>
@@ -1773,7 +1507,7 @@ const PlasmaSimulatorII = () => {
                   </div>
                 </div>
                 
-                <div className="mt-6 p-4 bg-orange-50 rounded-lg">
+                <div className="bg-orange-50 p-4 rounded-lg">
                   <h4 className="font-semibold text-orange-800 mb-3">실시간 공정 결과</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -1792,229 +1526,6 @@ const PlasmaSimulatorII = () => {
                       <span className="text-gray-600">이방성:</span>
                       <div className="font-semibold text-orange-900">{(Math.min(95, etchPower/5 + 60 - etchPressure/2)).toFixed(1)}%</div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 식각 대상 물질별 상세 조건 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border">
-              <h3 className="text-lg font-semibold text-orange-800 mb-4">식각 대상 물질별 상세 메커니즘 및 조건</h3>
-              
-              {/* 실리콘 계열 */}
-              <div className="mb-8">
-                <h4 className="text-lg font-semibold text-blue-800 mb-4 flex items-center">
-                  <span className="text-xl mr-2">💎</span>
-                  실리콘 계열 물질
-                </h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm border-collapse border border-blue-300">
-                    <thead className="bg-blue-50">
-                      <tr>
-                        <th className="border border-blue-300 px-3 py-2 text-left">물질</th>
-                        <th className="border border-blue-300 px-3 py-2 text-left">에칭 가스</th>
-                        <th className="border border-blue-300 px-3 py-2 text-left">플라즈마 분해산물</th>
-                        <th className="border border-blue-300 px-3 py-2 text-left">에칭 메커니즘</th>
-                        <th className="border border-blue-300 px-3 py-2 text-left">휘발성 생성물</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border border-blue-300 px-3 py-2 font-medium">Si (실리콘)</td>
-                        <td className="border border-blue-300 px-3 py-2">CF₄, SF₆</td>
-                        <td className="border border-blue-300 px-3 py-2">F*, CF₃*, CF₂*</td>
-                        <td className="border border-blue-300 px-3 py-2">F 라디칼이 Si-Si 결합을 공격하여 Si-F 결합 형성</td>
-                        <td className="border border-blue-300 px-3 py-2">SiF₄ (기체)</td>
-                      </tr>
-                      <tr className="bg-blue-25">
-                        <td className="border border-blue-300 px-3 py-2 font-medium">SiO₂ (이산화실리콘)</td>
-                        <td className="border border-blue-300 px-3 py-2">CHF₃, C₄F₈</td>
-                        <td className="border border-blue-300 px-3 py-2">F*, CF₂*, CHF₂*</td>
-                        <td className="border border-blue-300 px-3 py-2">F가 Si-O를 공격, CF₂가 폴리머층 형성으로 선택비 향상</td>
-                        <td className="border border-blue-300 px-3 py-2">SiF₄ + CO₂ + H₂O</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-blue-300 px-3 py-2 font-medium">Si₃N₄ (질화실리콘)</td>
-                        <td className="border border-blue-300 px-3 py-2">CF₄/O₂, NF₃</td>
-                        <td className="border border-blue-300 px-3 py-2">F*, O*, CF₃*</td>
-                        <td className="border border-blue-300 px-3 py-2">F가 Si-N 결합 공격, O가 N 제거 촉진</td>
-                        <td className="border border-blue-300 px-3 py-2">SiF₄ + N₂ + NOₓ</td>
-                      </tr>
-                      <tr className="bg-blue-25">
-                        <td className="border border-blue-300 px-3 py-2 font-medium">Poly-Si (폴리실리콘)</td>
-                        <td className="border border-blue-300 px-3 py-2">Cl₂/HBr, SF₆</td>
-                        <td className="border border-blue-300 px-3 py-2">Cl*, Br*, F*</td>
-                        <td className="border border-blue-300 px-3 py-2">할로겐이 결정립계 우선 공격하여 선택적 제거</td>
-                        <td className="border border-blue-300 px-3 py-2">SiCl₄, SiBr₄, SiF₄</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 금속 계열 */}
-              <div className="mb-8">
-                <h4 className="text-lg font-semibold text-green-800 mb-4 flex items-center">
-                  <span className="text-xl mr-2">⚡</span>
-                  금속 계열 물질
-                </h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm border-collapse border border-green-300">
-                    <thead className="bg-green-50">
-                      <tr>
-                        <th className="border border-green-300 px-3 py-2 text-left">물질</th>
-                        <th className="border border-green-300 px-3 py-2 text-left">에칭 가스</th>
-                        <th className="border border-green-300 px-3 py-2 text-left">플라즈마 분해산물</th>
-                        <th className="border border-green-300 px-3 py-2 text-left">에칭 메커니즘</th>
-                        <th className="border border-green-300 px-3 py-2 text-left">휘발성 생성물</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border border-green-300 px-3 py-2 font-medium">Al (알루미늄)</td>
-                        <td className="border border-green-300 px-3 py-2">Cl₂/BCl₃</td>
-                        <td className="border border-green-300 px-3 py-2">Cl*, BCl₂*</td>
-                        <td className="border border-green-300 px-3 py-2">Cl이 Al 산화막 관통 후 Al-Cl 결합 형성</td>
-                        <td className="border border-green-300 px-3 py-2">AlCl₃ (승화성)</td>
-                      </tr>
-                      <tr className="bg-green-25">
-                        <td className="border border-green-300 px-3 py-2 font-medium">Ti (티타늄)</td>
-                        <td className="border border-green-300 px-3 py-2">Cl₂/SF₆</td>
-                        <td className="border border-green-300 px-3 py-2">Cl*, F*, S*</td>
-                        <td className="border border-green-300 px-3 py-2">고온에서 TiCl₄ 형성, F가 산화막 제거 촉진</td>
-                        <td className="border border-green-300 px-3 py-2">TiCl₄, TiF₄</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-green-300 px-3 py-2 font-medium">W (텅스텐)</td>
-                        <td className="border border-green-300 px-3 py-2">SF₆, NF₃</td>
-                        <td className="border border-green-300 px-3 py-2">F*, SF₅*</td>
-                        <td className="border border-green-300 px-3 py-2">상온에서도 WF₆ 형성 가능 (특수성)</td>
-                        <td className="border border-green-300 px-3 py-2">WF₆ (상온 기체)</td>
-                      </tr>
-                      <tr className="bg-green-25">
-                        <td className="border border-green-300 px-3 py-2 font-medium">Cu (구리)</td>
-                        <td className="border border-green-300 px-3 py-2">Cl₂/Ar (저온)</td>
-                        <td className="border border-green-300 px-3 py-2">Cl*, Ar⁺</td>
-                        <td className="border border-green-300 px-3 py-2">CuCl₂ 형성 후 물리적 스퍼터링으로 제거</td>
-                        <td className="border border-green-300 px-3 py-2">CuCl₂ (낮은 휘발성)</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 유기물 계열 */}
-              <div className="mb-6">
-                <h4 className="text-lg font-semibold text-purple-800 mb-4 flex items-center">
-                  <span className="text-xl mr-2">🧬</span>
-                  유기물 계열 물질
-                </h4>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm border-collapse border border-purple-300">
-                    <thead className="bg-purple-50">
-                      <tr>
-                        <th className="border border-purple-300 px-3 py-2 text-left">물질</th>
-                        <th className="border border-purple-300 px-3 py-2 text-left">에칭 가스</th>
-                        <th className="border border-purple-300 px-3 py-2 text-left">플라즈마 분해산물</th>
-                        <th className="border border-purple-300 px-3 py-2 text-left">에칭 메커니즘</th>
-                        <th className="border border-purple-300 px-3 py-2 text-left">휘발성 생성물</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td className="border border-purple-300 px-3 py-2 font-medium">PR (포토레지스트)</td>
-                        <td className="border border-purple-300 px-3 py-2">O₂/N₂</td>
-                        <td className="border border-purple-300 px-3 py-2">O*, O₂*, OH*</td>
-                        <td className="border border-purple-300 px-3 py-2">O 라디칼이 C-C, C-H 결합을 산화 분해</td>
-                        <td className="border border-purple-300 px-3 py-2">CO₂ + H₂O + N₂</td>
-                      </tr>
-                      <tr className="bg-purple-25">
-                        <td className="border border-purple-300 px-3 py-2 font-medium">Polymer (중합체)</td>
-                        <td className="border border-purple-300 px-3 py-2">O₂/CF₄</td>
-                        <td className="border border-purple-300 px-3 py-2">O*, F*, CF₃*</td>
-                        <td className="border border-purple-300 px-3 py-2">O가 탄소 골격 파괴, F가 불소 함유 폴리머 공격</td>
-                        <td className="border border-purple-300 px-3 py-2">CO₂ + H₂O + HF</td>
-                      </tr>
-                      <tr>
-                        <td className="border border-purple-300 px-3 py-2 font-medium">Carbon (탄소막)</td>
-                        <td className="border border-purple-300 px-3 py-2">O₂/H₂</td>
-                        <td className="border border-purple-300 px-3 py-2">O*, H*, OH*</td>
-                        <td className="border border-purple-300 px-3 py-2">H가 탄소 활성화, O가 산화반응 촉진</td>
-                        <td className="border border-purple-300 px-3 py-2">CO₂ + H₂O + CH₄</td>
-                      </tr>
-                      <tr className="bg-purple-25">
-                        <td className="border border-purple-300 px-3 py-2 font-medium">PI (폴리이미드)</td>
-                        <td className="border border-purple-300 px-3 py-2">O₂/CF₄/Ar</td>
-                        <td className="border border-purple-300 px-3 py-2">O*, F*, Ar⁺</td>
-                        <td className="border border-purple-300 px-3 py-2">내열성 강해 물리+화학 병행, Ar로 표면 활성화</td>
-                        <td className="border border-purple-300 px-3 py-2">CO₂ + H₂O + NOₓ</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-r from-amber-50 to-orange-50 p-4 rounded-lg border border-amber-200">
-                <h5 className="font-semibold text-amber-800 mb-2">핵심 포인트</h5>
-                <div className="grid md:grid-cols-3 gap-4 text-amber-700 text-sm">
-                  <div>
-                    <strong>실리콘 계열:</strong> 플루오르(F) 기반 화학 반응이 핵심. SiF₄가 상온에서 기체라는 점이 중요
-                  </div>
-                  <div>
-                    <strong>금속 계열:</strong> 온도 의존성 높음. 휘발성 생성물의 증기압이 식각률 결정
-                  </div>
-                  <div>
-                    <strong>유기물 계열:</strong> 산소(O) 기반 산화 반응. 완전 분해로 잔류물 없는 제거 가능
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 공정 최적화 가이드 */}
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-orange-200">
-              <h3 className="text-xl font-bold text-orange-800 mb-4">공정 최적화 실무 가이드</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-orange-800 mb-2">식각률 향상 방법</h4>
-                    <ul className="text-orange-700 text-sm space-y-1">
-                      <li>• RF 파워 증가 (이온 밀도 ↑)</li>
-                      <li>• 적절한 가스 유량 비율 최적화</li>
-                      <li>• 압력 조절 (MFP vs 밀도 균형)</li>
-                      <li>• 기판 온도 조절 (반응 활성화)</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-orange-800 mb-2">선택비 개선 방법</h4>
-                    <ul className="text-orange-700 text-sm space-y-1">
-                      <li>• 화학적 식각 비율 증가</li>
-                      <li>• 기판 온도 최적화</li>
-                      <li>• 가스 혼합비 정밀 제어</li>
-                      <li>• 폴리머 형성 조건 활용</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-orange-800 mb-2">이방성 향상 방법</h4>
-                    <ul className="text-orange-700 text-sm space-y-1">
-                      <li>• 압력 낮춤 (MFP 증가)</li>
-                      <li>• RF 파워 적절히 증가</li>
-                      <li>• 측벽 보호막 형성 가스 추가</li>
-                      <li>• 바이어스 전압 최적화</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-orange-800 mb-2">균일도 개선 방법</h4>
-                    <ul className="text-orange-700 text-sm space-y-1">
-                      <li>• 가스 분배 시스템 최적화</li>
-                      <li>• 전극 간격 및 형태 조정</li>
-                      <li>• 온도 분포 균일화</li>
-                      <li>• 플라즈마 밀도 분포 제어</li>
-                    </ul>
                   </div>
                 </div>
               </div>
@@ -2166,154 +1677,6 @@ const PlasmaSimulatorII = () => {
                 </div>
               </div>
             </div>
-
-            {/* 장비 선택 가이드 */}
-            <div className="bg-white rounded-xl shadow-lg p-6 border">
-              <h3 className="text-lg font-semibold text-red-800 mb-4">응용 목적별 최적 장비 선택 가이드</h3>
-              <div className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-blue-800 mb-3">🎯 고정밀 미세 가공</h4>
-                    <div className="space-y-2 text-blue-700 text-sm">
-                      <div><strong>요구사항:</strong> 높은 이방성, 정밀 치수 제어</div>
-                      <div><strong>추천 장비:</strong> ICP, RIE</div>
-                      <div><strong>핵심 파라미터:</strong> 저압, 고 RF 파워</div>
-                      <div><strong>응용 예:</strong> 반도체 Via, TSV, MEMS</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-green-800 mb-3">🏭 대량 생산</h4>
-                    <div className="space-y-2 text-green-700 text-sm">
-                      <div><strong>요구사항:</strong> 높은 처리량, 균일도</div>
-                      <div><strong>추천 장비:</strong> 대면적 CCP, ICP</div>
-                      <div><strong>핵심 파라미터:</strong> 최적화된 처리 시간</div>
-                      <div><strong>응용 예:</strong> PR Ashing, 세정</div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-purple-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-purple-800 mb-3">🔬 고선택비 요구</h4>
-                    <div className="space-y-2 text-purple-700 text-sm">
-                      <div><strong>요구사항:</strong> 특정 물질만 선택적 제거</div>
-                      <div><strong>추천 장비:</strong> RIE, 저온 플라즈마</div>
-                      <div><strong>핵심 파라미터:</strong> 화학적 식각 최적화</div>
-                      <div><strong>응용 예:</strong> 게이트 식각, 다층막 구조</div>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-orange-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-orange-800 mb-3">⚡ 고속 처리</h4>
-                    <div className="space-y-2 text-orange-700 text-sm">
-                      <div><strong>요구사항:</strong> 빠른 공정 시간</div>
-                      <div><strong>추천 장비:</strong> ICP, ECR</div>
-                      <div><strong>핵심 파라미터:</strong> 고밀도 플라즈마</div>
-                      <div><strong>응용 예:</strong> 두꺼운 막 식각, 대량 생산</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 미래 기술 동향 */}
-            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border border-indigo-200">
-              <h3 className="text-xl font-bold text-indigo-800 mb-4">🚀 플라즈마 기술의 미래 동향</h3>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-indigo-800 mb-2 flex items-center">
-                      <span className="mr-2">🔬</span>
-                      차세대 반도체 공정
-                    </h4>
-                    <ul className="text-indigo-700 text-sm space-y-1">
-                      <li>• 3D NAND: 100+ 층 적층 구조</li>
-                      <li>• EUV 리소그래피 후 공정</li>
-                      <li>• 원자층 식각 (ALE)</li>
-                      <li>• 2nm 이하 공정 대응</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-indigo-800 mb-2 flex items-center">
-                      <span className="mr-2">🌍</span>
-                      환경 친화적 공정
-                    </h4>
-                    <ul className="text-indigo-700 text-sm space-y-1">
-                      <li>• 친환경 가스 개발</li>
-                      <li>• 저온 공정 기술</li>
-                      <li>• 폐가스 재활용</li>
-                      <li>• 에너지 효율 향상</li>
-                    </ul>
-                  </div>
-                </div>
-                
-                <div className="space-y-4">
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-indigo-800 mb-2 flex items-center">
-                      <span className="mr-2">🤖</span>
-                      AI/머신러닝 융합
-                    </h4>
-                    <ul className="text-indigo-700 text-sm space-y-1">
-                      <li>• 실시간 공정 최적화</li>
-                      <li>• 예측 유지보수</li>
-                      <li>• 자동화된 레시피 개발</li>
-                      <li>• 디지털 트윈</li>
-                    </ul>
-                  </div>
-                  
-                  <div className="bg-white p-4 rounded-lg shadow-sm">
-                    <h4 className="font-semibold text-indigo-800 mb-2 flex items-center">
-                      <span className="mr-2">🔮</span>
-                      신개념 플라즈마
-                    </h4>
-                    <ul className="text-indigo-700 text-sm space-y-1">
-                      <li>• 대기압 플라즈마 확산</li>
-                      <li>• 마이크로 플라즈마 어레이</li>
-                      <li>• 펄스 플라즈마 기술</li>
-                      <li>• 복합 에너지원 활용</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* 실무 적용 팁 */}
-            <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-200">
-              <h3 className="text-xl font-bold text-yellow-800 mb-4">💡 실무 적용 팁</h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <h4 className="font-semibold text-yellow-800 mb-2">장비 선택 시</h4>
-                  <ul className="text-yellow-700 text-sm space-y-1">
-                    <li>• 공정 요구사항 명확화</li>
-                    <li>• 처리량 vs 성능 트레이드오프</li>
-                    <li>• 유지보수 비용 고려</li>
-                    <li>• 확장 가능성 검토</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <h4 className="font-semibold text-yellow-800 mb-2">공정 개발 시</h4>
-                  <ul className="text-yellow-700 text-sm space-y-1">
-                    <li>• 단계별 최적화 접근</li>
-                    <li>• DOE 활용한 체계적 실험</li>
-                    <li>• 실시간 모니터링 구축</li>
-                    <li>• 재현성 확보 최우선</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-white p-4 rounded-lg shadow-sm">
-                  <h4 className="font-semibold text-yellow-800 mb-2">문제 해결 시</h4>
-                  <ul className="text-yellow-700 text-sm space-y-1">
-                    <li>• 근본 원인 분석</li>
-                    <li>• 다중 변수 체크</li>
-                    <li>• 이력 데이터 활용</li>
-                    <li>• 전문가 협업</li>
-                  </ul>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </div>
@@ -2321,19 +1684,4 @@ const PlasmaSimulatorII = () => {
   );
 };
 
-export default PlasmaSimulatorII;GasType === 'XeF2' && '순수 화학반응 - 낮은 속도, 높은 선택비'}
-                        {etchGasType === 'Synergy' && '상승효과 - 최고 속도, 균형잡힌 특성'}
-                        {etchGasType === 'Ar' && '순수 물리반응 - 중간 속도, 높은 이방성'}
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <h5 className="font-semibold text-gray-800 mb-2">메커니즘 설명</h5>
-                      <div className="text-sm text-gray-700">
-                        {etchGasType === 'XeF2' && (
-                          <div>
-                            <strong>화학 반응:</strong> XeF₂ 라디칼이 Si와 화학적으로 결합하여 SiF₄를 형성합니다. 
-                            선택비는 우수하지만 속도가 느리고 등방성 식각이 발생합니다.
-                          </div>
-                        )}
-                        {etch
+export default PlasmaSimulatorII;
