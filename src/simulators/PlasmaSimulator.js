@@ -236,13 +236,16 @@ const PlasmaSimulator = () => {
         </div>
         
         <div className="mb-2 bg-white rounded-lg p-3 border-2 border-gray-400">
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-xs font-medium text-gray-700 mb-1">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" /></div>
-            <div><label className="block text-xs font-medium text-gray-700 mb-1">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" /></div>
-          </div>
-          <div className="text-center mt-2">
-            <span className="text-sm font-bold text-gray-700">pd = {currentPD.toFixed(2)} Torr·cm</span>
-            {calculateBreakdownVoltage(pressure, distance) !== null && <span className="text-sm text-gray-600 ml-4">항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</span>}
+          <h4 className="text-sm font-semibold text-gray-800 mb-2 text-center">⚙️ 방전 조건 제어</h4>
+          <div className="bg-blue-50 border border-blue-300 rounded-lg p-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div><label className="block text-xs font-medium text-gray-700 mb-1">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" /></div>
+              <div><label className="block text-xs font-medium text-gray-700 mb-1">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" /></div>
+            </div>
+            <div className="text-center mt-2">
+              <span className="text-sm font-bold text-gray-700">pd = {currentPD.toFixed(2)} Torr·cm</span>
+              {calculateBreakdownVoltage(pressure, distance) !== null && <span className="text-sm text-gray-600 ml-4">항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</span>}
+            </div>
           </div>
         </div>
 
@@ -449,9 +452,11 @@ const PlasmaSimulator = () => {
 
               <div className="bg-white rounded-xl shadow-lg p-6 border">
                 <h3 className="text-lg font-semibold text-indigo-800 mb-4">플라즈마 생성 조건</h3>
-                <div className="space-y-6">
-                  <div><label className="block text-sm font-medium text-gray-700 mb-2">가스 압력: {basicGasPressure} mTorr</label><input type="range" min="0.5" max="8" step="0.1" value={basicGasPressure} onChange={(e) => setBasicGasPressure(parseFloat(e.target.value))} className="w-full" /></div>
-                  <div><label className="block text-sm font-medium text-gray-700 mb-2">전기 에너지: {basicPlasmaEnergy} W</label><input type="range" min="50" max="300" step="10" value={basicPlasmaEnergy} onChange={(e) => setBasicPlasmaEnergy(parseInt(e.target.value))} className="w-full" /></div>
+                <div className="bg-indigo-50 border-2 border-indigo-300 rounded-lg p-4">
+                  <div className="space-y-6">
+                    <div><label className="block text-sm font-medium text-gray-700 mb-2">가스 압력: {basicGasPressure} mTorr</label><input type="range" min="0.5" max="8" step="0.1" value={basicGasPressure} onChange={(e) => setBasicGasPressure(parseFloat(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-2">전기 에너지: {basicPlasmaEnergy} W</label><input type="range" min="50" max="300" step="10" value={basicPlasmaEnergy} onChange={(e) => setBasicPlasmaEnergy(parseInt(e.target.value))} className="w-full" /></div>
+                  </div>
                 </div>
                 <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
                   <div className="flex"><div className="flex-shrink-0"><span className="text-yellow-600 font-bold text-sm">⚠️ 주의사항</span></div><div className="ml-3"><div className="text-sm text-yellow-800 space-y-2"><p><strong>교육용 시뮬레이션:</strong> 이 도구는 플라즈마 발생 원리의 <strong>개념 이해</strong>를 위한 단순화된 모델입니다.</p><p><strong>실제와 차이:</strong> 실제 플라즈마 공정은 온도, 유량, 챔버 형태, 전극 재질 등 수십 가지 변수가 복합적으로 작용합니다.</p><p><strong>결과의 한계:</strong> 여기서 보이는 수치와 현상은 <strong>상대적 경향성</strong>을 나타내는 예시로, 실제 공정 조건과는 다를 수 있습니다.</p><p><strong>학습 목표:</strong> 압력과 에너지의 <strong>상호작용 원리</strong>와 최적 조건의 <strong>개념</strong>을 이해하는 것이 목적입니다.</p></div></div></div>
@@ -538,11 +543,13 @@ const PlasmaSimulator = () => {
             <div className="grid lg:grid-cols-2 gap-8">
               <div className="bg-white rounded-xl shadow-lg p-6 border">
                 <h3 className="text-lg font-semibold text-violet-800 mb-4">파션커브 조건 설정</h3>
-                <div className="space-y-6">
-                  <div><label className="block text-sm font-medium text-gray-700 mb-2">방전 가스 종류</label><div className="grid grid-cols-2 gap-2">{['argon', 'air', 'helium', 'nitrogen', 'neon'].map(gas => (<label key={gas} className="flex items-center p-2 border rounded hover:bg-gray-50"><input type="radio" name="gasType" value={gas} checked={gasType === gas} onChange={(e) => setGasType(e.target.value)} className="mr-2" /><span className="text-red-600 font-medium">{gas === 'argon' ? 'Argon (Ar)' : gas === 'air' ? 'Air' : gas === 'helium' ? 'Helium (He)' : gas === 'nitrogen' ? 'Nitrogen (N₂)' : 'Neon (Ne)'}</span><span className="text-xs text-gray-500 ml-1">{gas === 'argon' ? '- 15.8eV' : gas === 'air' ? '- 혼합' : gas === 'helium' ? '- 24.5eV' : gas === 'nitrogen' ? '- 14.5eV' : '- 15.7eV'}</span></label>))}</div></div>
-                  <div><label className="block text-sm font-medium text-gray-700 mb-2">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full" /></div>
-                  <div><label className="block text-sm font-medium text-gray-700 mb-2">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full" /></div>
-                  <div className="bg-gray-50 p-4 rounded-lg"><div className="text-sm font-medium text-gray-700 mb-2">현재 조건</div><div className="space-y-1 text-sm text-gray-600"><div>pd 값: {(pressure * distance).toFixed(2)} Torr·cm</div>{calculateBreakdownVoltage(pressure, distance) !== null ? <div>항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</div> : <div className="text-red-600 font-bold">⚠️ 범위 초과 (0.1-100 Torr·cm)</div>}</div></div>
+                <div className="bg-violet-50 border-2 border-violet-300 rounded-lg p-4">
+                  <div className="space-y-6">
+                    <div><label className="block text-sm font-medium text-gray-700 mb-2">방전 가스 종류</label><div className="grid grid-cols-2 gap-2">{['argon', 'air', 'helium', 'nitrogen', 'neon'].map(gas => (<label key={gas} className="flex items-center p-2 border rounded hover:bg-gray-50"><input type="radio" name="gasType" value={gas} checked={gasType === gas} onChange={(e) => setGasType(e.target.value)} className="mr-2" /><span className="text-red-600 font-medium">{gas === 'argon' ? 'Argon (Ar)' : gas === 'air' ? 'Air' : gas === 'helium' ? 'Helium (He)' : gas === 'nitrogen' ? 'Nitrogen (N₂)' : 'Neon (Ne)'}</span><span className="text-xs text-gray-500 ml-1">{gas === 'argon' ? '- 15.8eV' : gas === 'air' ? '- 혼합' : gas === 'helium' ? '- 24.5eV' : gas === 'nitrogen' ? '- 14.5eV' : '- 15.7eV'}</span></label>))}</div></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-2">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full" /></div>
+                    <div><label className="block text-sm font-medium text-gray-700 mb-2">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full" /></div>
+                    <div className="bg-gray-50 p-4 rounded-lg"><div className="text-sm font-medium text-gray-700 mb-2">현재 조건</div><div className="space-y-1 text-sm text-gray-600"><div>pd 값: {(pressure * distance).toFixed(2)} Torr·cm</div>{calculateBreakdownVoltage(pressure, distance) !== null ? <div>항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</div> : <div className="text-red-600 font-bold">⚠️ 범위 초과 (0.1-100 Torr·cm)</div>}</div></div>
+                  </div>
                 </div>
               </div>
 
