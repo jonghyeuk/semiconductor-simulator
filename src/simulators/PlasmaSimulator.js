@@ -610,6 +610,43 @@ const PlasmaSimulator = () => {
 
             <div className="bg-white rounded-xl shadow-lg p-6 border">
               <h3 className="text-lg font-semibold text-green-800 mb-4">RF 매칭 네트워크 개념</h3>
+              
+              {/* 컨트롤 패널을 SVG 위쪽에 별도로 배치 */}
+              <div className="mb-6 grid grid-cols-3 gap-4">
+                <div className="bg-blue-100 border-2 border-blue-400 p-3 rounded-lg">
+                  <h4 className="text-sm font-bold text-blue-800 mb-2 text-center">🎛️ RF 주파수</h4>
+                  <label className="block text-xs font-medium text-blue-900 mb-1">주파수: {frequency} MHz</label>
+                  <input type="range" min="0.4" max="100" step="0.1" value={frequency} onChange={(e) => setFrequency(parseFloat(e.target.value))} className="w-full h-3 bg-blue-300 rounded-lg" />
+                  <div className="flex justify-between text-xs text-blue-700 mt-1">
+                    <span>0.4</span>
+                    <span>13.56</span>
+                    <span>100</span>
+                  </div>
+                </div>
+                
+                <div className="bg-green-50 border-2 border-green-400 p-3 rounded-lg">
+                  <h4 className="text-sm font-bold text-green-800 mb-2 text-center">⚙️ 매칭 네트워크</h4>
+                  <div className="mb-2">
+                    <label className="block text-xs font-medium text-green-900 mb-1">인덕턴스: {inductance} nH</label>
+                    <input type="range" min="10" max="1000" step="10" value={inductance} onChange={(e) => setInductance(parseInt(e.target.value))} className="w-full h-3 bg-green-300 rounded-lg" />
+                  </div>
+                  <div className="mb-2">
+                    <label className="block text-xs font-medium text-green-900 mb-1">캐패시턴스: {capacitance} pF</label>
+                    <input type="range" min="10" max="1000" step="10" value={capacitance} onChange={(e) => setCapacitance(parseInt(e.target.value))} className="w-full h-3 bg-green-300 rounded-lg" />
+                  </div>
+                  <button onClick={applyAutoMatching} className="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1 px-2 rounded">
+                    자동 매칭
+                  </button>
+                </div>
+                
+                <div className="bg-red-100 border-2 border-red-400 p-3 rounded-lg">
+                  <h4 className="text-sm font-bold text-red-800 mb-2 text-center">🎯 플라즈마 부하</h4>
+                  <label className="block text-xs font-medium text-red-900 mb-1">부하 임피던스: {loadImpedance} Ω</label>
+                  <input type="range" min="10" max="200" step="1" value={loadImpedance} onChange={(e) => setLoadImpedance(parseInt(e.target.value))} className="w-full h-3 bg-red-300 rounded-lg" />
+                  <div className="text-xs text-red-700 mt-1 text-center">{loadImpedance}Ω</div>
+                </div>
+              </div>
+
               <div className="bg-gray-50 p-6 rounded-lg">
                 <svg width="100%" height="600" viewBox="0 0 800 600">
                   {/* RF Generator */}
@@ -663,48 +700,6 @@ const PlasmaSimulator = () => {
                   <ellipse cx="730" cy="290" rx="30" ry="60" fill="#ef4444" stroke="#dc2626" strokeWidth="4"/>
                   <text x="730" y="275" textAnchor="middle" fontSize="14" fill="white" fontWeight="bold">플라즈마</text>
                   <text x="730" y="295" textAnchor="middle" fontSize="14" fill="white" fontWeight="bold">부하</text>
-
-                  {/* 모든 컨트롤 박스들을 맨 끝으로 이동 - 이제 다른 SVG 요소들 위에 표시됨 */}
-                  
-                  {/* RF 주파수 조절 슬라이더 */}
-                  <foreignObject x="20" y="350" width="160" height="80">
-                    <div className="bg-blue-100 border-2 border-blue-400 p-2 rounded">
-                      <label className="block text-xs font-medium text-blue-900 mb-1">RF 주파수: {frequency} MHz</label>
-                      <input type="range" min="0.4" max="100" step="0.1" value={frequency} onChange={(e) => setFrequency(parseFloat(e.target.value))} className="w-full h-2 bg-blue-300 rounded-lg" />
-                      <div className="flex justify-between text-xs text-blue-700 mt-1">
-                        <span>0.4</span>
-                        <span>13.56</span>
-                        <span>100</span>
-                      </div>
-                    </div>
-                  </foreignObject>
-
-                  {/* 인덕턴스/캐패시턴스 조절 슬라이더 */}
-                  <foreignObject x="220" y="420" width="240" height="150">
-                    <div className="bg-green-50 border-2 border-green-400 p-3 rounded">
-                      <h4 className="text-xs font-semibold text-green-800 mb-2 text-center">⚙️ 매칭 네트워크 조정</h4>
-                      <div className="mb-3">
-                        <label className="block text-xs font-medium text-green-900 mb-1">인덕턴스: {inductance} nH</label>
-                        <input type="range" min="10" max="1000" step="10" value={inductance} onChange={(e) => setInductance(parseInt(e.target.value))} className="w-full h-2 bg-green-300 rounded-lg" />
-                      </div>
-                      <div className="mb-2">
-                        <label className="block text-xs font-medium text-green-900 mb-1">캐패시턴스: {capacitance} pF</label>
-                        <input type="range" min="10" max="1000" step="10" value={capacitance} onChange={(e) => setCapacitance(parseInt(e.target.value))} className="w-full h-2 bg-green-300 rounded-lg" />
-                      </div>
-                      <button onClick={applyAutoMatching} className="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1 px-2 rounded">
-                        자동 매칭 (최적 L, C)
-                      </button>
-                    </div>
-                  </foreignObject>
-
-                  {/* 부하 임피던스 조절 슬라이더 */}
-                  <foreignObject x="660" y="370" width="140" height="70">
-                    <div className="bg-red-100 border-2 border-red-400 p-2 rounded">
-                      <h4 className="text-xs font-semibold text-red-800 mb-1 text-center">🎯 플라즈마 부하</h4>
-                      <label className="block text-xs font-medium text-red-900 mb-1">부하 임피던스: {loadImpedance} Ω</label>
-                      <input type="range" min="10" max="200" step="1" value={loadImpedance} onChange={(e) => setLoadImpedance(parseInt(e.target.value))} className="w-full h-2 bg-red-300 rounded-lg" />
-                    </div>
-                  </foreignObject>
                 </svg>
               </div>
               
