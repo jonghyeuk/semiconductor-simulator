@@ -619,7 +619,7 @@ const PlasmaSimulator = () => {
                   
                   {/* RF 주파수 조절 슬라이더 */}
                   <foreignObject x="20" y="350" width="160" height="80">
-                    <div className="bg-blue-100 p-2 rounded">
+                    <div className="bg-blue-100 border-2 border-blue-400 p-2 rounded">
                       <label className="block text-xs font-medium text-blue-900 mb-1">RF 주파수: {frequency} MHz</label>
                       <input type="range" min="0.4" max="100" step="0.1" value={frequency} onChange={(e) => setFrequency(parseFloat(e.target.value))} className="w-full h-2 bg-blue-300 rounded-lg" />
                       <div className="flex justify-between text-xs text-blue-700 mt-1">
@@ -654,7 +654,8 @@ const PlasmaSimulator = () => {
 
                   {/* 인덕턴스/캐패시턴스 조절 슬라이더 */}
                   <foreignObject x="220" y="420" width="240" height="150">
-                    <div className="bg-green-50 p-3 rounded border-2 border-green-400">
+                    <div className="bg-green-50 border-2 border-green-400 p-3 rounded">
+                      <h4 className="text-xs font-semibold text-green-800 mb-2 text-center">⚙️ 매칭 네트워크 조정</h4>
                       <div className="mb-3">
                         <label className="block text-xs font-medium text-green-900 mb-1">인덕턴스: {inductance} nH</label>
                         <input type="range" min="10" max="1000" step="10" value={inductance} onChange={(e) => setInductance(parseInt(e.target.value))} className="w-full h-2 bg-green-300 rounded-lg" />
@@ -695,7 +696,8 @@ const PlasmaSimulator = () => {
 
                   {/* 부하 임피던스 조절 슬라이더 */}
                   <foreignObject x="660" y="370" width="140" height="70">
-                    <div className="bg-red-100 p-2 rounded">
+                    <div className="bg-red-100 border-2 border-red-400 p-2 rounded">
+                      <h4 className="text-xs font-semibold text-red-800 mb-1 text-center">🎯 플라즈마 부하</h4>
                       <label className="block text-xs font-medium text-red-900 mb-1">부하 임피던스: {loadImpedance} Ω</label>
                       <input type="range" min="10" max="200" step="1" value={loadImpedance} onChange={(e) => setLoadImpedance(parseInt(e.target.value))} className="w-full h-2 bg-red-300 rounded-lg" />
                     </div>
