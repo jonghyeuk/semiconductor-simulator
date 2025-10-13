@@ -687,70 +687,115 @@ const OxidationSimulator = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h5 className="font-semibold mb-3">가스 플로우 제어 (sccm)</h5>
                   
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-1">O₂: {gasFlows.O2} sccm</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="200"
-                        step="10"
-                        value={gasFlows.O2}
-                        onChange={(e) => setGasFlows({...gasFlows, O2: Number(e.target.value)})}
-                        className="w-full"
-                      />
+                  <div className="space-y-4">
+                    <div className="p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
+                      <label className="block text-sm font-medium mb-2 text-blue-800">O₂: {gasFlows.O2} sccm</label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="200"
+                          step="10"
+                          value={gasFlows.O2}
+                          onChange={(e) => setGasFlows({...gasFlows, O2: Number(e.target.value)})}
+                          className="w-full h-3 bg-blue-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${gasFlows.O2/200*100}%, #dbeafe ${gasFlows.O2/200*100}%, #dbeafe 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>0</span>
+                          <span>200</span>
+                        </div>
+                      </div>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium mb-1">H₂O: {gasFlows.H2O} sccm</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="300"
-                        step="10"
-                        value={gasFlows.H2O}
-                        onChange={(e) => setGasFlows({...gasFlows, H2O: Number(e.target.value)})}
-                        className="w-full"
-                      />
+                    <div className="p-3 bg-white rounded-lg border-2 border-cyan-200 shadow-sm">
+                      <label className="block text-sm font-medium mb-2 text-cyan-800">H₂O: {gasFlows.H2O} sccm</label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="300"
+                          step="10"
+                          value={gasFlows.H2O}
+                          onChange={(e) => setGasFlows({...gasFlows, H2O: Number(e.target.value)})}
+                          className="w-full h-3 bg-cyan-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #06b6d4 0%, #06b6d4 ${gasFlows.H2O/300*100}%, #cffafe ${gasFlows.H2O/300*100}%, #cffafe 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>0</span>
+                          <span>300</span>
+                        </div>
+                      </div>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium mb-1">H₂: {gasFlows.H2} sccm</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        step="5"
-                        value={gasFlows.H2}
-                        onChange={(e) => setGasFlows({...gasFlows, H2: Number(e.target.value)})}
-                        className="w-full"
-                      />
+                    <div className="p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
+                      <label className="block text-sm font-medium mb-2 text-green-800">H₂: {gasFlows.H2} sccm</label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="5"
+                          value={gasFlows.H2}
+                          onChange={(e) => setGasFlows({...gasFlows, H2: Number(e.target.value)})}
+                          className="w-full h-3 bg-green-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #10b981 0%, #10b981 ${gasFlows.H2/100*100}%, #dcfce7 ${gasFlows.H2/100*100}%, #dcfce7 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>0</span>
+                          <span>100</span>
+                        </div>
+                      </div>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium mb-1">N₂: {gasFlows.N2} sccm</label>
-                      <input
-                        type="range"
-                        min="50"
-                        max="500"
-                        step="10"
-                        value={gasFlows.N2}
-                        onChange={(e) => setGasFlows({...gasFlows, N2: Number(e.target.value)})}
-                        className="w-full"
-                      />
+                    <div className="p-3 bg-white rounded-lg border-2 border-gray-200 shadow-sm">
+                      <label className="block text-sm font-medium mb-2 text-gray-800">N₂: {gasFlows.N2} sccm</label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="50"
+                          max="500"
+                          step="10"
+                          value={gasFlows.N2}
+                          onChange={(e) => setGasFlows({...gasFlows, N2: Number(e.target.value)})}
+                          className="w-full h-3 bg-gray-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #6b7280 0%, #6b7280 ${(gasFlows.N2-50)/450*100}%, #f3f4f6 ${(gasFlows.N2-50)/450*100}%, #f3f4f6 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>50</span>
+                          <span>500</span>
+                        </div>
+                      </div>
                     </div>
                     
-                    <div>
-                      <label className="block text-sm font-medium mb-1">HCl: {gasFlows.HCl} sccm</label>
-                      <input
-                        type="range"
-                        min="0"
-                        max="50"
-                        step="1"
-                        value={gasFlows.HCl}
-                        onChange={(e) => setGasFlows({...gasFlows, HCl: Number(e.target.value)})}
-                        className="w-full"
-                      />
+                    <div className="p-3 bg-white rounded-lg border-2 border-yellow-200 shadow-sm">
+                      <label className="block text-sm font-medium mb-2 text-yellow-800">HCl: {gasFlows.HCl} sccm</label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="50"
+                          step="1"
+                          value={gasFlows.HCl}
+                          onChange={(e) => setGasFlows({...gasFlows, HCl: Number(e.target.value)})}
+                          className="w-full h-3 bg-yellow-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${gasFlows.HCl/50*100}%, #fef3c7 ${gasFlows.HCl/50*100}%, #fef3c7 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>0</span>
+                          <span>50</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -758,31 +803,67 @@ const OxidationSimulator = () => {
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h5 className="font-semibold mb-3">장비 제어</h5>
                   
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-sm font-medium mb-2">온도: {temperature}°C</label>
-                      <input
-                        type="range"
-                        min="800"
-                        max="1200"
-                        step="25"
-                        value={temperature}
-                        onChange={(e) => setTemperature(Number(e.target.value))}
-                        className="w-full"
-                      />
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white rounded-lg border-2 border-red-200 shadow-sm">
+                      <label className="block text-sm font-medium mb-2 text-red-800">온도: {temperature}°C</label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="800"
+                          max="1200"
+                          step="25"
+                          value={temperature}
+                          onChange={(e) => setTemperature(Number(e.target.value))}
+                          className="w-full h-4 bg-red-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(temperature-800)/400*100}%, #fecaca ${(temperature-800)/400*100}%, #fecaca 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>800°C</span>
+                          <span>1200°C</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-center">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          temperature >= 1100 ? 'bg-red-100 text-red-800' :
+                          temperature >= 1000 ? 'bg-orange-100 text-orange-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {temperature >= 1100 ? '고온' : temperature >= 1000 ? '중온' : '저온'}
+                        </span>
+                      </div>
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium mb-2">시간: {time}분</label>
-                      <input
-                        type="range"
-                        min="10"
-                        max="180"
-                        step="10"
-                        value={time}
-                        onChange={(e) => setTime(Number(e.target.value))}
-                        className="w-full"
-                      />
+                    <div className="p-4 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
+                      <label className="block text-sm font-medium mb-2 text-blue-800">시간: {time}분</label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="10"
+                          max="180"
+                          step="10"
+                          value={time}
+                          onChange={(e) => setTime(Number(e.target.value))}
+                          className="w-full h-4 bg-blue-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #2563eb 0%, #2563eb ${(time-10)/170*100}%, #dbeafe ${(time-10)/170*100}%, #dbeafe 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>10분</span>
+                          <span>180분</span>
+                        </div>
+                      </div>
+                      <div className="mt-2 text-center">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          time >= 120 ? 'bg-blue-100 text-blue-800' :
+                          time >= 60 ? 'bg-green-100 text-green-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {time >= 120 ? '장시간' : time >= 60 ? '중간' : '단시간'}
+                        </span>
+                      </div>
                     </div>
 
                     <div className="flex space-x-2">
@@ -817,7 +898,7 @@ const OxidationSimulator = () => {
                   <div className="space-y-3">
                     <div className="text-sm">
                       <strong>공정 모드:</strong>
-                      <span className={`ml-2 px-2 py-1 rounded text-xs ${
+                      <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
                         processMode === 'wet' 
                           ? 'bg-blue-100 text-blue-800' 
                           : processMode === 'dry'
@@ -1044,25 +1125,44 @@ const OxidationSimulator = () => {
                     </p>
                   </div>
                   
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">
-                      Boron 도핑 농도: {simDopingLevel}×10¹⁸ cm⁻³
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="10"
-                      step="1"
-                      value={simDopingLevel}
-                      onChange={(e) => setSimDopingLevel(Number(e.target.value))}
-                      className="w-full h-3 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>무도핑</span>
-                      <span>고농도</span>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white rounded-lg border-2 border-yellow-200 shadow-sm">
+                      <label className="block text-sm font-medium text-yellow-800 mb-3">
+                        Boron 도핑 농도: {simDopingLevel}×10¹⁸ cm⁻³
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="10"
+                          step="1"
+                          value={simDopingLevel}
+                          onChange={(e) => setSimDopingLevel(Number(e.target.value))}
+                          className="w-full h-4 bg-yellow-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${simDopingLevel/10*100}%, #fef3c7 ${simDopingLevel/10*100}%, #fef3c7 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>무도핑</span>
+                          <span>고농도</span>
+                        </div>
+                      </div>
+                      <div className="mt-3 text-center">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          simDopingLevel >= 7 ? 'bg-red-100 text-red-800' :
+                          simDopingLevel >= 4 ? 'bg-orange-100 text-orange-800' :
+                          simDopingLevel > 0 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-800'
+                        }`}>
+                          {simDopingLevel >= 7 ? '고농도 도핑' : 
+                           simDopingLevel >= 4 ? '중농도 도핑' :
+                           simDopingLevel > 0 ? '저농도 도핑' : '무도핑'}
+                        </span>
+                      </div>
                     </div>
                     
-                    <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+                    <div className="p-3 bg-gray-100 rounded-lg">
                       <div className="text-sm font-medium text-gray-700">산화 속도 변화:</div>
                       <div className="text-2xl font-bold text-yellow-600">
                         {calculateDopingRate(simDopingLevel).toFixed(2)}x
@@ -1130,25 +1230,44 @@ const OxidationSimulator = () => {
                     </p>
                   </div>
                   
-                  <div className="space-y-3">
-                    <label className="block text-sm font-medium text-gray-700">
-                      초기 산화막 두께: {simInitialOxide} nm
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="10"
-                      value={simInitialOxide}
-                      onChange={(e) => setSimInitialOxide(Number(e.target.value))}
-                      className="w-full h-3 bg-gray-300 rounded-lg appearance-none cursor-pointer"
-                    />
-                    <div className="flex justify-between text-xs text-gray-500">
-                      <span>0 nm</span>
-                      <span>100 nm</span>
+                  <div className="space-y-4">
+                    <div className="p-4 bg-white rounded-lg border-2 border-green-200 shadow-sm">
+                      <label className="block text-sm font-medium text-green-800 mb-3">
+                        초기 산화막 두께: {simInitialOxide} nm
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          step="10"
+                          value={simInitialOxide}
+                          onChange={(e) => setSimInitialOxide(Number(e.target.value))}
+                          className="w-full h-4 bg-green-100 rounded-lg appearance-none cursor-pointer slider"
+                          style={{
+                            background: `linear-gradient(to right, #10b981 0%, #10b981 ${simInitialOxide/100*100}%, #dcfce7 ${simInitialOxide/100*100}%, #dcfce7 100%)`
+                          }}
+                        />
+                        <div className="flex justify-between text-xs text-gray-500 mt-1">
+                          <span>0 nm</span>
+                          <span>100 nm</span>
+                        </div>
+                      </div>
+                      <div className="mt-3 text-center">
+                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                          simInitialOxide >= 60 ? 'bg-red-100 text-red-800' :
+                          simInitialOxide >= 30 ? 'bg-orange-100 text-orange-800' :
+                          simInitialOxide > 0 ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-green-100 text-green-800'
+                        }`}>
+                          {simInitialOxide >= 60 ? '두꺼운 막' : 
+                           simInitialOxide >= 30 ? '중간 막' :
+                           simInitialOxide > 0 ? '얇은 막' : '신선한 표면'}
+                        </span>
+                      </div>
                     </div>
                     
-                    <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+                    <div className="p-3 bg-gray-100 rounded-lg">
                       <div className="text-sm font-medium text-gray-700">성장 속도:</div>
                       <div className="text-2xl font-bold text-green-600">
                         {calculateInitialOxideRate(simInitialOxide).toFixed(2)}x
@@ -1229,34 +1348,70 @@ const OxidationSimulator = () => {
               
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="p-4 bg-white rounded-lg border-2 border-red-200 shadow-sm">
+                    <label className="block text-sm font-medium text-red-800 mb-3">
                       온도: {simTemperature}°C
                     </label>
-                    <input
-                      type="range"
-                      min="900"
-                      max="1200"
-                      step="50"
-                      value={simTemperature}
-                      onChange={(e) => setSimTemperature(Number(e.target.value))}
-                      className="w-full h-3 bg-red-300 rounded-lg appearance-none cursor-pointer"
-                    />
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min="900"
+                        max="1200"
+                        step="50"
+                        value={simTemperature}
+                        onChange={(e) => setSimTemperature(Number(e.target.value))}
+                        className="w-full h-4 bg-red-100 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(simTemperature-900)/300*100}%, #fecaca ${(simTemperature-900)/300*100}%, #fecaca 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>900°C</span>
+                        <span>1200°C</span>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-center">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                        simTemperature >= 1100 ? 'bg-red-100 text-red-800' :
+                        simTemperature >= 1000 ? 'bg-orange-100 text-orange-800' :
+                        'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {simTemperature >= 1100 ? '고온' : simTemperature >= 1000 ? '중온' : '저온'}
+                      </span>
+                    </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <div className="p-4 bg-white rounded-lg border-2 border-purple-200 shadow-sm">
+                    <label className="block text-sm font-medium text-purple-800 mb-3">
                       압력: {simPressure.toFixed(1)} atm
                     </label>
-                    <input
-                      type="range"
-                      min="0.5"
-                      max="3"
-                      step="0.5"
-                      value={simPressure}
-                      onChange={(e) => setSimPressure(Number(e.target.value))}
-                      className="w-full h-3 bg-purple-300 rounded-lg appearance-none cursor-pointer"
-                    />
+                    <div className="relative">
+                      <input
+                        type="range"
+                        min="0.5"
+                        max="3"
+                        step="0.5"
+                        value={simPressure}
+                        onChange={(e) => setSimPressure(Number(e.target.value))}
+                        className="w-full h-4 bg-purple-100 rounded-lg appearance-none cursor-pointer slider"
+                        style={{
+                          background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${(simPressure-0.5)/2.5*100}%, #e9d5ff ${(simPressure-0.5)/2.5*100}%, #e9d5ff 100%)`
+                        }}
+                      />
+                      <div className="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0.5 atm</span>
+                        <span>3.0 atm</span>
+                      </div>
+                    </div>
+                    <div className="mt-2 text-center">
+                      <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
+                        simPressure >= 2.5 ? 'bg-purple-100 text-purple-800' :
+                        simPressure >= 1.5 ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {simPressure >= 2.5 ? '고압' : simPressure >= 1.5 ? '중압' : '저압'}
+                      </span>
+                    </div>
                   </div>
                   
                   <div className="p-4 bg-gray-100 rounded-lg">
@@ -1268,7 +1423,7 @@ const OxidationSimulator = () => {
                   
                   <button
                     onClick={() => setShowSimResult(true)}
-                    className="w-full py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-all"
+                    className="w-full py-3 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-all shadow-md"
                   >
                     전체 통합 효과 계산
                   </button>
@@ -1468,6 +1623,28 @@ const OxidationSimulator = () => {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
+      <style jsx>{`
+        .slider::-webkit-slider-thumb {
+          appearance: none;
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 3px solid #6366f1;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .slider::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #ffffff;
+          border: 3px solid #6366f1;
+          cursor: pointer;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+      `}</style>
+      
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="flex space-x-1 p-1">
           {tabs.map((tab) => (
