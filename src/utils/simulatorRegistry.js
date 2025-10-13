@@ -3,6 +3,7 @@ import VacuumSimulator from '../simulators/VacuumSimulator';
 // 미래에 추가될 시뮬레이터들
 import CleaningSimulator from '../simulators/CleaningSimulator';
 import OxidationSimulator from '../simulators/Oxidation';
+import PlasmaSimulator from '../simulators/PlasmaSimulator'; // ← 추가
 // import EtchingSimulator from '../simulators/EtchingSimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
 
@@ -86,6 +87,30 @@ class SimulatorRegistry {
       }
     });
 
+    // Plasma Simulation I 시뮬레이터 (완성됨) ← 추가
+    this.register({
+      id: 'plasma',
+      name: 'Plasma Simulation I',
+      icon: '⚡',
+      description: '플라즈마 발생원리 및 공정 제어',
+      component: PlasmaSimulator,
+      available: true,
+      category: 'process',
+      order: 4,
+      metadata: {
+        version: '1.0.0',
+        lastUpdated: '2025-01-29',
+        author: 'Semiconductor Simulator Team',
+        features: [
+          '플라즈마 기본 특성 이해',
+          '발생원리 및 파션커브',
+          'RF 매칭 네트워크',
+          'CCP 시스템 구조',
+          '고급 주제 및 미래 기술'
+        ]
+      }
+    });
+
     // Lithography 시뮬레이터 (준비중)
     this.register({
       id: 'lithograph',
@@ -95,7 +120,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 4,
+      order: 5, // ← 수정: 4 → 5
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-03-01',
@@ -117,7 +142,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 5,
+      order: 6, // ← 수정: 5 → 6
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-03-15',
@@ -139,7 +164,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 6,
+      order: 7, // ← 수정: 6 → 7
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-04-01',
@@ -161,7 +186,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 7,
+      order: 8, // ← 수정: 7 → 8
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-04-15',
@@ -183,7 +208,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'metrology',
-      order: 8,
+      order: 9, // ← 수정: 8 → 9
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-01',
@@ -205,7 +230,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'backend',
-      order: 9,
+      order: 10, // ← 수정: 9 → 10
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-15',
