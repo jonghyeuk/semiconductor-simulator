@@ -235,16 +235,17 @@ const PlasmaSimulator = () => {
           </div>
         </div>
         
-        <div className="mb-2 bg-white rounded-lg p-3 border-2 border-gray-400">
-          <h4 className="text-sm font-semibold text-gray-800 mb-2 text-center">⚙️ 방전 조건 제어</h4>
-          <div className="bg-blue-50 border border-blue-300 rounded-lg p-3">
-            <div className="grid grid-cols-2 gap-4">
-              <div><label className="block text-xs font-medium text-gray-700 mb-1">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" /></div>
-              <div><label className="block text-xs font-medium text-gray-700 mb-1">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" /></div>
+        {/* 컨트롤 박스를 맨 위로 이동하고 z-index 추가 */}
+        <div className="mb-4 bg-white rounded-lg p-4 border-2 border-blue-400 shadow-lg relative z-10">
+          <h4 className="text-base font-bold text-blue-800 mb-3 text-center">⚙️ 방전 조건 제어</h4>
+          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
+            <div className="grid grid-cols-2 gap-6">
+              <div><label className="block text-sm font-semibold text-gray-700 mb-2">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full h-3 bg-blue-300 rounded-lg appearance-none cursor-pointer" /></div>
+              <div><label className="block text-sm font-semibold text-gray-700 mb-2">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full h-3 bg-blue-300 rounded-lg appearance-none cursor-pointer" /></div>
             </div>
-            <div className="text-center mt-2">
-              <span className="text-sm font-bold text-gray-700">pd = {currentPD.toFixed(2)} Torr·cm</span>
-              {calculateBreakdownVoltage(pressure, distance) !== null && <span className="text-sm text-gray-600 ml-4">항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</span>}
+            <div className="text-center mt-3 bg-white rounded-lg p-2">
+              <span className="text-base font-bold text-blue-800">pd = {currentPD.toFixed(2)} Torr·cm</span>
+              {calculateBreakdownVoltage(pressure, distance) !== null && <span className="text-sm text-gray-700 ml-4">항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</span>}
             </div>
           </div>
         </div>
