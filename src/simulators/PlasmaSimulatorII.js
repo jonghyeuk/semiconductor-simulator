@@ -1106,11 +1106,11 @@ const PlasmaSimulatorII = () => {
               <h3 className="text-lg font-semibold text-indigo-800 mb-4">ICP의 핵심: 독립적 제어</h3>
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="bg-green-100 p-4 rounded-lg border-2 border-green-400 hover:border-green-500 transition-all shadow-sm">
-                    <label className="block text-sm font-medium text-green-800 mb-3">
+                  <div className="bg-green-200 p-4 rounded-lg border-2 border-green-600 hover:border-green-700 transition-all shadow-md">
+                    <label className="block text-sm font-medium text-green-900 mb-3">
                       <span className="flex items-center justify-between">
                         <span>Source RF Power (플라즈마 밀도 제어)</span>
-                        <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        <span className="bg-green-700 text-white px-3 py-1 rounded-full text-sm font-bold">
                           {(rfPower * 2).toFixed(0)} W
                         </span>
                       </span>
@@ -1123,21 +1123,21 @@ const PlasmaSimulatorII = () => {
                         step="10" 
                         value={rfPower * 2} 
                         onChange={(e) => setRfPower(parseInt(e.target.value) / 2)} 
-                        className="w-full h-4 bg-green-200 rounded-lg appearance-none cursor-pointer slider-thumb-green hover:bg-green-300 focus:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                        className="w-full h-4 bg-green-300 rounded-lg appearance-none cursor-pointer slider-thumb-green hover:bg-green-400 focus:bg-green-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
                       />
-                      <div className="flex justify-between text-xs text-green-600 mt-1">
+                      <div className="flex justify-between text-xs text-green-700 mt-1">
                         <span>50W</span>
-                        <span className="text-green-800 font-medium">조정 가능</span>
+                        <span className="text-green-900 font-medium">조정 가능</span>
                         <span>500W</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-red-100 p-4 rounded-lg border-2 border-red-400 hover:border-red-500 transition-all shadow-sm">
-                    <label className="block text-sm font-medium text-red-800 mb-3">
+                  <div className="bg-red-200 p-4 rounded-lg border-2 border-red-600 hover:border-red-700 transition-all shadow-md">
+                    <label className="block text-sm font-medium text-red-900 mb-3">
                       <span className="flex items-center justify-between">
                         <span>Bias RF Power (이온 에너지 제어)</span>
-                        <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        <span className="bg-red-700 text-white px-3 py-1 rounded-full text-sm font-bold">
                           {etchPower} W
                         </span>
                       </span>
@@ -1150,11 +1150,11 @@ const PlasmaSimulatorII = () => {
                         step="10" 
                         value={etchPower} 
                         onChange={(e) => setEtchPower(parseInt(e.target.value))} 
-                        className="w-full h-4 bg-red-200 rounded-lg appearance-none cursor-pointer slider-thumb-red hover:bg-red-300 focus:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                        className="w-full h-4 bg-red-300 rounded-lg appearance-none cursor-pointer slider-thumb-red hover:bg-red-400 focus:bg-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
                       />
-                      <div className="flex justify-between text-xs text-red-600 mt-1">
+                      <div className="flex justify-between text-xs text-red-700 mt-1">
                         <span>0W</span>
-                        <span className="text-red-800 font-medium">조정 가능</span>
+                        <span className="text-red-900 font-medium">조정 가능</span>
                         <span>300W</span>
                       </div>
                     </div>
@@ -1621,11 +1621,11 @@ const PlasmaSimulatorII = () => {
               <h3 className="text-lg font-semibold text-orange-800 mb-4">공정 조건 최적화</h3>
               <div className="grid lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="bg-orange-100 p-4 rounded-lg border-2 border-orange-400 hover:border-orange-500 transition-all shadow-sm">
-                    <label className="block text-sm font-medium text-orange-800 mb-3">
+                  <div className="bg-orange-200 p-4 rounded-lg border-2 border-orange-600 hover:border-orange-700 transition-all shadow-md">
+                    <label className="block text-sm font-medium text-orange-900 mb-3">
                       <span className="flex items-center justify-between">
                         <span>RF 파워</span>
-                        <span className="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        <span className="bg-orange-700 text-white px-3 py-1 rounded-full text-sm font-bold">
                           {etchPower} W
                         </span>
                       </span>
@@ -1638,21 +1638,21 @@ const PlasmaSimulatorII = () => {
                         step="10" 
                         value={etchPower} 
                         onChange={(e) => setEtchPower(parseInt(e.target.value))} 
-                        className="w-full h-4 bg-orange-200 rounded-lg appearance-none cursor-pointer slider-thumb-orange hover:bg-orange-300 focus:bg-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+                        className="w-full h-4 bg-orange-300 rounded-lg appearance-none cursor-pointer slider-thumb-orange hover:bg-orange-400 focus:bg-orange-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
                       />
-                      <div className="flex justify-between text-xs text-orange-600 mt-1">
+                      <div className="flex justify-between text-xs text-orange-700 mt-1">
                         <span>50W</span>
-                        <span className="text-orange-800 font-medium">드래그하여 조정</span>
+                        <span className="text-orange-900 font-medium">드래그하여 조정</span>
                         <span>500W</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-blue-100 p-4 rounded-lg border-2 border-blue-400 hover:border-blue-500 transition-all shadow-sm">
-                    <label className="block text-sm font-medium text-blue-800 mb-3">
+                  <div className="bg-blue-200 p-4 rounded-lg border-2 border-blue-600 hover:border-blue-700 transition-all shadow-md">
+                    <label className="block text-sm font-medium text-blue-900 mb-3">
                       <span className="flex items-center justify-between">
                         <span>압력</span>
-                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        <span className="bg-blue-700 text-white px-3 py-1 rounded-full text-sm font-bold">
                           {etchPressure} mTorr
                         </span>
                       </span>
@@ -1665,22 +1665,22 @@ const PlasmaSimulatorII = () => {
                         step="1" 
                         value={etchPressure} 
                         onChange={(e) => setEtchPressure(parseInt(e.target.value))} 
-                        className="w-full h-4 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-thumb-blue hover:bg-blue-300 focus:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                        className="w-full h-4 bg-blue-300 rounded-lg appearance-none cursor-pointer slider-thumb-blue hover:bg-blue-400 focus:bg-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
                       />
-                      <div className="flex justify-between text-xs text-blue-600 mt-1">
+                      <div className="flex justify-between text-xs text-blue-700 mt-1">
                         <span>1 mTorr</span>
-                        <span className="text-blue-800 font-medium">드래그하여 조정</span>
+                        <span className="text-blue-900 font-medium">드래그하여 조정</span>
                         <span>100 mTorr</span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="bg-gray-100 p-4 rounded-lg border-2 border-gray-400 shadow-sm">
-                    <label className="block text-sm font-medium text-gray-700 mb-3">공정 가스</label>
+                  <div className="bg-gray-200 p-4 rounded-lg border-2 border-gray-600 shadow-md">
+                    <label className="block text-sm font-medium text-gray-800 mb-3">공정 가스</label>
                     <select 
                       value={etchGasType === 'XeF2' || etchGasType === 'Synergy' || etchGasType === 'Ar' ? 'CF4' : etchGasType} 
                       onChange={(e) => setEtchGasType(e.target.value)} 
-                      className="w-full p-3 border-2 border-gray-400 rounded-lg focus:border-gray-600 focus:outline-none bg-white cursor-pointer hover:border-gray-500 transition-all"
+                      className="w-full p-3 border-2 border-gray-600 rounded-lg focus:border-gray-800 focus:outline-none bg-white cursor-pointer hover:border-gray-700 transition-all"
                     >
                       <option value="CF4">CF₄ (실리콘 식각)</option>
                       <option value="Cl2">Cl₂ (금속 식각)</option>
@@ -1688,11 +1688,11 @@ const PlasmaSimulatorII = () => {
                     </select>
                   </div>
                   
-                  <div className="bg-purple-100 p-4 rounded-lg border-2 border-purple-400 hover:border-purple-500 transition-all shadow-sm">
-                    <label className="block text-sm font-medium text-purple-800 mb-3">
+                  <div className="bg-purple-200 p-4 rounded-lg border-2 border-purple-600 hover:border-purple-700 transition-all shadow-md">
+                    <label className="block text-sm font-medium text-purple-900 mb-3">
                       <span className="flex items-center justify-between">
                         <span>패턴 밀도</span>
-                        <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                        <span className="bg-purple-700 text-white px-3 py-1 rounded-full text-sm font-bold">
                           {patternDensity}%
                         </span>
                       </span>
@@ -1705,11 +1705,11 @@ const PlasmaSimulatorII = () => {
                         step="5" 
                         value={patternDensity} 
                         onChange={(e) => setPatternDensity(parseInt(e.target.value))} 
-                        className="w-full h-4 bg-purple-200 rounded-lg appearance-none cursor-pointer slider-thumb-purple hover:bg-purple-300 focus:bg-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+                        className="w-full h-4 bg-purple-300 rounded-lg appearance-none cursor-pointer slider-thumb-purple hover:bg-purple-400 focus:bg-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
                       />
-                      <div className="flex justify-between text-xs text-purple-600 mt-1">
+                      <div className="flex justify-between text-xs text-purple-700 mt-1">
                         <span>0%</span>
-                        <span className="text-purple-800 font-medium">드래그하여 조정</span>
+                        <span className="text-purple-900 font-medium">드래그하여 조정</span>
                         <span>100%</span>
                       </div>
                     </div>
