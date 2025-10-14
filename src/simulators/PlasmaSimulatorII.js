@@ -735,7 +735,7 @@ const PlasmaSimulatorII = () => {
       <div dangerouslySetInnerHTML={{ __html: sliderStyles }} />
       
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex justify-between items-center py-6">
             <h1 className="text-2xl font-bold text-gray-900">플라즈마 공정 교육 시뮬레이터 II</h1>
             <div className="text-sm text-gray-500">Advanced Learning System</div>
@@ -744,7 +744,7 @@ const PlasmaSimulatorII = () => {
       </div>
 
       <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-full mx-auto px-3 sm:px-4 lg:px-6">
           <div className="flex space-x-1 py-4 overflow-x-auto">
             {themes.map((theme, index) => (
               <button key={theme.id} onClick={() => setActiveTheme(theme.id)} className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTheme === theme.id ? 'bg-blue-100 text-blue-800 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
@@ -756,7 +756,7 @@ const PlasmaSimulatorII = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-full mx-auto px-3 sm:px-4 lg:px-6 py-6">
         {activeTheme === 'system-structure-icp' && (
           <div className="space-y-8">
             <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-6 border">
