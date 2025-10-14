@@ -737,7 +737,7 @@ const PlasmaSimulatorII = () => {
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <h1 className="text-2xl font-bold text-gray-900">플라즈마 공정 교육 시뮬레이터 II - 고급 모듈</h1>
+            <h1 className="text-2xl font-bold text-gray-900">플라즈마 공정 교육 시뮬레이터 II</h1>
             <div className="text-sm text-gray-500">Advanced Learning System</div>
           </div>
         </div>
@@ -1106,7 +1106,7 @@ const PlasmaSimulatorII = () => {
               <h3 className="text-lg font-semibold text-indigo-800 mb-4">ICP의 핵심: 독립적 제어</h3>
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 hover:border-green-300 transition-all">
+                  <div className="bg-green-100 p-4 rounded-lg border-2 border-green-400 hover:border-green-500 transition-all shadow-sm">
                     <label className="block text-sm font-medium text-green-800 mb-3">
                       <span className="flex items-center justify-between">
                         <span>Source RF Power (플라즈마 밀도 제어)</span>
@@ -1133,7 +1133,7 @@ const PlasmaSimulatorII = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-red-50 p-4 rounded-lg border-2 border-red-200 hover:border-red-300 transition-all">
+                  <div className="bg-red-100 p-4 rounded-lg border-2 border-red-400 hover:border-red-500 transition-all shadow-sm">
                     <label className="block text-sm font-medium text-red-800 mb-3">
                       <span className="flex items-center justify-between">
                         <span>Bias RF Power (이온 에너지 제어)</span>
@@ -1621,7 +1621,7 @@ const PlasmaSimulatorII = () => {
               <h3 className="text-lg font-semibold text-orange-800 mb-4">공정 조건 최적화</h3>
               <div className="grid lg:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="bg-orange-50 p-4 rounded-lg border-2 border-orange-200 hover:border-orange-300 transition-all">
+                  <div className="bg-orange-100 p-4 rounded-lg border-2 border-orange-400 hover:border-orange-500 transition-all shadow-sm">
                     <label className="block text-sm font-medium text-orange-800 mb-3">
                       <span className="flex items-center justify-between">
                         <span>RF 파워</span>
@@ -1648,7 +1648,7 @@ const PlasmaSimulatorII = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 hover:border-blue-300 transition-all">
+                  <div className="bg-blue-100 p-4 rounded-lg border-2 border-blue-400 hover:border-blue-500 transition-all shadow-sm">
                     <label className="block text-sm font-medium text-blue-800 mb-3">
                       <span className="flex items-center justify-between">
                         <span>압력</span>
@@ -1675,12 +1675,12 @@ const PlasmaSimulatorII = () => {
                     </div>
                   </div>
                   
-                  <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
+                  <div className="bg-gray-100 p-4 rounded-lg border-2 border-gray-400 shadow-sm">
                     <label className="block text-sm font-medium text-gray-700 mb-3">공정 가스</label>
                     <select 
                       value={etchGasType === 'XeF2' || etchGasType === 'Synergy' || etchGasType === 'Ar' ? 'CF4' : etchGasType} 
                       onChange={(e) => setEtchGasType(e.target.value)} 
-                      className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-gray-500 focus:outline-none bg-white cursor-pointer hover:border-gray-400 transition-all"
+                      className="w-full p-3 border-2 border-gray-400 rounded-lg focus:border-gray-600 focus:outline-none bg-white cursor-pointer hover:border-gray-500 transition-all"
                     >
                       <option value="CF4">CF₄ (실리콘 식각)</option>
                       <option value="Cl2">Cl₂ (금속 식각)</option>
@@ -1688,7 +1688,7 @@ const PlasmaSimulatorII = () => {
                     </select>
                   </div>
                   
-                  <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-200 hover:border-purple-300 transition-all">
+                  <div className="bg-purple-100 p-4 rounded-lg border-2 border-purple-400 hover:border-purple-500 transition-all shadow-sm">
                     <label className="block text-sm font-medium text-purple-800 mb-3">
                       <span className="flex items-center justify-between">
                         <span>패턴 밀도</span>
