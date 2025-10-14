@@ -26,6 +26,146 @@ const PlasmaSimulatorII = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [difficulty, setDifficulty] = useState('상');
 
+  // 슬라이더 커스텀 스타일
+  const sliderStyles = `
+    <style>
+      /* 녹색 슬라이더 thumb 스타일 */
+      .slider-thumb-green::-webkit-slider-thumb {
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #059669, #10b981);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+      .slider-thumb-green::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-green::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #059669, #10b981);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+
+      /* 빨간색 슬라이더 thumb 스타일 */
+      .slider-thumb-red::-webkit-slider-thumb {
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+      .slider-thumb-red::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-red::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+
+      /* 오렌지색 슬라이더 thumb 스타일 */
+      .slider-thumb-orange::-webkit-slider-thumb {
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+      .slider-thumb-orange::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-orange::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+
+      /* 파란색 슬라이더 thumb 스타일 */
+      .slider-thumb-blue::-webkit-slider-thumb {
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+      .slider-thumb-blue::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-blue::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+
+      /* 보라색 슬라이더 thumb 스타일 */
+      .slider-thumb-purple::-webkit-slider-thumb {
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+      .slider-thumb-purple::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-purple::-moz-range-thumb {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+        cursor: pointer;
+        border: 3px solid white;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+    </style>
+  `;
+
   const themes = [
     { id: 'system-structure-icp', name: '시스템 구조(ICP)', icon: '🔬', color: 'indigo' },
     { id: 'etching-process', name: '식각 공정', icon: '⚙️', color: 'orange' },
@@ -591,6 +731,9 @@ const PlasmaSimulatorII = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* CSS 스타일 삽입 */}
+      <div dangerouslySetInnerHTML={{ __html: sliderStyles }} />
+      
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
@@ -963,34 +1106,58 @@ const PlasmaSimulatorII = () => {
               <h3 className="text-lg font-semibold text-indigo-800 mb-4">ICP의 핵심: 독립적 제어</h3>
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-green-700 mb-2">
-                      Source RF Power: {(rfPower * 2).toFixed(0)} W (플라즈마 밀도 제어)
+                  <div className="bg-green-50 p-4 rounded-lg border-2 border-green-200 hover:border-green-300 transition-all">
+                    <label className="block text-sm font-medium text-green-800 mb-3">
+                      <span className="flex items-center justify-between">
+                        <span>Source RF Power (플라즈마 밀도 제어)</span>
+                        <span className="bg-green-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          {(rfPower * 2).toFixed(0)} W
+                        </span>
+                      </span>
                     </label>
-                    <input 
-                      type="range" 
-                      min="50" 
-                      max="500" 
-                      step="10" 
-                      value={rfPower * 2} 
-                      onChange={(e) => setRfPower(parseInt(e.target.value) / 2)} 
-                      className="w-full h-3 bg-green-200 rounded-lg"
-                    />
+                    <div className="relative">
+                      <input 
+                        type="range" 
+                        min="50" 
+                        max="500" 
+                        step="10" 
+                        value={rfPower * 2} 
+                        onChange={(e) => setRfPower(parseInt(e.target.value) / 2)} 
+                        className="w-full h-4 bg-green-200 rounded-lg appearance-none cursor-pointer slider-thumb-green hover:bg-green-300 focus:bg-green-300 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50"
+                      />
+                      <div className="flex justify-between text-xs text-green-600 mt-1">
+                        <span>50W</span>
+                        <span className="text-green-800 font-medium">조정 가능</span>
+                        <span>500W</span>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-red-700 mb-2">
-                      Bias RF Power: {etchPower} W (이온 에너지 제어)
+                  <div className="bg-red-50 p-4 rounded-lg border-2 border-red-200 hover:border-red-300 transition-all">
+                    <label className="block text-sm font-medium text-red-800 mb-3">
+                      <span className="flex items-center justify-between">
+                        <span>Bias RF Power (이온 에너지 제어)</span>
+                        <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          {etchPower} W
+                        </span>
+                      </span>
                     </label>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="300" 
-                      step="10" 
-                      value={etchPower} 
-                      onChange={(e) => setEtchPower(parseInt(e.target.value))} 
-                      className="w-full h-3 bg-red-200 rounded-lg"
-                    />
+                    <div className="relative">
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="300" 
+                        step="10" 
+                        value={etchPower} 
+                        onChange={(e) => setEtchPower(parseInt(e.target.value))} 
+                        className="w-full h-4 bg-red-200 rounded-lg appearance-none cursor-pointer slider-thumb-red hover:bg-red-300 focus:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50"
+                      />
+                      <div className="flex justify-between text-xs text-red-600 mt-1">
+                        <span>0W</span>
+                        <span className="text-red-800 font-medium">조정 가능</span>
+                        <span>300W</span>
+                      </div>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4 mt-6">
@@ -1453,39 +1620,67 @@ const PlasmaSimulatorII = () => {
             <div className="bg-white rounded-xl shadow-lg p-6 border">
               <h3 className="text-lg font-semibold text-orange-800 mb-4">공정 조건 최적화</h3>
               <div className="grid lg:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">RF 파워: {etchPower} W</label>
-                    <input 
-                      type="range" 
-                      min="50" 
-                      max="500" 
-                      step="10" 
-                      value={etchPower} 
-                      onChange={(e) => setEtchPower(parseInt(e.target.value))} 
-                      className="w-full h-2 bg-orange-200 rounded-lg" 
-                    />
+                <div className="space-y-6">
+                  <div className="bg-orange-50 p-4 rounded-lg border-2 border-orange-200 hover:border-orange-300 transition-all">
+                    <label className="block text-sm font-medium text-orange-800 mb-3">
+                      <span className="flex items-center justify-between">
+                        <span>RF 파워</span>
+                        <span className="bg-orange-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          {etchPower} W
+                        </span>
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <input 
+                        type="range" 
+                        min="50" 
+                        max="500" 
+                        step="10" 
+                        value={etchPower} 
+                        onChange={(e) => setEtchPower(parseInt(e.target.value))} 
+                        className="w-full h-4 bg-orange-200 rounded-lg appearance-none cursor-pointer slider-thumb-orange hover:bg-orange-300 focus:bg-orange-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
+                      />
+                      <div className="flex justify-between text-xs text-orange-600 mt-1">
+                        <span>50W</span>
+                        <span className="text-orange-800 font-medium">드래그하여 조정</span>
+                        <span>500W</span>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">압력: {etchPressure} mTorr</label>
-                    <input 
-                      type="range" 
-                      min="1" 
-                      max="100" 
-                      step="1" 
-                      value={etchPressure} 
-                      onChange={(e) => setEtchPressure(parseInt(e.target.value))} 
-                      className="w-full h-2 bg-orange-200 rounded-lg" 
-                    />
+                  <div className="bg-blue-50 p-4 rounded-lg border-2 border-blue-200 hover:border-blue-300 transition-all">
+                    <label className="block text-sm font-medium text-blue-800 mb-3">
+                      <span className="flex items-center justify-between">
+                        <span>압력</span>
+                        <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          {etchPressure} mTorr
+                        </span>
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <input 
+                        type="range" 
+                        min="1" 
+                        max="100" 
+                        step="1" 
+                        value={etchPressure} 
+                        onChange={(e) => setEtchPressure(parseInt(e.target.value))} 
+                        className="w-full h-4 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-thumb-blue hover:bg-blue-300 focus:bg-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                      />
+                      <div className="flex justify-between text-xs text-blue-600 mt-1">
+                        <span>1 mTorr</span>
+                        <span className="text-blue-800 font-medium">드래그하여 조정</span>
+                        <span>100 mTorr</span>
+                      </div>
+                    </div>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">공정 가스</label>
+                  <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
+                    <label className="block text-sm font-medium text-gray-700 mb-3">공정 가스</label>
                     <select 
                       value={etchGasType === 'XeF2' || etchGasType === 'Synergy' || etchGasType === 'Ar' ? 'CF4' : etchGasType} 
                       onChange={(e) => setEtchGasType(e.target.value)} 
-                      className="w-full p-2 border border-gray-300 rounded-lg"
+                      className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-gray-500 focus:outline-none bg-white cursor-pointer hover:border-gray-400 transition-all"
                     >
                       <option value="CF4">CF₄ (실리콘 식각)</option>
                       <option value="Cl2">Cl₂ (금속 식각)</option>
@@ -1493,17 +1688,31 @@ const PlasmaSimulatorII = () => {
                     </select>
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">패턴 밀도: {patternDensity}%</label>
-                    <input 
-                      type="range" 
-                      min="0" 
-                      max="100" 
-                      step="5" 
-                      value={patternDensity} 
-                      onChange={(e) => setPatternDensity(parseInt(e.target.value))} 
-                      className="w-full h-2 bg-orange-200 rounded-lg" 
-                    />
+                  <div className="bg-purple-50 p-4 rounded-lg border-2 border-purple-200 hover:border-purple-300 transition-all">
+                    <label className="block text-sm font-medium text-purple-800 mb-3">
+                      <span className="flex items-center justify-between">
+                        <span>패턴 밀도</span>
+                        <span className="bg-purple-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                          {patternDensity}%
+                        </span>
+                      </span>
+                    </label>
+                    <div className="relative">
+                      <input 
+                        type="range" 
+                        min="0" 
+                        max="100" 
+                        step="5" 
+                        value={patternDensity} 
+                        onChange={(e) => setPatternDensity(parseInt(e.target.value))} 
+                        className="w-full h-4 bg-purple-200 rounded-lg appearance-none cursor-pointer slider-thumb-purple hover:bg-purple-300 focus:bg-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+                      />
+                      <div className="flex justify-between text-xs text-purple-600 mt-1">
+                        <span>0%</span>
+                        <span className="text-purple-800 font-medium">드래그하여 조정</span>
+                        <span>100%</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
