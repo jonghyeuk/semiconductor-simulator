@@ -498,9 +498,9 @@ const PlasmaSimulator = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {activeTheme === 'plasma-basics' && (
-          <div className="space-y-8">
+          <div className="space-y-4">
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border">
               <h2 className="text-2xl font-bold text-blue-900 mb-4">⚡ 플라즈마 기본 특성 이해</h2>
               <div className="grid md:grid-cols-2 gap-4 text-sm">
@@ -583,7 +583,7 @@ const PlasmaSimulator = () => {
         )}
 
         {activeTheme === 'plasma-principle1' && (
-          <div className="space-y-8">
+          <div className="space-y-4">
             <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl p-6 border">
               <h2 className="text-2xl font-bold text-indigo-900 mb-4">🔬 플라즈마 발생원리 1</h2>
               <p className="text-indigo-700 mb-2">압력과 에너지의 상호작용을 통한 플라즈마 생성 원리를 학습합니다.</p>
@@ -694,7 +694,7 @@ const PlasmaSimulator = () => {
         )}
 
         {activeTheme === 'plasma-principle2' && (
-          <div className="space-y-8">
+          <div className="space-y-4">
             <div className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl p-6 border">
               <h2 className="text-2xl font-bold text-violet-900 mb-4">📈 플라즈마 발생원리 2 - 파션커브</h2>
               <p className="text-violet-700 mb-2">가스 방전에서 압력×거리(pd)에 따른 항복전압의 관계를 학습합니다.</p>
@@ -842,7 +842,7 @@ const PlasmaSimulator = () => {
         )}
 
         {activeTheme === 'rf-matching' && (
-          <div className="space-y-8">
+          <div className="space-y-4">
             <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-xl p-6 border">
               <h2 className="text-2xl font-bold text-green-900 mb-4">📡 RF 및 매칭 네트워크</h2>
               <p className="text-green-700 mb-2">RF 파워서플라이와 플라즈마 부하 간의 매칭 메커니즘을 학습합니다.</p>
@@ -1179,7 +1179,7 @@ const PlasmaSimulator = () => {
         )}
 
         {activeTheme === 'system-structure' && (
-          <div className="space-y-8">
+          <div className="space-y-4">
             <div className="bg-gradient-to-r from-purple-50 to-violet-50 rounded-xl p-6 border">
               <h2 className="text-2xl font-bold text-purple-900 mb-4">🏗️ CCP 플라즈마 시스템 구조</h2>
               <p className="text-purple-700">용량결합 플라즈마(CCP) 시스템의 구조와 동작 원리를 학습합니다.</p>
