@@ -240,8 +240,40 @@ const PlasmaSimulator = () => {
           <h4 className="text-base font-bold text-blue-800 mb-3 text-center">⚙️ 방전 조건 제어</h4>
           <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
             <div className="grid grid-cols-2 gap-6">
-              <div><label className="block text-sm font-semibold text-gray-700 mb-2">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full h-3 bg-blue-300 rounded-lg appearance-none cursor-pointer" /></div>
-              <div><label className="block text-sm font-semibold text-gray-700 mb-2">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full h-3 bg-blue-300 rounded-lg appearance-none cursor-pointer" /></div>
+              <div>
+                <label className="block text-sm font-bold text-blue-800 mb-3">압력: {pressure} Torr</label>
+                <div className="relative">
+                  <input 
+                    type="range" 
+                    min="0.1" 
+                    max="10" 
+                    step="0.1" 
+                    value={pressure} 
+                    onChange={(e) => setPressure(parseFloat(e.target.value))} 
+                    className="w-full h-4 bg-gradient-to-r from-green-200 to-blue-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-blue-400 slider-thumb-blue"
+                  />
+                  <div className="flex justify-between text-xs text-blue-700 mt-1 font-medium">
+                    <span>0.1</span><span>2.5</span><span>5.0</span><span>7.5</span><span>10</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-blue-800 mb-3">전극간 거리: {distance} cm</label>
+                <div className="relative">
+                  <input 
+                    type="range" 
+                    min="0.1" 
+                    max="5" 
+                    step="0.1" 
+                    value={distance} 
+                    onChange={(e) => setDistance(parseFloat(e.target.value))} 
+                    className="w-full h-4 bg-gradient-to-r from-purple-200 to-pink-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-purple-400 slider-thumb-purple"
+                  />
+                  <div className="flex justify-between text-xs text-purple-700 mt-1 font-medium">
+                    <span>0.1</span><span>1.3</span><span>2.5</span><span>3.8</span><span>5.0</span>
+                  </div>
+                </div>
+              </div>
             </div>
             <div className="text-center mt-3 bg-white rounded-lg p-2">
               <span className="text-base font-bold text-blue-800">pd = {currentPD.toFixed(2)} Torr·cm</span>
@@ -318,6 +350,132 @@ const PlasmaSimulator = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <style>{`
+        /* 슬라이더 커스텀 스타일 */
+        input[type="range"] {
+          -webkit-appearance: none;
+          appearance: none;
+        }
+        
+        /* 슬라이더 썸(손잡이) 기본 스타일 - 항상 보이도록 */
+        input[type="range"]::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          transition: all 0.2s ease;
+          border: 3px solid white;
+          position: relative;
+          z-index: 10;
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          cursor: pointer;
+          box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+          border: 3px solid white;
+          background: inherit;
+          position: relative;
+          z-index: 10;
+        }
+        
+        /* 호버 효과 */
+        input[type="range"]:hover::-webkit-slider-thumb {
+          transform: scale(1.15);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        input[type="range"]:hover::-moz-range-thumb {
+          transform: scale(1.15);
+          box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+        }
+        
+        /* 색상별 썸 스타일 - 기본 상태에서도 보임 */
+        .slider-thumb-indigo::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #6366f1, #4f46e5);
+        }
+        .slider-thumb-orange::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #f97316, #ea580c);
+        }
+        .slider-thumb-blue::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #3b82f6, #2563eb);
+        }
+        .slider-thumb-purple::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #a855f7, #9333ea);
+        }
+        .slider-thumb-violet::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+        }
+        .slider-thumb-green::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #10b981, #059669);
+        }
+        .slider-thumb-teal::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #14b8a6, #0d9488);
+        }
+        .slider-thumb-red::-webkit-slider-thumb { 
+          background: linear-gradient(45deg, #ef4444, #dc2626);
+        }
+        
+        .slider-thumb-indigo::-moz-range-thumb { 
+          background: linear-gradient(45deg, #6366f1, #4f46e5);
+        }
+        .slider-thumb-orange::-moz-range-thumb { 
+          background: linear-gradient(45deg, #f97316, #ea580c);
+        }
+        .slider-thumb-blue::-moz-range-thumb { 
+          background: linear-gradient(45deg, #3b82f6, #2563eb);
+        }
+        .slider-thumb-purple::-moz-range-thumb { 
+          background: linear-gradient(45deg, #a855f7, #9333ea);
+        }
+        .slider-thumb-violet::-moz-range-thumb { 
+          background: linear-gradient(45deg, #8b5cf6, #7c3aed);
+        }
+        .slider-thumb-green::-moz-range-thumb { 
+          background: linear-gradient(45deg, #10b981, #059669);
+        }
+        .slider-thumb-teal::-moz-range-thumb { 
+          background: linear-gradient(45deg, #14b8a6, #0d9488);
+        }
+        .slider-thumb-red::-moz-range-thumb { 
+          background: linear-gradient(45deg, #ef4444, #dc2626);
+        }
+        
+        /* 활성 상태 */
+        input[type="range"]:active::-webkit-slider-thumb {
+          transform: scale(1.25);
+          box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+        
+        input[type="range"]:active::-moz-range-thumb {
+          transform: scale(1.25);
+          box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+        
+        /* 포커스 상태 */
+        input[type="range"]:focus {
+          outline: none;
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+          border-radius: 12px;
+        }
+        
+        /* 슬라이더 트랙 강화 */
+        input[type="range"]::-webkit-slider-track {
+          border-radius: 8px;
+          height: 16px;
+        }
+        
+        input[type="range"]::-moz-range-track {
+          border-radius: 8px;
+          height: 16px;
+        }
+      `}</style>
+      
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
@@ -455,8 +613,40 @@ const PlasmaSimulator = () => {
                 <h3 className="text-lg font-semibold text-indigo-800 mb-4">플라즈마 생성 조건</h3>
                 <div className="bg-indigo-50 border-2 border-indigo-300 rounded-lg p-4">
                   <div className="space-y-6">
-                    <div><label className="block text-sm font-medium text-gray-700 mb-2">가스 압력: {basicGasPressure} mTorr</label><input type="range" min="0.5" max="8" step="0.1" value={basicGasPressure} onChange={(e) => setBasicGasPressure(parseFloat(e.target.value))} className="w-full" /></div>
-                    <div><label className="block text-sm font-medium text-gray-700 mb-2">전기 에너지: {basicPlasmaEnergy} W</label><input type="range" min="50" max="300" step="10" value={basicPlasmaEnergy} onChange={(e) => setBasicPlasmaEnergy(parseInt(e.target.value))} className="w-full" /></div>
+                    <div>
+                      <label className="block text-sm font-bold text-indigo-800 mb-3">가스 압력: {basicGasPressure} mTorr</label>
+                      <div className="relative">
+                        <input 
+                          type="range" 
+                          min="0.5" 
+                          max="8" 
+                          step="0.1" 
+                          value={basicGasPressure} 
+                          onChange={(e) => setBasicGasPressure(parseFloat(e.target.value))} 
+                          className="w-full h-4 bg-gradient-to-r from-blue-200 to-indigo-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-indigo-400 slider-thumb-indigo"
+                        />
+                        <div className="flex justify-between text-xs text-indigo-700 mt-1 font-medium">
+                          <span>0.5</span><span>2.0</span><span>4.0</span><span>6.0</span><span>8.0</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-indigo-800 mb-3">전기 에너지: {basicPlasmaEnergy} W</label>
+                      <div className="relative">
+                        <input 
+                          type="range" 
+                          min="50" 
+                          max="300" 
+                          step="10" 
+                          value={basicPlasmaEnergy} 
+                          onChange={(e) => setBasicPlasmaEnergy(parseInt(e.target.value))} 
+                          className="w-full h-4 bg-gradient-to-r from-orange-200 to-red-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-orange-400 slider-thumb-orange"
+                        />
+                        <div className="flex justify-between text-xs text-orange-700 mt-1 font-medium">
+                          <span>50W</span><span>100W</span><span>150W</span><span>200W</span><span>250W</span><span>300W</span>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <div className="mt-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-r-lg">
@@ -546,10 +736,73 @@ const PlasmaSimulator = () => {
                 <h3 className="text-lg font-semibold text-violet-800 mb-4">파션커브 조건 설정</h3>
                 <div className="bg-violet-50 border-2 border-violet-300 rounded-lg p-4">
                   <div className="space-y-6">
-                    <div><label className="block text-sm font-medium text-gray-700 mb-2">방전 가스 종류</label><div className="grid grid-cols-2 gap-2">{['argon', 'air', 'helium', 'nitrogen', 'neon'].map(gas => (<label key={gas} className="flex items-center p-2 border rounded hover:bg-gray-50"><input type="radio" name="gasType" value={gas} checked={gasType === gas} onChange={(e) => setGasType(e.target.value)} className="mr-2" /><span className="text-red-600 font-medium">{gas === 'argon' ? 'Argon (Ar)' : gas === 'air' ? 'Air' : gas === 'helium' ? 'Helium (He)' : gas === 'nitrogen' ? 'Nitrogen (N₂)' : 'Neon (Ne)'}</span><span className="text-xs text-gray-500 ml-1">{gas === 'argon' ? '- 15.8eV' : gas === 'air' ? '- 혼합' : gas === 'helium' ? '- 24.5eV' : gas === 'nitrogen' ? '- 14.5eV' : '- 15.7eV'}</span></label>))}</div></div>
-                    <div><label className="block text-sm font-medium text-gray-700 mb-2">압력: {pressure} Torr</label><input type="range" min="0.1" max="10" step="0.1" value={pressure} onChange={(e) => setPressure(parseFloat(e.target.value))} className="w-full" /></div>
-                    <div><label className="block text-sm font-medium text-gray-700 mb-2">전극간 거리: {distance} cm</label><input type="range" min="0.1" max="5" step="0.1" value={distance} onChange={(e) => setDistance(parseFloat(e.target.value))} className="w-full" /></div>
-                    <div className="bg-gray-50 p-4 rounded-lg"><div className="text-sm font-medium text-gray-700 mb-2">현재 조건</div><div className="space-y-1 text-sm text-gray-600"><div>pd 값: {(pressure * distance).toFixed(2)} Torr·cm</div>{calculateBreakdownVoltage(pressure, distance) !== null ? <div>항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</div> : <div className="text-red-600 font-bold">⚠️ 범위 초과 (0.1-100 Torr·cm)</div>}</div></div>
+                    <div>
+                      <label className="block text-sm font-bold text-violet-800 mb-3">방전 가스 종류</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        {['argon', 'air', 'helium', 'nitrogen', 'neon'].map(gas => (
+                          <label key={gas} className="flex items-center p-3 border-2 rounded-lg hover:bg-violet-100 cursor-pointer transition-colors duration-200 border-violet-300 bg-white shadow-sm">
+                            <input 
+                              type="radio" 
+                              name="gasType" 
+                              value={gas} 
+                              checked={gasType === gas} 
+                              onChange={(e) => setGasType(e.target.value)} 
+                              className="mr-3 w-4 h-4 text-violet-600 border-2 border-violet-400"
+                            />
+                            <span className="text-violet-700 font-semibold">
+                              {gas === 'argon' ? 'Argon (Ar)' : gas === 'air' ? 'Air' : gas === 'helium' ? 'Helium (He)' : gas === 'nitrogen' ? 'Nitrogen (N₂)' : 'Neon (Ne)'}
+                            </span>
+                            <span className="text-xs text-violet-500 ml-2">
+                              {gas === 'argon' ? '- 15.8eV' : gas === 'air' ? '- 혼합' : gas === 'helium' ? '- 24.5eV' : gas === 'nitrogen' ? '- 14.5eV' : '- 15.7eV'}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-violet-800 mb-3">압력: {pressure} Torr</label>
+                      <div className="relative">
+                        <input 
+                          type="range" 
+                          min="0.1" 
+                          max="10" 
+                          step="0.1" 
+                          value={pressure} 
+                          onChange={(e) => setPressure(parseFloat(e.target.value))} 
+                          className="w-full h-4 bg-gradient-to-r from-green-200 to-violet-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-violet-400 slider-thumb-violet"
+                        />
+                        <div className="flex justify-between text-xs text-violet-700 mt-1 font-medium">
+                          <span>0.1</span><span>2.5</span><span>5.0</span><span>7.5</span><span>10</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-violet-800 mb-3">전극간 거리: {distance} cm</label>
+                      <div className="relative">
+                        <input 
+                          type="range" 
+                          min="0.1" 
+                          max="5" 
+                          step="0.1" 
+                          value={distance} 
+                          onChange={(e) => setDistance(parseFloat(e.target.value))} 
+                          className="w-full h-4 bg-gradient-to-r from-pink-200 to-purple-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-purple-400 slider-thumb-purple"
+                        />
+                        <div className="flex justify-between text-xs text-purple-700 mt-1 font-medium">
+                          <span>0.1</span><span>1.3</span><span>2.5</span><span>3.8</span><span>5.0</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-lg border-2 border-gray-300">
+                      <div className="text-sm font-bold text-gray-800 mb-2">현재 조건</div>
+                      <div className="space-y-1 text-sm text-gray-700">
+                        <div className="font-semibold">pd 값: <span className="text-violet-800">{(pressure * distance).toFixed(2)} Torr·cm</span></div>
+                        {calculateBreakdownVoltage(pressure, distance) !== null ? 
+                          <div className="font-semibold">항복전압: <span className="text-green-700">{Math.round(calculateBreakdownVoltage(pressure, distance))} V</span></div> : 
+                          <div className="text-red-600 font-bold">⚠️ 범위 초과 (0.1-100 Torr·cm)</div>
+                        }
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -615,35 +868,80 @@ const PlasmaSimulator = () => {
               <div className="mb-6 grid grid-cols-3 gap-4">
                 <div className="bg-blue-100 border-2 border-blue-400 p-3 rounded-lg">
                   <h4 className="text-sm font-bold text-blue-800 mb-2 text-center">🎛️ RF 주파수</h4>
-                  <label className="block text-xs font-medium text-blue-900 mb-1">주파수: {frequency} MHz</label>
-                  <input type="range" min="0.4" max="100" step="0.1" value={frequency} onChange={(e) => setFrequency(parseFloat(e.target.value))} className="w-full h-3 bg-blue-300 rounded-lg" />
-                  <div className="flex justify-between text-xs text-blue-700 mt-1">
-                    <span>0.4</span>
-                    <span>13.56</span>
-                    <span>100</span>
+                  <label className="block text-xs font-bold text-blue-900 mb-2">주파수: {frequency} MHz</label>
+                  <div className="relative">
+                    <input 
+                      type="range" 
+                      min="0.4" 
+                      max="100" 
+                      step="0.1" 
+                      value={frequency} 
+                      onChange={(e) => setFrequency(parseFloat(e.target.value))} 
+                      className="w-full h-4 bg-gradient-to-r from-blue-200 to-cyan-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-blue-400 slider-thumb-blue"
+                    />
+                    <div className="flex justify-between text-xs text-blue-700 mt-1 font-medium">
+                      <span>0.4</span>
+                      <span className="font-bold">13.56</span>
+                      <span>100</span>
+                    </div>
                   </div>
                 </div>
                 
                 <div className="bg-green-50 border-2 border-green-400 p-3 rounded-lg">
                   <h4 className="text-sm font-bold text-green-800 mb-2 text-center">⚙️ 매칭 네트워크</h4>
-                  <div className="mb-2">
-                    <label className="block text-xs font-medium text-green-900 mb-1">인덕턴스: {inductance} nH</label>
-                    <input type="range" min="10" max="1000" step="10" value={inductance} onChange={(e) => setInductance(parseInt(e.target.value))} className="w-full h-3 bg-green-300 rounded-lg" />
+                  <div className="mb-3">
+                    <label className="block text-xs font-bold text-green-900 mb-2">인덕턴스: {inductance} nH</label>
+                    <div className="relative">
+                      <input 
+                        type="range" 
+                        min="10" 
+                        max="1000" 
+                        step="10" 
+                        value={inductance} 
+                        onChange={(e) => setInductance(parseInt(e.target.value))} 
+                        className="w-full h-3 bg-gradient-to-r from-green-200 to-emerald-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-green-400 slider-thumb-green"
+                      />
+                    </div>
                   </div>
-                  <div className="mb-2">
-                    <label className="block text-xs font-medium text-green-900 mb-1">캐패시턴스: {capacitance} pF</label>
-                    <input type="range" min="10" max="1000" step="10" value={capacitance} onChange={(e) => setCapacitance(parseInt(e.target.value))} className="w-full h-3 bg-green-300 rounded-lg" />
+                  <div className="mb-3">
+                    <label className="block text-xs font-bold text-green-900 mb-2">캐패시턴스: {capacitance} pF</label>
+                    <div className="relative">
+                      <input 
+                        type="range" 
+                        min="10" 
+                        max="1000" 
+                        step="10" 
+                        value={capacitance} 
+                        onChange={(e) => setCapacitance(parseInt(e.target.value))} 
+                        className="w-full h-3 bg-gradient-to-r from-teal-200 to-green-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-teal-400 slider-thumb-teal"
+                      />
+                    </div>
                   </div>
-                  <button onClick={applyAutoMatching} className="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-1 px-2 rounded">
-                    자동 매칭
+                  <button 
+                    onClick={applyAutoMatching} 
+                    className="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2 px-2 rounded-lg shadow-md transition-colors duration-200 border-2 border-green-500"
+                  >
+                    🎯 자동 매칭
                   </button>
                 </div>
                 
                 <div className="bg-red-100 border-2 border-red-400 p-3 rounded-lg">
                   <h4 className="text-sm font-bold text-red-800 mb-2 text-center">🎯 플라즈마 부하</h4>
-                  <label className="block text-xs font-medium text-red-900 mb-1">부하 임피던스: {loadImpedance} Ω</label>
-                  <input type="range" min="10" max="200" step="1" value={loadImpedance} onChange={(e) => setLoadImpedance(parseInt(e.target.value))} className="w-full h-3 bg-red-300 rounded-lg" />
-                  <div className="text-xs text-red-700 mt-1 text-center">{loadImpedance}Ω</div>
+                  <label className="block text-xs font-bold text-red-900 mb-2">부하 임피던스: {loadImpedance} Ω</label>
+                  <div className="relative">
+                    <input 
+                      type="range" 
+                      min="10" 
+                      max="200" 
+                      step="1" 
+                      value={loadImpedance} 
+                      onChange={(e) => setLoadImpedance(parseInt(e.target.value))} 
+                      className="w-full h-4 bg-gradient-to-r from-red-200 to-pink-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-red-400 slider-thumb-red"
+                    />
+                    <div className="flex justify-between text-xs text-red-700 mt-1 font-medium">
+                      <span>10</span><span>50</span><span>100</span><span>150</span><span>200</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
