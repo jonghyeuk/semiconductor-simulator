@@ -517,7 +517,7 @@ const PlasmaSimulator = () => {
 
             <div className="grid lg:grid-cols-2 gap-8 w-full">
               <div className="bg-white rounded-xl shadow-lg p-6 border">
-                <h3 className="text-lg font-semibold text-blue-800 mb-4">2. CCP 상세 구조</h3>
+                <h3 className="text-lg font-semibold text-blue-800 mb-4">2. CCP 상세 구조</h3>d text-blue-800 mb-4">2. CCP 상세 구조</h3>
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <svg width="100%" height="300" viewBox="0 0 400 300">
                     <rect x="80" y="100" width="240" height="140" fill="none" stroke="#dc2626" strokeWidth="3"/>
