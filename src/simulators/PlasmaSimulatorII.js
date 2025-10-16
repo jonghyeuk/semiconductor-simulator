@@ -26,259 +26,10 @@ const PlasmaSimulatorII = () => {
   const [quizStarted, setQuizStarted] = useState(false);
   const [difficulty, setDifficulty] = useState('상');
 
-  // 슬라이더 커스텀 스타일
-  const sliderStyles = `
-    <style>
-      /* 녹색 슬라이더 스타일 */
-      .slider-thumb-green {
-        position: relative;
-        z-index: 10;
-      }
-      .slider-thumb-green::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #059669, #10b981);
-        border-radius: 10px;
-        border: 2px solid #047857;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-green::-webkit-slider-thumb {
-        appearance: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #059669, #10b981);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-        position: relative;
-        top: -2px;
-      }
-      .slider-thumb-green::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      }
-      .slider-thumb-green::-moz-range-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #059669, #10b981);
-        border-radius: 10px;
-        border: 2px solid #047857;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-green::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #059669, #10b981);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-      }
-
-      /* 빨간색 슬라이더 스타일 */
-      .slider-thumb-red {
-        position: relative;
-        z-index: 10;
-      }
-      .slider-thumb-red::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #dc2626, #ef4444);
-        border-radius: 10px;
-        border: 2px solid #b91c1c;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-red::-webkit-slider-thumb {
-        appearance: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #dc2626, #ef4444);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-        position: relative;
-        top: -2px;
-      }
-      .slider-thumb-red::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      }
-      .slider-thumb-red::-moz-range-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #dc2626, #ef4444);
-        border-radius: 10px;
-        border: 2px solid #b91c1c;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-red::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #dc2626, #ef4444);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-      }
-
-      /* 오렌지색 슬라이더 스타일 */
-      .slider-thumb-orange {
-        position: relative;
-        z-index: 10;
-      }
-      .slider-thumb-orange::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #ea580c, #f97316);
-        border-radius: 10px;
-        border: 2px solid #c2410c;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-orange::-webkit-slider-thumb {
-        appearance: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #ea580c, #f97316);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-        position: relative;
-        top: -2px;
-      }
-      .slider-thumb-orange::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      }
-      .slider-thumb-orange::-moz-range-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #ea580c, #f97316);
-        border-radius: 10px;
-        border: 2px solid #c2410c;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-orange::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #ea580c, #f97316);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-      }
-
-      /* 파란색 슬라이더 스타일 */
-      .slider-thumb-blue {
-        position: relative;
-        z-index: 10;
-      }
-      .slider-thumb-blue::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #2563eb, #3b82f6);
-        border-radius: 10px;
-        border: 2px solid #1d4ed8;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-blue::-webkit-slider-thumb {
-        appearance: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #2563eb, #3b82f6);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-        position: relative;
-        top: -2px;
-      }
-      .slider-thumb-blue::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      }
-      .slider-thumb-blue::-moz-range-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #2563eb, #3b82f6);
-        border-radius: 10px;
-        border: 2px solid #1d4ed8;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-blue::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #2563eb, #3b82f6);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-      }
-
-      /* 보라색 슬라이더 스타일 */
-      .slider-thumb-purple {
-        position: relative;
-        z-index: 10;
-      }
-      .slider-thumb-purple::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-        border-radius: 10px;
-        border: 2px solid #6d28d9;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-purple::-webkit-slider-thumb {
-        appearance: none;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-        position: relative;
-        top: -2px;
-      }
-      .slider-thumb-purple::-webkit-slider-thumb:hover {
-        transform: scale(1.2);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-      }
-      .slider-thumb-purple::-moz-range-track {
-        width: 100%;
-        height: 20px;
-        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-        border-radius: 10px;
-        border: 2px solid #6d28d9;
-        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-      .slider-thumb-purple::-moz-range-thumb {
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
-        cursor: pointer;
-        border: 3px solid white;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        transition: all 0.2s ease;
-      }
-    </style>
-  `;
-
   const themes = [
     { id: 'system-structure-icp', name: '시스템 구조(ICP)', icon: '🔬', color: 'indigo' },
-    { id: 'etching-process', name: '식각 공정', icon: '⚙️', color: 'orange' },
+    { id: 'etching-process', name: '식각 공정(기본)', icon: '⚙️', color: 'orange' },
+    { id: 'deposition-process', name: '증착 공정(기본)', icon: '🏗️', color: 'teal' },
     { id: 'equipment-application', name: '장비 응용', icon: '🏭', color: 'red' },
     { id: 'quiz', name: '개념 확인 퀴즈', icon: '📝', color: 'green' }
   ];
@@ -841,8 +592,252 @@ const PlasmaSimulatorII = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* CSS 스타일 삽입 */}
-      <div dangerouslySetInnerHTML={{ __html: sliderStyles }} />
+      <style>{`
+        /* 녹색 슬라이더 스타일 */
+        .slider-thumb-green {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-green::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #059669, #10b981);
+          border-radius: 10px;
+          border: 2px solid #047857;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-green::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #059669, #10b981);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-green::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-green::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #059669, #10b981);
+          border-radius: 10px;
+          border: 2px solid #047857;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-green::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #059669, #10b981);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 빨간색 슬라이더 스타일 */
+        .slider-thumb-red {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-red::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          border-radius: 10px;
+          border: 2px solid #b91c1c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-red::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-red::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-red::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          border-radius: 10px;
+          border: 2px solid #b91c1c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-red::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 오렌지색 슬라이더 스타일 */
+        .slider-thumb-orange {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-orange::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          border-radius: 10px;
+          border: 2px solid #c2410c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-orange::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-orange::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-orange::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          border-radius: 10px;
+          border: 2px solid #c2410c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-orange::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 파란색 슬라이더 스타일 */
+        .slider-thumb-blue {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-blue::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          border-radius: 10px;
+          border: 2px solid #1d4ed8;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-blue::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-blue::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-blue::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          border-radius: 10px;
+          border: 2px solid #1d4ed8;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-blue::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 보라색 슬라이더 스타일 */
+        .slider-thumb-purple {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-purple::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          border-radius: 10px;
+          border: 2px solid #6d28d9;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-purple::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-purple::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-purple::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          border-radius: 10px;
+          border: 2px solid #6d28d9;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-purple::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+      `}</style>
       
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-full mx-auto px-3 sm:px-4 lg:px-6">
@@ -1845,6 +1840,533 @@ const PlasmaSimulatorII = () => {
                       <span className="text-gray-600">이방성:</span>
                       <div className="font-semibold text-orange-900">{(Math.min(95, etchPower/5 + 60 - etchPressure/2)).toFixed(1)}%</div>
                     </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 주요 식각가스와 재료별 공정 */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border">
+              <h3 className="text-lg font-semibold text-orange-800 mb-4">주요 식각가스와 재료별 공정</h3>
+              <p className="text-gray-600 mb-6">다양한 재료에 따른 최적 식각가스 조합과 공정 조건을 학습합니다.</p>
+              
+              {/* 실리콘 계열 */}
+              <div className="mb-8">
+                <h4 className="text-md font-semibold text-blue-800 mb-4 flex items-center">
+                  <span className="bg-blue-100 p-2 rounded-lg mr-3">🔷</span>
+                  실리콘 계열 재료
+                </h4>
+                <div className="grid lg:grid-cols-3 gap-4">
+                  <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <h5 className="font-semibold text-blue-900 mb-2">Si (실리콘)</h5>
+                    <div className="text-sm text-blue-800 space-y-1">
+                      <div><strong>주요가스:</strong> CF₄, CHF₃, SF₆</div>
+                      <div><strong>반응생성물:</strong> SiF₄ (휘발성)</div>
+                      <div><strong>특징:</strong> 높은 식각률, 우수한 선택비</div>
+                      <div><strong>응용:</strong> MEMS, 트렌치, Via</div>
+                      <div className="mt-2 text-xs bg-blue-200 p-2 rounded">
+                        Si + 4F → SiF₄ ↑
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-cyan-50 p-4 rounded-lg border-l-4 border-cyan-500">
+                    <h5 className="font-semibold text-cyan-900 mb-2">SiO₂ (실리콘 산화막)</h5>
+                    <div className="text-sm text-cyan-800 space-y-1">
+                      <div><strong>주요가스:</strong> CHF₃, C₄F₈, CF₄/H₂</div>
+                      <div><strong>반응생성물:</strong> SiF₄, CO, H₂O</div>
+                      <div><strong>특징:</strong> 폴리머 형성으로 선택비 향상</div>
+                      <div><strong>응용:</strong> Gate 산화막, STI, IMD</div>
+                      <div className="mt-2 text-xs bg-cyan-200 p-2 rounded">
+                        SiO₂ + CHF₃ → SiF₄ + CO + H₂O
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-indigo-50 p-4 rounded-lg border-l-4 border-indigo-500">
+                    <h5 className="font-semibold text-indigo-900 mb-2">Si₃N₄ (실리콘 질화막)</h5>
+                    <div className="text-sm text-indigo-800 space-y-1">
+                      <div><strong>주요가스:</strong> CHF₃/O₂, CF₄/O₂</div>
+                      <div><strong>반응생성물:</strong> SiF₄, N₂, CO</div>
+                      <div><strong>특징:</strong> O₂ 첨가로 질소 결합 절단</div>
+                      <div><strong>응용:</strong> 절연막, 스페이서, 하드마스크</div>
+                      <div className="mt-2 text-xs bg-indigo-200 p-2 rounded">
+                        Si₃N₄ + CF₄ + O₂ → SiF₄ + N₂ + CO
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 금속 계열 */}
+              <div className="mb-8">
+                <h4 className="text-md font-semibold text-red-800 mb-4 flex items-center">
+                  <span className="bg-red-100 p-2 rounded-lg mr-3">⚡</span>
+                  금속 계열 재료
+                </h4>
+                <div className="grid lg:grid-cols-3 gap-4">
+                  <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                    <h5 className="font-semibold text-red-900 mb-2">Al (알루미늄)</h5>
+                    <div className="text-sm text-red-800 space-y-1">
+                      <div><strong>주요가스:</strong> Cl₂, BCl₃, BCl₃/Cl₂</div>
+                      <div><strong>반응생성물:</strong> AlCl₃ (휘발성)</div>
+                      <div><strong>특징:</strong> BCl₃가 Al₂O₃ 제거에 효과적</div>
+                      <div><strong>응용:</strong> 배선, 패드, 전극</div>
+                      <div className="mt-2 text-xs bg-red-200 p-2 rounded">
+                        Al + 3Cl → AlCl₃ ↑
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
+                    <h5 className="font-semibold text-orange-900 mb-2">Cu (구리)</h5>
+                    <div className="text-sm text-orange-800 space-y-1">
+                      <div><strong>주요가스:</strong> Ar, Ar/H₂, Ar/N₂</div>
+                      <div><strong>반응생성물:</strong> 물리적 스퍼터링</div>
+                      <div><strong>특징:</strong> 주로 물리적 식각, 낮은 휘발성</div>
+                      <div><strong>응용:</strong> 배선, Via, 범프</div>
+                      <div className="mt-2 text-xs bg-orange-200 p-2 rounded">
+                        Physical Sputtering Process
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                    <h5 className="font-semibold text-yellow-900 mb-2">W (텅스텐)</h5>
+                    <div className="text-sm text-yellow-800 space-y-1">
+                      <div><strong>주요가스:</strong> CF₄, SF₆, NF₃</div>
+                      <div><strong>반응생성물:</strong> WF₆ (휘발성)</div>
+                      <div><strong>특징:</strong> 고온에서 높은 식각률</div>
+                      <div><strong>응용:</strong> Via 플러그, 배리어</div>
+                      <div className="mt-2 text-xs bg-yellow-200 p-2 rounded">
+                        W + 6F → WF₆ ↑
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 유기물 및 기타 재료 */}
+              <div className="mb-6">
+                <h4 className="text-md font-semibold text-green-800 mb-4 flex items-center">
+                  <span className="bg-green-100 p-2 rounded-lg mr-3">🧪</span>
+                  유기물 및 기타 재료
+                </h4>
+                <div className="grid lg:grid-cols-2 gap-4">
+                  <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                    <h5 className="font-semibold text-green-900 mb-2">Photoresist (포토레지스트)</h5>
+                    <div className="text-sm text-green-800 space-y-1">
+                      <div><strong>주요가스:</strong> O₂, O₂/CF₄, O₂/Ar</div>
+                      <div><strong>반응생성물:</strong> CO₂, H₂O (완전 산화)</div>
+                      <div><strong>특징:</strong> 산소 라디칼에 의한 완전 제거</div>
+                      <div><strong>응용:</strong> 애싱(Ashing), 스트립</div>
+                      <div className="mt-2 text-xs bg-green-200 p-2 rounded">
+                        (C₈H₈)ₙ + O₂ → CO₂ + H₂O
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                    <h5 className="font-semibold text-purple-900 mb-2">Poly-Si (폴리실리콘)</h5>
+                    <div className="text-sm text-purple-800 space-y-1">
+                      <div><strong>주요가스:</strong> HBr/Cl₂, HBr/O₂</div>
+                      <div><strong>반응생성물:</strong> SiBr₄, SiCl₄</div>
+                      <div><strong>특징:</strong> 할로겐 혼합으로 프로파일 제어</div>
+                      <div><strong>응용:</strong> Gate 전극, 저항</div>
+                      <div className="mt-2 text-xs bg-purple-200 p-2 rounded">
+                        Si + HBr + Cl₂ → SiBr₄ + SiCl₄
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 공정 조건 요약 테이블 */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-gray-800 mb-3">재료별 최적 공정 조건 요약</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-xs">
+                    <thead className="bg-gray-200">
+                      <tr>
+                        <th className="px-3 py-2 text-left">재료</th>
+                        <th className="px-3 py-2 text-center">주요 가스</th>
+                        <th className="px-3 py-2 text-center">압력 (mTorr)</th>
+                        <th className="px-3 py-2 text-center">온도 (°C)</th>
+                        <th className="px-3 py-2 text-center">특징</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-300">
+                      <tr>
+                        <td className="px-3 py-2 font-medium">Si</td>
+                        <td className="px-3 py-2 text-center">CF₄/CHF₃</td>
+                        <td className="px-3 py-2 text-center">5-50</td>
+                        <td className="px-3 py-2 text-center">0-80</td>
+                        <td className="px-3 py-2 text-center">고속, 고선택비</td>
+                      </tr>
+                      <tr className="bg-gray-100">
+                        <td className="px-3 py-2 font-medium">SiO₂</td>
+                        <td className="px-3 py-2 text-center">CHF₃/C₄F₈</td>
+                        <td className="px-3 py-2 text-center">10-100</td>
+                        <td className="px-3 py-2 text-center">20-60</td>
+                        <td className="px-3 py-2 text-center">폴리머 형성</td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-2 font-medium">Al</td>
+                        <td className="px-3 py-2 text-center">BCl₃/Cl₂</td>
+                        <td className="px-3 py-2 text-center">2-20</td>
+                        <td className="px-3 py-2 text-center">40-80</td>
+                        <td className="px-3 py-2 text-center">산화막 제거</td>
+                      </tr>
+                      <tr className="bg-gray-100">
+                        <td className="px-3 py-2 font-medium">PR</td>
+                        <td className="px-3 py-2 text-center">O₂</td>
+                        <td className="px-3 py-2 text-center">100-1000</td>
+                        <td className="px-3 py-2 text-center">150-250</td>
+                        <td className="px-3 py-2 text-center">완전 산화</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTheme === 'deposition-process' && (
+          <div className="space-y-8">
+            <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl p-6 border">
+              <h2 className="text-2xl font-bold text-teal-900 mb-4">🏗️ PECVD 플라즈마 증착 공정</h2>
+              <p className="text-teal-700 mb-2">플라즈마 강화 화학 기상 증착(PECVD)의 원리와 특성을 학습합니다.</p>
+              <div className="text-sm text-teal-600 bg-teal-100 rounded-lg p-3">
+                <strong>핵심 학습:</strong> 저온 증착 원리, CCP vs ICP 증착 특성, 스텝 커버리지, 응용 분야
+              </div>
+            </div>
+
+            {/* PECVD 소개 및 원리 */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border">
+              <h3 className="text-lg font-semibold text-teal-800 mb-4">PECVD (Plasma Enhanced Chemical Vapor Deposition)</h3>
+              <div className="grid lg:grid-cols-2 gap-8">
+                <div>
+                  <div className="bg-teal-50 p-4 rounded-lg mb-4">
+                    <h4 className="font-semibold text-teal-900 mb-2">정의 및 원리</h4>
+                    <p className="text-teal-800 text-sm leading-relaxed">
+                      PECVD는 플라즈마 강화 화학 기상 증착으로, 플라즈마 에너지를 이용해 저온에서 박막을 형성하는 기술입니다. 
+                      플라즈마를 통해 소스 가스를 활성화시켜 <strong>400°C 이하</strong>의 낮은 온도에서도 고품질 박막 증착이 가능합니다.
+                    </p>
+                  </div>
+
+                  <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                    <h4 className="font-semibold text-blue-900 mb-2">기본 반응 메커니즘</h4>
+                    <div className="text-blue-800 text-sm space-y-2">
+                      <div>1. 소스 가스 → 플라즈마 활성화 → 라디칼 생성</div>
+                      <div>2. 활성 라디칼 → 기판 표면 흡착</div>
+                      <div>3. 표면 반응 → 박막 성장</div>
+                      <div>4. 반응 부산물 → 배기로 제거</div>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h4 className="font-semibold text-yellow-900 mb-2">PECVD vs 기존 CVD</h4>
+                    <div className="text-yellow-800 text-sm space-y-1">
+                      <div><strong>기존 CVD:</strong> 고온(600-1000°C) 필요</div>
+                      <div><strong>PECVD:</strong> 저온(200-400°C) 가능</div>
+                      <div><strong>장점:</strong> 열 손상 방지, 빠른 증착</div>
+                      <div><strong>단점:</strong> 불순물 증가, 스텝 커버리지 저하</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-3">CCP 타입 PECVD 장비 구조</h4>
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <svg width="100%" height="300" viewBox="0 0 400 300">
+                      {/* 챔버 */}
+                      <rect x="80" y="100" width="240" height="140" fill="none" stroke="#dc2626" strokeWidth="3"/>
+                      
+                      {/* 가스 시스템 - 우측 상단 */}
+                      {/* 가스통 3개 */}
+                      <rect x="350" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
+                      <text x="357" y="25" fontSize="12" fill="#374151" fontWeight="bold">CF4</text>
+                      <rect x="370" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
+                      <text x="378" y="25" fontSize="12" fill="#374151" fontWeight="bold">Ar</text>
+                      <rect x="390" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
+                      <text x="397" y="25" fontSize="12" fill="#374151" fontWeight="bold">O2</text>
+                      
+                      {/* 가스밸브 3개 */}
+                      <circle cx="357" cy="80" r="5" fill="white" stroke="#374151" strokeWidth="2"/>
+                      <line x1="354" y1="77" x2="360" y2="83" stroke="#374151" strokeWidth="2"/>
+                      <circle cx="377" cy="80" r="5" fill="white" stroke="#374151" strokeWidth="2"/>
+                      <line x1="374" y1="77" x2="380" y2="83" stroke="#374151" strokeWidth="2"/>
+                      <circle cx="397" cy="80" r="5" fill="white" stroke="#374151" strokeWidth="2"/>
+                      <line x1="394" y1="77" x2="400" y2="83" stroke="#374151" strokeWidth="2"/>
+                      
+                      {/* MFC 3개 */}
+                      <rect x="350" y="95" width="15" height="10" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1"/>
+                      <text x="352" y="103" fontSize="8" fill="#374151">MFC</text>
+                      <rect x="370" y="95" width="15" height="10" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1"/>
+                      <text x="372" y="103" fontSize="8" fill="#374151">MFC</text>
+                      <rect x="390" y="95" width="15" height="10" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1"/>
+                      <text x="392" y="103" fontSize="8" fill="#374151">MFC</text>
+                      
+                      {/* 가스라인 연결 */}
+                      <line x1="357" y1="70" x2="357" y2="75" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="377" y1="70" x2="377" y2="75" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="397" y1="70" x2="397" y2="75" stroke="#10b981" strokeWidth="2"/>
+                      
+                      <line x1="357" y1="85" x2="357" y2="95" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="377" y1="85" x2="377" y2="95" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="397" y1="85" x2="397" y2="95" stroke="#10b981" strokeWidth="2"/>
+                      
+                      <line x1="357" y1="105" x2="357" y2="115" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="377" y1="105" x2="377" y2="115" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="397" y1="105" x2="397" y2="115" stroke="#10b981" strokeWidth="2"/>
+                      
+                      {/* 합류점 */}
+                      <line x1="357" y1="115" x2="377" y2="115" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="377" y1="115" x2="397" y2="115" stroke="#10b981" strokeWidth="2"/>
+                      
+                      {/* 샤워헤드로 연결 */}
+                      <line x1="377" y1="115" x2="280" y2="115" stroke="#10b981" strokeWidth="2"/>
+                      <line x1="280" y1="115" x2="280" y2="127" stroke="#10b981" strokeWidth="2"/>
+                      <polygon points="277,125 283,125 280,130" fill="#10b981"/>
+                      
+                      {/* 플라즈마 샤워 헤드 - 상부 전극 (진한회색) */}
+                      <rect x="120" y="120" width="160" height="8" fill="#6b7280" stroke="#374151" strokeWidth="2"/>
+                      {/* 플라즈마 샤워 헤드 - 하부 (파란색) */}
+                      <rect x="120" y="128" width="160" height="7" fill="#2563eb" stroke="#1d4ed8" strokeWidth="2"/>
+                      
+                      {/* RF 파워 소스 - 상부로 이동 */}
+                      <circle cx="120" cy="50" r="15" fill="none" stroke="#dc2626" strokeWidth="2"/>
+                      <path d="M108,50 Q114,43 120,50 Q126,57 132,50" fill="none" stroke="#dc2626" strokeWidth="2"/>
+                      <text x="50" y="45" fontSize="13" fill="#dc2626" fontWeight="bold">RF</text>
+                      <text x="45" y="60" fontSize="13" fill="#dc2626" fontWeight="bold">power</text>
+                      <text x="45" y="75" fontSize="13" fill="#dc2626" fontWeight="bold">source</text>
+                      
+                      {/* RF 연결선 - 상부 전극으로 연결 */}
+                      <line x1="135" y1="50" x2="200" y2="50" stroke="#dc2626" strokeWidth="3"/>
+                      <line x1="200" y1="50" x2="200" y2="120" stroke="#dc2626" strokeWidth="3"/>
+                      
+                      <text x="300" y="110" fontSize="13" fill="#2563eb" fontWeight="bold">Plasma</text>
+                      <text x="300" y="125" fontSize="13" fill="#2563eb" fontWeight="bold">shower</text>
+                      <text x="310" y="140" fontSize="13" fill="#2563eb" fontWeight="bold">head</text>
+                      
+                      {/* 플라즈마 */}
+                      <rect x="120" y="135" width="160" height="70" fill="#a855f7" opacity="0.6"/>
+                      <text x="200" y="175" textAnchor="middle" fontSize="20" fill="white" fontWeight="bold">Plasma</text>
+                      
+                      {/* 하부 플레이트 */}
+                      <rect x="120" y="210" width="160" height="15" fill="#6b7280" stroke="#374151" strokeWidth="2"/>
+                      
+                      {/* 접지 기호 (하부 전극) */}
+                      <line x1="200" y1="225" x2="200" y2="250" stroke="#374151" strokeWidth="3"/>
+                      <line x1="190" y1="250" x2="210" y2="250" stroke="#374151" strokeWidth="3"/>
+                      <line x1="194" y1="255" x2="206" y2="255" stroke="#374151" strokeWidth="2"/>
+                      <line x1="198" y1="260" x2="202" y2="260" stroke="#374151" strokeWidth="2"/>
+                      
+                      {/* Reaction chamber 라벨 */}
+                      <text x="350" y="160" fontSize="13" fill="#dc2626" fontWeight="bold">Reaction</text>
+                      <text x="350" y="175" fontSize="13" fill="#dc2626" fontWeight="bold">chamber</text>
+                    </svg>
+                  </div>
+                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-gray-700 text-sm">
+                      <strong>동작 원리:</strong> 진공 챔버와 여러된 배관을 통해 펌프로 배기되고, 
+                      가스는 유량의 정밀한 제어를 위한 MFC를 거나 Shower Head를 통해 챔버 내부로 공급되고
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 장점과 단점 */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border">
+              <h3 className="text-lg font-semibold text-teal-800 mb-4">PECVD의 장점과 단점</h3>
+              <div className="grid lg:grid-cols-2 gap-8">
+                <div>
+                  <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                    <span className="bg-green-100 p-2 rounded-lg mr-3">✅</span>
+                    주요 장점
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                      <h5 className="font-semibold text-green-900 mb-2">저온 증착 (400°C 이하)</h5>
+                      <p className="text-green-800 text-sm">
+                        플라즈마를 이용해 소스 가스를 활성화시키므로 비교적 낮은 온도에서 증착이 가능합니다. 
+                        이는 열로 인한 손상을 줄일 수 있습니다.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                      <h5 className="font-semibold text-blue-900 mb-2">빠른 증착 속도</h5>
+                      <p className="text-blue-800 text-sm">
+                        소스 가스의 분해 속도가 매우 빨라 공정 시간을 단축할 수 있습니다. 
+                        일반적으로 100-1000 Å/min의 높은 증착률을 보입니다.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-purple-50 p-4 rounded-lg border-l-4 border-purple-500">
+                      <h5 className="font-semibold text-purple-900 mb-2">낮은 기판 온도</h5>
+                      <p className="text-purple-800 text-sm">
+                        고온에 민감한 기판(유기물, 플라스틱 등)에도 박막을 형성할 수 있어 
+                        응용 범위가 넓습니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-semibold text-red-800 mb-3 flex items-center">
+                    <span className="bg-red-100 p-2 rounded-lg mr-3">⚠️</span>
+                    주요 단점
+                  </h4>
+                  <div className="space-y-4">
+                    <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                      <h5 className="font-semibold text-red-900 mb-2">낮은 스텝 커버리지</h5>
+                      <p className="text-red-800 text-sm">
+                        평탄한 표면에는 잘 증착되지만, 굴곡이나 복잡한 구조에서는 균일한 증착이 어렵습니다. 
+                        특히 고종횡비 구조에서 문제가 됩니다.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-500">
+                      <h5 className="font-semibold text-orange-900 mb-2">불순물 함유</h5>
+                      <p className="text-orange-800 text-sm">
+                        플라즈마 사용으로 인해 수소, 탄소 등의 불순물이 박막에 포함될 수 있어 
+                        전기적, 기계적 특성에 영향을 줍니다.
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gray-50 p-4 rounded-lg border-l-4 border-gray-500">
+                      <h5 className="font-semibold text-gray-900 mb-2">장비 크기 제한</h5>
+                      <p className="text-gray-800 text-sm">
+                        진공 챔버 크기에 따라 처리할 수 있는 기판 크기가 제한적이며, 
+                        대면적 증착 시 균일도 확보가 어렵습니다.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 주요 활용 분야 */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border">
+              <h3 className="text-lg font-semibold text-teal-800 mb-4">PECVD 주요 활용 분야</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-4 rounded-lg border">
+                  <h4 className="font-semibold text-blue-800 mb-3 flex items-center">
+                    <span className="text-2xl mr-2">📱</span>
+                    OLED 디스플레이
+                  </h4>
+                  <div className="space-y-2 text-blue-700 text-sm">
+                    <div><strong>TFE:</strong> 박막 봉지(Thin Film Encapsulation)</div>
+                    <div><strong>보호막:</strong> 수분/산소 차단막</div>
+                    <div><strong>절연막:</strong> 층간 절연막</div>
+                    <div><strong>특징:</strong> 플렉서블 기판에 적합</div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-4 rounded-lg border">
+                  <h4 className="font-semibold text-green-800 mb-3 flex items-center">
+                    <span className="text-2xl mr-2">💻</span>
+                    반도체 공정
+                  </h4>
+                  <div className="space-y-2 text-green-700 text-sm">
+                    <div><strong>SiO₂:</strong> 게이트 절연막, IMD</div>
+                    <div><strong>SiNₓ:</strong> 패시베이션, 하드마스크</div>
+                    <div><strong>SiON:</strong> 저유전 절연막</div>
+                    <div><strong>특징:</strong> 저온으로 열 손상 방지</div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-purple-50 to-pink-50 p-4 rounded-lg border">
+                  <h4 className="font-semibold text-purple-800 mb-3 flex items-center">
+                    <span className="text-2xl mr-2">🔧</span>
+                    전자 부품
+                  </h4>
+                  <div className="space-y-2 text-purple-700 text-sm">
+                    <div><strong>보호막:</strong> 표면 보호 코팅</div>
+                    <div><strong>절연막:</strong> 전기적 절연</div>
+                    <div><strong>기능막:</strong> 반사방지막, 필터</div>
+                    <div><strong>특징:</strong> 다양한 재료에 적용</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* 재료별 PECVD 공정 조건 */}
+            <div className="bg-white rounded-xl shadow-lg p-6 border">
+              <h3 className="text-lg font-semibold text-teal-800 mb-4">재료별 PECVD 공정 조건</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-teal-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left font-semibold">증착 재료</th>
+                      <th className="px-4 py-3 text-center font-semibold">소스 가스</th>
+                      <th className="px-4 py-3 text-center font-semibold">온도 (°C)</th>
+                      <th className="px-4 py-3 text-center font-semibold">압력 (mTorr)</th>
+                      <th className="px-4 py-3 text-center font-semibold">증착률 (Å/min)</th>
+                      <th className="px-4 py-3 text-center font-semibold">주요 응용</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    <tr>
+                      <td className="px-4 py-3 font-medium">SiO₂</td>
+                      <td className="px-4 py-3 text-center">SiH₄ + N₂O</td>
+                      <td className="px-4 py-3 text-center">300-400</td>
+                      <td className="px-4 py-3 text-center">500-2000</td>
+                      <td className="px-4 py-3 text-center">100-500</td>
+                      <td className="px-4 py-3 text-center">절연막, IMD</td>
+                    </tr>
+                    <tr className="bg-gray-50">
+                      <td className="px-4 py-3 font-medium">SiNₓ</td>
+                      <td className="px-4 py-3 text-center">SiH₄ + NH₃</td>
+                      <td className="px-4 py-3 text-center">250-350</td>
+                      <td className="px-4 py-3 text-center">200-1000</td>
+                      <td className="px-4 py-3 text-center">50-200</td>
+                      <td className="px-4 py-3 text-center">패시베이션, 하드마스크</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 font-medium">SiON</td>
+                      <td className="px-4 py-3 text-center">SiH₄ + N₂O + NH₃</td>
+                      <td className="px-4 py-3 text-center">300-400</td>
+                      <td className="px-4 py-3 text-center">300-1500</td>
+                      <td className="px-4 py-3 text-center">80-300</td>
+                      <td className="px-4 py-3 text-center">저유전 절연막</td>
+                    </tr>
+                    <tr className="bg-gray-50">
+                      <td className="px-4 py-3 font-medium">a-Si</td>
+                      <td className="px-4 py-3 text-center">SiH₄</td>
+                      <td className="px-4 py-3 text-center">200-300</td>
+                      <td className="px-4 py-3 text-center">100-500</td>
+                      <td className="px-4 py-3 text-center">50-200</td>
+                      <td className="px-4 py-3 text-center">TFT, 태양전지</td>
+                    </tr>
+                    <tr>
+                      <td className="px-4 py-3 font-medium">DLC</td>
+                      <td className="px-4 py-3 text-center">C₂H₂, CH₄</td>
+                      <td className="px-4 py-3 text-center">100-200</td>
+                      <td className="px-4 py-3 text-center">10-100</td>
+                      <td className="px-4 py-3 text-center">10-100</td>
+                      <td className="px-4 py-3 text-center">보호막, 코팅</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              
+              <div className="mt-4 p-4 bg-teal-50 rounded-lg">
+                <h4 className="font-semibold text-teal-900 mb-2">공정 최적화 포인트</h4>
+                <div className="grid grid-cols-2 gap-4 text-sm text-teal-800">
+                  <div>
+                    <strong>온도 제어:</strong> 기판 손상 방지와 반응성 균형
+                  </div>
+                  <div>
+                    <strong>압력 조절:</strong> 증착률과 균일도 최적화
+                  </div>
+                  <div>
+                    <strong>RF 파워:</strong> 플라즈마 밀도와 이온 손상 제어
+                  </div>
+                  <div>
+                    <strong>가스비 조절:</strong> 박막 특성(스토이키오메트리) 제어
                   </div>
                 </div>
               </div>
