@@ -197,8 +197,8 @@ const PlasmaSimulator = () => {
           type: 'neutral',
           x: Math.random() * 300 + 25,
           y: Math.random() * 200 + 25,
-          vx: (Math.random() - 0.5) * 1.0, // 모든 입자 동일한 속도 범위
-          vy: (Math.random() - 0.5) * 1.0,
+          vx: (Math.random() - 0.5) * 2.5, // 속도 증가: 1.0 → 2.5
+          vy: (Math.random() - 0.5) * 2.5,
           color: '#9CA3AF',
           size: 3
         });
@@ -211,8 +211,8 @@ const PlasmaSimulator = () => {
           type: 'ion',
           x: Math.random() * 300 + 25,
           y: Math.random() * 200 + 25,
-          vx: (Math.random() - 0.5) * 1.0, // 중성입자와 동일한 움직임
-          vy: (Math.random() - 0.5) * 1.0,
+          vx: (Math.random() - 0.5) * 2.5, // 속도 증가
+          vy: (Math.random() - 0.5) * 2.5,
           color: '#EF4444',
           size: 4
         });
@@ -225,8 +225,8 @@ const PlasmaSimulator = () => {
           type: 'electron',
           x: Math.random() * 300 + 25,
           y: Math.random() * 200 + 25,
-          vx: (Math.random() - 0.5) * 1.0, // 중성입자와 동일한 움직임
-          vy: (Math.random() - 0.5) * 1.0,
+          vx: (Math.random() - 0.5) * 2.5, // 속도 증가
+          vy: (Math.random() - 0.5) * 2.5,
           color: '#3B82F6',
           size: 2
         });
@@ -256,14 +256,14 @@ const PlasmaSimulator = () => {
             }
 
             // 모든 입자에 동일한 브라운 운동 적용
-            newVx += (Math.random() - 0.5) * 0.05;
-            newVy += (Math.random() - 0.5) * 0.05;
+            newVx += (Math.random() - 0.5) * 0.15; // 브라운 운동 증가: 0.05 → 0.15
+            newVy += (Math.random() - 0.5) * 0.15;
             
             // 모든 입자의 속도를 동일하게 제한
             const speed = Math.sqrt(newVx * newVx + newVy * newVy);
-            if (speed > 1.5) {
-              newVx = (newVx / speed) * 1.5;
-              newVy = (newVy / speed) * 1.5;
+            if (speed > 3.5) { // 최대 속도 증가: 1.5 → 3.5
+              newVx = (newVx / speed) * 3.5;
+              newVy = (newVy / speed) * 3.5;
             }
 
             return {
@@ -364,70 +364,80 @@ const PlasmaSimulator = () => {
     const minPoint = findMinimumBreakdownPoint();
     
     return (
-      <div className="bg-gray-50 rounded-lg border-2 border-gray-300 p-4" style={{height: '520px'}}>
-        <div className="text-center mb-3">
-          <div className="text-xl font-bold text-gray-800">전극간 가스 방전 시스템</div>
-          <div className="mt-2">
-            <span className="text-lg font-bold" style={{color: gasType === 'argon' ? '#dc2626' : gasType === 'air' ? '#2563eb' : gasType === 'helium' ? '#9333ea' : gasType === 'nitrogen' ? '#16a34a' : gasType === 'neon' ? '#ea580c' : '#dc2626'}}>
-              {gasType === 'argon' ? 'Ar' : gasType === 'air' ? 'Air' : gasType === 'helium' ? 'He' : gasType === 'nitrogen' ? 'N₂' : gasType === 'neon' ? 'Ne' : 'Ar'}, 
-            </span>
-            <span className="text-lg font-bold text-gray-800 ml-1">pd = {currentPD.toFixed(2)} Torr·cm</span>
-            <span className="text-base text-gray-600 ml-4">P = {pressure} Torr    d = {distance} cm</span>
-          </div>
-        </div>
-        
-        {/* 컨트롤 박스를 맨 위로 이동하고 z-index 추가 */}
-        <div className="mb-4 bg-white rounded-lg p-4 border-2 border-blue-400 shadow-lg relative z-10">
-          <h4 className="text-base font-bold text-blue-800 mb-3 text-center">⚙️ 방전 조건 제어</h4>
-          <div className="bg-blue-50 border-2 border-blue-300 rounded-lg p-4">
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-bold text-blue-800 mb-3">압력: {pressure} Torr</label>
-                <div className="relative">
-                  <input 
-                    type="range" 
-                    min="0.1" 
-                    max="10" 
-                    step="0.1" 
-                    value={pressure} 
-                    onChange={(e) => setPressure(parseFloat(e.target.value))} 
-                    className="w-full h-4 bg-gradient-to-r from-green-200 to-blue-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-blue-400 slider-thumb-blue"
-                  />
-                  <div className="flex justify-between text-xs text-blue-700 mt-1 font-medium">
-                    <span>0.1</span><span>2.5</span><span>5.0</span><span>7.5</span><span>10</span>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-bold text-blue-800 mb-3">전극간 거리: {distance} cm</label>
-                <div className="relative">
-                  <input 
-                    type="range" 
-                    min="0.1" 
-                    max="5" 
-                    step="0.1" 
-                    value={distance} 
-                    onChange={(e) => setDistance(parseFloat(e.target.value))} 
-                    className="w-full h-4 bg-gradient-to-r from-purple-200 to-pink-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-purple-400 slider-thumb-purple"
-                  />
-                  <div className="flex justify-between text-xs text-purple-700 mt-1 font-medium">
-                    <span>0.1</span><span>1.3</span><span>2.5</span><span>3.8</span><span>5.0</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="text-center mt-3 bg-white rounded-lg p-2">
-              <span className="text-base font-bold text-blue-800">pd = {currentPD.toFixed(2)} Torr·cm</span>
-              {calculateBreakdownVoltage(pressure, distance) !== null && <span className="text-sm text-gray-700 ml-4">항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</span>}
-            </div>
+      <div className="space-y-6">
+        {/* 상단: 가스 종류와 pd 표시 */}
+        <div className="text-center">
+          <div className="text-xl font-bold mb-2">
+            <span className="text-red-600">{gasType === 'argon' ? 'Ar' : gasType === 'air' ? 'Air' : gasType === 'helium' ? 'He' : gasType === 'nitrogen' ? 'N₂' : gasType === 'neon' ? 'Ne' : 'Ar'}</span>
+            <span className="text-gray-800 ml-2">pd = {currentPD.toFixed(2)} Torr·cm</span>
+            <span className="text-gray-600 ml-4 text-base">P = {pressure} Torr, d = {distance} cm</span>
           </div>
         </div>
 
-        <div className="grid grid-cols-12 gap-4 items-start" style={{height: '280px'}}>
+        {/* 방전 조건 제어 박스 */}
+        <div className="bg-blue-50 border-2 border-blue-400 rounded-lg p-6">
+          <h3 className="text-lg font-bold text-blue-800 text-center mb-6">방전 조건 제어</h3>
+          
+          <div className="grid grid-cols-2 gap-8 mb-6">
+            {/* 압력 제어 */}
+            <div className="bg-white rounded-lg p-4 border border-blue-300">
+              <label className="block text-base font-bold text-blue-800 mb-3">압력: {pressure} Torr</label>
+              <input 
+                type="range" 
+                min="0.1" 
+                max="10" 
+                step="0.1" 
+                value={pressure} 
+                onChange={(e) => setPressure(parseFloat(e.target.value))} 
+                className="w-full h-5 bg-gradient-to-r from-green-200 to-blue-300 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
+              />
+              <div className="flex justify-between text-sm text-blue-700 mt-2">
+                <span>0.1</span><span>2.5</span><span>5.0</span><span>7.5</span><span>10</span>
+              </div>
+              <div className="mt-3 text-sm text-blue-700">
+                <div>압력이 낮으면: 입자가 적어 충돌 확률 감소</div>
+                <div>압력이 높으면: 자유경로가 짧아져 가속 어려움</div>
+              </div>
+            </div>
+
+            {/* 거리 제어 */}
+            <div className="bg-white rounded-lg p-4 border border-blue-300">
+              <label className="block text-base font-bold text-blue-800 mb-3">전극간 거리: {distance} cm</label>
+              <input 
+                type="range" 
+                min="0.1" 
+                max="5" 
+                step="0.1" 
+                value={distance} 
+                onChange={(e) => setDistance(parseFloat(e.target.value))} 
+                className="w-full h-5 bg-gradient-to-r from-purple-200 to-pink-300 rounded-lg appearance-none cursor-pointer slider-thumb-purple"
+              />
+              <div className="flex justify-between text-sm text-purple-700 mt-2">
+                <span>0.1</span><span>1.3</span><span>2.5</span><span>3.8</span><span>5.0</span>
+              </div>
+              <div className="mt-3 text-sm text-purple-700">
+                <div>거리가 짧으면: 전기장 강하지만 가속 거리 부족</div>
+                <div>거리가 길면: 가속 거리 충분하지만 전기장 약함</div>
+              </div>
+            </div>
+          </div>
+
+          {/* pd 값과 항복전압 표시 */}
+          <div className="bg-white rounded-lg p-4 border-2 border-blue-400 text-center">
+            <span className="text-xl font-bold text-blue-800">pd = {currentPD.toFixed(2)} Torr·cm</span>
+            {calculateBreakdownVoltage(pressure, distance) !== null && 
+              <span className="text-lg text-gray-700 ml-6">항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</span>
+            }
+          </div>
+        </div>
+
+        {/* 메인 분석 영역 */}
+        <div className="grid grid-cols-12 gap-6">
+          {/* 방전 조건 */}
           <div className="col-span-3">
             <div className="bg-blue-50 rounded-lg p-4 border-2 border-blue-400 h-full">
               <h3 className="text-blue-800 font-bold text-lg mb-4 text-center">방전 조건</h3>
-              <div className="space-y-3 text-base">
+              <div className="space-y-3">
                 <div className="text-blue-700">pd 값: <span className="font-bold">{currentPD.toFixed(2)} Torr·cm</span></div>
                 <div className="text-blue-700">입자 밀도: <span className="font-bold">{particleCount}개</span></div>
                 <div>이온화 효율: <span className={`font-bold ${townsendInfo.isOptimal ? "text-green-600" : "text-red-600"}`}>{townsendInfo.efficiency}</span></div>
@@ -436,45 +446,61 @@ const PlasmaSimulator = () => {
             </div>
           </div>
           
+          {/* 중앙 그림 */}
           <div className="col-span-6">
-            <div className="relative h-full flex items-center justify-center">
-              <svg width="100%" height="280" viewBox={`0 0 ${Math.max(300, actualDistance + 150)} 280`} className="bg-white rounded border">
-                <rect x="50" y="80" width="25" height="120" fill="#dc2626" rx="4"/>
-                <text x="30" y="145" fill="#dc2626" fontSize="24" fontWeight="bold">+</text>
-                <text x="10" y="230" fill="#000000" fontSize="20" fontWeight="bold">양극</text>
-                <rect x={75 + actualDistance} y="80" width="25" height="120" fill="#2563eb" rx="4"/>
-                <text x={110 + actualDistance} y="145" fill="#2563eb" fontSize="24" fontWeight="bold">−</text>
-                <text x={90 + actualDistance} y="230" fill="#000000" fontSize="20" fontWeight="bold">음극</text>
+            <div className="bg-white rounded-lg p-4 border-2 border-gray-300 h-full">
+              {/* 관찰 포인트 */}
+              <div className="mb-4 text-center">
+                <div className="text-sm font-bold text-green-700 mb-2">관찰 포인트:</div>
+                <div className="text-xs text-green-600 space-y-1">
+                  <div>• pd ≈ 1.0 Torr·cm에서 최적 방전</div>
+                  <div>• 전자 사태 현상 확인</div>
+                  <div>• Townsend 계수(α) 변화</div>
+                </div>
+              </div>
+              
+              <svg width="100%" height="200" viewBox={`0 0 ${Math.max(300, actualDistance + 150)} 200`}>
+                {/* 양극 */}
+                <rect x="50" y="40" width="25" height="120" fill="#dc2626" rx="4"/>
+                <text x="30" y="105" fill="#dc2626" fontSize="24" fontWeight="bold">+</text>
+                <text x="25" y="180" fill="#dc2626" fontSize="16" fontWeight="bold">양극</text>
+                
+                {/* 음극 */}
+                <rect x={75 + actualDistance} y="40" width="25" height="120" fill="#2563eb" rx="4"/>
+                <text x={110 + actualDistance} y="105" fill="#2563eb" fontSize="24" fontWeight="bold">−</text>
+                <text x={95 + actualDistance} y="180" fill="#2563eb" fontSize="16" fontWeight="bold">음극</text>
+                
+                {/* 전기장 화살표 */}
                 {Array.from({length: 6}, (_, i) => {
-                  const y = 100 + i * 20;
+                  const y = 60 + i * 16;
                   const startX = 80;
                   const endX = 70 + actualDistance;
                   return (
                     <g key={i}>
-                      <line x1={startX} y1={y} x2={endX} y2={y} stroke="#f59e0b" strokeWidth="2.5" strokeDasharray="10,5" />
-                      <polygon points={`${endX},${y-5} ${endX},${y+5} ${endX+10},${y}`} fill="#f59e0b" />
+                      <line x1={startX} y1={y} x2={endX} y2={y} stroke="#f59e0b" strokeWidth="2" strokeDasharray="8,4" />
+                      <polygon points={`${endX},${y-4} ${endX},${y+4} ${endX+8},${y}`} fill="#f59e0b" />
                     </g>
                   );
                 })}
-                {townsendInfo.isOptimal && (
-                  <g>
-                    <circle cx={75 + actualDistance/2} cy="50" r="25" fill="#10b981" opacity="0.3"/>
-                    <text x={75 + actualDistance/2} y="58" textAnchor="middle" fontSize="18" fill="#059669" fontWeight="bold">최적!</text>
-                  </g>
-                )}
+                
+                {/* 전기장 표시 */}
+                <text x={75 + actualDistance/2} y="30" textAnchor="middle" fontSize="14" fill="#f59e0b" fontWeight="bold">전기장 E</text>
               </svg>
             </div>
           </div>
           
+          {/* 항복 전압 */}
           <div className="col-span-3">
             <div className="bg-red-50 rounded-lg p-4 border-2 border-red-400 h-full">
               <h3 className="text-red-800 font-bold text-lg mb-4 text-center">항복 전압</h3>
               {calculateBreakdownVoltage(pressure, distance) !== null ? (
                 <div className="space-y-3">
-                  <div className="text-center"><div className="text-3xl font-bold text-red-600">{Math.round(calculateBreakdownVoltage(pressure, distance))} V</div></div>
-                  <div className="text-red-700 text-base">최소값: <span className="font-bold text-green-600">{Math.round(minPoint.voltage)} V</span></div>
-                  <div className="text-red-700 text-base">최적 pd: <span className="font-bold text-green-600">{minPoint.pd} Torr·cm</span></div>
-                  <div className="text-red-700 text-base font-bold">{gasType.toUpperCase()} 가스</div>
+                  <div className="text-center">
+                    <div className="text-3xl font-bold text-red-600">{Math.round(calculateBreakdownVoltage(pressure, distance))} V</div>
+                  </div>
+                  <div className="text-red-700">최소값: <span className="font-bold text-green-600">{Math.round(minPoint.voltage)} V</span></div>
+                  <div className="text-red-700">최적 pd: <span className="font-bold text-green-600">{minPoint.pd} Torr·cm</span></div>
+                  <div className="text-red-700 font-bold">{gasType.toUpperCase()} 가스</div>
                 </div>
               ) : (
                 <div className="text-center">
@@ -482,6 +508,33 @@ const PlasmaSimulator = () => {
                   <div className="text-red-600 text-sm">pd: 0.1~100 범위로 조정</div>
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+
+        {/* 하단: pd 영역별 설명 */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+            <h4 className="font-bold text-blue-800 mb-2">낮은 pd 영역</h4>
+            <div className="text-sm text-blue-700">
+              <div>압력 적어 충돌 확률 → 높은 전압 필요</div>
+              <div className="font-mono text-xs mt-1">0.1 ~ 0.8</div>
+            </div>
+          </div>
+          
+          <div className="bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+            <h4 className="font-bold text-green-800 mb-2">최적 pd 영역</h4>
+            <div className="text-sm text-green-700">
+              <div>이온화 효율 최대 → 최소 전압으로 방전</div>
+              <div className="font-mono text-xs mt-1">0.8 ~ 3.0</div>
+            </div>
+          </div>
+          
+          <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-400">
+            <h4 className="font-bold text-red-800 mb-2">높은 pd 영역</h4>
+            <div className="text-sm text-red-700">
+              <div>입자 많아 자유경로 짧음 → 높은 전압 필요</div>
+              <div className="font-mono text-xs mt-1">3.0 ~ 100</div>
             </div>
           </div>
         </div>
@@ -618,7 +671,7 @@ const PlasmaSimulator = () => {
       `}</style>
       
       <div className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
             <h1 className="text-2xl font-bold text-gray-900">플라즈마 공정 교육 시뮬레이터</h1>
             <div className="text-sm text-gray-500">Interactive Learning System</div>
@@ -627,7 +680,7 @@ const PlasmaSimulator = () => {
       </div>
 
       <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="px-4 sm:px-6 lg:px-8">
           <div className="flex space-x-1 py-4 overflow-x-auto">
             {themes.map((theme, index) => (
               <button key={theme.id} onClick={() => setActiveTheme(theme.id)} className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${activeTheme === theme.id ? 'bg-blue-100 text-blue-800 shadow-sm' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}>
@@ -639,7 +692,7 @@ const PlasmaSimulator = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <div className="px-4 sm:px-6 lg:px-8 py-6">
         {activeTheme === 'plasma-basics' && (
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border">
@@ -959,18 +1012,10 @@ const PlasmaSimulator = () => {
             <div className="bg-white rounded-xl shadow-lg p-6 border">
               <h3 className="text-lg font-semibold text-violet-800 mb-4">전극간 가스 방전 시스템</h3>
               <PaschenSchematic />
-              <div className="mt-4 text-sm text-gray-600 bg-violet-50 p-3 rounded-lg"><strong>💡 관찰 포인트:</strong> 압력과 거리를 조절하며 pd값 변화를 확인하세요. <strong>pd ≈ 1.0 Torr·cm</strong> 근처에서 "최적!" 마크가 나타나면 가장 효율적인 방전 조건입니다. 전자 경로(파란 점선)와 Townsend 계수(α)의 변화도 함께 관찰해보세요!</div>
             </div>
 
             <div className="bg-white rounded-xl shadow-lg p-6 border">
               <h3 className="text-lg font-semibold text-violet-800 mb-4">파션커브 ({gasType === 'argon' ? 'Argon' : gasType === 'air' ? 'Air' : gasType === 'helium' ? 'Helium' : gasType === 'nitrogen' ? 'Nitrogen' : gasType === 'neon' ? 'Neon' : 'Unknown'} 가스) - U자형 특성</h3>
-              <div className="relative mb-4">
-                <div className="grid grid-cols-3 gap-2 text-xs">
-                  <div className="bg-blue-50 p-2 rounded text-center border-l-4 border-blue-400"><div className="font-semibold text-blue-800 mb-1">낮은 pd 영역</div><div className="text-blue-600">입자 적어 충돌 부족 → 높은 전압 필요</div><div className="text-blue-500 font-mono text-xs mt-1">0.1 ~ 0.8</div></div>
-                  <div className="bg-green-50 p-2 rounded text-center border-l-4 border-green-400"><div className="font-semibold text-green-800 mb-1">최적 pd 영역</div><div className="text-green-600">이온화 효율 최대 → 최소 전압으로 방전</div><div className="text-green-500 font-mono text-xs mt-1">0.8 ~ 3.0</div></div>
-                  <div className="bg-red-50 p-2 rounded text-center border-l-4 border-red-400"><div className="font-semibold text-red-800 mb-1">높은 pd 영역</div><div className="text-red-600">입자 많아 자유경로 짧음 → 높은 전압 필요</div><div className="text-red-500 font-mono text-xs mt-1">3.0 ~ 100</div></div>
-                </div>
-              </div>
               <div style={{height: '400px'}}>
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={generatePaschenData()} margin={{ top: 30, right: 30, left: 20, bottom: 20 }}>
@@ -1183,7 +1228,7 @@ const PlasmaSimulator = () => {
                 <div className="bg-red-100 border-2 border-red-400 p-3 rounded-lg">
                   <h4 className="text-sm font-bold text-red-800 mb-2 text-center">🎯 플라즈마 부하</h4>
                   <label className="block text-xs font-bold text-red-900 mb-2">부하 임피던스: {loadImpedance} Ω</label>
-                  <div className="relative">
+                  <div className="relative mb-3">
                     <input 
                       type="range" 
                       min="10" 
@@ -1195,6 +1240,18 @@ const PlasmaSimulator = () => {
                     />
                     <div className="flex justify-between text-xs text-red-700 mt-1 font-medium">
                       <span>10</span><span>50</span><span>100</span><span>150</span><span>200</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white p-3 rounded-lg border border-red-300">
+                    <div className="text-xs text-red-800 space-y-2">
+                      <div className="font-semibold text-red-900 mb-2">부하 임피던스란?</div>
+                      <div>플라즈마는 생성 방식(ICP, CCP 등)에 따라 전기적 성분이 달라집니다.</div>
+                      <div>이를 전기적 임피던스로 환산하면 <strong>부하 임피던스</strong>가 됩니다.</div>
+                      <div className="mt-2 pt-2 border-t border-red-200">
+                        <div className="font-semibold text-red-900">매칭 설계:</div>
+                        <div>챔버와 소스전극의 하드웨어 정보로 매칭네트워크를 완벽한 역설계도 가능합니다.</div>
+                      </div>
                     </div>
                   </div>
                 </div>
