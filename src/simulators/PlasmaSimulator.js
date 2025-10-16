@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
 
 const PlasmaSimulator = () => {
@@ -177,36 +177,177 @@ const PlasmaSimulator = () => {
 
   function PlasmaVisualization() {
     const plasmaState = getBasicPlasmaState();
-    let baseParticles = Math.floor(basicGasPressure * 10);
-    if (plasmaState.description === 'Strong Plasma') baseParticles = Math.floor(baseParticles * 2);
-    const ionizationRate = calculateBasicIonizationDegree() / 100;
-    const ionParticles = Math.floor(baseParticles * ionizationRate);
-    const remainingNeutrals = baseParticles - ionParticles;
-    const particles = [];
-    for (let i = 0; i < remainingNeutrals; i++) particles.push({ id: i, type: 'neutral', x: Math.random() * 300 + 25, y: Math.random() * 200 + 25, color: '#9CA3AF', size: 3 });
-    for (let i = 0; i < ionParticles; i++) particles.push({ id: remainingNeutrals + i, type: 'ion', x: Math.random() * 300 + 25, y: Math.random() * 200 + 25, color: '#EF4444', size: 4 });
-    for (let i = 0; i < ionParticles; i++) particles.push({ id: remainingNeutrals + ionParticles + i, type: 'electron', x: Math.random() * 300 + 25, y: Math.random() * 200 + 25, color: '#3B82F6', size: 2 });
-    const backgroundClass = plasmaState.description === 'Strong Plasma' ? 'bg-gradient-to-br from-black via-gray-900 to-gray-800' : 'bg-black';
+    const [particles, setParticles] = useState([]);
+    const [animationId, setAnimationId] = useState(null);
+
+    // 초기 입자 생성
+    useEffect(() => {
+      let baseParticles = Math.floor(basicGasPressure * 10);
+      if (plasmaState.description === 'Strong Plasma') baseParticles = Math.floor(baseParticles * 2);
+      const ionizationRate = calculateBasicIonizationDegree() / 100;
+      const ionParticles = Math.floor(baseParticles * ionizationRate);
+      const remainingNeutrals = baseParticles - ionParticles;
+      
+      const newParticles = [];
+      
+      // 중성 입자
+      for (let i = 0; i < remainingNeutrals; i++) {
+        newParticles.push({
+          id: i,
+          type: 'neutral',
+          x: Math.random() * 300 + 25,
+          y: Math.random() * 200 + 25,
+          vx: (Math.random() - 0.5) * 1.0, // 모든 입자 동일한 속도 범위
+          vy: (Math.random() - 0.5) * 1.0,
+          color: '#9CA3AF',
+          size: 3
+        });
+      }
+      
+      // 이온 (빨간색)
+      for (let i = 0; i < ionParticles; i++) {
+        newParticles.push({
+          id: remainingNeutrals + i,
+          type: 'ion',
+          x: Math.random() * 300 + 25,
+          y: Math.random() * 200 + 25,
+          vx: (Math.random() - 0.5) * 1.0, // 중성입자와 동일한 움직임
+          vy: (Math.random() - 0.5) * 1.0,
+          color: '#EF4444',
+          size: 4
+        });
+      }
+      
+      // 전자 (파란색)
+      for (let i = 0; i < ionParticles; i++) {
+        newParticles.push({
+          id: remainingNeutrals + ionParticles + i,
+          type: 'electron',
+          x: Math.random() * 300 + 25,
+          y: Math.random() * 200 + 25,
+          vx: (Math.random() - 0.5) * 1.0, // 중성입자와 동일한 움직임
+          vy: (Math.random() - 0.5) * 1.0,
+          color: '#3B82F6',
+          size: 2
+        });
+      }
+      
+      setParticles(newParticles);
+    }, [basicGasPressure, basicPlasmaEnergy, plasmaState.description]);
+
+    // 애니메이션 루프 - 모든 입자가 동일한 브라운 운동
+    useEffect(() => {
+      const animate = () => {
+        setParticles(prevParticles => 
+          prevParticles.map(particle => {
+            let newX = particle.x + particle.vx;
+            let newY = particle.y + particle.vy;
+            let newVx = particle.vx;
+            let newVy = particle.vy;
+
+            // 경계 충돌 처리 (모든 입자 동일)
+            if (newX <= 25 || newX >= 325) {
+              newVx = -newVx * 0.9;
+              newX = Math.max(25, Math.min(325, newX));
+            }
+            if (newY <= 25 || newY >= 225) {
+              newVy = -newVy * 0.9;
+              newY = Math.max(25, Math.min(225, newY));
+            }
+
+            // 모든 입자에 동일한 브라운 운동 적용
+            newVx += (Math.random() - 0.5) * 0.05;
+            newVy += (Math.random() - 0.5) * 0.05;
+            
+            // 모든 입자의 속도를 동일하게 제한
+            const speed = Math.sqrt(newVx * newVx + newVy * newVy);
+            if (speed > 1.5) {
+              newVx = (newVx / speed) * 1.5;
+              newVy = (newVy / speed) * 1.5;
+            }
+
+            return {
+              ...particle,
+              x: newX,
+              y: newY,
+              vx: newVx,
+              vy: newVy
+            };
+          })
+        );
+
+        const id = requestAnimationFrame(animate);
+        setAnimationId(id);
+      };
+
+      const id = requestAnimationFrame(animate);
+      setAnimationId(id);
+
+      return () => {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+      };
+    }, [particles.length]);
+
+    // 컴포넌트 언마운트 시 애니메이션 정리
+    useEffect(() => {
+      return () => {
+        if (animationId) {
+          cancelAnimationFrame(animationId);
+        }
+      };
+    }, [animationId]);
+
+    // 플라즈마 상태에 따른 시각적 효과 (입자 수에 따른 색상 농도)
+    const getBackgroundClass = () => {
+      if (plasmaState.description === 'Strong Plasma') {
+        return 'bg-gradient-to-br from-purple-900 via-blue-900 to-red-900'; // 이온+전자 많아서 진한 색
+      } else if (plasmaState.description === 'Weak Plasma') {
+        return 'bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700'; // 이온+전자 적어서 연한 색
+      } else {
+        return 'bg-black'; // OFF 상태 - 중성입자만
+      }
+    };
 
     return (
-      <div className={`border-2 border-gray-300 rounded-lg ${backgroundClass} relative`} style={{width: '350px', height: '250px'}}>
+      <div className={`border-2 border-gray-300 rounded-lg ${getBackgroundClass()} relative`} style={{width: '350px', height: '250px'}}>
         <svg width="350" height="250">
-          {particles.map(particle => <circle key={particle.id} cx={particle.x} cy={particle.y} r={particle.size} fill={particle.color} />)}
+          {particles.map(particle => (
+            <circle 
+              key={particle.id} 
+              cx={particle.x} 
+              cy={particle.y} 
+              r={particle.size} 
+              fill={particle.color}
+              opacity={plasmaState.description === 'Strong Plasma' ? 0.8 : 0.9} // Strong일 때 약간 투명하게 중첩 효과
+            />
+          ))}
+          
+          {/* Strong Plasma일 때만 전체적인 글로우 효과 */}
           {plasmaState.description === 'Strong Plasma' && (
             <>
-              <defs><radialGradient id="plasmaGlow" cx="50%" cy="50%" r="50%"><stop offset="0%" style={{stopColor: '#3B82F6', stopOpacity: 0.05}} /><stop offset="100%" style={{stopColor: '#3B82F6', stopOpacity: 0}} /></radialGradient></defs>
+              <defs>
+                <radialGradient id="plasmaGlow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" style={{stopColor: '#8B5CF6', stopOpacity: 0.1}} />
+                  <stop offset="100%" style={{stopColor: '#3B82F6', stopOpacity: 0}} />
+                </radialGradient>
+              </defs>
               <circle cx="175" cy="125" r="100" fill="url(#plasmaGlow)" />
             </>
           )}
         </svg>
+        
         <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white p-2 rounded text-xs">
           <div className="flex items-center mb-1"><div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div><span>중성</span></div>
           <div className="flex items-center mb-1"><div className="w-3 h-3 bg-red-500 rounded-full mr-2"></div><span>이온</span></div>
           <div className="flex items-center"><div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div><span>전자</span></div>
         </div>
+        
         <div className="absolute bottom-2 left-2 bg-black bg-opacity-70 text-white p-2 rounded text-xs">
           <div>총 입자: {particles.length}</div>
           <div>이온화도: {calculateBasicIonizationDegree()}%</div>
+          <div className="text-green-400 text-xs mt-1">● 가스 브라운 운동</div>
           {plasmaState.description === 'Strong Plasma' && <div className="text-yellow-400 font-bold">고밀도 플라즈마!</div>}
         </div>
       </div>
@@ -535,14 +676,128 @@ const PlasmaSimulator = () => {
               </div>
 
               <div className="bg-white rounded-xl shadow-lg p-6 border">
-                <h3 className="text-lg font-semibold text-blue-800 mb-4">플라즈마 발광과 색상</h3>
-                <div className="space-y-4">
-                  <div className="bg-gradient-to-r from-red-100 to-red-50 p-3 rounded-lg border"><div className="flex items-center space-x-3"><div className="w-6 h-6 bg-red-500 rounded-full"></div><div><div className="font-medium text-red-800">Neon (Ne)</div><div className="text-xs text-red-600">주황-빨강색 발광</div></div></div></div>
-                  <div className="bg-gradient-to-r from-blue-100 to-blue-50 p-3 rounded-lg border"><div className="flex items-center space-x-3"><div className="w-6 h-6 bg-blue-500 rounded-full"></div><div><div className="font-medium text-blue-800">Argon (Ar)</div><div className="text-xs text-blue-600">보라-파랑색 발광</div></div></div></div>
-                  <div className="bg-gradient-to-r from-green-100 to-green-50 p-3 rounded-lg border"><div className="flex items-center space-x-3"><div className="w-6 h-6 bg-green-500 rounded-full"></div><div><div className="font-medium text-green-800">Oxygen (O₂)</div><div className="text-xs text-green-600">녹색 발광</div></div></div></div>
-                  <div className="bg-gradient-to-r from-yellow-100 to-yellow-50 p-3 rounded-lg border"><div className="flex items-center space-x-3"><div className="w-6 h-6 bg-yellow-500 rounded-full"></div><div><div className="font-medium text-yellow-800">Helium (He)</div><div className="text-xs text-yellow-600">노랑-흰색 발광</div></div></div></div>
+                <h3 className="text-lg font-semibold text-blue-800 mb-4">반도체 공정용 플라즈마 가스별 발광 색상</h3>
+                <div className="mb-4 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                  <p className="text-blue-800 text-sm">
+                    <strong>색상 결정 원리:</strong> 가스 분자가 이온화되며 특정 파장의 빛을 방출하기 때문에, 가스마다 고유한 색을 띠게 됩니다. 
+                    색상은 가스 종류, 압력, 전력 등 조건에 따라 달라집니다.
+                  </p>
                 </div>
-                <div className="mt-4 bg-purple-50 p-3 rounded-lg"><div className="text-purple-800 text-sm"><strong>🌈 색상의 원리:</strong> 가스마다 원자 구조가 달라 재결합 시 방출하는 에너지(파장)가 다릅니다. 이것이 네온사인이나 형광등에서 다양한 색상을 만드는 원리입니다.</div></div>
+                <div className="space-y-3">
+                  <div className="bg-gradient-to-r from-purple-100 to-purple-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-purple-600 to-red-600 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-purple-800">아르곤 (Ar)</div>
+                        <div className="text-xs text-purple-600">보라색 또는 짙은 붉은색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-purple-700 font-medium">범용 플라즈마 가스</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-blue-100 to-cyan-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-white to-cyan-200 rounded-full border border-cyan-300"></div>
+                      <div>
+                        <div className="font-medium text-blue-800">산소 (O₂)</div>
+                        <div className="text-xs text-blue-600">옅은 흰색 또는 푸른빛 흰색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-blue-700 font-medium">애싱, 산화막 공정</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-pink-100 to-pink-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-pink-400 to-red-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-pink-800">수소 (H₂)</div>
+                        <div className="text-xs text-pink-600">분홍색 또는 붉은빛 분홍색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-pink-700 font-medium">환원 공정</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-indigo-100 to-yellow-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-purple-500 to-yellow-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-indigo-800">질소 (N₂)</div>
+                        <div className="text-xs text-indigo-600">보라색~붉은색~노란색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-indigo-700 font-medium">질화막 공정</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-cyan-100 to-blue-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-cyan-500 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-cyan-800">사불화탄소 (CF₄)</div>
+                        <div className="text-xs text-cyan-600">푸른색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-cyan-700 font-medium">식각 가스</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-red-100 to-orange-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-red-600 to-orange-600 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-red-800">네온 (Ne)</div>
+                        <div className="text-xs text-red-600">벽돌색 붉은색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-red-700 font-medium">희가스 공정</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-red-100 to-purple-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-red-500 to-purple-500 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-red-800">헬륨 (He)</div>
+                        <div className="text-xs text-red-600">붉은색~보라색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-red-700 font-medium">청정 공정</div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-teal-100 to-cyan-50 p-3 rounded-lg border flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="w-6 h-6 bg-gradient-to-r from-teal-300 to-cyan-300 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-teal-800">육불화황 (SF₆)</div>
+                        <div className="text-xs text-teal-600">옅은 푸른색</div>
+                      </div>
+                    </div>
+                    <div className="text-xs text-teal-700 font-medium">절연체 식각</div>
+                  </div>
+                </div>
+                
+                <div className="mt-6 grid md:grid-cols-2 gap-4">
+                  <div className="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-400">
+                    <h4 className="font-semibold text-yellow-800 mb-2">🔍 공정 모니터링</h4>
+                    <p className="text-yellow-700 text-sm">
+                      플라즈마 색상 변화를 통해 공정 상태를 실시간 모니터링할 수 있습니다. 
+                      색상이 예상과 다르면 가스 유입, 압력 변화, 오염 등을 의심해볼 수 있습니다.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-400">
+                    <h4 className="font-semibold text-red-800 mb-2">⚠️ 오염 감지 사례</h4>
+                    <p className="text-red-700 text-sm">
+                      <strong>예시:</strong> 산소 플라즈마 공정 중 분홍빛이나 보라빛이 감지되면 
+                      공기(질소)가 챔버로 유입되었음을 짐작할 수 있습니다.
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="mt-4 bg-purple-50 p-3 rounded-lg">
+                  <div className="text-purple-800 text-sm">
+                    <strong>🌈 실제 공정에서:</strong> 엔지니어들은 플라즈마 색상을 육안으로 관찰하여 
+                    공정 안정성을 판단합니다. 각 가스의 고유 색상을 알고 있으면 챔버 내 상황을 
+                    즉시 파악할 수 있어 공정 제어에 매우 유용합니다.
+                  </div>
+                </div>
               </div>
             </div>
 
