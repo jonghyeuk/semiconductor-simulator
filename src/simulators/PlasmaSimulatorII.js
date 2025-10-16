@@ -29,7 +29,19 @@ const PlasmaSimulatorII = () => {
   // 슬라이더 커스텀 스타일
   const sliderStyles = `
     <style>
-      /* 녹색 슬라이더 thumb 스타일 */
+      /* 녹색 슬라이더 스타일 */
+      .slider-thumb-green {
+        position: relative;
+        z-index: 10;
+      }
+      .slider-thumb-green::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #059669, #10b981);
+        border-radius: 10px;
+        border: 2px solid #047857;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
       .slider-thumb-green::-webkit-slider-thumb {
         appearance: none;
         width: 24px;
@@ -40,10 +52,20 @@ const PlasmaSimulatorII = () => {
         border: 3px solid white;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         transition: all 0.2s ease;
+        position: relative;
+        top: -2px;
       }
       .slider-thumb-green::-webkit-slider-thumb:hover {
         transform: scale(1.2);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-green::-moz-range-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #059669, #10b981);
+        border-radius: 10px;
+        border: 2px solid #047857;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .slider-thumb-green::-moz-range-thumb {
         width: 24px;
@@ -56,7 +78,19 @@ const PlasmaSimulatorII = () => {
         transition: all 0.2s ease;
       }
 
-      /* 빨간색 슬라이더 thumb 스타일 */
+      /* 빨간색 슬라이더 스타일 */
+      .slider-thumb-red {
+        position: relative;
+        z-index: 10;
+      }
+      .slider-thumb-red::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        border-radius: 10px;
+        border: 2px solid #b91c1c;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
       .slider-thumb-red::-webkit-slider-thumb {
         appearance: none;
         width: 24px;
@@ -67,10 +101,20 @@ const PlasmaSimulatorII = () => {
         border: 3px solid white;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         transition: all 0.2s ease;
+        position: relative;
+        top: -2px;
       }
       .slider-thumb-red::-webkit-slider-thumb:hover {
         transform: scale(1.2);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-red::-moz-range-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #dc2626, #ef4444);
+        border-radius: 10px;
+        border: 2px solid #b91c1c;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .slider-thumb-red::-moz-range-thumb {
         width: 24px;
@@ -83,7 +127,19 @@ const PlasmaSimulatorII = () => {
         transition: all 0.2s ease;
       }
 
-      /* 오렌지색 슬라이더 thumb 스타일 */
+      /* 오렌지색 슬라이더 스타일 */
+      .slider-thumb-orange {
+        position: relative;
+        z-index: 10;
+      }
+      .slider-thumb-orange::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        border-radius: 10px;
+        border: 2px solid #c2410c;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
       .slider-thumb-orange::-webkit-slider-thumb {
         appearance: none;
         width: 24px;
@@ -94,10 +150,20 @@ const PlasmaSimulatorII = () => {
         border: 3px solid white;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         transition: all 0.2s ease;
+        position: relative;
+        top: -2px;
       }
       .slider-thumb-orange::-webkit-slider-thumb:hover {
         transform: scale(1.2);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-orange::-moz-range-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        border-radius: 10px;
+        border: 2px solid #c2410c;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .slider-thumb-orange::-moz-range-thumb {
         width: 24px;
@@ -110,7 +176,19 @@ const PlasmaSimulatorII = () => {
         transition: all 0.2s ease;
       }
 
-      /* 파란색 슬라이더 thumb 스타일 */
+      /* 파란색 슬라이더 스타일 */
+      .slider-thumb-blue {
+        position: relative;
+        z-index: 10;
+      }
+      .slider-thumb-blue::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        border-radius: 10px;
+        border: 2px solid #1d4ed8;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
       .slider-thumb-blue::-webkit-slider-thumb {
         appearance: none;
         width: 24px;
@@ -121,10 +199,20 @@ const PlasmaSimulatorII = () => {
         border: 3px solid white;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         transition: all 0.2s ease;
+        position: relative;
+        top: -2px;
       }
       .slider-thumb-blue::-webkit-slider-thumb:hover {
         transform: scale(1.2);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-blue::-moz-range-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #2563eb, #3b82f6);
+        border-radius: 10px;
+        border: 2px solid #1d4ed8;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .slider-thumb-blue::-moz-range-thumb {
         width: 24px;
@@ -137,7 +225,19 @@ const PlasmaSimulatorII = () => {
         transition: all 0.2s ease;
       }
 
-      /* 보라색 슬라이더 thumb 스타일 */
+      /* 보라색 슬라이더 스타일 */
+      .slider-thumb-purple {
+        position: relative;
+        z-index: 10;
+      }
+      .slider-thumb-purple::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+        border-radius: 10px;
+        border: 2px solid #6d28d9;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
       .slider-thumb-purple::-webkit-slider-thumb {
         appearance: none;
         width: 24px;
@@ -148,10 +248,20 @@ const PlasmaSimulatorII = () => {
         border: 3px solid white;
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
         transition: all 0.2s ease;
+        position: relative;
+        top: -2px;
       }
       .slider-thumb-purple::-webkit-slider-thumb:hover {
         transform: scale(1.2);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+      .slider-thumb-purple::-moz-range-track {
+        width: 100%;
+        height: 20px;
+        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+        border-radius: 10px;
+        border: 2px solid #6d28d9;
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
       }
       .slider-thumb-purple::-moz-range-thumb {
         width: 24px;
