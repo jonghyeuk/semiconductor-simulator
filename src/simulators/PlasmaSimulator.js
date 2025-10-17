@@ -374,14 +374,14 @@ const PlasmaSimulator = () => {
           </div>
         </div>
 
-        {/* 방전 조건 제어 박스 */}
-        <div className="bg-blue-50 border-2 border-blue-400 rounded-lg p-6">
-          <h3 className="text-lg font-bold text-blue-800 text-center mb-6">방전 조건 제어</h3>
+        {/* 방전 조건 제어 박스 - 맨 앞으로 */}
+        <div className="bg-violet-50 border-2 border-violet-300 rounded-lg p-6 shadow-lg">
+          <h3 className="text-lg font-bold text-violet-800 text-center mb-6">방전 조건 제어</h3>
           
           <div className="grid grid-cols-2 gap-8 mb-6">
             {/* 압력 제어 */}
-            <div className="bg-white rounded-lg p-4 border border-blue-300">
-              <label className="block text-base font-bold text-blue-800 mb-3">압력: {pressure} Torr</label>
+            <div>
+              <label className="block text-base font-bold text-violet-800 mb-3">압력: {pressure} Torr</label>
               <input 
                 type="range" 
                 min="0.1" 
@@ -389,20 +389,20 @@ const PlasmaSimulator = () => {
                 step="0.1" 
                 value={pressure} 
                 onChange={(e) => setPressure(parseFloat(e.target.value))} 
-                className="w-full h-5 bg-gradient-to-r from-green-200 to-blue-300 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
+                className="w-full h-4 bg-gradient-to-r from-green-200 to-violet-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-violet-400 slider-thumb-violet"
               />
-              <div className="flex justify-between text-sm text-blue-700 mt-2">
+              <div className="flex justify-between text-sm text-violet-700 mt-2">
                 <span>0.1</span><span>2.5</span><span>5.0</span><span>7.5</span><span>10</span>
               </div>
-              <div className="mt-3 text-sm text-blue-700">
+              <div className="mt-3 text-sm text-violet-700">
                 <div>압력이 낮으면: 입자가 적어 충돌 확률 감소</div>
                 <div>압력이 높으면: 자유경로가 짧아져 가속 어려움</div>
               </div>
             </div>
 
             {/* 거리 제어 */}
-            <div className="bg-white rounded-lg p-4 border border-blue-300">
-              <label className="block text-base font-bold text-blue-800 mb-3">전극간 거리: {distance} cm</label>
+            <div>
+              <label className="block text-base font-bold text-violet-800 mb-3">전극간 거리: {distance} cm</label>
               <input 
                 type="range" 
                 min="0.1" 
@@ -410,7 +410,7 @@ const PlasmaSimulator = () => {
                 step="0.1" 
                 value={distance} 
                 onChange={(e) => setDistance(parseFloat(e.target.value))} 
-                className="w-full h-5 bg-gradient-to-r from-purple-200 to-pink-300 rounded-lg appearance-none cursor-pointer slider-thumb-purple"
+                className="w-full h-4 bg-gradient-to-r from-pink-200 to-purple-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-purple-400 slider-thumb-purple"
               />
               <div className="flex justify-between text-sm text-purple-700 mt-2">
                 <span>0.1</span><span>1.3</span><span>2.5</span><span>3.8</span><span>5.0</span>
@@ -423,8 +423,8 @@ const PlasmaSimulator = () => {
           </div>
 
           {/* pd 값과 항복전압 표시 */}
-          <div className="bg-white rounded-lg p-4 border-2 border-blue-400 text-center">
-            <span className="text-xl font-bold text-blue-800">pd = {currentPD.toFixed(2)} Torr·cm</span>
+          <div className="bg-white rounded-lg p-4 border-2 border-violet-400 text-center shadow-inner">
+            <span className="text-xl font-bold text-violet-800">pd = {currentPD.toFixed(2)} Torr·cm</span>
             {calculateBreakdownVoltage(pressure, distance) !== null && 
               <span className="text-lg text-gray-700 ml-6">항복전압: {Math.round(calculateBreakdownVoltage(pressure, distance))} V</span>
             }
