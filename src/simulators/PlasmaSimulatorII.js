@@ -2086,7 +2086,7 @@ const PlasmaSimulatorII = () => {
                       {/* 가스 시스템 - 우측 상단 */}
                       {/* 가스통 3개 */}
                       <rect x="350" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
-                      <text x="357" y="25" fontSize="12" fill="#374151" fontWeight="bold">CF4</text>
+                      <text x="355" y="25" fontSize="11" fill="#374151" fontWeight="bold">SiH4</text>
                       <rect x="370" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
                       <text x="378" y="25" fontSize="12" fill="#374151" fontWeight="bold">Ar</text>
                       <rect x="390" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
