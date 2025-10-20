@@ -304,37 +304,37 @@ const PhotolithographySimulator = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <svg width="400" height="200" viewBox="0 0 400 200">
+                    <svg width="600" height="300" viewBox="0 0 600 300">
                       {/* Before - 좌측 실리콘 웨이퍼 */}
-                      <rect x="30" y="120" width="100" height="30" fill="#4a5568" />
-                      <text x="80" y="140" textAnchor="middle" className="text-sm font-bold fill-white">Silicon Wafer</text>
+                      <rect x="45" y="180" width="150" height="45" fill="#4a5568" />
+                      <text x="120" y="210" textAnchor="middle" className="text-lg font-bold fill-white">Silicon Wafer</text>
                       
                       {/* 친수성 표면 (파란색 H2O 분자들) */}
                       <g>
-                        <circle cx="40" cy="110" r="4" fill="#3b82f6" fillOpacity="0.7" />
-                        <circle cx="60" cy="115" r="4" fill="#3b82f6" fillOpacity="0.7" />
-                        <circle cx="80" cy="108" r="4" fill="#3b82f6" fillOpacity="0.7" />
-                        <circle cx="100" cy="112" r="4" fill="#3b82f6" fillOpacity="0.7" />
-                        <circle cx="120" cy="107" r="4" fill="#3b82f6" fillOpacity="0.7" />
-                        <text x="80" y="95" textAnchor="middle" className="text-xs fill-blue-600">H₂O 분자 (친수성)</text>
+                        <circle cx="60" cy="165" r="6" fill="#3b82f6" fillOpacity="0.7" />
+                        <circle cx="90" cy="172" r="6" fill="#3b82f6" fillOpacity="0.7" />
+                        <circle cx="120" cy="162" r="6" fill="#3b82f6" fillOpacity="0.7" />
+                        <circle cx="150" cy="168" r="6" fill="#3b82f6" fillOpacity="0.7" />
+                        <circle cx="180" cy="160" r="6" fill="#3b82f6" fillOpacity="0.7" />
+                        <text x="120" y="142" textAnchor="middle" className="text-sm fill-blue-600">H₂O 분자 (친수성)</text>
                       </g>
                       
                       {/* 오른쪽 화살표 */}
-                      <path d="M 150 135 L 210 135 M 200 125 L 210 135 L 200 145" stroke="#ef4444" strokeWidth="3" fill="none" />
-                      <text x="180" y="125" textAnchor="middle" className="text-sm font-bold fill-red-600">HMDS 처리</text>
+                      <path d="M 225 202 L 315 202 M 300 187 L 315 202 L 300 217" stroke="#ef4444" strokeWidth="4" fill="none" />
+                      <text x="270" y="187" textAnchor="middle" className="text-lg font-bold fill-red-600">HMDS 처리</text>
                       
                       {/* After - 우측 실리콘 웨이퍼 */}
-                      <rect x="230" y="120" width="100" height="30" fill="#4a5568" />
-                      <text x="280" y="140" textAnchor="middle" className="text-sm font-bold fill-white">Silicon Wafer</text>
+                      <rect x="345" y="180" width="150" height="45" fill="#4a5568" />
+                      <text x="420" y="210" textAnchor="middle" className="text-lg font-bold fill-white">Silicon Wafer</text>
                       
                       {/* 소수성 표면 (초록색 HMDS 분자들) */}
                       <g>
-                        <circle cx="240" cy="110" r="4" fill="#10b981" fillOpacity="0.8" />
-                        <circle cx="260" cy="115" r="4" fill="#10b981" fillOpacity="0.8" />
-                        <circle cx="280" cy="108" r="4" fill="#10b981" fillOpacity="0.8" />
-                        <circle cx="300" cy="112" r="4" fill="#10b981" fillOpacity="0.8" />
-                        <circle cx="320" cy="107" r="4" fill="#10b981" fillOpacity="0.8" />
-                        <text x="280" y="95" textAnchor="middle" className="text-xs fill-green-600">HMDS 분자 (소수성)</text>
+                        <circle cx="360" cy="165" r="6" fill="#10b981" fillOpacity="0.8" />
+                        <circle cx="390" cy="172" r="6" fill="#10b981" fillOpacity="0.8" />
+                        <circle cx="420" cy="162" r="6" fill="#10b981" fillOpacity="0.8" />
+                        <circle cx="450" cy="168" r="6" fill="#10b981" fillOpacity="0.8" />
+                        <circle cx="480" cy="160" r="6" fill="#10b981" fillOpacity="0.8" />
+                        <text x="420" y="142" textAnchor="middle" className="text-sm fill-green-600">HMDS 분자 (소수성)</text>
                       </g>
                     </svg>
                   </div>
@@ -374,25 +374,25 @@ const PhotolithographySimulator = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <svg width="250" height="200" viewBox="0 0 250 200">
+                    <svg width="375" height="300" viewBox="0 0 375 300">
                       {/* 스핀 코터 */}
-                      <circle cx="125" cy="100" r="60" fill="#e5e7eb" stroke="#6b7280" strokeWidth="2" />
-                      <circle cx="125" cy="100" r="50" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
-                      <text x="125" y="105" textAnchor="middle" className="text-sm font-bold fill-white">Wafer</text>
+                      <circle cx="187" cy="150" r="90" fill="#e5e7eb" stroke="#6b7280" strokeWidth="3" />
+                      <circle cx="187" cy="150" r="75" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3" />
+                      <text x="187" y="158" textAnchor="middle" className="text-lg font-bold fill-white">Wafer</text>
                       
                       {/* PR 드롭 */}
-                      <circle cx="125" cy="70" r="8" fill="#ef4444" />
-                      <text x="125" y="55" textAnchor="middle" className="text-xs font-bold fill-red-600">PR Drop</text>
+                      <circle cx="187" cy="105" r="12" fill="#ef4444" />
+                      <text x="187" y="82" textAnchor="middle" className="text-sm font-bold fill-red-600">PR Drop</text>
                       
                       {/* 회전 화살표 */}
-                      <path d="M 90 75 A 25 25 0 0 1 115 50" stroke="#10b981" strokeWidth="3" fill="none" />
-                      <path d="M 160 75 A 25 25 0 0 0 135 50" stroke="#10b981" strokeWidth="3" fill="none" />
+                      <path d="M 135 112 A 37 37 0 0 1 172 75" stroke="#10b981" strokeWidth="4" fill="none" />
+                      <path d="M 240 112 A 37 37 0 0 0 202 75" stroke="#10b981" strokeWidth="4" fill="none" />
                       
-                      <text x="50" y="40" className="text-sm font-bold fill-green-600">RPM</text>
+                      <text x="75" y="60" className="text-lg font-bold fill-green-600">RPM</text>
                       
                       {/* Edge Bead */}
-                      <ellipse cx="125" cy="100" rx="55" ry="55" fill="none" stroke="#f59e0b" strokeWidth="4" strokeDasharray="5,5" />
-                      <text x="190" y="100" className="text-xs fill-orange-600">Edge Bead</text>
+                      <ellipse cx="187" cy="150" rx="82" ry="82" fill="none" stroke="#f59e0b" strokeWidth="6" strokeDasharray="7,7" />
+                      <text x="285" y="150" className="text-sm fill-orange-600">Edge Bead</text>
                     </svg>
                   </div>
                 </div>
@@ -400,40 +400,40 @@ const PhotolithographySimulator = () => {
                 <div className="mt-6">
                   <h5 className="font-semibold text-gray-800 mb-3">EBR (Edge Bead Removal) 공정</h5>
                   <div className="flex justify-center">
-                    <svg width="400" height="150" viewBox="0 0 400 150">
+                    <svg width="600" height="225" viewBox="0 0 600 225">
                       {/* Before - 왼쪽 측면도 */}
                       <g>
                         {/* Wafer 기판 */}
-                        <rect x="20" y="90" width="120" height="20" fill="#4a5568" />
-                        <text x="80" y="125" textAnchor="middle" className="text-xs font-bold fill-gray-600">Wafer</text>
+                        <rect x="30" y="135" width="180" height="30" fill="#4a5568" />
+                        <text x="120" y="187" textAnchor="middle" className="text-sm font-bold fill-gray-600">Wafer</text>
                         
                         {/* PR 층 - 가장자리가 두꺼움 */}
-                        <path d="M 20 90 Q 30 75 50 80 L 110 80 Q 130 75 140 90" 
+                        <path d="M 30 135 Q 45 112 75 120 L 165 120 Q 195 112 210 135" 
                               fill="#3b82f6" />
-                        <text x="80" y="70" textAnchor="middle" className="text-xs fill-blue-600">PR (Edge Bead)</text>
-                        <text x="80" y="60" textAnchor="middle" className="text-xs font-bold">Before</text>
+                        <text x="120" y="105" textAnchor="middle" className="text-sm fill-blue-600">PR (Edge Bead)</text>
+                        <text x="120" y="90" textAnchor="middle" className="text-sm font-bold">Before</text>
                       </g>
                       
                       {/* EBR 화살표와 텍스트 */}
                       <g>
-                        <path d="M 170 85 L 230 85 M 220 75 L 230 85 L 220 95" stroke="#ef4444" strokeWidth="3" fill="none" />
-                        <text x="200" y="105" textAnchor="middle" className="text-sm font-bold fill-red-600">EBR</text>
+                        <path d="M 255 127 L 345 127 M 330 112 L 345 127 L 330 142" stroke="#ef4444" strokeWidth="4" fill="none" />
+                        <text x="300" y="157" textAnchor="middle" className="text-lg font-bold fill-red-600">EBR</text>
                       </g>
                       
                       {/* After - 오른쪽 측면도 */}
                       <g>
                         {/* Wafer 기판 */}
-                        <rect x="260" y="90" width="120" height="20" fill="#4a5568" />
-                        <text x="320" y="125" textAnchor="middle" className="text-xs font-bold fill-gray-600">Wafer</text>
+                        <rect x="390" y="135" width="180" height="30" fill="#4a5568" />
+                        <text x="480" y="187" textAnchor="middle" className="text-sm font-bold fill-gray-600">Wafer</text>
                         
                         {/* PR 층 - 플랫하게 */}
-                        <rect x="260" y="80" width="120" height="10" fill="#3b82f6" />
-                        <text x="320" y="75" textAnchor="middle" className="text-xs fill-blue-600">Uniform PR</text>
-                        <text x="320" y="60" textAnchor="middle" className="text-xs font-bold">After</text>
+                        <rect x="390" y="120" width="180" height="15" fill="#3b82f6" />
+                        <text x="480" y="112" textAnchor="middle" className="text-sm fill-blue-600">Uniform PR</text>
+                        <text x="480" y="90" textAnchor="middle" className="text-sm font-bold">After</text>
                       </g>
                       
                       {/* 하단 설명 */}
-                      <text x="200" y="145" textAnchor="middle" className="text-sm font-bold fill-gray-700">Edge Bead Removal을 통한 균일한 PR 두께 확보</text>
+                      <text x="300" y="217" textAnchor="middle" className="text-lg font-bold fill-gray-700">Edge Bead Removal을 통한 균일한 PR 두께 확보</text>
                     </svg>
                   </div>
                 </div>
@@ -473,41 +473,41 @@ const PhotolithographySimulator = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <svg width="250" height="200" viewBox="0 0 250 200">
+                    <svg width="375" height="300" viewBox="0 0 375 300">
                       {/* Before */}
                       <g>
-                        <rect x="30" y="60" width="80" height="15" fill="#3b82f6" />
-                        <rect x="30" y="75" width="80" height="20" fill="#4a5568" />
-                        <text x="70" y="105" textAnchor="middle" className="text-xs font-bold">Before</text>
+                        <rect x="45" y="90" width="120" height="22" fill="#3b82f6" />
+                        <rect x="45" y="112" width="120" height="30" fill="#4a5568" />
+                        <text x="105" y="157" textAnchor="middle" className="text-sm font-bold">Before</text>
                         
                         {/* 용매 분자들 */}
-                        <circle cx="40" cy="67" r="2" fill="#fbbf24" />
-                        <circle cx="55" cy="65" r="2" fill="#fbbf24" />
-                        <circle cx="70" cy="68" r="2" fill="#fbbf24" />
-                        <circle cx="85" cy="66" r="2" fill="#fbbf24" />
-                        <circle cx="100" cy="67" r="2" fill="#fbbf24" />
-                        <text x="70" y="50" textAnchor="middle" className="text-xs">용매 80-90%</text>
+                        <circle cx="60" cy="100" r="3" fill="#fbbf24" />
+                        <circle cx="82" cy="97" r="3" fill="#fbbf24" />
+                        <circle cx="105" cy="102" r="3" fill="#fbbf24" />
+                        <circle cx="127" cy="99" r="3" fill="#fbbf24" />
+                        <circle cx="150" cy="100" r="3" fill="#fbbf24" />
+                        <text x="105" y="75" textAnchor="middle" className="text-sm">용매 80-90%</text>
                       </g>
                       
                       {/* 열처리 화살표 */}
                       <g>
-                        <path d="M 125 70 L 155 70 M 150 65 L 155 70 L 150 75" stroke="#ef4444" strokeWidth="3" fill="none" />
-                        <text x="140" y="90" textAnchor="middle" className="text-xs font-bold fill-red-600">100°C</text>
-                        <text x="140" y="105" textAnchor="middle" className="text-xs font-bold fill-red-600">Heat</text>
+                        <path d="M 187 105 L 232 105 M 225 97 L 232 105 L 225 112" stroke="#ef4444" strokeWidth="4" fill="none" />
+                        <text x="210" y="135" textAnchor="middle" className="text-sm font-bold fill-red-600">100°C</text>
+                        <text x="210" y="157" textAnchor="middle" className="text-sm font-bold fill-red-600">Heat</text>
                         
                         {/* 증발하는 용매 */}
-                        <circle cx="130" cy="45" r="1.5" fill="#fbbf24" fillOpacity="0.5" />
-                        <circle cx="140" cy="40" r="1.5" fill="#fbbf24" fillOpacity="0.5" />
-                        <circle cx="150" cy="35" r="1.5" fill="#fbbf24" fillOpacity="0.5" />
-                        <path d="M 130 50 L 130 40 M 140 55 L 140 45 M 150 50 L 150 40" stroke="#fbbf24" strokeWidth="1" strokeDasharray="2,2" />
+                        <circle cx="195" cy="67" r="2" fill="#fbbf24" fillOpacity="0.5" />
+                        <circle cx="210" cy="60" r="2" fill="#fbbf24" fillOpacity="0.5" />
+                        <circle cx="225" cy="52" r="2" fill="#fbbf24" fillOpacity="0.5" />
+                        <path d="M 195 75 L 195 60 M 210 82 L 210 67 M 225 75 L 225 60" stroke="#fbbf24" strokeWidth="1" strokeDasharray="3,3" />
                       </g>
                       
                       {/* After */}
                       <g>
-                        <rect x="170" y="60" width="80" height="15" fill="#3b82f6" />
-                        <rect x="170" y="75" width="80" height="20" fill="#4a5568" />
-                        <text x="210" y="105" textAnchor="middle" className="text-xs font-bold">After</text>
-                        <text x="210" y="50" textAnchor="middle" className="text-xs">고형 PR 필름</text>
+                        <rect x="255" y="90" width="120" height="22" fill="#3b82f6" />
+                        <rect x="255" y="112" width="120" height="30" fill="#4a5568" />
+                        <text x="315" y="157" textAnchor="middle" className="text-sm font-bold">After</text>
+                        <text x="315" y="75" textAnchor="middle" className="text-sm">고형 PR 필름</text>
                       </g>
                     </svg>
                   </div>
@@ -563,42 +563,42 @@ const PhotolithographySimulator = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <svg width="200" height="250" viewBox="0 0 200 250">
+                    <svg width="300" height="375" viewBox="0 0 300 375">
                       {/* UV Light */}
                       <g>
-                        <circle cx="100" cy="30" r="15" fill="#fbbf24" />
-                        <text x="100" y="36" textAnchor="middle" className="text-xs font-bold">UV</text>
-                        <path d="M 85 45 L 85 70 M 80 65 L 85 70 L 90 65" stroke="#fbbf24" strokeWidth="2" fill="none" />
-                        <path d="M 100 45 L 100 70 M 95 65 L 100 70 L 105 65" stroke="#fbbf24" strokeWidth="2" fill="none" />
-                        <path d="M 115 45 L 115 70 M 110 65 L 115 70 L 120 65" stroke="#fbbf24" strokeWidth="2" fill="none" />
+                        <circle cx="150" cy="45" r="22" fill="#fbbf24" />
+                        <text x="150" y="54" textAnchor="middle" className="text-sm font-bold">UV</text>
+                        <path d="M 127 67 L 127 105 M 120 97 L 127 105 L 135 97" stroke="#fbbf24" strokeWidth="3" fill="none" />
+                        <path d="M 150 67 L 150 105 M 142 97 L 150 105 L 157 97" stroke="#fbbf24" strokeWidth="3" fill="none" />
+                        <path d="M 172 67 L 172 105 M 165 97 L 172 105 L 180 97" stroke="#fbbf24" strokeWidth="3" fill="none" />
                       </g>
                       
                       {/* Lens */}
-                      <ellipse cx="100" cy="80" rx="30" ry="8" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
-                      <text x="140" y="85" className="text-xs">Lens</text>
+                      <ellipse cx="150" cy="120" rx="45" ry="12" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3" />
+                      <text x="210" y="127" className="text-sm">Lens</text>
                       
                       {/* Mask */}
-                      <rect x="70" y="110" width="60" height="8" fill="#a855f7" />
-                      <rect x="75" y="110" width="8" height="8" fill="#fbbf24" />
-                      <rect x="88" y="110" width="8" height="8" fill="#fbbf24" />
-                      <rect x="104" y="110" width="8" height="8" fill="#fbbf24" />
-                      <rect x="117" y="110" width="8" height="8" fill="#fbbf24" />
-                      <text x="140" y="118" className="text-xs">Mask</text>
+                      <rect x="105" y="165" width="90" height="12" fill="#a855f7" />
+                      <rect x="112" y="165" width="12" height="12" fill="#fbbf24" />
+                      <rect x="132" y="165" width="12" height="12" fill="#fbbf24" />
+                      <rect x="156" y="165" width="12" height="12" fill="#fbbf24" />
+                      <rect x="175" y="165" width="12" height="12" fill="#fbbf24" />
+                      <text x="210" y="177" className="text-sm">Mask</text>
                       
                       {/* Projection Lens */}
-                      <ellipse cx="100" cy="140" rx="25" ry="6" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
-                      <ellipse cx="100" cy="155" rx="20" ry="5" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
-                      <ellipse cx="100" cy="170" rx="25" ry="6" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="2" />
-                      <text x="140" y="155" className="text-xs">Projection</text>
+                      <ellipse cx="150" cy="210" rx="37" ry="9" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3" />
+                      <ellipse cx="150" cy="232" rx="30" ry="7" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3" />
+                      <ellipse cx="150" cy="255" rx="37" ry="9" fill="#3b82f6" stroke="#1d4ed8" strokeWidth="3" />
+                      <text x="210" y="232" className="text-sm">Projection</text>
                       
                       {/* Immersion */}
-                      <rect x="80" y="180" width="40" height="10" fill="#06b6d4" fillOpacity="0.6" />
-                      <text x="140" y="188" className="text-xs">Water</text>
+                      <rect x="120" y="270" width="60" height="15" fill="#06b6d4" fillOpacity="0.6" />
+                      <text x="210" y="282" className="text-sm">Water</text>
                       
                       {/* Wafer */}
-                      <rect x="70" y="200" width="60" height="8" fill="#22c55e" />
-                      <rect x="70" y="208" width="60" height="12" fill="#4a5568" />
-                      <text x="100" y="235" textAnchor="middle" className="text-xs">Wafer</text>
+                      <rect x="105" y="300" width="90" height="12" fill="#22c55e" />
+                      <rect x="105" y="312" width="90" height="18" fill="#4a5568" />
+                      <text x="150" y="352" textAnchor="middle" className="text-sm">Wafer</text>
                     </svg>
                   </div>
                 </div>
@@ -644,40 +644,40 @@ const PhotolithographySimulator = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <svg width="400" height="200" viewBox="0 0 400 200">
+                    <svg width="600" height="300" viewBox="0 0 600 300">
                       {/* 기준선 */}
-                      <line x1="0" y1="180" x2="400" y2="180" stroke="#000" strokeWidth="3" />
+                      <line x1="0" y1="270" x2="600" y2="270" stroke="#000" strokeWidth="4" />
                       
                       {/* Before - 왼쪽 직사각형 패턴 + 측면 돌기들 */}
                       <g>
-                        <rect x="60" y="120" width="80" height="60" fill="#6b7280" />
+                        <rect x="90" y="180" width="120" height="90" fill="#6b7280" />
                         
                         {/* 왼쪽 측면 돌기들 */}
-                        <circle cx="60" cy="130" r="4" fill="#6b7280" />
-                        <circle cx="60" cy="145" r="4" fill="#6b7280" />
-                        <circle cx="60" cy="160" r="4" fill="#6b7280" />
-                        <circle cx="60" cy="175" r="4" fill="#6b7280" />
+                        <circle cx="90" cy="195" r="6" fill="#6b7280" />
+                        <circle cx="90" cy="217" r="6" fill="#6b7280" />
+                        <circle cx="90" cy="240" r="6" fill="#6b7280" />
+                        <circle cx="90" cy="262" r="6" fill="#6b7280" />
                         
                         {/* 오른쪽 측면 돌기들 */}
-                        <circle cx="140" cy="125" r="4" fill="#6b7280" />
-                        <circle cx="140" cy="140" r="4" fill="#6b7280" />
-                        <circle cx="140" cy="155" r="4" fill="#6b7280" />
-                        <circle cx="140" cy="170" r="4" fill="#6b7280" />
+                        <circle cx="210" cy="187" r="6" fill="#6b7280" />
+                        <circle cx="210" cy="210" r="6" fill="#6b7280" />
+                        <circle cx="210" cy="232" r="6" fill="#6b7280" />
+                        <circle cx="210" cy="255" r="6" fill="#6b7280" />
                       </g>
                       
                       {/* Bake 화살표와 텍스트 */}
                       <g>
-                        <path d="M 170 140 L 230 140 M 220 130 L 230 140 L 220 150" stroke="#9ca3af" strokeWidth="4" fill="none" />
-                        <text x="200" y="125" textAnchor="middle" className="text-xl font-bold fill-gray-600">Bake</text>
+                        <path d="M 255 210 L 345 210 M 330 195 L 345 210 L 330 225" stroke="#9ca3af" strokeWidth="6" fill="none" />
+                        <text x="300" y="187" textAnchor="middle" className="text-2xl font-bold fill-gray-600">Bake</text>
                       </g>
                       
                       {/* After - 오른쪽 매끄러운 직사각형 패턴 */}
                       <g>
-                        <rect x="260" y="120" width="80" height="60" fill="#6b7280" />
+                        <rect x="390" y="180" width="120" height="90" fill="#6b7280" />
                       </g>
                       
                       {/* 하단 설명 */}
-                      <text x="200" y="195" textAnchor="middle" className="text-sm font-bold fill-gray-700">PEB를 통한 Standing Wave 제거</text>
+                      <text x="300" y="292" textAnchor="middle" className="text-lg font-bold fill-gray-700">PEB를 통한 Standing Wave 제거</text>
                     </svg>
                   </div>
                 </div>
@@ -723,43 +723,43 @@ const PhotolithographySimulator = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <svg width="250" height="200" viewBox="0 0 250 200">
+                    <svg width="375" height="300" viewBox="0 0 375 300">
                       {/* Before Develop */}
                       <g>
-                        <rect x="30" y="70" width="80" height="15" fill="#3b82f6" />
-                        <rect x="30" y="85" width="80" height="15" fill="#4a5568" />
-                        <text x="70" y="115" textAnchor="middle" className="text-xs font-bold">Before</text>
+                        <rect x="45" y="105" width="120" height="22" fill="#3b82f6" />
+                        <rect x="45" y="127" width="120" height="22" fill="#4a5568" />
+                        <text x="105" y="172" textAnchor="middle" className="text-sm font-bold">Before</text>
                         
                         {/* 노광된 영역 표시 */}
-                        <rect x="40" y="70" width="15" height="15" fill="#ff9999" />
-                        <rect x="65" y="70" width="15" height="15" fill="#ff9999" />
-                        <rect x="90" y="70" width="15" height="15" fill="#ff9999" />
-                        <text x="70" y="60" textAnchor="middle" className="text-xs">노광된 PR</text>
+                        <rect x="60" y="105" width="22" height="22" fill="#ff9999" />
+                        <rect x="97" y="105" width="22" height="22" fill="#ff9999" />
+                        <rect x="135" y="105" width="22" height="22" fill="#ff9999" />
+                        <text x="105" y="90" textAnchor="middle" className="text-sm">노광된 PR</text>
                       </g>
                       
                       {/* 현상액 */}
                       <g>
-                        <path d="M 125 78 L 155 78 M 150 73 L 155 78 L 150 83" stroke="#06b6d4" strokeWidth="3" fill="none" />
-                        <text x="140" y="95" textAnchor="middle" className="text-xs font-bold fill-cyan-600">TMAH</text>
-                        <text x="140" y="110" textAnchor="middle" className="text-xs font-bold fill-cyan-600">현상액</text>
+                        <path d="M 187 117 L 232 117 M 225 109 L 232 117 L 225 124" stroke="#06b6d4" strokeWidth="4" fill="none" />
+                        <text x="210" y="142" textAnchor="middle" className="text-sm font-bold fill-cyan-600">TMAH</text>
+                        <text x="210" y="165" textAnchor="middle" className="text-sm font-bold fill-cyan-600">현상액</text>
                         
                         {/* 화학반응 표시 */}
-                        <circle cx="130" cy="65" r="3" fill="#06b6d4" fillOpacity="0.5" />
-                        <circle cx="145" cy="68" r="3" fill="#06b6d4" fillOpacity="0.5" />
-                        <circle cx="140" cy="55" r="3" fill="#06b6d4" fillOpacity="0.5" />
+                        <circle cx="195" cy="97" r="4" fill="#06b6d4" fillOpacity="0.5" />
+                        <circle cx="217" cy="102" r="4" fill="#06b6d4" fillOpacity="0.5" />
+                        <circle cx="210" cy="82" r="4" fill="#06b6d4" fillOpacity="0.5" />
                       </g>
                       
                       {/* After Develop */}
                       <g>
-                        <rect x="170" y="85" width="80" height="15" fill="#4a5568" />
-                        <text x="210" y="115" textAnchor="middle" className="text-xs font-bold">After</text>
+                        <rect x="255" y="127" width="120" height="22" fill="#4a5568" />
+                        <text x="315" y="172" textAnchor="middle" className="text-sm font-bold">After</text>
                         
                         {/* 패턴 형성 */}
-                        <rect x="175" y="70" width="12" height="15" fill="#3b82f6" />
-                        <rect x="195" y="70" width="15" height="15" fill="#3b82f6" />
-                        <rect x="220" y="70" width="12" height="15" fill="#3b82f6" />
-                        <rect x="240" y="70" width="8" height="15" fill="#3b82f6" />
-                        <text x="210" y="60" textAnchor="middle" className="text-xs fill-blue-600">패턴 형성</text>
+                        <rect x="262" y="105" width="18" height="22" fill="#3b82f6" />
+                        <rect x="292" y="105" width="22" height="22" fill="#3b82f6" />
+                        <rect x="330" y="105" width="18" height="22" fill="#3b82f6" />
+                        <rect x="360" y="105" width="12" height="22" fill="#3b82f6" />
+                        <text x="315" y="90" textAnchor="middle" className="text-sm fill-blue-600">패턴 형성</text>
                       </g>
                     </svg>
                   </div>
@@ -806,49 +806,49 @@ const PhotolithographySimulator = () => {
                   </div>
                   
                   <div className="flex justify-center">
-                    <svg width="250" height="200" viewBox="0 0 250 200">
+                    <svg width="375" height="300" viewBox="0 0 375 300">
                       {/* Before Hard Bake */}
                       <g>
-                        <rect x="30" y="85" width="80" height="15" fill="#4a5568" />
-                        <rect x="35" y="70" width="12" height="15" fill="#3b82f6" fillOpacity="0.7" />
-                        <rect x="55" y="70" width="15" height="15" fill="#3b82f6" fillOpacity="0.7" />
-                        <rect x="80" y="70" width="12" height="15" fill="#3b82f6" fillOpacity="0.7" />
-                        <rect x="100" y="70" width="8" height="15" fill="#3b82f6" fillOpacity="0.7" />
-                        <text x="70" y="115" textAnchor="middle" className="text-xs font-bold">Before</text>
-                        <text x="70" y="60" textAnchor="middle" className="text-xs">연성 PR</text>
+                        <rect x="45" y="127" width="120" height="22" fill="#4a5568" />
+                        <rect x="52" y="105" width="18" height="22" fill="#3b82f6" fillOpacity="0.7" />
+                        <rect x="82" y="105" width="22" height="22" fill="#3b82f6" fillOpacity="0.7" />
+                        <rect x="120" y="105" width="18" height="22" fill="#3b82f6" fillOpacity="0.7" />
+                        <rect x="150" y="105" width="12" height="22" fill="#3b82f6" fillOpacity="0.7" />
+                        <text x="105" y="172" textAnchor="middle" className="text-sm font-bold">Before</text>
+                        <text x="105" y="90" textAnchor="middle" className="text-sm">연성 PR</text>
                         
                         {/* 잔여 수분/용매 */}
-                        <circle cx="45" cy="77" r="1.5" fill="#fbbf24" fillOpacity="0.6" />
-                        <circle cx="65" cy="75" r="1.5" fill="#fbbf24" fillOpacity="0.6" />
-                        <circle cx="85" cy="78" r="1.5" fill="#fbbf24" fillOpacity="0.6" />
+                        <circle cx="67" cy="115" r="2" fill="#fbbf24" fillOpacity="0.6" />
+                        <circle cx="97" cy="112" r="2" fill="#fbbf24" fillOpacity="0.6" />
+                        <circle cx="127" cy="117" r="2" fill="#fbbf24" fillOpacity="0.6" />
                       </g>
                       
                       {/* Hard Bake */}
                       <g>
-                        <path d="M 125 78 L 155 78 M 150 73 L 155 78 L 150 83" stroke="#f59e0b" strokeWidth="3" fill="none" />
-                        <text x="140" y="95" textAnchor="middle" className="text-xs font-bold fill-orange-600">140°C</text>
-                        <text x="140" y="110" textAnchor="middle" className="text-xs font-bold fill-orange-600">Hard Bake</text>
+                        <path d="M 187 117 L 232 117 M 225 109 L 232 117 L 225 124" stroke="#f59e0b" strokeWidth="4" fill="none" />
+                        <text x="210" y="142" textAnchor="middle" className="text-sm font-bold fill-orange-600">140°C</text>
+                        <text x="210" y="165" textAnchor="middle" className="text-sm font-bold fill-orange-600">Hard Bake</text>
                         
                         {/* 강한 열 표시 */}
-                        <path d="M 130 55 Q 135 45 130 35 Q 135 25 130 15" stroke="#f59e0b" strokeWidth="3" fill="none" />
-                        <path d="M 140 55 Q 145 45 140 35 Q 145 25 140 15" stroke="#f59e0b" strokeWidth="3" fill="none" />
-                        <path d="M 150 55 Q 155 45 150 35 Q 155 25 150 15" stroke="#f59e0b" strokeWidth="3" fill="none" />
+                        <path d="M 195 82 Q 202 67 195 52 Q 202 37 195 22" stroke="#f59e0b" strokeWidth="4" fill="none" />
+                        <path d="M 210 82 Q 217 67 210 52 Q 217 37 210 22" stroke="#f59e0b" strokeWidth="4" fill="none" />
+                        <path d="M 225 82 Q 232 67 225 52 Q 232 37 225 22" stroke="#f59e0b" strokeWidth="4" fill="none" />
                         
                         {/* 증발 */}
-                        <circle cx="130" cy="45" r="1" fill="#fbbf24" fillOpacity="0.3" />
-                        <circle cx="145" cy="40" r="1" fill="#fbbf24" fillOpacity="0.3" />
-                        <circle cx="155" cy="35" r="1" fill="#fbbf24" fillOpacity="0.3" />
+                        <circle cx="195" cy="67" r="1.5" fill="#fbbf24" fillOpacity="0.3" />
+                        <circle cx="217" cy="60" r="1.5" fill="#fbbf24" fillOpacity="0.3" />
+                        <circle cx="232" cy="52" r="1.5" fill="#fbbf24" fillOpacity="0.3" />
                       </g>
                       
                       {/* After Hard Bake */}
                       <g>
-                        <rect x="170" y="85" width="80" height="15" fill="#4a5568" />
-                        <rect x="175" y="70" width="12" height="15" fill="#1d4ed8" />
-                        <rect x="195" y="70" width="15" height="15" fill="#1d4ed8" />
-                        <rect x="220" y="70" width="12" height="15" fill="#1d4ed8" />
-                        <rect x="240" y="70" width="8" height="15" fill="#1d4ed8" />
-                        <text x="210" y="115" textAnchor="middle" className="text-xs font-bold">After</text>
-                        <text x="210" y="60" textAnchor="middle" className="text-xs fill-blue-800">경화된 PR</text>
+                        <rect x="255" y="127" width="120" height="22" fill="#4a5568" />
+                        <rect x="262" y="105" width="18" height="22" fill="#1d4ed8" />
+                        <rect x="292" y="105" width="22" height="22" fill="#1d4ed8" />
+                        <rect x="330" y="105" width="18" height="22" fill="#1d4ed8" />
+                        <rect x="360" y="105" width="12" height="22" fill="#1d4ed8" />
+                        <text x="315" y="172" textAnchor="middle" className="text-sm font-bold">After</text>
+                        <text x="315" y="90" textAnchor="middle" className="text-sm fill-blue-800">경화된 PR</text>
                       </g>
                     </svg>
                   </div>
@@ -2624,134 +2624,6 @@ const PhotolithographySimulator = () => {
                 </div>
               </div>
             </div>
-          </div>
-        );
-
-      case 'analysis':
-        return (
-          <div className="space-y-6">
-            <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg">
-              <h3 className="text-xl font-bold text-indigo-800 mb-4">📊 공정 결과 분석</h3>
-              <p className="text-gray-700">
-                설정한 Recipe 조건에 따른 결과를 분석하고 최적화 방향을 확인하세요.
-              </p>
-            </div>
-
-            {processResults.prThickness > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h4 className="text-lg font-semibold mb-4">주요 결과 지표</h4>
-                  
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                      <span className="font-medium">PR 두께</span>
-                      <span className="text-lg font-bold text-blue-600">
-                        {processResults.prThickness.toFixed(0)} nm
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="font-medium">해상도</span>
-                      <span className="text-lg font-bold text-green-600">
-                        {processResults.resolution.toFixed(1)} %
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                      <span className="font-medium">균일도</span>
-                      <span className="text-lg font-bold text-purple-600">
-                        {processResults.uniformity.toFixed(1)} %
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                      <span className="font-medium">결함 밀도</span>
-                      <span className="text-lg font-bold text-red-600">
-                        {processResults.defectDensity.toFixed(1)} /cm²
-                      </span>
-                    </div>
-                    
-                    <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
-                      <span className="font-medium">CD 균일도</span>
-                      <span className="text-lg font-bold text-orange-600">
-                        {processResults.cdUniformity.toFixed(1)} %
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-md">
-                  <h4 className="text-lg font-semibold mb-4">성능 지표 차트</h4>
-                  
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={[
-                          { name: '해상도', value: processResults.resolution, fill: '#3b82f6' },
-                          { name: '균일도', value: processResults.uniformity, fill: '#8b5cf6' },
-                          { name: 'CD균일도', value: processResults.cdUniformity, fill: '#f59e0b' }
-                        ]}
-                        cx="50%"
-                        cy="50%"
-                        outerRadius={80}
-                        dataKey="value"
-                        label={({ name, value }) => `${name}: ${value.toFixed(1)}%`}
-                      />
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="bg-white p-6 rounded-lg shadow-md md:col-span-2">
-                  <h4 className="text-lg font-semibold mb-4">Recipe 최적화 가이드</h4>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 bg-green-50 rounded-lg">
-                      <h5 className="font-semibold text-green-800 mb-2">1단계 최적화</h5>
-                      <p className="text-sm text-gray-700 mb-2">
-                        현재 설정: {processParams.step1_rpm} RPM × {processParams.step1_time}초
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        최적 범위: 400-600 RPM, 4초 이상<br/>
-                        PR 분산 효과를 위한 중간 속도
-                      </p>
-                    </div>
-                    
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <h5 className="font-semibold text-blue-800 mb-2">2단계 최적화</h5>
-                      <p className="text-sm text-gray-700 mb-2">
-                        현재 설정: {processParams.step2_rpm} RPM × {processParams.step2_time}초
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        최적 범위: 2500-4000 RPM, 20초 이상<br/>
-                        균일한 두께를 위한 적절한 속도와 시간
-                      </p>
-                    </div>
-                    
-                    <div className="p-4 bg-purple-50 rounded-lg">
-                      <h5 className="font-semibold text-purple-800 mb-2">3단계 최적화</h5>
-                      <p className="text-sm text-gray-700 mb-2">
-                        현재 설정: {processParams.step3_rpm} RPM × {processParams.step3_time}초
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        최적 설정: 0 RPM, 2초 이상<br/>
-                        완전 정지로 안정화 시간 확보
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white p-6 rounded-lg shadow-md text-center">
-                <div className="text-gray-500 mb-4">
-                  <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                  </svg>
-                  <h4 className="text-lg font-semibold text-gray-700">분석할 데이터가 없습니다</h4>
-                  <p className="text-gray-600">공정 실습 탭에서 Recipe를 실행해주세요.</p>
-                </div>
-              </div>
-            )}
           </div>
         );
 
