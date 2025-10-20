@@ -3,8 +3,9 @@ import VacuumSimulator from '../simulators/VacuumSimulator';
 // 미래에 추가될 시뮬레이터들
 import CleaningSimulator from '../simulators/CleaningSimulator';
 import OxidationSimulator from '../simulators/Oxidation';
+import LithographySimulator from '../simulators/LithographySimulator'; // ← 새로 추가
 import PlasmaSimulator from '../simulators/PlasmaSimulator';
-import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII'; // ← 새로 추가
+import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII';
 // import EtchingSimulator from '../simulators/EtchingSimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
 
@@ -88,24 +89,29 @@ class SimulatorRegistry {
       }
     });
 
-    // Lithography 시뮬레이터 (준비중)
+    // Lithography 시뮬레이터 (완성됨) ← 업데이트
     this.register({
       id: 'lithograph',
-      name: 'Lithograph',
+      name: 'Lithography',
       icon: '💡',
-      description: '포토리소그래피 공정',
-      component: null,
-      available: false,
+      description: '포토리소그라피 공정 및 PR 코팅',
+      component: LithographySimulator, // ← 컴포넌트 추가
+      available: true, // ← available을 true로 변경
       category: 'process',
       order: 4,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-03-01',
+        version: '1.0.0', // ← 버전 업데이트
+        lastUpdated: '2025-01-30', // ← 최신 업데이트 날짜
+        author: 'Semiconductor Simulator Team',
         features: [
-          '노광 공정 시뮬레이션',
-          '현상 및 패턴 형성',
-          '해상도 및 CD 제어',
-          'Overlay 정확도'
+          '포토리소그라피 8단계 공정 상세 설명',
+          'PR 코팅 Recipe 실시간 시뮬레이션',
+          'DUV/EUV 노광 방식 비교 분석',
+          'Stepper vs Scanner 시스템 비교',
+          'PSM 마스크 기술 및 진화 과정',
+          '공정 애니메이션 및 시각화',
+          '난이도별 평가 퀴즈 (10문제)',
+          'RPM 파라미터 최적화 실험'
         ]
       }
     });
@@ -134,7 +140,7 @@ class SimulatorRegistry {
       }
     });
 
-    // Plasma Simulation II 시뮬레이터 (완성됨) ← 새로 추가
+    // Plasma Simulation II 시뮬레이터 (완성됨)
     this.register({
       id: 'plasma-ii',
       name: 'Plasma Simulation II',
@@ -143,7 +149,7 @@ class SimulatorRegistry {
       component: PlasmaSimulatorII,
       available: true,
       category: 'process',
-      order: 6, // ← Plasma I 바로 다음
+      order: 6,
       metadata: {
         version: '1.0.0',
         lastUpdated: '2025-01-30',
@@ -168,7 +174,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 7, // ← 순서 조정: 6 → 7
+      order: 7,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-03-15',
@@ -190,7 +196,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 8, // ← 순서 조정: 7 → 8
+      order: 8,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-04-01',
@@ -212,7 +218,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'process',
-      order: 9, // ← 순서 조정: 8 → 9
+      order: 9,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-04-15',
@@ -234,7 +240,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'metrology',
-      order: 10, // ← 순서 조정: 9 → 10
+      order: 10,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-01',
@@ -256,7 +262,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'backend',
-      order: 11, // ← 순서 조정: 10 → 11
+      order: 11,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-15',
