@@ -187,9 +187,20 @@ const PlasmaSimulator = () => {
     // 초기 입자 생성
     useEffect(() => {
       let baseParticles = Math.floor(basicGasPressure * 10);
-      if (plasmaState.description === 'Strong Plasma') baseParticles = Math.floor(baseParticles * 2);
-      const ionizationRate = calculateBasicIonizationDegree() / 100;
-      const ionParticles = Math.floor(baseParticles * ionizationRate);
+
+      // 실제 이온화율은 매우 낮지만 (0.0018%), 시각화를 위해 입자 수는 별도 계산
+      // Weak Plasma: 적은 수의 이온/전자
+      // Strong Plasma: 더 많은 이온/전자
+      let ionParticles;
+      if (plasmaState.description === 'Strong Plasma') {
+        ionParticles = Math.floor(baseParticles * 0.3); // Strong: 30% 정도 이온화
+        baseParticles = Math.floor(baseParticles * 2);
+      } else if (plasmaState.description === 'Weak Plasma') {
+        ionParticles = Math.floor(baseParticles * 0.1); // Weak: 10% 정도 이온화
+      } else {
+        ionParticles = 0; // No Plasma: 이온 없음
+      }
+
       const remainingNeutrals = baseParticles - ionParticles;
       
       const newParticles = [];
