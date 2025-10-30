@@ -30,11 +30,15 @@ const PlasmaSimulator = () => {
     { id: 'system-structure', name: '시스템 구조(CCP)', icon: '🏗️', color: 'purple' }
   ];
 
+  // 이온화율 계산 함수
+  // 참고: 태양의 핵 이온화율 = 100%
+  // 반도체 공정용 플라즈마 이온화율 = <0.001% (매우 낮은 편)
+  // Strong Plasma (고밀도 플라즈마) = ~0.001% 수준
   const calculateBasicIonizationDegree = () => {
     const optimalPressure = 3.0;
     const pressureFactor = Math.exp(-Math.pow((basicGasPressure - optimalPressure) / 2, 2));
     const energyFactor = basicPlasmaEnergy / (basicPlasmaEnergy + 50);
-    return (pressureFactor * energyFactor * 80).toFixed(1);
+    return (pressureFactor * energyFactor * 0.0018).toFixed(4);
   };
 
   const calculateBasicPlasmaGenerationProbability = () => {
@@ -910,7 +914,7 @@ const PlasmaSimulator = () => {
                       <div className="text-sm text-gray-300 mb-4 font-mono">{getBasicPlasmaState().description}</div>
                       <div className="border-t border-gray-600 pt-3 mt-3">
                         <div className="text-xs text-gray-400 mb-1 font-mono">IONIZATION RATE</div>
-                        <div className="text-xl font-mono font-bold" style={{ color: getBasicPlasmaState().status === 'OFF' ? '#dc2626' : '#10b981' }}>{getBasicPlasmaState().ionizationRate.toFixed(1)}%</div>
+                        <div className="text-xl font-mono font-bold" style={{ color: getBasicPlasmaState().status === 'OFF' ? '#dc2626' : '#10b981' }}>{getBasicPlasmaState().ionizationRate.toFixed(4)}%</div>
                       </div>
                     </div>
                   </div>
