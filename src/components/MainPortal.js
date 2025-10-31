@@ -12,7 +12,7 @@ const MainPortal = ({ activeSimulator, onSimulatorChange }) => {
           반도체 공정 시뮬레이터
         </h1>
         <p className="text-sm text-gray-600 mt-1">
-          v1.0 | 교육용 시뮬레이터
+          v1.1 | 교육용 시뮬레이터
         </p>
       </div>
 
