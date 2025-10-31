@@ -916,6 +916,13 @@ const PlasmaSimulator = () => {
             <div className="grid lg:grid-cols-2 gap-8">
               <div className="bg-white rounded-xl shadow-lg p-6 border">
                 <h3 className="text-lg font-semibold text-indigo-800 mb-4">플라즈마 입자 상태</h3>
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-indigo-700 leading-relaxed">
+                    반도체 공정용 플라즈마의 이온화율은 <span className="font-bold text-indigo-900">&lt;0.001%</span> 정도로 매우 낮습니다.
+                    <br/>
+                    <span className="text-xs text-indigo-600 mt-1 inline-block">참고: 태양 핵의 이온화율은 100%</span>
+                  </p>
+                </div>
                 <div className="flex justify-center mb-4 space-x-4">
                   <PlasmaVisualization />
                   <div className="bg-black rounded-lg border-2 border-gray-600 p-4" style={{width: '200px', height: '250px'}}>
