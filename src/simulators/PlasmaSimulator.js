@@ -193,10 +193,10 @@ const PlasmaSimulator = () => {
       // Strong Plasma: 더 많은 이온/전자
       let ionParticles;
       if (plasmaState.description === 'Strong Plasma') {
+        baseParticles = Math.floor(baseParticles * 2); // 전체 입자 증가
         ionParticles = Math.floor(baseParticles * 0.3); // Strong: 30% 정도 이온화
-        baseParticles = Math.floor(baseParticles * 2);
       } else if (plasmaState.description === 'Weak Plasma') {
-        ionParticles = Math.floor(baseParticles * 0.1); // Weak: 10% 정도 이온화
+        ionParticles = Math.floor(baseParticles * 0.15); // Weak: 15% 정도 이온화
       } else {
         ionParticles = 0; // No Plasma: 이온 없음
       }
