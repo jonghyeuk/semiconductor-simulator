@@ -1547,4 +1547,793 @@ const SiliconEtchingSimulator = () => {
   );
 };
 
-export default SiliconEtchingSimulator;
+// ============================================================
+// Main EtchSimulator Component (Tabbed Interface)
+// ============================================================
+
+const EtchSimulator = () => {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const tabs = [
+    { id: 'overview', name: '식각 공정 개요', icon: '📋', color: 'blue' },
+    { id: 'etch-elements', name: '식각 요소', icon: '🔬', color: 'indigo' },
+    { id: 'process', name: '식각 원리', icon: '⚗️', color: 'violet' },
+    { id: 'analysis', name: 'Si식각메커니즘', icon: '🧪', color: 'purple' },
+    { id: 'quiz', name: '식각 평가', icon: '📝', color: 'green' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">⚗️ Etching Simulator</h1>
+          <p className="text-gray-600">건식/습식 식각 공정 시뮬레이터</p>
+        </div>
+
+        {/* Tab Navigation */}
+        <div className="bg-white rounded-lg shadow-lg mb-6 p-4">
+          <div className="flex flex-wrap gap-2">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-blue-100 text-blue-800 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                }`}
+              >
+                <span>{tab.icon}</span>
+                <span>{tab.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === 'overview' && (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">식각 공정 개요</h2>
+
+            <div className="space-y-6">
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-lg">
+                <h3 className="text-lg font-semibold text-blue-900 mb-3">식각(Etching)이란?</h3>
+                <p className="text-gray-700 leading-relaxed">
+                  식각은 반도체 제조 공정에서 불필요한 물질을 선택적으로 제거하는 핵심 공정입니다.
+                  포토리소그래피로 형성된 패턴을 기반으로 노출된 영역의 물질을 화학적 또는 물리적 방법으로 제거합니다.
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-lg border border-purple-200">
+                  <h3 className="text-xl font-bold text-purple-900 mb-4">🧪 습식 식각 (Wet Etching)</h3>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">•</span>
+                      <span><strong>원리:</strong> 액체 화학 용액을 사용하여 화학 반응으로 물질 제거</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">•</span>
+                      <span><strong>특징:</strong> 등방성(isotropic) 식각, 언더컷 발생</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">•</span>
+                      <span><strong>장점:</strong> 저비용, 높은 선택비, 대면적 처리 가능</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">•</span>
+                      <span><strong>단점:</strong> 미세 패턴 제어 어려움, 방향성 제어 불가</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-purple-600 font-bold">•</span>
+                      <span><strong>응용:</strong> 실리콘 식각(KOH, TMAH), 산화막 식각(HF, BOE)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 p-6 rounded-lg border border-indigo-200">
+                  <h3 className="text-xl font-bold text-indigo-900 mb-4">⚡ 건식 식각 (Dry Etching)</h3>
+                  <div className="space-y-3 text-sm text-gray-700">
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">•</span>
+                      <span><strong>원리:</strong> 플라즈마를 이용한 화학적/물리적 식각</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">•</span>
+                      <span><strong>특징:</strong> 이방성(anisotropic) 식각, 수직 프로파일</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">•</span>
+                      <span><strong>장점:</strong> 미세 패턴 제어 우수, 방향성 제어 가능</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">•</span>
+                      <span><strong>단점:</strong> 고비용, 낮은 선택비 가능성, 플라즈마 손상</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">•</span>
+                      <span><strong>응용:</strong> RIE, ICP, CCP를 이용한 실리콘/금속/절연막 식각</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">식각 공정의 핵심 파라미터</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <h4 className="font-bold text-blue-700 mb-2">📏 식각률 (Etch Rate)</h4>
+                    <p className="text-xs text-gray-600">단위 시간당 제거되는 물질의 두께 (Å/min, nm/min)</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <h4 className="font-bold text-green-700 mb-2">🎯 선택비 (Selectivity)</h4>
+                    <p className="text-xs text-gray-600">목표 물질과 다른 물질의 식각률 비율</p>
+                  </div>
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <h4 className="font-bold text-purple-700 mb-2">📐 이방성 (Anisotropy)</h4>
+                    <p className="text-xs text-gray-600">수직/수평 식각률 비율, 프로파일 제어</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-5">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-3">💡 반도체 공정에서의 식각의 중요성</h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-600 font-bold">1.</span>
+                    <span><strong>패턴 전사:</strong> 포토리소그래피로 형성된 패턴을 하부 물질층에 전사</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-600 font-bold">2.</span>
+                    <span><strong>미세화:</strong> 나노미터 수준의 미세 패턴 형성 (10nm 이하 공정)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-600 font-bold">3.</span>
+                    <span><strong>3D 구조:</strong> FinFET, GAA 등 3차원 트랜지스터 구조 형성</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-600 font-bold">4.</span>
+                    <span><strong>층간 연결:</strong> 컨택홀, 비아홀 형성으로 다층 배선 연결</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'etch-elements' && (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">식각 요소 및 메커니즘</h2>
+
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border border-blue-200">
+                <h3 className="text-xl font-bold text-blue-900 mb-4">건식 식각의 3가지 주요 메커니즘</h3>
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div className="bg-white p-5 rounded-lg shadow-sm">
+                    <h4 className="font-bold text-purple-700 mb-3 text-center">⚛️ 물리적 식각</h4>
+                    <p className="text-sm text-gray-700 mb-3"><strong>스퍼터링 (Sputtering)</strong></p>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      <li>• 고에너지 이온의 물리적 충격</li>
+                      <li>• 운동량 전달로 원자 탈착</li>
+                      <li>• 방향성 우수, 선택비 낮음</li>
+                      <li>• Ar⁺ 이온 사용</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white p-5 rounded-lg shadow-sm">
+                    <h4 className="font-bold text-green-700 mb-3 text-center">🧪 화학적 식각</h4>
+                    <p className="text-sm text-gray-700 mb-3"><strong>라디칼 반응</strong></p>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      <li>• 활성 라디칼의 화학 반응</li>
+                      <li>• 휘발성 부산물 생성</li>
+                      <li>• 선택비 우수, 등방성</li>
+                      <li>• F*, Cl* 라디칼 사용</li>
+                    </ul>
+                  </div>
+                  <div className="bg-white p-5 rounded-lg shadow-sm">
+                    <h4 className="font-bold text-indigo-700 mb-3 text-center">⚡ 이온 증강 식각</h4>
+                    <p className="text-sm text-gray-700 mb-3"><strong>RIE (Reactive Ion Etching)</strong></p>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      <li>• 물리적 + 화학적 시너지</li>
+                      <li>• 이온이 반응 활성화</li>
+                      <li>• 방향성 + 선택비 균형</li>
+                      <li>• 가장 일반적인 방법</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">주요 식각 가스 및 응용</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-200">
+                      <tr>
+                        <th className="px-4 py-3 text-left font-semibold">가스</th>
+                        <th className="px-4 py-3 text-left font-semibold">화학식</th>
+                        <th className="px-4 py-3 text-left font-semibold">주요 라디칼</th>
+                        <th className="px-4 py-3 text-left font-semibold">식각 대상</th>
+                        <th className="px-4 py-3 text-left font-semibold">특징</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-200">
+                      <tr className="bg-white hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium">육불화황</td>
+                        <td className="px-4 py-3">SF₆</td>
+                        <td className="px-4 py-3">F*</td>
+                        <td className="px-4 py-3">Si, SiO₂</td>
+                        <td className="px-4 py-3 text-xs">높은 식각률, 등방성</td>
+                      </tr>
+                      <tr className="bg-white hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium">사불화탄소</td>
+                        <td className="px-4 py-3">CF₄</td>
+                        <td className="px-4 py-3">F*, CF₃*</td>
+                        <td className="px-4 py-3">Si, SiO₂</td>
+                        <td className="px-4 py-3 text-xs">안정적, 중간 속도</td>
+                      </tr>
+                      <tr className="bg-white hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium">염소</td>
+                        <td className="px-4 py-3">Cl₂</td>
+                        <td className="px-4 py-3">Cl*</td>
+                        <td className="px-4 py-3">Si, 금속</td>
+                        <td className="px-4 py-3 text-xs">이방성 우수</td>
+                      </tr>
+                      <tr className="bg-white hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium">브롬화수소</td>
+                        <td className="px-4 py-3">HBr</td>
+                        <td className="px-4 py-3">Br*, H*</td>
+                        <td className="px-4 py-3">Si, Poly-Si</td>
+                        <td className="px-4 py-3 text-xs">깊은 트렌치, 고선택비</td>
+                      </tr>
+                      <tr className="bg-white hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium">산소</td>
+                        <td className="px-4 py-3">O₂</td>
+                        <td className="px-4 py-3">O*</td>
+                        <td className="px-4 py-3">Photoresist, 유기물</td>
+                        <td className="px-4 py-3 text-xs">애싱(Ashing) 공정</td>
+                      </tr>
+                      <tr className="bg-white hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium">삼불화질소</td>
+                        <td className="px-4 py-3">NF₃</td>
+                        <td className="px-4 py-3">F*, N*</td>
+                        <td className="px-4 py-3">챔버 클리닝</td>
+                        <td className="px-4 py-3 text-xs">강력한 산화제</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-blue-50 p-5 rounded-lg border border-blue-200">
+                  <h3 className="text-lg font-semibold text-blue-900 mb-3">🎯 선택비 (Selectivity)</h3>
+                  <p className="text-sm text-gray-700 mb-3">
+                    선택비 = (목표 물질 식각률) / (다른 물질 식각률)
+                  </p>
+                  <div className="bg-white p-4 rounded text-xs space-y-2">
+                    <div><strong>예시:</strong> Si 식각 시 SiO₂ 선택비 = 50:1</div>
+                    <div>→ Si는 500nm/min, SiO₂는 10nm/min 식각</div>
+                    <div className="text-green-600 font-semibold mt-2">선택비가 높을수록 정밀한 공정 제어 가능</div>
+                  </div>
+                </div>
+
+                <div className="bg-purple-50 p-5 rounded-lg border border-purple-200">
+                  <h3 className="text-lg font-semibold text-purple-900 mb-3">📐 이방성 지수</h3>
+                  <p className="text-sm text-gray-700 mb-3">
+                    A = 1 - (수평 식각률 / 수직 식각률)
+                  </p>
+                  <div className="bg-white p-4 rounded text-xs space-y-2">
+                    <div><strong>A = 0:</strong> 완전 등방성 (Wet etching)</div>
+                    <div><strong>A = 1:</strong> 완전 이방성 (Ideal RIE)</div>
+                    <div><strong>A = 0.5-0.9:</strong> 일반적인 플라즈마 식각</div>
+                    <div className="text-purple-600 font-semibold mt-2">미세 패턴일수록 높은 이방성 필요</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-red-50 border border-red-200 rounded-lg p-5">
+                <h3 className="text-lg font-semibold text-red-900 mb-3">⚠️ 식각 공정의 주요 문제점</h3>
+                <div className="grid md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <h4 className="font-bold text-red-700 mb-2">1. 마이크로로딩 효과</h4>
+                    <p className="text-xs text-gray-700">패턴 밀도에 따라 식각률이 달라지는 현상</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-red-700 mb-2">2. ARDE 효과</h4>
+                    <p className="text-xs text-gray-700">Aspect Ratio에 따른 식각률 의존성</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-red-700 mb-2">3. 플라즈마 손상</h4>
+                    <p className="text-xs text-gray-700">고에너지 이온에 의한 결정 구조 손상</p>
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-red-700 mb-2">4. 프로파일 제어</h4>
+                    <p className="text-xs text-gray-700">보잉, 언더컷, 거칠기 등의 문제</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'process' && (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">식각 원리 및 반응 메커니즘</h2>
+
+            <div className="space-y-6">
+              <div className="bg-gradient-to-r from-indigo-50 to-purple-50 p-6 rounded-lg border border-indigo-200">
+                <h3 className="text-xl font-bold text-indigo-900 mb-4">플라즈마 식각의 단계별 프로세스</h3>
+                <div className="space-y-4">
+                  <div className="flex gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex-shrink-0 w-12 h-12 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold text-lg">1</div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-blue-900 mb-2">가스 주입 및 플라즈마 생성</h4>
+                      <p className="text-sm text-gray-700">
+                        반응기 내부로 식각 가스(SF₆, CF₄, Cl₂ 등)를 주입하고, RF 전력을 인가하여 플라즈마를 생성합니다.
+                        전자가 가스 분자와 충돌하여 이온화가 발생하며, 양이온과 활성 라디칼이 생성됩니다.
+                      </p>
+                      <div className="mt-2 text-xs bg-blue-50 p-2 rounded">
+                        <strong>예:</strong> SF₆ + e⁻ → SF₅⁺ + F* + 2e⁻
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex-shrink-0 w-12 h-12 bg-purple-500 text-white rounded-full flex items-center justify-center font-bold text-lg">2</div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-purple-900 mb-2">분자 해리 및 라디칼 생성</h4>
+                      <p className="text-sm text-gray-700">
+                        플라즈마 내에서 전자 충돌에 의해 가스 분자가 분해되어 활성 라디칼이 생성됩니다.
+                        이 라디칼들은 전기적으로 중성이지만 화학적으로 매우 활성이 높습니다.
+                      </p>
+                      <div className="mt-2 text-xs bg-purple-50 p-2 rounded">
+                        <strong>예:</strong> CF₄ → C + 4F* (불소 라디칼 생성)
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex-shrink-0 w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center font-bold text-lg">3</div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-green-900 mb-2">웨이퍼 표면으로 확산</h4>
+                      <p className="text-sm text-gray-700">
+                        생성된 이온과 라디칼이 웨이퍼 표면으로 이동합니다. 이온은 전기장에 의해 가속되어 방향성을 가지며,
+                        라디칼은 농도 구배에 따라 확산으로 이동합니다.
+                      </p>
+                      <div className="mt-2 text-xs bg-green-50 p-2 rounded">
+                        이온: 수직 입사 (방향성) / 라디칼: 등방성 확산
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex-shrink-0 w-12 h-12 bg-yellow-500 text-white rounded-full flex items-center justify-center font-bold text-lg">4</div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-yellow-900 mb-2">표면 흡착 및 반응</h4>
+                      <p className="text-sm text-gray-700">
+                        라디칼이 실리콘 표면에 흡착되고, 이온 충격에 의해 반응이 활성화됩니다.
+                        이온의 운동 에너지가 화학 반응의 활성화 에너지를 낮추어 식각을 촉진합니다.
+                      </p>
+                      <div className="mt-2 text-xs bg-yellow-50 p-2 rounded">
+                        <strong>표면 반응:</strong> Si(s) + 4F*(ads) → SiF₄(g)
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-4 items-start bg-white p-4 rounded-lg shadow-sm">
+                    <div className="flex-shrink-0 w-12 h-12 bg-red-500 text-white rounded-full flex items-center justify-center font-bold text-lg">5</div>
+                    <div className="flex-1">
+                      <h4 className="font-bold text-red-900 mb-2">부산물 생성 및 배출</h4>
+                      <p className="text-sm text-gray-700">
+                        식각 반응의 결과로 휘발성 부산물(SiF₄, SiCl₄ 등)이 생성됩니다.
+                        이 부산물들은 기체 상태로 표면에서 탈착되어 진공 펌프를 통해 배출됩니다.
+                      </p>
+                      <div className="mt-2 text-xs bg-red-50 p-2 rounded">
+                        부산물의 휘발성이 식각률과 선택비를 결정하는 핵심 요소
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-gray-50 p-6 rounded-lg">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">식각 반응 에너지 다이어그램</h3>
+                <div className="bg-white p-6 rounded-lg border border-gray-200">
+                  <div className="space-y-4">
+                    <div className="text-center text-sm font-semibold text-gray-700 mb-4">
+                      Si + F* → SiF₄ 반응 경로
+                    </div>
+                    <div className="relative h-48 bg-gradient-to-b from-blue-50 to-white rounded-lg p-4 border border-blue-200">
+                      <div className="absolute top-8 left-8 text-xs">
+                        <div className="font-bold">Si + F*</div>
+                        <div className="text-gray-600">(반응물)</div>
+                      </div>
+                      <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                        <div className="bg-red-100 border-2 border-red-400 rounded px-3 py-1 text-xs font-bold">
+                          활성화 에너지
+                        </div>
+                        <div className="text-xs text-center text-gray-600 mt-1">이온 충격으로 감소!</div>
+                      </div>
+                      <div className="absolute bottom-8 right-8 text-xs text-right">
+                        <div className="font-bold">SiF₄↑</div>
+                        <div className="text-gray-600">(휘발성 생성물)</div>
+                      </div>
+                      <svg className="absolute inset-0 w-full h-full" style={{pointerEvents: 'none'}}>
+                        <path d="M 60 140 Q 150 40, 240 120 Q 280 140, 320 160"
+                              stroke="#2563eb" strokeWidth="3" fill="none"
+                              markerEnd="url(#arrowhead)"/>
+                        <defs>
+                          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#2563eb"/>
+                          </marker>
+                        </defs>
+                      </svg>
+                    </div>
+                    <div className="text-xs text-gray-600 text-center">
+                      ⚡ 이온 충격 에너지가 활성화 에너지를 낮추어 반응을 촉진합니다
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="bg-indigo-50 p-5 rounded-lg border border-indigo-200">
+                  <h3 className="text-lg font-semibold text-indigo-900 mb-3">⚡ 이온의 역할</h3>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">1.</span>
+                      <span><strong>방향성 제공:</strong> 전기장에 의해 수직으로 가속되어 이방성 식각 구현</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">2.</span>
+                      <span><strong>반응 활성화:</strong> 운동 에너지로 화학 반응의 활성화 에너지 감소</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">3.</span>
+                      <span><strong>물리적 제거:</strong> 스퍼터링으로 직접 원자 탈착 (보조적 역할)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-indigo-600 font-bold">4.</span>
+                      <span><strong>억제층 제거:</strong> 측벽의 보호막을 선택적으로 제거</span>
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-green-50 p-5 rounded-lg border border-green-200">
+                  <h3 className="text-lg font-semibold text-green-900 mb-3">🧪 라디칼의 역할</h3>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">1.</span>
+                      <span><strong>화학 반응:</strong> 실리콘과 직접 반응하여 휘발성 화합물 생성</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">2.</span>
+                      <span><strong>선택비 향상:</strong> 특정 물질에 대한 화학적 선택성 제공</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">3.</span>
+                      <span><strong>식각률 증가:</strong> 높은 라디칼 농도로 빠른 식각 가능</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-green-600 font-bold">4.</span>
+                      <span><strong>표면 개질:</strong> 측벽에 보호층 형성 (폴리머 증착)</span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-purple-900 mb-4">🎯 RIE의 시너지 효과</h3>
+                <p className="text-sm text-gray-700 mb-4">
+                  반응성 이온 식각(RIE)은 화학적 식각과 물리적 식각의 장점을 결합하여 높은 이방성과 적절한 선택비를 동시에 달성합니다.
+                </p>
+                <div className="grid md:grid-cols-3 gap-4 text-xs">
+                  <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="font-bold text-red-700 mb-2">순수 화학 식각</div>
+                    <div className="text-gray-600">• 등방성 (A=0)</div>
+                    <div className="text-gray-600">• 높은 선택비</div>
+                    <div className="text-gray-600">• 언더컷 발생</div>
+                  </div>
+                  <div className="bg-purple-100 p-3 rounded shadow-sm border-2 border-purple-400">
+                    <div className="font-bold text-purple-900 mb-2">⚡ RIE (최적)</div>
+                    <div className="text-gray-700">• 이방성 (A=0.7-0.9)</div>
+                    <div className="text-gray-700">• 적절한 선택비</div>
+                    <div className="text-gray-700">• 수직 프로파일</div>
+                  </div>
+                  <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="font-bold text-blue-700 mb-2">순수 물리 식각</div>
+                    <div className="text-gray-600">• 이방성 (A=1)</div>
+                    <div className="text-gray-600">• 낮은 선택비</div>
+                    <div className="text-gray-600">• 표면 손상</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'analysis' && (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">Si 식각 메커니즘 3D 시뮬레이션</h2>
+
+            <div className="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+              <p className="text-sm text-gray-700 leading-relaxed">
+                실리콘 식각 과정을 3D로 시각화합니다. 다양한 식각 가스를 선택하여 가스 분자의 플라즈마 영역 진입,
+                분해를 통한 라디칼 생성, 실리콘 표면 반응, 그리고 휘발성 부산물 배출까지의 전체 프로세스를 실시간으로 관찰할 수 있습니다.
+              </p>
+            </div>
+
+            <SiliconEtchingSimulator />
+
+            <div className="mt-6 grid md:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-green-50 to-green-100 p-5 rounded-lg border border-green-200">
+                <h3 className="text-lg font-semibold text-green-900 mb-3">📊 시뮬레이션 관찰 포인트</h3>
+                <ul className="space-y-2 text-sm text-gray-700">
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">•</span>
+                    <span>가스 종류에 따른 분자 구조 차이 (팔면체, 사면체, 2원자)</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">•</span>
+                    <span>플라즈마 영역에서 분자 해리 현상</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">•</span>
+                    <span>라디칼의 실리콘 표면으로의 확산 과정</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">•</span>
+                    <span>Si 원자 제거에 따른 식각 깊이 증가</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-green-600 font-bold">•</span>
+                    <span>휘발성 부산물(SiF₄, SiCl₄ 등)의 위로 배출</span>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-5 rounded-lg border border-yellow-200">
+                <h3 className="text-lg font-semibold text-yellow-900 mb-3">🔬 가스별 특성 비교</h3>
+                <div className="space-y-3 text-sm">
+                  <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="font-bold text-green-700">SF₆: 가장 빠른 식각</div>
+                    <div className="text-xs text-gray-600">6개의 F 라디칼 생성, 높은 반응성</div>
+                  </div>
+                  <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="font-bold text-gray-700">CF₄: 안정적인 식각</div>
+                    <div className="text-xs text-gray-600">4개의 F 라디칼, 중간 속도</div>
+                  </div>
+                  <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="font-bold text-blue-700">Cl₂: 이방성 우수</div>
+                    <div className="text-xs text-gray-600">2개의 Cl 라디칼, 방향성 제어</div>
+                  </div>
+                  <div className="bg-white p-3 rounded shadow-sm">
+                    <div className="font-bold text-orange-700">HBr: 깊은 트렌치</div>
+                    <div className="text-xs text-gray-600">Br 라디칼, 고선택비</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'quiz' && (
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <h2 className="text-2xl font-bold text-gray-800 mb-6">식각 공정 이해도 평가</h2>
+
+            <div className="mb-6 bg-gradient-to-r from-green-50 to-blue-50 border-l-4 border-green-500 p-5 rounded-r-lg">
+              <h3 className="font-semibold text-green-900 mb-2">📝 학습 내용 확인</h3>
+              <p className="text-sm text-gray-700">
+                앞서 학습한 식각 공정의 원리, 메커니즘, 가스 종류와 특성 등을 이해했는지 확인하는 문제들입니다.
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <QuizSection
+                number={1}
+                question="습식 식각과 건식 식각의 가장 큰 차이점은 무엇인가요?"
+                options={[
+                  "식각 속도의 차이",
+                  "식각 방향성 (등방성 vs 이방성)",
+                  "사용하는 화학물질의 종류",
+                  "온도 조건"
+                ]}
+                correctAnswer={1}
+                explanation="습식 식각은 등방성(isotropic)으로 모든 방향으로 균일하게 식각되며, 건식 식각은 이방성(anisotropic)으로 수직 방향으로 선택적 식각이 가능합니다."
+              />
+
+              <QuizSection
+                number={2}
+                question="RIE(Reactive Ion Etching)에서 '이온'의 주요 역할이 아닌 것은?"
+                options={[
+                  "반응의 방향성 제공",
+                  "화학 반응 활성화 에너지 감소",
+                  "휘발성 부산물 생성",
+                  "물리적 스퍼터링"
+                ]}
+                correctAnswer={2}
+                explanation="휘발성 부산물 생성은 라디칼의 화학 반응에 의한 것입니다. 이온은 방향성 제공, 반응 활성화, 물리적 스퍼터링 역할을 합니다."
+              />
+
+              <QuizSection
+                number={3}
+                question="SF₆ 가스가 플라즈마에서 분해될 때 생성되는 활성 라디칼은?"
+                options={[
+                  "Cl*",
+                  "F*",
+                  "O*",
+                  "Br*"
+                ]}
+                correctAnswer={1}
+                explanation="SF₆ → S + 6F* 반응으로 불소(F) 라디칼이 생성됩니다. 이 F 라디칼이 실리콘과 반응하여 SiF₄ 부산물을 생성합니다."
+              />
+
+              <QuizSection
+                number={4}
+                question="선택비(Selectivity) 50:1이 의미하는 것은?"
+                options={[
+                  "목표 물질이 50배 빠르게 식각됨",
+                  "50개의 라디칼이 필요함",
+                  "50초 동안 식각함",
+                  "50% 효율로 식각됨"
+                ]}
+                correctAnswer={0}
+                explanation="선택비는 목표 물질과 다른 물질의 식각률 비율입니다. 50:1은 목표 물질이 다른 물질보다 50배 빠르게 식각된다는 의미입니다."
+              />
+
+              <QuizSection
+                number={5}
+                question="이방성 지수(Anisotropy) A=1일 때의 의미는?"
+                options={[
+                  "완전 등방성 식각",
+                  "완전 이방성 식각 (수직 방향만)",
+                  "50% 등방성, 50% 이방성",
+                  "식각이 일어나지 않음"
+                ]}
+                correctAnswer={1}
+                explanation="A = 1 - (수평/수직) 식에서 A=1은 수평 식각이 0이라는 의미로, 완전히 수직 방향으로만 식각되는 이상적인 이방성 식각입니다."
+              />
+
+              <QuizSection
+                number={6}
+                question="실리콘 식각에서 생성된 SiF₄ 부산물의 중요한 특성은?"
+                options={[
+                  "고체 상태로 표면에 쌓임",
+                  "휘발성으로 기체 상태로 배출됨",
+                  "액체 상태로 용해됨",
+                  "플라즈마를 생성함"
+                ]}
+                correctAnswer={1}
+                explanation="SiF₄는 휘발성(volatile) 화합물로 기체 상태로 표면에서 쉽게 탈착되어 진공 펌프로 배출됩니다. 이 휘발성이 식각 진행에 매우 중요합니다."
+              />
+
+              <QuizSection
+                number={7}
+                question="플라즈마 식각 공정에서 라디칼의 이동 방식은?"
+                options={[
+                  "전기장에 의해 직선으로 가속",
+                  "농도 구배에 따른 확산",
+                  "중력에 의해 낙하",
+                  "자기장을 따라 회전"
+                ]}
+                correctAnswer={1}
+                explanation="라디칼은 전기적으로 중성이므로 전기장의 영향을 받지 않고, 농도 구배(concentration gradient)에 따라 확산으로 이동합니다."
+              />
+
+              <QuizSection
+                number={8}
+                question="ARDE 효과가 가리키는 것은?"
+                options={[
+                  "Aspect Ratio Dependent Etching - 종횡비에 따른 식각률 변화",
+                  "Advanced Radical Distribution Effect - 라디칼 분포 효과",
+                  "Anisotropic Rate Differential Etching - 이방성 차등 식각",
+                  "Automatic Reaction Detection Equipment - 자동 반응 검출"
+                ]}
+                correctAnswer={0}
+                explanation="ARDE는 Aspect Ratio Dependent Etching으로, 홀이나 트렌치의 깊이/폭 비율(종횡비)에 따라 식각률이 달라지는 현상을 의미합니다."
+              />
+
+              <QuizSection
+                number={9}
+                question="CF₄ 가스가 플라즈마에서 분해될 때 생성되는 라디칼의 개수는?"
+                options={[
+                  "1개 (1F)",
+                  "2개 (2F)",
+                  "4개 (4F)",
+                  "6개 (6F)"
+                ]}
+                correctAnswer={2}
+                explanation="CF₄ → C + 4F* 반응으로 4개의 불소 라디칼이 생성됩니다. SF₆는 6개, Cl₂는 2개의 라디칼을 생성합니다."
+              />
+
+              <QuizSection
+                number={10}
+                question="미세 패턴 형성에 가장 적합한 식각 방법은?"
+                options={[
+                  "습식 식각 (Wet Etching)",
+                  "등방성 플라즈마 식각",
+                  "이방성 RIE",
+                  "화학적 용해"
+                ]}
+                correctAnswer={2}
+                explanation="미세 패턴은 수직 프로파일과 정밀한 치수 제어가 필요하므로, 이방성(anisotropic)이 높은 RIE(Reactive Ion Etching)가 가장 적합합니다."
+              />
+            </div>
+
+            <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-blue-900 mb-3">🎯 학습 완료!</h3>
+              <p className="text-sm text-gray-700 leading-relaxed">
+                모든 문제를 풀어보셨나요? 식각 공정은 반도체 제조에서 패턴을 형성하는 핵심 공정입니다.
+                습식/건식 식각의 차이, RIE의 원리, 다양한 식각 가스의 특성, 그리고 선택비와 이방성의 개념을 잘 이해하셨기를 바랍니다.
+                3D 시뮬레이션을 통해 실제 식각 메커니즘을 시각적으로 확인하면서 더욱 깊이 있는 학습이 되셨기를 바랍니다.
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// Quiz Section Component
+const QuizSection = ({ number, question, options, correctAnswer, explanation }) => {
+  const [selectedAnswer, setSelectedAnswer] = useState(null);
+  const [showExplanation, setShowExplanation] = useState(false);
+
+  const handleAnswer = (index) => {
+    setSelectedAnswer(index);
+    setShowExplanation(true);
+  };
+
+  const isCorrect = selectedAnswer === correctAnswer;
+
+  return (
+    <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+      <h3 className="font-semibold text-gray-800 mb-4">
+        <span className="text-blue-600">Q{number}.</span> {question}
+      </h3>
+      <div className="space-y-2 mb-4">
+        {options.map((option, index) => (
+          <button
+            key={index}
+            onClick={() => handleAnswer(index)}
+            disabled={showExplanation}
+            className={`w-full text-left px-4 py-3 rounded-lg border transition-all ${
+              selectedAnswer === index
+                ? index === correctAnswer
+                  ? 'bg-green-100 border-green-500 text-green-900'
+                  : 'bg-red-100 border-red-500 text-red-900'
+                : showExplanation && index === correctAnswer
+                ? 'bg-green-50 border-green-400'
+                : 'bg-white border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+            } ${showExplanation ? 'cursor-default' : 'cursor-pointer'}`}
+          >
+            <span className="font-medium mr-2">{index + 1}.</span>
+            {option}
+            {showExplanation && index === correctAnswer && (
+              <span className="float-right text-green-600">✓</span>
+            )}
+            {selectedAnswer === index && index !== correctAnswer && (
+              <span className="float-right text-red-600">✗</span>
+            )}
+          </button>
+        ))}
+      </div>
+      {showExplanation && (
+        <div className={`p-4 rounded-lg ${isCorrect ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'}`}>
+          <div className="flex items-start gap-2">
+            <span className="text-lg">{isCorrect ? '✅' : '💡'}</span>
+            <div>
+              <div className="font-semibold text-sm mb-1">
+                {isCorrect ? '정답입니다!' : '정답: ' + options[correctAnswer]}
+              </div>
+              <div className="text-sm text-gray-700">{explanation}</div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default EtchSimulator;
