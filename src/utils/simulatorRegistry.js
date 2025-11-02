@@ -6,7 +6,7 @@ import OxidationSimulator from '../simulators/Oxidation';
 import LithographySimulator from '../simulators/LithographySimulator'; // ← 새로 추가
 import PlasmaSimulator from '../simulators/PlasmaSimulator';
 import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII';
-// import EtchingSimulator from '../simulators/EtchingSimulator';
+import EtchingSimulator from '../simulators/EtchingSimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
 
 class SimulatorRegistry {
@@ -165,24 +165,28 @@ class SimulatorRegistry {
       }
     });
 
-    // Etching 시뮬레이터 (준비중)
+    // Etching 시뮬레이터 (완성됨)
     this.register({
       id: 'etching',
       name: 'Etching',
       icon: '⚗️',
       description: '건식/습식 식각 공정',
-      component: null,
-      available: false,
+      component: EtchingSimulator,
+      available: true,
       category: 'process',
       order: 7,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-03-15',
+        version: '1.0.0',
+        lastUpdated: '2025-02-01',
+        author: 'Semiconductor Simulator Team',
         features: [
-          '플라즈마 식각',
-          '선택비 및 이방성',
-          '프로파일 제어',
-          '식각 균일도'
+          '식각 공정 개요 (습식/건식 식각)',
+          '식각 요소 및 메커니즘 (RIE, 가스 종류)',
+          '플라즈마 식각 단계별 프로세스',
+          '3D 실리콘 식각 시뮬레이션 (Three.js)',
+          '다양한 식각 가스 비교 (SF₆, CF₄, Cl₂, HBr)',
+          '선택비 및 이방성 개념',
+          '식각 평가 퀴즈 (10문제)'
         ]
       }
     });
