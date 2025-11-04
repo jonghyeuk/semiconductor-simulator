@@ -3426,7 +3426,7 @@ const EtchSimulator = () => {
                         step="10"
                         value={pressure}
                         onChange={(e) => setPressure(Number(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-600"
+                        className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-red"
                       />
                     </div>
 
@@ -3441,7 +3441,7 @@ const EtchSimulator = () => {
                         step="50"
                         value={power}
                         onChange={(e) => setPower(Number(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                        className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
                       />
                     </div>
 
@@ -3456,7 +3456,7 @@ const EtchSimulator = () => {
                         step="10"
                         value={time}
                         onChange={(e) => setTime(Number(e.target.value))}
-                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
+                        className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-green"
                       />
                     </div>
                   </div>
@@ -3481,7 +3481,7 @@ const EtchSimulator = () => {
                             ...gasFlows,
                             [gas]: Number(e.target.value)
                           })}
-                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                          className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
                         />
                       </div>
                     ))}
@@ -4071,6 +4071,154 @@ const EtchSimulator = () => {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
+      <style>{`
+        /* 빨간색 슬라이더 스타일 (압력) */
+        .slider-thumb-red {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-red::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          border-radius: 10px;
+          border: 2px solid #b91c1c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-red::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-red::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-red::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          border-radius: 10px;
+          border: 2px solid #b91c1c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-red::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 파란색 슬라이더 스타일 (RF 파워, 가스) */
+        .slider-thumb-blue {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-blue::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          border-radius: 10px;
+          border: 2px solid #1d4ed8;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-blue::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-blue::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-blue::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          border-radius: 10px;
+          border: 2px solid #1d4ed8;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-blue::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 녹색 슬라이더 스타일 (시간) */
+        .slider-thumb-green {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-green::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #059669, #10b981);
+          border-radius: 10px;
+          border: 2px solid #047857;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-green::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #059669, #10b981);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-green::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-green::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #059669, #10b981);
+          border-radius: 10px;
+          border: 2px solid #047857;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-green::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #059669, #10b981);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+      `}</style>
       {/* 탭 네비게이션 */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="flex space-x-1 p-1">
