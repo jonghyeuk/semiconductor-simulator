@@ -1543,231 +1543,6 @@ const SiliconEtchingSimulator = () => {
           </div>
         </div>
       </div>
-
-      {/* 가스별 반응 상세 정보 섹션 */}
-      <div className="absolute bottom-4 left-4 right-4 bg-gray-800 bg-opacity-95 rounded-lg p-6 text-white max-h-96 overflow-y-auto">
-        <h3 className="text-xl font-bold mb-4 text-center">
-          👁️ 시뮬레이션 관찰 가이드
-        </h3>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* 왼쪽: 현재 가스 반응 정보 */}
-          <div className="bg-gradient-to-br from-blue-900 to-purple-900 p-4 rounded-lg border-2 border-blue-400">
-            <h4 className="text-lg font-bold mb-3 text-blue-300">
-              🧪 {currentProps.name} 반응 메커니즘
-            </h4>
-
-            <div className="space-y-3 text-sm">
-              <div className="bg-black bg-opacity-30 p-3 rounded">
-                <p className="font-semibold text-yellow-300 mb-1">① 플라즈마 분해 (주목!)</p>
-                <p className="font-mono text-xs mb-1">{currentProps.dissociationFormula}</p>
-                <p className="text-gray-300 text-xs">
-                  {gasType === 'fluorine' && '플라즈마 영역에서 SF₆ 분자가 분해되면서 황(노란색)과 불소(녹색) 라디칼로 나뉘는 것을 관찰하세요!'}
-                  {gasType === 'cf4' && '플라즈마 영역에서 CF₄ 분자가 분해되면서 탄소(검은색)와 불소(녹색) 라디칼로 나뉘는 것을 관찰하세요!'}
-                  {gasType === 'chlorine' && '플라즈마 영역에서 Cl₂ 분자가 두 개의 녹색 염소 라디칼로 분리되는 것을 관찰하세요!'}
-                  {gasType === 'bromine' && '플라즈마 영역에서 HBr 분자가 수소(흰색)와 브롬(밤색) 라디칼로 분리되는 것을 관찰하세요!'}
-                </p>
-              </div>
-
-              <div className="bg-black bg-opacity-30 p-3 rounded">
-                <p className="font-semibold text-green-300 mb-1">② 라디칼 확산 (주목!)</p>
-                <p className="text-gray-300 text-xs">
-                  분해된 {currentProps.radical} 라디칼들이 아래로 떨어지면서 Si 웨이퍼 표면으로 이동합니다.
-                  라디칼의 움직임과 속도를 주의깊게 관찰하세요!
-                </p>
-              </div>
-
-              <div className="bg-black bg-opacity-30 p-3 rounded">
-                <p className="font-semibold text-orange-300 mb-1">③ Si 원자 제거 (핵심!)</p>
-                <p className="font-mono text-xs mb-1">{currentProps.reactionFormula}</p>
-                <p className="text-gray-300 text-xs">
-                  라디칼이 Si 웨이퍼 표면에 닿으면 <span className="text-yellow-400 font-bold">번쩍이는 섬광</span>과 함께
-                  <span className="text-red-400 font-bold"> Si 원자(은색 점)가 사라지는</span> 것을 확인하세요!
-                  이것이 바로 실제 식각이 일어나는 순간입니다.
-                </p>
-              </div>
-
-              <div className="bg-black bg-opacity-30 p-3 rounded">
-                <p className="font-semibold text-cyan-300 mb-1">④ 부산물 배출 (확인!)</p>
-                <p className="text-gray-300 text-xs">
-                  Si 원자가 제거된 자리에서 {currentProps.byproduct} 분자(중심 은색 + 주변 {gasType === 'bromine' ? '밤색' : '녹색'})가 생성되어
-                  위로 회전하며 배출되는 것을 관찰하세요. 이것이 휘발성 부산물입니다!
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 오른쪽: 파라미터 영향 */}
-          <div className="bg-gradient-to-br from-green-900 to-teal-900 p-4 rounded-lg border-2 border-green-400">
-            <h4 className="text-lg font-bold mb-3 text-green-300">
-              ⚙️ 파라미터가 식각에 미치는 영향
-            </h4>
-
-            <div className="space-y-3 text-sm">
-              <div className="bg-black bg-opacity-30 p-3 rounded">
-                <p className="font-semibold text-yellow-300 mb-2">🎛️ Source RF Power (플라즈마 밀도)</p>
-                <ul className="space-y-1 text-xs text-gray-300">
-                  <li>• <span className="text-green-400">파워 증가</span> → 플라즈마 밀도 ↑ → 분해율 ↑</li>
-                  <li>• 더 많은 가스 분자가 분해됨</li>
-                  <li>• 더 많은 라디칼 생성 → 식각 속도 증가</li>
-                  <li>• <span className="text-red-400">너무 높으면</span> 플라즈마 데미지 발생 가능</li>
-                </ul>
-                <div className="mt-2 p-2 bg-blue-900 rounded text-xs">
-                  💡 <strong>관찰 포인트:</strong> RF 파워를 높이면 플라즈마 영역에서
-                  가스 분자가 더 빠르게 분해되는 것을 확인할 수 있습니다!
-                </div>
-              </div>
-
-              <div className="bg-black bg-opacity-30 p-3 rounded">
-                <p className="font-semibold text-yellow-300 mb-2">📡 RF 주파수 (13.56 MHz 기준)</p>
-                <ul className="space-y-1 text-xs text-gray-300">
-                  <li>• <span className="text-green-400">저주파 (수 MHz)</span> → 이온 에너지 ↑, 물리적 충격 ↑</li>
-                  <li>• <span className="text-blue-400">고주파 (13.56 MHz)</span> → 전자 가속 ↑, 화학 반응 ↑</li>
-                  <li>• 주파수에 따라 이온/라디칼 비율 변화</li>
-                  <li>• 플라즈마 밀도와 균일성에 영향</li>
-                </ul>
-                <div className="mt-2 p-2 bg-purple-900 rounded text-xs">
-                  💡 <strong>실제 장비:</strong> ICP 시스템은 주파수를 조절하여
-                  이방성(수직) vs 등방성(수평) 식각 특성을 제어합니다.
-                </div>
-              </div>
-
-              <div className="bg-black bg-opacity-30 p-3 rounded">
-                <p className="font-semibold text-yellow-300 mb-2">🎯 가스 종류에 따른 차이</p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div className="bg-red-900 bg-opacity-50 p-2 rounded">
-                    <p className="font-bold text-red-300">SF₆</p>
-                    <p className="text-gray-300">6개 F* → 빠른 식각</p>
-                  </div>
-                  <div className="bg-blue-900 bg-opacity-50 p-2 rounded">
-                    <p className="font-bold text-blue-300">CF₄</p>
-                    <p className="text-gray-300">4개 F* → 안정적</p>
-                  </div>
-                  <div className="bg-green-900 bg-opacity-50 p-2 rounded">
-                    <p className="font-bold text-green-300">Cl₂</p>
-                    <p className="text-gray-300">2개 Cl* → 이방성</p>
-                  </div>
-                  <div className="bg-yellow-900 bg-opacity-50 p-2 rounded">
-                    <p className="font-bold text-yellow-300">HBr</p>
-                    <p className="text-gray-300">1개 Br* → 깊은 식각</p>
-                  </div>
-                </div>
-                <div className="mt-2 p-2 bg-indigo-900 rounded text-xs">
-                  💡 <strong>실험해보기:</strong> 가스를 바꿔가며 라디칼 개수와
-                  식각 속도 차이를 직접 비교해보세요!
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* 생각해보기 섹션 */}
-        <div className="bg-gradient-to-br from-purple-900 to-pink-900 p-6 rounded-lg border-2 border-purple-400">
-          <h4 className="text-xl font-bold mb-4 text-center text-purple-200">
-            🤔 생각해보기 (Think & Explore)
-          </h4>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* 질문 세트 1 */}
-            <div className="space-y-4">
-              <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-yellow-400">
-                <p className="font-bold text-yellow-300 mb-2">Q1. 라디칼 개수와 식각 속도</p>
-                <p className="text-sm text-gray-300 mb-2">
-                  SF₆는 6개의 F* 라디칼을, Cl₂는 2개의 Cl* 라디칼을 생성합니다.
-                  그렇다면 SF₆가 항상 Cl₂보다 3배 빠르게 식각할까요?
-                </p>
-                <p className="text-xs text-gray-400 italic">
-                  힌트: 라디칼의 '반응성'과 '확산 속도'도 고려해보세요
-                </p>
-              </div>
-
-              <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-green-400">
-                <p className="font-bold text-green-300 mb-2">Q2. 플라즈마 영역의 위치</p>
-                <p className="text-sm text-gray-300 mb-2">
-                  플라즈마 영역이 웨이퍼와 너무 가까우면 어떤 문제가 발생할까요?
-                  반대로 너무 멀면요?
-                </p>
-                <p className="text-xs text-gray-400 italic">
-                  힌트: 라디칼의 수명과 에너지를 생각해보세요
-                </p>
-              </div>
-
-              <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-blue-400">
-                <p className="font-bold text-blue-300 mb-2">Q3. Si 원자 격자 구조</p>
-                <p className="text-sm text-gray-300 mb-2">
-                  웨이퍼 표면의 Si 원자들이 빽빽하게 배열되어 있습니다.
-                  실제로는 모든 Si 원자가 같은 속도로 식각될까요?
-                </p>
-                <p className="text-xs text-gray-400 italic">
-                  힌트: 표면 원자와 내부 원자의 결합 에너지 차이를 생각해보세요
-                </p>
-              </div>
-            </div>
-
-            {/* 질문 세트 2 */}
-            <div className="space-y-4">
-              <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-red-400">
-                <p className="font-bold text-red-300 mb-2">Q4. 부산물의 역할</p>
-                <p className="text-sm text-gray-300 mb-2">
-                  SiF₄ 부산물이 빠르게 배출되지 않고 표면에 머물면 어떤 일이 발생할까요?
-                </p>
-                <p className="text-xs text-gray-400 italic">
-                  힌트: 부산물이 라디칼과 Si 사이를 방해할 수 있습니다
-                </p>
-              </div>
-
-              <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-purple-400">
-                <p className="font-bold text-purple-300 mb-2">Q5. RF 파워와 선택비</p>
-                <p className="text-sm text-gray-300 mb-2">
-                  RF 파워를 매우 높이면 식각 속도는 빨라지지만,
-                  Si와 SiO₂의 선택비(selectivity)는 어떻게 변할까요?
-                </p>
-                <p className="text-xs text-gray-400 italic">
-                  힌트: 물리적 충격 vs 화학적 반응의 비율 변화를 생각해보세요
-                </p>
-              </div>
-
-              <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-cyan-400">
-                <p className="font-bold text-cyan-300 mb-2">Q6. 등방성 vs 이방성</p>
-                <p className="text-sm text-gray-300 mb-2">
-                  시뮬레이션에서 라디칼이 모든 방향으로 균일하게 움직이는 것을 볼 수 있습니다.
-                  실제로 수직 식각(이방성)을 얻으려면 어떻게 해야 할까요?
-                </p>
-                <p className="text-xs text-gray-400 italic">
-                  힌트: 이온의 방향성과 측벽 보호막(폴리머)을 생각해보세요
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* 실험 제안 */}
-          <div className="mt-6 bg-gradient-to-r from-indigo-800 to-blue-800 p-4 rounded-lg">
-            <p className="font-bold text-yellow-300 mb-3 text-center">
-              🔬 직접 실험해보세요!
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-              <div className="bg-black bg-opacity-30 p-3 rounded text-center">
-                <p className="font-semibold text-green-300 mb-1">실험 1</p>
-                <p className="text-xs text-gray-300">
-                  각 가스를 바꿔가며 식각 깊이와 부산물 생성량을 비교해보세요
-                </p>
-              </div>
-              <div className="bg-black bg-opacity-30 p-3 rounded text-center">
-                <p className="font-semibold text-blue-300 mb-1">실험 2</p>
-                <p className="text-xs text-gray-300">
-                  플라즈마 영역을 주의깊게 관찰하며 분해 속도의 차이를 느껴보세요
-                </p>
-              </div>
-              <div className="bg-black bg-opacity-30 p-3 rounded text-center">
-                <p className="font-semibold text-purple-300 mb-1">실험 3</p>
-                <p className="text-xs text-gray-300">
-                  Si 원자가 사라지는 패턴을 관찰하여 식각의 균일성을 평가해보세요
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };
@@ -4164,7 +3939,239 @@ const EtchSimulator = () => {
         );
 
       case 'analysis':
-        return <SiliconEtchingSimulator />;
+        return (
+          <div className="space-y-6">
+            <SiliconEtchingSimulator />
+
+            {/* 가스별 반응 상세 정보 섹션 */}
+            <div className="bg-gray-800 rounded-lg p-6 text-white">
+              <h3 className="text-xl font-bold mb-4 text-center">
+                👁️ 시뮬레이션 관찰 가이드
+              </h3>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                {/* 왼쪽: 가스 반응 정보 */}
+                <div className="bg-gradient-to-br from-blue-900 to-purple-900 p-4 rounded-lg border-2 border-blue-400">
+                  <h4 className="text-lg font-bold mb-3 text-blue-300">
+                    🧪 가스별 반응 메커니즘
+                  </h4>
+
+                  <div className="space-y-3 text-sm">
+                    <div className="bg-black bg-opacity-30 p-3 rounded">
+                      <p className="font-semibold text-yellow-300 mb-1">① 플라즈마 분해 (주목!)</p>
+                      <p className="text-gray-300 text-xs space-y-1">
+                        <div>• <strong>SF₆:</strong> 플라즈마에서 황(노란색)과 불소(녹색) 라디칼로 분해</div>
+                        <div>• <strong>CF₄:</strong> 플라즈마에서 탄소(검은색)와 불소(녹색) 라디칼로 분해</div>
+                        <div>• <strong>Cl₂:</strong> 플라즈마에서 두 개의 녹색 염소 라디칼로 분리</div>
+                        <div>• <strong>HBr:</strong> 플라즈마에서 수소(흰색)와 브롬(밤색) 라디칼로 분리</div>
+                      </p>
+                    </div>
+
+                    <div className="bg-black bg-opacity-30 p-3 rounded">
+                      <p className="font-semibold text-green-300 mb-1">② 라디칼 확산 (주목!)</p>
+                      <p className="text-gray-300 text-xs">
+                        분해된 라디칼들이 아래로 떨어지면서 Si 웨이퍼 표면으로 이동합니다.
+                        라디칼의 움직임과 속도를 주의깊게 관찰하세요!
+                      </p>
+                    </div>
+
+                    <div className="bg-black bg-opacity-30 p-3 rounded">
+                      <p className="font-semibold text-orange-300 mb-1">③ Si 원자 제거 (핵심!)</p>
+                      <p className="text-gray-300 text-xs space-y-1">
+                        <div>• <strong>SF₆/CF₄:</strong> Si + 4F* → SiF₄↑</div>
+                        <div>• <strong>Cl₂:</strong> Si + 4Cl* → SiCl₄↑</div>
+                        <div>• <strong>HBr:</strong> Si + 4Br* → SiBr₄↑</div>
+                      </p>
+                      <p className="text-gray-300 text-xs mt-2">
+                        라디칼이 Si 웨이퍼 표면에 닿으면 <span className="text-yellow-400 font-bold">번쩍이는 섬광</span>과 함께
+                        <span className="text-red-400 font-bold"> Si 원자(은색 점)가 사라지는</span> 것을 확인하세요!
+                        이것이 바로 실제 식각이 일어나는 순간입니다.
+                      </p>
+                    </div>
+
+                    <div className="bg-black bg-opacity-30 p-3 rounded">
+                      <p className="font-semibold text-cyan-300 mb-1">④ 부산물 배출 (확인!)</p>
+                      <p className="text-gray-300 text-xs">
+                        Si 원자가 제거된 자리에서 휘발성 부산물(SiF₄, SiCl₄, SiBr₄)이 생성되어
+                        위로 회전하며 배출되는 것을 관찰하세요!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 오른쪽: 파라미터 영향 */}
+                <div className="bg-gradient-to-br from-green-900 to-teal-900 p-4 rounded-lg border-2 border-green-400">
+                  <h4 className="text-lg font-bold mb-3 text-green-300">
+                    ⚙️ 파라미터가 식각에 미치는 영향
+                  </h4>
+
+                  <div className="space-y-3 text-sm">
+                    <div className="bg-black bg-opacity-30 p-3 rounded">
+                      <p className="font-semibold text-yellow-300 mb-2">🎛️ Source RF Power (플라즈마 밀도)</p>
+                      <ul className="space-y-1 text-xs text-gray-300">
+                        <li>• <span className="text-green-400">파워 증가</span> → 플라즈마 밀도 ↑ → 분해율 ↑</li>
+                        <li>• 더 많은 가스 분자가 분해됨</li>
+                        <li>• 더 많은 라디칼 생성 → 식각 속도 증가</li>
+                        <li>• <span className="text-red-400">너무 높으면</span> 플라즈마 데미지 발생 가능</li>
+                      </ul>
+                      <div className="mt-2 p-2 bg-blue-900 rounded text-xs">
+                        💡 <strong>관찰 포인트:</strong> RF 파워를 높이면 플라즈마 영역에서
+                        가스 분자가 더 빠르게 분해되는 것을 확인할 수 있습니다!
+                      </div>
+                    </div>
+
+                    <div className="bg-black bg-opacity-30 p-3 rounded">
+                      <p className="font-semibold text-yellow-300 mb-2">📡 RF 주파수 (13.56 MHz 기준)</p>
+                      <ul className="space-y-1 text-xs text-gray-300">
+                        <li>• <span className="text-green-400">저주파 (수 MHz)</span> → 이온 에너지 ↑, 물리적 충격 ↑</li>
+                        <li>• <span className="text-blue-400">고주파 (13.56 MHz)</span> → 전자 가속 ↑, 화학 반응 ↑</li>
+                        <li>• 주파수에 따라 이온/라디칼 비율 변화</li>
+                        <li>• 플라즈마 밀도와 균일성에 영향</li>
+                      </ul>
+                      <div className="mt-2 p-2 bg-purple-900 rounded text-xs">
+                        💡 <strong>실제 장비:</strong> ICP 시스템은 주파수를 조절하여
+                        이방성(수직) vs 등방성(수평) 식각 특성을 제어합니다.
+                      </div>
+                    </div>
+
+                    <div className="bg-black bg-opacity-30 p-3 rounded">
+                      <p className="font-semibold text-yellow-300 mb-2">🎯 가스 종류에 따른 차이</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="bg-red-900 bg-opacity-50 p-2 rounded">
+                          <p className="font-bold text-red-300">SF₆</p>
+                          <p className="text-gray-300">6개 F* → 빠른 식각</p>
+                        </div>
+                        <div className="bg-blue-900 bg-opacity-50 p-2 rounded">
+                          <p className="font-bold text-blue-300">CF₄</p>
+                          <p className="text-gray-300">4개 F* → 안정적</p>
+                        </div>
+                        <div className="bg-green-900 bg-opacity-50 p-2 rounded">
+                          <p className="font-bold text-green-300">Cl₂</p>
+                          <p className="text-gray-300">2개 Cl* → 이방성</p>
+                        </div>
+                        <div className="bg-yellow-900 bg-opacity-50 p-2 rounded">
+                          <p className="font-bold text-yellow-300">HBr</p>
+                          <p className="text-gray-300">1개 Br* → 깊은 식각</p>
+                        </div>
+                      </div>
+                      <div className="mt-2 p-2 bg-indigo-900 rounded text-xs">
+                        💡 <strong>실험해보기:</strong> 가스를 바꿔가며 라디칼 개수와
+                        식각 속도 차이를 직접 비교해보세요!
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 생각해보기 섹션 */}
+              <div className="bg-gradient-to-br from-purple-900 to-pink-900 p-6 rounded-lg border-2 border-purple-400">
+                <h4 className="text-xl font-bold mb-4 text-center text-purple-200">
+                  🤔 생각해보기 (Think & Explore)
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* 질문 세트 1 */}
+                  <div className="space-y-4">
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-yellow-400">
+                      <p className="font-bold text-yellow-300 mb-2">Q1. 라디칼 개수와 식각 속도</p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        SF₆는 6개의 F* 라디칼을, Cl₂는 2개의 Cl* 라디칼을 생성합니다.
+                        그렇다면 SF₆가 항상 Cl₂보다 3배 빠르게 식각할까요?
+                      </p>
+                      <p className="text-xs text-gray-400 italic">
+                        힌트: 라디칼의 '반응성'과 '확산 속도'도 고려해보세요
+                      </p>
+                    </div>
+
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-green-400">
+                      <p className="font-bold text-green-300 mb-2">Q2. 플라즈마 영역의 위치</p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        플라즈마 영역이 웨이퍼와 너무 가까우면 어떤 문제가 발생할까요?
+                        반대로 너무 멀면요?
+                      </p>
+                      <p className="text-xs text-gray-400 italic">
+                        힌트: 라디칼의 수명과 에너지를 생각해보세요
+                      </p>
+                    </div>
+
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-blue-400">
+                      <p className="font-bold text-blue-300 mb-2">Q3. Si 원자 격자 구조</p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        웨이퍼 표면의 Si 원자들이 빽빽하게 배열되어 있습니다.
+                        실제로는 모든 Si 원자가 같은 속도로 식각될까요?
+                      </p>
+                      <p className="text-xs text-gray-400 italic">
+                        힌트: 표면 원자와 내부 원자의 결합 에너지 차이를 생각해보세요
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* 질문 세트 2 */}
+                  <div className="space-y-4">
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-red-400">
+                      <p className="font-bold text-red-300 mb-2">Q4. 부산물의 역할</p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        SiF₄ 부산물이 빠르게 배출되지 않고 표면에 머물면 어떤 일이 발생할까요?
+                      </p>
+                      <p className="text-xs text-gray-400 italic">
+                        힌트: 부산물이 라디칼과 Si 사이를 방해할 수 있습니다
+                      </p>
+                    </div>
+
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-purple-400">
+                      <p className="font-bold text-purple-300 mb-2">Q5. RF 파워와 선택비</p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        RF 파워를 매우 높이면 식각 속도는 빨라지지만,
+                        Si와 SiO₂의 선택비(selectivity)는 어떻게 변할까요?
+                      </p>
+                      <p className="text-xs text-gray-400 italic">
+                        힌트: 물리적 충격 vs 화학적 반응의 비율 변화를 생각해보세요
+                      </p>
+                    </div>
+
+                    <div className="bg-black bg-opacity-40 p-4 rounded-lg border-l-4 border-cyan-400">
+                      <p className="font-bold text-cyan-300 mb-2">Q6. 등방성 vs 이방성</p>
+                      <p className="text-sm text-gray-300 mb-2">
+                        시뮬레이션에서 라디칼이 모든 방향으로 균일하게 움직이는 것을 볼 수 있습니다.
+                        실제로 수직 식각(이방성)을 얻으려면 어떻게 해야 할까요?
+                      </p>
+                      <p className="text-xs text-gray-400 italic">
+                        힌트: 이온의 방향성과 측벽 보호막(폴리머)을 생각해보세요
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 실험 제안 */}
+                <div className="mt-6 bg-gradient-to-r from-indigo-800 to-blue-800 p-4 rounded-lg">
+                  <p className="font-bold text-yellow-300 mb-3 text-center">
+                    🔬 직접 실험해보세요!
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                    <div className="bg-black bg-opacity-30 p-3 rounded text-center">
+                      <p className="font-semibold text-green-300 mb-1">실험 1</p>
+                      <p className="text-xs text-gray-300">
+                        각 가스를 바꿔가며 식각 깊이와 부산물 생성량을 비교해보세요
+                      </p>
+                    </div>
+                    <div className="bg-black bg-opacity-30 p-3 rounded text-center">
+                      <p className="font-semibold text-blue-300 mb-1">실험 2</p>
+                      <p className="text-xs text-gray-300">
+                        플라즈마 영역을 주의깊게 관찰하며 분해 속도의 차이를 느껴보세요
+                      </p>
+                    </div>
+                    <div className="bg-black bg-opacity-30 p-3 rounded text-center">
+                      <p className="font-semibold text-purple-300 mb-1">실험 3</p>
+                      <p className="text-xs text-gray-300">
+                        Si 원자가 사라지는 패턴을 관찰하여 식각의 균일성을 평가해보세요
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
 
       case 'quiz':
         return (
