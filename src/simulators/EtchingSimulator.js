@@ -3426,7 +3426,7 @@ const EtchSimulator = () => {
                         step="10"
                         value={pressure}
                         onChange={(e) => setPressure(Number(e.target.value))}
-                        className="w-full"
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-red-600"
                       />
                     </div>
 
@@ -3441,7 +3441,7 @@ const EtchSimulator = () => {
                         step="50"
                         value={power}
                         onChange={(e) => setPower(Number(e.target.value))}
-                        className="w-full"
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
                       />
                     </div>
 
@@ -3456,7 +3456,7 @@ const EtchSimulator = () => {
                         step="10"
                         value={time}
                         onChange={(e) => setTime(Number(e.target.value))}
-                        className="w-full"
+                        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-green-600"
                       />
                     </div>
                   </div>
@@ -3481,7 +3481,7 @@ const EtchSimulator = () => {
                             ...gasFlows,
                             [gas]: Number(e.target.value)
                           })}
-                          className="w-full"
+                          className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500"
                         />
                       </div>
                     ))}
