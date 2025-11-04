@@ -291,126 +291,155 @@ input[type="range"]::-moz-range-thumb {
 
 /* 트랙을 더 진하고 명확하게 */
 input[type="range"] {
-  height: 8px;
+  height: 8px !important;
+  position: relative;
 }
 
 input[type="range"]::-webkit-slider-track {
-  background: #d1d5db; /* 더 진한 회색 (gray-300) */
-  height: 8px;
-  border-radius: 4px;
-  border: 1px solid #9ca3af; /* 테두리 추가 (gray-400) */
+  background: #d1d5db !important; /* 더 진한 회색 (gray-300) */
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 1px solid #9ca3af !important; /* 테두리 추가 (gray-400) */
+  position: relative;
+  z-index: 1;
 }
 
 input[type="range"]::-moz-range-track {
-  background: #d1d5db;
-  height: 8px;
-  border-radius: 4px;
-  border: 1px solid #9ca3af;
+  background: #d1d5db !important;
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 1px solid #9ca3af !important;
+  position: relative;
+  z-index: 1;
 }
 
 /* 빨간색 슬라이더 (압력) */
 input[type="range"].accent-red-600::-webkit-slider-thumb {
-  background: #dc2626; /* red-600 */
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+  -webkit-appearance: none;
+  appearance: none;
+  background: #dc2626 !important; /* red-600 */
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 50% !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4) !important;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
 }
 
 input[type="range"].accent-red-600::-webkit-slider-thumb:hover {
-  background: #b91c1c; /* red-700 */
+  background: #b91c1c !important; /* red-700 */
   transform: scale(1.15);
-  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.6);
+  box-shadow: 0 4px 8px rgba(220, 38, 38, 0.6) !important;
 }
 
 input[type="range"].accent-red-600::-moz-range-thumb {
-  background: #dc2626;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+  background: #dc2626 !important;
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 50% !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4) !important;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
 }
 
 /* 파란색 슬라이더 (RF 파워, 가스) */
 input[type="range"].accent-blue-600::-webkit-slider-thumb,
 input[type="range"].accent-blue-500::-webkit-slider-thumb {
-  background: #2563eb; /* blue-600 */
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  -webkit-appearance: none;
+  appearance: none;
+  background: #2563eb !important; /* blue-600 */
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 50% !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4) !important;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
 }
 
 input[type="range"].accent-blue-600::-webkit-slider-thumb:hover,
 input[type="range"].accent-blue-500::-webkit-slider-thumb:hover {
-  background: #1d4ed8; /* blue-700 */
+  background: #1d4ed8 !important; /* blue-700 */
   transform: scale(1.15);
-  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.6);
+  box-shadow: 0 4px 8px rgba(37, 99, 235, 0.6) !important;
 }
 
 input[type="range"].accent-blue-600::-moz-range-thumb,
 input[type="range"].accent-blue-500::-moz-range-thumb {
-  background: #2563eb;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4);
+  background: #2563eb !important;
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 50% !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.4) !important;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
 }
 
 /* 녹색 슬라이더 (시간) */
 input[type="range"].accent-green-600::-webkit-slider-thumb {
-  background: #16a34a; /* green-600 */
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4);
+  -webkit-appearance: none;
+  appearance: none;
+  background: #16a34a !important; /* green-600 */
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 50% !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4) !important;
   transition: all 0.2s ease;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
 }
 
 input[type="range"].accent-green-600::-webkit-slider-thumb:hover {
-  background: #15803d; /* green-700 */
+  background: #15803d !important; /* green-700 */
   transform: scale(1.15);
-  box-shadow: 0 4px 8px rgba(22, 163, 74, 0.6);
+  box-shadow: 0 4px 8px rgba(22, 163, 74, 0.6) !important;
 }
 
 input[type="range"].accent-green-600::-moz-range-thumb {
-  background: #16a34a;
-  height: 20px;
-  width: 20px;
-  border-radius: 50%;
-  border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4);
+  background: #16a34a !important;
+  height: 20px !important;
+  width: 20px !important;
+  border-radius: 50% !important;
+  border: 3px solid white !important;
+  box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4) !important;
+  position: relative;
+  z-index: 10;
+  cursor: pointer;
 }
 
 /* 호버 시 트랙 강조 */
 input[type="range"]:hover::-webkit-slider-track {
-  background: #cbd5e1; /* gray-300 */
-  border: 1px solid #64748b; /* gray-500 */
+  background: #cbd5e1 !important; /* gray-300 */
+  border: 1px solid #64748b !important; /* gray-500 */
 }
 
 input[type="range"]:hover::-moz-range-track {
-  background: #cbd5e1;
-  border: 1px solid #64748b;
+  background: #cbd5e1 !important;
+  border: 1px solid #64748b !important;
 }
 
 /* 포커스 시 효과 */
 input[type="range"]:focus {
-  outline: none;
+  outline: none !important;
 }
 
 input[type="range"]:focus::-webkit-slider-track {
-  background: #cbd5e1;
-  border: 2px solid #60a5fa; /* blue-400 */
+  background: #cbd5e1 !important;
+  border: 2px solid #60a5fa !important; /* blue-400 */
 }
 
 input[type="range"]:focus::-moz-range-track {
-  background: #cbd5e1;
-  border: 2px solid #60a5fa;
+  background: #cbd5e1 !important;
+  border: 2px solid #60a5fa !important;
 }
