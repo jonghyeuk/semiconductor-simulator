@@ -3941,7 +3941,10 @@ const EtchSimulator = () => {
       case 'analysis':
         return (
           <div className="space-y-6">
-            <SiliconEtchingSimulator />
+            {/* 시뮬레이터를 고정 높이 컨테이너에 넣기 */}
+            <div className="h-[800px] overflow-hidden rounded-lg">
+              <SiliconEtchingSimulator />
+            </div>
 
             {/* 가스별 반응 상세 정보 섹션 */}
             <div className="bg-gray-800 rounded-lg p-6 text-white">
