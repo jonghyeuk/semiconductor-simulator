@@ -1,8 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
+// Simple icon components
+const PlayIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
+  </svg>
+);
+
 const OxidationSimulator = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('theory');
   const [temperature, setTemperature] = useState(1000);
   const [time, setTime] = useState(60);
   const [pressure, setPressure] = useState(1);
@@ -33,6 +52,12 @@ const OxidationSimulator = () => {
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
+  // Theory opening animation states
+  const [theoryStep, setTheoryStep] = useState(0);
+  const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+
   const [simOrientation, setSimOrientation] = useState('100');
   const [simDopingLevel, setSimDopingLevel] = useState(0);
   const [simInitialOxide, setSimInitialOxide] = useState(0);
@@ -41,6 +66,7 @@ const OxidationSimulator = () => {
   const [showSimResult, setShowSimResult] = useState(false);
 
   const tabs = [
+    { id: 'theory', name: '이론', icon: '🎬' },
     { id: 'overview', name: '산화 공정 개요', icon: '🔥' },
     { id: 'thermal', name: '열산화 실험', icon: '🌡️' },
     { id: 'analysis', name: '산화 영향 인자', icon: '📊' },
@@ -188,6 +214,164 @@ const OxidationSimulator = () => {
     return data;
   };
 
+  // Theory opening steps
+  const theorySteps = [
+    {
+      title: "🎯 산화(Oxidation)란?",
+      content: "실리콘 웨이퍼 표면에 산소를 반응시켜 SiO₂(이산화규소) 절연막을 형성하는 핵심 공정입니다.\n\n" +
+               "마치 철이 녹슬어 산화철(Fe₂O₃)을 만드는 것처럼, 실리콘도 고온에서 산소와 반응하여 산화막을 형성합니다.\n\n" +
+               "💡 **놀라운 특성**: SiO₂는 자연계에서 가장 안정적인 절연체 중 하나!\n" +
+               "   • 절연파괴 전압: **1,000만 V/cm** 이상\n" +
+               "   • Si와의 계면 결함 밀도: **10¹⁰ /cm²** 수준\n" +
+               "   • 열팽창 계수가 Si와 거의 동일 → 열적 스트레스 최소화\n\n" +
+               "산화막은 트랜지스터의 게이트 절연막, 소자 간 격리, 확산 마스크, 패시베이션층 등 반도체 공정 전반에 사용됩니다.",
+      highlight: "반도체 산업의 근간! SiO₂ 없이는 현대 전자기기가 불가능합니다.",
+      icon: "🎯"
+    },
+    {
+      title: "🔬 건식 vs 습식 산화",
+      content: "산화 방법은 사용하는 산화제에 따라 크게 두 가지로 나뉩니다.\n\n" +
+               "**1️⃣ 건식 산화(Dry Oxidation)**\n" +
+               "   • 반응식: Si + O₂ → SiO₂\n" +
+               "   • 온도: **900~1,200°C**\n" +
+               "   • 성장 속도: **느림** (10~100 nm/hr)\n" +
+               "   • 막질: **치밀하고 높은 품질** → 게이트 산화막에 사용\n" +
+               "   • 특징: 결함 밀도가 낮고 절연 특성 우수\n\n" +
+               "**2️⃣ 습식 산화(Wet Oxidation)**\n" +
+               "   • 반응식: Si + 2H₂O → SiO₂ + 2H₂\n" +
+               "   • 온도: **900~1,100°C**\n" +
+               "   • 성장 속도: **빠름** (100~500 nm/hr, 건식의 **5~10배**)\n" +
+               "   • 막질: 다소 성김 → 필드 산화막, 두꺼운 절연막에 사용\n" +
+               "   • 특징: 빠른 성장이 필요한 경우 사용\n\n" +
+               "💧 **Pyrogenic 산화**: H₂ + O₂ → H₂O (고순도 수증기 생성)",
+      highlight: "용도에 따라 선택! 게이트 산화막은 건식, 두꺼운 절연막은 습식",
+      icon: "🔬"
+    },
+    {
+      title: "📈 Deal-Grove 모델과 산화 이론",
+      content: "1965년 Bruce Deal과 Andrew Grove가 확립한 산화 성장 이론입니다.\n\n" +
+               "**🔬 산화 메커니즘 (3단계)**\n\n" +
+               "1️⃣ **산화제 확산** (O₂ 또는 H₂O)\n" +
+               "   • 가스 상태 → 산화막 표면으로 확산\n" +
+               "   • 확산 속도는 압력과 온도에 의존\n\n" +
+               "2️⃣ **산화막 내부 확산**\n" +
+               "   • 산화막을 통과하여 Si/SiO₂ 계면으로 이동\n" +
+               "   • **속도 제한 단계** → 두꺼워질수록 느려짐\n\n" +
+               "3️⃣ **계면 반응**\n" +
+               "   • Si와 O₂(또는 H₂O)의 화학 반응\n" +
+               "   • Si가 소모되며 산화막 형성\n\n" +
+               "**📐 Deal-Grove 방정식**\n" +
+               "```\n" +
+               "x² + Ax = B(t + τ)\n" +
+               "```\n" +
+               "x: 산화막 두께, t: 시간\n" +
+               "A: 선형 속도 상수 (계면 반응 속도)\n" +
+               "B: 포물선 속도 상수 (확산 속도)\n\n" +
+               "🌡️ **온도 의존성**: Arrhenius 법칙\n" +
+               "   • 온도 **100°C 상승** → 성장 속도 **2~3배** 증가\n" +
+               "   • 활성화 에너지: **Ea = 1.23 eV** (건식), **0.78 eV** (습식)",
+      highlight: "반도체 공정의 정량적 예측을 가능케 한 획기적 모델!",
+      icon: "📈"
+    },
+    {
+      title: "🏭 실제 산업 응용",
+      content: "산화 공정은 반도체 제조의 **가장 기본적이면서도 중요한** 단계입니다.\n\n" +
+               "**🖥️ Logic 소자 (CPU/GPU)**\n" +
+               "   • **게이트 산화막**: 2~10 nm 초박막 (건식)\n" +
+               "   • 최신 3nm 공정: **High-k** 물질과 결합 (HfO₂)\n" +
+               "   • Intel, TSMC, Samsung 핵심 공정\n\n" +
+               "**💾 메모리 소자**\n" +
+               "   • **ONO 구조** (Oxide-Nitride-Oxide): Flash 메모리\n" +
+               "   • **터널 산화막**: 8~10 nm (전하 터널링 제어)\n" +
+               "   • **STI**(Shallow Trench Isolation): 300~500 nm (습식)\n\n" +
+               "**📱 파워 반도체**\n" +
+               "   • **두꺼운 산화막**: 50~100 nm (절연 및 패시베이션)\n" +
+               "   • SiC 산화: 차세대 전기차용 파워 소자\n\n" +
+               "**🌐 MEMS/센서**\n" +
+               "   • 희생층(sacrificial layer) 공정\n" +
+               "   • 보호막 및 구조층\n\n" +
+               "**🔧 엔지니어의 역할**\n" +
+               "   • 온도, 시간, 분위기 최적화로 목표 두께 달성\n" +
+               "   • 균일도(Uniformity) **±1% 이내** 관리\n" +
+               "   • 결함 밀도 최소화 → 수율 향상",
+      highlight: "반도체 공정의 시작과 끝! 모든 소자에 필수적입니다.",
+      icon: "🏭"
+    },
+    {
+      title: "🎓 이 시뮬레이터로 배우는 내용",
+      content: "Deal-Grove 이론을 실제로 체험하며 산화 공정을 완벽히 이해할 수 있습니다.\n\n" +
+               "**📚 각 탭별 학습 목표**\n\n" +
+               "1️⃣ **개요(Overview)**: 산화 공정의 기초와 핵심 개념\n" +
+               "   • 산화막의 역할과 중요성\n" +
+               "   • 건식 vs 습식 비교\n\n" +
+               "2️⃣ **열산화 실험(Thermal)**: 장비 조작 시뮬레이션\n" +
+               "   • 온도, 시간, 분위기 설정\n" +
+               "   • 실시간 산화막 성장 관찰\n" +
+               "   • Deal-Grove 곡선 확인\n\n" +
+               "3️⃣ **산화 영향 인자(Analysis)**: 파라미터 효과 분석\n" +
+               "   • **결정 방향**: (100), (110), (111)에 따른 성장 속도 차이\n" +
+               "   • **도핑 농도**: 불순물이 산화 속도에 미치는 영향\n" +
+               "   • **초기 산화막**: 성장 초기 특성 (linear regime)\n" +
+               "   • **온도와 압력**: 활성화 에너지의 실제 효과\n\n" +
+               "4️⃣ **평가(Quiz)**: 학습 내용 점검\n\n" +
+               "**💡 학습 방법**\n" +
+               "   ① 이론 먼저 읽고 → ② 시뮬레이터로 실습\n" +
+               "   ③ 조건 변경하며 결과 관찰 → ④ 그래프로 경향성 파악\n\n" +
+               "**🎯 학습 목표**\n" +
+               "   • Deal-Grove 모델 완벽 이해\n" +
+               "   • 건식/습식 산화 특성 비교\n" +
+               "   • 실무 엔지니어처럼 최적 조건 도출!",
+      highlight: "지금 바로 열산화 퍼니스(Furnace)를 가동해 보세요! 🔥",
+      icon: "🎓"
+    }
+  ];
+
+  // Typing animation effect for theory
+  useEffect(() => {
+    if (isTheoryPlaying && theoryStep < theorySteps.length) {
+      const fullText = theorySteps[theoryStep].content;
+      let currentIndex = 0;
+
+      const typingInterval = setInterval(() => {
+        if (currentIndex <= fullText.length) {
+          setTypedText(fullText.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 20);
+
+      return () => clearInterval(typingInterval);
+    }
+  }, [isTheoryPlaying, theoryStep]);
+
+  // Theory control functions
+  const startTheoryAnimation = () => {
+    setIsTheoryPlaying(true);
+    setTheoryStep(0);
+    setTypedText('');
+  };
+
+  const stopTheoryAnimation = () => {
+    setIsTheoryPlaying(false);
+  };
+
+  const nextTheoryStep = () => {
+    if (theoryStep < theorySteps.length - 1) {
+      setTheoryStep(prev => prev + 1);
+      setTypedText('');
+    } else {
+      setIsTheoryPlaying(false);
+    }
+  };
+
+  const prevTheoryStep = () => {
+    if (theoryStep > 0) {
+      setTheoryStep(prev => prev - 1);
+      setTypedText('');
+    }
+  };
+
   const quizQuestions = [
     {
       question: "열산화에서 Deal-Grove 모델의 주요 매개변수는?",
@@ -273,6 +457,146 @@ const OxidationSimulator = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'theory':
+        return (
+          <div className="space-y-6">
+            {!showDetailedTheory ? (
+              <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+                {!isTheoryPlaying ? (
+                  <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                    <div className="text-6xl mb-4">🎬</div>
+                    <h2 className="text-4xl font-bold mb-4">
+                      열산화 공정 시뮬레이터
+                    </h2>
+                    <p className="text-xl text-orange-100 max-w-2xl leading-relaxed">
+                      SiO₂ 절연막 형성의 과학! Deal-Grove 모델의 세계로 초대합니다.<br/>
+                      <span className="text-yellow-300 font-bold">5단계 스토리텔링</span>으로 쉽고 재미있게 배워보세요!
+                    </p>
+                    <button
+                      onClick={startTheoryAnimation}
+                      className="flex items-center gap-3 px-8 py-4 bg-white text-orange-600 rounded-full hover:bg-yellow-50 transition-all text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 mt-8"
+                    >
+                      <PlayIcon />
+                      시작하기
+                    </button>
+                    <p className="text-sm text-orange-200 mt-4">
+                      ⏱️ 약 3분 소요 • 📚 5단계 학습 • 🔥 열산화의 모든 것
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex-1 flex flex-col">
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold">
+                          Step {theoryStep + 1} / {theorySteps.length}
+                        </span>
+                        <span className="text-sm text-orange-200">
+                          {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}% 완료
+                        </span>
+                      </div>
+                      <div className="w-full bg-white/30 rounded-full h-2">
+                        <div
+                          className="bg-white h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6 overflow-y-auto">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-5xl">{theorySteps[theoryStep].icon}</span>
+                        <h3 className="text-2xl font-bold">
+                          {theorySteps[theoryStep].title}
+                        </h3>
+                      </div>
+
+                      <div className="text-lg leading-relaxed whitespace-pre-line mb-6 font-medium">
+                        {typedText}
+                        {typedText.length < theorySteps[theoryStep].content.length && (
+                          <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                        )}
+                      </div>
+
+                      {typedText.length >= theorySteps[theoryStep].content.length && (
+                        <div className="mt-6 p-4 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
+                          <div className="flex items-start gap-2 text-yellow-300">
+                            <LightbulbIcon />
+                            <p className="text-yellow-100 font-semibold">
+                              {theorySteps[theoryStep].highlight}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={prevTheoryStep}
+                        disabled={theoryStep === 0}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                          theoryStep === 0
+                            ? 'bg-white/20 text-white/50 cursor-not-allowed'
+                            : 'bg-white/30 text-white hover:bg-white/40'
+                        }`}
+                      >
+                        ← 이전
+                      </button>
+
+                      <button
+                        onClick={stopTheoryAnimation}
+                        className="flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all font-semibold"
+                      >
+                        <PauseIcon />
+                        일시정지
+                      </button>
+
+                      {theoryStep < theorySteps.length - 1 ? (
+                        <button
+                          onClick={nextTheoryStep}
+                          className="flex items-center gap-2 px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-yellow-50 transition-all font-semibold shadow-lg"
+                        >
+                          다음 →
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setActiveTab('overview')}
+                          className="flex items-center gap-2 px-6 py-3 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-300 transition-all font-semibold shadow-lg animate-pulse"
+                        >
+                          시뮬레이터 시작! 🚀
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                <button
+                  onClick={() => setShowDetailedTheory(false)}
+                  className="flex items-center gap-2 text-orange-600 hover:text-orange-700 font-semibold mb-4"
+                >
+                  ← 오프닝으로 돌아가기
+                </button>
+                <div className="prose max-w-none">
+                  <h3 className="text-2xl font-bold mb-4">상세 이론</h3>
+                  <p>상세 이론 내용이 여기에 들어갑니다.</p>
+                </div>
+              </div>
+            )}
+
+            {!isTheoryPlaying && !showDetailedTheory && (
+              <div className="text-center">
+                <button
+                  onClick={() => setShowDetailedTheory(true)}
+                  className="px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-gray-50 transition-all font-semibold shadow-lg border-2 border-orange-600"
+                >
+                  📚 상세 이론 보기
+                </button>
+              </div>
+            )}
+          </div>
+        );
+
       case 'overview':
         return (
           <div className="space-y-6">
