@@ -1,9 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
+// Icon components
+const PlayIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+  </svg>
+);
+
 const PhotolithographySimulator = () => {
-  const [activeTab, setActiveTab] = useState('overview1');
+  const [activeTab, setActiveTab] = useState('theory');
   const [processStep, setProcessStep] = useState(0);
+
+  // Theory tab state
+  const [theoryStep, setTheoryStep] = useState(0);
+  const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
   const [prType, setPrType] = useState('positive');
   const [maskType, setMaskType] = useState('binary');
   const [exposureType, setExposureType] = useState('contact');
@@ -39,6 +64,7 @@ const PhotolithographySimulator = () => {
   const [showResults, setShowResults] = useState(false);
 
   const tabs = [
+    { id: 'theory', name: '이론', icon: '🎬' },
     { id: 'overview1', name: '포토리소그라피 공정 개요1', icon: '📋' },
     { id: 'overview2', name: '포토리소그라피 공정 개요2', icon: '📷' },
     { id: 'process', name: 'PR Coating 공정', icon: '⚙️' },
@@ -107,6 +133,134 @@ const PhotolithographySimulator = () => {
     }
   ];
 
+  // Theory steps for opening animation
+  const theorySteps = [
+    {
+      title: "🎯 포토리소그라피(Photolithography)란?",
+      content: "반도체 회로 패턴을 웨이퍼에 정밀하게 전사하는 **핵심 공정**입니다.\n\n" +
+               "마치 사진 인화처럼, 빛을 이용해 원하는 패턴을 **나노미터 정밀도**로 새겨 넣습니다.\n\n" +
+               "**기본 원리**:\n" +
+               "1️⃣ 감광막(Photoresist, PR) 도포\n" +
+               "2️⃣ 마스크(패턴판)를 통한 선택적 노광\n" +
+               "3️⃣ 현상액으로 노광부/비노광부 선택적 제거\n" +
+               "4️⃣ 식각 또는 이온주입 공정\n" +
+               "5️⃣ PR 제거 (Strip)\n\n" +
+               "💡 **핵심**: 빛의 파장이 짧을수록 더 미세한 패턴 가능!\n" +
+               "• DUV (Deep UV): 193nm → 45nm 공정\n" +
+               "• EUV (Extreme UV): 13.5nm → 3nm 이하 공정",
+      highlight: "반도체 집적도를 결정하는 가장 중요한 공정! 포토리소 없이는 트랜지스터 한 개도 만들 수 없습니다!",
+      icon: "🎯"
+    },
+    {
+      title: "⚙️ 포토리소는 어떻게 동작할까?",
+      content: "**Step 1: PR Coating (감광막 도포)**\n" +
+               "• 스핀 코팅: 3000~5000 RPM으로 균일한 막 형성 (1~2 μm 두께)\n" +
+               "• Soft Bake: 90~110°C에서 용매 제거\n\n" +
+               "**Step 2: Exposure (노광)**\n" +
+               "• **Contact**: 마스크와 웨이퍼 직접 접촉 (저가, 해상도 낮음)\n" +
+               "• **Stepper**: 렌즈로 축소 투영 (4:1 또는 5:1)\n" +
+               "• **Scanner**: 슬릿 스캔 방식 (대면적, 고해상도)\n" +
+               "• **EUV**: 13.5nm 극자외선 + 반사형 광학계 (3nm 이하)\n\n" +
+               "**Step 3: PEB (Post Exposure Bake)**\n" +
+               "• 110~130°C로 화학 반응 안정화\n" +
+               "• Standing Wave 제거 → 프로파일 개선\n\n" +
+               "**Step 4: Develop (현상)**\n" +
+               "• Positive PR: 노광부 제거 (일반적)\n" +
+               "• Negative PR: 비노광부 제거 (특수 용도)\n" +
+               "• TMAH 현상액 사용 (2.38% 수용액)\n\n" +
+               "**Step 5: Hard Bake & Inspection**\n" +
+               "• 120~140°C로 식각 내성 강화\n" +
+               "• CD-SEM으로 Critical Dimension 측정",
+      highlight: "수십 번의 포토리소 반복으로 수백억 개 트랜지스터를 만듭니다! 단 1회 정렬 오차 0.1nm = 불량!",
+      icon: "⚙️"
+    },
+    {
+      title: "🚀 포토리소 기술은 어떻게 발전했을까?",
+      content: "**1970년대: Contact 방식**\n" +
+               "• 파장: 365nm (g-line), 해상도: 2~5 μm\n" +
+               "• 마스크-웨이퍼 직접 접촉 → 불량률 높음\n\n" +
+               "**1990년대: Stepper + i-line**\n" +
+               "• 파장: 365nm → 248nm (KrF), 해상도: 0.35~0.18 μm\n" +
+               "• Step & Repeat 방식으로 수율 향상\n\n" +
+               "**2000년대: ArF 액침 리소그라피**\n" +
+               "• 파장: 193nm (ArF), 해상도: 45~10nm\n" +
+               "• Immersion (액침): 물을 렌즈와 웨이퍼 사이에 삽입 → NA 향상\n" +
+               "• OPC (Optical Proximity Correction): 회절 보정\n\n" +
+               "**2010년대: 다중 패터닝 시대**\n" +
+               "• Double/Quad Patterning: 193nm로 7nm 공정 구현\n" +
+               "• LELE (Litho-Etch-Litho-Etch) 반복\n" +
+               "• 공정 복잡도 급증 → 비용 폭발\n\n" +
+               "**2020년대: EUV 혁명**\n" +
+               "• 파장: 13.5nm (극자외선), 해상도: 3nm 이하\n" +
+               "• **Single Patterning**으로 공정 단순화!\n" +
+               "• 반사형 미러 시스템 (진공 환경 필수)\n" +
+               "• High-NA EUV: 0.55 → 1nm 공정 목표\n\n" +
+               "📈 **놀라운 발전**: 50년간 해상도 **5000배** 향상! (5μm → 1nm)\n\n" +
+               "💰 **EUV 장비 가격**: 대당 **2000억 원** (ASML 독점)",
+      highlight: "무어의 법칙의 핵심 엔진! 파장을 1/27로 줄이며 반도체 미세화를 이끌었습니다!",
+      icon: "🚀"
+    },
+    {
+      title: "🏭 포토리소는 어디에 쓰일까?",
+      content: "**1. 트랜지스터 패터닝**\n" +
+               "• Gate 전극 형성: 5~20nm 폭 FinFET, GAA 구조\n" +
+               "• Source/Drain 영역 정의\n" +
+               "• Contact Hole 형성: 수백만 개의 미세 구멍\n\n" +
+               "**2. 배선(Interconnect) 형성**\n" +
+               "• BEOL (Back-End-Of-Line) 공정\n" +
+               "• Cu Damascene: Trench → 구리 증착 → CMP\n" +
+               "• 10~15층 금속 배선 (최신 로직 칩)\n\n" +
+               "**3. 메모리 셀 제작**\n" +
+               "• DRAM 커패시터: 고해상도 리소그라피 필수\n" +
+               "• 3D NAND: 100+ 층 수직 적층 → 각 층마다 리소그라피\n\n" +
+               "**4. 고급 패키징 (Advanced Packaging)**\n" +
+               "• TSV (Through Silicon Via): 웨이퍼 관통 배선\n" +
+               "• Fan-Out WLP: 재배선층(RDL) 패터닝\n" +
+               "• Chiplet 연결용 미세 범프\n\n" +
+               "**5. MEMS & 센서**\n" +
+               "• 가속도계, 자이로스코프 미세 구조\n" +
+               "• 이미지 센서 픽셀 분리 (1.0μm 픽셀)\n\n" +
+               "**6. 디스플레이 (TFT-LCD, OLED)**\n" +
+               "• TFT 트랜지스터 패터닝\n" +
+               "• Pixel 분리 및 배선\n\n" +
+               "**7. 광학 소자**\n" +
+               "• Photonic IC: 광 도파로, 회절 격자\n" +
+               "• AR/VR 렌즈 마이크로 패턴",
+      highlight: "반도체 전체 공정의 30~40%를 차지! 한 칩 제조에 평균 20~50회 리소그라피 반복!",
+      icon: "🏭"
+    },
+    {
+      title: "📚 이 시뮬레이터로 무엇을 배울까?",
+      content: "**'포토리소그라피 공정 개요1' 탭**\n" +
+               "✅ 포토리소 전체 공정 플로우 이해\n" +
+               "✅ Positive/Negative PR 차이 체험\n" +
+               "✅ 노광 → 현상 과정 애니메이션 관찰\n\n" +
+               "**'포토리소그라피 공정 개요2' 탭**\n" +
+               "✅ 마스크 종류 비교 (Binary, Phase Shift)\n" +
+               "✅ OPC, Resolution Enhancement 기술 이해\n" +
+               "✅ 실제 공정 파라미터 최적화 실습\n\n" +
+               "**'PR Coating 공정' 탭**\n" +
+               "✅ 스핀 코팅 RPM vs 두께 관계 시뮬레이션\n" +
+               "✅ 3단계 Spin Recipe 설계 (Spread → Spin → Stop)\n" +
+               "✅ Soft Bake, HMDS 처리 등 전처리 이해\n" +
+               "✅ 균일도(Uniformity), 두께 측정 실습\n\n" +
+               "**'노광 방식 비교' 탭**\n" +
+               "✅ Contact vs Proximity vs Stepper vs Scanner 비교\n" +
+               "✅ DUV vs EUV 차이점 이해\n" +
+               "✅ NA (Numerical Aperture), DOF 관계 학습\n" +
+               "✅ 해상도 공식 R = k₁λ/NA 시각화\n\n" +
+               "**'학습 평가' 탭**\n" +
+               "✅ 포토리소 전 과정 종합 평가\n" +
+               "✅ Dehydration Bake vs HMDS 온도 차이 이유\n" +
+               "✅ PSM이 0.18μm 이하에서 필요한 이유\n" +
+               "✅ EUV Throughput 한계의 원인\n" +
+               "✅ WEE vs EBR 공정 차이점\n" +
+               "✅ Scanner의 수차 최소화 원리",
+      highlight: "이론과 실습을 통해 포토리소 전문가로! 각 탭을 순서대로 학습하면 완벽합니다.",
+      icon: "📚"
+    }
+  ];
+
   // Recipe 단계별 데이터 생성 함수
   const generateRecipeProfile = () => {
     const { step1_rpm, step1_time, step2_rpm, step2_time, step3_rpm, step3_time } = processParams;
@@ -120,6 +274,51 @@ const PhotolithographySimulator = () => {
       { time: 3 + step1_time + step2_time, rpm: step3_rpm, step: 'Stop' },
       { time: 3 + step1_time + step2_time + step3_time, rpm: step3_rpm, step: 'Stop' }
     ];
+  };
+
+  // Theory animation effect
+  useEffect(() => {
+    if (!isTheoryPlaying) {
+      setTypedText('');
+      return;
+    }
+
+    const currentStepContent = theorySteps[theoryStep].content;
+    let currentIndex = 0;
+
+    const typingInterval = setInterval(() => {
+      if (currentIndex <= currentStepContent.length) {
+        setTypedText(currentStepContent.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 20);
+
+    return () => clearInterval(typingInterval);
+  }, [theoryStep, isTheoryPlaying]);
+
+  // Theory control functions
+  const startTheoryAnimation = () => {
+    setIsTheoryPlaying(true);
+    setTheoryStep(0);
+  };
+
+  const stopTheoryAnimation = () => {
+    setIsTheoryPlaying(false);
+    setTheoryStep(0);
+  };
+
+  const nextTheoryStep = () => {
+    if (theoryStep < theorySteps.length - 1) {
+      setTheoryStep(theoryStep + 1);
+    }
+  };
+
+  const prevTheoryStep = () => {
+    if (theoryStep > 0) {
+      setTheoryStep(theoryStep - 1);
+    }
   };
 
   // 공정 실행 함수
@@ -231,6 +430,9 @@ const PhotolithographySimulator = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'theory':
+        return <TheoryTab />;
+
       case 'overview1':
         return (
           <div className="space-y-6">
@@ -2744,6 +2946,149 @@ const PhotolithographySimulator = () => {
         return <div>탭을 선택해주세요.</div>;
     }
   };
+
+  // Theory Tab Component
+  const TheoryTab = () => (
+    <div className="space-y-6">
+      {!showDetailedTheory ? (
+        <div className="bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+          {!isTheoryPlaying ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+              <div className="text-6xl mb-4">🎬</div>
+              <h2 className="text-4xl font-bold mb-4">포토리소그라피 시뮬레이터</h2>
+              <p className="text-xl text-purple-100 max-w-2xl leading-relaxed">
+                반도체 패터닝의 핵심, 포토리소그라피의 세계로 초대합니다!<br/>
+                <span className="text-yellow-300 font-bold">5단계 스토리텔링</span>으로 쉽고 재미있게 배워보세요!
+              </p>
+              <button
+                onClick={startTheoryAnimation}
+                className="mt-8 bg-white text-purple-600 px-12 py-4 rounded-full font-bold text-lg hover:bg-purple-50 transition-all transform hover:scale-105 shadow-lg flex items-center gap-3"
+              >
+                <PlayIcon />
+                시작하기
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col">
+              {/* Progress bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-purple-100">
+                    진행률: {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}%
+                  </span>
+                  <span className="text-sm font-medium text-purple-100">
+                    {theoryStep + 1} / {theorySteps.length}
+                  </span>
+                </div>
+                <div className="w-full bg-purple-800 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-yellow-300 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-8 mb-6 overflow-y-auto">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
+                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+                </div>
+
+                <div className="text-lg leading-relaxed mb-6 whitespace-pre-line">
+                  {typedText}
+                  {typedText.length < theorySteps[theoryStep].content.length && (
+                    <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                  )}
+                </div>
+
+                {typedText.length === theorySteps[theoryStep].content.length && (
+                  <div className="mt-6 p-4 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                    <p className="text-yellow-100 font-medium">
+                      💡 {theorySteps[theoryStep].highlight}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation buttons */}
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={stopTheoryAnimation}
+                  className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                >
+                  <PauseIcon />
+                  처음으로
+                </button>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={prevTheoryStep}
+                    disabled={theoryStep === 0}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                      theoryStep === 0
+                        ? 'bg-gray-500 bg-opacity-50 text-gray-300 cursor-not-allowed'
+                        : 'bg-white bg-opacity-20 hover:bg-opacity-30 text-white'
+                    }`}
+                  >
+                    ← 이전
+                  </button>
+
+                  {theoryStep < theorySteps.length - 1 ? (
+                    <button
+                      onClick={nextTheoryStep}
+                      className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 px-6 py-3 rounded-lg font-medium transition-all"
+                    >
+                      다음 →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowDetailedTheory(true)}
+                      className="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                    >
+                      <LightbulbIcon />
+                      상세 이론 보기
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-800">포토리소그라피 상세 이론</h2>
+            <button
+              onClick={() => setShowDetailedTheory(false)}
+              className="text-purple-600 hover:text-purple-800 font-medium"
+            >
+              ← 애니메이션으로 돌아가기
+            </button>
+          </div>
+
+          <div className="space-y-8">
+            {theorySteps.map((step, index) => (
+              <div key={index} className="border-l-4 border-purple-500 pl-6 py-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">{step.icon}</span>
+                  <h3 className="text-xl font-bold text-gray-800">{step.title}</h3>
+                </div>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
+                  {step.content}
+                </div>
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <p className="text-purple-800 font-medium">
+                    💡 {step.highlight}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
