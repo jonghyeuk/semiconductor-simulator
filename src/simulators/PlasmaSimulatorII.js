@@ -1,8 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
 
+// Icon components
+const PlayIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+  </svg>
+);
+
 const PlasmaSimulatorII = () => {
-  const [activeTheme, setActiveTheme] = useState('system-structure-icp');
+  const [activeTheme, setActiveTheme] = useState('theory');
+
+  // Theory tab state
+  const [theoryStep, setTheoryStep] = useState(0);
+  const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+
   const [etchPower, setEtchPower] = useState(200);
   const [etchPressure, setEtchPressure] = useState(10);
   const [etchGasType, setEtchGasType] = useState('CF4');
@@ -27,11 +53,167 @@ const PlasmaSimulatorII = () => {
   const [difficulty, setDifficulty] = useState('상');
 
   const themes = [
+    { id: 'theory', name: '이론', icon: '🎬', color: 'purple' },
     { id: 'system-structure-icp', name: '시스템 구조(ICP)', icon: '🔬', color: 'indigo' },
     { id: 'etching-process', name: '식각 공정(기본)', icon: '⚙️', color: 'orange' },
     { id: 'deposition-process', name: '증착 공정(기본)', icon: '🏗️', color: 'teal' },
     { id: 'equipment-application', name: '장비 응용', icon: '🏭', color: 'red' },
     { id: 'quiz', name: '개념 확인 퀴즈', icon: '📝', color: 'green' }
+  ];
+
+  // Theory steps for opening animation
+  const theorySteps = [
+    {
+      title: "🎯 ICP(Inductively Coupled Plasma)란?",
+      content: "**유도결합 플라즈마**로, 코일에 의한 유도 전기장으로 고밀도 플라즈마를 생성하는 첨단 기술입니다.\n\n" +
+               "CCP(용량결합)보다 **10~100배 높은 플라즈마 밀도**를 달성합니다!\n\n" +
+               "**ICP의 핵심 특징**:\n" +
+               "• **고밀도**: 10¹¹~10¹² cm⁻³ (CCP: 10⁹~10¹⁰ cm⁻³)\n" +
+               "• **저압 운전**: 1~10 mTorr (CCP: 10~100 mTorr)\n" +
+               "• **독립 제어**: 이온 밀도 vs 이온 에너지 분리 제어\n" +
+               "• **고균일도**: 대면적 웨이퍼 처리 가능\n\n" +
+               "**동작 원리**:\n" +
+               "1️⃣ RF 코일에 13.56 MHz 전류 인가\n" +
+               "2️⃣ 시변 자기장 생성 (B-field)\n" +
+               "3️⃣ 패러데이 법칙으로 원형 전기장 유도 (E-field)\n" +
+               "4️⃣ 전자가 원형 궤도로 가속 (Cyclotron Motion)\n" +
+               "5️⃣ 충돌 이온화로 고밀도 플라즈마 생성\n\n" +
+               "💡 **왜 원형 전기장?** 직선 전기장은 전극까지만 가속하지만, 원형 전기장은 무한히 가속 가능!",
+      highlight: "ICP = 반도체 미세 공정의 필수 기술! 7nm 이하 공정은 ICP 없이 불가능!",
+      icon: "🎯"
+    },
+    {
+      title: "⚙️ ICP는 어떻게 동작할까?",
+      content: "**Step 1: RF 코일 전류 (13.56 MHz)**\n" +
+               "• 챔버 상단 나선형 코일에 고주파 교류 전류\n" +
+               "• 전류 방향이 초당 1356만 번 반전!\n\n" +
+               "**Step 2: 시변 자기장 생성**\n" +
+               "• 앙페르 법칙: 전류 → 자기장\n" +
+               "• 코일 중심에서 강한 자기장\n" +
+               "• 시간에 따라 변하는 자기장 (dB/dt)\n\n" +
+               "**Step 3: 유도 전기장 생성**\n" +
+               "• 패러데이 유도 법칙: dB/dt → 원형 E-field\n" +
+               "• ∮E·dl = -dΦ_B/dt\n" +
+               "• 전극 없이도 전기장 형성!\n\n" +
+               "**Step 4: 전자 가속 (Cyclotron Motion)**\n" +
+               "• 자유 전자가 원형 전기장을 따라 무한히 회전\n" +
+               "• 로렌츠 힘: F = q(E + v×B)\n" +
+               "• 이동 거리↑ → 충돌 확률↑\n\n" +
+               "**Step 5: 충돌 이온화**\n" +
+               "• e⁻ (고속) + Ar → Ar⁺ + 2e⁻\n" +
+               "• 전자 개수가 기하급수적 증가\n" +
+               "• 플라즈마 밀도 10¹²/cm³ 달성!\n\n" +
+               "**Step 6: 독립적 바이어스 제어**\n" +
+               "• ICP Source: 플라즈마 밀도 제어 (상단 코일)\n" +
+               "• Bias RF: 이온 충격 에너지 제어 (하단 전극)\n" +
+               "• Dual Frequency로 정밀 공정 제어",
+      highlight: "원형 전기장 덕분에 전자가 무한 가속! 이것이 ICP의 고밀도 비결!",
+      icon: "⚙️"
+    },
+    {
+      title: "🚀 ICP 기술은 어떻게 발전했을까?",
+      content: "**1980년대: CCP 시대의 한계**\n" +
+               "• 용량결합 플라즈마(CCP) 주류\n" +
+               "• 플라즈마 밀도 낮음 (10⁹~10¹⁰/cm³)\n" +
+               "• 고압 운전 (50~100 mTorr) → 등방성 식각\n" +
+               "• 미세 패턴 구현 어려움\n\n" +
+               "**1990년대: ICP 상용화 원년**\n" +
+               "• 첫 상용 ICP 장비 출시 (LAM, Applied Materials)\n" +
+               "• 플라즈마 밀도 10~100배 증가\n" +
+               "• 저압 고밀도 (1~10 mTorr)\n" +
+               "• 0.35μm → 0.18μm 공정 실현\n\n" +
+               "**2000년대: Dual Frequency ICP**\n" +
+               "• Source RF (13.56 MHz): 밀도 제어\n" +
+               "• Bias RF (2~13 MHz): 에너지 제어\n" +
+               "• 독립 제어로 공정 윈도우 확대\n" +
+               "• 90nm → 45nm 공정 대응\n\n" +
+               "**2010년대: Pulsed ICP & 원자층 공정**\n" +
+               "• Pulsed Plasma: μs~ms 단위 On/Off\n" +
+               "• Charge 축적 최소화 → 고종횡비 구조 식각\n" +
+               "• ALE (Atomic Layer Etching): <1nm/cycle\n" +
+               "• 3D NAND, FinFET 대응 (14nm~7nm)\n\n" +
+               "**2020년대 현재: 극한 ICP 제어**\n" +
+               "• Multi-frequency ICP (3개 이상 주파수)\n" +
+               "• Plasma Diagnostics 실시간 피드백\n" +
+               "• AI 기반 Recipe 최적화\n" +
+               "• 종횡비 100:1 이상 Deep Trench\n" +
+               "• 3nm GAA, 2nm 공정 양산\n\n" +
+               "📈 **놀라운 발전**: 밀도 100배↑, 압력 1/10↓, 균일도 <1% 달성!",
+      highlight: "ICP의 진화 = 무어의 법칙의 지속! 0.35μm → 2nm, 175배 미세화 달성!",
+      icon: "🚀"
+    },
+    {
+      title: "🏭 ICP는 어디에 쓰일까?",
+      content: "**1. 플라즈마 식각 (Etching) - 최대 응용 분야**\n" +
+               "• **Poly-Si Gate 식각**: FinFET, GAA 트랜지스터\n" +
+               "• **Deep Trench**: DRAM 커패시터 (종횡비 50:1)\n" +
+               "• **Contact/Via Hole**: 3D 적층 배선 (100:1)\n" +
+               "• **STI (Shallow Trench Isolation)**: 소자 분리\n" +
+               "• **3D NAND Hole 식각**: 100+ 층 관통 홀\n" +
+               "가스: CF₄, CHF₃, Cl₂, HBr, SF₆, C₄F₈\n\n" +
+               "**2. 플라즈마 증착 (PECVD)**\n" +
+               "• **SiO₂ 절연막**: Gap-fill, IMD (층간절연막)\n" +
+               "• **SiN 확산방지막**: Cu 배선 보호\n" +
+               "• **SiON**: DRAM 게이트 유전체\n" +
+               "• **a-Si**: TFT, 태양전지\n" +
+               "저온 증착 (200~400°C) → 열손상 최소화\n\n" +
+               "**3. 플라즈마 애싱 (Ashing)**\n" +
+               "• O₂ Plasma로 포토레지스트(PR) 제거\n" +
+               "• 유기물, 폴리머 잔류물 세정\n" +
+               "• 후공정 세정: Post-etch cleaning\n\n" +
+               "**4. 표면 개질 (Surface Treatment)**\n" +
+               "• Plasma Nitridation: 질화막 형성\n" +
+               "• Plasma Oxidation: 저온 산화\n" +
+               "• Surface Activation: 접착력 향상\n\n" +
+               "**5. 플라즈마 도핑 (PLAD)**\n" +
+               "• 이온 주입 대체 기술\n" +
+               "• Ultra-shallow junction (<10nm)\n" +
+               "• FinFET S/D 도핑\n\n" +
+               "**6. 원자층 식각 (ALE)**\n" +
+               "• 흡착(Adsorption) + 이탈(Desorption) 반복\n" +
+               "• 층별 제어 (<1nm/cycle)\n" +
+               "• 3D NAND 정밀 식각\n\n" +
+               "**7. 신소재 공정**\n" +
+               "• GaN 에칭 (전력반도체)\n" +
+               "• 2D 소재(Graphene, MoS₂) 패터닝\n" +
+               "• SiC 가공 (전기차 인버터)",
+      highlight: "ICP는 반도체 공정의 만능 도구! 식각, 증착, 세정, 표면처리 모두 가능!",
+      icon: "🏭"
+    },
+    {
+      title: "📚 이 시뮬레이터로 무엇을 배울까?",
+      content: "**'시스템 구조(ICP)' 탭**\n" +
+               "✅ ICP vs CCP 구조 비교\n" +
+               "✅ RF 코일 동작 원리 애니메이션\n" +
+               "✅ 4단계 플라즈마 생성 과정 시각화\n" +
+               "• Step 1: RF 전류 → Step 2: 자기장\n" +
+               "• Step 3: 유도 전기장 → Step 4: 이온화\n" +
+               "✅ Cyclotron Motion(자이로 운동) 이해\n" +
+               "✅ Source vs Bias 독립 제어 체험\n\n" +
+               "**'식각 공정(기본)' 탭**\n" +
+               "✅ 플라즈마 파워에 따른 식각률 변화\n" +
+               "✅ 압력 영향: 등방성 vs 이방성 식각\n" +
+               "✅ 5가지 가스별 특성 (CF₄, SF₆, Cl₂, HBr, BCl₃)\n" +
+               "✅ Loading Effect 시뮬레이션\n" +
+               "✅ Aspect Ratio Dependent Etching (ARDE)\n\n" +
+               "**'증착 공정(기본)' 탭**\n" +
+               "✅ PECVD 온도별 막질 변화\n" +
+               "✅ SiO₂, SiN, SiON 증착 조건\n" +
+               "✅ Step Coverage vs 압력 관계\n" +
+               "✅ Deposition Rate 최적화\n\n" +
+               "**'장비 응용' 탭**\n" +
+               "✅ 실제 반도체 공정 적용 예제\n" +
+               "✅ Contact Hole 식각 시나리오\n" +
+               "✅ Deep Trench DRAM 공정\n" +
+               "✅ 3D NAND Hole 식각 Challenge\n" +
+               "✅ Recipe 최적화 실습\n\n" +
+               "**'개념 확인 퀴즈' 탭**\n" +
+               "✅ 3단계 난이도별 문제 (하/중/상)\n" +
+               "✅ ICP 원리, 식각, 증착 종합 평가\n" +
+               "✅ 실무 엔지니어 수준 문제 도전",
+      highlight: "ICP 원리부터 실무 응용까지 완벽 마스터! 플라즈마 전문가로 성장하세요!",
+      icon: "📚"
+    }
   ];
 
   // 각 단계별 설명 텍스트
@@ -462,6 +644,51 @@ const PlasmaSimulatorII = () => {
     ]
   };
 
+  // Theory animation effect
+  useEffect(() => {
+    if (!isTheoryPlaying) {
+      setTypedText('');
+      return;
+    }
+
+    const currentStepContent = theorySteps[theoryStep].content;
+    let currentIndex = 0;
+
+    const typingInterval = setInterval(() => {
+      if (currentIndex <= currentStepContent.length) {
+        setTypedText(currentStepContent.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 20);
+
+    return () => clearInterval(typingInterval);
+  }, [theoryStep, isTheoryPlaying]);
+
+  // Theory control functions
+  const startTheoryAnimation = () => {
+    setIsTheoryPlaying(true);
+    setTheoryStep(0);
+  };
+
+  const stopTheoryAnimation = () => {
+    setIsTheoryPlaying(false);
+    setTheoryStep(0);
+  };
+
+  const nextTheoryStep = () => {
+    if (theoryStep < theorySteps.length - 1) {
+      setTheoryStep(theoryStep + 1);
+    }
+  };
+
+  const prevTheoryStep = () => {
+    if (theoryStep > 0) {
+      setTheoryStep(theoryStep - 1);
+    }
+  };
+
   // 타이핑 애니메이션 효과
   useEffect(() => {
     if (!autoPlay || !stepDescriptions[icpStep]) return;
@@ -589,6 +816,149 @@ const PlasmaSimulatorII = () => {
     resetQuiz();
     setQuizStarted(true);
   };
+
+  // Theory Tab Component
+  const TheoryTab = () => (
+    <div className="space-y-6">
+      {!showDetailedTheory ? (
+        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+          {!isTheoryPlaying ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+              <div className="text-6xl mb-4">🎬</div>
+              <h2 className="text-4xl font-bold mb-4">플라즈마 II 시뮬레이터</h2>
+              <p className="text-xl text-indigo-100 max-w-2xl leading-relaxed">
+                ICP 고밀도 플라즈마의 세계로 초대합니다!<br/>
+                <span className="text-yellow-300 font-bold">5단계 스토리텔링</span>으로 쉽고 재미있게 배워보세요!
+              </p>
+              <button
+                onClick={startTheoryAnimation}
+                className="mt-8 bg-white text-indigo-600 px-12 py-4 rounded-full font-bold text-lg hover:bg-indigo-50 transition-all transform hover:scale-105 shadow-lg flex items-center gap-3"
+              >
+                <PlayIcon />
+                시작하기
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col">
+              {/* Progress bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-indigo-100">
+                    진행률: {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}%
+                  </span>
+                  <span className="text-sm font-medium text-indigo-100">
+                    {theoryStep + 1} / {theorySteps.length}
+                  </span>
+                </div>
+                <div className="w-full bg-indigo-800 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-yellow-300 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-8 mb-6 overflow-y-auto">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
+                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+                </div>
+
+                <div className="text-lg leading-relaxed mb-6 whitespace-pre-line">
+                  {typedText}
+                  {typedText.length < theorySteps[theoryStep].content.length && (
+                    <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                  )}
+                </div>
+
+                {typedText.length === theorySteps[theoryStep].content.length && (
+                  <div className="mt-6 p-4 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                    <p className="text-yellow-100 font-medium">
+                      💡 {theorySteps[theoryStep].highlight}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation buttons */}
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={stopTheoryAnimation}
+                  className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                >
+                  <PauseIcon />
+                  처음으로
+                </button>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={prevTheoryStep}
+                    disabled={theoryStep === 0}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                      theoryStep === 0
+                        ? 'bg-gray-500 bg-opacity-50 text-gray-300 cursor-not-allowed'
+                        : 'bg-white bg-opacity-20 hover:bg-opacity-30 text-white'
+                    }`}
+                  >
+                    ← 이전
+                  </button>
+
+                  {theoryStep < theorySteps.length - 1 ? (
+                    <button
+                      onClick={nextTheoryStep}
+                      className="bg-yellow-400 hover:bg-yellow-300 text-indigo-900 px-6 py-3 rounded-lg font-medium transition-all"
+                    >
+                      다음 →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowDetailedTheory(true)}
+                      className="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                    >
+                      <LightbulbIcon />
+                      상세 이론 보기
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-800">ICP 플라즈마 상세 이론</h2>
+            <button
+              onClick={() => setShowDetailedTheory(false)}
+              className="text-indigo-600 hover:text-indigo-800 font-medium"
+            >
+              ← 애니메이션으로 돌아가기
+            </button>
+          </div>
+
+          <div className="space-y-8">
+            {theorySteps.map((step, index) => (
+              <div key={index} className="border-l-4 border-indigo-500 pl-6 py-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">{step.icon}</span>
+                  <h3 className="text-xl font-bold text-gray-800">{step.title}</h3>
+                </div>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
+                  {step.content}
+                </div>
+                <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4">
+                  <p className="text-indigo-800 font-medium">
+                    💡 {step.highlight}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -862,6 +1232,8 @@ const PlasmaSimulatorII = () => {
       </div>
 
       <div className="max-w-full mx-auto px-3 sm:px-4 lg:px-6 py-6">
+        {activeTheme === 'theory' && <TheoryTab />}
+
         {activeTheme === 'system-structure-icp' && (
           <div className="space-y-8">
             <div className="bg-gradient-to-r from-indigo-50 to-blue-50 rounded-xl p-6 border">
