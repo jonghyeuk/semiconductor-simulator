@@ -1,11 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
+// Icon components
+const PlayIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+  </svg>
+);
+
 const VacuumSimulator = () => {
   // 탭 상태
-  const [activeTab, setActiveTab] = useState('pumping-simulation');
+  const [activeTab, setActiveTab] = useState('theory');
   const [selectedModel, setSelectedModel] = useState(2); // 모델 2가 기본값
   const [targetPressure, setTargetPressure] = useState(5); // 목표 압력 (슬라이더로 설정)
+
+  // Theory tab state
+  const [theoryStep, setTheoryStep] = useState(0);
+  const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
   
   // 기존 상태들
   const [pumpingSpeed, setPumpingSpeed] = useState(1800);
@@ -50,6 +75,7 @@ const VacuumSimulator = () => {
   
   // 탭 정의
   const tabs = [
+    { id: 'theory', name: '이론', icon: '🎬' },
     { id: 'pumping-simulation', name: '실시간 펌핑 시뮬레이션', icon: '⚡' },
     { id: 'performance-analysis', name: '성능 특성 곡선 분석', icon: '📊' },
     { id: 'process-control', name: '공정 압력 세팅 실험', icon: '🔧' },
@@ -191,7 +217,108 @@ const VacuumSimulator = () => {
       explanation: "3자리수 진공도 향상을 위해서는 펌프 성능 향상과 배관 Conductance 최적화가 필요합니다."
     }
   ];
-  
+
+  // Theory steps for opening animation
+  const theorySteps = [
+    {
+      title: "🎯 진공(Vacuum)이란?",
+      content: "반도체 공정에서 불순물과 오염을 제거하기 위해 **대기압보다 낮은 압력 상태**를 만드는 핵심 기술입니다.\n\n" +
+               "마치 완벽하게 깨끗한 수술실처럼, **진공 환경**은 원자 단위의 정밀 작업을 가능하게 합니다.\n\n" +
+               "**압력 범위**:\n" +
+               "• 대기압: 760 Torr (1 atm)\n" +
+               "• 저진공: 760~1 Torr\n" +
+               "• 중진공: 1~10⁻³ Torr\n" +
+               "• 고진공: 10⁻³~10⁻⁹ Torr\n" +
+               "• 초고진공: < 10⁻⁻⁹ Torr\n\n" +
+               "💡 **핵심**: 진공도가 높을수록 불순물 농도가 낮아져 고품질 반도체 제조가 가능합니다!",
+      highlight: "진공 없이는 7nm 이하 초미세 반도체를 만들 수 없습니다. 단 1개의 불순물 원자도 치명적입니다!",
+      icon: "🎯"
+    },
+    {
+      title: "⚙️ 진공은 어떻게 만들까?",
+      content: "**1단계: Roughing Pump (조진공 펌프)**\n" +
+               "대기압(760 Torr) → 10⁻³ Torr까지 빠르게 배기\n" +
+               "• 회전식 베인 펌프 (Rotary Vane Pump)\n" +
+               "• 기계적 피스톤 방식으로 가스 압축 배출\n\n" +
+               "**2단계: High Vacuum Pump (고진공 펌프)**\n" +
+               "10⁻³ Torr → 10⁻⁹ Torr까지 극한 진공 달성\n" +
+               "• Turbo Molecular Pump (TMP): 초고속 회전 블레이드로 분자 운동량 전달\n" +
+               "• Cryo Pump: 극저온(-200°C)에서 기체 분자를 직접 응축 포집\n\n" +
+               "**3단계: 압력 제어**\n" +
+               "• APC (Auto Pressure Controller): 공정 압력 정밀 유지\n" +
+               "• Gate Valve: 컨덕턴스 조절로 펌핑 속도 제어\n\n" +
+               "🔬 **실제 공정**: 에칭 공정은 수십 mTorr, 증착 공정은 10⁻⁶ Torr 수준의 초고진공 필요!",
+      highlight: "TMP는 분당 60,000회 회전하며 분자 하나하나를 밀어내는 기계의 극한입니다!",
+      icon: "⚙️"
+    },
+    {
+      title: "🚀 진공 기술은 왜 중요할까?",
+      content: "**1970년대: 기초 진공 시대**\n" +
+               "마이크로미터(μm) 공정 → 10⁻⁵ Torr 수준의 진공\n" +
+               "간단한 회전 펌프만으로 충분\n\n" +
+               "**2000년대: 나노 공정 진입**\n" +
+               "90nm → 32nm 공정 → 10⁻⁷ Torr 초고진공 필수\n" +
+               "TMP + Cryo Pump 조합, Load Lock 시스템 도입\n\n" +
+               "**2020년대: 극한 진공의 시대**\n" +
+               "3nm EUV 공정 → **10⁻⁹ Torr 이하 극한 진공**\n" +
+               "• EUV 노광: 진공 없이 13.5nm 파장 빛이 흡수됨\n" +
+               "• 원자층 증착(ALD): 단 1개 원자층씩 쌓기 위해 완벽한 진공 필요\n" +
+               "• 이온 주입: 불순물 원자의 정밀한 궤적 제어를 위한 무충돌 환경\n\n" +
+               "📈 **놀라운 발전**: 50년간 진공도 **1만 배 이상** 향상! (10⁻⁵ → 10⁻⁹ Torr)\n\n" +
+               "💰 **비용**: 최첨단 진공 시스템은 장비 가격의 30% 차지 (수십억 원)",
+      highlight: "무어의 법칙을 지탱하는 숨은 영웅! 진공 기술의 발전 = 반도체 미세화의 역사",
+      icon: "🚀"
+    },
+    {
+      title: "🏭 진공은 어디에 쓰일까?",
+      content: "**1. 박막 증착 (Thin Film Deposition)**\n" +
+               "• CVD (Chemical Vapor Deposition): 수십 mTorr에서 화학 반응\n" +
+               "• PVD (Physical Vapor Deposition): 10⁻⁶ Torr에서 금속 증착\n" +
+               "• ALD (Atomic Layer Deposition): 초정밀 단원자층 증착\n\n" +
+               "**2. 플라즈마 에칭 (Plasma Etching)**\n" +
+               "• RIE (Reactive Ion Etching): 10~100 mTorr에서 이온 충격\n" +
+               "• ICP (Inductively Coupled Plasma): 수 mTorr 고밀도 플라즈마\n\n" +
+               "**3. 이온 주입 (Ion Implantation)**\n" +
+               "• 10⁻⁶ Torr 초고진공에서 불순물 이온을 정확히 주입\n" +
+               "• 무충돌 환경으로 정밀한 도핑 깊이 제어\n\n" +
+               "**4. EUV 노광 (EUV Lithography)**\n" +
+               "• 13.5nm 극자외선은 공기 중에서 흡수 → 완전 진공 필수\n" +
+               "• 광학계 전체를 10⁻⁸ Torr 이하 진공 유지\n\n" +
+               "**5. 검사 및 분석 (Inspection & Metrology)**\n" +
+               "• SEM (Scanning Electron Microscope): 전자빔 관찰\n" +
+               "• SIMS (Secondary Ion Mass Spectroscopy): 성분 분석",
+      highlight: "반도체 제조 전 공정의 70% 이상이 진공 환경에서 진행됩니다!",
+      icon: "🏭"
+    },
+    {
+      title: "📚 이 시뮬레이터로 무엇을 배울까?",
+      content: "**'실시간 펌핑 시뮬레이션' 탭**\n" +
+               "✅ Roughing Pump와 TMP의 2단계 펌핑 과정 체험\n" +
+               "✅ 760 Torr → 10⁻⁹ Torr까지 압력 변화 실시간 관찰\n" +
+               "✅ Foreline, Gate Valve, APC 밸브 동작 원리 이해\n\n" +
+               "**'성능 특성 곡선 분석' 탭**\n" +
+               "✅ 4가지 펌프 모델별 배기 속도 특성 비교\n" +
+               "✅ 압력 구간별 최적 펌핑 속도 찾기\n" +
+               "✅ Q = S × P 관계식 시각화\n\n" +
+               "**'공정 압력 세팅 실험' 탭**\n" +
+               "✅ 실제 공정에서 목표 압력 달성 실습\n" +
+               "✅ APC를 이용한 정밀 압력 제어 체험\n" +
+               "✅ 펌핑 속도와 가스 유량의 균형점 찾기\n\n" +
+               "**'Conductance & 압력 관계' 탭**\n" +
+               "✅ Q = S × P 공식 이해 (가스 부하, 배기 속도, 압력)\n" +
+               "✅ 실시간 슬라이더 조작으로 변수 관계 파악\n\n" +
+               "**'배관 설계 최적화' 탭**\n" +
+               "✅ 배관 길이, 직경, 형상에 따른 컨덕턴스 변화\n" +
+               "✅ 실효 배기 속도 계산: 1/Seff = 1/Spump + 1/C\n" +
+               "✅ 최적 배관 설계로 펌핑 효율 극대화\n\n" +
+               "**'진공 기술 퀴즈' 탭**\n" +
+               "✅ 학습한 내용 종합 테스트\n" +
+               "✅ 실무 엔지니어 수준의 진공 지식 검증",
+      highlight: "이론과 실습을 모두 경험하며 진공 전문가로 성장하세요! 각 탭을 순서대로 학습하면 완벽합니다.",
+      icon: "📚"
+    }
+  ];
+
   // 4개 모델의 성능 곡선 데이터
   const pumpModels = {
     1: { // 소형 모델
@@ -431,7 +558,52 @@ const VacuumSimulator = () => {
     if (pressure > 0.001) return '#e8f5e8'; // 연녹색 (낮은 압력)
     return '#e3f2fd'; // 파랑 (매우 낮은 압력)
   };
-  
+
+  // Theory animation effect
+  useEffect(() => {
+    if (!isTheoryPlaying) {
+      setTypedText('');
+      return;
+    }
+
+    const currentStepContent = theorySteps[theoryStep].content;
+    let currentIndex = 0;
+
+    const typingInterval = setInterval(() => {
+      if (currentIndex <= currentStepContent.length) {
+        setTypedText(currentStepContent.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 20);
+
+    return () => clearInterval(typingInterval);
+  }, [theoryStep, isTheoryPlaying]);
+
+  // Theory control functions
+  const startTheoryAnimation = () => {
+    setIsTheoryPlaying(true);
+    setTheoryStep(0);
+  };
+
+  const stopTheoryAnimation = () => {
+    setIsTheoryPlaying(false);
+    setTheoryStep(0);
+  };
+
+  const nextTheoryStep = () => {
+    if (theoryStep < theorySteps.length - 1) {
+      setTheoryStep(theoryStep + 1);
+    }
+  };
+
+  const prevTheoryStep = () => {
+    if (theoryStep > 0) {
+      setTheoryStep(theoryStep - 1);
+    }
+  };
+
   // useEffect들
   useEffect(() => {
     const speed = calculatePumpingSpeed(targetPressure, selectedModel);
@@ -697,6 +869,149 @@ const VacuumSimulator = () => {
     return '부족! 시뮬레이터를 다시 체험해보세요! 💪';
   };
 
+  // Theory Tab Component
+  const TheoryTab = () => (
+    <div className="space-y-6">
+      {!showDetailedTheory ? (
+        <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+          {!isTheoryPlaying ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+              <div className="text-6xl mb-4">🎬</div>
+              <h2 className="text-4xl font-bold mb-4">진공 시스템 시뮬레이터</h2>
+              <p className="text-xl text-blue-100 max-w-2xl leading-relaxed">
+                반도체 공정의 핵심, 진공 기술의 세계로 초대합니다!<br/>
+                <span className="text-yellow-300 font-bold">5단계 스토리텔링</span>으로 쉽고 재미있게 배워보세요!
+              </p>
+              <button
+                onClick={startTheoryAnimation}
+                className="mt-8 bg-white text-blue-600 px-12 py-4 rounded-full font-bold text-lg hover:bg-blue-50 transition-all transform hover:scale-105 shadow-lg flex items-center gap-3"
+              >
+                <PlayIcon />
+                시작하기
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col">
+              {/* Progress bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-blue-100">
+                    진행률: {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}%
+                  </span>
+                  <span className="text-sm font-medium text-blue-100">
+                    {theoryStep + 1} / {theorySteps.length}
+                  </span>
+                </div>
+                <div className="w-full bg-blue-800 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-yellow-300 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-8 mb-6 overflow-y-auto">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
+                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+                </div>
+
+                <div className="text-lg leading-relaxed mb-6 whitespace-pre-line">
+                  {typedText}
+                  {typedText.length < theorySteps[theoryStep].content.length && (
+                    <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                  )}
+                </div>
+
+                {typedText.length === theorySteps[theoryStep].content.length && (
+                  <div className="mt-6 p-4 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                    <p className="text-yellow-100 font-medium">
+                      💡 {theorySteps[theoryStep].highlight}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation buttons */}
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={stopTheoryAnimation}
+                  className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                >
+                  <PauseIcon />
+                  처음으로
+                </button>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={prevTheoryStep}
+                    disabled={theoryStep === 0}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                      theoryStep === 0
+                        ? 'bg-gray-500 bg-opacity-50 text-gray-300 cursor-not-allowed'
+                        : 'bg-white bg-opacity-20 hover:bg-opacity-30 text-white'
+                    }`}
+                  >
+                    ← 이전
+                  </button>
+
+                  {theoryStep < theorySteps.length - 1 ? (
+                    <button
+                      onClick={nextTheoryStep}
+                      className="bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-6 py-3 rounded-lg font-medium transition-all"
+                    >
+                      다음 →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowDetailedTheory(true)}
+                      className="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                    >
+                      <LightbulbIcon />
+                      상세 이론 보기
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-800">진공 기술 상세 이론</h2>
+            <button
+              onClick={() => setShowDetailedTheory(false)}
+              className="text-blue-600 hover:text-blue-800 font-medium"
+            >
+              ← 애니메이션으로 돌아가기
+            </button>
+          </div>
+
+          <div className="space-y-8">
+            {theorySteps.map((step, index) => (
+              <div key={index} className="border-l-4 border-blue-500 pl-6 py-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">{step.icon}</span>
+                  <h3 className="text-xl font-bold text-gray-800">{step.title}</h3>
+                </div>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
+                  {step.content}
+                </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-blue-800 font-medium">
+                    💡 {step.highlight}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex-1 flex flex-col">
       {/* 상단 탭 네비게이션 */}
@@ -722,6 +1037,9 @@ const VacuumSimulator = () => {
       {/* 컨텐츠 영역 */}
       <div className="flex-1 overflow-auto">
         <div className="p-6">
+          {/* Theory Tab */}
+          {activeTab === 'theory' && <TheoryTab />}
+
           {/* 테마 1: 실시간 펌핑 시뮬레이션 */}
           {activeTab === 'pumping-simulation' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">

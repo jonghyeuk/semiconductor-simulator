@@ -1,8 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
+// Simple icon components
+const PlayIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
+  </svg>
+);
+
 const CleaningSimulator = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('theory');
   
   // 세정 공정 상태들
   const [wetCleaningParams, setWetCleaningParams] = useState({
@@ -31,8 +50,15 @@ const CleaningSimulator = () => {
     metals: 40
   });
 
+  // Theory opening animation states
+  const [theoryStep, setTheoryStep] = useState(0);
+  const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+
   // 탭 정의
   const tabs = [
+    { id: 'theory', name: '이론', icon: '🎬' },
     { id: 'overview', name: '세정 공정 개요', icon: '🔄' },
     { id: 'wet-cleaning', name: '습식 세정', icon: '💧' },
     { id: 'dry-cleaning', name: '건식 세정', icon: '⚡' },
@@ -1327,6 +1353,326 @@ const CleaningSimulator = () => {
     );
   };
 
+  // Theory opening steps
+  const theorySteps = [
+    {
+      title: "🎯 세정(Cleaning)이란?",
+      content: "반도체 웨이퍼 표면의 오염물질을 제거하여 깨끗한 상태로 만드는 핵심 공정입니다.\n\n" +
+               "반도체 제조 공정에서 가장 많이 반복되는 단계로, **전체 공정의 30% 이상**을 차지합니다!\n\n" +
+               "💡 **오염물질의 종류**\n" +
+               "   • **입자(Particles)**: 먼지, 미세 파편 (0.1μm 이하도 치명적!)\n" +
+               "   • **유기물(Organics)**: 포토레지스트 잔류물, 오일, 실리콘\n" +
+               "   • **금속(Metals)**: Fe, Cu, Na 등 미량 금속 이온\n" +
+               "   • **자연 산화막(Native Oxide)**: 공기 중 형성되는 얇은 SiO₂층\n\n" +
+               "⚠️ **왜 중요한가?**\n" +
+               "   • 단 **1개의 먼지**도 칩 전체를 불량으로 만들 수 있음\n" +
+               "   • 금속 오염은 **누설 전류**와 **수명 감소** 유발\n" +
+               "   • 클린룸 Class 1 (1ft³당 0.1μm 입자 1개 미만) 필수",
+      highlight: "세정이 없으면 반도체 제조는 불가능! 수율의 핵심입니다.",
+      icon: "🎯"
+    },
+    {
+      title: "🔬 습식 vs 건식 세정",
+      content: "세정 방법은 크게 습식(Wet)과 건식(Dry)으로 나뉩니다.\n\n" +
+               "**💧 습식 세정(Wet Cleaning)**\n\n" +
+               "1️⃣ **RCA 세정** (Radio Corporation of America)\n" +
+               "   • **SC-1** (Standard Clean 1): NH₄OH + H₂O₂ + H₂O\n" +
+               "     - 입자 및 유기물 제거\n" +
+               "     - 온도: 70~80°C, 시간: 10분\n" +
+               "   • **SC-2** (Standard Clean 2): HCl + H₂O₂ + H₂O\n" +
+               "     - 금속 이온 제거\n" +
+               "     - 온도: 70~80°C, 시간: 10분\n\n" +
+               "2️⃣ **HF 처리**\n" +
+               "   • 산화막 제거: SiO₂ + 6HF → H₂SiF₆ + 2H₂O\n" +
+               "   • 희석 HF (1~2%) 사용\n\n" +
+               "3️⃣ **SPM** (Sulfuric Peroxide Mixture)\n" +
+               "   • H₂SO₄ + H₂O₂ (Piranha solution)\n" +
+               "   • 강력한 유기물 제거 (150°C 이상)\n\n" +
+               "**⚡ 건식 세정(Dry Cleaning)**\n" +
+               "   • **플라즈마 세정**: O₂, Ar, N₂, H₂ 플라즈마\n" +
+               "   • **UV/오존 세정**: UV 조사로 유기물 분해\n" +
+               "   • **초임계 CO₂**: 화학약품 없는 친환경 세정\n" +
+               "   • 장점: 건조 공정 불필요, 화학약품 사용 최소화",
+      highlight: "용도에 따라 선택! 대부분 습식, 미세 패턴에서는 건식 병행",
+      icon: "🔬"
+    },
+    {
+      title: "📈 세정 기술의 발전",
+      content: "반도체 미세화와 함께 세정 기술도 진화했습니다.\n\n" +
+               "**🕐 1970년대: RCA 세정 개발**\n" +
+               "   • Werner Kern이 개발한 표준 세정법\n" +
+               "   • 현재까지도 기본 방법으로 사용\n\n" +
+               "**🕑 1980~90년대: 메가소닉 세정**\n" +
+               "   • 900 kHz~1 MHz 초음파\n" +
+               "   • 물리적 + 화학적 세정 결합\n" +
+               "   • 입자 제거 효율 획기적 향상\n\n" +
+               "**🕒 2000년대: Single Wafer 세정**\n" +
+               "   • 배치(Batch) → 매엽(Single wafer) 방식\n" +
+               "   • 정밀한 공정 제어\n" +
+               "   • Cross contamination 방지\n\n" +
+               "**🕓 2010년대: 환경 친화적 세정**\n" +
+               "   • **DIW** (De-Ionized Water) 사용 증가\n" +
+               "   • **Ozonated water** (O₃ 용존 초순수)\n" +
+               "   • 화학약품 사용량 50% 감소\n\n" +
+               "**🕔 현재: EUV 리소그래피 대응**\n" +
+               "   • **원자층 수준** 청정도 요구\n" +
+               "   • 금속 오염 기준: **10¹⁰ atoms/cm²** 이하\n" +
+               "   • **Cryogenic 세정**, **초임계 유체** 도입\n\n" +
+               "📊 **시장 규모**: 세정 장비 시장 약 **60억 달러**(2024)\n" +
+               "💎 **핵심 기업**: SCREEN, Tokyo Electron, LAM Research, Veeco",
+      highlight: "청정도 요구사항은 계속 엄격해집니다!",
+      icon: "📈"
+    },
+    {
+      title: "🏭 실제 산업 응용",
+      content: "세정은 거의 모든 반도체 공정 단계에서 필수적입니다.\n\n" +
+               "**🔄 공정 단계별 세정**\n\n" +
+               "1️⃣ **Pre-diffusion Clean**\n" +
+               "   • 불순물 도입 전 표면 청정화\n" +
+               "   • RCA 세정 + HF dip\n\n" +
+               "2️⃣ **Post-Etch Clean**\n" +
+               "   • 식각 후 잔류물 제거\n" +
+               "   • 폴리머, 부산물 제거\n" +
+               "   • SPM 또는 플라즈마 세정\n\n" +
+               "3️⃣ **Pre-Deposition Clean**\n" +
+               "   • 박막 증착 전 산화막 제거\n" +
+               "   • HF 마지막 처리\n" +
+               "   • 원자층 수준 청정도\n\n" +
+               "4️⃣ **CMP 후 세정**\n" +
+               "   • 연마(Polishing) 후 슬러리 제거\n" +
+               "   • 브러시 + 화학약품 세정\n\n" +
+               "5️⃣ **Final Clean**\n" +
+               "   • 칩 완성 후 최종 세정\n" +
+               "   • 패키징 전 표면 처리\n\n" +
+               "**📱 응용 제품별**\n" +
+               "   • **Logic**: 30~40 단계 세정\n" +
+               "   • **Memory**: 50~60 단계 세정\n" +
+               "   • **MEMS**: 희생층 제거 + 릴리스 세정\n\n" +
+               "**👨‍🔬 세정 엔지니어의 역할**\n" +
+               "   • 오염 분석 (TXRF, ICP-MS)\n" +
+               "   • 세정 레시피 최적화\n" +
+               "   • 수율 향상 (세정 불량 **50% 이상** 감소)",
+      highlight: "반도체 제조의 숨은 영웅! 세정이 수율을 좌우합니다.",
+      icon: "🏭"
+    },
+    {
+      title: "🎓 이 시뮬레이터로 배우는 내용",
+      content: "다양한 세정 방법을 직접 체험하며 완벽히 이해할 수 있습니다.\n\n" +
+               "**📚 각 탭별 학습 목표**\n\n" +
+               "1️⃣ **개요(Overview)**: 세정 공정의 기초와 중요성\n" +
+               "   • 오염물질 종류와 영향\n" +
+               "   • 세정 방법 분류\n\n" +
+               "2️⃣ **습식 세정(Wet Cleaning)**: 화학적 세정 실습\n" +
+               "   • SC-1, SC-2 레시피 조정\n" +
+               "   • 온도, 농도, 시간 최적화\n" +
+               "   • 오염 제거율 실시간 확인\n\n" +
+               "3️⃣ **건식 세정(Dry Cleaning)**: 플라즈마 세정 체험\n" +
+               "   • O₂, Ar, N₂ 가스 선택\n" +
+               "   • RF 파워와 압력 제어\n" +
+               "   • 선택적 세정 특성\n\n" +
+               "4️⃣ **초음파 세정(Ultrasonic)**: 물리적 세정 이해\n" +
+               "   • 주파수 효과 (40 kHz vs 1 MHz)\n" +
+               "   • 캐비테이션 현상\n" +
+               "   • 입자 제거 메커니즘\n\n" +
+               "5️⃣ **평가(Quiz)**: 학습 내용 점검\n\n" +
+               "**💡 학습 방법**\n" +
+               "   ① 오염물질 유형 파악 → ② 세정 방법 선택\n" +
+               "   ③ 조건 최적화 → ④ 결과 분석\n\n" +
+               "**🎯 학습 목표**\n" +
+               "   • RCA 세정 프로세스 완벽 이해\n" +
+               "   • 오염물질별 최적 세정법 선택\n" +
+               "   • 실무 수준의 레시피 설계 능력!",
+      highlight: "지금 바로 클린룸에서 세정 공정을 시작해보세요! 🧼",
+      icon: "🎓"
+    }
+  ];
+
+  // Typing animation effect for theory
+  useEffect(() => {
+    if (isTheoryPlaying && theoryStep < theorySteps.length) {
+      const fullText = theorySteps[theoryStep].content;
+      let currentIndex = 0;
+
+      const typingInterval = setInterval(() => {
+        if (currentIndex <= fullText.length) {
+          setTypedText(fullText.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 20);
+
+      return () => clearInterval(typingInterval);
+    }
+  }, [isTheoryPlaying, theoryStep]);
+
+  // Theory control functions
+  const startTheoryAnimation = () => {
+    setIsTheoryPlaying(true);
+    setTheoryStep(0);
+    setTypedText('');
+  };
+
+  const stopTheoryAnimation = () => {
+    setIsTheoryPlaying(false);
+  };
+
+  const nextTheoryStep = () => {
+    if (theoryStep < theorySteps.length - 1) {
+      setTheoryStep(prev => prev + 1);
+      setTypedText('');
+    } else {
+      setIsTheoryPlaying(false);
+    }
+  };
+
+  const prevTheoryStep = () => {
+    if (theoryStep > 0) {
+      setTheoryStep(prev => prev - 1);
+      setTypedText('');
+    }
+  };
+
+  // Theory Tab Component
+  const TheoryTab = () => (
+    <div className="space-y-6">
+      {!showDetailedTheory ? (
+        <div className="bg-gradient-to-br from-green-600 via-teal-600 to-cyan-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+          {!isTheoryPlaying ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+              <div className="text-6xl mb-4">🎬</div>
+              <h2 className="text-4xl font-bold mb-4">
+                세정 공정 시뮬레이터
+              </h2>
+              <p className="text-xl text-green-100 max-w-2xl leading-relaxed">
+                반도체 제조의 숨은 영웅, 세정 공정의 세계로 초대합니다!<br/>
+                <span className="text-yellow-300 font-bold">5단계 스토리텔링</span>으로 쉽고 재미있게 배워보세요!
+              </p>
+              <button
+                onClick={startTheoryAnimation}
+                className="flex items-center gap-3 px-8 py-4 bg-white text-green-600 rounded-full hover:bg-yellow-50 transition-all text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 mt-8"
+              >
+                <PlayIcon />
+                시작하기
+              </button>
+              <p className="text-sm text-green-200 mt-4">
+                ⏱️ 약 3분 소요 • 📚 5단계 학습 • 🧼 클린룸의 모든 것
+              </p>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col">
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold">
+                    Step {theoryStep + 1} / {theorySteps.length}
+                  </span>
+                  <span className="text-sm text-green-200">
+                    {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}% 완료
+                  </span>
+                </div>
+                <div className="w-full bg-white/30 rounded-full h-2">
+                  <div
+                    className="bg-white h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6 overflow-y-auto">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-5xl">{theorySteps[theoryStep].icon}</span>
+                  <h3 className="text-2xl font-bold">
+                    {theorySteps[theoryStep].title}
+                  </h3>
+                </div>
+
+                <div className="text-lg leading-relaxed whitespace-pre-line mb-6 font-medium">
+                  {typedText}
+                  {typedText.length < theorySteps[theoryStep].content.length && (
+                    <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                  )}
+                </div>
+
+                {typedText.length >= theorySteps[theoryStep].content.length && (
+                  <div className="mt-6 p-4 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
+                    <div className="flex items-start gap-2 text-yellow-300">
+                      <LightbulbIcon />
+                      <p className="text-yellow-100 font-semibold">
+                        {theorySteps[theoryStep].highlight}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between">
+                <button
+                  onClick={prevTheoryStep}
+                  disabled={theoryStep === 0}
+                  className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                    theoryStep === 0
+                      ? 'bg-white/20 text-white/50 cursor-not-allowed'
+                      : 'bg-white/30 text-white hover:bg-white/40'
+                  }`}
+                >
+                  ← 이전
+                </button>
+
+                <button
+                  onClick={stopTheoryAnimation}
+                  className="flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all font-semibold"
+                >
+                  <PauseIcon />
+                  일시정지
+                </button>
+
+                {theoryStep < theorySteps.length - 1 ? (
+                  <button
+                    onClick={nextTheoryStep}
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-yellow-50 transition-all font-semibold shadow-lg"
+                  >
+                    다음 →
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setActiveTab('overview')}
+                    className="flex items-center gap-2 px-6 py-3 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-300 transition-all font-semibold shadow-lg animate-pulse"
+                  >
+                    시뮬레이터 시작! 🚀
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+          <button
+            onClick={() => setShowDetailedTheory(false)}
+            className="flex items-center gap-2 text-green-600 hover:text-green-700 font-semibold mb-4"
+          >
+            ← 오프닝으로 돌아가기
+          </button>
+          <div className="prose max-w-none">
+            <h3 className="text-2xl font-bold mb-4">상세 이론</h3>
+            <p>상세 이론 내용이 여기에 들어갑니다.</p>
+          </div>
+        </div>
+      )}
+
+      {!isTheoryPlaying && !showDetailedTheory && (
+        <div className="text-center">
+          <button
+            onClick={() => setShowDetailedTheory(true)}
+            className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-50 transition-all font-semibold shadow-lg border-2 border-green-600"
+          >
+            📚 상세 이론 보기
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="flex-1 flex flex-col">
       {/* 상단 탭 네비게이션 */}
@@ -1352,6 +1698,7 @@ const CleaningSimulator = () => {
       {/* 컨텐츠 영역 */}
       <div className="flex-1 overflow-auto">
         <div className="p-6">
+          {activeTab === 'theory' && <TheoryTab />}
           {activeTab === 'overview' && <OverviewTab />}
           {activeTab === 'wet-cleaning' && <WetCleaningTab />}
           {activeTab === 'dry-cleaning' && <DryCleaningTab />}
