@@ -1,8 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
 
+// Icon components
+const PlayIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7zm2.85 11.1l-.85.6V16h-4v-2.3l-.85-.6A4.997 4.997 0 0 1 7 9c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.63-.8 3.16-2.15 4.1z"/>
+  </svg>
+);
+
 const PlasmaSimulator = () => {
-  const [activeTheme, setActiveTheme] = useState('plasma-basics');
+  const [activeTheme, setActiveTheme] = useState('theory');
+
+  // Theory tab state
+  const [theoryStep, setTheoryStep] = useState(0);
+  const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+
   const [gasPressure, setGasPressure] = useState(1.0);
   const [plasmaEnergy, setPlasmaEnergy] = useState(100);
   const [electronTemp, setElectronTemp] = useState(3.0);
@@ -23,11 +49,144 @@ const PlasmaSimulator = () => {
   const [electrodeGap, setElectrodeGap] = useState(5);
 
   const themes = [
+    { id: 'theory', name: '이론', icon: '🎬', color: 'red' },
     { id: 'plasma-basics', name: '플라즈마 기본 특성', icon: '⚡', color: 'blue' },
     { id: 'plasma-principle1', name: '플라즈마 발생원리1', icon: '🔬', color: 'indigo' },
     { id: 'plasma-principle2', name: '플라즈마 발생원리2', icon: '📈', color: 'violet' },
     { id: 'rf-matching', name: 'RF 및 매칭', icon: '📡', color: 'green' },
     { id: 'system-structure', name: '시스템 구조(CCP)', icon: '🏗️', color: 'purple' }
+  ];
+
+  // Theory steps for opening animation
+  const theorySteps = [
+    {
+      title: "🎯 플라즈마(Plasma)란?",
+      content: "물질의 제4상태로, **전자와 이온이 분리된 이온화된 기체** 상태입니다.\n\n" +
+               "고체 → 액체 → 기체 → **플라즈마** 순으로 에너지가 증가하면서 상태가 변합니다.\n\n" +
+               "**플라즈마의 특징**:\n" +
+               "• **전기 전도성**: 자유 전자와 이온으로 인해 전기가 통함\n" +
+               "• **집단 거동**: 개별 입자가 아닌 전체가 함께 움직임\n" +
+               "• **준중성(Quasi-neutrality)**: 전자 밀도 ≈ 이온 밀도\n" +
+               "• **높은 반응성**: 에너지가 높아 화학 반응 촉진\n\n" +
+               "**우주의 99%는 플라즈마!**\n" +
+               "• 태양, 별: 핵융합 플라즈마 (이온화율 100%)\n" +
+               "• 오로라: 대기 상층부 플라즈마\n" +
+               "• 번개: 순간적 고온 플라즈마\n\n" +
+               "💡 **반도체 플라즈마**: 이온화율 0.001~1% (저온 플라즈마)\n" +
+               "• 전자 온도: 1~10 eV (1만~10만 K)\n" +
+               "• 이온/중성 입자 온도: 0.03 eV (300~500 K, 실온 수준)",
+      highlight: "플라즈마 없이는 반도체 제조 불가능! 식각, 증착, 세정 등 핵심 공정의 80%가 플라즈마 사용!",
+      icon: "🎯"
+    },
+    {
+      title: "⚙️ 플라즈마는 어떻게 만들까?",
+      content: "**1단계: RF 전력 인가**\n" +
+               "• 13.56 MHz 고주파 전기장 생성\n" +
+               "• 전극 사이에 강한 전기장 형성 (수백~수천 V)\n\n" +
+               "**2단계: 전자 가속 (Electron Acceleration)**\n" +
+               "• 전기장이 자유 전자를 가속 (e⁻ → 고속 e⁻)\n" +
+               "• 전자는 가볍고 빠르게 움직임 (이온보다 1800배 가벼움)\n\n" +
+               "**3단계: 충돌 이온화 (Impact Ionization)**\n" +
+               "• 고속 전자 + 중성 원자 → 전자 + 이온 + 새로운 전자\n" +
+               "• e⁻ (가속) + Ar → Ar⁺ + 2e⁻\n" +
+               "• 전자 1개가 2개로 증가 → **눈사태 효과 (Avalanche)**\n\n" +
+               "**4단계: 플라즈마 유지 (Steady State)**\n" +
+               "• 생성률 = 손실률 → 안정적 플라즈마 밀도 유지\n" +
+               "• 전자 밀도: 10⁹~10¹² cm⁻³ (대기압의 1억분의 1 수준)\n\n" +
+               "**5단계: 화학 반응 (Reactive Species)**\n" +
+               "• 플라즈마가 라디칼, 이온 생성\n" +
+               "• CF₄ 플라즈마 → CF₃⁺, F*, F⁻ (반응성 종)\n" +
+               "• 이들이 웨이퍼 표면과 반응 → 식각/증착",
+      highlight: "Paschen's Law: 최적 압력×거리 조건에서 최소 전압으로 플라즈마 발생 가능!",
+      icon: "⚙️"
+    },
+    {
+      title: "🚀 플라즈마 기술은 어떻게 발전했을까?",
+      content: "**1960년대: DC 플라즈마 시대**\n" +
+               "• 직류(DC) 방전으로 플라즈마 생성\n" +
+               "• 단순 스퍼터링, 저해상도 에칭\n" +
+               "• 압력: 100 mTorr~수 Torr (고압)\n\n" +
+               "**1980년대: RF CCP 플라즈마**\n" +
+               "• RF 13.56 MHz 사용 → 절연체 처리 가능\n" +
+               "• CCP (Capacitively Coupled Plasma) 상용화\n" +
+               "• RIE (Reactive Ion Etching) 도입\n" +
+               "• 압력 감소: 10~100 mTorr\n\n" +
+               "**1990년대: ICP 고밀도 플라즈마**\n" +
+               "• ICP (Inductively Coupled Plasma) 개발\n" +
+               "• 플라즈마 밀도 10배 증가 (10¹¹~10¹² cm⁻³)\n" +
+               "• 저압 고밀도: 1~10 mTorr\n" +
+               "• 이방성 식각(Anisotropic Etching) 향상\n\n" +
+               "**2000년대: Dual Frequency & Pulsed Plasma**\n" +
+               "• 이온 에너지와 플라즈마 밀도 독립 제어\n" +
+               "• HF (13.56 MHz) + LF (2 MHz) 동시 사용\n" +
+               "• Pulsed Plasma: 손상 최소화\n\n" +
+               "**2010년대 이후: ALE & 원자층 제어**\n" +
+               "• ALE (Atomic Layer Etching): 층별 제어 (<1nm/cycle)\n" +
+               "• 3D NAND, FinFET 고종횡비 구조 식각\n" +
+               "• 저손상 플라즈마: 5nm 이하 공정 대응\n\n" +
+               "📈 **놀라운 발전**: 플라즈마 밀도 1000배, 압력 1/100, 선택비 100배 향상!",
+      highlight: "플라즈마 제어 기술 = 반도체 미세화의 핵심! 3nm 공정은 플라즈마 없이 불가능!",
+      icon: "🚀"
+    },
+    {
+      title: "🏭 플라즈마는 어디에 쓰일까?",
+      content: "**1. 플라즈마 식각 (Plasma Etching)**\n" +
+               "• RIE (Reactive Ion Etching): 고이방성 패턴 전사\n" +
+               "• Deep Trench: DRAM, 3D NAND 고종횡비 홀\n" +
+               "• 가스: CF₄, CHF₃, Cl₂, HBr, SF₆\n\n" +
+               "**2. 플라즈마 증착 (PECVD)**\n" +
+               "• CVD보다 저온 (200~400°C vs 600~800°C)\n" +
+               "• SiO₂, SiN, SiON 절연막 증착\n" +
+               "• a-Si (Amorphous Silicon) 박막\n\n" +
+               "**3. 플라즈마 세정 (Plasma Cleaning)**\n" +
+               "• O₂ Plasma Ashing: PR 제거\n" +
+               "• H₂ Plasma: 유기물 제거\n" +
+               "• Remote Plasma: 저손상 세정\n\n" +
+               "**4. 플라즈마 표면 처리**\n" +
+               "• Plasma Treatment: 친수성/소수성 개질\n" +
+               "• Surface Activation: 접착력 향상\n" +
+               "• Plasma Doping: 이온 주입\n\n" +
+               "**5. PVD (Sputtering)**\n" +
+               "• 금속막 증착 (Al, Cu, Ti, Ta, W)\n" +
+               "• 플라즈마로 타겟 원자 튕겨내기\n\n" +
+               "**6. 디스플레이 & 태양전지**\n" +
+               "• LCD/OLED TFT 제조\n" +
+               "• 태양전지 텍스처링\n\n" +
+               "**7. 의료 & 환경**\n" +
+               "• 의료기구 멸균\n" +
+               "• 대기오염 물질 분해",
+      highlight: "반도체 공정의 80% 이상이 플라즈마 사용! 식각, 증착, 세정, 표면처리 모두 플라즈마 기반!",
+      icon: "🏭"
+    },
+    {
+      title: "📚 이 시뮬레이터로 무엇을 배울까?",
+      content: "**'플라즈마 기본 특성' 탭**\n" +
+               "✅ 전자 온도 vs 이온 온도 차이 이해\n" +
+               "✅ 전자 밀도와 이온화율 관계 학습\n" +
+               "✅ 압력에 따른 플라즈마 밀도 변화 시뮬레이션\n" +
+               "✅ Debye Length 개념 체험\n\n" +
+               "**'플라즈마 발생원리1' 탭**\n" +
+               "✅ 압력과 전력에 따른 플라즈마 발생 조건 실습\n" +
+               "✅ Weak/Strong Plasma 구분\n" +
+               "✅ 이온화율 계산 (<0.001% 이해)\n\n" +
+               "**'플라즈마 발생원리2' 탭**\n" +
+               "✅ Paschen's Law 시각화\n" +
+               "✅ Breakdown Voltage 계산\n" +
+               "✅ 5가지 가스별 차이점 (Ar, Air, He, N₂, Ne)\n" +
+               "✅ p×d (압력×거리) 최적 조건 찾기\n\n" +
+               "**'RF 및 매칭' 탭**\n" +
+               "✅ RF 임피던스 매칭 원리 이해\n" +
+               "✅ L-C 매칭 네트워크 설계\n" +
+               "✅ 반사 전력(Reflected Power) 최소화\n" +
+               "✅ 13.56 MHz 주파수 특성\n\n" +
+               "**'시스템 구조(CCP)' 탭**\n" +
+               "✅ CCP vs ICP 구조 비교\n" +
+               "✅ 전극 면적과 간격 영향 학습\n" +
+               "✅ Sheath 형성과 이온 충격 에너지\n" +
+               "✅ 실제 반도체 장비 구조 이해",
+      highlight: "이론부터 실무까지 완벽 학습! 각 탭을 순서대로 체험하면 플라즈마 전문가 수준 도달!",
+      icon: "📚"
+    }
   ];
 
   // 이온화율 계산 함수
@@ -177,6 +336,51 @@ const PlasmaSimulator = () => {
     const optimal = calculateOptimalLC();
     setInductance(parseInt(optimal.L));
     setCapacitance(parseInt(optimal.C));
+  };
+
+  // Theory animation effect
+  useEffect(() => {
+    if (!isTheoryPlaying) {
+      setTypedText('');
+      return;
+    }
+
+    const currentStepContent = theorySteps[theoryStep].content;
+    let currentIndex = 0;
+
+    const typingInterval = setInterval(() => {
+      if (currentIndex <= currentStepContent.length) {
+        setTypedText(currentStepContent.slice(0, currentIndex));
+        currentIndex++;
+      } else {
+        clearInterval(typingInterval);
+      }
+    }, 20);
+
+    return () => clearInterval(typingInterval);
+  }, [theoryStep, isTheoryPlaying]);
+
+  // Theory control functions
+  const startTheoryAnimation = () => {
+    setIsTheoryPlaying(true);
+    setTheoryStep(0);
+  };
+
+  const stopTheoryAnimation = () => {
+    setIsTheoryPlaying(false);
+    setTheoryStep(0);
+  };
+
+  const nextTheoryStep = () => {
+    if (theoryStep < theorySteps.length - 1) {
+      setTheoryStep(theoryStep + 1);
+    }
+  };
+
+  const prevTheoryStep = () => {
+    if (theoryStep > 0) {
+      setTheoryStep(theoryStep - 1);
+    }
   };
 
   function PlasmaVisualization() {
@@ -557,6 +761,149 @@ const PlasmaSimulator = () => {
     );
   }
 
+  // Theory Tab Component
+  const TheoryTab = () => (
+    <div className="space-y-6">
+      {!showDetailedTheory ? (
+        <div className="bg-gradient-to-br from-red-600 via-orange-600 to-yellow-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+          {!isTheoryPlaying ? (
+            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+              <div className="text-6xl mb-4">🎬</div>
+              <h2 className="text-4xl font-bold mb-4">플라즈마 I 시뮬레이터</h2>
+              <p className="text-xl text-red-100 max-w-2xl leading-relaxed">
+                물질의 제4상태, 플라즈마의 신비로운 세계로 초대합니다!<br/>
+                <span className="text-yellow-300 font-bold">5단계 스토리텔링</span>으로 쉽고 재미있게 배워보세요!
+              </p>
+              <button
+                onClick={startTheoryAnimation}
+                className="mt-8 bg-white text-red-600 px-12 py-4 rounded-full font-bold text-lg hover:bg-red-50 transition-all transform hover:scale-105 shadow-lg flex items-center gap-3"
+              >
+                <PlayIcon />
+                시작하기
+              </button>
+            </div>
+          ) : (
+            <div className="flex-1 flex flex-col">
+              {/* Progress bar */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-medium text-red-100">
+                    진행률: {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}%
+                  </span>
+                  <span className="text-sm font-medium text-red-100">
+                    {theoryStep + 1} / {theorySteps.length}
+                  </span>
+                </div>
+                <div className="w-full bg-red-800 rounded-full h-2 overflow-hidden">
+                  <div
+                    className="bg-yellow-300 h-2 rounded-full transition-all duration-500 ease-out"
+                    style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
+                  />
+                </div>
+              </div>
+
+              {/* Content */}
+              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-8 mb-6 overflow-y-auto">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
+                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+                </div>
+
+                <div className="text-lg leading-relaxed mb-6 whitespace-pre-line">
+                  {typedText}
+                  {typedText.length < theorySteps[theoryStep].content.length && (
+                    <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                  )}
+                </div>
+
+                {typedText.length === theorySteps[theoryStep].content.length && (
+                  <div className="mt-6 p-4 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                    <p className="text-yellow-100 font-medium">
+                      💡 {theorySteps[theoryStep].highlight}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Navigation buttons */}
+              <div className="flex justify-between items-center">
+                <button
+                  onClick={stopTheoryAnimation}
+                  className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                >
+                  <PauseIcon />
+                  처음으로
+                </button>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={prevTheoryStep}
+                    disabled={theoryStep === 0}
+                    className={`px-6 py-3 rounded-lg font-medium transition-all ${
+                      theoryStep === 0
+                        ? 'bg-gray-500 bg-opacity-50 text-gray-300 cursor-not-allowed'
+                        : 'bg-white bg-opacity-20 hover:bg-opacity-30 text-white'
+                    }`}
+                  >
+                    ← 이전
+                  </button>
+
+                  {theoryStep < theorySteps.length - 1 ? (
+                    <button
+                      onClick={nextTheoryStep}
+                      className="bg-yellow-400 hover:bg-yellow-300 text-red-900 px-6 py-3 rounded-lg font-medium transition-all"
+                    >
+                      다음 →
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => setShowDetailedTheory(true)}
+                      className="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
+                    >
+                      <LightbulbIcon />
+                      상세 이론 보기
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-lg p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-800">플라즈마 상세 이론</h2>
+            <button
+              onClick={() => setShowDetailedTheory(false)}
+              className="text-red-600 hover:text-red-800 font-medium"
+            >
+              ← 애니메이션으로 돌아가기
+            </button>
+          </div>
+
+          <div className="space-y-8">
+            {theorySteps.map((step, index) => (
+              <div key={index} className="border-l-4 border-red-500 pl-6 py-4">
+                <div className="flex items-center gap-3 mb-3">
+                  <span className="text-3xl">{step.icon}</span>
+                  <h3 className="text-xl font-bold text-gray-800">{step.title}</h3>
+                </div>
+                <div className="text-gray-700 leading-relaxed whitespace-pre-line mb-4">
+                  {step.content}
+                </div>
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-red-800 font-medium">
+                    💡 {step.highlight}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <style>{`
@@ -708,6 +1055,8 @@ const PlasmaSimulator = () => {
       </div>
 
       <div className="px-4 sm:px-6 lg:px-8 py-6">
+        {activeTheme === 'theory' && <TheoryTab />}
+
         {activeTheme === 'plasma-basics' && (
           <div className="space-y-4">
             <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-6 border">
