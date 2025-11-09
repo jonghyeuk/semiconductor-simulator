@@ -1,7 +1,25 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
-import { Play, Pause, Lightbulb } from 'lucide-react';
 import * as THREE from 'three';
+
+// Simple icon components
+const PlayIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const PauseIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const LightbulbIcon = () => (
+  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/>
+  </svg>
+);
 
 // ============================================================
 // SiliconEtchingSimulator Component (Three.js 3D Simulator)
@@ -2045,7 +2063,7 @@ const EtchSimulator = () => {
                       onClick={startTheoryAnimation}
                       className="flex items-center gap-3 px-8 py-4 bg-white text-red-600 rounded-full hover:bg-yellow-50 transition-all text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 mt-8"
                     >
-                      <Play className="w-8 h-8" />
+                      <PlayIcon />
                       시작하기
                     </button>
                     <p className="text-sm text-orange-200 mt-4">
@@ -2091,8 +2109,8 @@ const EtchSimulator = () => {
 
                       {typedText.length >= theorySteps[theoryStep].content.length && (
                         <div className="mt-6 p-4 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
-                          <div className="flex items-start gap-2">
-                            <Lightbulb className="w-6 h-6 text-yellow-300 flex-shrink-0 mt-1" />
+                          <div className="flex items-start gap-2 text-yellow-300">
+                            <LightbulbIcon />
                             <p className="text-yellow-100 font-semibold">
                               {theorySteps[theoryStep].highlight}
                             </p>
@@ -2119,7 +2137,7 @@ const EtchSimulator = () => {
                         onClick={stopTheoryAnimation}
                         className="flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all font-semibold"
                       >
-                        <Pause className="w-5 h-5" />
+                        <PauseIcon />
                         일시정지
                       </button>
 
