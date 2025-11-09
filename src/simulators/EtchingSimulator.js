@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
+import { Play, Pause, Lightbulb } from 'lucide-react';
 import * as THREE from 'three';
 
 // ============================================================
@@ -1553,7 +1554,7 @@ const SiliconEtchingSimulator = () => {
 
 const EtchSimulator = () => {
   // 탭 상태 관리
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('theory');
 
   // 기본 공정 파라미터 상태들 (실제 식각 파라미터)
   const [pressure, setPressure] = useState(100); // mTorr
@@ -1598,6 +1599,12 @@ const EtchSimulator = () => {
   const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
+  // Theory opening animation states
+  const [theoryStep, setTheoryStep] = useState(0);
+  const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+
   // 분석 탭용 시뮬레이션 파라미터들
   const [analysisPressure, setAnalysisPressure] = useState(100);
   const [analysisPower, setAnalysisPower] = useState(300);
@@ -1641,6 +1648,7 @@ const EtchSimulator = () => {
 
   // 탭 정의
   const tabs = [
+    { id: 'theory', name: '이론', icon: '🎬' },
     { id: 'overview', name: '식각 공정 개요', icon: '📋' },
     { id: 'etch-elements', name: '식각 요소', icon: '🔬' },
     { id: 'process', name: '식각 원리', icon: '🧪' },
@@ -1757,6 +1765,88 @@ const EtchSimulator = () => {
     return data;
   };
 
+  // Theory opening steps
+  const theorySteps = [
+    {
+      title: "🎯 식각(Etching)이란?",
+      content: "반도체 제조에서 필요한 부분만 남기고 불필요한 부분을 제거하는 핵심 공정입니다.\n\n" +
+               "마치 조각가가 대리석을 깎아 작품을 만들듯이, 식각은 나노미터(nm) 단위의 초정밀 작업으로 웨이퍼를 패턴화합니다.\n\n" +
+               "💡 놀라운 정밀도: 3nm 공정에서는 사람 머리카락 두께(약 100,000nm)의 30,000분의 1 수준!\n\n" +
+               "포토리소그래피로 그려진 마스크 패턴을 실제 소자 구조로 전사하는 필수 과정이며, 트랜지스터 형성, 배선 연결, 절연층 형성 등 거의 모든 단계에서 사용됩니다.",
+      highlight: "식각 없이는 반도체 칩을 만들 수 없습니다. 현대 전자기기의 핵심 기술!",
+      icon: "🎯"
+    },
+    {
+      title: "🔬 습식 vs 건식 식각",
+      content: "식각 방법은 크게 두 가지로 나뉩니다.\n\n" +
+               "1️⃣ 습식 식각(Wet Etching)\n" +
+               "   • 방법: 화학 용액에 웨이퍼를 담가 화학 반응으로 제거\n" +
+               "   • 장점: 간단하고 저렴하며 대면적 처리 가능\n" +
+               "   • 단점: 등방성(모든 방향으로 식각) → 미세 패턴 부적합\n" +
+               "   • 사용: 세정, 간단한 패터닝\n\n" +
+               "2️⃣ 건식 식각(Dry Etching)\n" +
+               "   • 방법: 플라즈마로 생성된 이온/라디칼로 물리화학적 제거\n" +
+               "   • 장점: 이방성(수직 방향 식각) → 정밀한 패턴 가능\n" +
+               "   • 종류: RIE, ICP, CCP 등\n" +
+               "   • 사용: 현대 반도체의 거의 모든 식각 공정",
+      highlight: "나노미터 시대에는 건식 식각이 필수! 3nm 이하 공정은 100% 건식 식각",
+      icon: "🔬"
+    },
+    {
+      title: "📈 식각 기술의 발전과 중요성",
+      content: "반도체 미세화와 함께 식각 기술도 비약적으로 발전했습니다.\n\n" +
+               "🕐 1970년대: 습식 식각 중심 (10μm 이상)\n" +
+               "🕑 1980년대: 플라즈마 식각 도입 (1μm 시대)\n" +
+               "🕒 1990년대: ICP(고밀도 플라즈마) 등장 (100nm 돌파)\n" +
+               "🕓 2000년대: 고종횡비 식각 기술 (FinFET 시대)\n" +
+               "🕔 2010년대: 원자층 식각(ALE) 개발\n" +
+               "🕕 2020년대: 3nm GAA 공정, 단원자층 정밀도 요구\n\n" +
+               "📊 시장 규모: 글로벌 식각 장비 시장 약 200억 달러(2024)\n" +
+               "💎 핵심 기업: LAM Research, Tokyo Electron, Applied Materials\n\n" +
+               "칩 성능의 80%가 식각 품질에 달려있다고 해도 과언이 아닙니다.",
+      highlight: "무어의 법칙을 가능하게 한 핵심 기술 중 하나입니다!",
+      icon: "📈"
+    },
+    {
+      title: "🏭 실제 산업 응용 사례",
+      content: "식각은 모든 반도체 제품 제조의 핵심입니다.\n\n" +
+               "🖥️ CPU/GPU 제조\n" +
+               "   • FinFET, GAA 트랜지스터의 3D 구조 형성\n" +
+               "   • 다층 배선(10층 이상) 형성\n" +
+               "   • 삼성 3nm, TSMC 2nm 공정 핵심 기술\n\n" +
+               "💾 메모리 제조\n" +
+               "   • 3D NAND: 200층 이상의 수직 홀(구멍) 식각\n" +
+               "   • DRAM: 고종횡비(1:40 이상) 트렌치 식각\n" +
+               "   • SK하이닉스 238층 NAND 양산\n\n" +
+               "📱 모바일/AI 칩\n" +
+               "   • Apple A17 Pro, Qualcomm Snapdragon\n" +
+               "   • NVIDIA H100 GPU\n\n" +
+               "👨‍🔬 식각 엔지니어의 역할\n" +
+               "   • 공정 조건 최적화 (가스, 압력, 파워, 온도)\n" +
+               "   • 선택비, 균일성, 프로파일 제어\n" +
+               "   • 수율 향상 및 비용 절감",
+      highlight: "여러분의 스마트폰 하나에 수백 번의 식각 공정이 사용되었습니다!",
+      icon: "🏭"
+    },
+    {
+      title: "🎓 이 시뮬레이터로 배우는 내용",
+      content: "실무에서 사용하는 식각 기술을 단계별로 학습할 수 있습니다.\n\n" +
+               "📚 각 탭별 학습 목표:\n\n" +
+               "1️⃣ 개요(Overview): 식각 공정의 기초 이해\n" +
+               "2️⃣ 핵심 요소(Key Elements): 식각률, 선택성, 균일성, 이방도, 로딩효과\n" +
+               "3️⃣ 식각 원리(Process): Si, SiO₂, Si₃N₄, PR 각 물질별 최적 조건 체험\n" +
+               "4️⃣ Si 식각 메커니즘(Analysis): 3D 시각화로 가스 반응 과정 관찰\n" +
+               "   • SF₆, CF₄, Cl₂, HBr 가스 비교\n" +
+               "   • 플라즈마 분해 → 라디칼 확산 → 식각 → 부산물 배출\n" +
+               "5️⃣ 평가(Quiz): 학습 내용 점검\n\n" +
+               "💡 학습 방법:\n" +
+               "   ① 이론을 먼저 읽고 → ② 시뮬레이터로 실습 → ③ 파라미터 변화 관찰 → ④ 생각해보기 질문에 답변\n\n" +
+               "🎯 목표: 실제 fab 엔지니어처럼 최적 조건을 찾아내는 능력 함양!",
+      highlight: "지금 바로 시뮬레이터를 시작하여 플라즈마 식각의 세계를 탐험해보세요! 🚀",
+      icon: "🎓"
+    }
+  ];
+
   // 식각 관련 퀴즈 문제들
   const quizQuestions = [
     {
@@ -1808,6 +1898,52 @@ const EtchSimulator = () => {
     }, 1000);
     return () => clearInterval(blinkInterval);
   }, []);
+
+  // Typing animation effect for theory
+  useEffect(() => {
+    if (isTheoryPlaying && theoryStep < theorySteps.length) {
+      const fullText = theorySteps[theoryStep].content;
+      let currentIndex = 0;
+
+      const typingInterval = setInterval(() => {
+        if (currentIndex <= fullText.length) {
+          setTypedText(fullText.slice(0, currentIndex));
+          currentIndex++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 20);
+
+      return () => clearInterval(typingInterval);
+    }
+  }, [isTheoryPlaying, theoryStep]);
+
+  // Theory control functions
+  const startTheoryAnimation = () => {
+    setIsTheoryPlaying(true);
+    setTheoryStep(0);
+    setTypedText('');
+  };
+
+  const stopTheoryAnimation = () => {
+    setIsTheoryPlaying(false);
+  };
+
+  const nextTheoryStep = () => {
+    if (theoryStep < theorySteps.length - 1) {
+      setTheoryStep(prev => prev + 1);
+      setTypedText('');
+    } else {
+      setIsTheoryPlaying(false);
+    }
+  };
+
+  const prevTheoryStep = () => {
+    if (theoryStep > 0) {
+      setTheoryStep(prev => prev - 1);
+      setTypedText('');
+    }
+  };
 
   const submitAnswer = () => {
     if (selectedAnswer === quizQuestions[currentQuestion].correct.toString()) {
@@ -1889,6 +2025,154 @@ const EtchSimulator = () => {
   // 탭별 컨텐츠 렌더링
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'theory':
+        return (
+          <div className="space-y-6">
+            {!showDetailedTheory ? (
+              <div className="bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+                {!isTheoryPlaying ? (
+                  // Initial welcome screen
+                  <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+                    <div className="text-6xl mb-4">🎬</div>
+                    <h2 className="text-4xl font-bold mb-4">
+                      플라즈마 식각 공정 시뮬레이터
+                    </h2>
+                    <p className="text-xl text-orange-100 max-w-2xl leading-relaxed">
+                      나노미터 단위의 초정밀 공정, 플라즈마 식각의 세계로 초대합니다.<br/>
+                      <span className="text-yellow-300 font-bold">5단계 스토리텔링</span>으로 쉽고 재미있게 배워보세요!
+                    </p>
+                    <button
+                      onClick={startTheoryAnimation}
+                      className="flex items-center gap-3 px-8 py-4 bg-white text-red-600 rounded-full hover:bg-yellow-50 transition-all text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 mt-8"
+                    >
+                      <Play className="w-8 h-8" />
+                      시작하기
+                    </button>
+                    <p className="text-sm text-orange-200 mt-4">
+                      ⏱️ 약 3분 소요 • 📚 5단계 학습 • 🎯 핵심만 쏙쏙
+                    </p>
+                  </div>
+                ) : (
+                  // Animation playing
+                  <div className="flex-1 flex flex-col">
+                    {/* Progress bar */}
+                    <div className="mb-6">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold">
+                          Step {theoryStep + 1} / {theorySteps.length}
+                        </span>
+                        <span className="text-sm text-orange-200">
+                          {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}% 완료
+                        </span>
+                      </div>
+                      <div className="w-full bg-white/30 rounded-full h-2">
+                        <div
+                          className="bg-white h-2 rounded-full transition-all duration-500"
+                          style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Content area */}
+                    <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6 overflow-y-auto">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-5xl">{theorySteps[theoryStep].icon}</span>
+                        <h3 className="text-2xl font-bold">
+                          {theorySteps[theoryStep].title}
+                        </h3>
+                      </div>
+
+                      <div className="text-lg leading-relaxed whitespace-pre-line mb-6 font-medium">
+                        {typedText}
+                        {typedText.length < theorySteps[theoryStep].content.length && (
+                          <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                        )}
+                      </div>
+
+                      {typedText.length >= theorySteps[theoryStep].content.length && (
+                        <div className="mt-6 p-4 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
+                          <div className="flex items-start gap-2">
+                            <Lightbulb className="w-6 h-6 text-yellow-300 flex-shrink-0 mt-1" />
+                            <p className="text-yellow-100 font-semibold">
+                              {theorySteps[theoryStep].highlight}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Navigation buttons */}
+                    <div className="flex items-center justify-between">
+                      <button
+                        onClick={prevTheoryStep}
+                        disabled={theoryStep === 0}
+                        className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                          theoryStep === 0
+                            ? 'bg-white/20 text-white/50 cursor-not-allowed'
+                            : 'bg-white/30 text-white hover:bg-white/40'
+                        }`}
+                      >
+                        ← 이전
+                      </button>
+
+                      <button
+                        onClick={stopTheoryAnimation}
+                        className="flex items-center gap-2 px-6 py-3 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all font-semibold"
+                      >
+                        <Pause className="w-5 h-5" />
+                        일시정지
+                      </button>
+
+                      {theoryStep < theorySteps.length - 1 ? (
+                        <button
+                          onClick={nextTheoryStep}
+                          className="flex items-center gap-2 px-6 py-3 bg-white text-red-600 rounded-lg hover:bg-yellow-50 transition-all font-semibold shadow-lg"
+                        >
+                          다음 →
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setActiveTab('overview')}
+                          className="flex items-center gap-2 px-6 py-3 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-300 transition-all font-semibold shadow-lg animate-pulse"
+                        >
+                          시뮬레이터 시작! 🚀
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              // Detailed theory content (if needed in the future)
+              <div className="bg-white rounded-xl shadow-lg p-6 space-y-6">
+                <button
+                  onClick={() => setShowDetailedTheory(false)}
+                  className="flex items-center gap-2 text-red-600 hover:text-red-700 font-semibold mb-4"
+                >
+                  ← 오프닝으로 돌아가기
+                </button>
+
+                <div className="prose max-w-none">
+                  <h3 className="text-2xl font-bold mb-4">상세 이론</h3>
+                  <p>상세 이론 내용이 여기에 들어갑니다.</p>
+                </div>
+              </div>
+            )}
+
+            {/* Toggle detailed theory button */}
+            {!isTheoryPlaying && !showDetailedTheory && (
+              <div className="text-center">
+                <button
+                  onClick={() => setShowDetailedTheory(true)}
+                  className="px-6 py-3 bg-white text-red-600 rounded-lg hover:bg-gray-50 transition-all font-semibold shadow-lg border-2 border-red-600"
+                >
+                  📚 상세 이론 보기
+                </button>
+              </div>
+            )}
+          </div>
+        );
+
       case 'overview':
         return (
           <div className="space-y-6">
