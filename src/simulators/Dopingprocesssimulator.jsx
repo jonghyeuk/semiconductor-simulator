@@ -533,6 +533,301 @@ const DopingProcessSimulator = () => {
 
   return (
     <div className="flex-1 flex flex-col">
+      <style>{`
+        /* 빨간색 슬라이더 스타일 (온도) */
+        .slider-thumb-red {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-red::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          border-radius: 10px;
+          border: 2px solid #b91c1c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-red::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-red::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-red::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          border-radius: 10px;
+          border: 2px solid #b91c1c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-red::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #dc2626, #ef4444);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 파란색 슬라이더 스타일 (시간) */
+        .slider-thumb-blue {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-blue::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          border-radius: 10px;
+          border: 2px solid #1d4ed8;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-blue::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-blue::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-blue::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          border-radius: 10px;
+          border: 2px solid #1d4ed8;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-blue::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #2563eb, #3b82f6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 녹색 슬라이더 스타일 (농도) */
+        .slider-thumb-green {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-green::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #059669, #10b981);
+          border-radius: 10px;
+          border: 2px solid #047857;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-green::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #059669, #10b981);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-green::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-green::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #059669, #10b981);
+          border-radius: 10px;
+          border: 2px solid #047857;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-green::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #059669, #10b981);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 보라색 슬라이더 스타일 (배경농도, 도즈) */
+        .slider-thumb-purple {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-purple::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          border-radius: 10px;
+          border: 2px solid #6d28d9;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-purple::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-purple::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-purple::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          border-radius: 10px;
+          border: 2px solid #6d28d9;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-purple::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 오렌지색 슬라이더 스타일 (에너지) */
+        .slider-thumb-orange {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-orange::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          border-radius: 10px;
+          border: 2px solid #c2410c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-orange::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-orange::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-orange::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          border-radius: 10px;
+          border: 2px solid #c2410c;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-orange::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #ea580c, #f97316);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+
+        /* 인디고색 슬라이더 스타일 (경사각) */
+        .slider-thumb-indigo {
+          position: relative;
+          z-index: 10;
+        }
+        .slider-thumb-indigo::-webkit-slider-runnable-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #4f46e5, #6366f1);
+          border-radius: 10px;
+          border: 2px solid #4338ca;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-indigo::-webkit-slider-thumb {
+          appearance: none;
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #4f46e5, #6366f1);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+          position: relative;
+          top: -2px;
+        }
+        .slider-thumb-indigo::-webkit-slider-thumb:hover {
+          transform: scale(1.2);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        .slider-thumb-indigo::-moz-range-track {
+          width: 100%;
+          height: 20px;
+          background: linear-gradient(135deg, #4f46e5, #6366f1);
+          border-radius: 10px;
+          border: 2px solid #4338ca;
+          box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .slider-thumb-indigo::-moz-range-thumb {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #4f46e5, #6366f1);
+          cursor: pointer;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+      `}</style>
       {/* Tab Navigation */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="flex space-x-1 p-2">
@@ -1184,7 +1479,7 @@ const DopingProcessSimulator = () => {
                     setDiffTemperature(Number(e.target.value));
                     resetAnimation();
                   }}
-                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-red"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>800°C</span>
@@ -1206,7 +1501,7 @@ const DopingProcessSimulator = () => {
                     setDiffTime(Number(e.target.value));
                     resetAnimation();
                   }}
-                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>5분</span>
@@ -1228,7 +1523,7 @@ const DopingProcessSimulator = () => {
                     setDiffSurfaceConc(Math.pow(10, Number(e.target.value)));
                     resetAnimation();
                   }}
-                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-green"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10¹⁸</span>
@@ -1250,7 +1545,7 @@ const DopingProcessSimulator = () => {
                     setDiffBackgroundConc(Math.pow(10, Number(e.target.value)));
                     resetAnimation();
                   }}
-                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-purple"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10¹⁴</span>
@@ -1699,7 +1994,7 @@ const DopingProcessSimulator = () => {
                   step="5"
                   value={implEnergy}
                   onChange={(e) => setImplEnergy(Number(e.target.value))}
-                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-orange"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10 keV</span>
@@ -1718,7 +2013,7 @@ const DopingProcessSimulator = () => {
                   step="0.1"
                   value={Math.log10(implDose)}
                   onChange={(e) => setImplDose(Math.pow(10, Number(e.target.value)))}
-                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-purple"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10¹²</span>
@@ -1737,7 +2032,7 @@ const DopingProcessSimulator = () => {
                   step="1"
                   value={implTilt}
                   onChange={(e) => setImplTilt(Number(e.target.value))}
-                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-indigo"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>0°</span>
@@ -1768,7 +2063,7 @@ const DopingProcessSimulator = () => {
                         step="50"
                         value={annealTemp}
                         onChange={(e) => setAnnealTemp(Number(e.target.value))}
-                        className="w-full h-4 rounded-lg appearance-none cursor-pointer"
+                        className="w-full h-4 rounded-lg appearance-none cursor-pointer slider-thumb-red"
                       />
                     </div>
                     <div className="p-2 bg-white rounded border-2 border-blue-200">
@@ -1782,7 +2077,7 @@ const DopingProcessSimulator = () => {
                         step="5"
                         value={annealTime}
                         onChange={(e) => setAnnealTime(Number(e.target.value))}
-                        className="w-full h-4 rounded-lg appearance-none cursor-pointer"
+                        className="w-full h-4 rounded-lg appearance-none cursor-pointer slider-thumb-blue"
                       />
                     </div>
                   </div>
