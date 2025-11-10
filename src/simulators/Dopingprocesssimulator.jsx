@@ -532,25 +532,10 @@ const DopingProcessSimulator = () => {
   };
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <div className="bg-white rounded-xl shadow-lg p-6 mb-6">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-lg">
-            <Target className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-3xl font-bold text-gray-800">
-            반도체 도핑 공정 시뮬레이터
-          </h1>
-        </div>
-        <p className="text-gray-600 ml-14">
-          Semiconductor Doping Process Simulator - Diffusion & Ion Implantation
-        </p>
-      </div>
-
+    <div className="flex-1 flex flex-col">
       {/* Tab Navigation */}
-      <div className="bg-white rounded-xl shadow-lg mb-6">
-        <div className="flex flex-wrap border-b">
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="flex space-x-1 p-2">
           {[
             { id: 'theory', label: '이론', icon: BookOpen },
             { id: 'diffusion', label: '확산 공정', icon: TrendingUp },
@@ -563,28 +548,31 @@ const DopingProcessSimulator = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-4 font-semibold transition-colors min-w-[120px] ${
+              className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all ${
                 activeTab === tab.id
-                  ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50'
-                  : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                  ? 'bg-blue-100 text-blue-800 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
               }`}
             >
               <tab.icon className="w-5 h-5" />
-              {tab.label}
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Theory Tab - Opening Animation */}
-      {activeTab === 'theory' && (
-        <div className="space-y-6">
-          {/* Main Animation Area */}
-          {!showDetailedTheory ? (
-            <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
-              {!isTheoryPlaying ? (
-                // Initial welcome screen
-                <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+      {/* Content Area */}
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          {/* Theory Tab - Opening Animation */}
+          {activeTab === 'theory' && (
+            <div className="space-y-6">
+              {/* Main Animation Area */}
+              {!showDetailedTheory ? (
+                <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+                  {!isTheoryPlaying ? (
+                    // Initial welcome screen
+                    <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
                   <div className="text-6xl mb-4">🎬</div>
                   <h2 className="text-4xl font-bold mb-4">
                     반도체 도핑공정
@@ -932,12 +920,12 @@ const DopingProcessSimulator = () => {
               </button>
             </div>
           )}
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Diffusion Simulator Tab */}
-      {activeTab === 'diffusion' && (
-        <div className="space-y-6">
+          {/* Diffusion Simulator Tab */}
+          {activeTab === 'diffusion' && (
+            <div className="space-y-6">
           {/* Diffusion Theory Section */}
           <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -1459,12 +1447,12 @@ const DopingProcessSimulator = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Implantation Simulator Tab */}
-      {activeTab === 'implantation' && (
-        <div className="space-y-6">
+          {/* Implantation Simulator Tab */}
+          {activeTab === 'implantation' && (
+            <div className="space-y-6">
           {/* Implantation Theory & Equipment */}
           <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -1988,12 +1976,12 @@ const DopingProcessSimulator = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Comparison Tab */}
-      {activeTab === 'comparison' && (
-        <div className="space-y-6">
+          {/* Comparison Tab */}
+          {activeTab === 'comparison' && (
+            <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               확산 vs 이온 주입 비교
@@ -2196,12 +2184,12 @@ const DopingProcessSimulator = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Temperature Effect Tab */}
-      {activeTab === 'temperature' && (
-        <div className="space-y-6">
+          {/* Temperature Effect Tab */}
+          {activeTab === 'temperature' && (
+            <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               온도가 도핑 공정에 미치는 영향
@@ -2403,12 +2391,12 @@ const DopingProcessSimulator = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Application Guide Tab */}
-      {activeTab === 'application' && (
-        <div className="space-y-6">
+          {/* Application Guide Tab */}
+          {activeTab === 'application' && (
+            <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
               실무 적용 가이드
@@ -2642,12 +2630,12 @@ const DopingProcessSimulator = () => {
               </div>
             </div>
           </div>
-        </div>
-      )}
+            </div>
+          )}
 
-      {/* Quiz Tab */}
-      {activeTab === 'quiz' && (
-        <div className="space-y-6">
+          {/* Quiz Tab */}
+          {activeTab === 'quiz' && (
+            <div className="space-y-6">
           <div className="bg-white rounded-xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -2826,15 +2814,9 @@ const DopingProcessSimulator = () => {
               </div>
             </div>
           </div>
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Footer */}
-      <div className="bg-white rounded-xl shadow-lg p-4 mt-6">
-        <p className="text-center text-sm text-gray-600">
-          반도체 도핑 공정 교육용 시뮬레이터 | 
-          Diffusion & Ion Implantation Simulator for Education
-        </p>
       </div>
     </div>
   );
