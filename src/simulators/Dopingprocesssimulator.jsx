@@ -1170,8 +1170,8 @@ const DopingProcessSimulator = () => {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="p-3 bg-white rounded-lg border-2 border-red-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-red-800">
                   온도: {diffTemperature}°C
                 </label>
                 <input
@@ -1184,7 +1184,7 @@ const DopingProcessSimulator = () => {
                     setDiffTemperature(Number(e.target.value));
                     resetAnimation();
                   }}
-                  className="w-full"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>800°C</span>
@@ -1192,8 +1192,8 @@ const DopingProcessSimulator = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-blue-800">
                   시간: {diffTime} 분
                 </label>
                 <input
@@ -1206,7 +1206,7 @@ const DopingProcessSimulator = () => {
                     setDiffTime(Number(e.target.value));
                     resetAnimation();
                   }}
-                  className="w-full"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>5분</span>
@@ -1214,8 +1214,8 @@ const DopingProcessSimulator = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-green-800">
                   표면 농도: {(diffSurfaceConc).toExponential(1)} /cm³
                 </label>
                 <input
@@ -1228,7 +1228,7 @@ const DopingProcessSimulator = () => {
                     setDiffSurfaceConc(Math.pow(10, Number(e.target.value)));
                     resetAnimation();
                   }}
-                  className="w-full"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10¹⁸</span>
@@ -1236,8 +1236,8 @@ const DopingProcessSimulator = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="p-3 bg-white rounded-lg border-2 border-purple-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-purple-800">
                   배경 농도: {(diffBackgroundConc).toExponential(1)} /cm³
                 </label>
                 <input
@@ -1250,7 +1250,7 @@ const DopingProcessSimulator = () => {
                     setDiffBackgroundConc(Math.pow(10, Number(e.target.value)));
                     resetAnimation();
                   }}
-                  className="w-full"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10¹⁴</span>
@@ -1688,8 +1688,8 @@ const DopingProcessSimulator = () => {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="p-3 bg-white rounded-lg border-2 border-orange-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-orange-800">
                   에너지: {implEnergy} keV
                 </label>
                 <input
@@ -1699,7 +1699,7 @@ const DopingProcessSimulator = () => {
                   step="5"
                   value={implEnergy}
                   onChange={(e) => setImplEnergy(Number(e.target.value))}
-                  className="w-full"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10 keV</span>
@@ -1707,8 +1707,8 @@ const DopingProcessSimulator = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="p-3 bg-white rounded-lg border-2 border-purple-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-purple-800">
                   도즈: {(implDose).toExponential(1)} ions/cm²
                 </label>
                 <input
@@ -1718,7 +1718,7 @@ const DopingProcessSimulator = () => {
                   step="0.1"
                   value={Math.log10(implDose)}
                   onChange={(e) => setImplDose(Math.pow(10, Number(e.target.value)))}
-                  className="w-full"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>10¹²</span>
@@ -1726,8 +1726,8 @@ const DopingProcessSimulator = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+              <div className="p-3 bg-white rounded-lg border-2 border-indigo-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-indigo-800">
                   경사각 (Tilt): {implTilt}°
                 </label>
                 <input
@@ -1737,7 +1737,7 @@ const DopingProcessSimulator = () => {
                   step="1"
                   value={implTilt}
                   onChange={(e) => setImplTilt(Number(e.target.value))}
-                  className="w-full"
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
                   <span>0°</span>
@@ -1757,8 +1757,8 @@ const DopingProcessSimulator = () => {
                 </label>
                 {implAnnealing && (
                   <div className="grid grid-cols-2 gap-4 mt-3">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
+                    <div className="p-2 bg-white rounded border-2 border-red-200">
+                      <label className="block text-xs font-medium text-red-800 mb-1">
                         온도: {annealTemp}°C
                       </label>
                       <input
@@ -1768,11 +1768,11 @@ const DopingProcessSimulator = () => {
                         step="50"
                         value={annealTemp}
                         onChange={(e) => setAnnealTemp(Number(e.target.value))}
-                        className="w-full"
+                        className="w-full h-4 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
+                    <div className="p-2 bg-white rounded border-2 border-blue-200">
+                      <label className="block text-xs font-medium text-blue-800 mb-1">
                         시간: {annealTime}분
                       </label>
                       <input
@@ -1782,7 +1782,7 @@ const DopingProcessSimulator = () => {
                         step="5"
                         value={annealTime}
                         onChange={(e) => setAnnealTime(Number(e.target.value))}
-                        className="w-full"
+                        className="w-full h-4 rounded-lg appearance-none cursor-pointer"
                       />
                     </div>
                   </div>
