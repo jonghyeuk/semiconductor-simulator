@@ -7,6 +7,7 @@ import LithographySimulator from '../simulators/LithographySimulator'; // ← �
 import PlasmaSimulator from '../simulators/PlasmaSimulator';
 import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII';
 import EtchingSimulator from '../simulators/EtchingSimulator';
+import DopingProcessSimulator from '../simulators/Dopingprocesssimulator';
 // import DepositionSimulator from '../simulators/DepositionSimulator';
 
 class SimulatorRegistry {
@@ -213,24 +214,29 @@ class SimulatorRegistry {
       }
     });
 
-    // Implantation 시뮬레이터 (준비중)
+    // Implantation 시뮬레이터 (완성됨)
     this.register({
       id: 'implantation',
       name: 'Implantation',
       icon: '⚛️',
       description: '이온주입 및 도핑',
-      component: null,
-      available: false,
+      component: DopingProcessSimulator,
+      available: true,
       category: 'process',
       order: 9,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-04-15',
+        version: '1.0.0',
+        lastUpdated: '2025-02-10',
+        author: 'Semiconductor Simulator Team',
         features: [
-          '이온주입 프로파일',
-          '어닐링 및 활성화',
-          '도즈량 최적화',
-          '채널링 효과'
+          '도핑 공정 5단계 이론 스토리텔링',
+          '이온주입(Implantation) 프로파일 시뮬레이션',
+          '확산(Diffusion) 공정 시뮬레이션',
+          '어닐링 및 활성화 과정',
+          '도즈량(Dose) 및 에너지 최적화',
+          'Gaussian 분포 프로파일 분석',
+          'LSS 이론 기반 계산',
+          '도핑 비교 및 Quiz'
         ]
       }
     });
