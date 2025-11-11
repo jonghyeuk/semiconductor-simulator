@@ -1590,9 +1590,9 @@ const DopingProcessSimulator = () => {
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">확산 공정 Furnace 개략도</h2>
             <div className="bg-gray-50 rounded-lg p-4">
-              <svg viewBox="0 0 900 500" style={{ width: '100%', height: '500px', backgroundColor: '#f8f9fa' }}>
+              <svg viewBox="0 0 1000 500" style={{ width: '100%', height: '500px', backgroundColor: '#f8f9fa' }}>
                 {/* Background */}
-                <rect width="900" height="500" fill="#f8f9fa" />
+                <rect width="1000" height="500" fill="#f8f9fa" />
 
                 {/* Gas Input Lines */}
                 {/* O2 Line */}
