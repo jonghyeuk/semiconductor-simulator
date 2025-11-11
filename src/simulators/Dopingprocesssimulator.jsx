@@ -1600,12 +1600,16 @@ const DopingProcessSimulator = () => {
                 {/* O2 Line */}
                 <line x1="50" y1="180" x2="180" y2="180" stroke="#333" strokeWidth="3" />
                 <line x1="180" y1="180" x2="180" y2="190" stroke="#333" strokeWidth="3" />
-                <line x1="180" y1="190" x2="270" y2="190" stroke="#333" strokeWidth="3" />
+                <line x1="180" y1="190" x2="230" y2="190" stroke="#333" strokeWidth="3" />
+                {/* O2 to tube connection - thick */}
+                <line x1="230" y1="190" x2="270" y2="200" stroke="#333" strokeWidth="5" />
 
                 {/* N2 Line */}
                 <line x1="50" y1="240" x2="180" y2="240" stroke="#333" strokeWidth="3" />
                 <line x1="180" y1="240" x2="180" y2="210" stroke="#333" strokeWidth="3" />
-                <line x1="180" y1="210" x2="270" y2="210" stroke="#333" strokeWidth="3" />
+                <line x1="180" y1="210" x2="230" y2="210" stroke="#333" strokeWidth="3" />
+                {/* N2 to tube connection - thick */}
+                <line x1="230" y1="210" x2="270" y2="200" stroke="#333" strokeWidth="5" />
 
                 {/* Gas Labels */}
                 <text x="30" y="185" fontSize="16" fontWeight="bold" textAnchor="middle">O₂</text>
@@ -1624,7 +1628,7 @@ const DopingProcessSimulator = () => {
                 {/* Flow Direction Arrows */}
                 <polygon points="150,175 165,180 150,185" fill="#333" />
                 <polygon points="150,235 165,240 150,245" fill="#333" />
-                <polygon points="200,195 215,200 200,205" fill="#333" />
+                <polygon points="240,195 255,200 240,205" fill="#333" />
 
                 {/* Quartz Diffusion Tube */}
                 <rect x="270" y="150" width="360" height="100" fill="#e6f3ff" stroke="#333" strokeWidth="3" rx="50" ry="50" />
@@ -1703,6 +1707,8 @@ const DopingProcessSimulator = () => {
                 <line x1="210" y1="320" x2="210" y2="270" stroke="#333" strokeWidth="2" />
                 <line x1="210" y1="270" x2="180" y2="270" stroke="#333" strokeWidth="2" />
                 <line x1="180" y1="270" x2="180" y2="225" stroke="#333" strokeWidth="2" />
+                {/* Vapor to tube connection - thick */}
+                <line x1="180" y1="225" x2="270" y2="200" stroke="#333" strokeWidth="5" />
 
                 {/* Vapor arrow */}
                 <polygon points="175,230 180,220 185,230" fill="#333" />
