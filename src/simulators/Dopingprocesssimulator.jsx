@@ -1285,7 +1285,10 @@ const DopingProcessSimulator = () => {
                     <circle cx="50" cy="255" r="12" fill="none" stroke="#374151" strokeWidth="2"/>
                     <line x1="44" y1="249" x2="56" y2="261" stroke="#374151" strokeWidth="2"/>
                     <rect x="45" y="210" width="10" height="20" fill="white" stroke="#374151" strokeWidth="2"/>
-                    
+                    <line x1="50" y1="210" x2="50" y2="155" stroke="#374151" strokeWidth="2"/>
+                    {/* O2 to tube connection - thick */}
+                    <line x1="50" y1="155" x2="270" y2="155" stroke="#374151" strokeWidth="4"/>
+
                     {/* N2 Line */}
                     <text x="110" y="340" fontSize="12" fill="#1f2937">N₂</text>
                     <line x1="130" y1="335" x2="130" y2="280" stroke="#374151" strokeWidth="2"/>
@@ -1295,6 +1298,9 @@ const DopingProcessSimulator = () => {
                     <rect x="125" y="210" width="10" height="20" fill="white" stroke="#374151" strokeWidth="2"/>
                     <line x1="130" y1="210" x2="190" y2="210" stroke="#374151" strokeWidth="2"/>
                     <polygon points="190,210 185,207 185,213" fill="#374151"/>
+                    <line x1="190" y1="210" x2="190" y2="155" stroke="#374151" strokeWidth="2"/>
+                    {/* N2 to tube connection - thick */}
+                    <line x1="190" y1="155" x2="270" y2="155" stroke="#374151" strokeWidth="4"/>
 
                     {/* Temperature Controlled Bath */}
                     <rect x="160" y="290" width="80" height="60" fill="#7dd3fc" stroke="#0369a1" strokeWidth="2"/>
@@ -1307,20 +1313,12 @@ const DopingProcessSimulator = () => {
                     <line x1="200" y1="290" x2="200" y2="210" stroke="#374151" strokeWidth="2"/>
                     <circle cx="200" cy="250" r="12" fill="none" stroke="#374151" strokeWidth="2"/>
                     <line x1="194" y1="244" x2="206" y2="256" stroke="#374151" strokeWidth="2"/>
+                    <line x1="200" y1="210" x2="200" y2="155" stroke="#374151" strokeWidth="2"/>
+                    {/* Bath vapor to tube connection - thick */}
+                    <line x1="200" y1="155" x2="270" y2="155" stroke="#374151" strokeWidth="4"/>
 
-                    {/* Gas flow to tube */}
-                    <line x1="200" y1="210" x2="260" y2="210" stroke="#374151" strokeWidth="2"/>
-                    <polygon points="260,210 255,207 255,213" fill="#374151"/>
-                    
-                    {/* Arrows entering tube */}
-                    <line x1="270" y1="125" x2="290" y2="125" stroke="#374151" strokeWidth="2"/>
-                    <polygon points="290,125 285,122 285,128" fill="#374151"/>
-                    <line x1="270" y1="145" x2="290" y2="145" stroke="#374151" strokeWidth="2"/>
-                    <polygon points="290,145 285,142 285,148" fill="#374151"/>
-                    <line x1="270" y1="165" x2="290" y2="165" stroke="#374151" strokeWidth="2"/>
-                    <polygon points="290,165 285,162 285,168" fill="#374151"/>
-                    <line x1="270" y1="185" x2="290" y2="185" stroke="#374151" strokeWidth="2"/>
-                    <polygon points="290,185 285,182 285,188" fill="#374151"/>
+                    {/* Gas flow arrow */}
+                    <polygon points="260,155 255,152 255,158" fill="#374151"/>
 
                     {/* Main Quartz Tube */}
                     <ellipse cx="300" cy="155" rx="30" ry="50" fill="url(#tubeGradient)" stroke="#374151" strokeWidth="3"/>
