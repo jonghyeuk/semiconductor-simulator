@@ -1588,6 +1588,174 @@ const DopingProcessSimulator = () => {
             </div>
           </div>
 
+          {/* Diffusion Furnace Schematic */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">확산 공정 Furnace 개략도</h2>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <svg viewBox="0 0 900 500" style={{ width: '100%', height: '500px' }}>
+                {/* Background */}
+                <rect width="900" height="500" fill="#f8f9fa" />
+
+                {/* Gas Input Lines */}
+                {/* N2 Carrier Gas Line */}
+                <line x1="50" y1="180" x2="180" y2="180" stroke="#333" strokeWidth="3" />
+                <line x1="180" y1="180" x2="180" y2="190" stroke="#333" strokeWidth="3" />
+                <line x1="180" y1="190" x2="270" y2="190" stroke="#333" strokeWidth="3" />
+
+                {/* Dopant Source Gas Line */}
+                <line x1="50" y1="240" x2="180" y2="240" stroke="#333" strokeWidth="3" />
+                <line x1="180" y1="240" x2="180" y2="210" stroke="#333" strokeWidth="3" />
+                <line x1="180" y1="210" x2="270" y2="210" stroke="#333" strokeWidth="3" />
+
+                {/* Gas Labels */}
+                <text x="25" y="185" fontSize="14" fontWeight="bold" textAnchor="middle">N₂</text>
+                <text x="25" y="200" fontSize="11" textAnchor="middle">(Carrier)</text>
+                <text x="25" y="240" fontSize="14" fontWeight="bold" textAnchor="middle">Dopant</text>
+                <text x="25" y="255" fontSize="11" textAnchor="middle">(POCl₃/BBr₃)</text>
+
+                {/* Flow Control Valves */}
+                <circle cx="120" cy="180" r="15" fill="white" stroke="#333" strokeWidth="2" />
+                <path d="M108 168 L132 192 M132 168 L108 192" stroke="#333" strokeWidth="2" />
+
+                <circle cx="120" cy="240" r="15" fill="white" stroke="#333" strokeWidth="2" />
+                <path d="M108 228 L132 252 M132 228 L108 252" stroke="#333" strokeWidth="2" />
+
+                <circle cx="230" cy="200" r="15" fill="white" stroke="#333" strokeWidth="2" />
+                <path d="M218 188 L242 212 M242 188 L218 212" stroke="#333" strokeWidth="2" />
+
+                {/* Flow Direction Arrows */}
+                <polygon points="150,175 165,180 150,185" fill="#333" />
+                <polygon points="150,235 165,240 150,245" fill="#333" />
+                <polygon points="200,195 215,200 200,205" fill="#333" />
+
+                {/* Quartz Diffusion Tube */}
+                <rect x="270" y="150" width="360" height="100" fill="#e6f3ff" stroke="#333" strokeWidth="3" rx="50" ry="50" />
+
+                {/* Three Heating Zones - colored differently */}
+                {/* Zone 1 (Preheat) */}
+                <rect x="280" y="135" width="100" height="130" fill="rgba(255, 200, 100, 0.2)" stroke="none" />
+                {/* Zone 2 (Main) */}
+                <rect x="400" y="135" width="140" height="130" fill="rgba(255, 100, 100, 0.2)" stroke="none" />
+                {/* Zone 3 (Cool down) */}
+                <rect x="520" y="135" width="100" height="130" fill="rgba(255, 200, 100, 0.2)" stroke="none" />
+
+                {/* Heaters above the tube */}
+                <circle cx="330" cy="130" r="6" fill="#ff6600" />
+                <circle cx="370" cy="130" r="6" fill="#ff6600" />
+                <circle cx="420" cy="125" r="7" fill="#ff0000" />
+                <circle cx="450" cy="125" r="7" fill="#ff0000" />
+                <circle cx="480" cy="125" r="7" fill="#ff0000" />
+                <circle cx="510" cy="125" r="7" fill="#ff0000" />
+                <circle cx="550" cy="130" r="6" fill="#ff6600" />
+                <circle cx="590" cy="130" r="6" fill="#ff6600" />
+
+                {/* Heaters below the tube */}
+                <circle cx="330" cy="270" r="6" fill="#ff6600" />
+                <circle cx="370" cy="270" r="6" fill="#ff6600" />
+                <circle cx="420" cy="275" r="7" fill="#ff0000" />
+                <circle cx="450" cy="275" r="7" fill="#ff0000" />
+                <circle cx="480" cy="275" r="7" fill="#ff0000" />
+                <circle cx="510" cy="275" r="7" fill="#ff0000" />
+                <circle cx="550" cy="270" r="6" fill="#ff6600" />
+                <circle cx="590" cy="270" r="6" fill="#ff6600" />
+
+                {/* Carrier Boat (long bar under wafers) */}
+                <rect x="315" y="205" width="265" height="8" fill="#8B4513" stroke="#333" strokeWidth="1" rx="4" />
+
+                {/* Wafer representations (vertical lines) - 25 wafers */}
+                <g stroke="#4472c4" strokeWidth="2.5">
+                  <line x1="320" y1="170" x2="320" y2="205" />
+                  <line x1="330" y1="170" x2="330" y2="205" />
+                  <line x1="340" y1="170" x2="340" y2="205" />
+                  <line x1="350" y1="170" x2="350" y2="205" />
+                  <line x1="360" y1="170" x2="360" y2="205" />
+                  <line x1="370" y1="170" x2="370" y2="205" />
+                  <line x1="380" y1="170" x2="380" y2="205" />
+                  <line x1="390" y1="170" x2="390" y2="205" />
+                  <line x1="400" y1="170" x2="400" y2="205" />
+                  <line x1="410" y1="170" x2="410" y2="205" />
+                  <line x1="420" y1="170" x2="420" y2="205" />
+                  <line x1="430" y1="170" x2="430" y2="205" />
+                  <line x1="440" y1="170" x2="440" y2="205" />
+                  <line x1="450" y1="170" x2="450" y2="205" />
+                  <line x1="460" y1="170" x2="460" y2="205" />
+                  <line x1="470" y1="170" x2="470" y2="205" />
+                  <line x1="480" y1="170" x2="480" y2="205" />
+                  <line x1="490" y1="170" x2="490" y2="205" />
+                  <line x1="500" y1="170" x2="500" y2="205" />
+                  <line x1="510" y1="170" x2="510" y2="205" />
+                  <line x1="520" y1="170" x2="520" y2="205" />
+                  <line x1="530" y1="170" x2="530" y2="205" />
+                  <line x1="540" y1="170" x2="540" y2="205" />
+                  <line x1="550" y1="170" x2="550" y2="205" />
+                  <line x1="570" y1="170" x2="570" y2="205" />
+                </g>
+
+                {/* Tube outlet to Scrubber */}
+                <line x1="630" y1="200" x2="680" y2="200" stroke="#333" strokeWidth="3" />
+
+                {/* Scrubber / Exhaust System */}
+                <rect x="680" y="160" width="80" height="80" fill="#f0f0f0" stroke="#333" strokeWidth="2" />
+                <text x="720" y="195" fontSize="12" fontWeight="bold" textAnchor="middle">Scrubber</text>
+                <text x="720" y="210" fontSize="11" textAnchor="middle">(배기 처리)</text>
+
+                {/* Exhaust line */}
+                <line x1="720" y1="160" x2="720" y2="50" stroke="#333" strokeWidth="3" />
+                <rect x="715" y="40" width="10" height="20" fill="#333" />
+                <text x="720" y="30" fontSize="12" fontWeight="bold" textAnchor="middle">Exhaust</text>
+
+                {/* Liquid Dopant Source Container (for liquid sources like POCl3, BBr3) */}
+                <rect x="180" y="320" width="60" height="60" fill="#fff5e6" stroke="#333" strokeWidth="2" />
+
+                {/* Liquid Dopant (orange liquid) */}
+                <ellipse cx="210" cy="355" rx="22" ry="18" fill="#ff9933" />
+
+                {/* Temperature Controlled Bath */}
+                <rect x="170" y="340" width="80" height="50" fill="#87ceeb" stroke="#333" strokeWidth="2" />
+
+                {/* Vapor line from liquid source (bubbler) */}
+                <line x1="210" y1="320" x2="210" y2="270" stroke="#333" strokeWidth="2" strokeDasharray="3,3" />
+                <line x1="210" y1="270" x2="180" y2="270" stroke="#333" strokeWidth="2" strokeDasharray="3,3" />
+                <line x1="180" y1="270" x2="180" y2="225" stroke="#333" strokeWidth="2" strokeDasharray="3,3" />
+
+                {/* Vapor arrow */}
+                <polygon points="175,230 180,220 185,230" fill="#333" />
+
+                {/* Temperature indicator for bath */}
+                <g stroke="#ff6600" strokeWidth="1" fill="none">
+                  <path d="M175 365 Q180 360 185 365 Q190 370 195 365" />
+                  <path d="M195 365 Q200 360 205 365 Q210 370 215 365" />
+                  <path d="M215 365 Q220 360 225 365 Q230 370 235 365" />
+                  <path d="M235 365 Q240 360 245 365" />
+                </g>
+
+                {/* Labels */}
+                <text x="450" y="110" fontSize="14" fontWeight="bold" textAnchor="middle">Quartz Diffusion Tube</text>
+                <text x="450" y="242" fontSize="12" textAnchor="middle">Si Wafers on Carrier Boat</text>
+
+                {/* Zone labels */}
+                <text x="330" y="290" fontSize="11" fontWeight="bold" textAnchor="middle" fill="#ff6600">예열 구간</text>
+                <text x="470" y="290" fontSize="11" fontWeight="bold" textAnchor="middle" fill="#ff0000">주 확산 구간</text>
+                <text x="470" y="303" fontSize="10" textAnchor="middle" fill="#ff0000">({diffTemperature}°C)</text>
+                <text x="570" y="290" fontSize="11" fontWeight="bold" textAnchor="middle" fill="#ff6600">냉각 구간</text>
+
+                <text x="150" y="310" fontSize="11" fontWeight="bold" textAnchor="middle">Dopant Source</text>
+                <text x="150" y="323" fontSize="10" textAnchor="middle">(Liquid Bubbler)</text>
+                <text x="210" y="410" fontSize="11" fontWeight="bold" textAnchor="middle">온도 조절 Bath</text>
+
+                {/* Process description */}
+                <text x="450" y="440" fontSize="11" fill="#555" textAnchor="middle">
+                  N₂ 캐리어 가스가 도펀트 소스를 거쳐 확산 튜브로 유입되어 웨이퍼 표면에 도펀트를 확산시킵니다
+                </text>
+                <text x="450" y="460" fontSize="11" fill="#555" textAnchor="middle">
+                  {diffProcessType === 'predeposition' ?
+                    'Pre-deposition: 도펀트 가스를 계속 공급하여 표면 농도를 일정하게 유지' :
+                    'Drive-in: 도펀트 가스 차단 후 N₂만 흘려 기존 도펀트를 깊이 확산'}
+                </text>
+              </svg>
+            </div>
+          </div>
+
           {/* Profile Chart */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">
