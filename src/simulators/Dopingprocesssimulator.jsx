@@ -1265,7 +1265,7 @@ const DopingProcessSimulator = () => {
               <div className="bg-white rounded-lg p-5">
                 <h3 className="font-bold text-gray-800 mb-3">🔥 Diffusion Furnace 구조</h3>
                 <div className="border-2 border-gray-300 rounded-lg p-4 bg-gray-50">
-                  <svg viewBox="0 0 700 400" className="w-full">
+                  <svg viewBox="0 0 800 400" className="w-full">
                     <defs>
                       {/* Gradient for tube */}
                       <linearGradient id="tubeGradient" x1="0%" y1="0%" x2="0%" y2="100%">
