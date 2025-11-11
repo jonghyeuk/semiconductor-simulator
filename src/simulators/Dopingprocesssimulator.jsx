@@ -1586,6 +1586,43 @@ const DopingProcessSimulator = () => {
             </div>
           </div>
 
+          {/* Profile Chart */}
+          <div className="bg-white rounded-xl shadow-lg p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">
+              도펀트 농도 프로파일 (Concentration Profile)
+            </h2>
+            <ResponsiveContainer width="100%" height={400}>
+              <LineChart data={calculateDiffusionProfile(isAnimating ? animationTime : diffTime)}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis
+                  dataKey="depth"
+                  label={{ value: '깊이 (μm)', position: 'insideBottom', offset: -5 }}
+                />
+                <YAxis
+                  label={{ value: '농도 (log₁₀ /cm³)', angle: -90, position: 'insideLeft' }}
+                  domain={[14, 21]}
+                />
+                <Tooltip
+                  formatter={(value, name) => {
+                    if (name === 'logConcentration') {
+                      return [`10^${value.toFixed(2)} /cm³`, '농도'];
+                    }
+                    return value;
+                  }}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="logConcentration"
+                  stroke={dopantProperties[diffDopantType].color}
+                  strokeWidth={3}
+                  dot={false}
+                  name="농도"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
           {/* Diffusion Furnace Schematic */}
           <div className="bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">확산 공정 Furnace 개략도</h2>
@@ -1724,43 +1761,6 @@ const DopingProcessSimulator = () => {
                 </g>
               </svg>
             </div>
-          </div>
-
-          {/* Profile Chart */}
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              도펀트 농도 프로파일 (Concentration Profile)
-            </h2>
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={calculateDiffusionProfile(isAnimating ? animationTime : diffTime)}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="depth" 
-                  label={{ value: '깊이 (μm)', position: 'insideBottom', offset: -5 }}
-                />
-                <YAxis 
-                  label={{ value: '농도 (log₁₀ /cm³)', angle: -90, position: 'insideLeft' }}
-                  domain={[14, 21]}
-                />
-                <Tooltip 
-                  formatter={(value, name) => {
-                    if (name === 'logConcentration') {
-                      return [`10^${value.toFixed(2)} /cm³`, '농도'];
-                    }
-                    return value;
-                  }}
-                />
-                <Legend />
-                <Line 
-                  type="monotone" 
-                  dataKey="logConcentration" 
-                  stroke={dopantProperties[diffDopantType].color}
-                  strokeWidth={3}
-                  dot={false}
-                  name="농도"
-                />
-              </LineChart>
-            </ResponsiveContainer>
           </div>
 
           {/* Pre-deposition vs Drive-in: Key Differences */}
