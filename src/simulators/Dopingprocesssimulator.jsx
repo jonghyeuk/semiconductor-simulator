@@ -1599,15 +1599,11 @@ const DopingProcessSimulator = () => {
                 <line x1="50" y1="180" x2="180" y2="180" stroke="#333" strokeWidth="3" />
                 <line x1="180" y1="180" x2="180" y2="190" stroke="#333" strokeWidth="3" />
                 <line x1="180" y1="190" x2="230" y2="190" stroke="#333" strokeWidth="3" />
-                {/* O2 to tube connection - thick */}
-                <line x1="230" y1="190" x2="270" y2="200" stroke="#333" strokeWidth="5" />
 
                 {/* N2 Line */}
                 <line x1="50" y1="240" x2="180" y2="240" stroke="#333" strokeWidth="3" />
                 <line x1="180" y1="240" x2="180" y2="210" stroke="#333" strokeWidth="3" />
                 <line x1="180" y1="210" x2="230" y2="210" stroke="#333" strokeWidth="3" />
-                {/* N2 to tube connection - thick */}
-                <line x1="230" y1="210" x2="270" y2="200" stroke="#333" strokeWidth="5" />
 
                 {/* Gas Labels */}
                 <text x="30" y="185" fontSize="16" fontWeight="bold" textAnchor="middle">O₂</text>
@@ -1705,8 +1701,6 @@ const DopingProcessSimulator = () => {
                 <line x1="210" y1="320" x2="210" y2="270" stroke="#333" strokeWidth="2" />
                 <line x1="210" y1="270" x2="180" y2="270" stroke="#333" strokeWidth="2" />
                 <line x1="180" y1="270" x2="180" y2="225" stroke="#333" strokeWidth="2" />
-                {/* Vapor to tube connection - thick */}
-                <line x1="180" y1="225" x2="270" y2="200" stroke="#333" strokeWidth="5" />
 
                 {/* Vapor arrow */}
                 <polygon points="175,230 180,220 185,230" fill="#333" />
