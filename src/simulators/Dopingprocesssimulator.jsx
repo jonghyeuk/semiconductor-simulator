@@ -361,7 +361,8 @@ const DopingProcessSimulator = () => {
     const profile = [];
     // Fixed x-axis range to show depth changes clearly
     // Considering min energy (10 keV) to max energy (200 keV) for all dopants
-    const maxDepth = 0.5; // Fixed at 0.5 μm to show profile movement
+    // B at 200 keV has max range of ~0.25 μm, so 0.3 μm covers all cases
+    const maxDepth = 0.3; // Fixed at 0.3 μm to show profile movement
     const points = 100;
 
     for (let i = 0; i <= points; i++) {
@@ -2237,7 +2238,7 @@ const DopingProcessSimulator = () => {
                 <XAxis
                   dataKey="depth"
                   label={{ value: '깊이 (μm)', position: 'insideBottom', offset: -5 }}
-                  domain={[0, 0.5]}
+                  domain={[0, 0.3]}
                   type="number"
                 />
                 <YAxis 
