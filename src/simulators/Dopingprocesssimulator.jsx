@@ -328,7 +328,7 @@ const DopingProcessSimulator = () => {
     const D = calculateDiffusionCoefficient(diffTemperature, diffDopantType);
     const t = currentTime * 60;
     const profile = [];
-    const maxDepth = 5;
+    const maxDepth = 3;
     const points = 100;
 
     for (let i = 0; i <= points; i++) {
