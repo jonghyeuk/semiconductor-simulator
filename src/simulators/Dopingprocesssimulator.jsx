@@ -359,7 +359,9 @@ const DopingProcessSimulator = () => {
   const calculateImplantationProfile = () => {
     const { Rp, deltaRp } = calculateImplantParams(implEnergy, implDopantType);
     const profile = [];
-    const maxDepth = Math.min(5, Rp + 4 * deltaRp);
+    // Fixed x-axis range to show depth changes clearly
+    // Considering min energy (10 keV) to max energy (200 keV) for all dopants
+    const maxDepth = 0.5; // Fixed at 0.5 μm to show profile movement
     const points = 100;
 
     for (let i = 0; i <= points; i++) {
@@ -2232,9 +2234,11 @@ const DopingProcessSimulator = () => {
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={calculateImplantationProfile()}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="depth" 
+                <XAxis
+                  dataKey="depth"
                   label={{ value: '깊이 (μm)', position: 'insideBottom', offset: -5 }}
+                  domain={[0, 0.5]}
+                  type="number"
                 />
                 <YAxis 
                   label={{ value: '농도 (log₁₀ /cm³)', angle: -90, position: 'insideLeft' }}
