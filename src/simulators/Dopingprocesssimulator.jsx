@@ -339,7 +339,15 @@ const DopingProcessSimulator = () => {
         const erfcArg = x / (2 * Math.sqrt(D * t));
         concentration = diffSurfaceConc * erfc(erfcArg);
       } else {
-        const Q = diffSurfaceConc * Math.sqrt(Math.PI * D * 30 * 60);
+        // Drive-in: Use predeposition conditions to calculate total dopant dose Q
+        // Typical predeposition is done at lower temperature (900-1000°C) for 30 min
+        const T_predep = 1000; // °C
+        const t_predep = 30 * 60; // seconds
+        const D_predep = calculateDiffusionCoefficient(T_predep, diffDopantType);
+        // Correct formula: Q = 2*C0*sqrt(D_predep*t_predep/π)
+        const Q = 2 * diffSurfaceConc * Math.sqrt(D_predep * t_predep / Math.PI);
+        // Drive-in profile: C(x,t) = (Q/sqrt(π*D*t)) * exp(-x²/(4*D*t))
+        // This always has maximum at surface (x=0) and decreases monotonically with depth
         concentration = (Q / Math.sqrt(Math.PI * D * t)) * Math.exp(-x * x / (4 * D * t));
       }
 
