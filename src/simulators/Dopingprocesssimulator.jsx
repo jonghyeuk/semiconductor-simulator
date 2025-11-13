@@ -2598,155 +2598,159 @@ const DopingProcessSimulator = () => {
 
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {/* Left Panel - Controls */}
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">이온 주입 시뮬레이터</h2>
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-4">이온 주입 시뮬레이터</h2>
 
-                {/* CMOS Device Type Selection */}
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">CMOS 소자 타입</label>
-                  <select
-                    value={deviceType}
-                    onChange={(e) => applyPreset(e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    {Object.entries(devicePresets).map(([key, preset]) => (
-                      <option key={key} value={key}>
-                        {preset.name}
-                      </option>
-                    ))}
-                  </select>
-                  {deviceType !== 'custom' && (
-                    <p className="text-xs text-gray-500 mt-1">{devicePresets[deviceType].description}</p>
-                  )}
-                </div>
+              {/* CMOS Device Type Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">CMOS 소자 타입</label>
+                <select
+                  value={deviceType}
+                  onChange={(e) => applyPreset(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  {Object.entries(devicePresets).map(([key, preset]) => (
+                    <option key={key} value={key}>
+                      {preset.name}
+                    </option>
+                  ))}
+                </select>
+                {deviceType !== 'custom' && (
+                  <p className="text-xs text-gray-500 mt-1">{devicePresets[deviceType].description}</p>
+                )}
+              </div>
 
-                {/* Ion Type Selection */}
-                <div className="mb-4">
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">이온 종류</label>
-                  <select
-                    value={implDopantType}
-                    onChange={(e) => {
-                      setImplDopantType(e.target.value);
-                      setDeviceType('custom');
-                    }}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  >
-                    {Object.entries(dopantProperties).map(([symbol, props]) => (
-                      <option key={symbol} value={symbol}>
-                        {symbol} ({props.name}) - {props.type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Ion Type Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-2">이온 종류</label>
+                <select
+                  value={implDopantType}
+                  onChange={(e) => {
+                    setImplDopantType(e.target.value);
+                    setDeviceType('custom');
+                  }}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                >
+                  {Object.entries(dopantProperties).map(([symbol, props]) => (
+                    <option key={symbol} value={symbol}>
+                      {symbol} ({props.name}) - {props.type}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-                {/* Energy Control */}
-                <div className="mb-4 p-3 bg-white rounded-lg border-2 border-orange-200 shadow-sm">
-                  <label className="block text-sm font-medium mb-2 text-orange-800">
-                    주입 에너지: {implEnergy} keV
-                  </label>
-                  <input
-                    type="range"
-                    min="10"
-                    max="400"
-                    value={implEnergy}
-                    onChange={(e) => {
-                      setImplEnergy(Number(e.target.value));
-                      setDeviceType('custom');
-                    }}
-                    className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-orange"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>10 keV</span>
-                    <span>400 keV</span>
-                  </div>
-                </div>
-
-                {/* Dose Control */}
-                <div className="mb-4 p-3 bg-white rounded-lg border-2 border-purple-200 shadow-sm">
-                  <label className="block text-sm font-medium mb-2 text-purple-800">
-                    도즈량: {implDose.toExponential(1)} ions/cm²
-                  </label>
-                  <input
-                    type="range"
-                    min="11"
-                    max="17"
-                    step="0.1"
-                    value={Math.log10(implDose)}
-                    onChange={(e) => {
-                      setImplDose(Math.pow(10, Number(e.target.value)));
-                      setDeviceType('custom');
-                    }}
-                    className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-purple"
-                  />
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>10¹¹</span>
-                    <span>10¹⁷</span>
-                  </div>
-                </div>
-
-                {/* Wafer Tilt Info */}
-                <div className="mb-4 p-3 bg-blue-50 rounded-md">
-                  <h4 className="text-sm font-medium text-blue-900 mb-1">웨이퍼 기울기 (7° Tilt)</h4>
-                  <p className="text-xs text-blue-700 mb-2">
-                    <strong>채널링 방지:</strong> 이온이 실리콘 결정 격자 사이로 깊숙이 파고드는 현상을 방지하여
-                    원하는 깊이에 균일하게 주입되도록 합니다.
-                  </p>
-                  <p className="text-xs text-blue-700">
-                    <strong>웨이퍼 회전:</strong> PR 패턴이나 3D 구조물에 의한 섀도잉(그림자) 효과를 방지하기 위해
-                    실제 공정에서는 웨이퍼를 회전시키며 이온을 주입하여 도핑 균일성을 확보합니다.
-                  </p>
-                </div>
-
-                {/* Calculated Results */}
-                <div className="mt-4 p-4 bg-white rounded border">
-                  <h3 className="font-medium text-gray-800 mb-2">계산 결과</h3>
-                  <div className="text-sm text-gray-600 space-y-1">
-                    <div>투영 거리 (Rp): {(calculateImplantParams(implEnergy, implDopantType).Rp * 1000).toFixed(1)} nm</div>
-                    <div>확산도 (ΔRp): {(calculateImplantParams(implEnergy, implDopantType).deltaRp * 1000).toFixed(1)} nm</div>
-                    <div>이온 질량: {dopantProperties[implDopantType].mass} amu</div>
-                    <div>도핑 타입: {dopantProperties[implDopantType].type}</div>
-                    <div>깊이 범위: 0 ~ {(calculateImplantParams(implEnergy, implDopantType).Rp * 4000).toFixed(0)} nm</div>
-                  </div>
+              {/* Energy Control */}
+              <div className="mb-4 p-3 bg-white rounded-lg border-2 border-orange-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-orange-800">
+                  주입 에너지: {implEnergy} keV
+                </label>
+                <input
+                  type="range"
+                  min="10"
+                  max="400"
+                  value={implEnergy}
+                  onChange={(e) => {
+                    setImplEnergy(Number(e.target.value));
+                    setDeviceType('custom');
+                  }}
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-orange"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>10 keV</span>
+                  <span>400 keV</span>
                 </div>
               </div>
 
-              {/* Wafer Cross Section */}
-              <WaferCrossSection
-                Rp={calculateImplantParams(implEnergy, implDopantType).Rp * 1000}
-                deltaRp={calculateImplantParams(implEnergy, implDopantType).deltaRp * 1000}
-              />
+              {/* Dose Control */}
+              <div className="mb-4 p-3 bg-white rounded-lg border-2 border-purple-200 shadow-sm">
+                <label className="block text-sm font-medium mb-2 text-purple-800">
+                  도즈량: {implDose.toExponential(1)} ions/cm²
+                </label>
+                <input
+                  type="range"
+                  min="11"
+                  max="17"
+                  step="0.1"
+                  value={Math.log10(implDose)}
+                  onChange={(e) => {
+                    setImplDose(Math.pow(10, Number(e.target.value)));
+                    setDeviceType('custom');
+                  }}
+                  className="w-full h-5 rounded-lg appearance-none cursor-pointer slider-thumb-purple"
+                />
+                <div className="flex justify-between text-xs text-gray-500 mt-1">
+                  <span>10¹¹</span>
+                  <span>10¹⁷</span>
+                </div>
+              </div>
+
+              {/* Wafer Tilt Info */}
+              <div className="mb-4 p-3 bg-blue-50 rounded-md">
+                <h4 className="text-sm font-medium text-blue-900 mb-1">웨이퍼 기울기 (7° Tilt)</h4>
+                <p className="text-xs text-blue-700 mb-2">
+                  <strong>채널링 방지:</strong> 이온이 실리콘 결정 격자 사이로 깊숙이 파고드는 현상을 방지하여
+                  원하는 깊이에 균일하게 주입되도록 합니다.
+                </p>
+                <p className="text-xs text-blue-700">
+                  <strong>웨이퍼 회전:</strong> PR 패턴이나 3D 구조물에 의한 섀도잉(그림자) 효과를 방지하기 위해
+                  실제 공정에서는 웨이퍼를 회전시키며 이온을 주입하여 도핑 균일성을 확보합니다.
+                </p>
+              </div>
+
+              {/* Calculated Results */}
+              <div className="mt-4 p-4 bg-white rounded border">
+                <h3 className="font-medium text-gray-800 mb-2">계산 결과</h3>
+                <div className="text-sm text-gray-600 space-y-1">
+                  <div>투영 거리 (Rp): {(calculateImplantParams(implEnergy, implDopantType).Rp * 1000).toFixed(1)} nm</div>
+                  <div>확산도 (ΔRp): {(calculateImplantParams(implEnergy, implDopantType).deltaRp * 1000).toFixed(1)} nm</div>
+                  <div>이온 질량: {dopantProperties[implDopantType].mass} amu</div>
+                  <div>도핑 타입: {dopantProperties[implDopantType].type}</div>
+                  <div>깊이 범위: 0 ~ {(calculateImplantParams(implEnergy, implDopantType).Rp * 4000).toFixed(0)} nm</div>
+                </div>
+              </div>
             </div>
 
-            {/* Right Panel - Profile Chart */}
+            {/* Right Panel - Visualizations side by side */}
             <div className="xl:col-span-2 space-y-6">
-              <div className="bg-white rounded-xl shadow-lg p-6">
-                <h3 className="text-lg font-semibold mb-4 text-gray-800">농도 분포 (선형 스케일)</h3>
-                <ResponsiveContainer width="100%" height={400}>
-                  <AreaChart data={calculateImplantationProfile()}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis
-                      dataKey="depth"
-                      label={{ value: '깊이 (μm)', position: 'insideBottom', offset: -5 }}
-                      tickFormatter={(value) => value.toFixed(2)}
-                    />
-                    <YAxis
-                      label={{ value: '농도 (ions/cm³)', angle: -90, position: 'insideLeft' }}
-                      tickFormatter={(value) => value.toExponential(0)}
-                    />
-                    <Tooltip
-                      formatter={(value, name) => [value.toExponential(2), '농도 (ions/cm³)']}
-                      labelFormatter={(value) => `깊이: ${(value * 1000).toFixed(0)} nm`}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="concentration"
-                      stroke="#3b82f6"
-                      fill="#93c5fd"
-                      fillOpacity={0.6}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+              {/* Concentration Profile and Wafer Cross Section - Side by Side */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Concentration Profile Chart */}
+                <div className="bg-white rounded-xl shadow-lg p-6">
+                  <h3 className="text-lg font-semibold mb-4 text-gray-800">농도 분포 (선형 스케일)</h3>
+                  <ResponsiveContainer width="100%" height={400}>
+                    <AreaChart data={calculateImplantationProfile()}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis
+                        dataKey="depth"
+                        label={{ value: '깊이 (μm)', position: 'insideBottom', offset: -5 }}
+                        tickFormatter={(value) => value.toFixed(2)}
+                      />
+                      <YAxis
+                        label={{ value: '농도 (ions/cm³)', angle: -90, position: 'insideLeft' }}
+                        tickFormatter={(value) => value.toExponential(0)}
+                      />
+                      <Tooltip
+                        formatter={(value, name) => [value.toExponential(2), '농도 (ions/cm³)']}
+                        labelFormatter={(value) => `깊이: ${(value * 1000).toFixed(0)} nm`}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="concentration"
+                        stroke="#3b82f6"
+                        fill="#93c5fd"
+                        fillOpacity={0.6}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Wafer Cross Section */}
+                <div>
+                  <WaferCrossSection
+                    Rp={calculateImplantParams(implEnergy, implDopantType).Rp * 1000}
+                    deltaRp={calculateImplantParams(implEnergy, implDopantType).deltaRp * 1000}
+                  />
+                </div>
               </div>
 
               {/* Additional Information Sections */}
