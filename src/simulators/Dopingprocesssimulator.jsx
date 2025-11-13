@@ -102,10 +102,10 @@ const XCircle = XCircleIcon;
 const DopingProcessSimulator = () => {
   // State management
   const [activeTab, setActiveTab] = useState('theory');
-  
+
   // Diffusion states
   const [diffProcessType, setDiffProcessType] = useState('predeposition');
-  const [diffDopantType, setDiffDopantType] = useState('phosphorus');
+  const [diffDopantType, setDiffDopantType] = useState('P');
   const [diffTemperature, setDiffTemperature] = useState(1000);
   const [diffTime, setDiffTime] = useState(30);
   const [diffSurfaceConc, setDiffSurfaceConc] = useState(1e20);
