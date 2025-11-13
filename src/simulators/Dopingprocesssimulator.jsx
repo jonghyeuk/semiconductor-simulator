@@ -328,7 +328,7 @@ const DopingProcessSimulator = () => {
     const D = calculateDiffusionCoefficient(diffTemperature, diffDopantType);
     const t = currentTime * 60;
     const profile = [];
-    const maxDepth = 5;
+    const maxDepth = 3;
     const points = 100;
 
     for (let i = 0; i <= points; i++) {
@@ -1244,31 +1244,59 @@ const DopingProcessSimulator = () => {
               <div className="bg-white rounded-lg p-5">
                 <h3 className="font-bold text-gray-800 mb-3">📐 Fick의 확산 법칙</h3>
                 <div className="space-y-4">
-                  <div className="p-3 bg-blue-50 rounded-lg">
+                  <div className="p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
                     <p className="font-semibold text-blue-900 mb-2">제1법칙 (정상 상태)</p>
-                    <p className="font-mono text-lg text-blue-700 mb-2">J = -D · (∂C/∂x)</p>
-                    <p className="text-sm text-gray-700">
-                      <strong>의미:</strong> 확산 플럭스(J)는 농도 기울기에 비례합니다.<br/>
-                      높은 농도에서 낮은 농도로 흐름이 발생합니다.
-                    </p>
-                  </div>
-                  
-                  <div className="p-3 bg-purple-50 rounded-lg">
-                    <p className="font-semibold text-purple-900 mb-2">제2법칙 (비정상 상태)</p>
-                    <p className="font-mono text-lg text-purple-700 mb-2">∂C/∂t = D · (∂²C/∂x²)</p>
-                    <p className="text-sm text-gray-700">
-                      <strong>의미:</strong> 시간에 따른 농도 변화를 설명합니다.<br/>
-                      반도체 공정에서 실제 사용되는 방정식입니다.
-                    </p>
+                    <p className="font-mono text-lg text-blue-700 mb-3 bg-white p-2 rounded">J = -D · (∂C/∂x)</p>
+                    <div className="text-sm text-gray-700 space-y-2">
+                      <p><strong>📌 의미:</strong> 확산 플럭스(J)는 농도 기울기에 비례합니다.</p>
+                      <div className="bg-white p-2 rounded">
+                        <p className="font-semibold text-blue-800 mb-1">변수 설명:</p>
+                        <ul className="ml-4 space-y-1">
+                          <li><strong>J</strong>: 확산 플럭스 (단위 시간·면적당 이동하는 원자 수)</li>
+                          <li><strong>D</strong>: 확산 계수 (확산 속도를 결정하는 상수)</li>
+                          <li><strong>∂C/∂x</strong>: 농도 기울기 (위치에 따른 농도 변화율)</li>
+                          <li><strong>음수 부호(-)</strong>: 높은 농도 → 낮은 농도 방향으로 확산</li>
+                        </ul>
+                      </div>
+                      <p className="text-blue-800">💡 <em>쉽게 말하면:</em> 물감을 물에 떨어뜨리면 진한 곳에서 옅은 곳으로 퍼지는 것과 같습니다!</p>
+                    </div>
                   </div>
 
-                  <div className="p-3 bg-green-50 rounded-lg">
+                  <div className="p-3 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                    <p className="font-semibold text-purple-900 mb-2">제2법칙 (비정상 상태)</p>
+                    <p className="font-mono text-lg text-purple-700 mb-3 bg-white p-2 rounded">∂C/∂t = D · (∂²C/∂x²)</p>
+                    <div className="text-sm text-gray-700 space-y-2">
+                      <p><strong>📌 의미:</strong> 시간에 따른 농도 변화를 설명합니다.</p>
+                      <div className="bg-white p-2 rounded">
+                        <p className="font-semibold text-purple-800 mb-1">변수 설명:</p>
+                        <ul className="ml-4 space-y-1">
+                          <li><strong>∂C/∂t</strong>: 시간에 따른 농도 변화율</li>
+                          <li><strong>∂²C/∂x²</strong>: 농도의 2차 미분 (농도 곡률)</li>
+                          <li><strong>D</strong>: 확산 계수 (온도에 따라 변함)</li>
+                        </ul>
+                      </div>
+                      <p className="text-purple-800">💡 <em>쉽게 말하면:</em> 시간이 지날수록 도펀트가 실리콘 속으로 얼마나 깊이 들어가는지 계산합니다!</p>
+                      <p className="font-semibold text-purple-900">⭐ 반도체 공정에서 실제 사용되는 핵심 방정식입니다!</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 bg-green-50 rounded-lg border-l-4 border-green-500">
                     <p className="font-semibold text-green-900 mb-2">확산 계수 (D)</p>
-                    <p className="font-mono text-lg text-green-700 mb-2">D = D₀ · exp(-Qd/kT)</p>
-                    <p className="text-sm text-gray-700">
-                      <strong>온도 의존성:</strong> 온도가 올라가면 D가 지수적으로 증가<br/>
-                      → 고온에서 확산이 빠르게 진행됩니다.
-                    </p>
+                    <p className="font-mono text-lg text-green-700 mb-3 bg-white p-2 rounded">D = D₀ · exp(-Qd/kT)</p>
+                    <div className="text-sm text-gray-700 space-y-2">
+                      <p><strong>📌 의미:</strong> 확산 속도는 온도에 따라 지수적으로 변합니다.</p>
+                      <div className="bg-white p-2 rounded">
+                        <p className="font-semibold text-green-800 mb-1">변수 설명:</p>
+                        <ul className="ml-4 space-y-1">
+                          <li><strong>D₀</strong>: 확산 상수 (재료와 도펀트에 따라 결정)</li>
+                          <li><strong>Qd</strong>: 활성화 에너지 (확산에 필요한 에너지 장벽)</li>
+                          <li><strong>k</strong>: 볼츠만 상수 (1.38 × 10⁻²³ J/K)</li>
+                          <li><strong>T</strong>: 절대 온도 (Kelvin 단위)</li>
+                        </ul>
+                      </div>
+                      <p className="text-green-800">💡 <em>쉽게 말하면:</em> 온도를 올리면 원자들이 활발해져서 확산이 훨씬 빨라집니다!</p>
+                      <p className="font-semibold text-green-900">🔥 예: 900°C → 1000°C로 올리면 확산 속도가 약 3-5배 증가!</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1399,35 +1427,88 @@ const DopingProcessSimulator = () => {
 
             {/* Process Types Comparison */}
             <div className="grid md:grid-cols-2 gap-6 mt-6">
-              <div className="bg-purple-100 border-2 border-purple-300 rounded-lg p-4">
+              <div className="bg-purple-100 border-2 border-purple-300 rounded-lg p-4 shadow-md">
                 <h4 className="font-bold text-purple-900 mb-3 flex items-center gap-2">
                   <span className="text-2xl">📥</span>
                   Pre-deposition (정원 확산)
                 </h4>
-                <div className="space-y-2 text-sm">
-                  <p className="text-gray-800"><strong>조건:</strong> 표면에 무한한 도펀트 공급</p>
-                  <p className="font-mono text-purple-700 bg-white p-2 rounded">C(x,t) = C₀ · erfc(x/2√Dt)</p>
-                  <p className="text-gray-700">
-                    • 표면 농도(C₀)는 일정<br/>
+                <div className="space-y-3 text-sm">
+                  <p className="text-gray-800 bg-white p-2 rounded"><strong>조건:</strong> 표면에 무한한 도펀트 공급 (Constant Source)</p>
+                  <p className="font-mono text-purple-700 bg-white p-2 rounded font-semibold">C(x,t) = C₀ · erfc(x/2√Dt)</p>
+
+                  <div className="bg-white p-3 rounded">
+                    <p className="font-semibold text-purple-800 mb-2">변수 설명:</p>
+                    <ul className="ml-4 space-y-1 text-gray-700">
+                      <li><strong>C(x,t)</strong>: 깊이 x, 시간 t에서의 농도</li>
+                      <li><strong>C₀</strong>: 표면 농도 (일정하게 유지됨)</li>
+                      <li><strong>erfc</strong>: 여오차함수 (Complementary Error Function)</li>
+                      <li><strong>x</strong>: 실리콘 표면으로부터의 깊이</li>
+                      <li><strong>D</strong>: 확산 계수, <strong>t</strong>: 확산 시간</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-purple-50 p-2 rounded">
+                    <p className="text-purple-900"><strong>💡 쉬운 설명:</strong></p>
+                    <p className="text-gray-700">도펀트 가스를 계속 공급하면서 표면 농도를 높게 유지합니다. 마치 물에 설탕을 계속 넣으면서 녹이는 것과 비슷합니다!</p>
+                  </div>
+
+                  <div className="text-gray-700 bg-white p-2 rounded">
+                    <strong>공정 특성:</strong><br/>
+                    • 표면 농도(C₀)는 일정하게 유지<br/>
                     • 짧은 시간 (15-60분)<br/>
+                    • 낮은 온도 (900-1000°C)<br/>
                     • 목적: 높은 표면 농도 확보
-                  </p>
+                  </div>
                 </div>
               </div>
-              
-              <div className="bg-orange-100 border-2 border-orange-300 rounded-lg p-4">
+
+              <div className="bg-orange-100 border-2 border-orange-300 rounded-lg p-4 shadow-md">
                 <h4 className="font-bold text-orange-900 mb-3 flex items-center gap-2">
                   <span className="text-2xl">📤</span>
                   Drive-in (제한 확산)
                 </h4>
-                <div className="space-y-2 text-sm">
-                  <p className="text-gray-800"><strong>조건:</strong> 고정된 도즈(Q), 가스 차단</p>
-                  <p className="font-mono text-orange-700 bg-white p-2 rounded">C(x,t) = Q/√πDt · exp(-x²/4Dt)</p>
-                  <p className="text-gray-700">
-                    • 표면 농도는 시간에 따라 감소<br/>
+                <div className="space-y-3 text-sm">
+                  <p className="text-gray-800 bg-white p-2 rounded"><strong>조건:</strong> 고정된 도즈(Q), 도펀트 가스 차단</p>
+                  <p className="font-mono text-orange-700 bg-white p-2 rounded font-semibold">C(x,t) = Q/√πDt · exp(-x²/4Dt)</p>
+
+                  <div className="bg-white p-3 rounded">
+                    <p className="font-semibold text-orange-800 mb-2">변수 설명:</p>
+                    <ul className="ml-4 space-y-1 text-gray-700">
+                      <li><strong>C(x,t)</strong>: 깊이 x, 시간 t에서의 농도</li>
+                      <li><strong>Q</strong>: 총 도펀트 도즈 (pre-dep에서 주입된 총량, 일정)</li>
+                      <li><strong>exp(-x²/4Dt)</strong>: 가우시안 분포 함수</li>
+                      <li><strong>x</strong>: 실리콘 표면으로부터의 깊이</li>
+                      <li><strong>D</strong>: 확산 계수, <strong>t</strong>: 확산 시간</li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-orange-50 p-2 rounded">
+                    <p className="text-orange-900"><strong>💡 쉬운 설명:</strong></p>
+                    <p className="text-gray-700">Pre-dep에서 주입한 도펀트를 더 깊이 밀어넣습니다. 도펀트 공급을 중단하고 고온에서 가열하면, 표면의 도펀트가 안쪽으로 확산됩니다!</p>
+                  </div>
+
+                  <div className="text-gray-700 bg-white p-2 rounded">
+                    <strong>공정 특성:</strong><br/>
+                    • 표면 농도는 시간에 따라 감소 (1/√t)<br/>
                     • 긴 시간 (수 시간)<br/>
-                    • 목적: 깊은 접합 형성, 재분포
-                  </p>
+                    • 높은 온도 (1000-1200°C)<br/>
+                    • 목적: 깊은 접합 형성, 농도 재분포
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Visual comparison of profiles */}
+            <div className="mt-6 bg-gradient-to-r from-purple-50 to-orange-50 rounded-lg p-4 border-2 border-gray-300">
+              <h4 className="font-bold text-gray-800 mb-3 text-center">📊 농도 프로파일 비교</h4>
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="bg-white p-3 rounded-lg">
+                  <p className="font-semibold text-purple-800 mb-2">Pre-deposition 프로파일</p>
+                  <p className="text-sm text-gray-700">• 표면에서 가장 높은 농도 (C₀)<br/>• erfc 함수 형태 (급격한 감소)<br/>• 표면 농도는 일정</p>
+                </div>
+                <div className="bg-white p-3 rounded-lg">
+                  <p className="font-semibold text-orange-800 mb-2">Drive-in 프로파일</p>
+                  <p className="text-sm text-gray-700">• 표면 농도가 시간에 따라 감소<br/>• 가우시안 분포 형태<br/>• 깊이 방향으로 더 균일하게 분포</p>
                 </div>
               </div>
             </div>
