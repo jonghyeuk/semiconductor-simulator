@@ -427,26 +427,25 @@ const DopingProcessSimulator = () => {
   const calculateImplantationProfile = () => {
     const { Rp, deltaRp } = calculateImplantParams(implEnergy, implDopantType);
     const profile = [];
-    // Fixed x-axis range to show depth changes clearly
-    // Considering min energy (10 keV) to max energy (200 keV) for all dopants
-    // B at 200 keV has max range of ~0.25 μm, so 0.3 μm covers all cases
-    const maxDepth = 0.3; // Fixed at 0.3 μm to show profile movement
+    // Dynamic x-axis range based on Rp and deltaRp
+    // Most of the concentration is within Rp ± 3*deltaRp
+    const maxDepth = Math.max((Rp + 4 * deltaRp), 0.05); // At least 0.05 μm
     const points = 100;
 
     for (let i = 0; i <= points; i++) {
       const x = (i / points) * maxDepth;
-      
+
       // Gaussian profile
-      let concentration = (implDose / (Math.sqrt(2 * Math.PI) * deltaRp * 1e-4)) * 
+      let concentration = (implDose / (Math.sqrt(2 * Math.PI) * deltaRp * 1e-4)) *
                          Math.exp(-Math.pow(x * 1e-4 - Rp * 1e-4, 2) / (2 * Math.pow(deltaRp * 1e-4, 2)));
-      
+
       // If annealing is enabled, add diffusion
       if (implAnnealing) {
         const D = calculateDiffusionCoefficient(annealTemp, implDopantType);
         const t = annealTime * 60;
         const diffusionBroadening = Math.sqrt(deltaRp * deltaRp * 1e-8 + 2 * D * t) * 1e4;
-        
-        concentration = (implDose / (Math.sqrt(2 * Math.PI) * diffusionBroadening * 1e-4)) * 
+
+        concentration = (implDose / (Math.sqrt(2 * Math.PI) * diffusionBroadening * 1e-4)) *
                        Math.exp(-Math.pow(x * 1e-4 - Rp * 1e-4, 2) / (2 * Math.pow(diffusionBroadening * 1e-4, 2)));
       }
 
@@ -464,11 +463,11 @@ const DopingProcessSimulator = () => {
 
   // Wafer Cross Section Component for Ion Implantation
   const WaferCrossSection = ({ Rp, deltaRp }) => {
-    const waferHeight = 300;
-    const waferWidth = 450;
-    const maskHeight = 30;
-    const surfaceY = 60;
-    const scaleMargin = 60;
+    const waferHeight = 240;  // Reduced from 300
+    const waferWidth = 360;   // Reduced from 450
+    const maskHeight = 24;    // Reduced from 30
+    const surfaceY = 48;      // Reduced from 60
+    const scaleMargin = 48;   // Reduced from 60
 
     const effectiveRp = Rp / Math.cos(implTilt * Math.PI / 180);
     const effectiveDeltaRp = deltaRp / Math.cos(implTilt * Math.PI / 180);
