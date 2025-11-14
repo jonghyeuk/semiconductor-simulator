@@ -746,14 +746,38 @@ const IonBeamSystemDiagram = () => {
 
       {/* Description */}
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <h4 className="font-bold text-blue-900 mb-2">📖 System Description</h4>
-        <p className="text-sm text-gray-700 leading-relaxed">
-          이온빔 시스템은 이온소스에서 굵은 빔(여러 이온들)이 생성되어 곡선형 분석자석(Analyzer Magnet)을 통해
-          부드럽게 90도 굽어지면서 질량 분리됩니다. 굵은 빔은 Variable Slit을 통과하면서 집속되어 얇은 빔으로 변환되고,
-          가속관을 거쳐 에너지를 얻은 후 Vertical/Horizontal Scanner를 통해 빔 방향이 조절됩니다.
-          최종적으로 이온빔은 웨이퍼 중앙 부근을 중앙 위에서 중앙 아래까지 왔다갔다 스캐닝하면서 균등하게 이온을 주입합니다.
-          이 과정은 실제 반도체 공정에서 이온 주입(Ion Implantation) 시 사용되는 정확한 물리적 원리를 반영합니다.
-        </p>
+        <h4 className="font-bold text-blue-900 mb-3">📖 이온 주입 장치의 동작 원리</h4>
+        <div className="text-sm text-gray-700 leading-relaxed space-y-2">
+          <div className="flex items-start gap-2">
+            <span className="font-bold text-red-600 min-w-[20px]">1️⃣</span>
+            <p><strong>이온 생성:</strong> Ion Source에서 가스(BF₃, PH₃ 등)를 플라즈마 상태로 만들어 다양한 이온들을 생성합니다. 이때 굵은 빔 형태로 여러 이온이 동시에 나옵니다.</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-bold text-green-600 min-w-[20px]">2️⃣</span>
+            <p><strong>질량 분리:</strong> Analyzer Magnet(곡선 자석)을 통과하면서 빔이 90도로 휘어집니다. 이때 원하는 질량의 이온만 선택되고 나머지는 걸러집니다.</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-bold text-gray-600 min-w-[20px]">3️⃣</span>
+            <p><strong>빔 집속:</strong> Variable Slit(슬릿)을 통과하면서 굵었던 빔이 좁고 얇은 빔으로 집속됩니다. 마치 물줄기가 좁은 틈을 통과하는 것과 같습니다.</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-bold text-blue-600 min-w-[20px]">4️⃣</span>
+            <p><strong>이온 가속:</strong> Acceleration Tube(가속관)에서 고전압을 가해 이온에게 높은 에너지를 줍니다. 이 에너지가 이온이 웨이퍼에 침투하는 깊이를 결정합니다.</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-bold text-orange-600 min-w-[20px]">5️⃣</span>
+            <p><strong>빔 스캐닝:</strong> Vertical/Horizontal Scanner가 빔의 방향을 조절하여 웨이퍼 전체 면적에 골고루 이온을 주입합니다. 애니메이션에서 웨이퍼 표면을 위아래로 스캔하는 모습을 볼 수 있습니다.</p>
+          </div>
+          <div className="flex items-start gap-2">
+            <span className="font-bold text-purple-600 min-w-[20px]">6️⃣</span>
+            <p><strong>이온 주입:</strong> 마지막으로 고속 이온이 웨이퍼 표면에 충돌하여 실리콘 내부로 침투합니다. 충돌 시 빛나는 효과(스파크)를 통해 주입 과정을 확인할 수 있습니다.</p>
+          </div>
+        </div>
+        <div className="mt-3 pt-3 border-t border-blue-200">
+          <p className="text-xs text-blue-800 italic">
+            💡 위 애니메이션은 실제 반도체 공정에서 사용되는 이온 주입 장치의 물리적 원리를 시각화한 것입니다.
+          </p>
+        </div>
       </div>
     </div>
   );
