@@ -1636,7 +1636,7 @@ const PhotolithographySimulator = () => {
                 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="p-3 border rounded-lg bg-blue-50">
+                    <div className="p-3 bg-blue-50 rounded-lg border-2 border-blue-200 shadow-sm">
                       <h6 className="font-medium text-blue-800 mb-2">1단계: Spread</h6>
                       <div className="space-y-2">
                         <div>
@@ -1667,7 +1667,7 @@ const PhotolithographySimulator = () => {
                       <div className="text-xs text-gray-600 mt-2">PR 고르게 분산</div>
                     </div>
 
-                    <div className="p-3 border rounded-lg bg-green-50">
+                    <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200 shadow-sm">
                       <h6 className="font-medium text-green-800 mb-2">2단계: Spin</h6>
                       <div className="space-y-2">
                         <div>
@@ -1698,7 +1698,7 @@ const PhotolithographySimulator = () => {
                       <div className="text-xs text-gray-600 mt-2">목표 두께 달성</div>
                     </div>
 
-                    <div className="p-3 border rounded-lg bg-gray-50">
+                    <div className="p-3 bg-gray-50 rounded-lg border-2 border-gray-200 shadow-sm">
                       <h6 className="font-medium text-gray-800 mb-2">3단계: Stop</h6>
                       <div className="space-y-2">
                         <div>
