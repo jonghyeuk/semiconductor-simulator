@@ -1636,94 +1636,124 @@ const PhotolithographySimulator = () => {
                 
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div className="p-3 bg-blue-50 rounded-lg border-2 border-blue-200 shadow-sm">
+                    <div className="p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
                       <h6 className="font-medium text-blue-800 mb-2">1단계: Spread</h6>
                       <div className="space-y-2">
                         <div>
-                          <label className="block text-xs font-medium mb-1">RPM: {processParams.step1_rpm}</label>
-                          <input
-                            type="range"
-                            min="300"
-                            max="1000"
-                            step="100"
-                            value={processParams.step1_rpm}
-                            onChange={(e) => setProcessParams({...processParams, step1_rpm: Number(e.target.value)})}
-                            className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
-                          />
+                          <label className="block text-xs font-medium mb-1 text-blue-800">RPM: {processParams.step1_rpm}</label>
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="300"
+                              max="1000"
+                              step="100"
+                              value={processParams.step1_rpm}
+                              onChange={(e) => setProcessParams({...processParams, step1_rpm: Number(e.target.value)})}
+                              className="w-full h-3 bg-blue-100 rounded-lg appearance-none cursor-pointer slider"
+                              style={{
+                                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(processParams.step1_rpm-300)/(1000-300)*100}%, #dbeafe ${(processParams.step1_rpm-300)/(1000-300)*100}%, #dbeafe 100%)`
+                              }}
+                            />
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium mb-1">시간: {processParams.step1_time}초</label>
-                          <input
-                            type="range"
-                            min="2"
-                            max="10"
-                            step="1"
-                            value={processParams.step1_time}
-                            onChange={(e) => setProcessParams({...processParams, step1_time: Number(e.target.value)})}
-                            className="w-full h-2 bg-blue-200 rounded-lg appearance-none cursor-pointer slider"
-                          />
+                          <label className="block text-xs font-medium mb-1 text-blue-800">시간: {processParams.step1_time}초</label>
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="2"
+                              max="10"
+                              step="1"
+                              value={processParams.step1_time}
+                              onChange={(e) => setProcessParams({...processParams, step1_time: Number(e.target.value)})}
+                              className="w-full h-3 bg-blue-100 rounded-lg appearance-none cursor-pointer slider"
+                              style={{
+                                background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${(processParams.step1_time-2)/(10-2)*100}%, #dbeafe ${(processParams.step1_time-2)/(10-2)*100}%, #dbeafe 100%)`
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="text-xs text-gray-600 mt-2">PR 고르게 분산</div>
                     </div>
 
-                    <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200 shadow-sm">
+                    <div className="p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
                       <h6 className="font-medium text-green-800 mb-2">2단계: Spin</h6>
                       <div className="space-y-2">
                         <div>
-                          <label className="block text-xs font-medium mb-1">RPM: {processParams.step2_rpm}</label>
-                          <input
-                            type="range"
-                            min="1000"
-                            max="6000"
-                            step="500"
-                            value={processParams.step2_rpm}
-                            onChange={(e) => setProcessParams({...processParams, step2_rpm: Number(e.target.value)})}
-                            className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer slider"
-                          />
+                          <label className="block text-xs font-medium mb-1 text-green-800">RPM: {processParams.step2_rpm}</label>
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="1000"
+                              max="6000"
+                              step="500"
+                              value={processParams.step2_rpm}
+                              onChange={(e) => setProcessParams({...processParams, step2_rpm: Number(e.target.value)})}
+                              className="w-full h-3 bg-green-100 rounded-lg appearance-none cursor-pointer slider"
+                              style={{
+                                background: `linear-gradient(to right, #10b981 0%, #10b981 ${(processParams.step2_rpm-1000)/(6000-1000)*100}%, #d1fae5 ${(processParams.step2_rpm-1000)/(6000-1000)*100}%, #d1fae5 100%)`
+                              }}
+                            />
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium mb-1">시간: {processParams.step2_time}초</label>
-                          <input
-                            type="range"
-                            min="10"
-                            max="60"
-                            step="5"
-                            value={processParams.step2_time}
-                            onChange={(e) => setProcessParams({...processParams, step2_time: Number(e.target.value)})}
-                            className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer slider"
-                          />
+                          <label className="block text-xs font-medium mb-1 text-green-800">시간: {processParams.step2_time}초</label>
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="10"
+                              max="60"
+                              step="5"
+                              value={processParams.step2_time}
+                              onChange={(e) => setProcessParams({...processParams, step2_time: Number(e.target.value)})}
+                              className="w-full h-3 bg-green-100 rounded-lg appearance-none cursor-pointer slider"
+                              style={{
+                                background: `linear-gradient(to right, #10b981 0%, #10b981 ${(processParams.step2_time-10)/(60-10)*100}%, #d1fae5 ${(processParams.step2_time-10)/(60-10)*100}%, #d1fae5 100%)`
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="text-xs text-gray-600 mt-2">목표 두께 달성</div>
                     </div>
 
-                    <div className="p-3 bg-gray-50 rounded-lg border-2 border-gray-200 shadow-sm">
+                    <div className="p-3 bg-white rounded-lg border-2 border-gray-300 shadow-sm">
                       <h6 className="font-medium text-gray-800 mb-2">3단계: Stop</h6>
                       <div className="space-y-2">
                         <div>
-                          <label className="block text-xs font-medium mb-1">RPM: {processParams.step3_rpm}</label>
-                          <input
-                            type="range"
-                            min="0"
-                            max="100"
-                            step="50"
-                            value={processParams.step3_rpm}
-                            onChange={(e) => setProcessParams({...processParams, step3_rpm: Number(e.target.value)})}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                          />
+                          <label className="block text-xs font-medium mb-1 text-gray-800">RPM: {processParams.step3_rpm}</label>
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="50"
+                              value={processParams.step3_rpm}
+                              onChange={(e) => setProcessParams({...processParams, step3_rpm: Number(e.target.value)})}
+                              className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                              style={{
+                                background: `linear-gradient(to right, #6b7280 0%, #6b7280 ${(processParams.step3_rpm-0)/(100-0)*100}%, #e5e7eb ${(processParams.step3_rpm-0)/(100-0)*100}%, #e5e7eb 100%)`
+                              }}
+                            />
+                          </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium mb-1">시간: {processParams.step3_time}초</label>
-                          <input
-                            type="range"
-                            min="1"
-                            max="5"
-                            step="1"
-                            value={processParams.step3_time}
-                            onChange={(e) => setProcessParams({...processParams, step3_time: Number(e.target.value)})}
-                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
-                          />
+                          <label className="block text-xs font-medium mb-1 text-gray-800">시간: {processParams.step3_time}초</label>
+                          <div className="relative">
+                            <input
+                              type="range"
+                              min="1"
+                              max="5"
+                              step="1"
+                              value={processParams.step3_time}
+                              onChange={(e) => setProcessParams({...processParams, step3_time: Number(e.target.value)})}
+                              className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                              style={{
+                                background: `linear-gradient(to right, #6b7280 0%, #6b7280 ${(processParams.step3_time-1)/(5-1)*100}%, #e5e7eb ${(processParams.step3_time-1)/(5-1)*100}%, #e5e7eb 100%)`
+                              }}
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="text-xs text-gray-600 mt-2">정지 및 안정화</div>
