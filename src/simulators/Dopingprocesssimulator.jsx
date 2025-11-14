@@ -99,6 +99,666 @@ const HelpCircle = HelpCircleIcon;
 const CheckCircle = CheckCircleIcon;
 const XCircle = XCircleIcon;
 
+// Ion Beam System Diagram Component
+const IonBeamSystemDiagram = () => {
+  const [particles, setParticles] = useState([]);
+  const [isRunning, setIsRunning] = useState(true);
+  const [scanPosition, setScanPosition] = useState(135); // 웨이퍼 스캔 위치 (135-165로 확장)
+  const [scanDirection, setScanDirection] = useState(1); // 1: 아래로, -1: 위로
+  const animationRef = useRef();
+  const particleIdRef = useRef(0);
+
+  // 파티클 생성 함수 (굵은 빔 시작)
+  const createParticle = () => {
+    // 이온소스에서는 굵은 빔으로 여러 이온이 동시에 나옴
+    const beamWidth = 20; // 빔의 폭
+    const yOffset = (Math.random() - 0.5) * beamWidth; // -10 ~ +10 범위
+
+    return {
+      id: particleIdRef.current++,
+      x: 150, // 이온소스 중앙
+      y: 220 + yOffset, // 이온소스에서 y 좌표 분산
+      progress: 0, // 전체 경로상의 진행도 (0-100)
+      speed: 0.8 + Math.random() * 0.4, // 속도 랜덤
+      initialY: 220 + yOffset, // 초기 y 좌표 저장 (집속 계산용)
+      active: true
+    };
+  };
+
+  // 경로상의 위치 계산 함수 (굵은 빔에서 집속 빔으로, 웨이퍼 스캐닝 포함)
+  const getPositionOnPath = (progress, particle, currentScanPosition) => {
+    const initialYOffset = particle.initialY - 220; // 초기 y 오프셋
+
+    if (progress < 15) {
+      // 이온소스에서 수직 상승 (0-15%): 굵은 빔 유지
+      const localProgress = progress / 15;
+      return {
+        x: 150,
+        y: particle.initialY - localProgress * 10 // 초기 y 위치에서 10픽셀 상승
+      };
+    } else if (progress < 40) {
+      // 곡선 자석에서 90도 휘어짐 (15-40%): 굵은 빔이 함께 휘어짐
+      const localProgress = (progress - 15) / 25;
+
+      if (localProgress < 0.5) {
+        // 첫 번째 구간: 수직 부분
+        const segmentProgress = localProgress * 2;
+        return {
+          x: 150,
+          y: (particle.initialY - 10) - segmentProgress * 20 + initialYOffset // 굵은 빔 유지
+        };
+      } else {
+        // 곡선 구간: 베지어 곡선으로 휘어짐
+        const segmentProgress = (localProgress - 0.5) * 2;
+        const t = segmentProgress * 0.8;
+
+        // 기본 곡선 경로
+        const baseX = Math.pow(1-t, 2) * 150 + 2*(1-t)*t * 150 + Math.pow(t, 2) * 190;
+        const baseY = Math.pow(1-t, 2) * (particle.initialY - 30) + 2*(1-t)*t * 150 + Math.pow(t, 2) * 150;
+
+        if (segmentProgress > 0.8) {
+          // 직선 구간으로 변환
+          const lineProgress = (segmentProgress - 0.8) / 0.2;
+          return {
+            x: 190 + lineProgress * 20,
+            y: 150 + initialYOffset * (1 - lineProgress * 0.3) // 약간의 집속 시작
+          };
+        }
+
+        return {
+          x: baseX,
+          y: baseY + initialYOffset * (1 - t * 0.2) // 곡선에서 약간 집속 시작
+        };
+      }
+    } else {
+      // Variable Slit 이후 집속 및 수평 이동 (40-100%)
+      const localProgress = (progress - 40) / 60;
+
+      // 전체 수평 거리: 210 -> 720
+      let x = 210 + localProgress * 510;
+      let y = 150;
+
+      // Variable Slit에서의 집속 효과 (x = 225-240)
+      if (x >= 210 && x <= 240) {
+        // Variable slit 영역에서 빔 집속 - y 오프셋이 0으로 수렴
+        const focusProgress = (x - 210) / 30; // 0에서 1로
+        const focusedOffset = initialYOffset * (1 - focusProgress); // 점진적으로 0에 수렴
+        y += focusedOffset;
+
+        // 집속 과정에서 약간의 진동
+        y += Math.sin((x - 210) / 30 * Math.PI) * Math.abs(initialYOffset) * 0.1;
+      } else {
+        // Variable Slit 이후는 중심선 기준으로 진행
+
+        // Vertical Scanner 영역에서 수직 진동 효과
+        if (x > 470 && x < 510) {
+          y += Math.sin((x - 470) * 0.4) * 3;
+        }
+
+        // Horizontal Scanner 영역에서 수평 진동 효과
+        if (x > 530 && x < 570) {
+          y += Math.sin((x - 530) * 0.3) * 4;
+        }
+
+        // 웨이퍼 근처에서 스캐닝 효과 (x > 650)
+        if (x > 650) {
+          // 스캔 위치로 점진적으로 이동
+          const scanProgress = Math.min(1, (x - 650) / 70); // 650-720 구간에서 점진적 적용
+          const targetY = currentScanPosition || 150; // 현재 스캔 위치
+          y = 150 + (targetY - 150) * scanProgress;
+        } else if (x > 570) {
+          // 스캐너 이후 약간의 굴절 효과
+          const deflectionProgress = (x - 570) / 80;
+          y += Math.sin(deflectionProgress * Math.PI * 2) * 2;
+        }
+      }
+
+      return { x, y };
+    }
+  };
+
+  // 애니메이션 업데이트 (파티클 + 스캔 위치)
+  const updateParticles = () => {
+    // 스캔 위치 업데이트 (웨이퍼 중앙 위-중앙-중앙 아래 스캔)
+    setScanPosition(prev => {
+      const newPos = prev + scanDirection * 0.6; // 스캔 속도 조정
+      if (newPos >= 165) { // 중앙 아래
+        setScanDirection(-1); // 방향 반전 (위로)
+        return 165;
+      } else if (newPos <= 135) { // 중앙 위
+        setScanDirection(1); // 방향 반전 (아래로)
+        return 135;
+      }
+      return newPos;
+    });
+
+    setParticles(prev => {
+      let updated = prev.map(particle => {
+        if (!particle.active) return particle;
+
+        const newProgress = particle.progress + particle.speed;
+
+        if (newProgress >= 100) {
+          // 타겟에 도달하면 파티클 제거
+          return { ...particle, active: false };
+        }
+
+        const position = getPositionOnPath(newProgress, particle, scanPosition);
+        return {
+          ...particle,
+          x: position.x,
+          y: position.y,
+          progress: newProgress
+        };
+      });
+
+      // 비활성화된 파티클 제거
+      updated = updated.filter(p => p.active);
+
+      // 새 파티클 추가 (굵은 빔 효과를 위해 확률 증가)
+      if (Math.random() < 0.4) { // 생성 확률 증가
+        updated.push(createParticle());
+      }
+
+      return updated;
+    });
+  };
+
+  // 애니메이션 루프
+  useEffect(() => {
+    if (isRunning) {
+      const animate = () => {
+        updateParticles();
+        animationRef.current = requestAnimationFrame(animate);
+      };
+      animationRef.current = requestAnimationFrame(animate);
+    }
+
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isRunning, scanPosition, scanDirection]);
+
+  // 초기 파티클들 생성 (굵은 빔 효과)
+  useEffect(() => {
+    const initialParticles = [];
+    for (let i = 0; i < 6; i++) { // 파티클 수 증가 (3 -> 6)
+      const particle = createParticle();
+      particle.progress = i * 15; // 시차를 두고 배치
+      const pos = getPositionOnPath(particle.progress, particle, 135); // 초기값으로 135 사용
+      particle.x = pos.x;
+      particle.y = pos.y;
+      initialParticles.push(particle);
+    }
+    setParticles(initialParticles);
+  }, []);
+
+  return (
+    <div className="bg-white rounded-lg p-6">
+      <h3 className="text-xl font-bold text-gray-800 mb-4 text-center">⚙️ Ion Beam System Diagram</h3>
+
+      <div className="flex justify-center gap-3 mb-4">
+        <button
+          onClick={() => setIsRunning(!isRunning)}
+          className={`px-5 py-2 rounded-lg font-semibold text-white transition-colors ${
+            isRunning ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'
+          }`}
+        >
+          {isRunning ? '일시정지' : '시작'}
+        </button>
+        <button
+          onClick={() => {
+            setParticles([]);
+            particleIdRef.current = 0;
+            setScanPosition(135);
+            setScanDirection(1);
+          }}
+          className="px-5 py-2 bg-gray-700 hover:bg-gray-800 text-white rounded-lg font-semibold transition-colors"
+        >
+          초기화
+        </button>
+      </div>
+
+      <div className="border-2 border-gray-300 rounded-lg p-4 bg-gradient-to-b from-gray-50 to-gray-100 mb-4">
+        <svg
+          width="100%"
+          height="300"
+          viewBox="0 0 800 300"
+          className="w-full"
+          style={{ backgroundColor: 'white' }}
+        >
+          {/* Background */}
+          <defs>
+            {/* Hatching pattern for acceleration tube */}
+            <pattern id="hatchPattern" patternUnits="userSpaceOnUse" width="8" height="8">
+              <path d="M0,8 L8,0" stroke="#4A90E2" strokeWidth="1"/>
+              <path d="M0,0 L8,8" stroke="#4A90E2" strokeWidth="1"/>
+            </pattern>
+
+            {/* Arrow marker for beam direction */}
+            <marker
+              id="arrowhead"
+              markerWidth="10"
+              markerHeight="7"
+              refX="9"
+              refY="3.5"
+              orient="auto"
+            >
+              <polygon
+                points="0 0, 10 3.5, 0 7"
+                fill="#E67E22"
+                opacity="0.3"
+              />
+            </marker>
+
+            {/* Gradient for magnet */}
+            <linearGradient id="magnetGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style={{ stopColor: '#95A5A6', stopOpacity: 1 }} />
+              <stop offset="50%" style={{ stopColor: '#7F8C8D', stopOpacity: 1 }} />
+              <stop offset="100%" style={{ stopColor: '#6C7B7D', stopOpacity: 1 }} />
+            </linearGradient>
+
+            {/* Gradient for wafer */}
+            <linearGradient id="waferGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style={{ stopColor: '#5DADE2', stopOpacity: 1 }} />
+              <stop offset="50%" style={{ stopColor: '#3498DB', stopOpacity: 1 }} />
+              <stop offset="100%" style={{ stopColor: '#2E86AB', stopOpacity: 1 }} />
+            </linearGradient>
+          </defs>
+
+          {/* Ion Source (red rectangle) - positioned below the magnet */}
+          <rect
+            x="120"
+            y="220"
+            width="60"
+            height="60"
+            fill="#E74C3C"
+            stroke="#C0392B"
+            strokeWidth="2"
+          />
+          <text x="150" y="310" textAnchor="middle" fontSize="12" fontWeight="bold">ION SOURCE</text>
+
+          {/* 90도 휘는 지점의 자석 극 - 작은 직사각형들 */}
+          {/* 좌측상단 직사각형 - 135도 회전, 긴 변 확장 */}
+          <rect
+            x="130"
+            y="130"
+            width="35"
+            height="15"
+            fill="#27AE60"
+            stroke="#229954"
+            strokeWidth="1"
+            transform="rotate(135 147.5 137.5)"
+          />
+
+          {/* 우측하단 직사각형 - 빔에 더 가깝게 이동, 135도 회전, 긴 변 확장 */}
+          <rect
+            x="170"
+            y="170"
+            width="35"
+            height="15"
+            fill="#27AE60"
+            stroke="#229954"
+            strokeWidth="1"
+            transform="rotate(135 187.5 177.5)"
+          />
+
+          {/* Acceleration Tube - combined into single tube */}
+          <rect
+            x="270"
+            y="130"
+            width="180"
+            height="40"
+            fill="url(#hatchPattern)"
+            stroke="#2980B9"
+            strokeWidth="2"
+          />
+          <text x="360" y="125" textAnchor="middle" fontSize="10" fontWeight="bold">ACCELERATION TUBE</text>
+
+          {/* Vertical Scanner - positioned in the center of ion beam path like a tube */}
+          <rect
+            x="470"
+            y="140"
+            width="40"
+            height="20"
+            fill="#F39C12"
+            stroke="#E67E22"
+            strokeWidth="2"
+          />
+          <text x="490" y="132" textAnchor="middle" fontSize="9" fontWeight="bold">VERTICAL SCANNER</text>
+
+          {/* Horizontal Scanner - separated from vertical scanner, positioned to the right */}
+          {/* Upper rectangle */}
+          <rect
+            x="530"
+            y="120"
+            width="40"
+            height="15"
+            fill="#F39C12"
+            stroke="#E67E22"
+            strokeWidth="2"
+          />
+          {/* Lower rectangle */}
+          <rect
+            x="530"
+            y="165"
+            width="40"
+            height="15"
+            fill="#F39C12"
+            stroke="#E67E22"
+            strokeWidth="2"
+          />
+          <text x="550" y="110" textAnchor="middle" fontSize="9" fontWeight="bold">HORIZONTAL SCANNER</text>
+
+          {/* Variable slit for beam control - positioned after curved analyzer magnet */}
+          <rect
+            x="225"
+            y="140"
+            width="15"
+            height="20"
+            fill="#34495E"
+            stroke="#2C3E50"
+            strokeWidth="1"
+          />
+          <text x="232" y="125" textAnchor="middle" fontSize="8">VARIABLE SLIT</text>
+          <text x="232" y="135" textAnchor="middle" fontSize="8">FOR BEAM</text>
+          <text x="232" y="185" textAnchor="middle" fontSize="8">CONTROL</text>
+
+          {/* Wafer (Target) - side view: thin and long, bigger size */}
+          <rect
+            x="720"
+            y="100"
+            width="10"
+            height="100"
+            fill="url(#waferGradient)"
+            stroke="#2980B9"
+            strokeWidth="2"
+          />
+
+          <text x="745" y="125" textAnchor="start" fontSize="12" fontWeight="bold">WAFER</text>
+          <text x="745" y="185" textAnchor="start" fontSize="12" fontWeight="bold">(TARGET)</text>
+
+          {/* Guide path (lighter color) - showing the beam trajectory */}
+          {/* Vertical path from ion source */}
+          <path
+            d="M 150 220 L 150 210"
+            stroke="#E67E22"
+            strokeWidth="2"
+            fill="none"
+            opacity="0.3"
+          />
+          {/* Smooth 90-degree curve inside magnet */}
+          <path
+            d="M 150 210
+               L 150 190
+               Q 150 150 190 150
+               L 210 150"
+            stroke="#E67E22"
+            strokeWidth="2"
+            fill="none"
+            opacity="0.3"
+          />
+          {/* Horizontal path after magnet through acceleration tubes and scanners */}
+          <path
+            d="M 210 150 L 240 150 L 270 150 L 370 150 L 450 150 L 510 150 L 570 150 L 720 150"
+            stroke="#E67E22"
+            strokeWidth="2"
+            fill="none"
+            markerEnd="url(#arrowhead)"
+            opacity="0.3"
+          />
+
+          {/* 이온 파티클들 렌더링 */}
+          {particles.map(particle => {
+            // 이동 방향에 따른 꼬리 위치 계산
+            let tailOffsetX = -8;
+            let tailOffsetY = 0;
+            let tail2OffsetX = -15;
+            let tail2OffsetY = 0;
+
+            if (particle.progress < 15) {
+              // 수직 상승 구간 - 꼬리는 아래쪽
+              tailOffsetX = 0;
+              tailOffsetY = 8;
+              tail2OffsetX = 0;
+              tail2OffsetY = 15;
+            } else if (particle.progress < 40) {
+              // 곡선 구간 - 곡선에 따른 꼬리
+              const curveProgress = (particle.progress - 15) / 25;
+              if (curveProgress < 0.5) {
+                // 여전히 수직
+                tailOffsetX = 0;
+                tailOffsetY = 8;
+                tail2OffsetX = 0;
+                tail2OffsetY = 15;
+              } else {
+                // 점진적으로 수평으로 전환
+                const angle = curveProgress * Math.PI / 2;
+                tailOffsetX = -8 * Math.cos(angle);
+                tailOffsetY = 8 * Math.sin(angle);
+                tail2OffsetX = -15 * Math.cos(angle);
+                tail2OffsetY = 15 * Math.sin(angle);
+              }
+            }
+            // else: 수평 구간은 기본값 사용 (왼쪽 꼬리)
+
+            return (
+              <g key={particle.id}>
+                {/* 파티클 본체 */}
+                <circle
+                  cx={particle.x}
+                  cy={particle.y}
+                  r="3"
+                  fill="#FF6B35"
+                  stroke="#E55A2B"
+                  strokeWidth="1"
+                >
+                  {/* 파티클 깜빡임 효과 */}
+                  <animate
+                    attributeName="opacity"
+                    values="0.8;1;0.8"
+                    dur="0.5s"
+                    repeatCount="indefinite"
+                  />
+                </circle>
+                {/* 파티클 꼬리 효과 */}
+                <circle
+                  cx={particle.x + tailOffsetX}
+                  cy={particle.y + tailOffsetY}
+                  r="2"
+                  fill="#FF6B35"
+                  opacity="0.5"
+                />
+                <circle
+                  cx={particle.x + tail2OffsetX}
+                  cy={particle.y + tail2OffsetY}
+                  r="1"
+                  fill="#FF6B35"
+                  opacity="0.3"
+                />
+
+                {/* Variable Slit에서 빔 집속 효과 */}
+                {particle.x >= 210 && particle.x <= 240 && (
+                  <>
+                    {/* 집속 링 효과 */}
+                    <circle
+                      cx={232} // Variable slit 중심
+                      cy={150} // 집속 중심
+                      r="8"
+                      fill="none"
+                      stroke="#FFD700"
+                      strokeWidth="1"
+                      opacity="0.4"
+                    >
+                      <animate
+                        attributeName="r"
+                        values="5;12;5"
+                        dur="1s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                    {/* 파티클 주변 집속 효과 */}
+                    <circle
+                      cx={particle.x}
+                      cy={particle.y}
+                      r="4"
+                      fill="none"
+                      stroke="#00FFFF"
+                      strokeWidth="1"
+                      opacity="0.6"
+                    >
+                      <animate
+                        attributeName="r"
+                        values="2;5;2"
+                        dur="0.3s"
+                        repeatCount="indefinite"
+                      />
+                    </circle>
+                  </>
+                )}
+
+                {/* 굵은 빔 구간에서 파티클 연결선 효과 (이온소스와 분석자석 구간) */}
+                {particle.progress < 40 && Math.abs(particle.y - 150) > 5 && (
+                  <line
+                    x1={particle.x - 3}
+                    y1={particle.y}
+                    x2={particle.x + 3}
+                    y2={particle.y}
+                    stroke="#FF6B35"
+                    strokeWidth="1"
+                    opacity="0.3"
+                  />
+                )}
+
+                {/* 웨이퍼에 도달했을 때 임플란테이션 효과 */}
+                {particle.x >= 715 && (
+                  <>
+                    {/* 충돌 효과 - 스캔 위치에서 발생 */}
+                    <circle
+                      cx={720}
+                      cy={particle.y}
+                      r="4"
+                      fill="none"
+                      stroke="#FFD700"
+                      strokeWidth="2"
+                      opacity="0.8"
+                    >
+                      <animate
+                        attributeName="r"
+                        values="2;8;2"
+                        dur="0.2s"
+                        repeatCount="1"
+                      />
+                      <animate
+                        attributeName="opacity"
+                        values="0.8;0;0.8"
+                        dur="0.2s"
+                        repeatCount="1"
+                      />
+                    </circle>
+                    {/* 스파크 효과 */}
+                    <circle
+                      cx={718}
+                      cy={particle.y - 2}
+                      r="1"
+                      fill="#FF6B35"
+                      opacity="0.6"
+                    />
+                    <circle
+                      cx={718}
+                      cy={particle.y + 2}
+                      r="1"
+                      fill="#FF6B35"
+                      opacity="0.6"
+                    />
+                    {/* 임플란테이션 트레일 효과 */}
+                    <line
+                      x1={720}
+                      y1={particle.y}
+                      x2={725}
+                      y2={particle.y}
+                      stroke="#00FFFF"
+                      strokeWidth="1"
+                      opacity="0.7"
+                    >
+                      <animate
+                        attributeName="opacity"
+                        values="0.7;0;0.7"
+                        dur="0.1s"
+                        repeatCount="3"
+                      />
+                    </line>
+                  </>
+                )}
+                {particle.x >= 225 && particle.x <= 240 && (
+                  <circle
+                    cx={particle.x}
+                    cy={particle.y}
+                    r="5"
+                    fill="none"
+                    stroke="#FFD700"
+                    strokeWidth="1"
+                    opacity="0.6"
+                  >
+                    <animate
+                      attributeName="r"
+                      values="3;6;3"
+                      dur="0.3s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
+
+      {/* Component Legend */}
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-red-500 border border-red-700 rounded"></div>
+          <span className="text-sm font-medium">Ion Source</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-gray-500 border border-gray-700 rounded"></div>
+          <span className="text-sm font-medium">Analyzer Magnet</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-blue-400 border border-blue-600 rounded"></div>
+          <span className="text-sm font-medium">Acceleration Tube</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-orange-400 border border-orange-600 rounded"></div>
+          <span className="text-sm font-medium">Beam Scanner</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-5 h-5 bg-blue-500 border border-blue-700 rounded"></div>
+          <span className="text-sm font-medium">Wafer Target</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-0.5 bg-orange-500"></div>
+          <span className="text-sm font-medium">Ion Beam Path</span>
+        </div>
+      </div>
+
+      {/* Description */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h4 className="font-bold text-blue-900 mb-2">📖 System Description</h4>
+        <p className="text-sm text-gray-700 leading-relaxed">
+          이온빔 시스템은 이온소스에서 굵은 빔(여러 이온들)이 생성되어 곡선형 분석자석(Analyzer Magnet)을 통해
+          부드럽게 90도 굽어지면서 질량 분리됩니다. 굵은 빔은 Variable Slit을 통과하면서 집속되어 얇은 빔으로 변환되고,
+          가속관을 거쳐 에너지를 얻은 후 Vertical/Horizontal Scanner를 통해 빔 방향이 조절됩니다.
+          최종적으로 이온빔은 웨이퍼 중앙 부근을 중앙 위에서 중앙 아래까지 왔다갔다 스캐닝하면서 균등하게 이온을 주입합니다.
+          이 과정은 실제 반도체 공정에서 이온 주입(Ion Implantation) 시 사용되는 정확한 물리적 원리를 반영합니다.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 const DopingProcessSimulator = () => {
   // State management
   const [activeTab, setActiveTab] = useState('theory');
@@ -2387,143 +3047,9 @@ const DopingProcessSimulator = () => {
               <BookOpen className="w-6 h-6 text-orange-600" />
               이온 주입 장치 및 원리 (Ion Implanter)
             </h2>
-            
+
             {/* Equipment Diagram */}
-            <div className="bg-white rounded-lg p-5 mb-6">
-              <h3 className="font-bold text-gray-800 mb-3">⚙️ Ion Implantation 장치 구성도</h3>
-              <div className="border-2 border-gray-300 rounded-lg p-4 bg-gradient-to-b from-gray-50 to-gray-100">
-                <svg viewBox="0 0 800 300" className="w-full">
-                  {/* Ion Source */}
-                  <rect x="20" y="100" width="80" height="100" fill="#ef4444" stroke="#991b1b" strokeWidth="2" rx="5"/>
-                  <text x="35" y="140" fontSize="12" fill="white" fontWeight="bold">Ion Source</text>
-                  <text x="30" y="160" fontSize="10" fill="white">이온원</text>
-                  <text x="25" y="180" fontSize="9" fill="#fef2f2">BF₃, PH₃, As</text>
-                  
-                  {/* Plasma effect */}
-                  <circle cx="60" cy="130" r="3" fill="#fbbf24" opacity="0.8"/>
-                  <circle cx="55" cy="145" r="2" fill="#fbbf24" opacity="0.6"/>
-                  <circle cx="70" cy="140" r="2.5" fill="#fbbf24" opacity="0.7"/>
-                  
-                  {/* Extraction */}
-                  <line x1="100" y1="150" x2="160" y2="150" stroke="#3b82f6" strokeWidth="4" markerEnd="url(#arrow1)"/>
-                  <defs>
-                    <marker id="arrow1" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                      <polygon points="0 0, 10 3, 0 6" fill="#3b82f6" />
-                    </marker>
-                  </defs>
-                  <text x="110" y="140" fontSize="10" fill="#1f2937">Extraction</text>
-                  
-                  {/* Mass Separator (Magnet) */}
-                  <path d="M 160 100 L 240 100 Q 260 100 260 120 L 260 180 Q 260 200 240 200 L 160 200 Z" 
-                        fill="#8b5cf6" stroke="#5b21b6" strokeWidth="2"/>
-                  <text x="170" y="140" fontSize="12" fill="white" fontWeight="bold">Mass</text>
-                  <text x="165" y="155" fontSize="12" fill="white" fontWeight="bold">Separator</text>
-                  <text x="170" y="175" fontSize="10" fill="#ede9fe">질량 분리</text>
-                  
-                  {/* Magnet poles */}
-                  <text x="165" y="90" fontSize="20" fill="#dc2626">N</text>
-                  <text x="165" y="225" fontSize="20" fill="#2563eb">S</text>
-                  
-                  {/* Curved beam path */}
-                  <path d="M 260 150 Q 280 130 310 130" stroke="#3b82f6" strokeWidth="3" fill="none" strokeDasharray="5,3"/>
-                  <circle cx="310" cy="130" r="3" fill="#3b82f6"/>
-                  <text x="270" y="120" fontSize="9" fill="#6b7280">Unwanted ions</text>
-                  
-                  <path d="M 260 150 Q 290 150 320 150" stroke="#22c55e" strokeWidth="4" markerEnd="url(#arrow2)"/>
-                  <defs>
-                    <marker id="arrow2" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                      <polygon points="0 0, 10 3, 0 6" fill="#22c55e" />
-                    </marker>
-                  </defs>
-                  <text x="270" y="170" fontSize="9" fill="#15803d" fontWeight="bold">Selected ions</text>
-                  
-                  {/* Accelerator */}
-                  <rect x="320" y="120" width="100" height="60" fill="#f59e0b" stroke="#b45309" strokeWidth="2" rx="5"/>
-                  <text x="335" y="145" fontSize="12" fill="white" fontWeight="bold">Accelerator</text>
-                  <text x="345" y="165" fontSize="10" fill="white">가속관</text>
-                  
-                  {/* Acceleration stages */}
-                  <line x1="340" y1="130" x2="340" y2="170" stroke="white" strokeWidth="2"/>
-                  <line x1="360" y1="130" x2="360" y2="170" stroke="white" strokeWidth="2"/>
-                  <line x1="380" y1="130" x2="380" y2="170" stroke="white" strokeWidth="2"/>
-                  <line x1="400" y1="130" x2="400" y2="170" stroke="white" strokeWidth="2"/>
-                  
-                  <text x="325" y="195" fontSize="9" fill="#92400e">10-400 keV</text>
-                  
-                  {/* Beam after acceleration */}
-                  <line x1="420" y1="150" x2="480" y2="150" stroke="#22c55e" strokeWidth="5" markerEnd="url(#arrow3)"/>
-                  <defs>
-                    <marker id="arrow3" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                      <polygon points="0 0, 10 3, 0 6" fill="#22c55e" />
-                    </marker>
-                  </defs>
-                  
-                  {/* Scanner */}
-                  <rect x="480" y="120" width="80" height="60" fill="#06b6d4" stroke="#0e7490" strokeWidth="2" rx="5"/>
-                  <text x="495" y="145" fontSize="12" fill="white" fontWeight="bold">Scanner</text>
-                  <text x="495" y="165" fontSize="10" fill="white">스캐너</text>
-                  
-                  {/* Scanning motion */}
-                  <path d="M 510 135 L 530 125 L 550 135" stroke="white" strokeWidth="2" fill="none"/>
-                  <path d="M 510 155 L 530 165 L 550 155" stroke="white" strokeWidth="2" fill="none"/>
-                  
-                  {/* Scattered beam */}
-                  <line x1="560" y1="140" x2="620" y2="120" stroke="#22c55e" strokeWidth="3" opacity="0.7"/>
-                  <line x1="560" y1="150" x2="620" y2="150" stroke="#22c55e" strokeWidth="4"/>
-                  <line x1="560" y1="160" x2="620" y2="180" stroke="#22c55e" strokeWidth="3" opacity="0.7"/>
-                  
-                  <circle cx="620" cy="120" r="2" fill="#22c55e"/>
-                  <circle cx="620" cy="150" r="2" fill="#22c55e"/>
-                  <circle cx="620" cy="180" r="2" fill="#22c55e"/>
-                  
-                  {/* Wafer Chamber */}
-                  <rect x="620" y="80" width="150" height="140" fill="#475569" stroke="#1e293b" strokeWidth="2" rx="5"/>
-                  <text x="640" y="105" fontSize="12" fill="white" fontWeight="bold">Wafer Chamber</text>
-                  <text x="655" y="125" fontSize="10" fill="#cbd5e1">웨이퍼 챔버</text>
-                  
-                  {/* Wafer */}
-                  <ellipse cx="695" cy="165" rx="40" ry="35" fill="#64748b" stroke="#334155" strokeWidth="2"/>
-                  <ellipse cx="695" cy="162" rx="38" ry="33" fill="#94a3b8"/>
-                  
-                  {/* Tilt angle */}
-                  <line x1="695" y1="130" x2="695" y2="200" stroke="#fbbf24" strokeWidth="1" strokeDasharray="3,2"/>
-                  <line x1="695" y1="165" x2="675" y2="145" stroke="#334155" strokeWidth="2"/>
-                  <path d="M 685 155 Q 690 160 695 160" stroke="#ef4444" strokeWidth="2" fill="none"/>
-                  <text x="665" y="155" fontSize="9" fill="#ef4444" fontWeight="bold">7°</text>
-                  
-                  {/* Ion implantation effect */}
-                  <circle cx="680" cy="165" r="2" fill="#22c55e" opacity="0.8"/>
-                  <circle cx="690" cy="170" r="1.5" fill="#22c55e" opacity="0.7"/>
-                  <circle cx="700" cy="168" r="1.5" fill="#22c55e" opacity="0.7"/>
-                  <circle cx="695" cy="175" r="1" fill="#22c55e" opacity="0.6"/>
-                  
-                  <text x="640" y="210" fontSize="9" fill="#cbd5e1">Vacuum: 10⁻⁵ ~ 10⁻⁶ Torr</text>
-                </svg>
-              </div>
-              
-              <div className="grid md:grid-cols-5 gap-3 text-sm mt-4">
-                <div className="bg-red-50 p-3 rounded-lg border border-red-200">
-                  <p className="font-bold text-red-900 mb-1">1️⃣ Ion Source</p>
-                  <p className="text-xs text-gray-700">가스를 플라즈마화하여 이온 생성</p>
-                </div>
-                <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-                  <p className="font-bold text-purple-900 mb-1">2️⃣ Mass Separator</p>
-                  <p className="text-xs text-gray-700">자기장으로 원하는 이온만 선택</p>
-                </div>
-                <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-                  <p className="font-bold text-orange-900 mb-1">3️⃣ Accelerator</p>
-                  <p className="text-xs text-gray-700">고전압으로 이온 가속 (에너지 제어)</p>
-                </div>
-                <div className="bg-cyan-50 p-3 rounded-lg border border-cyan-200">
-                  <p className="font-bold text-cyan-900 mb-1">4️⃣ Scanner</p>
-                  <p className="text-xs text-gray-700">빔을 스캔하여 웨이퍼 전체 주입</p>
-                </div>
-                <div className="bg-gray-50 p-3 rounded-lg border border-gray-300">
-                  <p className="font-bold text-gray-900 mb-1">5️⃣ Chamber</p>
-                  <p className="text-xs text-gray-700">진공 상태에서 웨이퍼 고정</p>
-                </div>
-              </div>
-            </div>
+            <IonBeamSystemDiagram />
 
             {/* Theory and Key Concepts */}
             <div className="grid md:grid-cols-2 gap-6">
