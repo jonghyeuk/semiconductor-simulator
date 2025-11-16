@@ -1934,7 +1934,7 @@ const DopingProcessSimulator = () => {
             { id: 'diffusion', label: '확산 공정', icon: TrendingUp },
             { id: 'implantation', label: '이온 주입', icon: Target },
             { id: 'comparison', label: '공정 비교', icon: GitCompare },
-            { id: 'temperature', label: '온도 영향', icon: AlertCircle },
+            { id: 'temperature', label: 'Annealing효과', icon: AlertCircle },
             { id: 'application', label: '적용 가이드', icon: Lightbulb },
             { id: 'quiz', label: '퀴즈', icon: Award }
           ].map(tab => (
@@ -3671,210 +3671,15 @@ const DopingProcessSimulator = () => {
             </div>
           )}
 
-          {/* Temperature Effect Tab */}
+          {/* Annealing Effect Tab */}
           {activeTab === 'temperature' && (
-            <div className="space-y-6">
-          <div className="bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-4">
-              온도가 도핑 공정에 미치는 영향
-            </h2>
-            
-            {/* Temperature Comparison Chart */}
-            <ResponsiveContainer width="100%" height={400}>
-              <LineChart data={[900, 950, 1000, 1050, 1100, 1150, 1200].map(temp => {
-                const D = calculateDiffusionCoefficient(temp, diffDopantType);
-                return {
-                  temperature: temp,
-                  diffusionCoeff: D * 1e12,
-                  junctionDepth: 2 * Math.sqrt(D * diffTime * 60) * 1e4
-                };
-              })}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="temperature" 
-                  label={{ value: '온도 (°C)', position: 'insideBottom', offset: -5 }}
-                />
-                <YAxis 
-                  yAxisId="left"
-                  label={{ value: 'D (×10⁻¹² cm²/s)', angle: -90, position: 'insideLeft' }}
-                />
-                <YAxis 
-                  yAxisId="right"
-                  orientation="right"
-                  label={{ value: '접합 깊이 (μm)', angle: 90, position: 'insideRight' }}
-                />
-                <Tooltip />
-                <Legend />
-                <Line 
-                  yAxisId="left"
-                  type="monotone" 
-                  dataKey="diffusionCoeff" 
-                  stroke="#ef4444"
-                  strokeWidth={3}
-                  name="확산 계수"
-                />
-                <Line 
-                  yAxisId="right"
-                  type="monotone" 
-                  dataKey="junctionDepth" 
-                  stroke="#3b82f6"
-                  strokeWidth={3}
-                  name="접합 깊이"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          {/* Key Points */}
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="bg-red-50 rounded-xl p-5">
-              <h3 className="text-lg font-bold text-gray-800 mb-3">고온의 영향</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <span className="text-red-600 font-bold">↑</span>
-                  <span>확산 속도 급격히 증가</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-600 font-bold">↑</span>
-                  <span>접합 깊이 증가</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-600 font-bold">↑</span>
-                  <span>공정 시간 단축 가능</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-red-600 font-bold">↓</span>
-                  <span>제어 정밀도 감소</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-blue-50 rounded-xl p-5">
-              <h3 className="text-lg font-bold text-gray-800 mb-3">저온의 영향</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 font-bold">↓</span>
-                  <span>확산 속도 감소</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 font-bold">↓</span>
-                  <span>얕은 접합 형성</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 font-bold">↑</span>
-                  <span>제어 정밀도 향상</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-blue-600 font-bold">↑</span>
-                  <span>공정 시간 증가</span>
-                </li>
-              </ul>
-            </div>
-
-            <div className="bg-green-50 rounded-xl p-5">
-              <h3 className="text-lg font-bold text-gray-800 mb-3">최적 온도 선택</h3>
-              <ul className="space-y-2 text-sm text-gray-700">
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">•</span>
-                  <span>목표 접합 깊이</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">•</span>
-                  <span>공정 시간 제약</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">•</span>
-                  <span>재현성 요구사항</span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-green-600 font-bold">•</span>
-                  <span>다른 공정과의 호환성</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Annealing Section */}
-          <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-gray-800 mb-4">
-              Annealing (열처리)의 역할
-            </h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-bold text-gray-700 mb-3">이온 주입 후 Annealing</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="font-semibold text-gray-700 mb-1">1. 결정 손상 회복</p>
-                    <p className="text-gray-600">
-                      이온 충돌로 손상된 Si 결정 구조를 원상 복구
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="font-semibold text-gray-700 mb-1">2. 도펀트 활성화</p>
-                    <p className="text-gray-600">
-                      격자 위치로 이동하여 전기적으로 활성 상태로 전환
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="font-semibold text-gray-700 mb-1">3. 프로파일 조정</p>
-                    <p className="text-gray-600">
-                      약간의 확산으로 더 부드러운 프로파일 형성
-                    </p>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-bold text-gray-700 mb-3">Annealing 조건</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="font-semibold text-gray-700">RTA (Rapid Thermal Annealing)</p>
-                    <p className="text-gray-600 text-xs mt-1">
-                      • 온도: 900-1100°C<br/>
-                      • 시간: 수초 ~ 수십초<br/>
-                      • 장점: 최소 확산, 빠른 공정
-                    </p>
-                  </div>
-                  <div className="bg-white rounded-lg p-3">
-                    <p className="font-semibold text-gray-700">Furnace Annealing</p>
-                    <p className="text-gray-600 text-xs mt-1">
-                      • 온도: 800-1000°C<br/>
-                      • 시간: 30분 ~ 수시간<br/>
-                      • 장점: 완전한 회복, 균일성
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Think More Section */}
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl shadow-lg p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Lightbulb className="w-6 h-6 text-orange-600" />
-              <h3 className="text-xl font-bold text-gray-800">💡 더 생각해보기</h3>
-            </div>
-            <div className="space-y-3">
-              <div className="bg-white rounded-lg p-4">
-                <p className="font-semibold text-gray-700 mb-2">🤔 온도를 50°C 올리면 확산 속도는 약 몇 배 증가할까요?</p>
-                <p className="text-sm text-gray-600">
-                  힌트: Arrhenius 방정식의 지수 함수 특성. 일반적으로 2-3배 정도 증가합니다.
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-4">
-                <p className="font-semibold text-gray-700 mb-2">🤔 왜 RTA가 현대 공정에서 선호될까요?</p>
-                <p className="text-sm text-gray-600">
-                  힌트: 초미세 공정에서는 원하지 않는 확산을 최소화해야 합니다. 빠른 가열/냉각이 핵심!
-                </p>
-              </div>
-              <div className="bg-white rounded-lg p-4">
-                <p className="font-semibold text-gray-700 mb-2">🤔 Annealing 온도가 너무 낮으면?</p>
-                <p className="text-sm text-gray-600">
-                  힌트: 결정 손상이 완전히 회복되지 않아 누설 전류, 이동도 저하 등의 문제 발생
-                </p>
-              </div>
-            </div>
-          </div>
+            <div className="w-full" style={{ height: 'calc(100vh - 120px)' }}>
+              <iframe
+                src="/rta-annealing.html"
+                className="w-full h-full border-0"
+                title="RTA Annealing Simulation"
+                style={{ minHeight: '1000px' }}
+              />
             </div>
           )}
 
