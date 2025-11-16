@@ -1,0 +1,1717 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ion Implantation + RTA Simulation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.7.0/p5.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --anthropic-dark: #141413;
+            --anthropic-light: #faf9f5;
+            --anthropic-mid-gray: #b0aea5;
+            --anthropic-light-gray: #e8e6dc;
+            --anthropic-orange: #d97757;
+            --anthropic-blue: #6a9bcc;
+            --anthropic-green: #788c5d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, var(--anthropic-light) 0%, #f5f3ee 100%);
+            min-height: 100vh;
+            color: var(--anthropic-dark);
+        }
+
+        .container {
+            display: flex;
+            min-height: 100vh;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        .sidebar {
+            width: 320px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar h1 {
+            font-family: 'Lora', serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+        }
+
+        .sidebar .subtitle {
+            color: var(--anthropic-mid-gray);
+            font-size: 14px;
+            margin-bottom: 32px;
+            line-height: 1.4;
+        }
+
+        .control-section {
+            margin-bottom: 32px;
+        }
+
+        .control-section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--anthropic-dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-section h3::before {
+            content: '•';
+            color: var(--anthropic-orange);
+            font-weight: bold;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+        }
+
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .slider-container input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: var(--anthropic-light-gray);
+            border-radius: 2px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--anthropic-orange);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .slider-container input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            background: #c86641;
+        }
+
+        .value-display {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: var(--anthropic-mid-gray);
+            min-width: 60px;
+            text-align: right;
+        }
+
+        .button {
+            background: linear-gradient(135deg, var(--anthropic-orange) 0%, #e08966 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            width: 100%;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(217, 119, 87, 0.3);
+            background: linear-gradient(135deg, #c86641 0%, #d97757 100%);
+        }
+
+        .button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 6px rgba(217, 119, 87, 0.2);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .canvas-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(20, 20, 19, 0.1);
+            padding: 24px;
+            position: relative;
+        }
+
+        #canvas-container {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(20, 20, 19, 0.15);
+            background: white;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                padding: 16px;
+            }
+
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+
+            .canvas-area {
+                order: 1;
+                min-height: 50vh;
+            }
+        }
+
+        /* Educational Content Styles */
+        .educational-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 60px 20px;
+            margin-top: 0;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .theory-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(20, 20, 19, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .theory-card h2 {
+            font-family: 'Lora', serif;
+            font-size: 24px;
+            color: var(--anthropic-dark);
+            margin-bottom: 24px;
+            border-bottom: 3px solid var(--anthropic-orange);
+            padding-bottom: 8px;
+        }
+
+        .parameter-item {
+            margin-bottom: 24px;
+            padding: 16px;
+            background: rgba(250, 249, 245, 0.6);
+            border-radius: 8px;
+            border-left: 4px solid var(--anthropic-blue);
+        }
+
+        .parameter-item h3 {
+            font-size: 16px;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .parameter-item p {
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            color: #495057;
+        }
+
+        .parameter-item ul {
+            list-style: none;
+            padding-left: 0;
+            margin-bottom: 0;
+        }
+
+        .parameter-item li {
+            font-size: 13px;
+            line-height: 1.4;
+            margin-bottom: 4px;
+            color: #6c757d;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .parameter-item li::before {
+            content: '▸';
+            color: var(--anthropic-orange);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .rta-importance {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 2px solid #ffb74d;
+        }
+
+        .rta-importance h3 {
+            color: #e65100;
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+
+        .rta-importance p {
+            color: #bf360c;
+            font-weight: 500;
+            line-height: 1.6;
+        }
+
+        .rta-problems {
+            background: rgba(255, 235, 238, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border-left: 4px solid #f44336;
+        }
+
+        .rta-problems h3 {
+            color: #c62828;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .rta-problems ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .rta-problems li {
+            color: #d32f2f;
+            margin-bottom: 8px;
+            padding-left: 24px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .rta-problems li::before {
+            content: '⚠️';
+            position: absolute;
+            left: 0;
+        }
+
+        .rta-process {
+            margin-bottom: 24px;
+        }
+
+        .rta-process h3 {
+            color: var(--anthropic-dark);
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .process-step {
+            background: rgba(232, 245, 233, 0.8);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--anthropic-green);
+        }
+
+        .process-step h4 {
+            color: var(--anthropic-green);
+            font-size: 14px;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .process-step p {
+            color: #2e7d32;
+            font-size: 13px;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .rta-benefits {
+            background: rgba(227, 242, 253, 0.8);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--anthropic-blue);
+        }
+
+        .rta-benefits h3 {
+            color: var(--anthropic-blue);
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .rta-benefits ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .rta-benefits li {
+            color: #1976d2;
+            margin-bottom: 8px;
+            padding-left: 24px;
+            position: relative;
+            font-size: 14px;
+        }
+
+        .rta-benefits li::before {
+            content: '✓';
+            color: var(--anthropic-green);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        .real-applications {
+            margin-bottom: 24px;
+        }
+
+        .real-applications h3 {
+            color: var(--anthropic-dark);
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .application {
+            background: rgba(248, 249, 250, 0.9);
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            border-left: 3px solid var(--anthropic-orange);
+        }
+
+        .application h4 {
+            color: var(--anthropic-orange);
+            font-size: 14px;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .application p {
+            color: #495057;
+            font-size: 13px;
+            margin: 0;
+            line-height: 1.4;
+        }
+
+        .simulation-guide {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(20, 20, 19, 0.1);
+        }
+
+        .simulation-guide h2 {
+            font-family: 'Lora', serif;
+            font-size: 24px;
+            color: var(--anthropic-dark);
+            margin-bottom: 24px;
+            text-align: center;
+            border-bottom: 3px solid var(--anthropic-green);
+            padding-bottom: 8px;
+        }
+
+        .guide-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 24px;
+        }
+
+        .guide-step {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(250, 249, 245, 0.8) 0%, rgba(248, 249, 250, 0.6) 100%);
+            border-radius: 12px;
+            border: 1px solid rgba(217, 119, 87, 0.2);
+        }
+
+        .step-number {
+            background: var(--anthropic-orange);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+            font-size: 16px;
+        }
+
+        .step-content h3 {
+            font-size: 16px;
+            color: var(--anthropic-dark);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .step-content p {
+            font-size: 14px;
+            color: #495057;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        @media (max-width: 768px) {
+            .theory-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
+            }
+
+            .theory-card {
+                padding: 24px;
+            }
+
+            .guide-steps {
+                grid-template-columns: 1fr;
+            }
+
+            .educational-section {
+                padding: 40px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar with Controls -->
+        <div class="sidebar">
+            <h1>Ion Implantation + RTA</h1>
+            <p class="subtitle">완전한 반도체 공정: 이온 주입 → RTA 어닐링 → 완벽한 격자 복원과 도핑 원자 활성화</p>
+
+            <!-- Parameters Section -->
+            <div class="control-section">
+                <h3>물리 매개변수</h3>
+
+                <div class="control-group">
+                    <label>이온 에너지 (keV)</label>
+                    <div class="slider-container">
+                        <input type="range" id="ionEnergy" min="10" max="200" step="5" value="50" oninput="updateParam('ionEnergy', this.value)">
+                        <span class="value-display" id="ionEnergy-value">50</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>이온 플럭스 율</label>
+                    <div class="slider-container">
+                        <input type="range" id="ionFlux" min="1" max="10" step="1" value="3" oninput="updateParam('ionFlux', this.value)">
+                        <span class="value-display" id="ionFlux-value">3</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>산란 계수</label>
+                    <div class="slider-container">
+                        <input type="range" id="scatterFactor" min="0.1" max="2.0" step="0.1" value="0.8" oninput="updateParam('scatterFactor', this.value)">
+                        <span class="value-display" id="scatterFactor-value">0.8</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>격자 강성</label>
+                    <div class="slider-container">
+                        <input type="range" id="latticeStiffness" min="0.3" max="1.5" step="0.1" value="0.7" oninput="updateParam('latticeStiffness', this.value)">
+                        <span class="value-display" id="latticeStiffness-value">0.7</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>손상 누적</label>
+                    <div class="slider-container">
+                        <input type="range" id="damageRate" min="0.1" max="2.0" step="0.1" value="1.0" oninput="updateParam('damageRate', this.value)">
+                        <span class="value-display" id="damageRate-value">1.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions Section -->
+            <div class="control-section">
+                <h3>공정 제어</h3>
+                <div class="button-row">
+                    <button class="button" id="startStopBtn" onclick="toggleSimulation()">시작</button>
+                </div>
+                <div class="button-row">
+                    <button class="button" id="rtaBtn" onclick="startRTA()" style="background: linear-gradient(135deg, #ff9500 0%, #ff7b00 100%);">RTA 열처리</button>
+                </div>
+                <div class="button-row">
+                    <button class="button" onclick="resetParameters()">리셋</button>
+                </div>
+                <div class="button-row">
+                    <button class="button" onclick="clearDamage()">전체 클리어</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Canvas Area -->
+        <div class="canvas-area">
+            <div id="canvas-container"></div>
+        </div>
+    </div>
+
+    <!-- Educational Content Section -->
+    <div class="educational-section">
+        <div class="content-wrapper">
+            <div class="theory-grid">
+                <!-- Physics Parameters Explanation -->
+                <div class="theory-card">
+                    <h2>물리 매개변수 이해</h2>
+
+                    <div class="parameter-item">
+                        <h3>🔋 이온 에너지 (Ion Energy)</h3>
+                        <p><strong>범위:</strong> 10~200 keV</p>
+                        <p><strong>물리적 의미:</strong> 가속된 이온의 운동 에너지로, 이온이 실리콘 격자 내로 침투할 수 있는 깊이를 결정합니다.</p>
+                        <ul>
+                            <li>높은 에너지 → 깊은 침투, 넓은 Range 분포</li>
+                            <li>낮은 에너지 → 표면 근처 집중, 좁은 분포</li>
+                            <li>실제 예: As<sup>+</sup> 20keV (얕은 S/D), P<sup>+</sup> 80keV (깊은 웰)</li>
+                        </ul>
+                    </div>
+
+                    <div class="parameter-item">
+                        <h3>⚡ 이온 플럭스 율 (Ion Flux Rate)</h3>
+                        <p><strong>범위:</strong> 1~10 (상대값)</p>
+                        <p><strong>물리적 의미:</strong> 단위 시간당 입사하는 이온의 개수로, dose rate를 나타냅니다.</p>
+                        <ul>
+                            <li>높은 플럭스 → 빠른 dose 달성, 동시 충돌 증가</li>
+                            <li>낮은 플럭스 → 천천히 주입, 격자 손상 분산</li>
+                            <li>실제 범위: 1E12~1E16 ions/cm²/sec</li>
+                        </ul>
+                    </div>
+
+                    <div class="parameter-item">
+                        <h3>🎯 산란 계수 (Scattering Factor)</h3>
+                        <p><strong>범위:</strong> 0.1~2.0</p>
+                        <p><strong>물리적 의미:</strong> 이온-원자 충돌 확률과 각도 분산을 제어합니다.</p>
+                        <ul>
+                            <li>높은 산란 → channeling 방지, lateral straggling 증가</li>
+                            <li>낮은 산란 → channeling 효과, 좁은 분포</li>
+                            <li>결정 방향, 이온 질량, target 원자에 의존</li>
+                        </ul>
+                    </div>
+
+                    <div class="parameter-item">
+                        <h3>🔧 격자 강성 (Lattice Stiffness)</h3>
+                        <p><strong>범위:</strong> 0.3~1.5</p>
+                        <p><strong>물리적 의미:</strong> 실리콘 결정 격자의 변형에 대한 저항성입니다.</p>
+                        <ul>
+                            <li>높은 강성 → 적은 격자 변형, 탄성 충돌</li>
+                            <li>낮은 강성 → 쉬운 변형, 격자 손상 증가</li>
+                            <li>온도, 결정 방향, 불순물 농도에 의존</li>
+                        </ul>
+                    </div>
+
+                    <div class="parameter-item">
+                        <h3>💥 손상 누적 (Damage Accumulation)</h3>
+                        <p><strong>범위:</strong> 0.1~2.0</p>
+                        <p><strong>물리적 의미:</strong> 연쇄 손상(cascade damage)의 확산 정도를 나타냅니다.</p>
+                        <ul>
+                            <li>높은 누적 → 큰 손상 영역, 연쇄 반응</li>
+                            <li>낮은 누적 → 국소 손상, 격리된 결함</li>
+                            <li>PKA(Primary Knock-on Atom) 에너지와 관련</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- RTA Process Explanation -->
+                <div class="theory-card">
+                    <h2>RTA (Rapid Thermal Annealing)의 필수성</h2>
+
+                    <div class="rta-importance">
+                        <h3>🔥 왜 RTA가 필요한가?</h3>
+                        <p>이온 주입 후의 실리콘 격자는 심각하게 손상된 상태입니다. 이 손상을 치유하고 도핑 원자를 전기적으로 활성화하기 위해 RTA가 <strong>반드시 필요</strong>합니다.</p>
+                    </div>
+
+                    <div class="rta-problems">
+                        <h3>📋 주입 후 문제점들</h3>
+                        <ul>
+                            <li><strong>격자 손상:</strong> 변위된 Si 원자, vacancy, interstitial</li>
+                            <li><strong>비활성 도핑:</strong> 격자 사이에 끼어있는 이온들</li>
+                            <li><strong>높은 저항:</strong> 전기적으로 활성화되지 않은 상태</li>
+                            <li><strong>결정 결함:</strong> 비정질(amorphous) 영역 형성</li>
+                        </ul>
+                    </div>
+
+                    <div class="rta-process">
+                        <h3>🔄 RTA 4단계 과정</h3>
+                        <div class="process-step">
+                            <h4>1️⃣ Interstitial 제거 (0-20%)</h4>
+                            <p>격자 사이에 끼어있던 여분의 원자들이 높은 온도에서 가장 먼저 제거됩니다.</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>2️⃣ 격자 복원 (0-60%)</h4>
+                            <p>변위된 Si 원자들이 열 에너지를 받아 원래의 격자 위치로 천천히 돌아갑니다.</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>3️⃣ 도핑 원자 확산 (40-100%)</h4>
+                            <p>주입된 이온들이 열 확산에 의해 가장 가까운 격자 자리로 이동합니다.</p>
+                        </div>
+                        <div class="process-step">
+                            <h4>4️⃣ 완벽한 정렬 (80-100%)</h4>
+                            <p>모든 원자가 정확한 격자 위치에 안착하여 substitutional dopant가 됩니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="rta-benefits">
+                        <h3>✅ RTA의 장점</h3>
+                        <ul>
+                            <li><strong>빠른 처리:</strong> 900-1000°C에서 수 초간 (vs 확산로 수 시간)</li>
+                            <li><strong>낮은 확산:</strong> 짧은 시간으로 도핑 profile 보존</li>
+                            <li><strong>완벽한 활성화:</strong> >95% 전기적 활성화 달성</li>
+                            <li><strong>결정 복원:</strong> 단결정 구조 완전 회복</li>
+                        </ul>
+                    </div>
+
+                    <div class="real-applications">
+                        <h3>🏭 실제 공정 응용</h3>
+                        <div class="application">
+                            <h4>Source/Drain 형성</h4>
+                            <p>As+ 또는 P+ 주입 후 RTA로 얕은 접합과 낮은 저항 달성</p>
+                        </div>
+                        <div class="application">
+                            <h4>웰(Well) 형성</h4>
+                            <p>B+ 또는 P+ 주입 후 RTA로 깊은 웰 형성과 균일한 도핑 분포</p>
+                        </div>
+                        <div class="application">
+                            <h4>임계전압 조정</h4>
+                            <p>채널 도핑 후 RTA로 정밀한 Vth 제어</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="simulation-guide">
+                <h2>시뮬레이션 사용 가이드</h2>
+                <div class="guide-steps">
+                    <div class="guide-step">
+                        <span class="step-number">1</span>
+                        <div class="step-content">
+                            <h3>매개변수 조정</h3>
+                            <p>원하는 이온 주입 조건을 설정하세요. 각 변수가 결과에 미치는 영향을 관찰해보세요.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <span class="step-number">2</span>
+                        <div class="step-content">
+                            <h3>이온 주입 시작</h3>
+                            <p>'시작' 버튼을 눌러 이온 주입을 시작하고, 격자 손상이 누적되는 과정을 관찰하세요.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <span class="step-number">3</span>
+                        <div class="step-content">
+                            <h3>주입 정지</h3>
+                            <p>'정지' 버튼으로 원하는 시점에서 주입을 멈추세요. 손상 상태가 그대로 보존됩니다.</p>
+                        </div>
+                    </div>
+                    <div class="guide-step">
+                        <span class="step-number">4</span>
+                        <div class="step-content">
+                            <h3>RTA 처리</h3>
+                            <p>'RTA 열처리' 버튼으로 어닐링을 시작하고, 격자 회복과 도핑 원자 활성화를 관찰하세요.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════════════════
+        // 시뮬레이션 매개변수
+        // ═══════════════════════════════════════════════════════════════════════
+
+        let params = {
+            ionEnergy: 50,
+            ionFlux: 3,
+            scatterFactor: 0.8,
+            latticeStiffness: 0.7,
+            damageRate: 1.0
+        };
+
+        let defaultParams = {...params};
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // 시뮬레이션 변수
+        // ═══════════════════════════════════════════════════════════════════════
+
+        let ions = [];
+        let siliconAtoms = [];
+        let implantedIons = [];
+        let waferSurface;
+        let frameCounter = 0;
+        let simulationRunning = false;
+        let rtaMode = false;
+        let rtaProgress = 0;
+
+        function setup() {
+            let canvas = createCanvas(800, 600);
+            canvas.parent('canvas-container');
+
+            waferSurface = width * 0.3;
+
+            initializeSystem();
+        }
+
+        function initializeSystem() {
+            ions = [];
+            siliconAtoms = [];
+            implantedIons = [];
+            rtaMode = false;
+            rtaProgress = 0;
+
+            let latticeSpacing = 25;
+            let startX = waferSurface + 30;
+
+            for (let x = startX; x < width - 50; x += latticeSpacing) {
+                for (let y = 50; y < height - 50; y += latticeSpacing) {
+                    let atom = {
+                        x: x,
+                        y: y,
+                        size: 8,
+                        originalX: x,
+                        originalY: y,
+                        displaced: false,
+                        displacementX: 0,
+                        displacementY: 0,
+                        connected: [],
+                        isVacancy: false,
+                        damageLevel: 0,
+                        depth: x - startX,
+                        isDopant: false
+                    };
+
+                    siliconAtoms.push(atom);
+                }
+            }
+
+            // 격자점들 간의 연결 설정
+            for (let i = 0; i < siliconAtoms.length; i++) {
+                let atom = siliconAtoms[i];
+                for (let j = i + 1; j < siliconAtoms.length; j++) {
+                    let other = siliconAtoms[j];
+                    let distance = dist(atom.originalX, atom.originalY, other.originalX, other.originalY);
+
+                    let isHorizontal = abs(atom.originalY - other.originalY) < 5 && abs(atom.originalX - other.originalX) < latticeSpacing * 1.2;
+                    let isVertical = abs(atom.originalX - other.originalX) < 5 && abs(atom.originalY - other.originalY) < latticeSpacing * 1.2;
+
+                    if (distance < latticeSpacing * 1.2 && (isHorizontal || isVertical)) {
+                        atom.connected.push(j);
+                        other.connected.push(i);
+                    }
+                }
+            }
+
+            background(20, 25, 30);
+        }
+
+        function draw() {
+            // 반투명 오버레이
+            fill(20, 25, 30, 20);
+            rect(0, 0, width, height);
+
+            // 웨이퍼 표면 그리기
+            stroke(150, 150, 150);
+            strokeWeight(4);
+            line(waferSurface, 0, waferSurface, height);
+
+            // 왼쪽 영역 (진공)
+            fill(30, 30, 40, 120);
+            noStroke();
+            rect(0, 0, waferSurface, height);
+
+            // 표면 라벨
+            fill(200, 200, 200);
+            noStroke();
+            textSize(11);
+            text("이온 빔 →", 10, 30);
+            text("진공", 10, height - 40);
+
+            fill(180, 180, 180);
+            textSize(10);
+            text("웨이퍼", waferSurface + 5, 20);
+            text("표면", waferSurface + 5, 32);
+            text("Si 결정", waferSurface + 5, height - 40);
+
+            // 공정 정보
+            fill(150, 180, 150);
+            text("공정 단계:", waferSurface + 50, 20);
+            text("1. 이온 주입", waferSurface + 50, 32);
+            text("2. RTA (900-1000°C)", waferSurface + 50, 44);
+            text("3. 도핑 원자 활성화", waferSurface + 50, 56);
+
+            // 시뮬레이션 상태
+            if (rtaMode) {
+                fill(255, 150, 0);
+                textSize(12);
+                text("RTA 어닐링 진행 중", 10, 60);
+
+                fill(200, 200, 200);
+                textSize(10);
+                text(`진행도: ${Math.round(rtaProgress * 100)}%`, 10, 75);
+
+                // 진행 바
+                stroke(200, 200, 200);
+                strokeWeight(2);
+                noFill();
+                rect(10, 80, 100, 8);
+                fill(255, 150, 0);
+                noStroke();
+                rect(10, 80, rtaProgress * 100, 8);
+
+            } else {
+                fill(simulationRunning ? color(100, 255, 100) : color(255, 100, 100));
+                textSize(12);
+                text(simulationRunning ? "이온 주입 중" : "정지", 10, 60);
+            }
+
+            // 상태 범례
+            drawLegend();
+
+            // Range 가이드 라인
+            stroke(150, 180, 150, 100);
+            strokeWeight(2);
+            line(waferSurface + 125, 50, waferSurface + 125, height - 100);
+
+            // 새 이온 생성
+            if (simulationRunning && !rtaMode && frameCounter % Math.max(5, 20 - params.ionFlux * 3) === 0) {
+                for (let i = 0; i < Math.min(params.ionFlux, 2); i++) {
+                    ions.push(new Ion());
+                }
+            }
+
+            // RTA 프로세스 실행
+            if (rtaMode) {
+                performRTA();
+            }
+
+            // 이온 업데이트 및 그리기
+            for (let i = ions.length - 1; i >= 0; i--) {
+                let ion = ions[i];
+
+                if (rtaMode) {
+                    // RTA 중에는 움직이는 이온들을 implanted로 변환
+                    implantedIons.push({
+                        x: ion.x,
+                        y: ion.y,
+                        size: 7,
+                        type: 'implanted',
+                        snappedToLattice: false
+                    });
+                    ions.splice(i, 1);
+                    continue;
+                }
+
+                if (simulationRunning) {
+                    ion.update();
+                }
+                ion.display();
+
+                if (ion.stopped) {
+                    implantedIons.push({
+                        x: ion.x,
+                        y: ion.y,
+                        size: 7,
+                        type: 'implanted',
+                        snappedToLattice: false
+                    });
+                    ions.splice(i, 1);
+                } else if (ion.energy < 1) {
+                    implantedIons.push({
+                        x: ion.x,
+                        y: ion.y,
+                        size: 7,
+                        type: 'implanted',
+                        snappedToLattice: false
+                    });
+                    ions.splice(i, 1);
+                }
+            }
+
+            // 실리콘 격자 그리기
+            drawSiliconLattice();
+
+            // 주입된 이온들 그리기
+            drawImplantedIons();
+
+            if (simulationRunning || rtaMode) {
+                frameCounter++;
+            }
+        }
+
+        function drawLegend() {
+            fill(200, 200, 200);
+            noStroke();
+            textSize(10);
+            text("상태:", 10, height - 95);
+
+            // 움직이는 이온
+            fill(100, 150, 255, 200);
+            circle(15, height - 80, 6);
+            text("움직이는 이온", 25, height - 75);
+
+            // 주입된/활성화된 이온
+            if (rtaProgress >= 1.0) {
+                fill(255, 255, 255, 240);
+                stroke(50, 50, 50, 200);
+                strokeWeight(1.5);
+                circle(15, height - 65, 7);
+                noStroke();
+                text("활성화된 도핑 원자", 25, height - 60);
+            } else {
+                fill(255, 200, 0, 200);
+                circle(15, height - 65, 7);
+                text("주입된 이온", 25, height - 60);
+            }
+
+            // Si 원자
+            if (rtaProgress >= 1.0) {
+                fill(30, 30, 50, 240);
+                stroke(20, 20, 40, 200);
+                strokeWeight(1);
+                circle(15, height - 50, 8);
+                noStroke();
+            } else {
+                fill(180, 180, 220, 220);
+                circle(15, height - 50, 8);
+            }
+            text("Si 원자", 25, height - 45);
+
+            // Vacancy (손상 단계에서만 표시)
+            if (rtaProgress < 1.0) {
+                stroke(150, 150, 150, 200);
+                strokeWeight(2);
+                noFill();
+                circle(15, height - 35, 8);
+                text("결손", 25, height - 30);
+
+                fill(150, 150, 150);
+                textSize(9);
+                if (rtaMode) {
+                    text("(회복 진행 중...)", 25, height - 17);
+                } else {
+                    text("(무작위 분포)", 25, height - 17);
+                }
+            } else {
+                fill(100, 200, 100);
+                textSize(9);
+                text("완벽한 결정 + 활성화된 도핑", 25, height - 30);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // 이온 클래스
+        // ═══════════════════════════════════════════════════════════════════════
+
+        class Ion {
+            constructor() {
+                this.x = -20;
+                this.y = random(height * 0.3, height * 0.7);
+                this.vx = map(params.ionEnergy, 10, 200, 2, 6);
+                this.vy = 0;
+                this.energy = params.ionEnergy;
+                this.initialEnergy = params.ionEnergy;
+                this.trail = [];
+                this.color = color(100, 150, 255, 200);
+                this.scattered = false;
+                this.stopped = false;
+
+                this.meanRange = 125;
+                this.rangeStraggling = 20;
+                this.individualRange = this.gaussianRandom(this.meanRange, this.rangeStraggling);
+                this.individualRange = constrain(this.individualRange, 80, 170);
+            }
+
+            gaussianRandom(mean, stdev) {
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                return mean + stdev * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+
+            update() {
+                this.trail.push({x: this.x, y: this.y});
+                if (this.trail.length > 15) {
+                    this.trail.shift();
+                }
+
+                if (this.x > waferSurface) {
+                    let depthInLattice = this.x - waferSurface;
+                    let stoppingPower = 1 + depthInLattice * 0.008;
+                    this.energy *= (1.0 - stoppingPower * 0.005);
+                }
+
+                let currentDepth = this.x - waferSurface;
+                if (currentDepth > this.individualRange) {
+                    this.stopped = true;
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.x = waferSurface + this.individualRange + random(-3, 3);
+                    return;
+                }
+
+                this.checkCollisions();
+
+                if (!this.stopped && this.energy > 2) {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                } else if (!this.stopped) {
+                    this.stopped = true;
+                    this.vx = 0;
+                    this.vy = 0;
+                }
+
+                let energyRatio = this.energy / this.initialEnergy;
+                if (this.stopped) {
+                    this.color = color(255, 255, 100, 180);
+                } else {
+                    this.color = lerpColor(
+                        color(100, 100, 100, 120),
+                        color(100, 150, 255, 200),
+                        energyRatio
+                    );
+                }
+            }
+
+            checkCollisions() {
+                if (this.stopped) return;
+                if (this.x < waferSurface) return;
+
+                let depthInLattice = this.x - waferSurface;
+                let rangeFactor = depthInLattice / 150;
+                let densityFactor = 1.0 + rangeFactor * 3;
+                let baseProbability = params.scatterFactor * densityFactor * 0.25;
+
+                for (let atom of siliconAtoms) {
+                    if (atom.isVacancy) continue;
+
+                    let currentX = atom.originalX + atom.displacementX;
+                    let currentY = atom.originalY + atom.displacementY;
+                    let distance = dist(this.x, this.y, currentX, currentY);
+
+                    if (distance < atom.size + 5 && random() < baseProbability) {
+                        this.scatter(atom);
+                        this.createDamage(currentX, currentY);
+                        break;
+                    }
+                }
+            }
+
+            scatter(atom) {
+                let scatterAngle = random(-PI/4, PI/4) * params.scatterFactor;
+                let speed = sqrt(this.vx * this.vx + this.vy * this.vy);
+
+                let energyTransfer = random(0.3, 0.6) * this.energy;
+                this.energy -= energyTransfer;
+
+                let currentDepth = this.x - waferSurface;
+                let nearRange = currentDepth > this.individualRange * 0.8;
+
+                if (this.energy < 12 || nearRange) {
+                    this.stopped = true;
+                    this.vx = 0;
+                    this.vy = 0;
+                    this.x = waferSurface + this.individualRange + random(-5, 5);
+                    this.y = atom.originalY + random(-8, 8);
+                    return;
+                }
+
+                let speedReduction = 0.6 + (this.energy / this.initialEnergy) * 0.3;
+                this.vx = cos(scatterAngle) * speed * speedReduction;
+                this.vy = sin(scatterAngle) * speed * 0.2;
+
+                let depthFactor = Math.max(0.1, 1 - atom.depth / 200);
+                let displacementMagnitude = energyTransfer * 0.15 * depthFactor / params.latticeStiffness;
+
+                atom.displacementX += random(-displacementMagnitude, displacementMagnitude);
+                atom.displacementY += random(-displacementMagnitude, displacementMagnitude);
+                atom.displaced = true;
+                atom.damageLevel = Math.min(2, atom.damageLevel + 1);
+
+                if (atom.damageLevel >= 2 && random() < 0.3 * depthFactor) {
+                    atom.isVacancy = true;
+                }
+
+                for (let connectedIndex of atom.connected) {
+                    if (connectedIndex < siliconAtoms.length) {
+                        let connectedAtom = siliconAtoms[connectedIndex];
+                        let influence = displacementMagnitude * 0.4;
+                        connectedAtom.displacementX += random(-influence, influence);
+                        connectedAtom.displacementY += random(-influence, influence);
+
+                        if (random() < 0.3) {
+                            connectedAtom.displaced = true;
+                            connectedAtom.damageLevel = Math.min(2, connectedAtom.damageLevel + 0.5);
+                        }
+                    }
+                }
+
+                if (atom.depth < 100 && random() < 0.2 * depthFactor) {
+                    this.createInterstitialAtom(atom);
+                }
+
+                this.scattered = true;
+            }
+
+            createInterstitialAtom(nearAtom) {
+                let interstitial = {
+                    x: nearAtom.originalX + random(-15, 15),
+                    y: nearAtom.originalY + random(-15, 15),
+                    size: 6,
+                    originalX: nearAtom.originalX + random(-15, 15),
+                    originalY: nearAtom.originalY + random(-15, 15),
+                    displaced: true,
+                    displacementX: random(-10, 10),
+                    displacementY: random(-10, 10),
+                    connected: [],
+                    isVacancy: false,
+                    damageLevel: 2,
+                    depth: nearAtom.depth,
+                    isInterstitial: true,
+                    isDopant: false
+                };
+                siliconAtoms.push(interstitial);
+            }
+
+            createDamage(x, y) {
+                for (let atom of siliconAtoms) {
+                    let distance = dist(x, y, atom.originalX, atom.originalY);
+                    if (distance < 50) {
+                        let damageInfluence = map(distance, 0, 50, params.damageRate * 0.2, 0);
+                        atom.displacementX += random(-damageInfluence, damageInfluence);
+                        atom.displacementY += random(-damageInfluence, damageInfluence);
+                    }
+                }
+            }
+
+            display() {
+                if (!this.stopped) {
+                    stroke(this.color);
+                    strokeWeight(2);
+                    noFill();
+                    beginShape();
+                    for (let i = 0; i < this.trail.length; i++) {
+                        let alpha = map(i, 0, this.trail.length - 1, 0, 150);
+                        stroke(red(this.color), green(this.color), blue(this.color), alpha);
+                        if (i === 0) {
+                            vertex(this.trail[i].x, this.trail[i].y);
+                        } else {
+                            vertex(this.trail[i].x, this.trail[i].y);
+                        }
+                    }
+                    endShape();
+                }
+
+                fill(this.color);
+                noStroke();
+
+                if (this.stopped) {
+                    circle(this.x, this.y, 6);
+                    fill(255, 255, 0, 100);
+                    circle(this.x, this.y, 10);
+                } else {
+                    circle(this.x, this.y, 4);
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // RTA 프로세스
+        // ═══════════════════════════════════════════════════════════════════════
+
+        function performRTA() {
+            rtaProgress += 1 / 240; // 4초 동안 진행
+
+            if (rtaProgress >= 1.0) {
+                rtaProgress = 1.0;
+                rtaMode = false;
+
+                // 최종 완벽한 격자 정렬
+                finalizeLatticePerfection();
+
+                // 버튼 상태 복원
+                document.getElementById('rtaBtn').style.background = 'linear-gradient(135deg, #ff9500 0%, #ff7b00 100%)';
+                return;
+            }
+
+            // Phase 1 (0-20%): Interstitial 원자들 제거
+            if (rtaProgress > 0.2) {
+                siliconAtoms = siliconAtoms.filter(atom => !atom.isInterstitial);
+            }
+
+            // Phase 2 (0-60%): Si 원자들을 원래 격자 위치로 복원
+            restoreSiliconLattice();
+
+            // Phase 3 (40-100%): 이온들을 격자 자리로 이동
+            if (rtaProgress > 0.4) {
+                moveIonsToLatticeSites();
+            }
+
+            // Phase 4 (80-100%): 최종 미세 조정
+            if (rtaProgress > 0.8) {
+                fineTuneLatticePlacement();
+            }
+        }
+
+        function restoreSiliconLattice() {
+            for (let atom of siliconAtoms) {
+                if (atom.isInterstitial || atom.isDopant) continue;
+
+                // 열 에너지에 의한 점진적 위치 복원
+                let restoreRate = 0.02 + rtaProgress * 0.03;
+
+                atom.displacementX *= (1 - restoreRate);
+                atom.displacementY *= (1 - restoreRate);
+
+                if (abs(atom.displacementX) < 0.5 && abs(atom.displacementY) < 0.5) {
+                    atom.displacementX = 0;
+                    atom.displacementY = 0;
+                    atom.displaced = false;
+                    atom.damageLevel = 0;
+                    atom.isVacancy = false;
+                }
+
+                if (atom.damageLevel > 0) {
+                    atom.damageLevel = Math.max(0, atom.damageLevel - 0.01);
+                }
+            }
+        }
+
+        function moveIonsToLatticeSites() {
+            for (let i = 0; i < implantedIons.length; i++) {
+                let ion = implantedIons[i];
+
+                if (ion.snappedToLattice) continue;
+
+                // 가장 가까운 빈 격자 자리 찾기
+                let nearestAtom = null;
+                let minDistance = Infinity;
+
+                for (let atom of siliconAtoms) {
+                    if (atom.isInterstitial || atom.isDopant) continue;
+
+                    let distance = dist(ion.x, ion.y, atom.originalX, atom.originalY);
+                    if (distance < minDistance && distance < 40) {
+                        minDistance = distance;
+                        nearestAtom = atom;
+                    }
+                }
+
+                if (nearestAtom) {
+                    // 열 확산에 의한 점진적 이동
+                    let diffusionRate = 0.015 + (rtaProgress - 0.4) * 0.025;
+                    let dx = nearestAtom.originalX - ion.x;
+                    let dy = nearestAtom.originalY - ion.y;
+
+                    ion.x += dx * diffusionRate;
+                    ion.y += dy * diffusionRate;
+
+                    // 격자 자리에 거의 도달하면 정확히 배치
+                    if (abs(dx) < 2 && abs(dy) < 2) {
+                        ion.x = nearestAtom.originalX;
+                        ion.y = nearestAtom.originalY;
+                        ion.snappedToLattice = true;
+                        ion.targetAtom = nearestAtom;
+                    }
+                }
+            }
+        }
+
+        function fineTuneLatticePlacement() {
+            // 모든 Si 원자를 완벽한 격자 위치로
+            for (let atom of siliconAtoms) {
+                if (atom.isInterstitial) continue;
+
+                let fineAdjustRate = 0.1;
+                atom.displacementX *= (1 - fineAdjustRate);
+                atom.displacementY *= (1 - fineAdjustRate);
+
+                if (abs(atom.displacementX) < 0.1 && abs(atom.displacementY) < 0.1) {
+                    atom.displacementX = 0;
+                    atom.displacementY = 0;
+                    atom.displaced = false;
+                    atom.damageLevel = 0;
+                }
+            }
+        }
+
+        function finalizeLatticePerfection() {
+            // 모든 이온들을 substitutional dopant로 변환
+            for (let ion of implantedIons) {
+                if (ion.targetAtom) {
+                    ion.targetAtom.isDopant = true;
+                    ion.targetAtom.dopantType = 'substitutional';
+                    ion.targetAtom.displacementX = 0;
+                    ion.targetAtom.displacementY = 0;
+                    ion.targetAtom.displaced = false;
+                    ion.targetAtom.damageLevel = 0;
+                    ion.targetAtom.isVacancy = false;
+                }
+            }
+
+            // 완벽한 격자 구조 완성
+            for (let atom of siliconAtoms) {
+                atom.displacementX = 0;
+                atom.displacementY = 0;
+                atom.displaced = false;
+                atom.damageLevel = 0;
+                atom.isVacancy = false;
+            }
+
+            // 완료된 이온들 제거 (이제 dopant atom이 됨)
+            implantedIons = [];
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // 시각화 함수들
+        // ═══════════════════════════════════════════════════════════════════════
+
+        function drawSiliconLattice() {
+            let baseOpacity = rtaMode ? 120 : 60;
+            let baseColor = rtaMode ? [100, 150, 200] : [120, 120, 150];
+
+            // 격자 연결선 그리기
+            strokeWeight(1);
+            for (let i = 0; i < siliconAtoms.length; i++) {
+                let atom = siliconAtoms[i];
+                if (atom.isVacancy || atom.damageLevel >= 2) continue;
+
+                let currentX = atom.originalX + atom.displacementX;
+                let currentY = atom.originalY + atom.displacementY;
+
+                for (let connectedIndex of atom.connected) {
+                    if (connectedIndex < siliconAtoms.length) {
+                        let connectedAtom = siliconAtoms[connectedIndex];
+                        if (connectedAtom.isVacancy || connectedAtom.damageLevel >= 2) continue;
+
+                        let connectedX = connectedAtom.originalX + connectedAtom.displacementX;
+                        let connectedY = connectedAtom.originalY + connectedAtom.displacementY;
+
+                        let connectionOpacity = baseOpacity - (atom.damageLevel + connectedAtom.damageLevel) * 30;
+
+                        // RTA 완료 후 강한 연결선
+                        if (rtaProgress >= 1.0) {
+                            connectionOpacity = 160;
+                            baseColor = [80, 80, 120];
+                        } else if (rtaMode) {
+                            connectionOpacity += rtaProgress * 50;
+                        }
+
+                        stroke(baseColor[0], baseColor[1], baseColor[2], connectionOpacity);
+                        line(currentX, currentY, connectedX, connectedY);
+                    }
+                }
+            }
+
+            // 격자점 그리기
+            for (let atom of siliconAtoms) {
+                let currentX = atom.originalX + atom.displacementX;
+                let currentY = atom.originalY + atom.displacementY;
+
+                if (atom.isVacancy) {
+                    // 결손 - 빈 동그라미
+                    stroke(150, 150, 150, 200);
+                    strokeWeight(2);
+                    noFill();
+                    circle(atom.originalX, atom.originalY, atom.size);
+
+                } else if (atom.isDopant) {
+                    // 도핑 원자 (substitutional) - 흰색 (참조 이미지처럼)
+                    fill(255, 255, 255, 240);
+                    stroke(50, 50, 50, 200);
+                    strokeWeight(1.5);
+                    circle(currentX, currentY, atom.size);
+
+                    // 활성화된 도핑 원자 빛남 효과
+                    if (rtaProgress >= 1.0) {
+                        fill(255, 255, 150, 60);
+                        noStroke();
+                        circle(currentX, currentY, atom.size + 2);
+                    }
+
+                } else {
+                    noStroke();
+
+                    if (atom.isInterstitial) {
+                        // Interstitial atoms - 작은 검은 점
+                        fill(80, 80, 80, 200);
+                        circle(currentX, currentY, atom.size - 2);
+
+                    } else if (atom.damageLevel === 0) {
+                        // 정상 원자 - 어두운 색 (참조 이미지처럼)
+                        if (rtaProgress >= 1.0) {
+                            // 완벽한 격자 상태
+                            fill(30, 30, 50, 240);
+                            stroke(20, 20, 40, 200);
+                            strokeWeight(1);
+                            circle(currentX, currentY, atom.size);
+                            noStroke();
+                        } else if (rtaMode) {
+                            fill(40, 40, 60, 240);
+                            circle(currentX, currentY, atom.size);
+                        } else {
+                            fill(60, 60, 80, 220);
+                            circle(currentX, currentY, atom.size);
+                        }
+
+                    } else if (atom.damageLevel === 1) {
+                        // 경미한 손상 - RTA 중 점진적 회복
+                        let healingFactor = rtaMode ? rtaProgress : 0;
+                        let r = lerp(140, 60, healingFactor);
+                        let g = lerp(140, 60, healingFactor);
+                        let b = lerp(180, 80, healingFactor);
+                        let a = lerp(200, 240, healingFactor);
+
+                        fill(r, g, b, a);
+                        circle(currentX, currentY, atom.size);
+
+                        // 변위 표시 (RTA 중 점진적 사라짐)
+                        if (abs(atom.displacementX) > 3 || abs(atom.displacementY) > 3) {
+                            let lineOpacity = rtaMode ? 100 * (1 - rtaProgress) : 100;
+                            stroke(140, 140, 180, lineOpacity);
+                            strokeWeight(1);
+                            line(atom.originalX, atom.originalY, currentX, currentY);
+                            noStroke();
+                        }
+
+                    } else {
+                        // 심각한 손상 - RTA 중 점진적 회복
+                        let healingFactor = rtaMode ? rtaProgress : 0;
+                        let r = lerp(100, 60, healingFactor);
+                        let g = lerp(100, 60, healingFactor);
+                        let b = lerp(120, 80, healingFactor);
+                        let a = lerp(180, 240, healingFactor);
+
+                        fill(r, g, b, a);
+                        let sizeVariation = rtaMode ? (2 * (1 - rtaProgress)) : 2;
+                        circle(currentX, currentY, atom.size + random(-sizeVariation, sizeVariation));
+
+                        // 변위 벡터 (RTA 중 점진적 사라짐)
+                        let vectorOpacity = rtaMode ? 120 * (1 - rtaProgress) : 120;
+                        stroke(255, 120, 120, vectorOpacity);
+                        strokeWeight(1);
+                        line(atom.originalX, atom.originalY, currentX, currentY);
+                        noStroke();
+                    }
+                }
+            }
+        }
+
+        function drawImplantedIons() {
+            // RTA 완료 후에는 이온들이 substitutional dopant가 되므로 별도로 그리지 않음
+            if (rtaProgress >= 1.0) {
+                return;
+            }
+
+            for (let ion of implantedIons) {
+                if (rtaMode && rtaProgress > 0.4) {
+                    // RTA 중 격자 자리로 이동하는 단계
+                    let incorporationFactor = Math.min(1.0, (rtaProgress - 0.4) / 0.6);
+
+                    // 오렌지에서 흰색으로 점진적 변화
+                    let r = 255;
+                    let g = lerp(200, 255, incorporationFactor);
+                    let b = lerp(0, 255, incorporationFactor);
+                    let alpha = lerp(200, 120, incorporationFactor);
+
+                    fill(r, g, b, alpha);
+                    circle(ion.x, ion.y, ion.size);
+
+                    // 격자 자리로 이동 중인 시각적 표시
+                    if (incorporationFactor > 0.5) {
+                        fill(255, 255, 255, 100);
+                        circle(ion.x, ion.y, ion.size + 2);
+                    }
+
+                    // 이동 방향 표시
+                    if (incorporationFactor > 0.2) {
+                        // 가장 가까운 격자 자리 찾기
+                        let nearestAtom = null;
+                        let minDistance = Infinity;
+
+                        for (let atom of siliconAtoms) {
+                            if (atom.isInterstitial || atom.isDopant) continue;
+                            let distance = dist(ion.x, ion.y, atom.originalX, atom.originalY);
+                            if (distance < minDistance && distance < 50) {
+                                minDistance = distance;
+                                nearestAtom = atom;
+                            }
+                        }
+
+                        if (nearestAtom) {
+                            stroke(200, 255, 200, 150);
+                            strokeWeight(1);
+                            drawingContext.setLineDash([3, 3]);
+                            line(ion.x, ion.y, nearestAtom.originalX, nearestAtom.originalY);
+                            drawingContext.setLineDash([]);
+                            noStroke();
+                        }
+                    }
+
+                } else {
+                    // 일반 주입된 이온 시각화
+                    fill(255, 200, 0, 200);
+                    circle(ion.x, ion.y, ion.size);
+
+                    // 빛남 효과
+                    fill(255, 255, 150, 80);
+                    circle(ion.x, ion.y, ion.size + 3);
+                }
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════════════════
+        // UI 제어 함수들
+        // ═══════════════════════════════════════════════════════════════════════
+
+        function updateParam(paramName, value) {
+            params[paramName] = parseFloat(value);
+            document.getElementById(paramName + '-value').textContent = value;
+        }
+
+        function toggleSimulation() {
+            simulationRunning = !simulationRunning;
+            let button = document.getElementById('startStopBtn');
+            button.textContent = simulationRunning ? '정지' : '시작';
+            button.style.background = simulationRunning ?
+                'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)' :
+                'linear-gradient(135deg, #51cf66 0%, #40c057 100%)';
+
+            // Stop 버튼은 단순히 시뮬레이션만 정지, 현재 상태 보존
+        }
+
+        function startRTA() {
+            // RTA 시작 시 시뮬레이션 정지, 현재 손상 상태는 보존
+            simulationRunning = false;
+            document.getElementById('startStopBtn').textContent = '시작';
+            document.getElementById('startStopBtn').style.background = 'linear-gradient(135deg, #51cf66 0%, #40c057 100%)';
+
+            // RTA 모드 시작
+            rtaMode = true;
+            rtaProgress = 0;
+            document.getElementById('rtaBtn').style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%)';
+
+            // 기존 움직이는 이온들을 implanted로 변환
+            for (let ion of ions) {
+                implantedIons.push({
+                    x: ion.x,
+                    y: ion.y,
+                    size: 7,
+                    type: 'implanted',
+                    snappedToLattice: false
+                });
+            }
+            ions = [];
+        }
+
+        function clearDamage() {
+            // 모든 모드 정지
+            simulationRunning = false;
+            rtaMode = false;
+            rtaProgress = 0;
+
+            // 버튼 상태 초기화
+            document.getElementById('startStopBtn').textContent = '시작';
+            document.getElementById('startStopBtn').style.background = 'linear-gradient(135deg, #51cf66 0%, #40c057 100%)';
+            document.getElementById('rtaBtn').style.background = 'linear-gradient(135deg, #ff9500 0%, #ff7b00 100%)';
+
+            // 모든 이온 제거
+            ions = [];
+            implantedIons = [];
+
+            // Interstitial atoms 제거
+            siliconAtoms = siliconAtoms.filter(atom => !atom.isInterstitial);
+
+            // 모든 격자점을 완벽한 상태로 복구
+            for (let atom of siliconAtoms) {
+                atom.displaced = false;
+                atom.displacementX = 0;
+                atom.displacementY = 0;
+                atom.isVacancy = false;
+                atom.damageLevel = 0;
+                atom.isDopant = false;
+            }
+        }
+
+        function resetParameters() {
+            // 모든 모드 정지
+            simulationRunning = false;
+            rtaMode = false;
+            rtaProgress = 0;
+
+            // 버튼 상태 초기화
+            document.getElementById('startStopBtn').textContent = '시작';
+            document.getElementById('startStopBtn').style.background = 'linear-gradient(135deg, #51cf66 0%, #40c057 100%)';
+            document.getElementById('rtaBtn').style.background = 'linear-gradient(135deg, #ff9500 0%, #ff7b00 100%)';
+
+            params = {...defaultParams};
+
+            // UI 요소들 업데이트
+            document.getElementById('ionEnergy').value = params.ionEnergy;
+            document.getElementById('ionEnergy-value').textContent = params.ionEnergy;
+            document.getElementById('ionFlux').value = params.ionFlux;
+            document.getElementById('ionFlux-value').textContent = params.ionFlux;
+            document.getElementById('scatterFactor').value = params.scatterFactor;
+            document.getElementById('scatterFactor-value').textContent = params.scatterFactor;
+            document.getElementById('latticeStiffness').value = params.latticeStiffness;
+            document.getElementById('latticeStiffness-value').textContent = params.latticeStiffness;
+            document.getElementById('damageRate').value = params.damageRate;
+            document.getElementById('damageRate-value').textContent = params.damageRate;
+
+            initializeSystem();
+        }
+    </script>
+</body>
+</html>
