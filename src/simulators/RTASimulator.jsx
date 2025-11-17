@@ -792,10 +792,10 @@ const RTASimulator = () => {
               {/* Background Grid */}
               <g stroke="#E5E7EB" strokeWidth="1">
                 {[0, 1, 2, 3, 4, 5, 6].map(i => (
-                  <line key={`h${i}`} x1="40" y1={30 + i * 35} x2="280" y2={30 + i * 35} />
+                  <line key={`h${i}`} x1="40" y1={54 + i * 63} x2="280" y2={54 + i * 63} />
                 ))}
                 {[0, 1, 2, 3, 4, 5, 6].map(i => (
-                  <line key={`v${i}`} x1={40 + i * 40} y1="30" x2={40 + i * 40} y2="240" />
+                  <line key={`v${i}`} x1={40 + i * 40} y1="54" x2={40 + i * 40} y2="432" />
                 ))}
               </g>
 
@@ -814,17 +814,17 @@ const RTASimulator = () => {
                     time: time,
                     temp: temp,
                     x: 40 + (time / totalTime) * 240,
-                    y: 240 - ((temp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210
+                    y: 432 - ((temp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 378
                   });
                 }
 
                 return (
                   <>
                     {/* Phase backgrounds */}
-                    <rect x="40" y="30" width={(gasStabilizationTime / totalTime) * 240} height="210" fill="rgba(34, 197, 94, 0.1)" />
-                    <rect x={40 + (gasStabilizationTime / totalTime) * 240} y="30" width={(totalRampTime / totalTime) * 240} height="210" fill="rgba(239, 68, 68, 0.1)" />
-                    <rect x={40 + ((gasStabilizationTime + totalRampTime) / totalTime) * 240} y="30" width={(processTime / totalTime) * 240} height="210" fill="rgba(245, 158, 11, 0.1)" />
-                    <rect x={40 + ((gasStabilizationTime + totalRampTime + processTime) / totalTime) * 240} y="30" width={(rampDownTime / totalTime) * 240} height="210" fill="rgba(59, 130, 246, 0.1)" />
+                    <rect x="40" y="54" width={(gasStabilizationTime / totalTime) * 240} height="378" fill="rgba(34, 197, 94, 0.1)" />
+                    <rect x={40 + (gasStabilizationTime / totalTime) * 240} y="54" width={(totalRampTime / totalTime) * 240} height="378" fill="rgba(239, 68, 68, 0.1)" />
+                    <rect x={40 + ((gasStabilizationTime + totalRampTime) / totalTime) * 240} y="54" width={(processTime / totalTime) * 240} height="378" fill="rgba(245, 158, 11, 0.1)" />
+                    <rect x={40 + ((gasStabilizationTime + totalRampTime + processTime) / totalTime) * 240} y="54" width={(rampDownTime / totalTime) * 240} height="378" fill="rgba(59, 130, 246, 0.1)" />
 
                     {/* Theoretical profile */}
                     <polyline
@@ -845,7 +845,7 @@ const RTASimulator = () => {
                         strokeLinecap="round"
                         points={tempHistory.map((point) => {
                           const x = 40 + (point.time / totalTime) * 240;
-                          const y = 240 - ((point.temp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210;
+                          const y = 432 - ((point.temp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 378;
                           return `${x},${y}`;
                         }).join(' ')}
                       />
@@ -854,9 +854,9 @@ const RTASimulator = () => {
                     {/* Target line */}
                     <line
                       x1="40"
-                      y1={240 - ((targetTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210}
+                      y1={432 - ((targetTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 378}
                       x2="280"
-                      y2={240 - ((targetTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210}
+                      y2={432 - ((targetTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 378}
                       stroke="#6B7280"
                       strokeWidth="1"
                       strokeDasharray="8,4"
@@ -867,16 +867,16 @@ const RTASimulator = () => {
                       <>
                         <line
                           x1={40 + (currentTime / totalTime) * 240}
-                          y1="30"
+                          y1="54"
                           x2={40 + (currentTime / totalTime) * 240}
-                          y2="240"
+                          y2="432"
                           stroke="#FF0000"
                           strokeWidth="2"
                           strokeDasharray="2,2"
                         />
                         <circle
                           cx={40 + (currentTime / totalTime) * 240}
-                          cy={240 - ((currentTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210}
+                          cy={432 - ((currentTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 378}
                           r="5"
                           fill="#EF4444"
                           stroke="#FFFFFF"
@@ -886,24 +886,24 @@ const RTASimulator = () => {
                     )}
 
                     {/* Phase labels */}
-                    <text x={40 + (gasStabilizationTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#059669">Gas Stab</text>
-                    <text x={40 + (gasStabilizationTime / totalTime) * 240 + (totalRampTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#DC2626">Ramp</text>
-                    <text x={40 + ((gasStabilizationTime + totalRampTime) / totalTime) * 240 + (processTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#D97706">Hold</text>
-                    <text x={40 + ((gasStabilizationTime + totalRampTime + processTime) / totalTime) * 240 + (rampDownTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#2563EB">Cool</text>
+                    <text x={40 + (gasStabilizationTime / totalTime) * 240 / 2} y="45" fontSize="8" textAnchor="middle" fill="#059669">Gas Stab</text>
+                    <text x={40 + (gasStabilizationTime / totalTime) * 240 + (totalRampTime / totalTime) * 240 / 2} y="45" fontSize="8" textAnchor="middle" fill="#DC2626">Ramp</text>
+                    <text x={40 + ((gasStabilizationTime + totalRampTime) / totalTime) * 240 + (processTime / totalTime) * 240 / 2} y="45" fontSize="8" textAnchor="middle" fill="#D97706">Hold</text>
+                    <text x={40 + ((gasStabilizationTime + totalRampTime + processTime) / totalTime) * 240 + (rampDownTime / totalTime) * 240 / 2} y="45" fontSize="8" textAnchor="middle" fill="#2563EB">Cool</text>
 
                     {/* Axis labels */}
-                    <text x="40" y="260" fontSize="10" textAnchor="middle" fill="#6B7280">0s</text>
-                    <text x="160" y="260" fontSize="10" textAnchor="middle" fill="#6B7280">{(totalTime/2).toFixed(0)}s</text>
-                    <text x="280" y="260" fontSize="10" textAnchor="middle" fill="#6B7280">{totalTime.toFixed(0)}s</text>
+                    <text x="40" y="468" fontSize="10" textAnchor="middle" fill="#6B7280">0s</text>
+                    <text x="160" y="468" fontSize="10" textAnchor="middle" fill="#6B7280">{(totalTime/2).toFixed(0)}s</text>
+                    <text x="280" y="468" fontSize="10" textAnchor="middle" fill="#6B7280">{totalTime.toFixed(0)}s</text>
                   </>
                 );
               })()}
 
               {/* Y-axis */}
-              <text x="35" y="35" fontSize="10" textAnchor="end" fill="#6B7280">{Math.max(targetTemp, 1000) + 75}°C</text>
-              <text x="35" y="105" fontSize="10" textAnchor="end" fill="#6B7280">{Math.round((Math.max(targetTemp, 1000) + 75) * 0.66)}°C</text>
-              <text x="35" y="175" fontSize="10" textAnchor="end" fill="#6B7280">{Math.round((Math.max(targetTemp, 1000) + 75) * 0.33)}°C</text>
-              <text x="35" y="245" fontSize="10" textAnchor="end" fill="#6B7280">25°C</text>
+              <text x="35" y="63" fontSize="10" textAnchor="end" fill="#6B7280">{Math.max(targetTemp, 1000) + 75}°C</text>
+              <text x="35" y="189" fontSize="10" textAnchor="end" fill="#6B7280">{Math.round((Math.max(targetTemp, 1000) + 75) * 0.66)}°C</text>
+              <text x="35" y="315" fontSize="10" textAnchor="end" fill="#6B7280">{Math.round((Math.max(targetTemp, 1000) + 75) * 0.33)}°C</text>
+              <text x="35" y="441" fontSize="10" textAnchor="end" fill="#6B7280">25°C</text>
             </svg>
           </div>
 
