@@ -779,7 +779,7 @@ const RTASimulator = () => {
           {/* Temperature Profile Chart */}
           <div className="bg-gray-50 p-4 rounded-lg">
             <h2 className="text-xl font-semibold mb-3">실시간 온도 프로파일</h2>
-          <div className="h-80 relative">
+          <div className="h-[576px] relative">
             <svg className="w-full h-full">
               <defs>
                 <linearGradient id="tempGradient" x1="0%" y1="0%" x2="0%" y2="100%">
