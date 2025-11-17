@@ -1,5 +1,48 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Play, Pause, Square, Settings, Info, AlertTriangle, CheckCircle } from 'lucide-react';
+
+// Icon components (inline SVG)
+const Play = () => (
+  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
+  </svg>
+);
+
+const Pause = () => (
+  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+  </svg>
+);
+
+const Square = () => (
+  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+    <rect x="6" y="6" width="12" height="12"/>
+  </svg>
+);
+
+const Settings = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+  </svg>
+);
+
+const Info = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+  </svg>
+);
+
+const AlertTriangle = ({ className }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+  </svg>
+);
+
+const CheckCircle = ({ className }) => (
+  <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+  </svg>
+);
 
 const RTASimulator = () => {
   const [isRunning, setIsRunning] = useState(false);
@@ -253,12 +296,13 @@ const RTASimulator = () => {
   };
 
   const getProcessStatus = () => {
-    if (waferStress > 80) return { status: 'danger', icon: AlertTriangle, msg: 'High wafer stress detected' };
-    if (waferStress > 60) return { status: 'warning', icon: AlertTriangle, msg: 'Moderate wafer stress' };
-    return { status: 'good', icon: CheckCircle, msg: 'Process normal' };
+    if (waferStress > 80) return { status: 'danger', icon: 'AlertTriangle', msg: 'High wafer stress detected' };
+    if (waferStress > 60) return { status: 'warning', icon: 'AlertTriangle', msg: 'Moderate wafer stress' };
+    return { status: 'good', icon: 'CheckCircle', msg: 'Process normal' };
   };
 
   const status = getProcessStatus();
+  const StatusIcon = status.icon === 'AlertTriangle' ? AlertTriangle : CheckCircle;
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 bg-gray-50">
@@ -333,7 +377,7 @@ const RTASimulator = () => {
 
           <div className={`p-4 rounded-lg ${status.status === 'danger' ? 'bg-red-50' : status.status === 'warning' ? 'bg-yellow-50' : 'bg-green-50'}`}>
             <div className="flex items-center space-x-2">
-              <status.icon className={`h-5 w-5 ${status.status === 'danger' ? 'text-red-500' : status.status === 'warning' ? 'text-yellow-500' : 'text-green-500'}`} />
+              <StatusIcon className={`h-5 w-5 ${status.status === 'danger' ? 'text-red-500' : status.status === 'warning' ? 'text-yellow-500' : 'text-green-500'}`} />
               <div className="text-sm font-medium">{status.msg}</div>
             </div>
             <div className="text-sm mt-1">웨이퍼 스트레스: {waferStress.toFixed(1)}%</div>
