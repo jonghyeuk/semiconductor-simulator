@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
+import RTASimulator from './RTASimulator';
 
 // Icon components (inline SVG to avoid lucide-react dependency)
 const PlayIcon = () => (
@@ -1935,6 +1936,7 @@ const DopingProcessSimulator = () => {
             { id: 'implantation', label: '이온 주입', icon: Target },
             { id: 'comparison', label: '공정 비교', icon: GitCompare },
             { id: 'temperature', label: 'Annealing효과', icon: AlertCircle },
+            { id: 'rta', label: 'RTA', icon: Settings },
             { id: 'application', label: '적용 가이드', icon: Lightbulb },
             { id: 'quiz', label: '퀴즈', icon: Award }
           ].map(tab => (
@@ -3680,6 +3682,13 @@ const DopingProcessSimulator = () => {
                 title="RTA Annealing Simulation"
                 style={{ minHeight: '1000px' }}
               />
+            </div>
+          )}
+
+          {/* RTA Tab */}
+          {activeTab === 'rta' && (
+            <div className="w-full">
+              <RTASimulator />
             </div>
           )}
 
