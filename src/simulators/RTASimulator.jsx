@@ -240,10 +240,18 @@ const RTASimulator = () => {
   }, [isRunning, isPaused, targetTemp, rampRate, processTime, processStage, zoneTemps, zoneSetpoints, lampPower]);
 
   const startProcess = () => {
+    // 모든 상태 초기화 (Complete 상태에서 다시 시작할 수 있도록)
+    setCurrentTime(0);
+    setCurrentTemp(25);
+    setTempHistory([]);
+    setProcessStage('Gas Stabilization');
+    setPyrometer(25);
+    setWaferStress(0);
     setIsRunning(true);
     setIsPaused(false);
     setZoneTemps([25, 25, 25, 25, 25, 25]);
     setZoneSetpoints([25, 25, 25, 25, 25, 25]);
+    setLampPower([0, 0, 0, 0, 0, 0]);
     setProcessLog([
       `🚀 RTA 공정 시작!`,
       `📋 레시피: 목표온도 ${targetTemp}°C, 승온률 ${rampRate}°C/s, 유지시간 ${processTime}s`,
@@ -371,10 +379,10 @@ const RTASimulator = () => {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
           {/* Control Panel */}
-          <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 p-4 rounded-lg lg:col-span-1">
             <h2 className="text-xl font-semibold mb-4 flex items-center">
               <Settings className="h-5 w-5 mr-2" />
               공정 제어
@@ -508,15 +516,11 @@ const RTASimulator = () => {
             </div>
           </div>
 
-          {/* Equipment Diagram & Process Log */}
-          <div className="bg-gray-50 p-4 rounded-lg col-span-2">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-              {/* Equipment Diagram */}
-              <div>
-                <h2 className="text-lg font-semibold mb-3">장비 구성도</h2>
-                <div className="border rounded-lg bg-white p-4">
-                  <svg width="100%" height="320" viewBox="0 0 750 320" style={{ backgroundColor: 'white' }}>
+          {/* Equipment Diagram - 크게 */}
+          <div className="bg-gray-50 p-4 rounded-lg lg:col-span-2">
+            <h2 className="text-xl font-semibold mb-3">장비 구성도</h2>
+            <div className="border rounded-lg bg-white p-4">
+              <svg width="100%" height="500" viewBox="0 0 750 320" style={{ backgroundColor: 'white' }}>
 
                     {/* Main outer frame with rounded corners */}
                     <rect x="20" y="20" width="710" height="280" rx="15" ry="15" fill="none" stroke="black" strokeWidth="4" />
@@ -739,12 +743,12 @@ const RTASimulator = () => {
 
                   </svg>
                 </div>
-              </div>
+          </div>
 
-              {/* Real-time Process Log */}
-              <div>
-                <h2 className="text-lg font-semibold mb-3">실시간 공정 로그</h2>
-                <div className="bg-gray-900 text-green-400 p-3 rounded-lg font-mono text-xs max-h-80 overflow-y-auto">
+          {/* Real-time Process Log */}
+          <div className="bg-gray-50 p-4 rounded-lg lg:col-span-1">
+            <h2 className="text-xl font-semibold mb-3">실시간 공정 로그</h2>
+            <div className="bg-gray-900 text-green-400 p-3 rounded-lg font-mono text-xs h-[450px] overflow-y-auto">
                   {processLog.length === 0 ? (
                     <div className="text-gray-500">
                       <div className="animate-pulse">RTA 시뮬레이터 준비완료...</div>
@@ -766,50 +770,15 @@ const RTASimulator = () => {
                     </div>
                   )}
                 </div>
-
-                {/* Zone Temperature Monitor */}
-                <div className="mt-4">
-                  <h3 className="text-sm font-semibold mb-2">🌡️ Zone별 온도 모니터</h3>
-                  <div className="bg-black p-2 rounded-lg">
-                    <div className="grid grid-cols-3 gap-1 text-xs">
-                      {zoneTemps.map((temp, idx) => (
-                        <div key={idx} className="bg-gray-900 border border-gray-600 rounded p-1">
-                          <div className="text-green-400 font-mono text-center">Z{idx + 1}</div>
-                          <div className="text-center">
-                            <div className="text-yellow-400">{zoneSetpoints[idx].toFixed(0)}°C</div>
-                            <div className={`font-bold ${
-                              Math.abs(temp - zoneSetpoints[idx]) > 5 ? 'text-red-400' :
-                              Math.abs(temp - zoneSetpoints[idx]) > 2 ? 'text-orange-400' :
-                              'text-green-400'
-                            }`}>
-                              {temp.toFixed(0)}°C
-                            </div>
-                          </div>
-                          <div className="text-center">
-                            <span className={`text-xs ${
-                              lampPower[idx] > 70 ? 'text-red-400' :
-                              lampPower[idx] > 40 ? 'text-orange-400' :
-                              'text-gray-500'
-                            }`}>
-                              {lampPower[idx].toFixed(0)}%
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-2 text-xs text-gray-400 text-center">
-                      🟡 설정온도 | 🟢 실제온도 | 🔴 램프파워
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
-        {/* Temperature Profile Chart */}
-        <div className="bg-gray-50 p-4 rounded-lg mt-6">
-          <h2 className="text-lg font-semibold mb-3">실시간 온도 프로파일</h2>
+        {/* 하단: 온도 프로파일과 Zone 모니터 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+
+          {/* Temperature Profile Chart */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h2 className="text-xl font-semibold mb-3">실시간 온도 프로파일</h2>
           <div className="h-80 relative">
             <svg className="w-full h-full">
               <defs>
@@ -951,6 +920,61 @@ const RTASimulator = () => {
             <div className="flex items-center">
               <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
               <span>현재 위치</span>
+            </div>
+          </div>
+          </div>
+
+          {/* Zone Temperature Monitor */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h2 className="text-xl font-semibold mb-3">🌡️ Zone별 온도 모니터</h2>
+            <div className="bg-black p-4 rounded-lg">
+              <div className="grid grid-cols-3 gap-2 text-sm">
+                {zoneTemps.map((temp, idx) => (
+                  <div key={idx} className="bg-gray-900 border border-gray-600 rounded p-2">
+                    <div className="text-green-400 font-mono text-center text-lg font-bold">Z{idx + 1}</div>
+                    <div className="text-center mt-2">
+                      <div className="text-xs text-gray-400">설정온도</div>
+                      <div className="text-yellow-400 font-bold">{zoneSetpoints[idx].toFixed(0)}°C</div>
+                    </div>
+                    <div className="text-center mt-2">
+                      <div className="text-xs text-gray-400">실제온도</div>
+                      <div className={`font-bold text-lg ${
+                        Math.abs(temp - zoneSetpoints[idx]) > 5 ? 'text-red-400' :
+                        Math.abs(temp - zoneSetpoints[idx]) > 2 ? 'text-orange-400' :
+                        'text-green-400'
+                      }`}>
+                        {temp.toFixed(0)}°C
+                      </div>
+                    </div>
+                    <div className="text-center mt-2">
+                      <div className="text-xs text-gray-400">램프파워</div>
+                      <span className={`text-sm font-bold ${
+                        lampPower[idx] > 70 ? 'text-red-400' :
+                        lampPower[idx] > 40 ? 'text-orange-400' :
+                        'text-gray-500'
+                      }`}>
+                        {lampPower[idx].toFixed(0)}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-4 text-sm text-gray-400 text-center border-t border-gray-600 pt-3">
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="flex items-center justify-center">
+                    <div className="w-3 h-3 bg-yellow-400 rounded-full mr-2"></div>
+                    <span>설정온도</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <div className="w-3 h-3 bg-green-400 rounded-full mr-2"></div>
+                    <span>실제온도</span>
+                  </div>
+                  <div className="flex items-center justify-center">
+                    <div className="w-3 h-3 bg-red-400 rounded-full mr-2"></div>
+                    <span>램프파워</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
