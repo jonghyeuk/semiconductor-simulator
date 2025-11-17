@@ -65,7 +65,6 @@ const RTASimulator = () => {
   const [selectedRecipe, setSelectedRecipe] = useState('');
 
   const intervalRef = useRef(null);
-  const canvasRef = useRef(null);
 
   // Process applications
   const applications = {
@@ -220,21 +219,8 @@ const RTASimulator = () => {
           const totalTime = gasStabilizationTime + totalRampTime + processTime + (targetTemp - 25) / (rampRate * 0.3);
           if (newTime >= totalTime) {
             setIsRunning(false);
-            setIsPaused(false);
             setProcessStage('Complete');
-            setLampPower([0, 0, 0, 0, 0, 0]);
-            setProcessLog(prev => [...prev, `✅ 공정 완료! 총 시간: ${newTime.toFixed(1)}초`, '🔄 시뮬레이터 초기화됨']);
-            setTimeout(() => {
-              setCurrentTime(0);
-              setCurrentTemp(25);
-              setTempHistory([]);
-              setProcessStage('Ready');
-              setZoneTemps([25, 25, 25, 25, 25, 25]);
-              setZoneSetpoints([25, 25, 25, 25, 25, 25]);
-              setPyrometer(25);
-              setWaferStress(0);
-            }, 2000);
-            return newTime;
+            setProcessLog(prev => [...prev, `✅ 공정 완료! 총 시간: ${newTime.toFixed(1)}초`]);
           }
 
           return newTime;
@@ -296,13 +282,13 @@ const RTASimulator = () => {
   };
 
   const getProcessStatus = () => {
-    if (waferStress > 80) return { status: 'danger', icon: 'AlertTriangle', msg: 'High wafer stress detected' };
-    if (waferStress > 60) return { status: 'warning', icon: 'AlertTriangle', msg: 'Moderate wafer stress' };
-    return { status: 'good', icon: 'CheckCircle', msg: 'Process normal' };
+    if (waferStress > 80) return { status: 'danger', icon: AlertTriangle, msg: 'High wafer stress detected' };
+    if (waferStress > 60) return { status: 'warning', icon: AlertTriangle, msg: 'Moderate wafer stress' };
+    return { status: 'good', icon: CheckCircle, msg: 'Process normal' };
   };
 
   const status = getProcessStatus();
-  const StatusIcon = status.icon === 'AlertTriangle' ? AlertTriangle : CheckCircle;
+  const StatusIcon = status.icon;
 
   return (
     <div className="w-full max-w-7xl mx-auto p-6 bg-gray-50">
@@ -384,10 +370,627 @@ const RTASimulator = () => {
           </div>
         </div>
 
-        {/* Rest of the component continues... */}
-        <div className="text-center py-20 text-gray-500">
-          <p>RTA 시뮬레이터 UI - 전체 구현 필요</p>
-          <p className="text-sm mt-2">제어 패널, 장비 다이어그램, 온도 프로파일 차트 등</p>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Control Panel */}
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <h2 className="text-xl font-semibold mb-4 flex items-center">
+              <Settings className="h-5 w-5 mr-2" />
+              공정 제어
+            </h2>
+
+            {/* Quick Recipes */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Quick Recipes</label>
+              <select
+                onChange={(e) => e.target.value && loadApplication(e.target.value)}
+                className="w-full p-2 border rounded-lg"
+                value={selectedRecipe}
+              >
+                <option value="">레시피 선택...</option>
+                <option value="dopant_activation">도펀트 활성화</option>
+                <option value="silicide_formation">실리사이드 형성</option>
+                <option value="implant_anneal">이온주입 어닐링</option>
+                <option value="thermal_oxidation">열 산화</option>
+                <option value="spike_anneal">스파이크 어닐링</option>
+              </select>
+              {selectedRecipe && (
+                <div className="mt-2 text-xs text-green-600 font-medium">
+                  📝 선택된 레시피: {selectedRecipe.replace('_', ' ')}
+                </div>
+              )}
+            </div>
+
+            {/* Parameter Controls */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">목표 온도 (°C)</label>
+                <input
+                  type="number"
+                  value={targetTemp}
+                  onChange={(e) => setTargetTemp(Number(e.target.value))}
+                  min="200"
+                  max="1250"
+                  className="w-full p-2 border rounded-lg"
+                  disabled={isRunning}
+                />
+                <div className="text-xs text-gray-500 mt-1">범위: 200-1250°C</div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">승온률 (°C/s)</label>
+                <input
+                  type="number"
+                  value={rampRate}
+                  onChange={(e) => setRampRate(Number(e.target.value))}
+                  min="10"
+                  max="400"
+                  className="w-full p-2 border rounded-lg"
+                  disabled={isRunning}
+                />
+                <div className="text-xs text-gray-500 mt-1">범위: 10-400°C/s</div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">공정 시간 (s)</label>
+                <input
+                  type="number"
+                  value={processTime}
+                  onChange={(e) => setProcessTime(Number(e.target.value))}
+                  min="1"
+                  max="300"
+                  className="w-full p-2 border rounded-lg"
+                  disabled={isRunning}
+                />
+                <div className="text-xs text-gray-500 mt-1">범위: 1-300s</div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">분위기 가스</label>
+                <select
+                  value={gasFlow}
+                  onChange={(e) => setGasFlow(e.target.value)}
+                  className="w-full p-2 border rounded-lg"
+                  disabled={isRunning}
+                >
+                  <option value="N2">질소 (N₂)</option>
+                  <option value="Ar">아르곤 (Ar)</option>
+                  <option value="O2">산소 (O₂)</option>
+                  <option value="H2">수소 (H₂)</option>
+                  <option value="Vacuum">진공</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">압력 (mTorr)</label>
+                <input
+                  type="number"
+                  value={pressure}
+                  onChange={(e) => setPressure(Number(e.target.value))}
+                  min="1"
+                  max="760000"
+                  className="w-full p-2 border rounded-lg"
+                  disabled={isRunning}
+                />
+                <div className="text-xs text-gray-500 mt-1">1 mTorr - 760 Torr</div>
+              </div>
+            </div>
+
+            {/* Control Buttons */}
+            <div className="flex space-x-2 mt-6">
+              {!isRunning ? (
+                <button
+                  onClick={startProcess}
+                  className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-green-600"
+                >
+                  <Play className="h-4 w-4 mr-1" />
+                  시작
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={pauseProcess}
+                    className="flex-1 bg-yellow-500 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-yellow-600"
+                  >
+                    <Pause className="h-4 w-4 mr-1" />
+                    {isPaused ? '재개' : '일시정지'}
+                  </button>
+                  <button
+                    onClick={stopProcess}
+                    className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg flex items-center justify-center hover:bg-red-600"
+                  >
+                    <Square className="h-4 w-4 mr-1" />
+                    정지
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* Equipment Diagram & Process Log */}
+          <div className="bg-gray-50 p-4 rounded-lg col-span-2">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+              {/* Equipment Diagram */}
+              <div>
+                <h2 className="text-lg font-semibold mb-3">장비 구성도</h2>
+                <div className="border rounded-lg bg-white p-4">
+                  <svg width="100%" height="320" viewBox="0 0 750 320" style={{ backgroundColor: 'white' }}>
+
+                    {/* Main outer frame with rounded corners */}
+                    <rect x="20" y="20" width="710" height="280" rx="15" ry="15" fill="none" stroke="black" strokeWidth="4" />
+
+                    {/* Top row of lamps (13 lamps) - with power-based colors */}
+                    {(() => {
+                      const topLampPositions = [
+                        { cx: 105, zone: 5, label: 'Z6' },
+                        { cx: 150, zone: 5, label: 'Z6' },
+                        { cx: 195, zone: 3, label: 'Z4' },
+                        { cx: 240, zone: 2, label: 'Z3' },
+                        { cx: 285, zone: 1, label: 'Z2' },
+                        { cx: 330, zone: 0, label: 'Z1' },
+                        { cx: 375, zone: 0, label: 'Z1' },
+                        { cx: 420, zone: 0, label: 'Z1' },
+                        { cx: 465, zone: 1, label: 'Z2' },
+                        { cx: 510, zone: 2, label: 'Z3' },
+                        { cx: 555, zone: 3, label: 'Z4' },
+                        { cx: 600, zone: 4, label: 'Z5' },
+                        { cx: 645, zone: 4, label: 'Z5' }
+                      ];
+
+                      return topLampPositions.map((lamp, idx) => {
+                        const intensity = lampPower[lamp.zone] / 100;
+                        const power = lampPower[lamp.zone];
+
+                        let lampColor = '#666';
+                        let glowColor = 'rgba(255, 255, 255, 0)';
+                        let textColor = '#333';
+
+                        if (intensity > 0) {
+                          if (power <= 20) {
+                            lampColor = `rgb(${120 + power * 2}, ${60 + power * 1}, 0)`;
+                            glowColor = `rgba(255, 100, 0, ${0.3 + intensity * 0.4})`;
+                            textColor = '#FFaa00';
+                          } else if (power <= 40) {
+                            lampColor = `rgb(${160 + power * 1.5}, ${80 + power * 1.5}, 0)`;
+                            glowColor = `rgba(255, 120, 0, ${0.4 + intensity * 0.4})`;
+                            textColor = '#FF8800';
+                          } else if (power <= 60) {
+                            lampColor = `rgb(${180 + power * 1.25}, ${60 + power * 1}, 0)`;
+                            glowColor = `rgba(255, 140, 0, ${0.5 + intensity * 0.4})`;
+                            textColor = '#FF6600';
+                          } else if (power <= 80) {
+                            lampColor = `rgb(${200 + power * 0.7}, ${40 + power * 0.5}, 0)`;
+                            glowColor = `rgba(255, 160, 20, ${0.6 + intensity * 0.4})`;
+                            textColor = '#FF4400';
+                          } else {
+                            lampColor = `rgb(${220 + power * 0.35}, ${20 + power * 0.3}, ${(power - 80) * 2})`;
+                            glowColor = `rgba(255, 180, 40, ${0.7 + intensity * 0.3})`;
+                            textColor = '#FF2200';
+                          }
+                        }
+
+                        return (
+                          <g key={`top-${idx}`}>
+                            {intensity > 0 && (
+                              <circle cx={lamp.cx} cy="66" r="20" fill={glowColor} />
+                            )}
+                            {intensity > 0.6 && (
+                              <circle cx={lamp.cx} cy="66" r="17" fill={`rgba(255, ${200 - power}, ${100 - power}, ${0.4 + intensity * 0.3})`} />
+                            )}
+                            <circle cx={lamp.cx} cy="66" r="15" fill={lampColor} stroke="black" strokeWidth="2" />
+                            <text x={lamp.cx} y="94" textAnchor="middle" fontSize="10" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">{lamp.label}</text>
+                            {isRunning && intensity > 0 && (
+                              <text x={lamp.cx} y="71" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="bold" fill="white">
+                                {power.toFixed(0)}%
+                              </text>
+                            )}
+                          </g>
+                        );
+                      });
+                    })()}
+
+                    {/* Central process chamber */}
+                    <rect x="80" y="106" width="590" height="80" rx="8" ry="8" fill="#F8F9FA" stroke="black" strokeWidth="2" />
+                    <rect x="90" y="116" width="570" height="60" rx="5" ry="5" fill="none" stroke="black" strokeWidth="2" />
+
+                    {/* Wafer with temperature color */}
+                    {(() => {
+                      const waferTemp = (currentTemp - 25) / 1200;
+                      const waferColor = `rgb(${Math.min(255, 100 + waferTemp * 155)}, ${Math.max(50, 200 - waferTemp * 150)}, ${Math.max(50, 200 - waferTemp * 150)})`;
+
+                      return (
+                        <>
+                          <line x1="125" y1="146" x2="625" y2="146" stroke={waferColor} strokeWidth="8" />
+                          {isRunning && (
+                            <>
+                              <rect x="350" y="135" width="50" height="22" rx="3" fill="rgba(0, 0, 0, 0.8)" />
+                              <text x="375" y="150" textAnchor="middle" fontSize="12" fontFamily="Arial, sans-serif" fontWeight="bold" fill="white">
+                                {currentTemp.toFixed(0)}°C
+                              </text>
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
+
+                    {/* Zone temperature indicators */}
+                    {isRunning && (() => {
+                      const zoneIndicators = [
+                        { x: 375, y: 125, zone: 0, label: 'Z1' },
+                        { x: 320, y: 135, zone: 1, label: 'Z2' },
+                        { x: 430, y: 135, zone: 2, label: 'Z3' },
+                        { x: 280, y: 145, zone: 3, label: 'Z4' },
+                        { x: 470, y: 145, zone: 4, label: 'Z5' },
+                        { x: 375, y: 165, zone: 5, label: 'Z6' }
+                      ];
+
+                      return zoneIndicators.map((indicator, idx) => {
+                        const zoneTemp = zoneTemps[indicator.zone];
+                        const tempDiff = Math.abs(zoneTemp - zoneSetpoints[indicator.zone]);
+                        const color = tempDiff > 5 ? '#FF4444' : tempDiff > 2 ? '#FF8800' : '#44FF44';
+
+                        return (
+                          <g key={`zone-${idx}`}>
+                            <circle cx={indicator.x} cy={indicator.y} r="8" fill="rgba(0, 0, 0, 0.7)" />
+                            <text x={indicator.x} y={indicator.y + 2} textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="bold" fill={color}>
+                              {zoneTemp.toFixed(0)}
+                            </text>
+                            <text x={indicator.x} y={indicator.y - 12} textAnchor="middle" fontSize="7" fontFamily="Arial, sans-serif" fill="black">
+                              {indicator.label}
+                            </text>
+                          </g>
+                        );
+                      });
+                    })()}
+
+                    {/* Gas inlet/outlet */}
+                    <polygon points="275,166 295,166 285,151" fill="lightblue" stroke="black" strokeWidth="2" />
+                    <text x="285" y="175" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fill="black">{gasFlow}</text>
+
+                    <polygon points="455,166 475,166 465,151" fill="lightgray" stroke="black" strokeWidth="2" />
+                    <text x="465" y="175" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fill="black">Pump</text>
+
+                    {/* IR Pyrometer */}
+                    <line x1="625" y1="146" x2="660" y2="146" stroke="#FF6B35" strokeWidth="3" />
+                    <rect x="660" y="140" width="15" height="12" fill="#666" stroke="black" strokeWidth="1" />
+                    <text x="680" y="150" fontSize="8" fontFamily="Arial, sans-serif" fill="#FF6B35" fontWeight="bold">
+                      IR: {isRunning ? `${pyrometer.toFixed(0)}°C` : 'OFF'}
+                    </text>
+
+                    {/* Bottom lamps */}
+                    {(() => {
+                      const bottomLampPositions = [
+                        { cx: 105, zone: 5, label: 'Z6' },
+                        { cx: 150, zone: 5, label: 'Z6' },
+                        { cx: 195, zone: 3, label: 'Z4' },
+                        { cx: 240, zone: 2, label: 'Z3' },
+                        { cx: 285, zone: 1, label: 'Z2' },
+                        { cx: 330, zone: 0, label: 'Z1' },
+                        { cx: 375, zone: 0, label: 'Z1' },
+                        { cx: 420, zone: 0, label: 'Z1' },
+                        { cx: 465, zone: 1, label: 'Z2' },
+                        { cx: 510, zone: 2, label: 'Z3' },
+                        { cx: 555, zone: 3, label: 'Z4' },
+                        { cx: 600, zone: 4, label: 'Z5' },
+                        { cx: 645, zone: 4, label: 'Z5' }
+                      ];
+
+                      return bottomLampPositions.map((lamp, idx) => {
+                        const intensity = lampPower[lamp.zone] / 100;
+                        const power = lampPower[lamp.zone];
+
+                        let lampColor = '#666';
+                        let glowColor = 'rgba(255, 255, 255, 0)';
+
+                        if (intensity > 0) {
+                          if (power <= 20) {
+                            lampColor = `rgb(${120 + power * 2}, ${60 + power * 1}, 0)`;
+                            glowColor = `rgba(255, 100, 0, ${0.3 + intensity * 0.4})`;
+                          } else if (power <= 40) {
+                            lampColor = `rgb(${160 + power * 1.5}, ${80 + power * 1.5}, 0)`;
+                            glowColor = `rgba(255, 120, 0, ${0.4 + intensity * 0.4})`;
+                          } else if (power <= 60) {
+                            lampColor = `rgb(${180 + power * 1.25}, ${60 + power * 1}, 0)`;
+                            glowColor = `rgba(255, 140, 0, ${0.5 + intensity * 0.4})`;
+                          } else if (power <= 80) {
+                            lampColor = `rgb(${200 + power * 0.7}, ${40 + power * 0.5}, 0)`;
+                            glowColor = `rgba(255, 160, 20, ${0.6 + intensity * 0.4})`;
+                          } else {
+                            lampColor = `rgb(${220 + power * 0.35}, ${20 + power * 0.3}, ${(power - 80) * 2})`;
+                            glowColor = `rgba(255, 180, 40, ${0.7 + intensity * 0.3})`;
+                          }
+                        }
+
+                        return (
+                          <g key={`bottom-${idx}`}>
+                            {intensity > 0 && (
+                              <circle cx={lamp.cx} cy="246" r="20" fill={glowColor} />
+                            )}
+                            {intensity > 0.6 && (
+                              <circle cx={lamp.cx} cy="246" r="17" fill={`rgba(255, ${200 - power}, ${100 - power}, ${0.4 + intensity * 0.3})`} />
+                            )}
+                            <circle cx={lamp.cx} cy="246" r="15" fill={lampColor} stroke="black" strokeWidth="2" />
+                            <text x={lamp.cx} y="274" textAnchor="middle" fontSize="10" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">{lamp.label}</text>
+                            {isRunning && intensity > 0 && (
+                              <text x={lamp.cx} y="251" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="bold" fill="white">
+                                {power.toFixed(0)}%
+                              </text>
+                            )}
+                          </g>
+                        );
+                      });
+                    })()}
+
+                    {/* Process stage indicator */}
+                    {isRunning && (
+                      <text x="375" y="40" textAnchor="middle" fontSize="14" fontFamily="Arial, sans-serif" fontWeight="bold"
+                            fill={processStage === 'Rapid Ramp Up' ? '#FF8800' :
+                                 processStage === 'Process Hold' ? '#FF4444' :
+                                 processStage === 'Cool Down' ? '#4A90E2' : '#10B981'}>
+                        {processStage}
+                      </text>
+                    )}
+
+                    {/* Legend */}
+                    <text x="40" y="50" fontSize="12" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">Upper Halogen Lamps</text>
+                    <text x="40" y="290" fontSize="12" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">Lower Halogen Lamps</text>
+
+                  </svg>
+                </div>
+              </div>
+
+              {/* Real-time Process Log */}
+              <div>
+                <h2 className="text-lg font-semibold mb-3">실시간 공정 로그</h2>
+                <div className="bg-gray-900 text-green-400 p-3 rounded-lg font-mono text-xs max-h-80 overflow-y-auto">
+                  {processLog.length === 0 ? (
+                    <div className="text-gray-500">
+                      <div className="animate-pulse">RTA 시뮬레이터 준비완료...</div>
+                      <div className="mt-1 text-xs">공정을 시작하면 실시간 로그가 표시됩니다</div>
+                    </div>
+                  ) : (
+                    processLog.slice(-15).map((log, idx) => (
+                      <div key={idx} className="mb-1 flex items-start">
+                        <span className="text-gray-500 text-xs mr-2 mt-0.5 flex-shrink-0">
+                          [{new Date().toLocaleTimeString()}]
+                        </span>
+                        <span className="flex-1">{log}</span>
+                      </div>
+                    ))
+                  )}
+                  {isRunning && (
+                    <div className="mt-2 text-yellow-400 animate-pulse">
+                      ▶ 공정 실행 중... ({processStage})
+                    </div>
+                  )}
+                </div>
+
+                {/* Zone Temperature Monitor */}
+                <div className="mt-4">
+                  <h3 className="text-sm font-semibold mb-2">🌡️ Zone별 온도 모니터</h3>
+                  <div className="bg-black p-2 rounded-lg">
+                    <div className="grid grid-cols-3 gap-1 text-xs">
+                      {zoneTemps.map((temp, idx) => (
+                        <div key={idx} className="bg-gray-900 border border-gray-600 rounded p-1">
+                          <div className="text-green-400 font-mono text-center">Z{idx + 1}</div>
+                          <div className="text-center">
+                            <div className="text-yellow-400">{zoneSetpoints[idx].toFixed(0)}°C</div>
+                            <div className={`font-bold ${
+                              Math.abs(temp - zoneSetpoints[idx]) > 5 ? 'text-red-400' :
+                              Math.abs(temp - zoneSetpoints[idx]) > 2 ? 'text-orange-400' :
+                              'text-green-400'
+                            }`}>
+                              {temp.toFixed(0)}°C
+                            </div>
+                          </div>
+                          <div className="text-center">
+                            <span className={`text-xs ${
+                              lampPower[idx] > 70 ? 'text-red-400' :
+                              lampPower[idx] > 40 ? 'text-orange-400' :
+                              'text-gray-500'
+                            }`}>
+                              {lampPower[idx].toFixed(0)}%
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="mt-2 text-xs text-gray-400 text-center">
+                      🟡 설정온도 | 🟢 실제온도 | 🔴 램프파워
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Temperature Profile Chart */}
+        <div className="bg-gray-50 p-4 rounded-lg mt-6">
+          <h2 className="text-lg font-semibold mb-3">실시간 온도 프로파일</h2>
+          <div className="h-80 relative">
+            <svg className="w-full h-full">
+              <defs>
+                <linearGradient id="tempGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" style={{stopColor: '#EF4444', stopOpacity: 0.8}} />
+                  <stop offset="50%" style={{stopColor: '#F59E0B', stopOpacity: 0.8}} />
+                  <stop offset="100%" style={{stopColor: '#3B82F6', stopOpacity: 0.8}} />
+                </linearGradient>
+              </defs>
+
+              {/* Background Grid */}
+              <g stroke="#E5E7EB" strokeWidth="1">
+                {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                  <line key={`h${i}`} x1="40" y1={30 + i * 35} x2="280" y2={30 + i * 35} />
+                ))}
+                {[0, 1, 2, 3, 4, 5, 6].map(i => (
+                  <line key={`v${i}`} x1={40 + i * 40} y1="30" x2={40 + i * 40} y2="240" />
+                ))}
+              </g>
+
+              {(() => {
+                const gasStabilizationTime = 10;
+                const totalRampTime = (targetTemp - 25) / rampRate;
+                const rampDownTime = (targetTemp - 25) / (rampRate * 0.3);
+                const totalTime = gasStabilizationTime + totalRampTime + processTime + rampDownTime;
+
+                const theoreticalProfile = [];
+                const steps = 200;
+                for (let i = 0; i <= steps; i++) {
+                  const time = (i / steps) * totalTime;
+                  const temp = calculateTempProfile(time);
+                  theoreticalProfile.push({
+                    time: time,
+                    temp: temp,
+                    x: 40 + (time / totalTime) * 240,
+                    y: 240 - ((temp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210
+                  });
+                }
+
+                return (
+                  <>
+                    {/* Phase backgrounds */}
+                    <rect x="40" y="30" width={(gasStabilizationTime / totalTime) * 240} height="210" fill="rgba(34, 197, 94, 0.1)" />
+                    <rect x={40 + (gasStabilizationTime / totalTime) * 240} y="30" width={(totalRampTime / totalTime) * 240} height="210" fill="rgba(239, 68, 68, 0.1)" />
+                    <rect x={40 + ((gasStabilizationTime + totalRampTime) / totalTime) * 240} y="30" width={(processTime / totalTime) * 240} height="210" fill="rgba(245, 158, 11, 0.1)" />
+                    <rect x={40 + ((gasStabilizationTime + totalRampTime + processTime) / totalTime) * 240} y="30" width={(rampDownTime / totalTime) * 240} height="210" fill="rgba(59, 130, 246, 0.1)" />
+
+                    {/* Theoretical profile */}
+                    <polyline
+                      fill="none"
+                      stroke="#10B981"
+                      strokeWidth="2"
+                      strokeDasharray="4,2"
+                      strokeLinecap="round"
+                      points={theoreticalProfile.map(point => `${point.x},${point.y}`).join(' ')}
+                    />
+
+                    {/* Actual temperature */}
+                    {tempHistory.length > 1 && (
+                      <polyline
+                        fill="none"
+                        stroke="url(#tempGradient)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        points={tempHistory.map((point) => {
+                          const x = 40 + (point.time / totalTime) * 240;
+                          const y = 240 - ((point.temp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210;
+                          return `${x},${y}`;
+                        }).join(' ')}
+                      />
+                    )}
+
+                    {/* Target line */}
+                    <line
+                      x1="40"
+                      y1={240 - ((targetTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210}
+                      x2="280"
+                      y2={240 - ((targetTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210}
+                      stroke="#6B7280"
+                      strokeWidth="1"
+                      strokeDasharray="8,4"
+                    />
+
+                    {/* Current position */}
+                    {isRunning && tempHistory.length > 0 && (
+                      <>
+                        <line
+                          x1={40 + (currentTime / totalTime) * 240}
+                          y1="30"
+                          x2={40 + (currentTime / totalTime) * 240}
+                          y2="240"
+                          stroke="#FF0000"
+                          strokeWidth="2"
+                          strokeDasharray="2,2"
+                        />
+                        <circle
+                          cx={40 + (currentTime / totalTime) * 240}
+                          cy={240 - ((currentTemp - 25) / (Math.max(targetTemp, 1000) - 25 + 100)) * 210}
+                          r="5"
+                          fill="#EF4444"
+                          stroke="#FFFFFF"
+                          strokeWidth="2"
+                        />
+                      </>
+                    )}
+
+                    {/* Phase labels */}
+                    <text x={40 + (gasStabilizationTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#059669">Gas Stab</text>
+                    <text x={40 + (gasStabilizationTime / totalTime) * 240 + (totalRampTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#DC2626">Ramp</text>
+                    <text x={40 + ((gasStabilizationTime + totalRampTime) / totalTime) * 240 + (processTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#D97706">Hold</text>
+                    <text x={40 + ((gasStabilizationTime + totalRampTime + processTime) / totalTime) * 240 + (rampDownTime / totalTime) * 240 / 2} y="25" fontSize="8" textAnchor="middle" fill="#2563EB">Cool</text>
+
+                    {/* Axis labels */}
+                    <text x="40" y="260" fontSize="10" textAnchor="middle" fill="#6B7280">0s</text>
+                    <text x="160" y="260" fontSize="10" textAnchor="middle" fill="#6B7280">{(totalTime/2).toFixed(0)}s</text>
+                    <text x="280" y="260" fontSize="10" textAnchor="middle" fill="#6B7280">{totalTime.toFixed(0)}s</text>
+                  </>
+                );
+              })()}
+
+              {/* Y-axis */}
+              <text x="35" y="35" fontSize="10" textAnchor="end" fill="#6B7280">{Math.max(targetTemp, 1000) + 75}°C</text>
+              <text x="35" y="105" fontSize="10" textAnchor="end" fill="#6B7280">{Math.round((Math.max(targetTemp, 1000) + 75) * 0.66)}°C</text>
+              <text x="35" y="175" fontSize="10" textAnchor="end" fill="#6B7280">{Math.round((Math.max(targetTemp, 1000) + 75) * 0.33)}°C</text>
+              <text x="35" y="245" fontSize="10" textAnchor="end" fill="#6B7280">25°C</text>
+            </svg>
+          </div>
+
+          {/* Profile Info */}
+          <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
+            <div className="flex items-center">
+              <div className="w-3 h-0.5 bg-green-500 mr-2" style={{borderStyle: 'dashed'}}></div>
+              <span>예상 프로파일</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-3 h-0.5 bg-red-500 mr-2"></div>
+              <span>실제 온도</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+              <span>현재 위치</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Process Information */}
+        <div className="bg-gray-50 p-4 rounded-lg mt-6">
+          <h2 className="text-xl font-semibold mb-4 flex items-center">
+            <Info className="h-5 w-5 mr-2" />
+            RTA 공정 특성
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+            <div className="bg-blue-50 p-3 rounded">
+              <div className="font-medium text-blue-800 mb-2">📈 RTA 프로파일 특성</div>
+              <div className="text-blue-700">
+                • <strong>Gas 안정화</strong>: 25°C에서 가스 흐름 안정화<br/>
+                • <strong>급속 승온</strong>: 100°C/s 이상 빠른 온도 상승<br/>
+                • <strong>온도 유지</strong>: 목표온도에서 정확한 시간 제어<br/>
+                • <strong>제어 냉각</strong>: 열충격 방지를 위한 점진적 냉각
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 p-3 rounded">
+              <div className="font-medium text-yellow-800 mb-2">⏱️ Zone별 열전달 지연</div>
+              <div className="text-yellow-700">
+                • <strong>중앙 Zone 1</strong>: 응답시간 2초 (가장 빠름)<br/>
+                • <strong>가장자리 Zone 6</strong>: 응답시간 5초 (가장 느림)<br/>
+                • <strong>온도 균일성</strong>: Zone별 차등 제어로 확보
+              </div>
+            </div>
+
+            <div className="bg-green-50 p-3 rounded">
+              <div className="font-medium text-green-800 mb-2">🔧 장비 구성</div>
+              <div className="text-green-700">
+                • <strong>상하부 할로겐 램프</strong>: 6개 Zone 독립 제어<br/>
+                • <strong>IR 파이로미터</strong>: 비접촉 실시간 온도 측정<br/>
+                • <strong>쿼츠 윈도우</strong>: 균등한 열전달과 빠른 응답
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
