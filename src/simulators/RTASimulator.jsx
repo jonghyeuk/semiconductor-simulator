@@ -585,11 +585,6 @@ const RTASimulator = () => {
                             )}
                             <circle cx={lamp.cx} cy="66" r="15" fill={lampColor} stroke="black" strokeWidth="2" />
                             <text x={lamp.cx} y="94" textAnchor="middle" fontSize="10" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">{lamp.label}</text>
-                            {isRunning && intensity > 0 && (
-                              <text x={lamp.cx} y="71" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="bold" fill="white">
-                                {power.toFixed(0)}%
-                              </text>
-                            )}
                           </g>
                         );
                       });
@@ -618,43 +613,6 @@ const RTASimulator = () => {
                         </>
                       );
                     })()}
-
-                    {/* Zone temperature indicators */}
-                    {isRunning && (() => {
-                      const zoneIndicators = [
-                        { x: 375, y: 125, zone: 0, label: 'Z1' },
-                        { x: 320, y: 135, zone: 1, label: 'Z2' },
-                        { x: 430, y: 135, zone: 2, label: 'Z3' },
-                        { x: 280, y: 145, zone: 3, label: 'Z4' },
-                        { x: 470, y: 145, zone: 4, label: 'Z5' },
-                        { x: 375, y: 165, zone: 5, label: 'Z6' }
-                      ];
-
-                      return zoneIndicators.map((indicator, idx) => {
-                        const zoneTemp = zoneTemps[indicator.zone];
-                        const tempDiff = Math.abs(zoneTemp - zoneSetpoints[indicator.zone]);
-                        const color = tempDiff > 5 ? '#FF4444' : tempDiff > 2 ? '#FF8800' : '#44FF44';
-
-                        return (
-                          <g key={`zone-${idx}`}>
-                            <circle cx={indicator.x} cy={indicator.y} r="8" fill="rgba(0, 0, 0, 0.7)" />
-                            <text x={indicator.x} y={indicator.y + 2} textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="bold" fill={color}>
-                              {zoneTemp.toFixed(0)}
-                            </text>
-                            <text x={indicator.x} y={indicator.y - 12} textAnchor="middle" fontSize="7" fontFamily="Arial, sans-serif" fill="black">
-                              {indicator.label}
-                            </text>
-                          </g>
-                        );
-                      });
-                    })()}
-
-                    {/* Gas inlet/outlet */}
-                    <polygon points="275,166 295,166 285,151" fill="lightblue" stroke="black" strokeWidth="2" />
-                    <text x="285" y="175" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fill="black">{gasFlow}</text>
-
-                    <polygon points="455,166 475,166 465,151" fill="lightgray" stroke="black" strokeWidth="2" />
-                    <text x="465" y="175" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fill="black">Pump</text>
 
                     {/* IR Pyrometer */}
                     <line x1="625" y1="146" x2="660" y2="146" stroke="#FF6B35" strokeWidth="3" />
@@ -718,7 +676,7 @@ const RTASimulator = () => {
                             <circle cx={lamp.cx} cy="246" r="15" fill={lampColor} stroke="black" strokeWidth="2" />
                             <text x={lamp.cx} y="274" textAnchor="middle" fontSize="10" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">{lamp.label}</text>
                             {isRunning && intensity > 0 && (
-                              <text x={lamp.cx} y="251" textAnchor="middle" fontSize="8" fontFamily="Arial, sans-serif" fontWeight="bold" fill="white">
+                              <text x={lamp.cx} y="220" textAnchor="middle" fontSize="24" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">
                                 {power.toFixed(0)}%
                               </text>
                             )}
