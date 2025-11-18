@@ -99,7 +99,7 @@ const RTASimulator = () => {
 
   // Zone thermal lag simulation
   const updateZoneTemperatures = (globalSetpoint, deltaTime) => {
-    const timeConstants = [2.0, 3.0, 3.0, 4.0, 4.0, 5.0];
+    const timeConstants = [0.2, 0.3, 0.3, 0.4, 0.4, 0.5];
 
     const newSetpoints = zoneSetpoints.map((_, idx) => {
       const powerFactor = lampPower[idx] / 100;
@@ -676,7 +676,7 @@ const RTASimulator = () => {
                             <circle cx={lamp.cx} cy="246" r="15" fill={lampColor} stroke="black" strokeWidth="2" />
                             <text x={lamp.cx} y="274" textAnchor="middle" fontSize="10" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">{lamp.label}</text>
                             {isRunning && intensity > 0 && (
-                              <text x={lamp.cx} y="220" textAnchor="middle" fontSize="24" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">
+                              <text x={lamp.cx} y="220" textAnchor="middle" fontSize="12" fontFamily="Arial, sans-serif" fontWeight="bold" fill="black">
                                 {power.toFixed(0)}%
                               </text>
                             )}
