@@ -99,7 +99,7 @@ const RTASimulator = () => {
 
   // Zone thermal lag simulation
   const updateZoneTemperatures = (globalSetpoint, deltaTime) => {
-    const timeConstants = [0.29, 0.43, 0.43, 0.57, 0.57, 0.71];
+    const timeConstants = [0.5, 0.75, 0.75, 1.0, 1.0, 1.25];
 
     const newSetpoints = zoneSetpoints.map((_, idx) => {
       const powerFactor = lampPower[idx] / 100;
@@ -958,8 +958,8 @@ const RTASimulator = () => {
             <div className="bg-yellow-50 p-3 rounded">
               <div className="font-medium text-yellow-800 mb-2">⏱️ Zone별 열전달 지연</div>
               <div className="text-yellow-700">
-                • <strong>중앙 Zone 1</strong>: 응답시간 0.29초 (가장 빠름)<br/>
-                • <strong>가장자리 Zone 6</strong>: 응답시간 0.71초 (가장 느림)<br/>
+                • <strong>중앙 Zone 1</strong>: 응답시간 0.5초 (가장 빠름)<br/>
+                • <strong>가장자리 Zone 6</strong>: 응답시간 1.25초 (가장 느림)<br/>
                 • <strong>온도 균일성</strong>: Zone별 차등 제어로 확보
               </div>
             </div>
