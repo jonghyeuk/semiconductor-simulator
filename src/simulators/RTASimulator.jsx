@@ -941,64 +941,40 @@ const RTASimulator = () => {
         <div className="bg-gray-50 p-4 rounded-lg mt-6">
           <h2 className="text-xl font-semibold mb-4 flex items-center">
             <Info className="h-5 w-5 mr-2" />
-            RTA 공정 특성
+            RTA 공정 특성 이해하기
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-            <div className="bg-blue-50 p-3 rounded">
-              <div className="font-medium text-blue-800 mb-2">📈 RTA 프로파일 특성</div>
-              <div className="text-blue-700">
-                • <strong>Gas 안정화</strong>: 25°C에서 가스 흐름 안정화<br/>
-                • <strong>급속 승온</strong>: 100°C/s 이상 빠른 온도 상승<br/>
-                • <strong>온도 유지</strong>: 목표온도에서 정확한 시간 제어<br/>
-                • <strong>제어 냉각</strong>: 열충격 방지를 위한 점진적 냉각
-              </div>
-            </div>
+          <div className="bg-white p-4 rounded-lg text-sm leading-relaxed text-gray-700">
+            <p className="mb-3">
+              <strong className="text-blue-800">📈 RTA 프로파일은 4단계로 진행됩니다.</strong>
+              먼저 25°C 상온에서 가스 흐름을 안정화시키고, 이후 100°C/s 이상의 빠른 속도로 급속 승온합니다.
+              목표온도에 도달하면 정확한 시간 동안 온도를 유지하며, 마지막으로 열충격을 방지하기 위해 점진적으로 냉각합니다.
+            </p>
 
-            <div className="bg-yellow-50 p-3 rounded">
-              <div className="font-medium text-yellow-800 mb-2">⏱️ Zone별 열전달 지연</div>
-              <div className="text-yellow-700">
-                • <strong>중앙 Zone 1</strong>: 응답시간 0.5초 (가장 빠름)<br/>
-                • <strong>가장자리 Zone 6</strong>: 응답시간 1.25초 (가장 느림)<br/>
-                • <strong>온도 균일성</strong>: Zone별 차등 제어로 확보
-              </div>
-            </div>
+            <p className="mb-3">
+              <strong className="text-yellow-800">⏱️ Zone별로 열전달 속도가 다릅니다.</strong>
+              웨이퍼 중앙의 Zone 1은 응답시간이 0.5초로 가장 빠르고, 가장자리로 갈수록 느려져서 Zone 6은 1.25초가 걸립니다.
+              이런 차이를 보정하기 위해 각 Zone을 독립적으로 제어하여 전체적인 온도 균일성을 확보합니다.
+            </p>
 
-            <div className="bg-green-50 p-3 rounded">
-              <div className="font-medium text-green-800 mb-2">🔧 장비 구성</div>
-              <div className="text-green-700">
-                • <strong>상하부 할로겐 램프</strong>: 6개 Zone 독립 제어<br/>
-                • <strong>IR 파이로미터</strong>: 비접촉 실시간 온도 측정<br/>
-                • <strong>쿼츠 윈도우</strong>: 균등한 열전달과 빠른 응답
-              </div>
-            </div>
+            <p className="mb-3">
+              <strong className="text-purple-800">🎯 초고속 온도 변화 구간에서는 컨트롤 정밀도가 중요합니다.</strong>
+              Ramp나 Cool 같은 급속 변화 구간에서는 실제 온도와 설정값 사이에 차이가 발생할 수 있는데,
+              이는 챔버의 열용량과 램프 응답성 같은 장비 특성 때문입니다. 이런 차이 패턴을 분석하면 초벌이나 양산 시 장비를 튜닝하는 핵심 지표가 됩니다.
+            </p>
 
-            <div className="bg-purple-50 p-3 rounded">
-              <div className="font-medium text-purple-800 mb-2">🎯 컨트롤 정밀도</div>
-              <div className="text-purple-700">
-                • <strong>급속 변화 구간</strong>: Ramp/Cool 시 실제값과 설정값 차이 발생 가능<br/>
-                • <strong>장비 특성 반영</strong>: 챔버 열용량과 램프 응답성에 따른 지연<br/>
-                • <strong>튜닝 포인트</strong>: 초벌/양산 시 장비 최적화의 핵심 지표
-              </div>
-            </div>
+            <p className="mb-3">
+              <strong className="text-red-800">⚠️ Hold 구간에서 온도가 제대로 유지되지 않으면 실제 공정에 영향을 줍니다.</strong>
+              온도 오버슈트나 드리프트가 발생하면 도핑 프로파일이 변하거나 소자의 전기적 특성에 직접적인 영향을 미칠 수 있습니다.
+              현재 시뮬레이션에서도 Hold 구간에서 약간의 온도 변동을 재현하고 있어, 실제 장비의 동작을 이해하는 데 도움이 됩니다.
+            </p>
 
-            <div className="bg-red-50 p-3 rounded">
-              <div className="font-medium text-red-800 mb-2">⚠️ 실제 공정 영향</div>
-              <div className="text-red-700">
-                • <strong>Hold 구간 중요성</strong>: 온도 유지 불안정 시 도핑 프로파일 변화<br/>
-                • <strong>소자 특성 영향</strong>: 오버슈트/드리프트는 전기적 특성에 직접 영향<br/>
-                • <strong>현재 시뮬레이션</strong>: Hold 구간에서 약간의 온도 변동 재현
-              </div>
-            </div>
-
-            <div className="bg-indigo-50 p-3 rounded">
-              <div className="font-medium text-indigo-800 mb-2">📊 데이터 신뢰도</div>
-              <div className="text-indigo-700">
-                • <strong>오차 패턴 분석</strong>: 예상값 vs 실제값 차이의 주기적 경향 파악<br/>
-                • <strong>설비 보정</strong>: 반복되는 오차 패턴으로 장비 캘리브레이션<br/>
-                • <strong>공정 개선</strong>: 데이터 기반 레시피 최적화 가능
-              </div>
-            </div>
+            <p>
+              <strong className="text-indigo-800">📊 데이터를 주기적으로 분석하면 공정을 개선할 수 있습니다.</strong>
+              예상 온도 프로파일과 실제 측정값 사이의 오차가 어디서 주로 발생하는지 패턴을 찾아보세요.
+              반복되는 오차 패턴이 보인다면 그건 장비 캘리브레이션이 필요하다는 신호이고,
+              이렇게 수집된 데이터를 바탕으로 레시피를 최적화할 수 있습니다.
+            </p>
           </div>
         </div>
       </div>
