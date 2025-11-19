@@ -972,6 +972,33 @@ const RTASimulator = () => {
                 • <strong>쿼츠 윈도우</strong>: 균등한 열전달과 빠른 응답
               </div>
             </div>
+
+            <div className="bg-purple-50 p-3 rounded">
+              <div className="font-medium text-purple-800 mb-2">🎯 컨트롤 정밀도</div>
+              <div className="text-purple-700">
+                • <strong>급속 변화 구간</strong>: Ramp/Cool 시 실제값과 설정값 차이 발생 가능<br/>
+                • <strong>장비 특성 반영</strong>: 챔버 열용량과 램프 응답성에 따른 지연<br/>
+                • <strong>튜닝 포인트</strong>: 초벌/양산 시 장비 최적화의 핵심 지표
+              </div>
+            </div>
+
+            <div className="bg-red-50 p-3 rounded">
+              <div className="font-medium text-red-800 mb-2">⚠️ 실제 공정 영향</div>
+              <div className="text-red-700">
+                • <strong>Hold 구간 중요성</strong>: 온도 유지 불안정 시 도핑 프로파일 변화<br/>
+                • <strong>소자 특성 영향</strong>: 오버슈트/드리프트는 전기적 특성에 직접 영향<br/>
+                • <strong>현재 시뮬레이션</strong>: Hold 구간에서 약간의 온도 변동 재현
+              </div>
+            </div>
+
+            <div className="bg-indigo-50 p-3 rounded">
+              <div className="font-medium text-indigo-800 mb-2">📊 데이터 신뢰도</div>
+              <div className="text-indigo-700">
+                • <strong>오차 패턴 분석</strong>: 예상값 vs 실제값 차이의 주기적 경향 파악<br/>
+                • <strong>설비 보정</strong>: 반복되는 오차 패턴으로 장비 캘리브레이션<br/>
+                • <strong>공정 개선</strong>: 데이터 기반 레시피 최적화 가능
+              </div>
+            </div>
           </div>
         </div>
       </div>
