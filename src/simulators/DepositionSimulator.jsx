@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import SputteringSimulator from './SputteringSimulator';
 
 // Icon components
 const PlayIcon = () => (
@@ -502,68 +503,174 @@ const DepositionSimulator = () => {
     <div className="space-y-6 p-6">
       <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-lg">
         <h2 className="text-2xl font-bold text-blue-800 mb-4">
-          🎯 PVD (Sputtering) - 스퍼터링법
+          🎯 PVD (Sputtering) - 마그네트론 스퍼터링
         </h2>
         <p className="text-gray-700 text-lg">
-          고에너지 이온으로 타겟을 충돌시켜 원자를 물리적으로 방출시켜 기판에 증착시키는 방법입니다.
+          고에너지 Ar⁺ 이온으로 타겟을 충돌시켜 원자를 물리적으로 방출(스퍼터)시켜 웨이퍼에 증착시키는 방법입니다.
+          마그네트론을 사용하여 플라즈마 밀도를 높이고 타겟 근처에 전자를 가두어 효율을 극대화합니다.
         </p>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4">⚛️ 스퍼터링 메커니즘</h3>
-        <div className="bg-gray-100 rounded-lg p-8">
-          <div className="text-center">
-            <div className="inline-block animate-pulse text-6xl mb-4">🎯</div>
-            <p className="text-gray-600">Ar+ 이온이 타겟을 충돌하여 원자를 방출합니다</p>
+      {/* 3D 시뮬레이터 */}
+      <div className="bg-white rounded-lg shadow-2xl overflow-hidden" style={{ height: '800px' }}>
+        <SputteringSimulator />
+      </div>
+
+      {/* 한글 실습 가이드 */}
+      <div className="bg-gradient-to-br from-purple-50 to-blue-50 p-6 rounded-lg shadow-md">
+        <h3 className="text-2xl font-bold text-purple-800 mb-4 flex items-center">
+          <span className="mr-3">🧪</span>
+          실습 가이드
+        </h3>
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-lg border-l-4 border-green-500">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">1️⃣</span>
+              <div>
+                <h4 className="font-bold text-green-700 mb-1">플라즈마 켜기</h4>
+                <p className="text-gray-700">
+                  <strong>POWER 버튼</strong>을 눌러서 플라즈마를 켜보세요.
+                  주황색 플라즈마 영역과 파란색(전자), 주황색(Ar⁺ 이온), 회색(Ar 중성) 입자들이 나타납니다.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="mt-6 grid grid-cols-3 gap-4 text-sm">
-            <div className="bg-blue-100 p-3 rounded text-center">
-              <div className="font-bold text-blue-800">Ar+ 이온</div>
-              <div className="text-xs">100-300 eV</div>
+
+          <div className="bg-white p-4 rounded-lg border-l-4 border-blue-500">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">2️⃣</span>
+              <div>
+                <h4 className="font-bold text-blue-700 mb-1">이온 에너지 조절</h4>
+                <p className="text-gray-700">
+                  <strong>⚡ Ion Energy 슬라이더</strong>를 조절하여 Ar⁺ 이온의 충돌 에너지를 변경해보세요.
+                  에너지가 높을수록 이온 속도가 빨라지고 스퍼터링 수율(yield)이 증가합니다.
+                  타겟에서 더 많은 파란색 원자들이 튀어나오는 것을 관찰하세요.
+                </p>
+              </div>
             </div>
-            <div className="bg-orange-100 p-3 rounded text-center">
-              <div className="font-bold text-orange-800">타겟 충돌</div>
-              <div className="text-xs">운동량 전달</div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border-l-4 border-purple-500">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">3️⃣</span>
+              <div>
+                <h4 className="font-bold text-purple-700 mb-1">자기장 세기 조절</h4>
+                <p className="text-gray-700">
+                  <strong>🧲 B-Field 슬라이더</strong>를 조절하여 자기장 세기를 변경해보세요.
+                  자기장이 강할수록 전자가 타겟 근처에 더 오래 갇혀서 플라즈마 밀도가 증가하고,
+                  더 많은 Ar⁺ 이온이 생성됩니다. 하늘색 자기장 라인의 밝기 변화를 확인하세요.
+                </p>
+              </div>
             </div>
-            <div className="bg-yellow-100 p-3 rounded text-center">
-              <div className="font-bold text-yellow-800">원자 방출</div>
-              <div className="text-xs">~2 atoms/ion</div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border-l-4 border-orange-500">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">4️⃣</span>
+              <div>
+                <h4 className="font-bold text-orange-700 mb-1">카메라 각도 변경</h4>
+                <p className="text-gray-700">
+                  <strong>Substrate / Bottom↑ / Top↓ 버튼</strong>으로 카메라 모드를 전환해보세요.
+                  <br />
+                  • <strong>Substrate</strong>: 웨이퍼를 측면에서 관찰
+                  <br />
+                  • <strong>Bottom↑</strong>: 웨이퍼 아래에서 위를 올려다봄 (타겟의 erosion track 관찰에 최적)
+                  <br />
+                  • <strong>Top↓</strong>: 타겟 위에서 아래를 내려다봄
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border-l-4 border-red-500">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">5️⃣</span>
+              <div>
+                <h4 className="font-bold text-red-700 mb-1">Erosion Track (링 패턴) 관찰</h4>
+                <p className="text-gray-700">
+                  <strong>Bottom↑ 뷰</strong>로 전환한 후, 타겟이 깎이는 모습을 관찰해보세요.
+                  8개의 S극(파란 자석)이 만드는 원 모양을 따라 도넛/링 형태로 타겟이 집중적으로 깎입니다.
+                  이것이 마그네트론 스퍼터링의 특징적인 <strong>racetrack erosion</strong> 패턴입니다.
+                  타겟 원자가 한 층 완전히 깎이면 자동으로 새 층이 위에 생성됩니다.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border-l-4 border-yellow-500">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">6️⃣</span>
+              <div>
+                <h4 className="font-bold text-yellow-700 mb-1">최대 파라미터 실험</h4>
+                <p className="text-gray-700">
+                  <strong>Ion Energy</strong>와 <strong>B-Field</strong>를 모두 <strong>최대(100%)</strong>로 올려보세요!
+                  매우 집중적이고 빠른 스퍼터링이 일어나며, 웨이퍼에 증착되는 원자(Deposited) 개수가 빠르게 증가하는 것을 확인할 수 있습니다.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg border-l-4 border-indigo-500">
+            <div className="flex items-start">
+              <span className="text-2xl mr-3">7️⃣</span>
+              <div>
+                <h4 className="font-bold text-indigo-700 mb-1">줌 및 회전 조절</h4>
+                <p className="text-gray-700">
+                  <strong>마우스 휠</strong>로 줌 인/아웃하거나 <strong>➕/➖ 버튼</strong>을 사용하세요.
+                  <strong>🔄 Rotate / ⏸️ Fixed 버튼</strong>으로 자동 회전을 켜거나 끌 수 있습니다.
+                  고정 모드에서 특정 각도를 자세히 관찰해보세요.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-gradient-to-r from-green-100 to-blue-100 p-4 rounded-lg border-2 border-green-400">
+            <div className="flex items-start">
+              <span className="text-3xl mr-3">💡</span>
+              <div>
+                <h4 className="font-bold text-green-800 mb-2">핵심 관찰 포인트</h4>
+                <ul className="text-gray-800 space-y-1 text-sm">
+                  <li>• <strong>N극(빨강, 중앙)</strong>과 <strong>S극(진한 파랑, 8개 원형 배치)</strong>가 만드는 폐쇄 자기장</li>
+                  <li>• <strong>Ar⁺ 이온(주황색 구)</strong>이 타겟 표면에 충돌하는 순간</li>
+                  <li>• <strong>스퍼터된 타겟 원자(파란 구)</strong>가 중력으로 웨이퍼에 낙하</li>
+                  <li>• <strong>웨이퍼 표면</strong>에 작은 파란 점들이 쌓여서 막이 형성되는 과정</li>
+                  <li>• <strong>Erosion track</strong>: S극 원을 따라 도넛 형태로 타겟이 집중 깎임</li>
+                  <li>• 파라미터 변화에 따른 증착 속도(Deposited 카운트) 차이</li>
+                </ul>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
+      {/* 이론 요약 */}
       <div className="grid md:grid-cols-2 gap-4">
         <div className="bg-blue-50 p-4 rounded-lg">
           <h4 className="font-semibold text-blue-800 mb-2">🔄 스퍼터링 메커니즘</h4>
           <ol className="text-sm text-gray-700 space-y-1">
-            <li>1️⃣ 이온화: Ar → Ar+ + e-</li>
-            <li>2️⃣ 가속: 전기장에서 이온 가속</li>
-            <li>3️⃣ 충돌: 타겟 표면 운동량 전달</li>
-            <li>4️⃣ 방출: 타겟 원자 기체상 방출</li>
-            <li>5️⃣ 수송: 진공 챔버 내 이동</li>
-            <li>6️⃣ 증착: 웨이퍼 표면 응축</li>
+            <li>1️⃣ 이온화: Ar → Ar⁺ + e⁻ (플라즈마)</li>
+            <li>2️⃣ 가속: 전기장에서 Ar⁺ 이온 가속</li>
+            <li>3️⃣ 충돌: 타겟 표면에 운동량 전달</li>
+            <li>4️⃣ 방출: 타겟 원자 기체상 방출 (스퍼터)</li>
+            <li>5️⃣ 수송: 진공 챔버 내 직선/확산 이동</li>
+            <li>6️⃣ 증착: 웨이퍼 표면 응축 및 막 형성</li>
           </ol>
         </div>
 
         <div className="bg-cyan-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-cyan-800 mb-2">⚖️ 증발법과의 비교</h4>
-          <div className="text-sm space-y-2">
-            <div>
-              <span className="font-medium text-green-600">장점:</span>
-              <ul className="ml-4 list-disc text-xs">
-                <li>합금 조성 유지 가능</li>
-                <li>다양한 재료 증착</li>
-                <li>더 나은 Step Coverage</li>
-              </ul>
-            </div>
-            <div>
-              <span className="font-medium text-orange-600">단점:</span>
-              <ul className="ml-4 list-disc text-xs">
-                <li>더 복잡한 시스템</li>
-                <li>플라즈마 손상 가능성</li>
-              </ul>
-            </div>
+          <h4 className="font-semibold text-cyan-800 mb-2">🧲 마그네트론의 역할</h4>
+          <div className="text-sm space-y-2 text-gray-700">
+            <p>
+              <strong>N극(중앙)</strong>과 <strong>S극(링)</strong>이 만드는 자기장이
+              전자를 타겟 근처에 가두어 플라즈마 밀도를 10~100배 증가시킵니다.
+            </p>
+            <p className="text-xs space-y-1">
+              <div>✓ 전자가 나선 운동으로 타겟 근처에 머무름</div>
+              <div>✓ Ar 중성 원자와 충돌 확률 증가</div>
+              <div>✓ 더 많은 Ar⁺ 이온 생성</div>
+              <div>✓ 스퍼터링 효율 대폭 증가</div>
+              <div>✓ S극 원을 따라 erosion track 형성</div>
+            </p>
           </div>
         </div>
       </div>
