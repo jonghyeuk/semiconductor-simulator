@@ -8,7 +8,7 @@ import PlasmaSimulator from '../simulators/PlasmaSimulator';
 import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII';
 import EtchingSimulator from '../simulators/EtchingSimulator';
 import DopingProcessSimulator from '../simulators/Dopingprocesssimulator';
-// import DepositionSimulator from '../simulators/DepositionSimulator';
+import DepositionSimulator from '../simulators/DepositionSimulator';
 
 class SimulatorRegistry {
   constructor() {
@@ -192,24 +192,29 @@ class SimulatorRegistry {
       }
     });
 
-    // Deposition 시뮬레이터 (준비중)
+    // Deposition 시뮬레이터 (완성됨)
     this.register({
       id: 'deposition',
       name: 'Deposition',
       icon: '📦',
       description: '박막 증착 공정',
-      component: null,
-      available: false,
+      component: DepositionSimulator,
+      available: true,
       category: 'process',
       order: 8,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-04-01',
+        version: '1.0.0',
+        lastUpdated: '2025-01-24',
+        author: 'Semiconductor Simulator Team',
         features: [
-          'CVD/PVD 공정',
-          '증착속도 제어',
-          '막질 및 스텝커버리지',
-          '응력 및 접착력'
+          '증착공정 개요 및 이론 학습',
+          'PVD 증발 분자 시뮬레이션',
+          'PVD 스퍼터링 3D 분자 시각화',
+          'Thermal CVD 고온 열분해 메커니즘',
+          'PECVD 플라즈마 보조 증착',
+          'ALD 원자층 증착 사이클',
+          '상세한 이론 설명 및 비교',
+          '증착 기술 평가 퀴즈'
         ]
       }
     });
