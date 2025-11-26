@@ -6,7 +6,7 @@ export default function SputteringSimulator() {
   const isPowerOnRef = useRef(false);
   const ionEnergyRef = useRef(50);
   const magneticFieldRef = useRef(50);
-  const zoomRef = useRef(15);
+  const zoomRef = useRef(22);
   const cameraAngleRef = useRef(0);
   const isRotatingRef = useRef(true);
   const cameraModeRef = useRef(1);
@@ -15,7 +15,7 @@ export default function SputteringSimulator() {
   const [ionEnergy, setIonEnergy] = useState(50);
   const [magneticField, setMagneticField] = useState(50);
   const [depositedCount, setDepositedCount] = useState(0);
-  const [zoom, setZoom] = useState(15);
+  const [zoom, setZoom] = useState(22);
   const [cameraMode, setCameraMode] = useState(1);
   const [isRotating, setIsRotating] = useState(true);
 
@@ -41,7 +41,7 @@ export default function SputteringSimulator() {
 
     const handleWheel = (e) => {
       e.preventDefault();
-      const newZoom = Math.max(8, Math.min(30, zoomRef.current + e.deltaY * 0.01));
+      const newZoom = Math.max(12, Math.min(40, zoomRef.current + e.deltaY * 0.01));
       setZoom(newZoom);
       zoomRef.current = newZoom;
     };
@@ -663,9 +663,9 @@ export default function SputteringSimulator() {
               {isRotating ? '🔄 Rotate' : '⏸️ Fixed'}
             </button>
             <div className="flex gap-2">
-              <button onClick={() => { const z = Math.max(8, zoom-3); setZoom(z); zoomRef.current = z; }}
+              <button onClick={() => { const z = Math.max(12, zoom-3); setZoom(z); zoomRef.current = z; }}
                 className="flex-1 py-1 bg-green-700 text-white rounded font-bold">➕</button>
-              <button onClick={() => { const z = Math.min(30, zoom+3); setZoom(z); zoomRef.current = z; }}
+              <button onClick={() => { const z = Math.min(40, zoom+3); setZoom(z); zoomRef.current = z; }}
                 className="flex-1 py-1 bg-blue-700 text-white rounded font-bold">➖</button>
             </div>
           </div>
