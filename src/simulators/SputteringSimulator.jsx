@@ -479,7 +479,7 @@ export default function SputteringSimulator() {
       if (isRotatingRef.current) cameraAngleRef.current += 0.005;
 
       if (cameraModeRef.current === 1) {
-        camera.position.set(rad * Math.cos(cameraAngleRef.current), 5, rad * Math.sin(cameraAngleRef.current));
+        camera.position.set(rad * Math.cos(cameraAngleRef.current), 2, rad * Math.sin(cameraAngleRef.current));
         camera.lookAt(0, 0, 0);
       } else if (cameraModeRef.current === 2) {
         camera.position.set(rad * 0.8 * Math.cos(cameraAngleRef.current), -2, rad * 0.8 * Math.sin(cameraAngleRef.current));
