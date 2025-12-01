@@ -617,9 +617,73 @@ const ALDSimulator = () => {
     <div className="w-full h-full flex bg-gray-900">
       {/* 3D Viewport */}
       <div className="flex-1 relative" ref={mountRef}>
-        {/* Current step overlay */}
-        <div className="absolute top-2 left-2 bg-black/60 px-3 py-1 rounded text-white text-sm">
-          {getStepName(currentStep)}
+        {/* Pulse Timing Graph - 왼쪽 상단 오버레이 */}
+        <div className="absolute top-2 left-2 bg-black/80 p-2 rounded border border-gray-600">
+          <div className="text-gray-300 font-bold text-xs mb-1">Pulse Timing Graph</div>
+          <svg width="280" height="130" viewBox="0 0 240 130" className="bg-black/50 rounded">
+            {/* X축 시간 눈금 */}
+            <line x1="50" y1="115" x2="230" y2="115" stroke="#444" strokeWidth="1" />
+            <text x="50" y="125" fill="#888" fontSize="8" textAnchor="middle">0</text>
+            <text x="95" y="125" fill="#888" fontSize="8" textAnchor="middle">0.5</text>
+            <text x="122" y="125" fill="#888" fontSize="8" textAnchor="middle">0.8</text>
+            <text x="167" y="125" fill="#888" fontSize="8" textAnchor="middle">1.3</text>
+            <text x="194" y="125" fill="#888" fontSize="8" textAnchor="middle">1.6</text>
+            <text x="220" y="125" fill="#888" fontSize="8" textAnchor="middle">s</text>
+
+            {/* Y축 신호 라벨 */}
+            <text x="45" y="22" fill="#3b82f6" fontSize="8" textAnchor="end">Source A</text>
+            <text x="45" y="42" fill="#9ca3af" fontSize="8" textAnchor="end">Purge 1</text>
+            <text x="45" y="67" fill="#ef4444" fontSize="8" textAnchor="end">Reactant B</text>
+            <text x="45" y="92" fill="#9ca3af" fontSize="8" textAnchor="end">Purge 2</text>
+
+            {/* 타이밍 펄스 그래프 - Step 1 (Source A): 0 ~ 0.5초 */}
+            <path
+              d="M 50 27 L 50 12 L 95 12 L 95 27 L 230 27"
+              stroke="#3b82f6"
+              strokeWidth="2"
+              fill="none"
+            />
+
+            {/* 타이밍 펄스 그래프 - Step 2 (Purge 1): 0.5 ~ 0.8초 */}
+            <path
+              d="M 50 47 L 95 47 L 95 32 L 122 32 L 122 47 L 230 47"
+              stroke="#9ca3af"
+              strokeWidth="2"
+              fill="none"
+            />
+
+            {/* 타이밍 펄스 그래프 - Step 3 (Reactant B): 0.8 ~ 1.3초 */}
+            <path
+              d="M 50 72 L 122 72 L 122 57 L 167 57 L 167 72 L 230 72"
+              stroke="#ef4444"
+              strokeWidth="2"
+              fill="none"
+            />
+
+            {/* 타이밍 펄스 그래프 - Step 4 (Purge 2): 1.3 ~ 1.6초 */}
+            <path
+              d="M 50 97 L 167 97 L 167 82 L 194 82 L 194 97 L 230 97"
+              stroke="#9ca3af"
+              strokeWidth="2"
+              fill="none"
+            />
+
+            {/* 현재 시간 표시 (세로 선) - moving time indicator */}
+            {isRunning && (
+              <>
+                <line
+                  x1={50 + cycleTimePosition * 144}
+                  y1="5"
+                  x2={50 + cycleTimePosition * 144}
+                  y2="110"
+                  stroke="#00ff00"
+                  strokeWidth="2"
+                  strokeDasharray="4,2"
+                />
+                <circle cx={50 + cycleTimePosition * 144} cy="5" r="3" fill="#00ff00" />
+              </>
+            )}
+          </svg>
         </div>
       </div>
 
@@ -688,75 +752,6 @@ const ALDSimulator = () => {
           <div className="text-gray-500 text-xs">
             ({depositedCount > 0 ? ((reactedCount / depositedCount) * 100).toFixed(1) : 0}% reacted)
           </div>
-        </div>
-
-        {/* Timing Diagram - 펄스 타이밍 그래프 */}
-        <div className="mb-3 p-2 bg-gray-900 rounded">
-          <div className="text-gray-300 font-bold text-xs mb-2">Pulse Timing Graph</div>
-          <svg width="100%" height="150" viewBox="0 0 240 150" className="bg-black/50 rounded">
-            {/* X축 시간 눈금 */}
-            <line x1="50" y1="135" x2="230" y2="135" stroke="#444" strokeWidth="1" />
-            <text x="50" y="145" fill="#888" fontSize="8" textAnchor="middle">0</text>
-            <text x="95" y="145" fill="#888" fontSize="8" textAnchor="middle">0.5</text>
-            <text x="122" y="145" fill="#888" fontSize="8" textAnchor="middle">0.8</text>
-            <text x="167" y="145" fill="#888" fontSize="8" textAnchor="middle">1.3</text>
-            <text x="194" y="145" fill="#888" fontSize="8" textAnchor="middle">1.6</text>
-            <text x="230" y="145" fill="#888" fontSize="8" textAnchor="middle">s</text>
-
-            {/* Y축 신호 라벨 */}
-            <text x="45" y="30" fill="#3b82f6" fontSize="8" textAnchor="end">Source A</text>
-            <text x="45" y="55" fill="#9ca3af" fontSize="8" textAnchor="end">Purge 1</text>
-            <text x="45" y="85" fill="#ef4444" fontSize="8" textAnchor="end">Reactant B</text>
-            <text x="45" y="115" fill="#9ca3af" fontSize="8" textAnchor="end">Purge 2</text>
-
-            {/* 타이밍 펄스 그래프 - Step 1 (Source A): 0 ~ 0.5초 */}
-            <path
-              d="M 50 35 L 50 20 L 95 20 L 95 35 L 230 35"
-              stroke="#3b82f6"
-              strokeWidth="2"
-              fill="none"
-            />
-
-            {/* 타이밍 펄스 그래프 - Step 2 (Purge 1): 0.5 ~ 0.8초 */}
-            <path
-              d="M 50 60 L 95 60 L 95 45 L 122 45 L 122 60 L 230 60"
-              stroke="#9ca3af"
-              strokeWidth="2"
-              fill="none"
-            />
-
-            {/* 타이밍 펄스 그래프 - Step 3 (Reactant B): 0.8 ~ 1.3초 */}
-            <path
-              d="M 50 90 L 122 90 L 122 75 L 167 75 L 167 90 L 230 90"
-              stroke="#ef4444"
-              strokeWidth="2"
-              fill="none"
-            />
-
-            {/* 타이밍 펄스 그래프 - Step 4 (Purge 2): 1.3 ~ 1.6초 */}
-            <path
-              d="M 50 120 L 167 120 L 167 105 L 194 105 L 194 120 L 230 120"
-              stroke="#9ca3af"
-              strokeWidth="2"
-              fill="none"
-            />
-
-            {/* 현재 시간 표시 (세로 선) - moving time indicator */}
-            {isRunning && (
-              <>
-                <line
-                  x1={50 + cycleTimePosition * 144}
-                  y1="10"
-                  x2={50 + cycleTimePosition * 144}
-                  y2="130"
-                  stroke="#00ff00"
-                  strokeWidth="2"
-                  strokeDasharray="4,2"
-                />
-                <circle cx={50 + cycleTimePosition * 144} cy="10" r="3" fill="#00ff00" />
-              </>
-            )}
-          </svg>
         </div>
 
         {/* Legend */}
