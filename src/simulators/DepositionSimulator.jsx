@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import SputteringSimulator from './SputteringSimulator';
 import EvaporatorSimulator from './EvaporatorSimulator';
+import ALDSimulator from './ALDSimulator';
 
 // Icon components
 const PlayIcon = () => (
@@ -1014,78 +1015,246 @@ const DepositionSimulator = () => {
 
   const renderALDTab = () => (
     <div className="space-y-6 p-6">
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg">
-        <h2 className="text-2xl font-bold text-purple-800 mb-4">
-          ⚛️ ALD (Atomic Layer Deposition) - 원자층 증착
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-900 to-indigo-900 p-4 rounded-lg">
+        <h1 className="text-xl font-bold text-white">ALD (Atomic Layer Deposition) 시뮬레이터</h1>
+        <p className="text-purple-200 text-sm">자기제한적 표면반응을 통한 원자층 단위 정밀 증착</p>
+      </div>
+
+      {/* 3D Simulator */}
+      <div className="bg-white rounded-lg shadow-2xl overflow-hidden" style={{ height: '550px' }}>
+        <ALDSimulator />
+      </div>
+
+      {/* Experiment Guide */}
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-lg">
+        <h2 className="text-2xl font-bold text-white mb-6 border-b-2 border-purple-500 pb-2">
+          ALD 시뮬레이터 관전 포인트 및 실험 가이드
         </h2>
-        <p className="text-gray-700 text-lg">
-          전구체를 순차적으로 주입하여 자기제한적 표면반응을 통해 원자층 단위로 정밀하게 증착하는 방법입니다.
-        </p>
-      </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4">🔄 ALD 4단계 사이클</h3>
-        <div className="space-y-3">
-          <div className="flex items-center p-3 bg-blue-100 rounded">
-            <span className="font-bold text-blue-600 mr-3">1️⃣</span>
-            <div>
-              <div className="font-medium">전구체 A 주입</div>
-              <div className="text-xs">TMA (Al(CH₃)₃) → 표면 -OH와 반응</div>
+        {/* Key Observation Points */}
+        <div className="mb-8 bg-purple-900/40 p-5 rounded-lg border-2 border-purple-500">
+          <h3 className="text-xl font-bold text-purple-300 mb-4">핵심 관전 포인트</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-blue-500">
+              <h4 className="text-blue-300 font-bold mb-2">1. 자기제한적 흡착 (Self-Limiting)</h4>
+              <p className="text-gray-300 text-sm">
+                <span className="text-blue-400 font-bold">파란색 분자(Source A)</span>가 웨이퍼에 떨어질 때,
+                <span className="text-yellow-400"> 빈 자리(초록점)</span>에만 흡착되는 것을 관찰하세요.
+                이미 차 있는 자리에 떨어진 분자는 <span className="text-red-400">표면을 따라 흘러나감</span>니다.
+                이것이 ALD의 핵심 - <span className="text-cyan-400 font-bold">"더 이상 붙을 곳이 없으면 멈춘다"</span>
+              </p>
             </div>
-          </div>
-          <div className="flex items-center p-3 bg-gray-100 rounded">
-            <span className="font-bold text-gray-600 mr-3">2️⃣</span>
-            <div>
-              <div className="font-medium">퍼지 (Purge)</div>
-              <div className="text-xs">N₂ 가스로 잔여 TMA와 부산물 제거</div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-red-500">
+              <h4 className="text-red-300 font-bold mb-2">2. 선택적 반응</h4>
+              <p className="text-gray-300 text-sm">
+                <span className="text-red-400 font-bold">빨간색 분자(Reactant B)</span>는
+                <span className="text-blue-400"> 파란색 분자가 있는 자리</span>에서만 반응합니다.
+                빈 웨이퍼 표면에 떨어지면 반응하지 않고 흘러나갑니다.
+                이것이 <span className="text-cyan-400 font-bold">"화학적 선택성"</span>입니다.
+              </p>
             </div>
-          </div>
-          <div className="flex items-center p-3 bg-red-100 rounded">
-            <span className="font-bold text-red-600 mr-3">3️⃣</span>
-            <div>
-              <div className="font-medium">전구체 B 주입</div>
-              <div className="text-xs">H₂O → Al-CH₃와 반응하여 Al₂O₃ 형성</div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-gray-500">
+              <h4 className="text-gray-300 font-bold mb-2">3. 퍼지(Purge)의 역할</h4>
+              <p className="text-gray-300 text-sm">
+                <span className="text-gray-400 font-bold">회색 가스(N2)</span>가 웨이퍼 위를 쓸면서
+                <span className="text-yellow-400"> 반응하지 못한 잔여 분자들을 제거</span>합니다.
+                이 과정이 없으면 다음 단계에서 <span className="text-red-400">기체상 반응(CVD처럼)</span>이 일어납니다.
+              </p>
             </div>
-          </div>
-          <div className="flex items-center p-3 bg-gray-100 rounded">
-            <span className="font-bold text-gray-600 mr-3">4️⃣</span>
-            <div>
-              <div className="font-medium">퍼지 (Purge)</div>
-              <div className="text-xs">N₂ 가스로 H₂O와 CH₄ 부산물 제거</div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-cyan-500">
+              <h4 className="text-cyan-300 font-bold mb-2">4. 층간 누적</h4>
+              <p className="text-gray-300 text-sm">
+                사이클이 반복될 때마다 <span className="text-cyan-400 font-bold">파란-빨간 층이 쌓이는</span> 것을 관찰하세요.
+                각 사이클은 정확히 <span className="text-green-400">~0.1nm</span>씩 두께가 증가합니다.
+                10사이클 = 1nm, 100사이클 = 10nm!
+              </p>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-yellow-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-yellow-800 mb-2">🎯 자기제한적 특성</h4>
-          <ul className="text-sm text-gray-700 space-y-1">
-            <li>• 포화 흡착: 표면 사이트 완전 채워짐</li>
-            <li>• 정밀 제어: 1 사이클 = 1 원자층</li>
-            <li>• 재현성: 매번 동일한 두께</li>
-            <li>• 균일성: 복잡한 3D 구조도 균일</li>
-          </ul>
+        {/* Step-by-step Guide */}
+        <div className="mb-8 bg-blue-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-blue-300 mb-4">시뮬레이터 따라하기</h3>
+
+          <div className="space-y-4">
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-green-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-green-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 0</span>
+                <div>
+                  <div className="font-bold text-green-300 text-lg">Start 버튼 클릭</div>
+                  <p className="text-gray-300 mt-1">시뮬레이션이 자동으로 4단계 사이클을 반복합니다.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-blue-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-blue-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 1</span>
+                <div>
+                  <div className="font-bold text-blue-300 text-lg">Source A 주입 (파란색)</div>
+                  <p className="text-gray-300 mt-1">
+                    TMA (트리메틸알루미늄) 분자가 위에서 떨어집니다.<br/>
+                    <span className="text-yellow-400">관찰:</span> 웨이퍼의 -OH 표면과 반응하여 흡착.
+                    흡착된 분자는 <span className="text-blue-400">파란색</span>으로 고정됩니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-gray-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-gray-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 2</span>
+                <div>
+                  <div className="font-bold text-gray-300 text-lg">Purge (회색)</div>
+                  <p className="text-gray-300 mt-1">
+                    N2 가스로 챔버를 청소합니다.<br/>
+                    <span className="text-yellow-400">관찰:</span> 흡착되지 못한 TMA와 반응 부산물(CH4)이
+                    <span className="text-gray-400"> 웨이퍼 가장자리로 쓸려나갑니다.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-red-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-red-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 3</span>
+                <div>
+                  <div className="font-bold text-red-300 text-lg">Reactant B 주입 (빨간색)</div>
+                  <p className="text-gray-300 mt-1">
+                    H2O (물) 분자가 위에서 떨어집니다.<br/>
+                    <span className="text-yellow-400">관찰:</span> TMA의 -CH3 그룹과 반응하여 Al-O 결합 형성.
+                    <span className="text-red-400"> 빨간색</span> 분자가 파란색 위에 쌓입니다.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-gray-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-gray-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 4</span>
+                <div>
+                  <div className="font-bold text-gray-300 text-lg">Purge (회색)</div>
+                  <p className="text-gray-300 mt-1">
+                    다시 N2 가스로 청소합니다.<br/>
+                    <span className="text-yellow-400">관찰:</span> 미반응 H2O와 부산물(CH4)이 제거됩니다.
+                    1 사이클 완료! 표면에 <span className="text-cyan-400">~0.1nm Al2O3</span> 형성.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-green-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-green-800 mb-2">📊 성능 비교</h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <div className="font-medium">Step Coverage</div>
-              <div className="text-green-600">거의 완벽</div>
+        {/* Why ALD is Special */}
+        <div className="mb-8 bg-cyan-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-cyan-300 mb-4">왜 ALD가 특별한가?</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-green-300 mb-2">CVD와의 차이점</h4>
+              <div className="space-y-2 text-sm text-gray-300">
+                <div className="flex items-start gap-2">
+                  <span className="text-red-400">CVD:</span>
+                  <span>두 가스가 <span className="text-red-400">동시에</span> 들어감 → 기체상에서 반응 → 불균일</span>
+                </div>
+                <div className="flex items-start gap-2">
+                  <span className="text-green-400">ALD:</span>
+                  <span>두 가스가 <span className="text-green-400">번갈아</span> 들어감 → 표면에서만 반응 → 균일</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-yellow-300 mb-2">Self-Limiting의 의미</h4>
+              <p className="text-gray-300 text-sm">
+                시간을 더 오래 줘도, 가스를 더 많이 줘도,
+                <span className="text-yellow-400 font-bold"> "딱 1층만"</span> 쌓입니다.
+                표면의 반응 사이트가 모두 채워지면 더 이상 반응이 일어나지 않기 때문입니다.
+                이것이 <span className="text-cyan-400">원자층 단위 제어</span>의 비밀입니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Chemical Reaction */}
+        <div className="mb-8 bg-indigo-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-indigo-300 mb-4">Al2O3 ALD 화학 반응</h3>
+
+          <div className="bg-gray-900 p-4 rounded-lg font-mono text-sm">
+            <div className="mb-4">
+              <div className="text-blue-400 mb-1">Step 1: TMA 흡착</div>
+              <div className="text-gray-300">Surface-OH + Al(CH3)3 → Surface-O-Al(CH3)2 + CH4 </div>
             </div>
             <div>
-              <div className="font-medium">막두께 제어</div>
-              <div className="text-green-600">Ångström 단위</div>
+              <div className="text-red-400 mb-1">Step 3: H2O 반응</div>
+              <div className="text-gray-300">Surface-O-Al(CH3)2 + H2O → Surface-O-Al-OH + CH4 </div>
             </div>
-            <div>
-              <div className="font-medium">균일도</div>
-              <div className="text-green-600">±1% 이내</div>
+          </div>
+
+          <div className="mt-4 text-gray-400 text-sm">
+            결과: 2Al(CH3)3 + 3H2O → Al2O3 + 6CH4
+            <br/>
+            <span className="text-cyan-400">Growth Per Cycle (GPC): ~0.1 nm/cycle @ 200-300°C</span>
+          </div>
+        </div>
+
+        {/* Applications */}
+        <div className="mb-8 bg-green-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-green-300 mb-4">ALD 적용 분야</h3>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">🔌</div>
+              <div className="text-green-400 font-bold">High-k Gate</div>
+              <p className="text-gray-400 text-xs mt-1">HfO2, ZrO2</p>
             </div>
-            <div>
-              <div className="font-medium">증착속도</div>
-              <div className="text-red-600">느림</div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">🔋</div>
+              <div className="text-green-400 font-bold">배터리</div>
+              <p className="text-gray-400 text-xs mt-1">보호막 코팅</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">💡</div>
+              <div className="text-green-400 font-bold">LED/OLED</div>
+              <p className="text-gray-400 text-xs mt-1">패시베이션</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">🏔️</div>
+              <div className="text-green-400 font-bold">3D NAND</div>
+              <p className="text-gray-400 text-xs mt-1">초고 종횡비</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Performance Comparison */}
+        <div className="bg-yellow-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-yellow-300 mb-4">ALD 성능 요약</h3>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-yellow-400 font-bold mb-1">Step Coverage</div>
+              <div className="text-green-400 text-lg font-bold">~100%</div>
+              <p className="text-gray-500 text-xs">어떤 구조도 균일</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-yellow-400 font-bold mb-1">두께 제어</div>
+              <div className="text-green-400 text-lg font-bold">0.1nm</div>
+              <p className="text-gray-500 text-xs">원자층 단위</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-yellow-400 font-bold mb-1">균일도</div>
+              <div className="text-green-400 text-lg font-bold">+/-1%</div>
+              <p className="text-gray-500 text-xs">300mm 웨이퍼</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-yellow-400 font-bold mb-1">증착 속도</div>
+              <div className="text-red-400 text-lg font-bold">느림</div>
+              <p className="text-gray-500 text-xs">~1nm/min</p>
             </div>
           </div>
         </div>
