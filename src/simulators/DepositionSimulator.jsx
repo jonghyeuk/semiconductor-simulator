@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import SputteringSimulator from './SputteringSimulator';
+import EvaporatorSimulator from './EvaporatorSimulator';
 
 // Icon components
 const PlayIcon = () => (
@@ -352,146 +353,306 @@ const DepositionSimulator = () => {
 
   const renderPVDEvaporationTab = () => (
     <div className="space-y-6 p-6">
-      <div className="bg-gradient-to-r from-orange-50 to-red-50 p-6 rounded-lg">
-        <h2 className="text-2xl font-bold text-orange-800 mb-4">
-          🔥 PVD (Evaporation) - 열 증발법
-        </h2>
-        <p className="text-gray-700 text-lg">
-          타겟 재료를 가열하여 증발시키고, 증발된 원자들이 기판에 직선으로 이동하여 증착되는 방법입니다.
-        </p>
+      <div className="bg-gradient-to-r from-blue-900 to-purple-900 p-4 rounded-lg">
+        <h1 className="text-xl font-bold text-white">진공 증착 장치 시뮬레이터 (Evaporator)</h1>
+        <p className="text-blue-200 text-sm">E-beam 또는 Thermal 방식으로 소스 물질 증발 → 기판에 박막 증착</p>
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4">⚛️ 증발 메커니즘 시뮬레이션</h3>
-        <div className="w-full h-80 bg-gradient-to-b from-gray-800 to-black rounded-lg border-4 border-gray-600 overflow-hidden relative">
-          <svg className="w-full h-full">
-            {/* 기판 (상단) */}
-            <rect x="120" y="100" width="160" height="20" fill="#4ECDC4" />
-            <text x="200" y="95" textAnchor="middle" fill="white" fontSize="12">Substrate (기판)</text>
+      {/* 3D Simulator */}
+      <div className="bg-white rounded-lg shadow-2xl overflow-hidden" style={{ height: '600px' }}>
+        <EvaporatorSimulator />
+      </div>
 
-            {/* 증발 소스 (하단) */}
-            <rect x="160" y="240" width="80" height="30" fill="#C0C0C0" />
-            <text x="200" y="285" textAnchor="middle" fill="white" fontSize="12">Al Source</text>
+      {/* Experiment Guide */}
+      <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-lg">
+        <h2 className="text-2xl font-bold text-white mb-6 border-b-2 border-blue-500 pb-2">
+          진공 증착 장치 (Evaporator) 실험 지침서
+        </h2>
 
-            {/* 전자빔/히터 */}
-            <rect x="170" y="275" width="60" height="8" fill="#FF6B6B" opacity={isSimulating ? "0.8" : "0.3"}>
-              {isSimulating && <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite" />}
-            </rect>
-            <text x="200" y="295" textAnchor="middle" fill="#FFD700" fontSize="10">E-beam Heater</text>
+        {/* Two mode comparison */}
+        <div className="mb-8 bg-gray-800 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-white mb-4">두 가지 증착 모드</h3>
 
-            {/* 증발된 원자들 */}
-            {vaporAtoms.map((atom) => {
-              const age = animationStep - atom.startTime;
-              const currentY = atom.y - age * 1.5;
-              const currentX = atom.x + (Math.random() - 0.5) * age * 0.3;
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-cyan-900/30 p-4 rounded-lg border border-cyan-500">
+              <h4 className="text-lg font-bold text-cyan-300 mb-2">E-beam Evaporator</h4>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• 전자빔으로 타겟 <span className="text-red-400">국부 가열</span></li>
+                <li>• 270° 자기장 편향 (Gun 보호)</li>
+                <li>• <span className="text-cyan-400">고융점 금속</span> 증착 가능 (W, Ta, Mo)</li>
+                <li>• 고순도 박막 (도가니 오염 최소)</li>
+                <li>• X-ray 발생 주의</li>
+              </ul>
+            </div>
 
-              if (currentY < 120) return null;
-
-              return (
-                <g key={atom.id}>
-                  <Atom x={currentX} y={currentY} element={atom.element} size={6} />
-                  <line
-                    x1={atom.x}
-                    y1={atom.y}
-                    x2={currentX}
-                    y2={currentY}
-                    stroke="#C0C0C0"
-                    strokeWidth="1"
-                    opacity="0.4"
-                  />
-                </g>
-              );
-            })}
-
-            {/* 증발 효과 */}
-            {isSimulating && (
-              <g>
-                {[...Array(6)].map((_, i) => (
-                  <circle
-                    key={i}
-                    cx={170 + i * 12}
-                    cy={245}
-                    r="4"
-                    fill="#FFD700"
-                    opacity="0.7"
-                  >
-                    <animate attributeName="cy" values="245;220;245" dur="2s" repeatCount="indefinite" begin={`${i * 0.2}s`} />
-                    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite" begin={`${i * 0.2}s`} />
-                  </circle>
-                ))}
-              </g>
-            )}
-
-            {/* 온도 표시 */}
-            <text x="200" y="320" textAnchor="middle" fill="#FF6B6B" fontSize="14" fontWeight="bold">
-              {isSimulating ? "1200-1500°C" : "RT"}
-            </text>
-          </svg>
-
-          <div className="absolute top-4 left-4 text-white text-xs">
-            <div>🔥 열 증발: Al 소스 가열 → 기화</div>
-            <div>⚛️ 직선 이동: 가스 분자의 자유 비행</div>
-            <div>🎯 기판 증착: 응축 및 막 성장</div>
-            <div>📏 Line-of-sight: 그림자 효과</div>
+            <div className="bg-orange-900/30 p-4 rounded-lg border border-orange-500">
+              <h4 className="text-lg font-bold text-orange-300 mb-2">Thermal Evaporator</h4>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• DC 전류로 보트 <span className="text-orange-400">저항 가열</span></li>
+                <li>• 간단한 구조, 경제적</li>
+                <li>• <span className="text-orange-400">저융점 금속</span> (Al, Au, Ag, Cu)</li>
+                <li>• 유기물 증착 (OLED)</li>
+                <li>• 보트 수명 제한</li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 flex justify-center space-x-4">
-          <button
-            onClick={startSimulation}
-            className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600"
-          >
-            <PlayIcon />
-            시작
-          </button>
-          <button
-            onClick={pauseSimulation}
-            className="flex items-center gap-2 px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
-          >
-            <PauseIcon />
-            일시정지
-          </button>
-          <button
-            onClick={resetSimulation}
-            className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-          >
-            <ResetIcon />
-            리셋
-          </button>
-        </div>
-      </div>
+        {/* Step-by-step guide */}
+        <div className="mb-8 bg-blue-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-blue-300 mb-4">시뮬레이터 따라하기</h3>
 
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-orange-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-orange-800 mb-2">🔥 증발 메커니즘</h4>
-          <ol className="text-sm text-gray-700 space-y-1">
-            <li>1️⃣ 가열: 전자빔/저항으로 소스 재료 가열</li>
-            <li>2️⃣ 증발: 원자들이 열에너지로 기화</li>
-            <li>3️⃣ 확산: 진공 중에서 직선 비행</li>
-            <li>4️⃣ 충돌: 기판 표면에 원자 충돌</li>
-            <li>5️⃣ 흡착: 표면에 원자 흡착 및 확산</li>
-            <li>6️⃣ 성장: 핵생성 및 막 성장</li>
-          </ol>
+          <div className="space-y-4">
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-indigo-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-indigo-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 0</span>
+                <div>
+                  <div className="font-bold text-indigo-300 text-lg">모드 선택</div>
+                  <p className="text-gray-300 mt-1">E-beam 또는 Thermal 모드 선택 (왼쪽: E-beam 도가니, 오른쪽: Thermal 보트)</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-yellow-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-yellow-500 text-black font-bold px-3 py-1 rounded-full text-sm">Step 1</span>
+                <div>
+                  <div className="font-bold text-yellow-300 text-lg">전원 ON</div>
+                  <p className="text-gray-300 mt-1">
+                    E-beam: 노란색 전자들이 곡선으로 이동<br/>
+                    Thermal: 보트가 빨갛게 가열되며 원자 색상 변화
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-orange-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-orange-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 2</span>
+                <div>
+                  <div className="font-bold text-orange-300 text-lg">가열 대기</div>
+                  <p className="text-gray-300 mt-1">소스가 충분히 가열될 때까지 대기 (2~3초)</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-blue-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-blue-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 3</span>
+                <div>
+                  <div className="font-bold text-blue-300 text-lg">증착 관찰</div>
+                  <p className="text-gray-300 mt-1">
+                    원자가 기판(위쪽 큰 웨이퍼)에 랜덤하게 증착되는 과정 관찰
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-purple-500">
+              <div className="flex items-start gap-3">
+                <span className="bg-purple-500 text-white font-bold px-3 py-1 rounded-full text-sm">Step 4</span>
+                <div>
+                  <div className="font-bold text-purple-300 text-lg">박막 단면 관찰</div>
+                  <p className="text-gray-300 mt-1">버튼 클릭 → Columnar 구조와 Void 관찰</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="bg-red-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-red-800 mb-2">📊 주요 특성</h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <div className="font-medium">증착속도</div>
-              <div className="text-green-600">빠름</div>
+        {/* E-beam principle */}
+        <div className="mb-8 bg-indigo-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-indigo-300 mb-4">E-beam 증착의 원리</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-yellow-300 mb-2">1. 전자빔 생성</h4>
+              <p className="text-gray-300 text-sm">
+                텅스텐 필라멘트에서 <span className="text-yellow-400">열전자 방출</span>로 전자 생성.
+                고전압(5~10kV)으로 전자를 가속시킴.
+              </p>
             </div>
-            <div>
-              <div className="font-medium">Step Coverage</div>
-              <div className="text-red-600">제한적</div>
+
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-cyan-300 mb-2">2. 자기장 편향</h4>
+              <p className="text-gray-300 text-sm">
+                <span className="text-cyan-400">270° 자기장 편향</span>으로 전자빔을 휘어서 타겟에 조사.
+                E-gun이 증발물로 오염되는 것을 방지.
+              </p>
             </div>
-            <div>
-              <div className="font-medium">막질</div>
-              <div className="text-blue-600">치밀함</div>
+
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-red-300 mb-2">3. 국부 가열</h4>
+              <p className="text-gray-300 text-sm">
+                전자 운동에너지 → 열에너지 변환. 타겟 표면이
+                <span className="text-red-400"> 수천 °C</span>까지 국부 가열되어 증발.
+              </p>
             </div>
-            <div>
-              <div className="font-medium">진공도</div>
-              <div className="text-purple-600">고진공</div>
+
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-blue-300 mb-2">4. Line-of-Sight 증착</h4>
+              <p className="text-gray-300 text-sm">
+                증발된 원자가 <span className="text-blue-400">직선으로</span> 이동하여 기판에 도달.
+                고진공(10^-6 Torr 이하)에서 Mean Free Path 확보.
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-gray-900 p-4 rounded-lg">
+            <h4 className="text-lg font-bold text-green-300 mb-2">주요 공정 파라미터</h4>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+              <div className="bg-gray-800 p-2 rounded text-center">
+                <div className="text-green-400 font-bold">전자빔 전류</div>
+                <div className="text-gray-400">50~500 mA</div>
+              </div>
+              <div className="bg-gray-800 p-2 rounded text-center">
+                <div className="text-green-400 font-bold">가속 전압</div>
+                <div className="text-gray-400">5~10 kV</div>
+              </div>
+              <div className="bg-gray-800 p-2 rounded text-center">
+                <div className="text-green-400 font-bold">진공도</div>
+                <div className="text-gray-400">10^-6~10^-7 Torr</div>
+              </div>
+              <div className="bg-gray-800 p-2 rounded text-center">
+                <div className="text-green-400 font-bold">증착률</div>
+                <div className="text-gray-400">1~100 A/s</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Thermal Evaporator principle */}
+        <div className="mb-8 bg-orange-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-orange-300 mb-4">Thermal Evaporator 원리</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-orange-300 mb-2">1. 저항 가열</h4>
+              <p className="text-gray-300 text-sm">
+                텅스텐, 몰리브덴 또는 탄탈럼 보트에 <span className="text-orange-400">DC 전류</span>를 흘려
+                줄 열(Joule Heating)로 가열. P = I^2R
+              </p>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-yellow-300 mb-2">2. 소스 증발</h4>
+              <p className="text-gray-300 text-sm">
+                보트 위의 소스 물질이 가열되어 <span className="text-yellow-400">증기압</span>에 도달하면 증발.
+                저융점 금속(Al, Au, Ag)에 적합.
+              </p>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-green-300 mb-2">3. 장점</h4>
+              <p className="text-gray-300 text-sm">
+                구조 간단, 저비용, 유지보수 용이.
+                <span className="text-green-400"> 유기물 증착</span>(OLED)에 널리 사용.
+              </p>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg">
+              <h4 className="text-lg font-bold text-red-300 mb-2">4. 단점</h4>
+              <p className="text-gray-300 text-sm">
+                보트 수명 제한, <span className="text-red-400">고융점 금속 불가</span>,
+                보트-소스 반응 가능성, 온도 제어 어려움.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Safety notes */}
+        <div className="mb-8 bg-yellow-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-yellow-300 mb-4">장비 운용 시 유의사항</h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-red-500">
+              <h4 className="text-lg font-bold text-red-300 mb-2">안전 주의</h4>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• 고전압(~10kV) 감전 위험</li>
+                <li>• E-beam: X-ray 발생 → 차폐 필수</li>
+                <li>• 고온 부품 화상 주의</li>
+                <li>• 진공 파손 시 내파 위험</li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-yellow-500">
+              <h4 className="text-lg font-bold text-yellow-300 mb-2">공정 전 체크</h4>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• Base pressure 확인 (10^-6 Torr)</li>
+                <li>• 소스 물질 충분량 확인</li>
+                <li>• 셔터 동작 테스트</li>
+                <li>• 기판 온도 안정화</li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-800 p-4 rounded-lg border-l-4 border-blue-500">
+              <h4 className="text-lg font-bold text-blue-300 mb-2">품질 관리</h4>
+              <ul className="text-gray-300 text-sm space-y-1">
+                <li>• QCM으로 실시간 두께 모니터링</li>
+                <li>• 증착률 일정하게 유지</li>
+                <li>• 기판 회전으로 균일도 확보</li>
+                <li>• 정기적 도가니/보트 교체</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* Columnar structure problem */}
+        <div className="mb-8 bg-red-900/30 p-5 rounded-lg border-2 border-red-500">
+          <h3 className="text-xl font-bold text-red-300 mb-4">Columnar Structure + Void 문제 (핵심!)</h3>
+
+          <div className="bg-gray-800 p-4 rounded-lg mb-4">
+            <h4 className="text-lg font-bold text-yellow-300 mb-3">왜 Columnar 구조가 생기나?</h4>
+            <p className="text-gray-300 mb-3">
+              Evaporation은 <span className="text-blue-400 font-bold">Line-of-Sight 증착</span>이므로,
+              원자가 직선으로 날아와 먼저 쌓인 원자 뒤에 <span className="text-red-400 font-bold">그림자(Shadow)</span>가 생김.
+              이로 인해 세로 기둥(Column)이 형성되고, 기둥 사이에 빈 공간(Void)이 발생.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="bg-red-900/50 p-3 rounded border border-red-500">
+              <span className="text-red-300 font-bold">전기적 문제</span>
+              <p className="text-gray-300 mt-1">저항 증가, Electromigration 취약</p>
+            </div>
+            <div className="bg-red-900/50 p-3 rounded border border-red-500">
+              <span className="text-red-300 font-bold">기계적 문제</span>
+              <p className="text-gray-300 mt-1">인장 응력, 크랙, 박리</p>
+            </div>
+            <div className="bg-red-900/50 p-3 rounded border border-red-500">
+              <span className="text-red-300 font-bold">화학적 문제</span>
+              <p className="text-gray-300 mt-1">Void로 수분/산소 침투</p>
+            </div>
+            <div className="bg-red-900/50 p-3 rounded border border-red-500">
+              <span className="text-red-300 font-bold">Step Coverage</span>
+              <p className="text-gray-300 mt-1">측벽 코팅 불량, 단선 위험</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Suitable applications */}
+        <div className="bg-green-900/30 p-5 rounded-lg">
+          <h3 className="text-xl font-bold text-green-300 mb-4">Evaporator 적합 분야</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">🔬</div>
+              <div className="text-green-400 font-bold">R&D / 연구</div>
+              <p className="text-gray-400 text-xs mt-1">빠른 재료 평가</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">🔭</div>
+              <div className="text-green-400 font-bold">광학 코팅</div>
+              <p className="text-gray-400 text-xs mt-1">렌즈, 거울, AR</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">📺</div>
+              <div className="text-green-400 font-bold">OLED</div>
+              <p className="text-gray-400 text-xs mt-1">유기물 증착</p>
+            </div>
+            <div className="bg-gray-800 p-3 rounded text-center">
+              <div className="text-3xl mb-2">💎</div>
+              <div className="text-green-400 font-bold">고순도 금속</div>
+              <p className="text-gray-400 text-xs mt-1">Au, Ag, Al</p>
             </div>
           </div>
         </div>
