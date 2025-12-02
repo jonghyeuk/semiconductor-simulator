@@ -295,13 +295,14 @@ const ALDSimulator = () => {
                 const dz = molecule.mesh.position.z - site.z;
                 const distance = Math.sqrt(dx * dx + dz * dz);
 
-                if (distance < minDistance && distance < GRID_SPACING * 1.5) {
+                if (distance < minDistance) {
                   minDistance = distance;
                   closestSite = site;
                 }
               }
             });
 
+            // 빈 사이트가 있으면 무조건 그쪽으로 이동해서 붙음
             if (closestSite) {
               molecule.mesh.position.set(
                 closestSite.x,
@@ -339,13 +340,14 @@ const ALDSimulator = () => {
                 const dz = molecule.mesh.position.z - site.z;
                 const distance = Math.sqrt(dx * dx + dz * dz);
 
-                if (distance < minDistance && distance < GRID_SPACING * 1.5) {
+                if (distance < minDistance) {
                   minDistance = distance;
                   closestSite = site;
                 }
               }
             });
 
+            // 반응 가능한 사이트가 있으면 무조건 그쪽으로 이동해서 반응
             if (closestSite) {
               molecule.mesh.position.set(
                 closestSite.x,
