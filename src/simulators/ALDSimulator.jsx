@@ -42,10 +42,10 @@ const ALDSimulator = () => {
   const STEP3_DURATION = 6000;
   const STEP4_DURATION = 2500;
 
-  const SPAWN_INTERVAL = 50;  // 더 느리게 (15 → 50ms)
-  const SPAWN_COUNT_BLUE = 2;  // 적게 but 충분히
-  const SPAWN_COUNT_RED = 2;
-  const SPAWN_COUNT_GRAY = 1;
+  const SPAWN_INTERVAL = 30;
+  const SPAWN_COUNT_BLUE = 3;
+  const SPAWN_COUNT_RED = 3;
+  const SPAWN_COUNT_GRAY = 4;  // 퍼지는 많이 나와야 함
 
   const spawnIntervalRef = useRef(null);
 
@@ -195,31 +195,10 @@ const ALDSimulator = () => {
 
     const scene = sceneRef.current;
 
-    if (type !== 'gray') {
-      if (type === 'blue') {
-        const occupiedCount = depositionSitesRef.current.filter(site => site.occupied).length;
-        if (occupiedCount >= depositionSitesRef.current.length) {
-          if (spawnIntervalRef.current) {
-            clearInterval(spawnIntervalRef.current);
-            spawnIntervalRef.current = null;
-          }
-          return;
-        }
-      }
+    // 파란/빨간은 다 차도 계속 스폰 (넘치면 흘러감)
+    // 회색은 항상 스폰
 
-      if (type === 'red') {
-        const reactableCount = depositionSitesRef.current.filter(site => site.occupied && !site.reacted).length;
-        if (reactableCount === 0) {
-          if (spawnIntervalRef.current) {
-            clearInterval(spawnIntervalRef.current);
-            spawnIntervalRef.current = null;
-          }
-          return;
-        }
-      }
-    }
-
-    const count = type === 'gray' ? 1 : 2;  // 성능 최적화
+    const count = type === 'gray' ? 2 : 3;  // gray 2개, blue/red 3개씩
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
@@ -486,7 +465,7 @@ const ALDSimulator = () => {
           for (let i = 0; i < SPAWN_COUNT_GRAY; i++) {
             spawnMolecule('gray');
           }
-        }, SPAWN_INTERVAL * 2);
+        }, SPAWN_INTERVAL);  // 퍼지도 동일 간격
         break;
 
       case 3:
@@ -506,7 +485,7 @@ const ALDSimulator = () => {
           for (let i = 0; i < SPAWN_COUNT_GRAY; i++) {
             spawnMolecule('gray');
           }
-        }, SPAWN_INTERVAL * 2);
+        }, SPAWN_INTERVAL);  // 퍼지도 동일 간격
         break;
 
       default:
