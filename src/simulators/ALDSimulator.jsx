@@ -42,9 +42,9 @@ const ALDSimulator = () => {
   const STEP3_DURATION = 6000;
   const STEP4_DURATION = 2500;
 
-  const SPAWN_INTERVAL = 10;
-  const SPAWN_COUNT_BLUE = 3;
-  const SPAWN_COUNT_RED = 3;
+  const SPAWN_INTERVAL = 15;
+  const SPAWN_COUNT_BLUE = 4;
+  const SPAWN_COUNT_RED = 4;
   const SPAWN_COUNT_GRAY = 2;
 
   const spawnIntervalRef = useRef(null);
@@ -514,7 +514,6 @@ const ALDSimulator = () => {
     }
 
     setTimeout(() => {
-      setIsPulseOn(false);
       if (spawnIntervalRef.current) {
         clearInterval(spawnIntervalRef.current);
         spawnIntervalRef.current = null;
@@ -543,8 +542,11 @@ const ALDSimulator = () => {
         });
       }
 
+      // 다음 스텝으로 즉시 전환 (isPulseOn 유지)
       if (isRunningRef.current && nextStep) {
         startStep(nextStep);
+      } else {
+        setIsPulseOn(false);
       }
     }, duration);
   };
