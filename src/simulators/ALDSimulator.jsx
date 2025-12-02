@@ -43,9 +43,9 @@ const ALDSimulator = () => {
   const STEP4_DURATION = 2500;
 
   const SPAWN_INTERVAL = 10;
-  const SPAWN_COUNT_BLUE = 5;
-  const SPAWN_COUNT_RED = 5;
-  const SPAWN_COUNT_GRAY = 3;
+  const SPAWN_COUNT_BLUE = 3;
+  const SPAWN_COUNT_RED = 3;
+  const SPAWN_COUNT_GRAY = 2;
 
   const spawnIntervalRef = useRef(null);
 
