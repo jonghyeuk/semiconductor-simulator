@@ -42,10 +42,10 @@ const ALDSimulator = () => {
   const STEP3_DURATION = 6000;
   const STEP4_DURATION = 2500;
 
-  const SPAWN_INTERVAL = 15;
-  const SPAWN_COUNT_BLUE = 4;
-  const SPAWN_COUNT_RED = 4;
-  const SPAWN_COUNT_GRAY = 2;
+  const SPAWN_INTERVAL = 50;  // 더 느리게 (15 → 50ms)
+  const SPAWN_COUNT_BLUE = 2;  // 적게 but 충분히
+  const SPAWN_COUNT_RED = 2;
+  const SPAWN_COUNT_GRAY = 1;
 
   const spawnIntervalRef = useRef(null);
 
@@ -219,7 +219,7 @@ const ALDSimulator = () => {
       }
     }
 
-    const count = type === 'gray' ? 2 : 3;
+    const count = type === 'gray' ? 1 : 2;  // 성능 최적화
 
     for (let i = 0; i < count; i++) {
       const angle = Math.random() * Math.PI * 2;
