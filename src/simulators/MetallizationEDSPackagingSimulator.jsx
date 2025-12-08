@@ -48,32 +48,37 @@ const MetallizationEDSPackagingSimulator = () => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [answers, setAnswers] = useState([]);
 
-  // 개요 씬 데이터
+  // 개요 씬 데이터 (더 자세하고 쉬운 설명)
   const overviewScenes = [
     {
-      title: "🔌 BEOL (Back-End-Of-Line)",
-      content: "트랜지스터(FEOL) 제작 후, 수십억 개의 소자를 연결하는 금속 배선을 형성합니다. 현대 반도체는 10층 이상의 다층 금속 배선을 사용하며, 구리(Cu) Damascene 공정이 표준입니다.",
-      highlight: "금속배선"
+      title: "🔌 BEOL이란? (Back-End-Of-Line)",
+      content: "반도체 제조는 크게 두 단계로 나뉩니다. 먼저 FEOL(Front-End)에서 트랜지스터라는 '스위치'를 만들고, 그 다음 BEOL(Back-End)에서 이 스위치들을 '전선'으로 연결합니다.\n\n비유하자면, FEOL은 수십억 개의 전구를 만드는 것이고, BEOL은 이 전구들을 전선으로 연결해서 실제로 불이 켜지게 만드는 작업입니다. 현대 반도체는 10~15층의 금속 배선을 사용하는데, 마치 고층 아파트의 각 층마다 복잡한 배관과 전선이 깔려있는 것과 같습니다.",
+      highlight: "BEOL = 트랜지스터 연결 배선 공정"
     },
     {
-      title: "⚙️ Damascene 공정",
-      content: "구리는 식각이 어려워 '먼저 파고, 채우는' Damascene 방식을 사용합니다. 트렌치/비아 식각 → 배리어 증착 → Cu 시드 → 전기도금 → CMP 평탄화 순서로 진행됩니다.",
-      highlight: "Damascene"
+      title: "🏭 왜 구리(Cu)를 쓸까? - 알루미늄의 한계",
+      content: "1990년대까지는 알루미늄(Al)으로 배선을 만들었습니다. 하지만 배선이 점점 가늘어지면서 심각한 문제가 생겼습니다.\n\n첫째, '힐록(Hillock)' 현상 - 알루미늄이 열을 받으면 표면에 작은 돌기가 솟아올라 위층 배선과 합선됩니다. 마치 뜨거운 아스팔트가 부풀어 오르는 것처럼요.\n\n둘째, '일렉트로마이그레이션(EM)' - 전류가 흐르면 알루미늄 원자들이 밀려나며 배선이 끊어집니다. 강물에 모래가 쓸려가는 것과 비슷합니다.\n\n이를 해결하려고 Al에 Si나 Cu를 소량 섞은 합금(Al-Si, Al-Cu)을 썼지만, 결국 저항이 37% 낮은 구리로 완전히 교체되었습니다.",
+      highlight: "Cu는 Al보다 저항 37% ↓, EM 저항 10배 ↑"
     },
     {
-      title: "🔍 EDS (Electrical Die Sorting)",
-      content: "웨이퍼 레벨에서 각 칩의 전기적 특성을 검사합니다. 프로브 카드로 패드에 접촉하여 양품/불량을 선별하고, 수선 가능한 칩은 레이저로 복구합니다. 후공정 비용 절감의 핵심입니다.",
-      highlight: "EDS"
+      title: "⚙️ Damascene 공정이란?",
+      content: "구리는 좋은 재료지만, 큰 단점이 있습니다. 플라즈마로 깎아내기(식각)가 매우 어렵습니다! 그래서 완전히 새로운 방식을 개발했는데, 이것이 바로 'Damascene(다마신)' 공정입니다.\n\n다마신의 원리는 간단합니다: '먼저 홈을 파고, 나중에 금속을 채운다'\n\n마치 도장 만들기와 비슷합니다. 나무에 글자를 새기고(홈 파기), 잉크를 바른 후(금속 채우기), 표면을 닦아내면(CMP 연마) 글자만 남습니다.\n\n이 방식 덕분에 구리를 직접 깎을 필요가 없어졌고, 현재 모든 첨단 반도체가 이 공정을 사용합니다.",
+      highlight: "Damascene = 홈 파기 → 금속 채우기 → 연마"
     },
     {
-      title: "📦 패키징 (Packaging)",
-      content: "다이싱으로 개별 칩을 분리한 후, 외부와 전기적 연결을 형성합니다. Wire Bonding, Flip Chip 등의 본딩 기술과 함께 EMC 몰딩으로 보호합니다.",
-      highlight: "패키징"
+      title: "🔍 EDS란? (Electrical Die Sorting)",
+      content: "웨이퍼 한 장에는 수백~수천 개의 칩이 있습니다. 이 중에서 불량품을 어떻게 찾을까요? 바로 EDS 검사입니다!\n\nEDS는 '프로브 카드'라는 특수 장치를 사용합니다. 수백~수천 개의 미세한 바늘(프로브)이 칩의 전극 패드에 동시에 접촉하여, 전기 신호를 보내고 응답을 확인합니다.\n\n마치 의사가 청진기로 심장 소리를 듣는 것처럼, 프로브는 칩의 '건강 상태'를 진단합니다. 양품은 통과, 수선 가능한 것은 레이저로 치료(퓨즈 끊기), 완전 불량은 폐기 표시를 합니다.\n\n이 과정이 중요한 이유는? 불량 칩을 미리 걸러내지 않으면, 비싼 패키징 비용이 낭비되기 때문입니다!",
+      highlight: "EDS = 칩의 건강검진, 불량 사전 선별"
     },
     {
-      title: "🚀 첨단 패키징 (2.5D/3D)",
-      content: "무어의 법칙 한계를 극복하기 위해 수직 적층 기술이 발전합니다. 2.5D는 인터포저 위에 칩렛을 배치하고, 3D는 TSV로 다이를 직접 적층합니다. HBM, CoWoS가 대표적입니다.",
-      highlight: "첨단"
+      title: "📦 패키징이란?",
+      content: "웨이퍼에서 잘라낸 칩(다이)은 매우 연약합니다. 먼지 한 톨, 수분 한 방울에도 망가질 수 있죠. 패키징은 이 칩을 보호하고, 외부 회로와 연결하는 '옷 입히기' 과정입니다.\n\n가장 중요한 단계는 '본딩(Bonding)'입니다. 칩의 전극을 기판에 연결하는 방법은 두 가지가 있습니다:\n\n1) Wire Bonding: 금선이나 구리선으로 칩과 기판을 연결 (재봉틀처럼)\n2) Flip Chip: 칩을 뒤집어서 범프(돌기)로 직접 연결 (도장 찍듯이)\n\nFlip Chip이 더 빠르고 신호 품질이 좋아서, 고성능 CPU/GPU에 사용됩니다.",
+      highlight: "패키징 = 보호 + 외부 연결 + 열 방출"
+    },
+    {
+      title: "🚀 미래: 2.5D/3D 패키징",
+      content: "트랜지스터를 더 작게 만드는 것도 한계에 다다르고 있습니다. 그래서 새로운 방향이 등장했는데, 바로 '쌓기(적층)' 기술입니다!\n\n2.5D 패키징: 여러 칩을 '인터포저'라는 중간 기판 위에 나란히 배치합니다. 마치 도마 위에 여러 재료를 올려놓은 것처럼요. HBM 메모리가 대표적입니다.\n\n3D 패키징: 칩을 아예 위아래로 쌓습니다! 'TSV(Through-Silicon Via)'라는 실리콘을 관통하는 구멍으로 층간 연결합니다. 고층 빌딩의 엘리베이터처럼요.\n\n이 기술 덕분에 작은 면적에 더 많은 기능을 넣을 수 있게 되었습니다.",
+      highlight: "2.5D = 나란히 배치, 3D = 위아래 적층"
     }
   ];
 
@@ -155,18 +160,69 @@ const MetallizationEDSPackagingSimulator = () => {
   ];
 
   const metalProperties = {
-    aluminum: { resistivity: 2.65, em: 'Low', melting: 660, mtf: 0.3, color: '#C0C0C0', name: 'Al' },
-    copper: { resistivity: 1.68, em: 'High', melting: 1085, mtf: 1.0, color: '#B87333', name: 'Cu' },
-    tungsten: { resistivity: 5.6, em: 'Very High', melting: 3422, mtf: 3.0, color: '#708090', name: 'W' },
-    cobalt: { resistivity: 6.24, em: 'High', melting: 1495, mtf: 1.5, color: '#0047AB', name: 'Co' }
+    aluminum: {
+      resistivity: 2.65, em: 'Low', melting: 660, mtf: 0.3, color: '#C0C0C0', name: 'Al',
+      desc: '1990년대까지 주력 배선 재료. 힐록/EM 문제로 Cu로 교체됨',
+      usage: '현재는 최상위 패드층, 본딩 와이어에만 제한적 사용',
+      history: 'Al-Si(1%), Al-Cu(0.5%) 합금으로 EM 개선 시도했으나 한계'
+    },
+    copper: {
+      resistivity: 1.68, em: 'High', melting: 1085, mtf: 1.0, color: '#B87333', name: 'Cu',
+      desc: '1997년 IBM이 처음 도입. 현재 모든 첨단 반도체의 표준',
+      usage: 'M1~최상위층 모든 배선에 사용 (Damascene 공정)',
+      history: 'Al 대비 저항 37%↓, EM 수명 10배↑, RC지연 대폭 감소'
+    },
+    tungsten: {
+      resistivity: 5.6, em: 'Very High', melting: 3422, mtf: 3.0, color: '#708090', name: 'W',
+      desc: '녹는점 최고! EM에 매우 강함. 저항은 높지만 특수 용도에 필수',
+      usage: 'Contact/Via 플러그 (트랜지스터↔M1 연결), 게이트 전극',
+      history: 'CVD로 증착. 좁은 홀 채우기에 탁월 (우수한 Step Coverage)'
+    },
+    cobalt: {
+      resistivity: 6.24, em: 'High', melting: 1495, mtf: 1.5, color: '#0047AB', name: 'Co',
+      desc: '차세대 미세 배선용. 7nm 이하에서 Cu의 한계 극복 기대',
+      usage: 'M0/M1 초미세 배선, Cu 캡핑층(EM 방지), Contact 라이너',
+      history: '2017년 인텔 10nm부터 도입. Cu 배리어 두께 줄여 저항 감소'
+    }
   };
 
+  // EDS 5단계 - 더 자세한 설명 포함
   const edsSteps = [
-    { name: 'ET Test', desc: '전기적 특성', detail: 'DC 전압/전류 측정', icon: '⚡' },
-    { name: 'WBI', desc: 'Wafer Burn-In', detail: '가속 스트레스', icon: '🔥' },
-    { name: 'Hot/Cold', desc: '온도별 테스트', detail: '-40°C ~ 125°C', icon: '🌡️' },
-    { name: 'Repair', desc: '불량 칩 수선', detail: '레이저 리페어', icon: '🔧' },
-    { name: 'Inking', desc: '불량 표시', detail: '데이터 매핑', icon: '✓' }
+    {
+      name: 'ET Test',
+      desc: '전기적 특성',
+      detail: 'DC 전압/전류 측정',
+      icon: '⚡',
+      fullDesc: '기본 전기 테스트(Electrical Test). 트랜지스터 Vth, 누설전류, 저항, 단락/단선 등을 측정합니다. 가장 기본적인 양품/불량 판정 단계입니다.'
+    },
+    {
+      name: 'WBI',
+      desc: 'Wafer Burn-In',
+      detail: '가속 스트레스',
+      icon: '🔥',
+      fullDesc: '고온(85~125°C) + 고전압 스트레스를 가해 초기 불량(Infant Mortality)을 걸러냅니다. 배송 후 바로 고장나는 제품을 미리 제거하는 "욕탕" 테스트입니다.'
+    },
+    {
+      name: 'Hot/Cold',
+      desc: '온도별 테스트',
+      detail: '-40°C ~ 125°C',
+      icon: '🌡️',
+      fullDesc: '극한 온도에서 동작 확인. 자동차(-40°C 겨울)부터 서버(125°C 발열)까지 다양한 환경을 시뮬레이션합니다. 온도에 따라 특성이 변하는 칩을 걸러냅니다.'
+    },
+    {
+      name: 'Repair',
+      desc: '불량 칩 수선',
+      detail: '레이저 리페어',
+      icon: '🔧',
+      fullDesc: '메모리 칩의 불량 셀을 예비 셀(Redundancy)로 교체합니다. 레이저로 퓨즈를 끊어 회로를 변경합니다. 수율을 5~10% 높이는 핵심 기술입니다.'
+    },
+    {
+      name: 'Inking',
+      desc: '불량 표시',
+      detail: '데이터 매핑',
+      icon: '✓',
+      fullDesc: '최종 불량 칩에 잉크 점을 찍거나, 웨이퍼 맵(Wafer Map)에 디지털 기록합니다. 후공정에서 불량 칩을 건너뛰어 비용을 절감합니다.'
+    }
   ];
 
   const packageTypes = {
@@ -420,6 +476,7 @@ const MetallizationEDSPackagingSimulator = () => {
         <p className="text-sm opacity-90">BEOL: 트랜지스터 연결 다층 배선 형성</p>
       </div>
 
+      {/* 금속 선택 버튼 */}
       <div className="grid grid-cols-4 gap-2">
         {Object.entries(metalProperties).map(([metal, props]) => (
           <button
@@ -436,18 +493,50 @@ const MetallizationEDSPackagingSimulator = () => {
         ))}
       </div>
 
+      {/* 선택된 금속 상세 설명 */}
+      <div className="bg-white border-2 border-amber-300 rounded-lg p-4">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-lg"
+               style={{ backgroundColor: metalProperties[metalType].color }}>
+            {metalProperties[metalType].name}
+          </div>
+          <div>
+            <h3 className="font-bold text-lg">{metalType === 'aluminum' ? '알루미늄 (Aluminum)' :
+                                               metalType === 'copper' ? '구리 (Copper)' :
+                                               metalType === 'tungsten' ? '텅스텐 (Tungsten)' : '코발트 (Cobalt)'}</h3>
+            <p className="text-sm text-gray-600">{metalProperties[metalType].desc}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3 text-sm">
+          <div className="bg-gray-50 p-2 rounded">
+            <span className="font-bold text-amber-700">📍 현재 용도:</span>
+            <p className="text-gray-700 mt-1">{metalProperties[metalType].usage}</p>
+          </div>
+          <div className="bg-gray-50 p-2 rounded">
+            <span className="font-bold text-blue-700">📜 역사/특징:</span>
+            <p className="text-gray-700 mt-1">{metalProperties[metalType].history}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* 배선 시각화 */}
       <div className="bg-white border rounded-lg p-3">
         <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-sm">Metal Layers: {metalLayers}</span>
-          <input
-            type="range"
-            min="4"
-            max="15"
-            value={metalLayers}
-            onChange={(e) => setMetalLayers(parseInt(e.target.value))}
-            className="w-32"
-          />
+          <span className="font-bold text-sm">Metal Layers: {metalLayers}층</span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-500">4층</span>
+            <input
+              type="range"
+              min="4"
+              max="15"
+              value={metalLayers}
+              onChange={(e) => setMetalLayers(parseInt(e.target.value))}
+              className="w-24"
+            />
+            <span className="text-xs text-gray-500">15층</span>
+          </div>
         </div>
+        <p className="text-xs text-gray-500 mb-2">※ 최신 첨단 공정은 10~15층의 금속 배선을 사용합니다. 아래층(M1)은 좁고, 위로 갈수록 넓어집니다.</p>
         <svg viewBox="0 0 300 160" className="w-full h-36 bg-gray-900 rounded">
           <rect x="20" y="130" width="260" height="25" fill="#4A5568" />
           <text x="150" y="147" textAnchor="middle" fill="#A0AEC0" fontSize="8">Si Substrate</text>
@@ -479,12 +568,14 @@ const MetallizationEDSPackagingSimulator = () => {
             );
           })}
 
-          <text x="285" y="30" fontSize="6" fill="#68D391" textAnchor="end">← Global (Wide)</text>
-          <text x="285" y="100" fontSize="6" fill="#FC8181" textAnchor="end">← Local (Fine)</text>
+          <text x="285" y="30" fontSize="6" fill="#68D391" textAnchor="end">← Global (Wide, 전원/GND)</text>
+          <text x="285" y="100" fontSize="6" fill="#FC8181" textAnchor="end">← Local (Fine, 신호선)</text>
         </svg>
+        <p className="text-xs text-gray-500 mt-2">💡 <strong>왜 층마다 폭이 다를까?</strong> 아래층은 트랜지스터 직접 연결(신호), 위층은 전원/접지 공급(큰 전류)에 사용되므로 폭이 더 넓습니다.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
+        {/* 배선 특성 */}
         <div className="bg-white border rounded-lg p-3">
           <h4 className="font-bold text-sm mb-2 text-amber-700">📊 배선 특성</h4>
           <div className="space-y-2 text-xs">
@@ -507,8 +598,9 @@ const MetallizationEDSPackagingSimulator = () => {
           </div>
         </div>
 
+        {/* Electromigration + MTF 설명 */}
         <div className="bg-white border rounded-lg p-3">
-          <h4 className="font-bold text-sm mb-2 text-red-700">⚠️ Electromigration</h4>
+          <h4 className="font-bold text-sm mb-2 text-red-700">⚠️ Electromigration (EM)</h4>
           <div className="mb-2">
             <div className="text-xs text-gray-500">전류밀도 (MA/cm²)</div>
             <input
@@ -524,22 +616,76 @@ const MetallizationEDSPackagingSimulator = () => {
           </div>
           <div className="text-xs bg-red-50 p-2 rounded">
             <strong>MTF:</strong> {calcMTF()} years
-            <div className="text-gray-500 mt-1">J↑ → MTF↓ (J² 반비례)</div>
+            <div className="text-gray-500 mt-1">※ MTF(Mean Time to Failure) = 배선이 끊어지기까지 평균 시간</div>
+            <div className="text-gray-500">전류↑ → 금속원자 이동↑ → 수명↓ (J² 반비례)</div>
           </div>
         </div>
       </div>
 
+      {/* EM과 힐록 설명 */}
+      <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-yellow-800">⚡ 왜 알루미늄(Al)을 안 쓰게 되었나?</h4>
+        <div className="text-xs text-gray-700 space-y-2">
+          <p><strong>1. 힐록(Hillock) 현상:</strong> Al이 열을 받으면 표면에 작은 돌기(언덕)가 솟아올라 위층 배선과 합선됩니다. 뜨거운 아스팔트가 부풀어 오르는 것처럼요.</p>
+          <p><strong>2. 일렉트로마이그레이션(EM):</strong> 전류가 흐르면 전자가 Al 원자를 밀어내어 빈 공간(void)이 생기고 결국 단선됩니다. 강물에 모래가 쓸려가는 것과 비슷합니다.</p>
+          <p><strong>3. 해결 시도:</strong> Al에 Si(1%)나 Cu(0.5%)를 섞은 합금(Al-Si, Al-Cu)으로 개선했지만, 근본적 한계로 결국 Cu로 완전 교체되었습니다.</p>
+        </div>
+      </div>
+
+      {/* W, Co 설명 */}
+      <div className="bg-blue-50 border border-blue-300 rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-blue-800">🔧 텅스텐(W)과 코발트(Co)는 어디에 쓰일까?</h4>
+        <div className="text-xs text-gray-700 space-y-2">
+          <p><strong>텅스텐(W):</strong> 저항이 높아 배선에는 부적합하지만, 녹는점이 가장 높아(3422°C) EM에 매우 강합니다. 주로 <strong>Contact/Via 플러그</strong>(트랜지스터↔M1 연결)와 <strong>게이트 전극</strong>에 사용됩니다. CVD로 증착하여 좁은 홀도 잘 채웁니다.</p>
+          <p><strong>코발트(Co):</strong> 7nm 이하 미세 공정에서 Cu의 한계를 극복하기 위해 도입되었습니다. M0/M1 <strong>초미세 배선</strong>, Cu 위에 덮는 <strong>캡핑층(EM 방지)</strong>, Contact <strong>라이너</strong> 등에 사용됩니다. 2017년 인텔 10nm부터 적용되기 시작했습니다.</p>
+        </div>
+      </div>
+
       <div className="bg-amber-50 p-3 rounded-lg border border-amber-200">
-        <h4 className="font-bold text-sm mb-2">💡 더 생각해보기</h4>
+        <h4 className="font-bold text-sm mb-2">💡 핵심 정리</h4>
         <ul className="text-xs space-y-1 text-gray-700">
-          <li>• Cu가 Al을 대체한 이유는? (저항률, RC delay)</li>
-          <li>• 왜 Cu는 직접 식각하지 않고 Damascene을 쓸까?</li>
-          <li>• Global vs Local 배선의 폭이 다른 이유는?</li>
-          <li>• EM을 줄이는 설계 방법은? (폭, 합금, 배리어)</li>
+          <li>• <strong>Cu(구리)</strong>: 주력 배선 재료. 낮은 저항, Damascene 공정 사용</li>
+          <li>• <strong>Al(알루미늄)</strong>: 과거 주력. 현재는 패드/본딩 와이어에만 사용</li>
+          <li>• <strong>W(텅스텐)</strong>: Contact/Via 플러그, 게이트 전극</li>
+          <li>• <strong>Co(코발트)</strong>: 7nm 이하 미세 배선, Cu 캡핑층</li>
         </ul>
       </div>
     </div>
   );
+
+  // Damascene 공정 단계별 설명
+  const damasceneStepDetails = [
+    {
+      name: 'Via/Trench 형성',
+      short: 'Via/Trench',
+      desc: '절연체(ILD)에 홈(Trench)과 구멍(Via)을 식각으로 만듭니다.',
+      detail: '포토리소그라피로 패턴을 형성하고, RIE(Reactive Ion Etching)로 Low-k 절연막을 식각합니다. Dual Damascene에서는 Via와 Trench를 한 번에 만들어 공정을 단축합니다.'
+    },
+    {
+      name: 'Barrier 증착',
+      short: 'Barrier',
+      desc: 'Cu가 절연체로 확산되는 것을 막는 얇은 막을 입힙니다.',
+      detail: 'TaN/Ta 이중층을 PVD로 증착합니다. TaN은 Cu 확산 방지, Ta는 Cu와의 접착력 향상 역할을 합니다. 막이 너무 두꺼우면 저항이 증가하므로 2~5nm 수준으로 매우 얇게 만듭니다.'
+    },
+    {
+      name: 'Cu Seed 증착',
+      short: 'Cu Seed',
+      desc: '전기도금(ECP)을 위한 얇은 Cu 씨앗층을 입힙니다.',
+      detail: 'PVD로 10~50nm의 얇은 Cu층을 증착합니다. 이 층이 있어야 다음 단계에서 전기도금이 가능합니다. 씨앗층이 균일해야 도금도 균일하게 됩니다.'
+    },
+    {
+      name: 'ECP (전기도금)',
+      short: 'ECP Fill',
+      desc: '전기도금으로 홈을 Cu로 완전히 채웁니다.',
+      detail: 'ECP(Electrochemical Plating)로 Cu를 채웁니다. 바닥부터 빈틈없이 채우는 "Bottom-up filling"이 핵심입니다. 첨가제(억제제, 촉진제, 레벨러)로 채움 품질을 조절합니다.'
+    },
+    {
+      name: 'CMP (평탄화)',
+      short: 'CMP',
+      desc: '표면의 여분 Cu를 연마하여 평탄하게 만듭니다.',
+      detail: 'CMP(Chemical Mechanical Polishing)로 과잉 Cu와 배리어를 제거합니다. 연마 패드와 슬러리(화학약품+연마입자)를 사용합니다. Dishing(Cu 패임)과 Erosion을 최소화하는 것이 과제입니다.'
+    }
+  ];
 
   // Damascene 탭
   const renderDamasceneTab = () => (
@@ -547,6 +693,24 @@ const MetallizationEDSPackagingSimulator = () => {
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white p-4 rounded-lg">
         <h2 className="text-lg font-bold">⚙️ Damascene 공정</h2>
         <p className="text-sm opacity-90">Cu 배선: 먼저 파고 채우는 Additive 방식</p>
+      </div>
+
+      {/* Damascene 개념 설명 */}
+      <div className="bg-white border rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-orange-700">🤔 Damascene이란?</h4>
+        <p className="text-xs text-gray-700 mb-2">
+          <strong>구리(Cu)는 플라즈마 식각이 매우 어렵습니다.</strong> 그래서 완전히 새로운 방식을 개발했습니다:
+        </p>
+        <div className="flex items-center gap-2 text-xs text-gray-600 bg-orange-50 p-2 rounded">
+          <span className="font-bold">1. 홈 파기</span>
+          <span>→</span>
+          <span className="font-bold">2. 배리어 입히기</span>
+          <span>→</span>
+          <span className="font-bold">3. Cu 채우기</span>
+          <span>→</span>
+          <span className="font-bold">4. 연마(CMP)</span>
+        </div>
+        <p className="text-xs text-gray-500 mt-2">※ 마치 <strong>도장 만들기</strong>와 비슷합니다: 나무에 글자를 새기고(홈), 잉크를 바른 후(Cu), 표면을 닦아내면(CMP) 글자만 남습니다.</p>
       </div>
 
       <div className="grid grid-cols-2 gap-2">
@@ -560,7 +724,7 @@ const MetallizationEDSPackagingSimulator = () => {
           >
             <div className="font-bold capitalize">{type} Damascene</div>
             <div className="text-xs text-gray-500">
-              {type === 'single' ? 'Via와 Trench 별도 공정' : 'Via + Trench 동시 형성'}
+              {type === 'single' ? 'Via와 Trench 별도 공정 (단순)' : 'Via + Trench 동시 형성 (효율적)'}
             </div>
           </button>
         ))}
@@ -581,29 +745,36 @@ const MetallizationEDSPackagingSimulator = () => {
           onChange={(e) => setLineWidth(parseInt(e.target.value))}
           className="w-full"
         />
-      </div>
-
-      <div className="grid grid-cols-4 gap-1 mb-2">
-        {['TaN', 'Ta', 'TaN/Ta', 'TiN'].map((b) => (
-          <button
-            key={b}
-            onClick={() => setBarrierMaterial(b)}
-            className={`p-2 rounded text-xs font-medium transition ${
-              barrierMaterial === b ? 'bg-orange-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
-            }`}
-          >
-            {b}
-          </button>
-        ))}
+        <p className="text-xs text-gray-500 mt-1">※ 배선 폭이 좁을수록 첨단 공정. 7nm 이하에서는 Cu의 저항 증가 문제가 심각해집니다.</p>
       </div>
 
       <div className="bg-white border rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-purple-700">🛡️ 배리어 재료 선택</h4>
+        <div className="grid grid-cols-4 gap-1 mb-2">
+          {['TaN', 'Ta', 'TaN/Ta', 'TiN'].map((b) => (
+            <button
+              key={b}
+              onClick={() => setBarrierMaterial(b)}
+              className={`p-2 rounded text-xs font-medium transition ${
+                barrierMaterial === b ? 'bg-purple-500 text-white' : 'bg-gray-100 hover:bg-gray-200'
+              }`}
+            >
+              {b}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500">
+          ※ <strong>TaN/Ta 이중층</strong>이 가장 일반적. TaN=Cu 확산 차단, Ta=Cu 접착력 향상. 배리어가 너무 두꺼우면 배선 저항↑
+        </p>
+      </div>
+
+      <div className="bg-white border-2 border-orange-300 rounded-lg p-4">
         <div className="flex justify-between items-center mb-3">
-          <h4 className="font-bold text-sm">🔄 Dual Damascene 공정</h4>
+          <h4 className="font-bold text-sm">🔄 {damasceneType === 'dual' ? 'Dual' : 'Single'} Damascene 공정 시뮬레이션</h4>
           <button
             onClick={startCMPProcess}
             disabled={isProcessing}
-            className={`px-3 py-1.5 rounded font-bold text-sm ${
+            className={`px-4 py-2 rounded font-bold text-sm ${
               isProcessing ? 'bg-gray-300' : 'bg-orange-500 text-white hover:bg-orange-600'
             }`}
           >
@@ -611,20 +782,49 @@ const MetallizationEDSPackagingSimulator = () => {
           </button>
         </div>
 
+        {/* 진행 단계 표시 - 외곽선 추가 */}
         <div className="grid grid-cols-5 gap-1 mb-3">
-          {['Via/Trench', 'Barrier', 'Cu Seed', 'ECP Fill', 'CMP'].map((step, i) => (
+          {damasceneStepDetails.map((step, i) => (
             <div
               key={i}
-              className={`p-2 rounded text-center text-xs transition ${
-                i <= damasceneStep ? 'bg-orange-500 text-white' : 'bg-gray-100'
+              className={`p-2 rounded text-center text-xs transition border-2 ${
+                i <= damasceneStep
+                  ? 'bg-orange-500 text-white border-orange-600'
+                  : 'bg-gray-100 border-gray-300 text-gray-600'
               }`}
             >
-              {step}
+              {step.short}
             </div>
           ))}
         </div>
 
-        <svg viewBox="0 0 300 100" className="w-full h-24 bg-gray-100 rounded">
+        {/* CMP 진행 바 - 외곽선 추가 */}
+        <div className="mb-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-medium">진행률:</span>
+            <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-gray-300 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all"
+                style={{ width: `${damasceneStep >= 0 ? ((damasceneStep + 1) / 5) * 100 : 0}%` }}
+              />
+            </div>
+            <span className="text-xs font-bold text-orange-600">{Math.round((damasceneStep >= 0 ? (damasceneStep + 1) / 5 : 0) * 100)}%</span>
+          </div>
+        </div>
+
+        {/* 현재 단계 설명 */}
+        {damasceneStep >= 0 && damasceneStep < 5 && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+            <h5 className="font-bold text-sm text-orange-800 mb-1">
+              📍 Step {damasceneStep + 1}: {damasceneStepDetails[damasceneStep].name}
+            </h5>
+            <p className="text-xs text-gray-700 mb-2">{damasceneStepDetails[damasceneStep].desc}</p>
+            <p className="text-xs text-gray-600 bg-white p-2 rounded">{damasceneStepDetails[damasceneStep].detail}</p>
+          </div>
+        )}
+
+        {/* 시각화 */}
+        <svg viewBox="0 0 300 100" className="w-full h-24 bg-gray-900 rounded border border-gray-300">
           <rect x="0" y="70" width="300" height="30" fill="#4A5568" />
           <rect x="0" y="50" width="300" height="20" fill="#718096" />
 
@@ -641,9 +841,9 @@ const MetallizationEDSPackagingSimulator = () => {
 
           {damasceneStep >= 1 && (
             <>
-              <rect x="40" y="20" width="40" height="50" fill="none" stroke="#6366F1" strokeWidth="3" />
-              <rect x="120" y="20" width="40" height="50" fill="none" stroke="#6366F1" strokeWidth="3" />
-              <rect x="200" y="20" width="40" height="50" fill="none" stroke="#6366F1" strokeWidth="3" />
+              <rect x="40" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
+              <rect x="120" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
+              <rect x="200" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
             </>
           )}
 
@@ -670,32 +870,55 @@ const MetallizationEDSPackagingSimulator = () => {
             <rect x="0" y="0" width="300" height="20" fill="#E2E8F0" />
           )}
 
-          <text x="150" y="90" textAnchor="middle" fill="white" fontSize="8">Lower Metal / ILD</text>
+          <text x="150" y="90" textAnchor="middle" fill="white" fontSize="8">Lower Metal / ILD (절연층)</text>
         </svg>
 
+        {/* CMP 진행 바 (isProcessing 중) */}
         {isProcessing && (
-          <div className="mt-2">
+          <div className="mt-3">
             <div className="flex items-center gap-2">
-              <span className="text-xs">CMP Progress:</span>
-              <div className="flex-1 bg-gray-200 rounded-full h-2">
+              <span className="text-xs font-medium">CMP 연마 중:</span>
+              <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-orange-300 overflow-hidden">
                 <div
-                  className="bg-orange-500 h-2 rounded-full transition-all"
+                  className="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full transition-all"
                   style={{ width: `${cmpProgress}%` }}
                 />
               </div>
-              <span className="text-xs font-bold">{cmpProgress}%</span>
+              <span className="text-xs font-bold text-orange-600">{cmpProgress}%</span>
             </div>
           </div>
         )}
       </div>
 
+      {/* Single vs Dual 비교 */}
+      <div className="bg-gray-50 border rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-gray-700">📊 Single vs Dual Damascene</h4>
+        <div className="grid grid-cols-2 gap-3 text-xs">
+          <div className="bg-white p-2 rounded border">
+            <strong className="text-blue-700">Single Damascene:</strong>
+            <ul className="mt-1 space-y-1 text-gray-600">
+              <li>• Via와 Trench 별도 형성</li>
+              <li>• 공정 단순, 초기 기술</li>
+              <li>• CMP 2번 필요</li>
+            </ul>
+          </div>
+          <div className="bg-white p-2 rounded border">
+            <strong className="text-orange-700">Dual Damascene:</strong>
+            <ul className="mt-1 space-y-1 text-gray-600">
+              <li>• Via + Trench 동시 형성</li>
+              <li>• 공정 단축, 현재 표준</li>
+              <li>• CMP 1번으로 충분</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
-        <h4 className="font-bold text-sm mb-2">💡 더 생각해보기</h4>
+        <h4 className="font-bold text-sm mb-2">💡 핵심 포인트</h4>
         <ul className="text-xs space-y-1 text-gray-700">
-          <li>• Cu를 직접 RIE로 식각하지 않는 이유는?</li>
-          <li>• Dual이 Single보다 유리한 점은? (공정 단축)</li>
-          <li>• 배리어 두께가 너무 두꺼우면 생기는 문제는?</li>
-          <li>• CMP 후 Cu dishing/erosion 문제는?</li>
+          <li>• <strong>Cu를 직접 식각 안 하는 이유:</strong> Cu 염화물이 비휘발성이라 플라즈마 식각이 안 됨</li>
+          <li>• <strong>배리어 역할:</strong> Cu 원자가 Si/SiO₂로 확산되면 소자 특성 파괴</li>
+          <li>• <strong>CMP 과제:</strong> Dishing(Cu 패임), Erosion(절연막 손상) 최소화</li>
         </ul>
       </div>
     </div>
@@ -709,24 +932,48 @@ const MetallizationEDSPackagingSimulator = () => {
         <p className="text-sm opacity-90">웨이퍼 레벨 전기적 검사 및 양품 선별</p>
       </div>
 
+      {/* EDS 개념 설명 */}
+      <div className="bg-white border rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-green-700">🤔 EDS란?</h4>
+        <p className="text-xs text-gray-700 mb-2">
+          웨이퍼 한 장에는 수백~수천 개의 칩(다이)이 있습니다. 이 중에서 <strong>불량품을 사전에 걸러내는</strong> 것이 EDS입니다.
+        </p>
+        <p className="text-xs text-gray-600 bg-green-50 p-2 rounded">
+          💡 왜 중요할까요? → 불량 칩을 패키징하면 비용 낭비! 미리 걸러내면 수천만 원 절약됩니다.
+        </p>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <div className="bg-white border rounded-lg p-3">
-          <h3 className="font-bold text-sm mb-2 text-green-700">🎯 EDS 목적</h3>
+          <h3 className="font-bold text-sm mb-2 text-green-700">🎯 EDS의 4가지 목적</h3>
           <ul className="text-xs space-y-1">
-            <li className="flex items-center gap-1"><span className="text-green-500">✓</span> 양품/불량 선별</li>
-            <li className="flex items-center gap-1"><span className="text-green-500">✓</span> 수선 가능 칩 양품화</li>
-            <li className="flex items-center gap-1"><span className="text-green-500">✓</span> 공정 피드백 (Fab)</li>
-            <li className="flex items-center gap-1"><span className="text-green-500">✓</span> 후공정 비용 절감</li>
+            <li className="flex items-start gap-1">
+              <span className="text-green-500 mt-0.5">✓</span>
+              <span><strong>양품/불량 선별:</strong> 동작하지 않는 칩 제거</span>
+            </li>
+            <li className="flex items-start gap-1">
+              <span className="text-green-500 mt-0.5">✓</span>
+              <span><strong>수선(Repair):</strong> 예비 회로로 교체하여 양품화</span>
+            </li>
+            <li className="flex items-start gap-1">
+              <span className="text-green-500 mt-0.5">✓</span>
+              <span><strong>공정 피드백:</strong> 불량 패턴 분석 → Fab 개선</span>
+            </li>
+            <li className="flex items-start gap-1">
+              <span className="text-green-500 mt-0.5">✓</span>
+              <span><strong>비용 절감:</strong> 불량 칩 패키징 비용 방지</span>
+            </li>
           </ul>
         </div>
 
         <div className="bg-white border rounded-lg p-3">
-          <h3 className="font-bold text-sm mb-2 text-green-700">🔌 프로브 카드</h3>
+          <h3 className="font-bold text-sm mb-2 text-green-700">🔌 프로브 카드란?</h3>
+          <p className="text-xs text-gray-600 mb-2">수백~수천 개의 미세한 바늘(프로브)이 칩의 패드에 동시 접촉하여 전기 신호를 주고받습니다.</p>
           <div className="space-y-1">
             {[
-              { id: 'cantilever', name: 'Cantilever', app: 'LCD Driver' },
-              { id: 'vertical', name: 'Vertical', app: 'Logic/SoC' },
-              { id: 'mems', name: 'MEMS', app: 'DRAM/CIS' }
+              { id: 'cantilever', name: 'Cantilever', app: 'LCD Driver', desc: '단순 구조, 저비용' },
+              { id: 'vertical', name: 'Vertical', app: 'Logic/SoC', desc: '수직형, 고밀도 패드' },
+              { id: 'mems', name: 'MEMS', app: 'DRAM/CIS', desc: '초미세 피치, 최첨단' }
             ].map((p) => (
               <button
                 key={p.id}
@@ -737,36 +984,80 @@ const MetallizationEDSPackagingSimulator = () => {
               >
                 <span className="font-bold">{p.name}</span>
                 <span className="text-gray-500"> - {p.app}</span>
+                <span className="text-gray-400 text-xs ml-1">({p.desc})</span>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      <div className="bg-white border rounded-lg p-3">
+      <div className="bg-white border-2 border-green-300 rounded-lg p-4">
         <div className="flex justify-between items-center mb-3">
-          <h3 className="font-bold text-sm">📋 EDS 5단계</h3>
+          <h3 className="font-bold text-sm">📋 EDS 5단계 시뮬레이션</h3>
           <button
             onClick={runEDSSimulation}
             disabled={edsAnimating}
-            className={`px-3 py-1.5 rounded font-bold text-sm ${
+            className={`px-4 py-2 rounded font-bold text-sm ${
               edsAnimating ? 'bg-gray-300' : 'bg-green-500 text-white hover:bg-green-600'
             }`}
           >
-            ▶ 시작
+            {edsAnimating ? '진행중...' : '▶ 시작'}
           </button>
         </div>
-        <div className="grid grid-cols-5 gap-1">
+
+        {/* 진행 단계 표시 */}
+        <div className="grid grid-cols-5 gap-1 mb-3">
           {edsSteps.map((step, i) => (
             <div
               key={i}
-              className={`p-2 rounded text-center transition ${
-                i <= edsStep ? 'bg-green-500 text-white' : 'bg-gray-100'
+              className={`p-2 rounded text-center transition border-2 ${
+                i <= edsStep
+                  ? 'bg-green-500 text-white border-green-600'
+                  : 'bg-gray-100 border-gray-300 text-gray-600'
               }`}
             >
               <div className="text-lg mb-1">{step.icon}</div>
               <div className="text-xs font-bold leading-tight">{step.name}</div>
               <div className="text-xs opacity-75">{step.desc}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* 현재 단계 상세 설명 */}
+        {edsStep >= 0 && edsStep < 5 && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+            <h5 className="font-bold text-sm text-green-800 mb-1">
+              {edsSteps[edsStep].icon} Step {edsStep + 1}: {edsSteps[edsStep].name}
+            </h5>
+            <p className="text-xs text-gray-700">{edsSteps[edsStep].fullDesc}</p>
+          </div>
+        )}
+
+        {/* 진행 바 */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-medium">진행률:</span>
+          <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-gray-300 overflow-hidden">
+            <div
+              className="bg-gradient-to-r from-green-400 to-teal-500 h-full rounded-full transition-all"
+              style={{ width: `${edsStep >= 0 ? ((edsStep + 1) / 5) * 100 : 0}%` }}
+            />
+          </div>
+          <span className="text-xs font-bold text-green-600">{Math.round((edsStep >= 0 ? (edsStep + 1) / 5 : 0) * 100)}%</span>
+        </div>
+      </div>
+
+      {/* EDS 5단계 상세 설명 카드 */}
+      <div className="bg-gray-50 border rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-gray-700">📖 EDS 각 단계 상세 설명</h4>
+        <div className="space-y-2">
+          {edsSteps.map((step, i) => (
+            <div key={i} className="bg-white p-2 rounded border text-xs">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-lg">{step.icon}</span>
+                <span className="font-bold text-green-700">{step.name}</span>
+                <span className="text-gray-400">- {step.desc}</span>
+              </div>
+              <p className="text-gray-600 ml-7">{step.fullDesc}</p>
             </div>
           ))}
         </div>
