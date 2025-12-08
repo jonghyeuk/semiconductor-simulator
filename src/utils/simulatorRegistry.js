@@ -9,6 +9,7 @@ import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII';
 import EtchingSimulator from '../simulators/EtchingSimulator';
 import DopingProcessSimulator from '../simulators/Dopingprocesssimulator';
 import DepositionSimulator from '../simulators/DepositionSimulator';
+import MetallizationEDSPackagingSimulator from '../simulators/MetallizationEDSPackagingSimulator';
 
 class SimulatorRegistry {
   constructor() {
@@ -246,6 +247,33 @@ class SimulatorRegistry {
       }
     });
 
+    // 배선검사패키징 시뮬레이터 (완성됨)
+    this.register({
+      id: 'metallization-eds-packaging',
+      name: '배선검사패키징',
+      icon: '🔌',
+      description: '금속배선, EDS, 패키징',
+      component: MetallizationEDSPackagingSimulator,
+      available: true,
+      category: 'process',
+      order: 10,
+      metadata: {
+        version: '1.0.0',
+        lastUpdated: '2025-12-08',
+        author: 'Semiconductor Simulator Team',
+        features: [
+          '금속배선 (Metallization) 다층 구조 시각화',
+          'Damascene 공정 시뮬레이션 (Single/Dual)',
+          'EDS (Electrical Die Sorting) 5단계 프로세스',
+          '웨이퍼 맵 및 수율 시뮬레이션',
+          '패키징 타입 비교 (DIP, QFP, BGA, CSP, FC-BGA)',
+          '2.5D/3D 첨단 패키징 (CoWoS, HBM, TSV)',
+          'Wire Bonding vs Flip Chip 본딩 비교',
+          '금속배선, EDS, 패키징 평가 퀴즈 (10문제)'
+        ]
+      }
+    });
+
     // 검사계측 시뮬레이터 (준비중)
     this.register({
       id: 'inspection',
@@ -255,7 +283,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'metrology',
-      order: 10,
+      order: 11,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-01',
@@ -277,7 +305,7 @@ class SimulatorRegistry {
       component: null,
       available: false,
       category: 'backend',
-      order: 11,
+      order: 12,
       metadata: {
         version: '0.0.0',
         estimatedRelease: '2025-05-15',
