@@ -253,32 +253,52 @@ const MetallizationEDSPackagingSimulator = () => {
     setDisplayedText('');
   };
 
-  const startCMPProcess = () => {
+  // Damascene 수동 네비게이션
+  const startDamasceneProcess = () => {
     setDamasceneStep(0);
     setCmpProgress(0);
-    let step = 0;
-    const stepInterval = setInterval(() => {
-      step++;
-      setDamasceneStep(step);
-      if (step === 3) {
-        clearInterval(stepInterval);
-        setIsProcessing(true);
-      }
-    }, 800);
+    setIsProcessing(false);
   };
 
-  const runEDSSimulation = () => {
+  const nextDamasceneStep = () => {
+    if (damasceneStep < 4) {
+      setDamasceneStep(damasceneStep + 1);
+    }
+  };
+
+  const prevDamasceneStep = () => {
+    if (damasceneStep > 0) {
+      setDamasceneStep(damasceneStep - 1);
+    }
+  };
+
+  const resetDamascene = () => {
+    setDamasceneStep(-1);
+    setCmpProgress(0);
+    setIsProcessing(false);
+  };
+
+  // EDS 수동 네비게이션
+  const startEDSProcess = () => {
+    setEdsStep(0);
+    setEdsAnimating(false);
+  };
+
+  const nextEDSStep = () => {
+    if (edsStep < 4) {
+      setEdsStep(edsStep + 1);
+    }
+  };
+
+  const prevEDSStep = () => {
+    if (edsStep > 0) {
+      setEdsStep(edsStep - 1);
+    }
+  };
+
+  const resetEDS = () => {
     setEdsStep(-1);
-    setEdsAnimating(true);
-    let step = 0;
-    const interval = setInterval(() => {
-      setEdsStep(step);
-      step++;
-      if (step >= 5) {
-        clearInterval(interval);
-        setEdsAnimating(false);
-      }
-    }, 1200);
+    setEdsAnimating(false);
   };
 
   const handleAnswerSelect = (index) => {
@@ -771,122 +791,162 @@ const MetallizationEDSPackagingSimulator = () => {
       <div className="bg-white border-2 border-orange-300 rounded-lg p-4">
         <div className="flex justify-between items-center mb-3">
           <h4 className="font-bold text-sm">🔄 {damasceneType === 'dual' ? 'Dual' : 'Single'} Damascene 공정 시뮬레이션</h4>
-          <button
-            onClick={startCMPProcess}
-            disabled={isProcessing}
-            className={`px-4 py-2 rounded font-bold text-sm ${
-              isProcessing ? 'bg-gray-300' : 'bg-orange-500 text-white hover:bg-orange-600'
-            }`}
-          >
-            {isProcessing ? '진행중...' : '▶ 시작'}
-          </button>
-        </div>
-
-        {/* 진행 단계 표시 - 외곽선 추가 */}
-        <div className="grid grid-cols-5 gap-1 mb-3">
-          {damasceneStepDetails.map((step, i) => (
-            <div
-              key={i}
-              className={`p-2 rounded text-center text-xs transition border-2 ${
-                i <= damasceneStep
-                  ? 'bg-orange-500 text-white border-orange-600'
-                  : 'bg-gray-100 border-gray-300 text-gray-600'
-              }`}
+          {damasceneStep < 0 ? (
+            <button
+              onClick={startDamasceneProcess}
+              className="px-4 py-2 rounded font-bold text-sm bg-orange-500 text-white hover:bg-orange-600"
             >
-              {step.short}
-            </div>
-          ))}
+              ▶ 시작
+            </button>
+          ) : (
+            <button
+              onClick={resetDamascene}
+              className="px-3 py-1.5 rounded font-bold text-xs bg-gray-200 text-gray-600 hover:bg-gray-300"
+            >
+              ↺ 처음으로
+            </button>
+          )}
         </div>
 
-        {/* CMP 진행 바 - 외곽선 추가 */}
-        <div className="mb-3">
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium">진행률:</span>
-            <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-gray-300 overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all"
-                style={{ width: `${damasceneStep >= 0 ? ((damasceneStep + 1) / 5) * 100 : 0}%` }}
-              />
-            </div>
-            <span className="text-xs font-bold text-orange-600">{Math.round((damasceneStep >= 0 ? (damasceneStep + 1) / 5 : 0) * 100)}%</span>
-          </div>
-        </div>
-
-        {/* 현재 단계 설명 */}
-        {damasceneStep >= 0 && damasceneStep < 5 && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
-            <h5 className="font-bold text-sm text-orange-800 mb-1">
-              📍 Step {damasceneStep + 1}: {damasceneStepDetails[damasceneStep].name}
-            </h5>
-            <p className="text-xs text-gray-700 mb-2">{damasceneStepDetails[damasceneStep].desc}</p>
-            <p className="text-xs text-gray-600 bg-white p-2 rounded">{damasceneStepDetails[damasceneStep].detail}</p>
+        {/* 시작 전 안내 */}
+        {damasceneStep < 0 && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+            <div className="text-3xl mb-2">⚙️</div>
+            <p className="text-sm text-gray-600">시작 버튼을 눌러 Damascene 공정을 단계별로 학습하세요</p>
+            <p className="text-xs text-gray-400 mt-1">이전/다음 버튼으로 각 단계를 직접 넘길 수 있습니다</p>
           </div>
         )}
 
-        {/* 시각화 */}
-        <svg viewBox="0 0 300 100" className="w-full h-24 bg-gray-900 rounded border border-gray-300">
-          <rect x="0" y="70" width="300" height="30" fill="#4A5568" />
-          <rect x="0" y="50" width="300" height="20" fill="#718096" />
-
-          {damasceneStep >= 0 && (
-            <>
-              <rect x="40" y="20" width="40" height="50" fill="#1A202C" />
-              <rect x="120" y="20" width="40" height="50" fill="#1A202C" />
-              <rect x="200" y="20" width="40" height="50" fill="#1A202C" />
-              <rect x="55" y="50" width="10" height="20" fill="#1A202C" />
-              <rect x="135" y="50" width="10" height="20" fill="#1A202C" />
-              <rect x="215" y="50" width="10" height="20" fill="#1A202C" />
-            </>
-          )}
-
-          {damasceneStep >= 1 && (
-            <>
-              <rect x="40" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
-              <rect x="120" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
-              <rect x="200" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
-            </>
-          )}
-
-          {damasceneStep >= 2 && (
-            <>
-              <rect x="43" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
-              <rect x="123" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
-              <rect x="203" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
-            </>
-          )}
-
-          {damasceneStep >= 3 && (
-            <>
-              <rect x="43" y="23" width="34" height="44" fill="#B87333" />
-              <rect x="123" y="23" width="34" height="44" fill="#B87333" />
-              <rect x="203" y="23" width="34" height="44" fill="#B87333" />
-              {damasceneStep === 3 && (
-                <rect x="0" y="0" width="300" height="20" fill="#B87333" opacity="0.5" />
-              )}
-            </>
-          )}
-
-          {damasceneStep >= 4 && (
-            <rect x="0" y="0" width="300" height="20" fill="#E2E8F0" />
-          )}
-
-          <text x="150" y="90" textAnchor="middle" fill="white" fontSize="8">Lower Metal / ILD (절연층)</text>
-        </svg>
-
-        {/* CMP 진행 바 (isProcessing 중) */}
-        {isProcessing && (
-          <div className="mt-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-medium">CMP 연마 중:</span>
-              <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-orange-300 overflow-hidden">
+        {/* 시작 후 표시 */}
+        {damasceneStep >= 0 && (
+          <>
+            {/* 진행 단계 표시 - 외곽선 추가 */}
+            <div className="grid grid-cols-5 gap-1 mb-3">
+              {damasceneStepDetails.map((step, i) => (
                 <div
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 h-full rounded-full transition-all"
-                  style={{ width: `${cmpProgress}%` }}
-                />
-              </div>
-              <span className="text-xs font-bold text-orange-600">{cmpProgress}%</span>
+                  key={i}
+                  onClick={() => setDamasceneStep(i)}
+                  className={`p-2 rounded text-center text-xs transition border-2 cursor-pointer ${
+                    i === damasceneStep
+                      ? 'bg-orange-500 text-white border-orange-600'
+                      : i < damasceneStep
+                      ? 'bg-orange-200 text-orange-800 border-orange-300'
+                      : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-orange-300'
+                  }`}
+                >
+                  {step.short}
+                </div>
+              ))}
             </div>
-          </div>
+
+            {/* 진행 바 */}
+            <div className="mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium">진행률:</span>
+                <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-gray-300 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-orange-400 to-orange-600 h-full rounded-full transition-all"
+                    style={{ width: `${((damasceneStep + 1) / 5) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs font-bold text-orange-600">{Math.round(((damasceneStep + 1) / 5) * 100)}%</span>
+              </div>
+            </div>
+
+            {/* 현재 단계 설명 */}
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-3">
+              <h5 className="font-bold text-sm text-orange-800 mb-1">
+                📍 Step {damasceneStep + 1}: {damasceneStepDetails[damasceneStep].name}
+              </h5>
+              <p className="text-xs text-gray-700 mb-2">{damasceneStepDetails[damasceneStep].desc}</p>
+              <p className="text-xs text-gray-600 bg-white p-2 rounded">{damasceneStepDetails[damasceneStep].detail}</p>
+            </div>
+
+            {/* 시각화 */}
+            <svg viewBox="0 0 300 100" className="w-full h-24 bg-gray-900 rounded border border-gray-300 mb-3">
+              <rect x="0" y="70" width="300" height="30" fill="#4A5568" />
+              <rect x="0" y="50" width="300" height="20" fill="#718096" />
+
+              {damasceneStep >= 0 && (
+                <>
+                  <rect x="40" y="20" width="40" height="50" fill="#1A202C" />
+                  <rect x="120" y="20" width="40" height="50" fill="#1A202C" />
+                  <rect x="200" y="20" width="40" height="50" fill="#1A202C" />
+                  <rect x="55" y="50" width="10" height="20" fill="#1A202C" />
+                  <rect x="135" y="50" width="10" height="20" fill="#1A202C" />
+                  <rect x="215" y="50" width="10" height="20" fill="#1A202C" />
+                </>
+              )}
+
+              {damasceneStep >= 1 && (
+                <>
+                  <rect x="40" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
+                  <rect x="120" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
+                  <rect x="200" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
+                </>
+              )}
+
+              {damasceneStep >= 2 && (
+                <>
+                  <rect x="43" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
+                  <rect x="123" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
+                  <rect x="203" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
+                </>
+              )}
+
+              {damasceneStep >= 3 && (
+                <>
+                  <rect x="43" y="23" width="34" height="44" fill="#B87333" />
+                  <rect x="123" y="23" width="34" height="44" fill="#B87333" />
+                  <rect x="203" y="23" width="34" height="44" fill="#B87333" />
+                  {damasceneStep === 3 && (
+                    <rect x="0" y="0" width="300" height="20" fill="#B87333" opacity="0.5" />
+                  )}
+                </>
+              )}
+
+              {damasceneStep >= 4 && (
+                <rect x="0" y="0" width="300" height="20" fill="#E2E8F0" />
+              )}
+
+              <text x="150" y="90" textAnchor="middle" fill="white" fontSize="8">Lower Metal / ILD (절연층)</text>
+            </svg>
+
+            {/* 이전/다음 버튼 */}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={prevDamasceneStep}
+                disabled={damasceneStep === 0}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                  damasceneStep === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                ← 이전
+              </button>
+
+              <span className="text-sm text-gray-500">
+                {damasceneStep + 1} / 5
+              </span>
+
+              {damasceneStep < 4 ? (
+                <button
+                  onClick={nextDamasceneStep}
+                  className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-all font-semibold text-sm"
+                >
+                  다음 →
+                </button>
+              ) : (
+                <button
+                  onClick={resetDamascene}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold text-sm"
+                >
+                  완료 ✓
+                </button>
+              )}
+            </div>
+          </>
         )}
       </div>
 
@@ -994,56 +1054,114 @@ const MetallizationEDSPackagingSimulator = () => {
       <div className="bg-white border-2 border-green-300 rounded-lg p-4">
         <div className="flex justify-between items-center mb-3">
           <h3 className="font-bold text-sm">📋 EDS 5단계 시뮬레이션</h3>
-          <button
-            onClick={runEDSSimulation}
-            disabled={edsAnimating}
-            className={`px-4 py-2 rounded font-bold text-sm ${
-              edsAnimating ? 'bg-gray-300' : 'bg-green-500 text-white hover:bg-green-600'
-            }`}
-          >
-            {edsAnimating ? '진행중...' : '▶ 시작'}
-          </button>
-        </div>
-
-        {/* 진행 단계 표시 */}
-        <div className="grid grid-cols-5 gap-1 mb-3">
-          {edsSteps.map((step, i) => (
-            <div
-              key={i}
-              className={`p-2 rounded text-center transition border-2 ${
-                i <= edsStep
-                  ? 'bg-green-500 text-white border-green-600'
-                  : 'bg-gray-100 border-gray-300 text-gray-600'
-              }`}
+          {edsStep < 0 ? (
+            <button
+              onClick={startEDSProcess}
+              className="px-4 py-2 rounded font-bold text-sm bg-green-500 text-white hover:bg-green-600"
             >
-              <div className="text-lg mb-1">{step.icon}</div>
-              <div className="text-xs font-bold leading-tight">{step.name}</div>
-              <div className="text-xs opacity-75">{step.desc}</div>
-            </div>
-          ))}
+              ▶ 시작
+            </button>
+          ) : (
+            <button
+              onClick={resetEDS}
+              className="px-3 py-1.5 rounded font-bold text-xs bg-gray-200 text-gray-600 hover:bg-gray-300"
+            >
+              ↺ 처음으로
+            </button>
+          )}
         </div>
 
-        {/* 현재 단계 상세 설명 */}
-        {edsStep >= 0 && edsStep < 5 && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
-            <h5 className="font-bold text-sm text-green-800 mb-1">
-              {edsSteps[edsStep].icon} Step {edsStep + 1}: {edsSteps[edsStep].name}
-            </h5>
-            <p className="text-xs text-gray-700">{edsSteps[edsStep].fullDesc}</p>
+        {/* 시작 전 안내 */}
+        {edsStep < 0 && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+            <div className="text-3xl mb-2">🔍</div>
+            <p className="text-sm text-gray-600">시작 버튼을 눌러 EDS 검사 단계를 학습하세요</p>
+            <p className="text-xs text-gray-400 mt-1">이전/다음 버튼으로 각 단계를 직접 넘길 수 있습니다</p>
           </div>
         )}
 
-        {/* 진행 바 */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium">진행률:</span>
-          <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-gray-300 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-green-400 to-teal-500 h-full rounded-full transition-all"
-              style={{ width: `${edsStep >= 0 ? ((edsStep + 1) / 5) * 100 : 0}%` }}
-            />
-          </div>
-          <span className="text-xs font-bold text-green-600">{Math.round((edsStep >= 0 ? (edsStep + 1) / 5 : 0) * 100)}%</span>
-        </div>
+        {/* 시작 후 표시 */}
+        {edsStep >= 0 && (
+          <>
+            {/* 진행 단계 표시 */}
+            <div className="grid grid-cols-5 gap-1 mb-3">
+              {edsSteps.map((step, i) => (
+                <div
+                  key={i}
+                  onClick={() => setEdsStep(i)}
+                  className={`p-2 rounded text-center transition border-2 cursor-pointer ${
+                    i === edsStep
+                      ? 'bg-green-500 text-white border-green-600'
+                      : i < edsStep
+                      ? 'bg-green-200 text-green-800 border-green-300'
+                      : 'bg-gray-100 border-gray-300 text-gray-600 hover:border-green-300'
+                  }`}
+                >
+                  <div className="text-lg mb-1">{step.icon}</div>
+                  <div className="text-xs font-bold leading-tight">{step.name}</div>
+                  <div className="text-xs opacity-75">{step.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* 진행 바 */}
+            <div className="mb-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-medium">진행률:</span>
+                <div className="flex-1 bg-gray-100 rounded-full h-3 border-2 border-gray-300 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-green-400 to-teal-500 h-full rounded-full transition-all"
+                    style={{ width: `${((edsStep + 1) / 5) * 100}%` }}
+                  />
+                </div>
+                <span className="text-xs font-bold text-green-600">{Math.round(((edsStep + 1) / 5) * 100)}%</span>
+              </div>
+            </div>
+
+            {/* 현재 단계 상세 설명 */}
+            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+              <h5 className="font-bold text-sm text-green-800 mb-1">
+                {edsSteps[edsStep].icon} Step {edsStep + 1}: {edsSteps[edsStep].name}
+              </h5>
+              <p className="text-xs text-gray-700">{edsSteps[edsStep].fullDesc}</p>
+            </div>
+
+            {/* 이전/다음 버튼 */}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={prevEDSStep}
+                disabled={edsStep === 0}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-semibold text-sm transition-all ${
+                  edsStep === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+              >
+                ← 이전
+              </button>
+
+              <span className="text-sm text-gray-500">
+                {edsStep + 1} / 5
+              </span>
+
+              {edsStep < 4 ? (
+                <button
+                  onClick={nextEDSStep}
+                  className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-all font-semibold text-sm"
+                >
+                  다음 →
+                </button>
+              ) : (
+                <button
+                  onClick={resetEDS}
+                  className="flex items-center gap-2 px-4 py-2 bg-teal-500 text-white rounded-lg hover:bg-teal-600 transition-all font-semibold text-sm"
+                >
+                  완료 ✓
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
 
       {/* EDS 5단계 상세 설명 카드 */}
