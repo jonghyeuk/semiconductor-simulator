@@ -10,6 +10,7 @@ import EtchingSimulator from '../simulators/EtchingSimulator';
 import DopingProcessSimulator from '../simulators/Dopingprocesssimulator';
 import DepositionSimulator from '../simulators/DepositionSimulator';
 import MetallizationEDSPackagingSimulator from '../simulators/MetallizationEDSPackagingSimulator';
+import ComprehensiveAssessmentSimulator from '../simulators/ComprehensiveAssessmentSimulator';
 
 class SimulatorRegistry {
   constructor() {
@@ -274,46 +275,26 @@ class SimulatorRegistry {
       }
     });
 
-    // 검사계측 시뮬레이터 (준비중)
+    // 종합평가 시뮬레이터 (완성됨)
     this.register({
-      id: 'inspection',
-      name: '검사계측',
-      icon: '🔍',
-      description: '측정 및 품질 관리',
-      component: null,
-      available: false,
-      category: 'metrology',
+      id: 'comprehensive-assessment',
+      name: '종합평가',
+      icon: '🏆',
+      description: '전체 공정 통합 평가',
+      component: ComprehensiveAssessmentSimulator,
+      available: true,
+      category: 'assessment',
       order: 11,
       metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-05-01',
+        version: '1.0.0',
+        lastUpdated: '2025-12-08',
+        author: 'Semiconductor Simulator Team',
         features: [
-          '막두께 측정',
-          '결함 검출',
-          'CD-SEM 분석',
-          '통계적 공정관리'
-        ]
-      }
-    });
-
-    // 패키징 시뮬레이터 (준비중)
-    this.register({
-      id: 'packaging',
-      name: '패키징',
-      icon: '📱',
-      description: '조립 및 테스트',
-      component: null,
-      available: false,
-      category: 'backend',
-      order: 12,
-      metadata: {
-        version: '0.0.0',
-        estimatedRelease: '2025-05-15',
-        features: [
-          '다이싱 및 본딩',
-          '열관리 설계',
-          '신뢰성 테스트',
-          '패키지 최적화'
+          '기초 레벨 15문제 (진공, 세정, 산화, 리소)',
+          '심화 레벨 15문제 (플라즈마, 식각, 증착, 도핑, 배선)',
+          '전체 시뮬레이터 통합 문제',
+          '점수 및 등급 평가',
+          '오답 해설 제공'
         ]
       }
     });
