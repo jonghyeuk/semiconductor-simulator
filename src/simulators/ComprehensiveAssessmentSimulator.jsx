@@ -295,8 +295,8 @@ const ComprehensiveAssessmentSimulator = () => {
   const renderMainScreen = () => (
     <div className="space-y-6">
       <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-bold mb-2 text-center">🏆 반도체 공정 종합평가</h2>
-        <p className="text-center opacity-90">전체 공정의 핵심 개념을 테스트합니다</p>
+        <h2 className="text-2xl font-bold mb-2">🏆 반도체 공정 종합평가</h2>
+        <p className="opacity-90">전체 공정의 핵심 개념을 테스트합니다</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -477,14 +477,16 @@ const ComprehensiveAssessmentSimulator = () => {
 
     return (
       <div className="space-y-4">
-        <div className={`text-white p-6 rounded-lg text-center ${activeLevel === 'basic' ? 'bg-gradient-to-r from-green-500 to-teal-500' : 'bg-gradient-to-r from-purple-500 to-indigo-500'}`}>
-          <div className="text-6xl mb-2">{gradeInfo.emoji}</div>
-          <h2 className="text-2xl font-bold">
-            {activeLevel === 'basic' ? '기초 레벨' : '심화 레벨'} 완료!
-          </h2>
+        <div className={`text-white p-6 rounded-lg ${activeLevel === 'basic' ? 'bg-gradient-to-r from-green-500 to-teal-500' : 'bg-gradient-to-r from-purple-500 to-indigo-500'}`}>
+          <div className="flex items-center gap-4">
+            <div className="text-5xl">{gradeInfo.emoji}</div>
+            <h2 className="text-2xl font-bold">
+              {activeLevel === 'basic' ? '기초 레벨' : '심화 레벨'} 완료!
+            </h2>
+          </div>
         </div>
 
-        <div className="bg-white border rounded-lg p-6 text-center">
+        <div className="bg-white border rounded-lg p-6">
           <div className={`text-6xl font-bold mb-2 ${gradeInfo.color}`}>
             {gradeInfo.grade}
           </div>
@@ -576,20 +578,13 @@ const ComprehensiveAssessmentSimulator = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-gray-100 min-h-screen">
-      <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 text-white p-4 shadow-lg">
-        <h1 className="text-xl font-bold text-center">🏆 반도체 공정 종합평가</h1>
-        <p className="text-sm text-center opacity-90 mt-1">기초 · 심화 레벨별 30문제 통합 평가</p>
-      </div>
-
-      <div className="p-4">
-        {!activeLevel && renderMainScreen()}
-        {activeLevel && !quizCompleted && renderQuizScreen()}
-        {activeLevel && quizCompleted && renderResultScreen()}
-      </div>
-
-      <div className="text-center text-xs text-gray-400 py-4">
-        © 반도체 공정 교육 시뮬레이터 v1.0
+    <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          {!activeLevel && renderMainScreen()}
+          {activeLevel && !quizCompleted && renderQuizScreen()}
+          {activeLevel && quizCompleted && renderResultScreen()}
+        </div>
       </div>
     </div>
   );
