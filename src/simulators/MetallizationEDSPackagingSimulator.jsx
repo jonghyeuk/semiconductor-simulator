@@ -77,7 +77,7 @@ const MetallizationEDSPackagingSimulator = () => {
     }
   ];
 
-  // 타이핑 애니메이션
+  // 타이핑 애니메이션 (자동 진행 없음)
   useEffect(() => {
     if (isPlaying && currentScene < overviewScenes.length) {
       const scene = overviewScenes[currentScene];
@@ -89,20 +89,28 @@ const MetallizationEDSPackagingSimulator = () => {
           setCharIndex(charIndex + 1);
         }, 25);
         return () => clearTimeout(timer);
-      } else {
-        const timer = setTimeout(() => {
-          if (currentScene < overviewScenes.length - 1) {
-            setCurrentScene(currentScene + 1);
-            setCharIndex(0);
-            setDisplayedText('');
-          } else {
-            setIsPlaying(false);
-          }
-        }, 2000);
-        return () => clearTimeout(timer);
       }
+      // 타이핑 완료 시 자동 진행 없음 - 사용자가 버튼으로 넘김
     }
   }, [isPlaying, currentScene, charIndex]);
+
+  // 다음 스텝으로 이동
+  const nextScene = () => {
+    if (currentScene < overviewScenes.length - 1) {
+      setCurrentScene(currentScene + 1);
+      setCharIndex(0);
+      setDisplayedText('');
+    }
+  };
+
+  // 이전 스텝으로 이동
+  const prevScene = () => {
+    if (currentScene > 0) {
+      setCurrentScene(currentScene - 1);
+      setCharIndex(0);
+      setDisplayedText('');
+    }
+  };
 
   // CMP 애니메이션
   useEffect(() => {
@@ -314,19 +322,44 @@ const MetallizationEDSPackagingSimulator = () => {
 
             <div className="flex items-center justify-between">
               <button
+                onClick={prevScene}
+                disabled={currentScene === 0}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                  currentScene === 0
+                    ? 'bg-white/20 text-white/50 cursor-not-allowed'
+                    : 'bg-white/30 text-white hover:bg-white/40'
+                }`}
+              >
+                ← 이전
+              </button>
+
+              <button
                 onClick={() => {
                   setIsPlaying(false);
                   setDisplayedText('');
                   setCurrentScene(0);
                   setCharIndex(0);
                 }}
-                className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-white/30 text-white hover:bg-white/40 transition-all"
+                className="flex items-center gap-2 px-4 py-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-all text-sm"
               >
                 ↺ 처음으로
               </button>
-              <div className="text-sm text-white/70">
-                {isPlaying ? '재생 중...' : '완료'}
-              </div>
+
+              {currentScene < overviewScenes.length - 1 ? (
+                <button
+                  onClick={nextScene}
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-amber-600 rounded-lg hover:bg-yellow-50 transition-all font-semibold shadow-lg"
+                >
+                  다음 →
+                </button>
+              ) : (
+                <button
+                  onClick={() => setActiveTab('metallization')}
+                  className="flex items-center gap-2 px-6 py-3 bg-amber-400 text-white rounded-lg hover:bg-amber-300 transition-all font-semibold shadow-lg"
+                >
+                  시뮬레이션 시작 🔥
+                </button>
+              )}
             </div>
           </div>
         )}
