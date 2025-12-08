@@ -263,45 +263,71 @@ const MetallizationEDSPackagingSimulator = () => {
 
   // 개요 탭 렌더링
   const renderOverviewTab = () => (
-    <div className="space-y-4">
-      <div className="bg-gradient-to-r from-amber-600 via-green-500 to-blue-600 text-white p-4 rounded-lg">
-        <h2 className="text-lg font-bold mb-1">🔌 금속배선 & 🔍 EDS & 📦 패키징</h2>
-        <p className="text-sm opacity-90">반도체 8대 공정: BEOL → 검사 → 후공정</p>
-      </div>
-
-      <div className="bg-white border rounded-lg p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-gray-700">📖 공정 개요</h3>
-          <button
-            onClick={startOverview}
-            disabled={isPlaying}
-            className={`px-4 py-2 rounded-lg font-bold text-sm transition ${
-              isPlaying ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-600'
-            }`}
-          >
-            {isPlaying ? '재생 중...' : '▶ 재생'}
-          </button>
-        </div>
-
-        {isPlaying || displayedText ? (
-          <div className="bg-gray-900 rounded-lg p-4 min-h-[150px]">
-            <div className="text-amber-400 font-bold mb-2">{overviewScenes[currentScene]?.title}</div>
-            <p className="text-gray-200 text-sm leading-relaxed">
-              {displayedText}
-              <span className="animate-pulse">|</span>
+    <div className="space-y-6">
+      <div className="bg-gradient-to-br from-amber-600 via-green-500 to-blue-600 rounded-xl shadow-2xl p-8 text-white min-h-[500px] flex flex-col">
+        {!isPlaying && !displayedText ? (
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
+            <div className="text-6xl mb-4">🔌🔍📦</div>
+            <h2 className="text-3xl font-bold mb-4">
+              금속배선 & EDS & 패키징 시뮬레이터
+            </h2>
+            <p className="text-xl text-blue-100 max-w-2xl leading-relaxed">
+              반도체 BEOL 공정부터 검사, 후공정까지<br/>
+              <span className="text-yellow-300 font-bold">단계별 가이드</span>로 학습하세요!
             </p>
-            <div className="flex gap-1 mt-4">
-              {overviewScenes.map((_, i) => (
-                <div
-                  key={i}
-                  className={`h-1 flex-1 rounded ${i <= currentScene ? 'bg-amber-500' : 'bg-gray-600'}`}
-                />
-              ))}
-            </div>
+            <button
+              onClick={startOverview}
+              className="flex items-center gap-3 px-8 py-4 bg-white text-amber-600 rounded-full hover:bg-yellow-50 transition-all text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 mt-8"
+            >
+              <span className="text-2xl">▶</span>
+              가이드 시작하기
+            </button>
           </div>
         ) : (
-          <div className="bg-gray-50 rounded-lg p-4 text-center text-gray-500">
-            ▶ 버튼을 눌러 공정 개요를 확인하세요
+          <div className="flex-1 flex flex-col">
+            <div className="mb-6">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-semibold">
+                  Step {currentScene + 1} / {overviewScenes.length}
+                </span>
+                <span className="text-sm text-blue-200">
+                  {Math.round(((currentScene + 1) / overviewScenes.length) * 100)}% 완료
+                </span>
+              </div>
+              <div className="w-full bg-white/30 rounded-full h-2">
+                <div
+                  className="bg-white h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${((currentScene + 1) / overviewScenes.length) * 100}%` }}
+                />
+              </div>
+            </div>
+
+            <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6">
+              <h3 className="text-2xl font-bold mb-4">
+                {overviewScenes[currentScene]?.title}
+              </h3>
+              <div className="text-lg leading-relaxed whitespace-pre-line font-medium">
+                {displayedText}
+                {isPlaying && <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => {
+                  setIsPlaying(false);
+                  setDisplayedText('');
+                  setCurrentScene(0);
+                  setCharIndex(0);
+                }}
+                className="flex items-center gap-2 px-6 py-3 rounded-lg font-semibold bg-white/30 text-white hover:bg-white/40 transition-all"
+              >
+                ↺ 처음으로
+              </button>
+              <div className="text-sm text-white/70">
+                {isPlaying ? '재생 중...' : '완료'}
+              </div>
+            </div>
           </div>
         )}
       </div>
@@ -1346,35 +1372,30 @@ const MetallizationEDSPackagingSimulator = () => {
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto bg-gray-100 min-h-screen">
-      <div className="bg-gradient-to-r from-amber-600 via-green-600 to-blue-600 text-white p-4 shadow-lg">
-        <h1 className="text-xl font-bold text-center">🔌 금속배선 & 🔍 EDS & 📦 패키징 시뮬레이터</h1>
-        <p className="text-sm text-center opacity-90 mt-1">반도체 BEOL → 검사 → 후공정 통합 교육</p>
+    <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
+      <div className="bg-white shadow-sm border-b border-gray-200">
+        <div className="flex space-x-1 p-1 overflow-x-auto">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${
+                activeTab === tab.id
+                  ? 'bg-gradient-to-r from-amber-100 via-green-100 to-blue-100 text-amber-800 shadow-sm border border-amber-200'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+              }`}
+            >
+              <span className="text-lg">{tab.icon}</span>
+              <span>{tab.name}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="flex flex-wrap gap-1 p-2 bg-white shadow">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition ${
-              activeTab === tab.id
-                ? 'bg-gradient-to-r from-amber-500 via-green-500 to-blue-500 text-white shadow'
-                : 'hover:bg-gray-100 text-gray-700'
-            }`}
-          >
-            <span>{tab.icon}</span>
-            <span>{tab.name}</span>
-          </button>
-        ))}
-      </div>
-
-      <div className="p-4">
-        {renderContent()}
-      </div>
-
-      <div className="text-center text-xs text-gray-400 py-4">
-        © 반도체 공정 교육 시뮬레이터 v1.0
+      <div className="flex-1 overflow-auto">
+        <div className="p-6">
+          {renderContent()}
+        </div>
       </div>
     </div>
   );
