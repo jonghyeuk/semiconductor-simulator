@@ -2037,6 +2037,130 @@ const MetallizationEDSPackagingSimulator = () => {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
+      <style>{`
+        /* 슬라이더 기본 스타일 */
+        input[type="range"].slider-thumb-red,
+        input[type="range"].slider-thumb-blue,
+        input[type="range"].slider-thumb-green {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+
+        /* 빨간색 슬라이더 트랙 */
+        input[type="range"].slider-thumb-red::-webkit-slider-runnable-track {
+          background: #fecaca;
+          height: 10px;
+          border-radius: 5px;
+          border: 2px solid #dc2626;
+        }
+        input[type="range"].slider-thumb-red::-moz-range-track {
+          background: #fecaca;
+          height: 10px;
+          border-radius: 5px;
+          border: 2px solid #dc2626;
+        }
+        input[type="range"].slider-thumb-red::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -7px;
+          background: linear-gradient(145deg, #ef4444, #dc2626);
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(220, 38, 38, 0.5);
+          cursor: pointer;
+        }
+        input[type="range"].slider-thumb-red::-moz-range-thumb {
+          background: linear-gradient(145deg, #ef4444, #dc2626);
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(220, 38, 38, 0.5);
+          cursor: pointer;
+        }
+
+        /* 파란색 슬라이더 트랙 */
+        input[type="range"].slider-thumb-blue::-webkit-slider-runnable-track {
+          background: #bfdbfe;
+          height: 10px;
+          border-radius: 5px;
+          border: 2px solid #2563eb;
+        }
+        input[type="range"].slider-thumb-blue::-moz-range-track {
+          background: #bfdbfe;
+          height: 10px;
+          border-radius: 5px;
+          border: 2px solid #2563eb;
+        }
+        input[type="range"].slider-thumb-blue::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -7px;
+          background: linear-gradient(145deg, #3b82f6, #2563eb);
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(37, 99, 235, 0.5);
+          cursor: pointer;
+        }
+        input[type="range"].slider-thumb-blue::-moz-range-thumb {
+          background: linear-gradient(145deg, #3b82f6, #2563eb);
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(37, 99, 235, 0.5);
+          cursor: pointer;
+        }
+
+        /* 녹색 슬라이더 트랙 */
+        input[type="range"].slider-thumb-green::-webkit-slider-runnable-track {
+          background: #bbf7d0;
+          height: 10px;
+          border-radius: 5px;
+          border: 2px solid #16a34a;
+        }
+        input[type="range"].slider-thumb-green::-moz-range-track {
+          background: #bbf7d0;
+          height: 10px;
+          border-radius: 5px;
+          border: 2px solid #16a34a;
+        }
+        input[type="range"].slider-thumb-green::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -7px;
+          background: linear-gradient(145deg, #22c55e, #16a34a);
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(22, 163, 74, 0.5);
+          cursor: pointer;
+        }
+        input[type="range"].slider-thumb-green::-moz-range-thumb {
+          background: linear-gradient(145deg, #22c55e, #16a34a);
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 6px rgba(22, 163, 74, 0.5);
+          cursor: pointer;
+        }
+
+        /* 호버 효과 */
+        input[type="range"].slider-thumb-red:hover::-webkit-slider-thumb,
+        input[type="range"].slider-thumb-blue:hover::-webkit-slider-thumb,
+        input[type="range"].slider-thumb-green:hover::-webkit-slider-thumb {
+          transform: scale(1.1);
+          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+      `}</style>
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="flex space-x-1 p-1 overflow-x-auto">
           {tabs.map((tab) => (
