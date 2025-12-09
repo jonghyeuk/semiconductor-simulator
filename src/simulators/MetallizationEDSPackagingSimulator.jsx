@@ -25,7 +25,6 @@ const MetallizationEDSPackagingSimulator = () => {
   // EDS 상태
   const [edsStep, setEdsStep] = useState(-1);
   const [probeType, setProbeType] = useState('mems');
-  const [testTemp, setTestTemp] = useState('room');
   const [yieldRate, setYieldRate] = useState(92);
   const [totalDies, setTotalDies] = useState(500);
   const [waferMapData, setWaferMapData] = useState([]);
@@ -541,19 +540,21 @@ const MetallizationEDSPackagingSimulator = () => {
 
       {/* 배선 시각화 */}
       <div className="bg-white border rounded-lg p-3">
-        <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-sm">Metal Layers: {metalLayers}층</span>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500">4층</span>
-            <input
-              type="range"
-              min="4"
-              max="15"
-              value={metalLayers}
-              onChange={(e) => setMetalLayers(parseInt(e.target.value))}
-              className="w-24"
-            />
-            <span className="text-xs text-gray-500">15층</span>
+        <div className="p-3 bg-amber-50 rounded-lg border-2 border-amber-200 shadow-sm mb-3">
+          <label className="block text-sm font-medium mb-2 text-amber-800">
+            Metal Layers: {metalLayers}층
+          </label>
+          <input
+            type="range"
+            min="4"
+            max="15"
+            value={metalLayers}
+            onChange={(e) => setMetalLayers(parseInt(e.target.value))}
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-amber-200"
+          />
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>4층</span>
+            <span>15층</span>
           </div>
         </div>
         <p className="text-xs text-gray-500 mb-2">※ 최신 첨단 공정은 10~15층의 금속 배선을 사용합니다. 아래층(M1)은 좁고, 위로 갈수록 넓어집니다.</p>
@@ -621,8 +622,10 @@ const MetallizationEDSPackagingSimulator = () => {
         {/* Electromigration + MTF 설명 */}
         <div className="bg-white border rounded-lg p-3">
           <h4 className="font-bold text-sm mb-2 text-red-700">⚠️ Electromigration (EM)</h4>
-          <div className="mb-2">
-            <div className="text-xs text-gray-500">전류밀도 (MA/cm²)</div>
+          <div className="p-3 bg-red-50 rounded-lg border-2 border-red-200 shadow-sm mb-2">
+            <label className="block text-sm font-medium mb-2 text-red-800">
+              전류밀도: {currentDensity.toFixed(1)} MA/cm²
+            </label>
             <input
               type="range"
               min="0.5"
@@ -630,11 +633,14 @@ const MetallizationEDSPackagingSimulator = () => {
               step="0.1"
               value={currentDensity}
               onChange={(e) => setCurrentDensity(parseFloat(e.target.value))}
-              className="w-full"
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-red-200"
             />
-            <div className="text-center font-bold">{currentDensity.toFixed(1)}</div>
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>0.5</span>
+              <span>3.0</span>
+            </div>
           </div>
-          <div className="text-xs bg-red-50 p-2 rounded">
+          <div className="text-xs bg-red-50 p-2 rounded border border-red-200">
             <strong>MTF:</strong> {calcMTF()} years
             <div className="text-gray-500 mt-1">※ MTF(Mean Time to Failure) = 배선이 끊어지기까지 평균 시간</div>
             <div className="text-gray-500">전류↑ → 금속원자 이동↑ → 수명↓ (J² 반비례)</div>
@@ -750,9 +756,9 @@ const MetallizationEDSPackagingSimulator = () => {
         ))}
       </div>
 
-      <div className="bg-white border rounded-lg p-3">
+      <div className="p-3 bg-orange-50 rounded-lg border-2 border-orange-200 shadow-sm">
         <div className="flex justify-between items-center mb-2">
-          <span className="font-bold text-sm">Line Width: {lineWidth}nm</span>
+          <label className="block text-sm font-medium text-orange-800">Line Width: {lineWidth}nm</label>
           <span className="text-xs px-2 py-1 bg-orange-100 rounded">
             {lineWidth <= 14 ? '3nm' : lineWidth <= 28 ? '7nm' : lineWidth <= 45 ? '14nm' : '28nm+'} node
           </span>
@@ -763,8 +769,12 @@ const MetallizationEDSPackagingSimulator = () => {
           max="180"
           value={lineWidth}
           onChange={(e) => setLineWidth(parseInt(e.target.value))}
-          className="w-full"
+          className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-orange-200"
         />
+        <div className="flex justify-between text-xs text-gray-500 mt-1">
+          <span>10nm</span>
+          <span>180nm</span>
+        </div>
         <p className="text-xs text-gray-500 mt-1">※ 배선 폭이 좁을수록 첨단 공정. 7nm 이하에서는 Cu의 저항 증가 문제가 심각해집니다.</p>
       </div>
 
@@ -1205,11 +1215,10 @@ const MetallizationEDSPackagingSimulator = () => {
       <div className="bg-white border rounded-lg p-3">
         <h3 className="font-bold text-sm mb-2">📊 수율 시뮬레이터</h3>
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
-              <span>전체 다이</span>
-              <span>{totalDies}</span>
-            </div>
+          <div className="p-3 bg-green-50 rounded-lg border-2 border-green-200 shadow-sm">
+            <label className="block text-sm font-medium mb-2 text-green-800">
+              전체 다이: {totalDies}
+            </label>
             <input
               type="range"
               min="100"
@@ -1217,22 +1226,29 @@ const MetallizationEDSPackagingSimulator = () => {
               step="50"
               value={totalDies}
               onChange={(e) => setTotalDies(parseInt(e.target.value))}
-              className="w-full"
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-green-200"
             />
-          </div>
-          <div>
-            <div className="flex justify-between text-xs text-gray-500 mb-1">
-              <span>수율</span>
-              <span>{yieldRate}%</span>
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>100</span>
+              <span>1000</span>
             </div>
+          </div>
+          <div className="p-3 bg-blue-50 rounded-lg border-2 border-blue-200 shadow-sm">
+            <label className="block text-sm font-medium mb-2 text-blue-800">
+              수율: {yieldRate}%
+            </label>
             <input
               type="range"
               min="70"
               max="99"
               value={yieldRate}
               onChange={(e) => setYieldRate(parseInt(e.target.value))}
-              className="w-full"
+              className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-blue-200"
             />
+            <div className="flex justify-between text-xs text-gray-500 mt-1">
+              <span>70%</span>
+              <span>99%</span>
+            </div>
           </div>
         </div>
 
@@ -1301,25 +1317,6 @@ const MetallizationEDSPackagingSimulator = () => {
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="grid grid-cols-3 gap-2">
-        {[
-          { id: 'cold', t: '-40°C', n: 'Cold Test' },
-          { id: 'room', t: '25°C', n: 'Room Temp' },
-          { id: 'hot', t: '125°C', n: 'Hot Test' }
-        ].map((temp) => (
-          <button
-            key={temp.id}
-            onClick={() => setTestTemp(temp.id)}
-            className={`p-2 rounded border-2 text-center transition ${
-              testTemp === temp.id ? 'bg-green-500 text-white border-green-500' : 'border-gray-200 hover:border-green-300'
-            }`}
-          >
-            <div className="text-lg font-bold">{temp.t}</div>
-            <div className="text-xs">{temp.n}</div>
-          </button>
-        ))}
       </div>
 
       {/* 용어 설명 */}
@@ -1848,8 +1845,10 @@ const MetallizationEDSPackagingSimulator = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white border rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">I/O Count</div>
+        <div className="p-3 bg-purple-50 rounded-lg border-2 border-purple-200 shadow-sm">
+          <label className="block text-sm font-medium mb-2 text-purple-800">
+            I/O Count: {wireCount}
+          </label>
           <input
             type="range"
             min="64"
@@ -1857,12 +1856,17 @@ const MetallizationEDSPackagingSimulator = () => {
             step="64"
             value={wireCount}
             onChange={(e) => setWireCount(parseInt(e.target.value))}
-            className="w-full"
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-purple-200"
           />
-          <div className="text-center text-xl font-bold text-purple-700">{wireCount}</div>
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>64</span>
+            <span>2048</span>
+          </div>
         </div>
-        <div className="bg-white border rounded-lg p-3">
-          <div className="text-xs text-gray-500 mb-1">Pitch (μm)</div>
+        <div className="p-3 bg-pink-50 rounded-lg border-2 border-pink-200 shadow-sm">
+          <label className="block text-sm font-medium mb-2 text-pink-800">
+            Pitch: {pitchSize}μm
+          </label>
           <input
             type="range"
             min="30"
@@ -1870,9 +1874,12 @@ const MetallizationEDSPackagingSimulator = () => {
             step="10"
             value={pitchSize}
             onChange={(e) => setPitchSize(parseInt(e.target.value))}
-            className="w-full"
+            className="w-full h-2 rounded-lg appearance-none cursor-pointer bg-pink-200"
           />
-          <div className="text-center text-xl font-bold text-pink-700">{pitchSize}</div>
+          <div className="flex justify-between text-xs text-gray-500 mt-1">
+            <span>30μm</span>
+            <span>300μm</span>
+          </div>
         </div>
       </div>
 
