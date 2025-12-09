@@ -557,7 +557,7 @@ const MetallizationEDSPackagingSimulator = () => {
           </div>
         </div>
         <p className="text-xs text-gray-500 mb-2">※ 최신 첨단 공정은 10~15층의 금속 배선을 사용합니다. 아래층(M1)은 좁고, 위로 갈수록 넓어집니다.</p>
-        <svg viewBox="0 0 300 160" className="w-full h-36 bg-gray-900 rounded">
+        <svg viewBox="0 0 300 160" className="w-full h-72 bg-gray-900 rounded">
           <rect x="20" y="130" width="260" height="25" fill="#4A5568" />
           <text x="150" y="147" textAnchor="middle" fill="#A0AEC0" fontSize="8">Si Substrate</text>
           <rect x="20" y="115" width="260" height="15" fill="#2D3748" />
@@ -863,7 +863,7 @@ const MetallizationEDSPackagingSimulator = () => {
             </div>
 
             {/* 시각화 */}
-            <svg viewBox="0 0 300 100" className="w-full h-24 bg-gray-900 rounded border border-gray-300 mb-3">
+            <svg viewBox="0 0 300 100" className="w-full h-48 bg-gray-900 rounded border border-gray-300 mb-3">
               <rect x="0" y="70" width="300" height="30" fill="#4A5568" />
               <rect x="0" y="50" width="300" height="20" fill="#718096" />
 
@@ -1428,7 +1428,7 @@ const MetallizationEDSPackagingSimulator = () => {
 
           <div className="bg-white border rounded-lg p-3">
             <h3 className="font-bold text-sm mb-2">{packageTypes[packageType].name} 구조</h3>
-            <svg viewBox="0 0 200 120" className="w-full h-28 bg-gray-900 rounded">
+            <svg viewBox="0 0 200 120" className="w-full h-56 bg-gray-900 rounded">
               {packageType === 'bga' && (
                 <>
                   <rect x="40" y="20" width="120" height="45" fill="#2D3748" rx="3" />
@@ -1538,7 +1538,7 @@ const MetallizationEDSPackagingSimulator = () => {
             <div className="grid grid-cols-2 gap-3">
               <div className="text-center">
                 <div className="text-xs font-bold text-indigo-700 mb-1">2.5D (Side-by-Side)</div>
-                <svg viewBox="0 0 120 70" className="w-full h-16 bg-gray-900 rounded">
+                <svg viewBox="0 0 120 70" className="w-full h-32 bg-gray-900 rounded">
                   <rect x="10" y="50" width="100" height="15" fill="#2d5a27" />
                   <text x="60" y="61" textAnchor="middle" fill="#A0AEC0" fontSize="5">Substrate</text>
                   <rect x="15" y="30" width="90" height="18" fill="#6366F1" />
@@ -1553,7 +1553,7 @@ const MetallizationEDSPackagingSimulator = () => {
               </div>
               <div className="text-center">
                 <div className="text-xs font-bold text-purple-700 mb-1">3D (Stacked)</div>
-                <svg viewBox="0 0 120 70" className="w-full h-16 bg-gray-900 rounded">
+                <svg viewBox="0 0 120 70" className="w-full h-32 bg-gray-900 rounded">
                   <rect x="35" y="50" width="50" height="15" fill="#1A202C" />
                   <rect x="35" y="35" width="50" height="13" fill="#374151" />
                   <rect x="35" y="22" width="50" height="11" fill="#4B5563" />
@@ -1757,7 +1757,7 @@ const MetallizationEDSPackagingSimulator = () => {
         <h3 className="font-bold text-sm mb-2">
           {bondingMethod === 'wire' ? '〰️ Wire Bonding' : '🔄 Flip Chip'} 구조
         </h3>
-        <svg viewBox="0 0 240 110" className="w-full h-24 bg-gray-900 rounded">
+        <svg viewBox="0 0 240 110" className="w-full h-48 bg-gray-900 rounded">
           {bondingMethod === 'wire' ? (
             <>
               <rect x="20" y="70" width="200" height="30" fill="#2d5a27" />
