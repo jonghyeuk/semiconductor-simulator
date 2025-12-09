@@ -973,6 +973,27 @@ const MetallizationEDSPackagingSimulator = () => {
         </div>
       </div>
 
+      {/* 용어 설명 */}
+      <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-yellow-800">📖 용어 사전</h4>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="space-y-1">
+            <p><strong className="text-orange-700">Via:</strong> 상하층 금속을 연결하는 수직 구멍</p>
+            <p><strong className="text-orange-700">Trench:</strong> 배선이 들어갈 수평 홈/도랑</p>
+            <p><strong className="text-orange-700">ILD:</strong> Inter-Layer Dielectric, 층간 절연막</p>
+            <p><strong className="text-orange-700">Low-k:</strong> 낮은 유전율 절연막 (신호 지연↓)</p>
+            <p><strong className="text-orange-700">RIE:</strong> Reactive Ion Etching, 반응성 이온 식각</p>
+          </div>
+          <div className="space-y-1">
+            <p><strong className="text-orange-700">PVD:</strong> Physical Vapor Deposition, 물리적 증착</p>
+            <p><strong className="text-orange-700">ECP:</strong> Electrochemical Plating, 전기도금</p>
+            <p><strong className="text-orange-700">CMP:</strong> Chemical Mechanical Polishing, 화학기계연마</p>
+            <p><strong className="text-orange-700">Dishing:</strong> CMP 후 Cu가 움푹 패이는 현상</p>
+            <p><strong className="text-orange-700">Erosion:</strong> CMP 후 절연막이 깎이는 현상</p>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
         <h4 className="font-bold text-sm mb-2">💡 핵심 포인트</h4>
         <ul className="text-xs space-y-1 text-gray-700">
@@ -1301,13 +1322,36 @@ const MetallizationEDSPackagingSimulator = () => {
         ))}
       </div>
 
+      {/* 용어 설명 */}
+      <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-yellow-800">📖 용어 사전</h4>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="space-y-1">
+            <p><strong className="text-green-700">EDS:</strong> Electrical Die Sorting, 전기적 다이 선별</p>
+            <p><strong className="text-green-700">Die:</strong> 웨이퍼에서 잘라낸 개별 칩 (=다이)</p>
+            <p><strong className="text-green-700">Probe Card:</strong> 칩 패드에 접촉하는 바늘 어레이 장치</p>
+            <p><strong className="text-green-700">Pad:</strong> 칩 표면의 전극 접촉 영역</p>
+            <p><strong className="text-green-700">Yield:</strong> 수율, 양품 비율 (Good/Total)</p>
+            <p><strong className="text-green-700">Fab:</strong> Fabrication, 반도체 제조 공장</p>
+          </div>
+          <div className="space-y-1">
+            <p><strong className="text-green-700">ET:</strong> Electrical Test, 기본 전기 특성 검사</p>
+            <p><strong className="text-green-700">WBI:</strong> Wafer Burn-In, 고온 스트레스 테스트</p>
+            <p><strong className="text-green-700">MEMS:</strong> Micro-Electro-Mechanical Systems, 초미세 기계 시스템</p>
+            <p><strong className="text-green-700">Vth:</strong> Threshold Voltage, 문턱 전압</p>
+            <p><strong className="text-green-700">Redundancy:</strong> 예비 회로 (불량 셀 대체용)</p>
+            <p><strong className="text-green-700">Wafer Map:</strong> 웨이퍼 상 다이별 양/불량 지도</p>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-green-50 p-3 rounded-lg border border-green-200">
-        <h4 className="font-bold text-sm mb-2">💡 더 생각해보기</h4>
+        <h4 className="font-bold text-sm mb-2">💡 핵심 포인트</h4>
         <ul className="text-xs space-y-1 text-gray-700">
-          <li>• EDS를 하지 않으면 어떤 비용 손실이?</li>
-          <li>• Hot/Cold Test로 검출하는 불량 유형은?</li>
-          <li>• MEMS 프로브가 미세 피치에 유리한 이유는?</li>
-          <li>• Wafer Map 데이터의 활용 방법은?</li>
+          <li>• <strong>EDS 안 하면?</strong> 불량 칩도 패키징 → 비용 낭비, 수율 측정 불가</li>
+          <li>• <strong>Hot/Cold Test:</strong> 온도 의존 불량(누설전류↑, 타이밍 변화) 검출</li>
+          <li>• <strong>MEMS 프로브:</strong> 초미세 피치(40μm↓)에서 정밀 접촉 가능</li>
+          <li>• <strong>Wafer Map:</strong> 불량 위치 패턴 분석 → Fab 공정 개선 피드백</li>
         </ul>
       </div>
     </div>
@@ -1319,6 +1363,31 @@ const MetallizationEDSPackagingSimulator = () => {
       <div className="bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-lg">
         <h2 className="text-lg font-bold">📦 패키징 (Packaging)</h2>
         <p className="text-sm opacity-90">다이 보호, 외부 전기 연결, 열 방출</p>
+      </div>
+
+      {/* 패키징 개념 설명 */}
+      <div className="bg-white border rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-blue-700">🤔 패키징이란?</h4>
+        <p className="text-xs text-gray-700 mb-2">
+          웨이퍼에서 잘라낸 <strong>칩(다이)</strong>은 매우 연약합니다. 패키징은 이 칩을 <strong>보호</strong>하고, <strong>외부 회로와 연결</strong>하며, <strong>열을 방출</strong>시키는 '옷 입히기' 과정입니다.
+        </p>
+        <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="bg-blue-50 p-2 rounded text-center">
+            <div className="text-lg">🛡️</div>
+            <div className="font-bold">보호</div>
+            <div className="text-gray-500">먼지, 수분, 충격</div>
+          </div>
+          <div className="bg-blue-50 p-2 rounded text-center">
+            <div className="text-lg">🔌</div>
+            <div className="font-bold">전기 연결</div>
+            <div className="text-gray-500">칩 ↔ PCB 기판</div>
+          </div>
+          <div className="bg-blue-50 p-2 rounded text-center">
+            <div className="text-lg">🌡️</div>
+            <div className="font-bold">열 방출</div>
+            <div className="text-gray-500">발열 → 외부 배출</div>
+          </div>
+        </div>
       </div>
 
       <div className="flex gap-2">
@@ -1516,13 +1585,55 @@ const MetallizationEDSPackagingSimulator = () => {
         </>
       )}
 
+      {/* 용어 설명 - 기존 패키지 */}
+      {packageView === 'basic' && (
+        <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+          <h4 className="font-bold text-sm mb-2 text-yellow-800">📖 기존 패키지 용어</h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="space-y-1">
+              <p><strong className="text-blue-700">DIP:</strong> Dual In-line Package, 양쪽에 핀이 있는 직사각형 패키지 (구형, 납땜 삽입형)</p>
+              <p><strong className="text-blue-700">QFP:</strong> Quad Flat Package, 네 면에 핀이 있는 평면형 (SMD 방식)</p>
+              <p><strong className="text-blue-700">BGA:</strong> Ball Grid Array, 바닥에 솔더볼 격자 배열 (고밀도 I/O)</p>
+            </div>
+            <div className="space-y-1">
+              <p><strong className="text-blue-700">CSP:</strong> Chip Scale Package, 칩 크기와 거의 같은 소형 패키지</p>
+              <p><strong className="text-blue-700">FC-BGA:</strong> Flip Chip BGA, 칩을 뒤집어 범프로 연결 (고성능)</p>
+              <p><strong className="text-blue-700">SMD:</strong> Surface Mount Device, 표면 실장 (납땜 구멍 불필요)</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 용어 설명 - 첨단 패키징 */}
+      {packageView === 'advanced' && (
+        <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+          <h4 className="font-bold text-sm mb-2 text-yellow-800">📖 첨단 패키징 용어</h4>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div className="space-y-1">
+              <p><strong className="text-indigo-700">TSV:</strong> Through-Silicon Via, 실리콘을 관통하는 수직 연결 (3D용)</p>
+              <p><strong className="text-indigo-700">RDL:</strong> Re-Distribution Layer, 재배선층 (패드 위치 재배치)</p>
+              <p><strong className="text-indigo-700">Interposer:</strong> 칩들 사이 중간 연결 기판 (Si/유기물)</p>
+              <p><strong className="text-indigo-700">HBM:</strong> High Bandwidth Memory, 고대역폭 메모리 (DRAM 적층)</p>
+              <p><strong className="text-indigo-700">Chiplet:</strong> 기능별로 분리된 작은 칩 (모듈화 설계)</p>
+            </div>
+            <div className="space-y-1">
+              <p><strong className="text-indigo-700">CoWoS:</strong> Chip-on-Wafer-on-Substrate, TSMC의 2.5D 기술</p>
+              <p><strong className="text-indigo-700">EMIB:</strong> Embedded Multi-die Interconnect Bridge, 인텔의 2.5D 기술</p>
+              <p><strong className="text-indigo-700">Foveros:</strong> 인텔의 3D 적층 기술 (로직+로직 적층)</p>
+              <p><strong className="text-indigo-700">InFO:</strong> Integrated Fan-Out, TSMC의 팬아웃 기술</p>
+              <p><strong className="text-indigo-700">FOWLP:</strong> Fan-Out Wafer Level Package, 팬아웃 웨이퍼 레벨 패키지</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-        <h4 className="font-bold text-sm mb-2">💡 더 생각해보기</h4>
+        <h4 className="font-bold text-sm mb-2">💡 핵심 포인트</h4>
         <ul className="text-xs space-y-1 text-gray-700">
-          <li>• BGA가 QFP를 대체한 이유는? (I/O 밀도, 열방출)</li>
-          <li>• 2.5D에서 인터포저의 역할은?</li>
-          <li>• HBM이 3D 적층을 사용하는 이유는?</li>
-          <li>• Chiplet 아키텍처의 장점은?</li>
+          <li>• <strong>BGA vs QFP:</strong> BGA는 바닥 전체 사용 → I/O 수 10배↑, 열방출↑</li>
+          <li>• <strong>2.5D 인터포저:</strong> 고속 칩간 연결 (CPU↔HBM), 미세 배선 가능</li>
+          <li>• <strong>HBM 3D 적층:</strong> DRAM 4~12층 적층 → 대역폭 1TB/s↑, 면적↓</li>
+          <li>• <strong>Chiplet:</strong> 작은 칩 조합 → 수율↑, 유연한 구성, 비용↓</li>
         </ul>
       </div>
     </div>
@@ -1536,6 +1647,33 @@ const MetallizationEDSPackagingSimulator = () => {
         <p className="text-sm opacity-90">다이-패키지 전기적 연결 형성</p>
       </div>
 
+      {/* 본딩 개념 설명 */}
+      <div className="bg-white border rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-purple-700">🤔 본딩이란?</h4>
+        <p className="text-xs text-gray-700 mb-2">
+          칩(다이)의 전극 패드와 패키지 기판을 <strong>전기적으로 연결</strong>하는 핵심 공정입니다.
+          마치 <strong>전화선을 집과 전봇대에 연결</strong>하는 것처럼, 칩의 신호가 외부로 나가려면 반드시 본딩이 필요합니다.
+        </p>
+        <div className="grid grid-cols-2 gap-2 text-xs bg-purple-50 p-2 rounded">
+          <div>
+            <strong>📍 목적:</strong>
+            <ul className="mt-1 space-y-0.5 text-gray-600">
+              <li>• 전기 신호 전달 (I/O)</li>
+              <li>• 전원(VDD) 및 접지(GND) 공급</li>
+              <li>• 열 방출 경로 확보</li>
+            </ul>
+          </div>
+          <div>
+            <strong>📍 핵심 요구사항:</strong>
+            <ul className="mt-1 space-y-0.5 text-gray-600">
+              <li>• 낮은 저항 (신호 손실↓)</li>
+              <li>• 낮은 인덕턴스 (고주파 성능)</li>
+              <li>• 높은 신뢰성 (장기간 동작)</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-3">
         <button
           onClick={() => setBondingMethod('wire')}
@@ -1545,7 +1683,7 @@ const MetallizationEDSPackagingSimulator = () => {
         >
           <div className="text-3xl mb-1">〰️</div>
           <div className="font-bold">Wire Bonding</div>
-          <div className="text-xs text-gray-500">Au/Cu/Al Wire</div>
+          <div className="text-xs text-gray-500">가는 금속선으로 연결</div>
         </button>
         <button
           onClick={() => setBondingMethod('flip')}
@@ -1555,8 +1693,64 @@ const MetallizationEDSPackagingSimulator = () => {
         >
           <div className="text-3xl mb-1">🔄</div>
           <div className="font-bold">Flip Chip</div>
-          <div className="text-xs text-gray-500">Solder/Cu Bump</div>
+          <div className="text-xs text-gray-500">칩을 뒤집어 범프로 연결</div>
         </button>
+      </div>
+
+      {/* 선택된 방식 상세 설명 */}
+      <div className="bg-white border-2 border-purple-200 rounded-lg p-3">
+        {bondingMethod === 'wire' ? (
+          <>
+            <h4 className="font-bold text-sm mb-2 text-purple-700">〰️ Wire Bonding 상세</h4>
+            <p className="text-xs text-gray-700 mb-2">
+              <strong>가는 금속선(직경 15~50μm)</strong>으로 칩 패드와 기판을 연결합니다.
+              마치 <strong>재봉틀로 옷감을 꿰매는 것</strong>처럼, 한 올 한 올 연결합니다.
+            </p>
+            <div className="grid grid-cols-3 gap-2 text-xs mb-2">
+              <div className="bg-yellow-50 p-2 rounded text-center border">
+                <div className="font-bold text-yellow-700">Au (금)</div>
+                <div className="text-gray-500">고신뢰성, 고비용</div>
+                <div className="text-gray-400">고급 IC, LED</div>
+              </div>
+              <div className="bg-orange-50 p-2 rounded text-center border">
+                <div className="font-bold text-orange-700">Cu (구리)</div>
+                <div className="text-gray-500">저비용, 저저항</div>
+                <div className="text-gray-400">대량 생산품</div>
+              </div>
+              <div className="bg-gray-50 p-2 rounded text-center border">
+                <div className="font-bold text-gray-700">Al (알루미늄)</div>
+                <div className="text-gray-500">초음파 웨지용</div>
+                <div className="text-gray-400">파워 IC</div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 bg-purple-50 p-2 rounded">
+              💡 <strong>Ball-Wedge 방식:</strong> 먼저 볼(공)을 만들어 칩 패드에 붙이고, 와이어를 늘려서 기판에 웨지(쐐기) 형태로 접합합니다.
+            </p>
+          </>
+        ) : (
+          <>
+            <h4 className="font-bold text-sm mb-2 text-purple-700">🔄 Flip Chip 상세</h4>
+            <p className="text-xs text-gray-700 mb-2">
+              칩을 <strong>뒤집어서(Face Down)</strong> 패드 위의 <strong>범프(돌기)</strong>로 직접 기판에 접합합니다.
+              마치 <strong>도장을 찍듯이</strong> 한 번에 모든 연결이 완성됩니다.
+            </p>
+            <div className="grid grid-cols-2 gap-2 text-xs mb-2">
+              <div className="bg-orange-50 p-2 rounded border">
+                <div className="font-bold text-orange-700">C4 Solder Bump</div>
+                <div className="text-gray-500">솔더(납) 범프, 100μm급</div>
+                <div className="text-gray-400">CPU, GPU 표준</div>
+              </div>
+              <div className="bg-amber-50 p-2 rounded border">
+                <div className="font-bold text-amber-700">Cu Pillar</div>
+                <div className="text-gray-500">구리 기둥+솔더캡, 40μm급</div>
+                <div className="text-gray-400">미세 피치용</div>
+              </div>
+            </div>
+            <p className="text-xs text-gray-600 bg-purple-50 p-2 rounded">
+              💡 <strong>Underfill:</strong> 칩과 기판 사이 빈 공간을 에폭시로 채워 열팽창 차이(CTE mismatch)를 완화하고 신뢰성을 높입니다.
+            </p>
+          </>
+        )}
       </div>
 
       <div className="bg-white border rounded-lg p-3">
@@ -1682,13 +1876,34 @@ const MetallizationEDSPackagingSimulator = () => {
         </div>
       </div>
 
+      {/* 용어 설명 */}
+      <div className="bg-yellow-50 border border-yellow-300 rounded-lg p-3">
+        <h4 className="font-bold text-sm mb-2 text-yellow-800">📖 용어 사전</h4>
+        <div className="grid grid-cols-2 gap-2 text-xs">
+          <div className="space-y-1">
+            <p><strong className="text-purple-700">Ball Bonding:</strong> 볼(공) 형태로 칩 패드에 첫 접합</p>
+            <p><strong className="text-purple-700">Wedge Bonding:</strong> 쐐기 형태로 기판에 두 번째 접합</p>
+            <p><strong className="text-purple-700">Capillary:</strong> 와이어를 안내하는 가는 관 (본딩 도구)</p>
+            <p><strong className="text-purple-700">Bump:</strong> 칩 패드 위에 만든 금속 돌기 (Flip Chip용)</p>
+            <p><strong className="text-purple-700">C4:</strong> Controlled Collapse Chip Connection (IBM 특허)</p>
+          </div>
+          <div className="space-y-1">
+            <p><strong className="text-purple-700">Underfill:</strong> 칩-기판 사이 채우는 에폭시 (CTE 보완)</p>
+            <p><strong className="text-purple-700">CTE:</strong> Coefficient of Thermal Expansion, 열팽창계수</p>
+            <p><strong className="text-purple-700">I/O:</strong> Input/Output, 입출력 단자</p>
+            <p><strong className="text-purple-700">Pitch:</strong> 패드/범프 간 간격 (미세할수록 고밀도)</p>
+            <p><strong className="text-purple-700">Hybrid Bonding:</strong> Cu-Cu 직접 접합 (솔더 없음, 초미세)</p>
+          </div>
+        </div>
+      </div>
+
       <div className="bg-purple-50 p-3 rounded-lg border border-purple-200">
-        <h4 className="font-bold text-sm mb-2">💡 더 생각해보기</h4>
+        <h4 className="font-bold text-sm mb-2">💡 핵심 포인트</h4>
         <ul className="text-xs space-y-1 text-gray-700">
-          <li>• Wire Bonding에서 Au→Cu로 전환한 이유는?</li>
-          <li>• Flip Chip에서 Underfill의 역할은?</li>
-          <li>• 고주파 소자에 Flip Chip이 필수인 이유는?</li>
-          <li>• Hybrid Bonding (Cu-Cu)의 장점은?</li>
+          <li>• <strong>Au→Cu 전환:</strong> 금 가격 상승, Cu도 신뢰성 확보됨 (질소 분위기 본딩)</li>
+          <li>• <strong>Underfill 역할:</strong> Si(3ppm)와 기판(17ppm)의 열팽창 차이 완충</li>
+          <li>• <strong>고주파에 Flip Chip:</strong> 와이어 길이 0 → 인덕턴스↓ → GHz 동작 가능</li>
+          <li>• <strong>Hybrid Bonding:</strong> 피치 10μm↓ 가능, HBM/3D IC 핵심 기술</li>
         </ul>
       </div>
     </div>
