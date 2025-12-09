@@ -540,7 +540,7 @@ const MetallizationEDSPackagingSimulator = () => {
 
       {/* 배선 시각화 */}
       <div className="bg-white border rounded-lg p-3">
-        <div className="p-3 bg-white rounded-lg border-2 border-red-200 shadow-sm mb-3">
+        <div className="relative z-10 p-3 bg-white rounded-lg border-2 border-red-200 shadow-sm mb-3">
           <label className="block text-sm font-medium mb-2 text-red-800">
             Metal Layers: {metalLayers}층
           </label>
@@ -622,7 +622,7 @@ const MetallizationEDSPackagingSimulator = () => {
         {/* Electromigration + MTF 설명 */}
         <div className="bg-white border rounded-lg p-3">
           <h4 className="font-bold text-sm mb-2 text-red-700">⚠️ Electromigration (EM)</h4>
-          <div className="p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm mb-2">
+          <div className="relative z-10 p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm mb-2">
             <label className="block text-sm font-medium mb-2 text-blue-800">
               전류밀도: {currentDensity.toFixed(1)} MA/cm²
             </label>
@@ -756,7 +756,7 @@ const MetallizationEDSPackagingSimulator = () => {
         ))}
       </div>
 
-      <div className="p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
+      <div className="relative z-10 p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
         <div className="flex justify-between items-center mb-2">
           <label className="block text-sm font-medium text-green-800">Line Width: {lineWidth}nm</label>
           <span className="text-xs px-2 py-1 bg-green-100 rounded">
@@ -1215,7 +1215,7 @@ const MetallizationEDSPackagingSimulator = () => {
       <div className="bg-white border rounded-lg p-3">
         <h3 className="font-bold text-sm mb-2">📊 수율 시뮬레이터</h3>
         <div className="grid grid-cols-2 gap-3 mb-3">
-          <div className="p-3 bg-white rounded-lg border-2 border-red-200 shadow-sm">
+          <div className="relative z-10 p-3 bg-white rounded-lg border-2 border-red-200 shadow-sm">
             <label className="block text-sm font-medium mb-2 text-red-800">
               전체 다이: {totalDies}
             </label>
@@ -1233,7 +1233,7 @@ const MetallizationEDSPackagingSimulator = () => {
               <span>1000</span>
             </div>
           </div>
-          <div className="p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
+          <div className="relative z-10 p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
             <label className="block text-sm font-medium mb-2 text-blue-800">
               수율: {yieldRate}%
             </label>
@@ -1845,7 +1845,7 @@ const MetallizationEDSPackagingSimulator = () => {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <div className="p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
+        <div className="relative z-10 p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
           <label className="block text-sm font-medium mb-2 text-blue-800">
             I/O Count: {wireCount}
           </label>
@@ -1863,7 +1863,7 @@ const MetallizationEDSPackagingSimulator = () => {
             <span>2048</span>
           </div>
         </div>
-        <div className="p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
+        <div className="relative z-10 p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
           <label className="block text-sm font-medium mb-2 text-green-800">
             Pitch: {pitchSize}μm
           </label>
