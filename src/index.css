@@ -499,3 +499,105 @@ input[type="range"].slider-thumb-green::-moz-range-thumb {
   box-shadow: 0 2px 6px rgba(22, 163, 74, 0.4) !important;
   cursor: pointer;
 }
+
+/* ============================================ */
+/* Slider Track Styles for Each Color Class */
+/* ============================================ */
+
+/* 빨간색 슬라이더 트랙 */
+input[type="range"].slider-thumb-red::-webkit-slider-track {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #fecaca !important; /* red-200 */
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 2px solid #dc2626 !important; /* red-600 */
+}
+
+input[type="range"].slider-thumb-red::-moz-range-track {
+  background: #fecaca !important;
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 2px solid #dc2626 !important;
+}
+
+/* 파란색 슬라이더 트랙 */
+input[type="range"].slider-thumb-blue::-webkit-slider-track {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #bfdbfe !important; /* blue-200 */
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 2px solid #2563eb !important; /* blue-600 */
+}
+
+input[type="range"].slider-thumb-blue::-moz-range-track {
+  background: #bfdbfe !important;
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 2px solid #2563eb !important;
+}
+
+/* 녹색 슬라이더 트랙 */
+input[type="range"].slider-thumb-green::-webkit-slider-track {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #bbf7d0 !important; /* green-200 */
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 2px solid #16a34a !important; /* green-600 */
+}
+
+input[type="range"].slider-thumb-green::-moz-range-track {
+  background: #bbf7d0 !important;
+  height: 8px !important;
+  border-radius: 4px !important;
+  border: 2px solid #16a34a !important;
+}
+
+/* 호버 시 트랙 강조 */
+input[type="range"].slider-thumb-red:hover::-webkit-slider-track {
+  background: #fca5a5 !important; /* red-300 */
+  border: 2px solid #b91c1c !important; /* red-700 */
+}
+
+input[type="range"].slider-thumb-red:hover::-moz-range-track {
+  background: #fca5a5 !important;
+  border: 2px solid #b91c1c !important;
+}
+
+input[type="range"].slider-thumb-blue:hover::-webkit-slider-track {
+  background: #93c5fd !important; /* blue-300 */
+  border: 2px solid #1d4ed8 !important; /* blue-700 */
+}
+
+input[type="range"].slider-thumb-blue:hover::-moz-range-track {
+  background: #93c5fd !important;
+  border: 2px solid #1d4ed8 !important;
+}
+
+input[type="range"].slider-thumb-green:hover::-webkit-slider-track {
+  background: #86efac !important; /* green-300 */
+  border: 2px solid #15803d !important; /* green-700 */
+}
+
+input[type="range"].slider-thumb-green:hover::-moz-range-track {
+  background: #86efac !important;
+  border: 2px solid #15803d !important;
+}
+
+/* 포커스 시 아웃라인 */
+input[type="range"].slider-thumb-red:focus::-webkit-slider-track {
+  border: 2px solid #ef4444 !important; /* red-500 */
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.3) !important;
+}
+
+input[type="range"].slider-thumb-blue:focus::-webkit-slider-track {
+  border: 2px solid #3b82f6 !important; /* blue-500 */
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3) !important;
+}
+
+input[type="range"].slider-thumb-green:focus::-webkit-slider-track {
+  border: 2px solid #22c55e !important; /* green-500 */
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.3) !important;
+}
