@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SputteringSimulator from './SputteringSimulator';
 import EvaporatorSimulator from './EvaporatorSimulator';
 import ALDSimulator from './ALDSimulator';
+import PECVDSimulator from './PECVDSimulator';
 
 // Icon components
 const PlayIcon = () => (
@@ -929,87 +930,8 @@ const DepositionSimulator = () => {
   );
 
   const renderPECVDTab = () => (
-    <div className="space-y-6 p-6">
-      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-lg">
-        <h2 className="text-2xl font-bold text-purple-800 mb-4">
-          ⚡ CVD (PECVD) - 플라즈마 보조 화학기상증착
-        </h2>
-        <p className="text-gray-700 text-lg">
-          플라즈마의 고에너지 전자를 이용하여 저온에서 전구체 가스를 분해하고 화학반응을 촉진하여 막을 형성하는 방법입니다.
-        </p>
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4">⚡ 플라즈마 활성화</h3>
-        <div className="bg-purple-50 rounded-lg p-6">
-          <div className="text-center mb-6">
-            <div className="text-4xl mb-2">⚡</div>
-            <div className="font-mono text-xl font-bold text-purple-800">e⁻ + SiH₄ → SiH₃• + H•</div>
-            <div className="text-sm text-gray-600 mt-2">200-400°C (저온)</div>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 text-xs">
-            <div className="bg-white p-2 rounded text-center">
-              <div className="font-bold text-blue-600">RF 파워</div>
-              <div>13.56 MHz</div>
-            </div>
-            <div className="bg-white p-2 rounded text-center">
-              <div className="font-bold text-purple-600">플라즈마</div>
-              <div>전자 충돌</div>
-            </div>
-            <div className="bg-white p-2 rounded text-center">
-              <div className="font-bold text-green-600">라디칼</div>
-              <div>고반응성</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-indigo-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-indigo-800 mb-2">📊 주요 특성</h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <div className="font-medium">온도</div>
-              <div className="text-green-600">저온</div>
-            </div>
-            <div>
-              <div className="font-medium">증착속도</div>
-              <div className="text-green-600">빠름</div>
-            </div>
-            <div>
-              <div className="font-medium">Step Coverage</div>
-              <div className="text-orange-600">보통</div>
-            </div>
-            <div>
-              <div className="font-medium">막질</div>
-              <div className="text-blue-600">우수</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-blue-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-blue-800 mb-2">⚖️ Thermal CVD와 비교</h4>
-          <div className="text-sm space-y-2">
-            <div>
-              <span className="font-medium text-green-600">PECVD 장점:</span>
-              <ul className="ml-4 list-disc text-xs">
-                <li>저온 공정 (열 손상 방지)</li>
-                <li>빠른 증착속도</li>
-                <li>이온 충격으로 막질 개선</li>
-              </ul>
-            </div>
-            <div>
-              <span className="font-medium text-red-600">PECVD 단점:</span>
-              <ul className="ml-4 list-disc text-xs">
-                <li>복잡한 시스템</li>
-                <li>플라즈마 손상 가능성</li>
-                <li>수소 혼입</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="w-full">
+      <PECVDSimulator />
     </div>
   );
 
