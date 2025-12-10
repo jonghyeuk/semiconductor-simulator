@@ -4,42 +4,48 @@ const PECVDSimulator = () => {
   const [depositionThickness, setDepositionThickness] = useState(0);
   const [dissociationCount, setDissociationCount] = useState(0);
   const [threeLoaded, setThreeLoaded] = useState(false);
-  const [selectedProcess, setSelectedProcess] = useState(null);
   const [rfPowerOn, setRfPowerOn] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
 
-  const processPresets = {
-    'a-Si': {
-      name: 'a-Si (비정질 실리콘)',
-      color: '#888888',
-      gases: { silane: 30, hydrogen: 200, ammonia: 0, nitrousoxide: 0 },
-      pressure: 1000,  // 1 Torr = 1000 mTorr
-      temperature: 250,
-      power: 20
-    },
-    'SiNx': {
-      name: 'SiNx (질화규소)',
-      color: '#4488ff',
-      gases: { silane: 10, hydrogen: 0, ammonia: 80, nitrousoxide: 0 },  // NH3/SiH4 = 8:1
-      pressure: 300,   // 0.3 Torr
-      temperature: 350,
-      power: 20
-    },
-    'SiO2': {
-      name: 'SiO₂ (산화규소)',
-      color: '#ff6666',
-      gases: { silane: 50, hydrogen: 0, ammonia: 0, nitrousoxide: 710 },  // N2O/SiH4 ≈ 14:1
-      pressure: 1000,  // 1 Torr
-      temperature: 350,
-      power: 20
-    }
+  // 시나리오 모드
+  const [activeScenario, setActiveScenario] = useState('scenario1'); // scenario1, scenario2
+
+  // 시나리오1: 굴절률 맞추기 - N2O/SiH4 비율 조절
+  const [gasRatio, setGasRatio] = useState(14); // N2O/SiH4 ratio (5~25)
+  const [showRefractiveIndex, setShowRefractiveIndex] = useState(false);
+
+  // 시나리오2: 온도 비교
+  const [temperature, setTemperature] = useState(350); // 200~450°C
+
+  // 계산된 굴절률 (N2O/SiH4 비율에 따라)
+  const calculateRefractiveIndex = (ratio) => {
+    // 실제 데이터 기반 근사:
+    // ratio 5 → n ≈ 1.55 (Si-rich)
+    // ratio 14 → n ≈ 1.46 (stoichiometric)
+    // ratio 25 → n ≈ 1.44 (O-rich, 하지만 증착률 급감)
+    if (ratio < 10) return 1.55 - (ratio - 5) * 0.012;
+    if (ratio < 14) return 1.49 - (ratio - 10) * 0.0075;
+    if (ratio <= 18) return 1.46 - (ratio - 14) * 0.003;
+    return 1.448 - (ratio - 18) * 0.001;
   };
 
-  const [gasFlows, setGasFlows] = useState({ silane: 0, hydrogen: 0, ammonia: 0, nitrousoxide: 0 });
-  const [processPressure, setProcessPressure] = useState(10);
+  // 온도에 따른 H 함량 계산
+  const calculateHydrogenContent = (temp) => {
+    // 200°C → ~25%, 350°C → ~12%, 450°C → ~5%
+    return Math.max(5, 35 - temp * 0.07);
+  };
+
+  // 온도에 따른 막 밀도 (상대값)
+  const calculateFilmDensity = (temp) => {
+    // 200°C → 80%, 350°C → 95%, 450°C → 100%
+    return Math.min(100, 60 + temp * 0.1);
+  };
+
+  const [gasFlows, setGasFlows] = useState({ silane: 50, hydrogen: 0, ammonia: 0, nitrousoxide: 710 });
+  const [processPressure, setProcessPressure] = useState(1000);
   const [substrateTemp, setSubstrateTemp] = useState(350);
-  const [rfPower, setRfPower] = useState(300);
+  const [rfPower, setRfPower] = useState(20);
 
   const mountRef = useRef(null);
   const sceneRef = useRef(null);
@@ -52,29 +58,24 @@ const PECVDSimulator = () => {
   const fragmentsRef = useRef([]);
   const electronsRef = useRef([]);
   const depositedAtomsRef = useRef([]);
-  const depositLayerRef = useRef(0);
-  const lastDepositTimeRef = useRef(0);
   const rfPowerOnRef = useRef(false);
   const gasFlowsRef = useRef(gasFlows);
   const cameraStateRef = useRef({ distance: 22, angle: { x: 0.3, y: 0 } });
-  const selectedProcessRef = useRef(null);
+  const gasRatioRef = useRef(gasRatio);
+  const temperatureRef = useRef(temperature);
 
   useEffect(() => { rfPowerOnRef.current = rfPowerOn; }, [rfPowerOn]);
   useEffect(() => { gasFlowsRef.current = gasFlows; }, [gasFlows]);
-  useEffect(() => { selectedProcessRef.current = selectedProcess; }, [selectedProcess]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
+  useEffect(() => { gasRatioRef.current = gasRatio; }, [gasRatio]);
+  useEffect(() => { temperatureRef.current = temperature; }, [temperature]);
 
-  const selectProcess = (key) => {
-    const preset = processPresets[key];
-    setSelectedProcess(key);
-    setGasFlows(preset.gases);
-    setProcessPressure(preset.pressure);
-    setSubstrateTemp(preset.temperature);
-    setRfPower(preset.power);
-    setRfPowerOn(false);
-    setDepositionThickness(0);
-    setDissociationCount(0);
-  };
+  // 가스 비율 변경 시 가스 유량 업데이트
+  useEffect(() => {
+    const silane = 50;
+    const n2o = Math.round(silane * gasRatio);
+    setGasFlows({ silane, hydrogen: 0, ammonia: 0, nitrousoxide: n2o });
+  }, [gasRatio]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -135,32 +136,6 @@ const PECVDSimulator = () => {
         bonds.push(bond);
         group.add(bond);
       });
-    } else if (type === 'H2') {
-      const pos1 = new THREE.Vector3(-0.15, 0, 0);
-      const pos2 = new THREE.Vector3(0.15, 0, 0);
-      const h1 = createAtom(atomColors.H, atomSizes.H, pos1);
-      const h2 = createAtom(atomColors.H, atomSizes.H, pos2);
-      atoms.push({ mesh: h1, type: 'H', localPos: pos1.clone() });
-      atoms.push({ mesh: h2, type: 'H', localPos: pos2.clone() });
-      group.add(h1, h2);
-      const bond = createBond(pos1, pos2);
-      bonds.push(bond);
-      group.add(bond);
-    } else if (type === 'NH3') {
-      const nPos = new THREE.Vector3(0, 0, 0);
-      const n = createAtom(atomColors.N, atomSizes.N, nPos);
-      atoms.push({ mesh: n, type: 'N', localPos: nPos.clone() });
-      group.add(n);
-      const angles = [0, 2.094, 4.189];
-      angles.forEach(ang => {
-        const pos = new THREE.Vector3(Math.cos(ang) * bondLen * 0.9, -bondLen * 0.5, Math.sin(ang) * bondLen * 0.9);
-        const h = createAtom(atomColors.H, atomSizes.H, pos);
-        atoms.push({ mesh: h, type: 'H', localPos: pos.clone() });
-        group.add(h);
-        const bond = createBond(nPos, pos);
-        bonds.push(bond);
-        group.add(bond);
-      });
     } else if (type === 'N2O') {
       const positions = [new THREE.Vector3(-bondLen, 0, 0), new THREE.Vector3(0, 0, 0), new THREE.Vector3(bondLen, 0, 0)];
       const n1 = createAtom(atomColors.N, atomSizes.N, positions[0]);
@@ -213,11 +188,7 @@ const PECVDSimulator = () => {
       const mat = new THREE.MeshPhongMaterial({ color: colors[atomType] });
       const mesh = new THREE.Mesh(geo, mat);
       group.add(mesh);
-      // N은 SiNx 공정에서만 라디칼, SiO2에서는 그냥 흘러감
-      // O는 SiO2 공정에서만 라디칼
-      const isRadical = (atomType === 'Si') ||
-                        (atomType === 'N' && selectedProcessRef.current === 'SiNx') ||
-                        (atomType === 'O' && selectedProcessRef.current === 'SiO2');
+      const isRadical = (atomType === 'Si') || (atomType === 'O');
       group.userData = { type: atomType, velocity: velocity.clone(), isRadical };
     } else {
       const hCount = atomType === 'SiH' ? 1 : atomType === 'SiH2' ? 2 : 3;
@@ -317,16 +288,11 @@ const PECVDSimulator = () => {
       const colors = { Si: 0x8B7355, N: 0x3333FF, O: 0xFF3333 };
 
       if (atomType === 'SiO2') {
-        // SiO2 분자 형태로 증착 (Si 하나 + O 두개)
         const group = new THREE.Group();
-
-        // Si 중심
         const siGeo = new THREE.SphereGeometry(0.2, 8, 8);
         const siMat = new THREE.MeshPhongMaterial({ color: colors.Si });
         const si = new THREE.Mesh(siGeo, siMat);
         group.add(si);
-
-        // O 두 개
         const oGeo = new THREE.SphereGeometry(0.15, 8, 8);
         const oMat = new THREE.MeshPhongMaterial({ color: colors.O });
         const o1 = new THREE.Mesh(oGeo, oMat);
@@ -334,68 +300,33 @@ const PECVDSimulator = () => {
         o1.position.set(-0.25, 0, 0);
         o2.position.set(0.25, 0, 0);
         group.add(o1, o2);
-
         group.position.set(x, Math.min(y, 3), z);
         group.rotation.y = Math.random() * Math.PI * 2;
         scene.add(group);
         depositedAtomsRef.current.push(group);
         setDepositionThickness(prev => prev + 0.015);
       } else if (atomType === 'SiOx') {
-        // SiOx (Si + O 하나)
         const group = new THREE.Group();
-
         const siGeo = new THREE.SphereGeometry(0.2, 8, 8);
         const siMat = new THREE.MeshPhongMaterial({ color: colors.Si });
         const si = new THREE.Mesh(siGeo, siMat);
         group.add(si);
-
         const oGeo = new THREE.SphereGeometry(0.15, 8, 8);
         const oMat = new THREE.MeshPhongMaterial({ color: colors.O });
         const o = new THREE.Mesh(oGeo, oMat);
         o.position.set(0.22, 0, 0);
         group.add(o);
-
         group.position.set(x, Math.min(y, 3), z);
         group.rotation.y = Math.random() * Math.PI * 2;
         scene.add(group);
         depositedAtomsRef.current.push(group);
         setDepositionThickness(prev => prev + 0.012);
-      } else if (atomType === 'SiN') {
-        // SiN (Si + N)
-        const group = new THREE.Group();
-
-        const siGeo = new THREE.SphereGeometry(0.2, 8, 8);
-        const siMat = new THREE.MeshPhongMaterial({ color: colors.Si });
-        const si = new THREE.Mesh(siGeo, siMat);
-        group.add(si);
-
-        const nGeo = new THREE.SphereGeometry(0.18, 8, 8);
-        const nMat = new THREE.MeshPhongMaterial({ color: colors.N });
-        const n = new THREE.Mesh(nGeo, nMat);
-        n.position.set(0.23, 0, 0);
-        group.add(n);
-
-        group.position.set(x, Math.min(y, 3), z);
-        group.rotation.y = Math.random() * Math.PI * 2;
-        scene.add(group);
-        depositedAtomsRef.current.push(group);
-        setDepositionThickness(prev => prev + 0.012);
-      } else {
-        // 단일 원자 (a-Si)
-        const geo = new THREE.SphereGeometry(0.2, 8, 8);
-        const mat = new THREE.MeshPhongMaterial({ color: colors[atomType] || 0x8B7355 });
-        const atom = new THREE.Mesh(geo, mat);
-        atom.position.set(x, Math.min(y, 3), z);
-        scene.add(atom);
-        depositedAtomsRef.current.push(atom);
-        setDepositionThickness(prev => prev + 0.01);
       }
     };
 
     const animate = () => {
       frameId.current = requestAnimationFrame(animate);
 
-      // 정지 상태면 렌더링만 하고 업데이트 안 함
       if (isPausedRef.current) {
         const { distance, angle } = cameraStateRef.current;
         camera.position.set(
@@ -411,25 +342,19 @@ const PECVDSimulator = () => {
       timeRef.current += 0.016;
 
       const flows = gasFlowsRef.current;
-      const totalFlow = flows.silane + flows.hydrogen + flows.ammonia + flows.nitrousoxide;
+      const totalFlow = flows.silane + flows.nitrousoxide;
 
-      // Spawn molecules from showerhead - 균일 분포
-      if (totalFlow > 0 && Math.random() < totalFlow / 100) {
-        const types = [];
-        if (flows.silane > 0) for (let i = 0; i < flows.silane/25; i++) types.push('SiH4');
-        if (flows.hydrogen > 0) for (let i = 0; i < flows.hydrogen/25; i++) types.push('H2');
-        if (flows.ammonia > 0) for (let i = 0; i < flows.ammonia/25; i++) types.push('NH3');
-        if (flows.nitrousoxide > 0) for (let i = 0; i < flows.nitrousoxide/25; i++) types.push('N2O');
-        if (types.length > 0) {
-          const type = types[Math.floor(Math.random() * types.length)];
-          // 균일한 원형 분포
-          const r = Math.sqrt(Math.random()) * 6;
-          const ang = Math.random() * Math.PI * 2;
-          const x = Math.cos(ang) * r;
-          const z = Math.sin(ang) * r;
-          const mol = createMolecule(type, new THREE.Vector3(x, 9.7, z), THREE);
-          if (mol) moleculesRef.current.push(mol);
-        }
+      // Spawn molecules - N2O/SiH4 비율에 따라
+      if (totalFlow > 0 && Math.random() < 0.3) {
+        const ratio = gasRatioRef.current;
+        // SiH4 1개당 N2O ratio개 비율로 생성
+        const type = Math.random() < (1 / (ratio + 1)) ? 'SiH4' : 'N2O';
+        const r = Math.sqrt(Math.random()) * 6;
+        const ang = Math.random() * Math.PI * 2;
+        const x = Math.cos(ang) * r;
+        const z = Math.sin(ang) * r;
+        const mol = createMolecule(type, new THREE.Vector3(x, 9.7, z), THREE);
+        if (mol) moleculesRef.current.push(mol);
       }
 
       // Electrons in plasma
@@ -479,32 +404,17 @@ const PECVDSimulator = () => {
                 const type = mol.userData.type;
                 setDissociationCount(p => p + 1);
 
-                // 분해 시 웨이퍼 전체에 균일하게 증착 (은근슬쩍)
-                const process = selectedProcessRef.current;
+                // 증착 - 비율에 따라 SiO2 또는 SiOx
                 const depR = Math.sqrt(Math.random()) * 5.5;
                 const depAng = Math.random() * Math.PI * 2;
                 const depX = Math.cos(depAng) * depR;
                 const depZ = Math.sin(depAng) * depR;
 
-                if (type === 'SiH4') {
-                  if (process === 'a-Si') {
-                    depositAtom(depX, depZ, 'Si');
-                    // a-Si는 추가로 더 증착
-                    if (Math.random() < 0.5) {
-                      const depR2 = Math.sqrt(Math.random()) * 5.5;
-                      const depAng2 = Math.random() * Math.PI * 2;
-                      depositAtom(Math.cos(depAng2) * depR2, Math.sin(depAng2) * depR2, 'Si');
-                      const depR3 = Math.sqrt(Math.random()) * 5.5;
-                      const depAng3 = Math.random() * Math.PI * 2;
-                      depositAtom(Math.cos(depAng3) * depR3, Math.sin(depAng3) * depR3, 'Si');
-                    }
-                  }
-                } else if (type === 'NH3' && process === 'SiNx') {
-                  // SiNx: SiH4 분해 시 SiN 증착
-                  depositAtom(depX, depZ, 'SiN');
-                } else if (type === 'N2O' && process === 'SiO2') {
-                  // SiO2: N2O 분해 시 SiO2 증착
-                  depositAtom(depX, depZ, Math.random() < 0.8 ? 'SiO2' : 'SiOx');
+                const ratio = gasRatioRef.current;
+                if (type === 'N2O') {
+                  // 비율이 높을수록 SiO2, 낮으면 SiOx
+                  const stoichProb = Math.min(0.95, ratio / 20);
+                  depositAtom(depX, depZ, Math.random() < stoichProb ? 'SiO2' : 'SiOx');
                 }
 
                 if (type === 'SiH4') {
@@ -513,12 +423,6 @@ const PECVDSimulator = () => {
                   const hCount = chosen === 'Si' ? 4 : chosen === 'SiH' ? 3 : chosen === 'SiH2' ? 2 : 1;
                   createFragment(chosen, pos, vel.clone().add(new THREE.Vector3(0, -0.01, 0)), THREE);
                   for (let i = 0; i < hCount; i++) createFragment('H', pos.clone(), new THREE.Vector3((Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08), THREE);
-                } else if (type === 'H2') {
-                  createFragment('H', pos.clone(), new THREE.Vector3(-0.04, 0, 0), THREE);
-                  createFragment('H', pos.clone(), new THREE.Vector3(0.04, 0, 0), THREE);
-                } else if (type === 'NH3') {
-                  createFragment('N', pos, vel, THREE);
-                  for (let i = 0; i < 3; i++) createFragment('H', pos.clone(), new THREE.Vector3((Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08, (Math.random()-0.5)*0.08), THREE);
                 } else if (type === 'N2O') {
                   createFragment('N', pos.clone(), vel.clone().add(new THREE.Vector3(-0.02, -0.02, 0)), THREE);
                   createFragment('N', pos.clone(), vel.clone().add(new THREE.Vector3(0, -0.02, 0)), THREE);
@@ -566,7 +470,6 @@ const PECVDSimulator = () => {
         const dist = Math.sqrt(frag.position.x**2 + frag.position.z**2);
         if (frag.position.y <= surfaceY && dist <= 6) {
           if (frag.userData.isRadical) {
-            // 라디칼은 흡수됨 (이미 분해 시 증착했으므로 여기선 그냥 사라짐)
             scene.remove(frag);
             frag.traverse(c => { c.geometry?.dispose(); c.material?.dispose(); });
             return false;
@@ -637,14 +540,17 @@ const PECVDSimulator = () => {
     fragmentsRef.current = [];
     electronsRef.current = [];
     depositedAtomsRef.current = [];
-    depositLayerRef.current = 0;
-    lastDepositTimeRef.current = 0;
-    setSelectedProcess(null);
     setRfPowerOn(false);
     setIsPaused(false);
     setDepositionThickness(0);
     setDissociationCount(0);
-    setGasFlows({ silane: 0, hydrogen: 0, ammonia: 0, nitrousoxide: 0 });
+    setShowRefractiveIndex(false);
+  };
+
+  const handleMeasureRI = () => {
+    setIsPaused(true);
+    setRfPowerOn(false);
+    setShowRefractiveIndex(true);
   };
 
   useEffect(() => {
@@ -667,168 +573,502 @@ const PECVDSimulator = () => {
 
   if (!threeLoaded) return <div className="w-full h-screen flex items-center justify-center bg-gray-900 text-white text-xl">로딩 중...</div>;
 
-  const totalFlow = gasFlows.silane + gasFlows.hydrogen + gasFlows.ammonia + gasFlows.nitrousoxide;
+  const currentRI = calculateRefractiveIndex(gasRatio);
+  const currentH = calculateHydrogenContent(temperature);
+  const currentDensity = calculateFilmDensity(temperature);
+  const isRIGood = Math.abs(currentRI - 1.46) < 0.02;
 
   return (
     <div className="w-full bg-gray-900">
-      {/* 시뮬레이터 영역 - 화면 전체 높이 */}
+      {/* 슬라이더 스타일 */}
+      <style>{`
+        input[type="range"].slider-pecvd {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        input[type="range"].slider-pecvd::-webkit-slider-runnable-track {
+          background: #fecaca;
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #dc2626;
+        }
+        input[type="range"].slider-pecvd::-moz-range-track {
+          background: #fecaca;
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #dc2626;
+        }
+        input[type="range"].slider-pecvd::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -8px;
+          background: linear-gradient(145deg, #ef4444, #dc2626);
+          height: 28px;
+          width: 28px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(220, 38, 38, 0.6);
+          cursor: pointer;
+        }
+        input[type="range"].slider-pecvd::-moz-range-thumb {
+          background: linear-gradient(145deg, #ef4444, #dc2626);
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(220, 38, 38, 0.6);
+          cursor: pointer;
+        }
+        input[type="range"].slider-pecvd:hover::-webkit-slider-thumb {
+          transform: scale(1.1);
+          box-shadow: 0 4px 12px rgba(220, 38, 38, 0.8);
+        }
+
+        input[type="range"].slider-temp {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        input[type="range"].slider-temp::-webkit-slider-runnable-track {
+          background: linear-gradient(to right, #bfdbfe, #fecaca);
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #f97316;
+        }
+        input[type="range"].slider-temp::-moz-range-track {
+          background: linear-gradient(to right, #bfdbfe, #fecaca);
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #f97316;
+        }
+        input[type="range"].slider-temp::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -8px;
+          background: linear-gradient(145deg, #fb923c, #ea580c);
+          height: 28px;
+          width: 28px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(234, 88, 12, 0.6);
+          cursor: pointer;
+        }
+        input[type="range"].slider-temp::-moz-range-thumb {
+          background: linear-gradient(145deg, #fb923c, #ea580c);
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(234, 88, 12, 0.6);
+          cursor: pointer;
+        }
+      `}</style>
+
+      {/* 시뮬레이터 영역 */}
       <div className="h-screen flex flex-col">
         <div className="bg-gray-800 border-b border-gray-700 p-3">
-          <h1 className="text-xl font-bold text-white">🔬 PECVD 분자 시뮬레이터</h1>
-          <p className="text-gray-400 text-xs">RF OFF: 분자가 그대로 흘러내림 | RF ON: 플라즈마에서 분해 → Si 박막 증착</p>
+          <h1 className="text-xl font-bold text-white">🔬 PECVD SiO₂ 교육 시뮬레이터</h1>
+          <p className="text-gray-400 text-xs">가스 비율과 온도가 막질에 미치는 영향을 학습합니다</p>
+        </div>
+
+        {/* 시나리오 탭 */}
+        <div className="bg-gray-800 border-b border-gray-600 p-2 flex gap-2">
+          <button
+            onClick={() => { setActiveScenario('scenario1'); handleReset(); setGasRatio(14); }}
+            className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+              activeScenario === 'scenario1'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            📊 시나리오1: 굴절률 맞추기
+          </button>
+          <button
+            onClick={() => { setActiveScenario('scenario2'); handleReset(); setTemperature(350); }}
+            className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+              activeScenario === 'scenario2'
+                ? 'bg-orange-600 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            🌡️ 시나리오2: 저온 vs 고온
+          </button>
         </div>
 
         <div className="flex-1 flex overflow-hidden">
-        <div className="flex-1 relative bg-black">
-          <div ref={mountRef} className="w-full h-full" />
+          <div className="flex-1 relative bg-black">
+            <div ref={mountRef} className="w-full h-full" />
 
-          <div className="absolute top-3 left-3 right-3 flex justify-center">
-            <div className="bg-gray-800/95 rounded-lg p-2 backdrop-blur flex gap-2">
-              {Object.entries(processPresets).map(([key, preset]) => (
-                <button key={key} onClick={() => selectProcess(key)}
-                  className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${selectedProcess === key ? 'bg-blue-600 text-white' : 'bg-gray-700 text-gray-300 hover:bg-gray-600'}`}>
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full" style={{ backgroundColor: preset.color }} />
-                    <span>{key}</span>
+            {/* 증착 정보 */}
+            <div className="absolute bottom-3 left-3 bg-gray-800/95 rounded-lg p-3 backdrop-blur">
+              <div className="text-xs text-gray-400">증착 두께</div>
+              <div className="text-2xl font-bold text-yellow-400">{depositionThickness.toFixed(1)} nm</div>
+              <div className="text-xs text-gray-400 mt-1">분해: <span className="text-purple-400">{dissociationCount}</span></div>
+            </div>
+
+            {/* 굴절률 측정 결과 팝업 */}
+            {showRefractiveIndex && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                <div className="bg-gray-800 rounded-xl p-6 border-2 border-blue-500 max-w-md">
+                  <h3 className="text-xl font-bold text-white mb-4">📊 굴절률 측정 결과</h3>
+                  <div className="text-center mb-4">
+                    <div className="text-5xl font-bold mb-2" style={{ color: isRIGood ? '#22c55e' : '#ef4444' }}>
+                      n = {currentRI.toFixed(3)}
+                    </div>
+                    <div className="text-gray-400">목표: n = 1.460 ± 0.02</div>
                   </div>
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <div className="absolute bottom-3 left-3 bg-gray-800/95 rounded-lg p-3 backdrop-blur">
-            <div className="text-xs text-gray-400">증착 두께</div>
-            <div className="text-2xl font-bold text-yellow-400">{depositionThickness.toFixed(1)} nm</div>
-            <div className="text-xs text-gray-400 mt-1">분해: <span className="text-purple-400">{dissociationCount}</span></div>
-          </div>
+                  {isRIGood ? (
+                    <div className="bg-green-900/50 border border-green-500 rounded-lg p-3 mb-4">
+                      <div className="text-green-400 font-bold">✅ 성공!</div>
+                      <div className="text-green-300 text-sm">이상적인 화학양론적 SiO₂ 막입니다.</div>
+                    </div>
+                  ) : currentRI > 1.48 ? (
+                    <div className="bg-red-900/50 border border-red-500 rounded-lg p-3 mb-4">
+                      <div className="text-red-400 font-bold">⚠️ Si-rich 막</div>
+                      <div className="text-red-300 text-sm">N₂O 비율을 높여보세요. 산소가 부족합니다.</div>
+                    </div>
+                  ) : (
+                    <div className="bg-yellow-900/50 border border-yellow-500 rounded-lg p-3 mb-4">
+                      <div className="text-yellow-400 font-bold">⚠️ O-rich 막</div>
+                      <div className="text-yellow-300 text-sm">N₂O 비율이 너무 높습니다. 증착률이 낮아집니다.</div>
+                    </div>
+                  )}
 
-          <div className="absolute bottom-3 right-3 bg-gray-800/95 rounded-lg p-2 backdrop-blur text-xs">
-            <div className="text-gray-400 mb-1">범례</div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-2"><span className="text-yellow-700">●</span><span className="text-gray-300">Si</span></div>
-              <div className="flex items-center gap-2"><span className="text-white">●</span><span className="text-gray-300">H</span></div>
-              <div className="flex items-center gap-2"><span className="text-blue-500">●</span><span className="text-gray-300">N</span></div>
-              <div className="flex items-center gap-2"><span className="text-red-500">●</span><span className="text-gray-300">O</span></div>
-              <div className="flex items-center gap-2"><span className="text-cyan-400">●</span><span className="text-gray-300">e⁻</span></div>
-            </div>
-          </div>
-        </div>
+                  <div className="text-xs text-gray-400 mb-4">
+                    현재 설정: N₂O/SiH₄ = {gasRatio}:1
+                  </div>
 
-        <div className="w-72 bg-gray-800 border-l border-gray-700 overflow-y-auto p-3 space-y-3">
-          {selectedProcess && (
-            <div className="bg-gradient-to-br from-indigo-900 to-purple-900 rounded-lg p-3 border border-indigo-500">
-              <h2 className="font-bold text-white mb-2">{processPresets[selectedProcess].name}</h2>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div className="bg-black/40 p-2 rounded"><div className="text-gray-400">압력</div><div className="text-cyan-400 font-bold">{processPressure} mTorr</div></div>
-                <div className="bg-black/40 p-2 rounded"><div className="text-gray-400">온도</div><div className="text-orange-400 font-bold">{substrateTemp}°C</div></div>
-                <div className="bg-black/40 p-2 rounded"><div className="text-gray-400">RF Power</div><div className="text-yellow-400 font-bold">{rfPower}W</div></div>
-                <div className="bg-black/40 p-2 rounded"><div className="text-gray-400">총 유량</div><div className="text-green-400 font-bold">{totalFlow} sccm</div></div>
+                  <button
+                    onClick={() => setShowRefractiveIndex(false)}
+                    className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
+                  >
+                    확인
+                  </button>
+                </div>
               </div>
-              <div className="mt-2 bg-black/30 rounded p-2 text-xs">
-                <div className="text-gray-400 mb-1">가스 조성</div>
-                {gasFlows.silane > 0 && <div className="flex justify-between"><span className="text-white">SiH₄</span><span className="text-blue-300">{gasFlows.silane} sccm</span></div>}
-                {gasFlows.hydrogen > 0 && <div className="flex justify-between"><span className="text-white">H₂</span><span className="text-blue-300">{gasFlows.hydrogen} sccm</span></div>}
-                {gasFlows.ammonia > 0 && <div className="flex justify-between"><span className="text-white">NH₃</span><span className="text-blue-300">{gasFlows.ammonia} sccm</span></div>}
-                {gasFlows.nitrousoxide > 0 && <div className="flex justify-between"><span className="text-white">N₂O</span><span className="text-blue-300">{gasFlows.nitrousoxide} sccm</span></div>}
+            )}
+
+            {/* 범례 */}
+            <div className="absolute bottom-3 right-3 bg-gray-800/95 rounded-lg p-2 backdrop-blur text-xs">
+              <div className="text-gray-400 mb-1">범례</div>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2"><span className="text-yellow-700">●</span><span className="text-gray-300">Si</span></div>
+                <div className="flex items-center gap-2"><span className="text-white">●</span><span className="text-gray-300">H</span></div>
+                <div className="flex items-center gap-2"><span className="text-blue-500">●</span><span className="text-gray-300">N</span></div>
+                <div className="flex items-center gap-2"><span className="text-red-500">●</span><span className="text-gray-300">O</span></div>
+                <div className="flex items-center gap-2"><span className="text-cyan-400">●</span><span className="text-gray-300">e⁻</span></div>
               </div>
-            </div>
-          )}
-
-          <button onClick={() => setRfPowerOn(!rfPowerOn)} disabled={!selectedProcess}
-            className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${!selectedProcess ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : rfPowerOn ? 'bg-red-600 text-white animate-pulse' : 'bg-green-600 text-white hover:bg-green-500'}`}>
-            {!selectedProcess ? '공정 선택 필요' : rfPowerOn ? '⚡ RF OFF' : '⚡ RF ON'}
-          </button>
-
-          <button onClick={() => setIsPaused(!isPaused)} disabled={!selectedProcess}
-            className={`w-full py-3 rounded-lg font-bold text-sm transition-all ${!selectedProcess ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : isPaused ? 'bg-blue-600 text-white' : 'bg-yellow-600 text-white hover:bg-yellow-500'}`}>
-            {isPaused ? '▶️ 재생' : '⏸️ 정지'}
-          </button>
-
-          <div className="bg-gray-900 rounded-lg p-3 border border-gray-600 text-xs">
-            <h3 className="font-bold text-white mb-2">공정 상태</h3>
-            <div className="space-y-1">
-              <div className="flex justify-between"><span className="text-gray-400">가스</span><span className={totalFlow > 0 ? 'text-green-400' : 'text-gray-500'}>{totalFlow > 0 ? '● 주입중' : '○ 없음'}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">플라즈마</span><span className={rfPowerOn ? 'text-purple-400' : 'text-gray-500'}>{rfPowerOn ? '● ON' : '○ OFF'}</span></div>
-              <div className="flex justify-between"><span className="text-gray-400">증착</span><span className={rfPowerOn && totalFlow > 0 ? 'text-yellow-400' : 'text-gray-500'}>{rfPowerOn && totalFlow > 0 ? '● 진행' : '○ 정지'}</span></div>
             </div>
           </div>
 
-          <button onClick={handleReset} className="w-full py-2 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600 text-sm">🔄 리셋</button>
+          {/* 사이드 패널 */}
+          <div className="w-80 bg-gray-800 border-l border-gray-700 overflow-y-auto p-3 space-y-3">
 
-          {!selectedProcess && (
-            <div className="bg-blue-900/50 rounded-lg p-4 border border-blue-500/50 text-center">
-              <div className="text-3xl mb-2">👆</div>
-              <div className="text-blue-200 text-sm">상단에서 공정 선택</div>
-            </div>
-          )}
-        </div>
+            {/* 시나리오1: 굴절률 맞추기 */}
+            {activeScenario === 'scenario1' && (
+              <>
+                <div className="bg-blue-900/50 rounded-lg p-4 border border-blue-500">
+                  <h3 className="font-bold text-blue-300 mb-2">🎯 미션: 굴절률 맞추기</h3>
+                  <p className="text-gray-300 text-sm">
+                    N₂O/SiH₄ 가스 비율을 조절하여<br/>
+                    <span className="text-yellow-400 font-bold">굴절률 n = 1.46 ± 0.02</span>를 달성하세요!
+                  </p>
+                </div>
+
+                <div className="bg-gray-900 rounded-lg p-4 border border-gray-600">
+                  <label className="block text-sm font-bold mb-3 text-red-400">
+                    🧪 N₂O / SiH₄ 비율: {gasRatio}:1
+                  </label>
+                  <input
+                    type="range"
+                    min="5"
+                    max="25"
+                    step="1"
+                    value={gasRatio}
+                    onChange={(e) => setGasRatio(parseInt(e.target.value))}
+                    className="w-full slider-pecvd"
+                    disabled={rfPowerOn}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>5:1 (Si-rich)</span>
+                    <span className="text-green-400">14:1</span>
+                    <span>25:1 (O-rich)</span>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900 rounded-lg p-3 border border-gray-600 text-xs">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-black/40 p-2 rounded">
+                      <div className="text-gray-400">SiH₄</div>
+                      <div className="text-cyan-400 font-bold">{gasFlows.silane} sccm</div>
+                    </div>
+                    <div className="bg-black/40 p-2 rounded">
+                      <div className="text-gray-400">N₂O</div>
+                      <div className="text-cyan-400 font-bold">{gasFlows.nitrousoxide} sccm</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-gray-400">
+                    예상 굴절률: <span className={`font-bold ${isRIGood ? 'text-green-400' : 'text-yellow-400'}`}>
+                      n ≈ {currentRI.toFixed(3)}
+                    </span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 시나리오2: 온도 비교 */}
+            {activeScenario === 'scenario2' && (
+              <>
+                <div className="bg-orange-900/50 rounded-lg p-4 border border-orange-500">
+                  <h3 className="font-bold text-orange-300 mb-2">🌡️ 미션: 온도 영향 관찰</h3>
+                  <p className="text-gray-300 text-sm">
+                    온도를 변경하면서<br/>
+                    <span className="text-yellow-400 font-bold">수소 함량과 막 밀도</span>의 변화를 관찰하세요!
+                  </p>
+                </div>
+
+                <div className="bg-gray-900 rounded-lg p-4 border border-gray-600">
+                  <label className="block text-sm font-bold mb-3 text-orange-400">
+                    🌡️ 기판 온도: {temperature}°C
+                  </label>
+                  <input
+                    type="range"
+                    min="200"
+                    max="450"
+                    step="10"
+                    value={temperature}
+                    onChange={(e) => setTemperature(parseInt(e.target.value))}
+                    className="w-full slider-temp"
+                    disabled={rfPowerOn}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>200°C (저온)</span>
+                    <span>450°C (고온)</span>
+                  </div>
+                </div>
+
+                <div className="bg-gray-900 rounded-lg p-3 border border-gray-600">
+                  <h4 className="text-sm font-bold text-white mb-2">📊 막 특성 예측</h4>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">수소 함량 (H%)</span>
+                        <span className={`font-bold ${currentH > 15 ? 'text-red-400' : 'text-green-400'}`}>
+                          {currentH.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className={`h-2 rounded-full ${currentH > 15 ? 'bg-red-500' : 'bg-green-500'}`}
+                          style={{ width: `${currentH * 3}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">막 밀도</span>
+                        <span className={`font-bold ${currentDensity > 90 ? 'text-green-400' : 'text-yellow-400'}`}>
+                          {currentDensity.toFixed(0)}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className={`h-2 rounded-full ${currentDensity > 90 ? 'bg-green-500' : 'bg-yellow-500'}`}
+                          style={{ width: `${currentDensity}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`rounded-lg p-3 border text-xs ${
+                  temperature < 280 ? 'bg-blue-900/30 border-blue-500' :
+                  temperature > 400 ? 'bg-red-900/30 border-red-500' :
+                  'bg-green-900/30 border-green-500'
+                }`}>
+                  {temperature < 280 ? (
+                    <>
+                      <div className="font-bold text-blue-400">❄️ 저온 공정</div>
+                      <div className="text-blue-200 mt-1">
+                        • H 함량 높음 → 버블 위험<br/>
+                        • 막 밀도 낮음 → 약한 절연<br/>
+                        • 장점: 열손상 방지
+                      </div>
+                    </>
+                  ) : temperature > 400 ? (
+                    <>
+                      <div className="font-bold text-red-400">🔥 고온 공정</div>
+                      <div className="text-red-200 mt-1">
+                        • H 함량 낮음 → 안정적<br/>
+                        • 막 밀도 높음 → 우수한 절연<br/>
+                        • 단점: 열손상 가능
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-bold text-green-400">✅ 최적 온도 범위</div>
+                      <div className="text-green-200 mt-1">
+                        • 적절한 H 함량<br/>
+                        • 좋은 막 밀도<br/>
+                        • 열손상과 품질 균형
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            )}
+
+            {/* 공통 컨트롤 */}
+            <button
+              onClick={() => setRfPowerOn(!rfPowerOn)}
+              className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+                rfPowerOn
+                  ? 'bg-red-600 text-white animate-pulse'
+                  : 'bg-green-600 text-white hover:bg-green-500'
+              }`}
+            >
+              {rfPowerOn ? '⚡ RF OFF' : '⚡ RF ON - 증착 시작'}
+            </button>
+
+            {activeScenario === 'scenario1' && (
+              <button
+                onClick={handleMeasureRI}
+                disabled={depositionThickness < 5}
+                className={`w-full py-3 rounded-lg font-bold text-sm transition-all ${
+                  depositionThickness < 5
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-purple-600 text-white hover:bg-purple-500'
+                }`}
+              >
+                {depositionThickness < 5 ? '📊 5nm 이상 증착 필요' : '📊 굴절률 측정하기'}
+              </button>
+            )}
+
+            <button
+              onClick={() => setIsPaused(!isPaused)}
+              className={`w-full py-3 rounded-lg font-bold text-sm transition-all ${
+                isPaused
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-yellow-600 text-white hover:bg-yellow-500'
+              }`}
+            >
+              {isPaused ? '▶️ 재생' : '⏸️ 정지'}
+            </button>
+
+            <button
+              onClick={handleReset}
+              className="w-full py-2 rounded-lg bg-gray-700 text-gray-300 hover:bg-gray-600 text-sm"
+            >
+              🔄 리셋
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* PECVD 공정 설명 섹션 - 시뮬레이터 아래 별도 영역 */}
+      {/* 교육 설명 섹션 */}
       <div className="bg-gray-800 border-t border-gray-700 p-6">
-        <h2 className="text-xl font-bold text-white mb-4">📚 PECVD 공정 이해하기</h2>
+        <h2 className="text-xl font-bold text-white mb-4">📚 SiO₂ PECVD 공정 학습 가이드</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* 박막 명명법 */}
-          <div className="bg-gray-900 rounded-lg p-4 border border-gray-600">
-            <h3 className="text-yellow-400 font-bold mb-2 text-sm">🏷️ 박막 명명법</h3>
-            <div className="text-gray-300 text-sm space-y-2">
+          {/* 시나리오1 설명 */}
+          <div className="bg-gray-900 rounded-lg p-4 border border-blue-800">
+            <h3 className="text-blue-400 font-bold mb-3 text-lg">📊 시나리오1: 굴절률과 가스 비율</h3>
+            <div className="text-gray-300 text-sm space-y-3">
               <p>
-                <span className="text-cyan-300 font-bold">a-Si</span>: 'a'는 amorphous(비정질)의 약자입니다. 결정 구조가 없는 무질서한 실리콘 박막을 의미하며, PECVD의 저온 공정 특성상 결정화가 일어나지 않아 비정질 구조가 형성됩니다.
+                <span className="text-yellow-400 font-bold">왜 N₂O/SiH₄ 비율이 14:1인가요?</span><br/>
+                이론적으로 SiO₂를 만들려면 N₂O 2개가 필요합니다 (2:1).<br/>
+                하지만 N₂O는 <span className="text-red-400">분해율이 매우 낮아서</span> 실제로는 14:1 이상이 필요합니다.
               </p>
+              <div className="bg-black/30 p-3 rounded">
+                <div className="font-mono text-xs">
+                  <div className="text-cyan-400">SiH₄ + 2N₂O → SiO₂ + 2N₂ + 2H₂</div>
+                  <div className="text-gray-500 mt-1">이론 비율: 2:1</div>
+                  <div className="text-yellow-400 mt-1">실제 필요: 14:1 (N₂O 분해율 ~15%)</div>
+                </div>
+              </div>
               <p>
-                <span className="text-cyan-300 font-bold">SiNx</span>: 화학양론적 Si₃N₄가 아닌 이유는 PECVD 공정에서 Si:N 비율을 정확히 3:4로 맞추기 어렵기 때문입니다. 공정 조건에 따라 Si-rich 또는 N-rich 막이 형성되므로 'x'로 가변 조성을 표현합니다.
+                <span className="text-green-400 font-bold">굴절률로 막 조성 판단:</span>
               </p>
-              <p>
-                <span className="text-cyan-300 font-bold">SiO₂</span>: 실제로는 SiOx로 표기하기도 하며, N₂O/SiH₄ 비율에 따라 산소 함량이 달라집니다. 이상적인 SiO₂ 조성을 위해서는 높은 N₂O 비율(10:1 이상)이 필요합니다.
-              </p>
+              <ul className="list-disc ml-4 text-xs space-y-1">
+                <li><span className="text-red-400">n {">"} 1.50</span>: Si-rich (산소 부족) → N₂O 증가 필요</li>
+                <li><span className="text-green-400">n ≈ 1.46</span>: 화학양론적 SiO₂ (최적)</li>
+                <li><span className="text-blue-400">n {"<"} 1.45</span>: O-rich → 증착률 급감</li>
+              </ul>
             </div>
           </div>
 
-          {/* 장점 */}
-          <div className="bg-gray-900 rounded-lg p-4 border border-green-800">
-            <h3 className="text-green-400 font-bold mb-2 text-sm">✅ PECVD의 장점</h3>
-            <ul className="text-gray-300 text-sm space-y-1">
-              <li>• <span className="text-white font-medium">저온 공정</span>: 200~400°C에서 증착 가능 (열산화 900°C+ 대비 절반 이하)</li>
-              <li>• <span className="text-white font-medium">다양한 박막</span>: 가스 조합만 바꿔 SiO₂, SiNx, a-Si 등 다양한 막 증착</li>
-              <li>• <span className="text-white font-medium">조성 제어</span>: 가스 비율 조절로 막의 특성(응력, 굴절률, 유전율) 튜닝 가능</li>
-              <li>• <span className="text-white font-medium">높은 증착률</span>: 플라즈마 에너지로 반응 활성화 → 빠른 성막 (수십~수백 nm/min)</li>
-              <li>• <span className="text-white font-medium">대면적 균일성</span>: 샤워헤드 구조로 300mm 이상 대형 기판 처리 가능</li>
-              <li>• <span className="text-white font-medium">단순한 원리</span>: 원하는 가스를 넣고 플라즈마로 분해하면 박막 형성!</li>
-            </ul>
-          </div>
-
-          {/* 공정의 어려움 */}
-          <div className="bg-gray-900 rounded-lg p-4 border border-red-800">
-            <h3 className="text-red-400 font-bold mb-2 text-sm">⚠️ 공정의 어려움</h3>
-            <ul className="text-gray-300 text-sm space-y-1">
-              <li>• <span className="text-white font-medium">균일도 확보</span>: 플라즈마 밀도, 가스 분포, 온도 균일성을 동시에 제어해야 함</li>
-              <li>• <span className="text-white font-medium">조성 일정성</span>: 가스 비율의 미세한 변화 → 막질 급변 (굴절률, 응력 변화)</li>
-              <li>• <span className="text-white font-medium">파티클 문제</span>:
-                <span className="text-gray-400 block ml-3">- 과도한 가스 유량 → 기상 반응으로 분말(powder) 생성</span>
-                <span className="text-gray-400 block ml-3">- 챔버벽 박리 → 웨이퍼 오염 및 수율 저하</span>
-                <span className="text-gray-400 block ml-3">- 샤워헤드 구멍 막힘 → 불균일 증착</span>
-              </li>
-              <li>• <span className="text-white font-medium">펌프 손상</span>: SiH₄ 분해물이 펌프에 축적 → 오일 오염, 펌프 수명 단축</li>
-              <li>• <span className="text-white font-medium">플라즈마 불안정</span>: 압력/파워 설정 오류 → 아킹(arcing), 불균일 플라즈마</li>
-              <li>• <span className="text-white font-medium">수소 함량</span>: PECVD 막은 H 함량이 높아 후속 열처리 시 버블 발생 가능</li>
-            </ul>
-          </div>
-
-          {/* 공정 변수 영향 */}
-          <div className="bg-gray-900 rounded-lg p-4 border border-purple-800">
-            <h3 className="text-purple-400 font-bold mb-2 text-sm">🔬 공정 변수의 영향</h3>
-            <div className="text-gray-300 text-sm space-y-2">
-              <p><span className="text-yellow-300">RF 파워 ↑</span> → 분해율 ↑, 증착률 ↑, 막 밀도 ↑, 하지만 기판 손상 위험 ↑</p>
-              <p><span className="text-yellow-300">압력 ↑</span> → 증착률 ↑, 하지만 균일도 ↓, 파티클 위험 ↑</p>
-              <p><span className="text-yellow-300">온도 ↑</span> → H 함량 ↓, 막질 ↑, 하지만 기판/소자 손상 위험 ↑</p>
-              <p><span className="text-yellow-300">가스비 변화</span> → 조성비 변화 (Si-rich ↔ N/O-rich)</p>
-            </div>
-            <div className="mt-3 bg-blue-900/30 rounded p-2 border border-blue-500/30">
-              <p className="text-blue-200 text-xs">
-                💡 PECVD는 "가스를 넣고 플라즈마로 분해하면 쉽게 원하는 박막을 만들 수 있다"는 장점이 있지만, 이는 모든 공정 변수가 최적화되었을 때의 이야기입니다. 실제로는 수많은 변수들의 복잡한 상호작용을 이해하고 정밀하게 제어해야 하는 고난도 공정입니다.
+          {/* 시나리오2 설명 */}
+          <div className="bg-gray-900 rounded-lg p-4 border border-orange-800">
+            <h3 className="text-orange-400 font-bold mb-3 text-lg">🌡️ 시나리오2: 온도의 영향</h3>
+            <div className="text-gray-300 text-sm space-y-3">
+              <p>
+                <span className="text-yellow-400 font-bold">PECVD 막에는 수소(H)가 포함됩니다</span><br/>
+                SiH₄ 분해 시 모든 H가 제거되지 않고 막에 남습니다.<br/>
+                이 수소 함량이 막의 품질을 결정합니다.
               </p>
+              <div className="bg-black/30 p-3 rounded text-xs">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-gray-400">
+                      <th className="text-left">온도</th>
+                      <th className="text-center">H 함량</th>
+                      <th className="text-center">막 밀도</th>
+                      <th className="text-right">특징</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-white">
+                    <tr>
+                      <td className="text-blue-400">200°C</td>
+                      <td className="text-center text-red-400">~25%</td>
+                      <td className="text-center text-yellow-400">낮음</td>
+                      <td className="text-right text-xs">버블 위험</td>
+                    </tr>
+                    <tr>
+                      <td className="text-green-400">350°C</td>
+                      <td className="text-center text-green-400">~12%</td>
+                      <td className="text-center text-green-400">적정</td>
+                      <td className="text-right text-xs">일반 공정</td>
+                    </tr>
+                    <tr>
+                      <td className="text-red-400">450°C</td>
+                      <td className="text-center text-green-400">~5%</td>
+                      <td className="text-center text-green-400">높음</td>
+                      <td className="text-right text-xs">열손상 주의</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                <span className="text-red-400 font-bold">수소가 왜 문제인가요?</span><br/>
+                후속 고온 공정에서 H₂ 가스가 발생 → 버블(bubble) 형성 → 막 박리
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 핵심 요약 */}
+        <div className="mt-6 bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-lg p-4 border border-purple-500">
+          <h3 className="text-purple-300 font-bold mb-2">💡 핵심 요약</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-300">
+            <div>
+              <span className="text-blue-400 font-bold">가스 비율:</span>
+              <ul className="ml-4 mt-1 text-xs">
+                <li>• N₂O/SiH₄ ≈ 14:1 → 굴절률 n = 1.46</li>
+                <li>• 비율 낮으면 Si-rich, 높으면 O-rich</li>
+                <li>• 굴절률로 막 조성 모니터링 가능</li>
+              </ul>
+            </div>
+            <div>
+              <span className="text-orange-400 font-bold">온도:</span>
+              <ul className="ml-4 mt-1 text-xs">
+                <li>• 높을수록 H 함량↓, 밀도↑, 품질↑</li>
+                <li>• 하지만 기판/소자 열손상 위험</li>
+                <li>• 일반적으로 300~400°C 사용</li>
+              </ul>
             </div>
           </div>
         </div>
