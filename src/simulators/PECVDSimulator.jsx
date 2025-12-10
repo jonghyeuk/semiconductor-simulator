@@ -8,7 +8,10 @@ const PECVDSimulator = () => {
   const [isPaused, setIsPaused] = useState(false);
   const isPausedRef = useRef(false);
 
-  // 시나리오 모드
+  // 공정 선택
+  const [selectedProcess, setSelectedProcess] = useState('SiO2'); // 'a-Si', 'SiNx', 'SiO2'
+
+  // 시나리오 모드 (SiO2 전용)
   const [activeScenario, setActiveScenario] = useState('scenario1'); // scenario1, scenario2
 
   // 시나리오1: 굴절률 맞추기 - N2O/SiH4 비율 조절
@@ -17,6 +20,34 @@ const PECVDSimulator = () => {
 
   // 시나리오2: 온도 비교
   const [temperature, setTemperature] = useState(350); // 200~450°C
+
+  // 공정별 프리셋
+  const processPresets = {
+    'a-Si': {
+      name: 'a-Si (비정질 실리콘)',
+      color: '#888888',
+      gases: { silane: 30, hydrogen: 200, ammonia: 0, nitrousoxide: 0 },
+      pressure: 1000,
+      temperature: 250,
+      power: 20
+    },
+    'SiNx': {
+      name: 'SiNx (질화규소)',
+      color: '#4488ff',
+      gases: { silane: 10, hydrogen: 0, ammonia: 80, nitrousoxide: 0 },
+      pressure: 300,
+      temperature: 350,
+      power: 20
+    },
+    'SiO2': {
+      name: 'SiO₂ (산화규소)',
+      color: '#ff6666',
+      gases: { silane: 50, hydrogen: 0, ammonia: 0, nitrousoxide: 710 },
+      pressure: 1000,
+      temperature: 350,
+      power: 20
+    }
+  };
 
   // 계산된 굴절률 (N2O/SiH4 비율에 따라)
   const calculateRefractiveIndex = (ratio) => {
@@ -63,19 +94,25 @@ const PECVDSimulator = () => {
   const cameraStateRef = useRef({ distance: 22, angle: { x: 0.3, y: 0 } });
   const gasRatioRef = useRef(gasRatio);
   const temperatureRef = useRef(temperature);
+  const selectedProcessRef = useRef(selectedProcess);
 
   useEffect(() => { rfPowerOnRef.current = rfPowerOn; }, [rfPowerOn]);
   useEffect(() => { gasFlowsRef.current = gasFlows; }, [gasFlows]);
   useEffect(() => { isPausedRef.current = isPaused; }, [isPaused]);
   useEffect(() => { gasRatioRef.current = gasRatio; }, [gasRatio]);
   useEffect(() => { temperatureRef.current = temperature; }, [temperature]);
+  useEffect(() => { selectedProcessRef.current = selectedProcess; }, [selectedProcess]);
 
-  // 가스 비율 변경 시 가스 유량 업데이트
+  // 공정 선택 변경 시 가스 유량 업데이트
   useEffect(() => {
-    const silane = 50;
-    const n2o = Math.round(silane * gasRatio);
-    setGasFlows({ silane, hydrogen: 0, ammonia: 0, nitrousoxide: n2o });
-  }, [gasRatio]);
+    if (selectedProcess === 'SiO2') {
+      const silane = 50;
+      const n2o = Math.round(silane * gasRatio);
+      setGasFlows({ silane, hydrogen: 0, ammonia: 0, nitrousoxide: n2o });
+    } else {
+      setGasFlows(processPresets[selectedProcess].gases);
+    }
+  }, [selectedProcess, gasRatio]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -148,6 +185,35 @@ const PECVDSimulator = () => {
       bonds.push(createBond(positions[0], positions[1]));
       bonds.push(createBond(positions[1], positions[2]));
       bonds.forEach(b => group.add(b));
+    } else if (type === 'H2') {
+      const h1Pos = new THREE.Vector3(-bondLen * 0.4, 0, 0);
+      const h2Pos = new THREE.Vector3(bondLen * 0.4, 0, 0);
+      const h1 = createAtom(atomColors.H, atomSizes.H, h1Pos);
+      const h2 = createAtom(atomColors.H, atomSizes.H, h2Pos);
+      atoms.push({ mesh: h1, type: 'H', localPos: h1Pos.clone() });
+      atoms.push({ mesh: h2, type: 'H', localPos: h2Pos.clone() });
+      group.add(h1, h2);
+      const bond = createBond(h1Pos, h2Pos);
+      bonds.push(bond);
+      group.add(bond);
+    } else if (type === 'NH3') {
+      const nPos = new THREE.Vector3(0, 0, 0);
+      const n = createAtom(atomColors.N, atomSizes.N, nPos);
+      atoms.push({ mesh: n, type: 'N', localPos: nPos.clone() });
+      group.add(n);
+      const hPositions = [
+        new THREE.Vector3(0, -bondLen, 0),
+        new THREE.Vector3(bondLen * 0.87, bondLen * 0.5, 0),
+        new THREE.Vector3(-bondLen * 0.87, bondLen * 0.5, 0)
+      ];
+      hPositions.forEach((pos) => {
+        const h = createAtom(atomColors.H, atomSizes.H, pos);
+        atoms.push({ mesh: h, type: 'H', localPos: pos.clone() });
+        group.add(h);
+        const bond = createBond(nPos, pos);
+        bonds.push(bond);
+        group.add(bond);
+      });
     }
 
     group.userData = {
@@ -321,6 +387,37 @@ const PECVDSimulator = () => {
         scene.add(group);
         depositedAtomsRef.current.push(group);
         setDepositionThickness(prev => prev + 0.012);
+      } else if (atomType === 'a-Si') {
+        // 비정질 실리콘 - Si 원자만
+        const siGeo = new THREE.SphereGeometry(0.22, 8, 8);
+        const siMat = new THREE.MeshPhongMaterial({ color: 0x666666 });
+        const si = new THREE.Mesh(siGeo, siMat);
+        si.position.set(x, Math.min(y, 3), z);
+        scene.add(si);
+        depositedAtomsRef.current.push(si);
+        setDepositionThickness(prev => prev + 0.018);
+      } else if (atomType === 'SiNx') {
+        // 질화규소 - Si + N
+        const group = new THREE.Group();
+        const siGeo = new THREE.SphereGeometry(0.2, 8, 8);
+        const siMat = new THREE.MeshPhongMaterial({ color: colors.Si });
+        const si = new THREE.Mesh(siGeo, siMat);
+        group.add(si);
+        const nGeo = new THREE.SphereGeometry(0.16, 8, 8);
+        const nMat = new THREE.MeshPhongMaterial({ color: colors.N });
+        const n1 = new THREE.Mesh(nGeo, nMat);
+        n1.position.set(0.22, 0.1, 0);
+        group.add(n1);
+        if (Math.random() > 0.3) {
+          const n2 = new THREE.Mesh(nGeo, nMat);
+          n2.position.set(-0.15, -0.15, 0.1);
+          group.add(n2);
+        }
+        group.position.set(x, Math.min(y, 3), z);
+        group.rotation.y = Math.random() * Math.PI * 2;
+        scene.add(group);
+        depositedAtomsRef.current.push(group);
+        setDepositionThickness(prev => prev + 0.014);
       }
     };
 
@@ -342,17 +439,28 @@ const PECVDSimulator = () => {
       timeRef.current += 0.016;
 
       const flows = gasFlowsRef.current;
-      const totalFlow = flows.silane + flows.nitrousoxide;
+      const totalFlow = flows.silane + flows.nitrousoxide + flows.hydrogen + flows.ammonia;
+      const process = selectedProcessRef.current;
 
-      // Spawn molecules - N2O/SiH4 비율에 따라
+      // Spawn molecules - 공정별로 다른 가스
       if (totalFlow > 0 && Math.random() < 0.3) {
-        const ratio = gasRatioRef.current;
-        // SiH4 1개당 N2O ratio개 비율로 생성
-        const type = Math.random() < (1 / (ratio + 1)) ? 'SiH4' : 'N2O';
+        let type = 'SiH4';
         const r = Math.sqrt(Math.random()) * 6;
         const ang = Math.random() * Math.PI * 2;
         const x = Math.cos(ang) * r;
         const z = Math.sin(ang) * r;
+
+        if (process === 'SiO2') {
+          const ratio = gasRatioRef.current;
+          type = Math.random() < (1 / (ratio + 1)) ? 'SiH4' : 'N2O';
+        } else if (process === 'a-Si') {
+          // SiH4:H2 = 30:200 비율
+          type = Math.random() < 0.13 ? 'SiH4' : 'H2';
+        } else if (process === 'SiNx') {
+          // SiH4:NH3 = 10:80 비율
+          type = Math.random() < 0.11 ? 'SiH4' : 'NH3';
+        }
+
         const mol = createMolecule(type, new THREE.Vector3(x, 9.7, z), THREE);
         if (mol) moleculesRef.current.push(mol);
       }
@@ -404,19 +512,30 @@ const PECVDSimulator = () => {
                 const type = mol.userData.type;
                 setDissociationCount(p => p + 1);
 
-                // 증착 - 비율에 따라 SiO2 또는 SiOx
+                // 증착 위치
                 const depR = Math.sqrt(Math.random()) * 5.5;
                 const depAng = Math.random() * Math.PI * 2;
                 const depX = Math.cos(depAng) * depR;
                 const depZ = Math.sin(depAng) * depR;
 
-                const ratio = gasRatioRef.current;
-                if (type === 'N2O') {
-                  // 비율이 높을수록 SiO2, 낮으면 SiOx
-                  const stoichProb = Math.min(0.95, ratio / 20);
-                  depositAtom(depX, depZ, Math.random() < stoichProb ? 'SiO2' : 'SiOx');
+                // 공정별 증착
+                if (process === 'SiO2') {
+                  const ratio = gasRatioRef.current;
+                  if (type === 'N2O') {
+                    const stoichProb = Math.min(0.95, ratio / 20);
+                    depositAtom(depX, depZ, Math.random() < stoichProb ? 'SiO2' : 'SiOx');
+                  }
+                } else if (process === 'a-Si') {
+                  if (type === 'SiH4') {
+                    depositAtom(depX, depZ, 'a-Si');
+                  }
+                } else if (process === 'SiNx') {
+                  if (type === 'SiH4' || type === 'NH3') {
+                    depositAtom(depX, depZ, 'SiNx');
+                  }
                 }
 
+                // 분해 조각 생성
                 if (type === 'SiH4') {
                   const frags = ['Si', 'SiH', 'SiH2', 'SiH3'];
                   const chosen = frags[Math.floor(Math.random() * frags.length)];
@@ -427,6 +546,12 @@ const PECVDSimulator = () => {
                   createFragment('N', pos.clone(), vel.clone().add(new THREE.Vector3(-0.02, -0.02, 0)), THREE);
                   createFragment('N', pos.clone(), vel.clone().add(new THREE.Vector3(0, -0.02, 0)), THREE);
                   createFragment('O', pos.clone(), vel.clone().add(new THREE.Vector3(0.02, -0.02, 0)), THREE);
+                } else if (type === 'H2') {
+                  createFragment('H', pos.clone(), vel.clone().add(new THREE.Vector3(-0.02, -0.02, 0)), THREE);
+                  createFragment('H', pos.clone(), vel.clone().add(new THREE.Vector3(0.02, -0.02, 0)), THREE);
+                } else if (type === 'NH3') {
+                  createFragment('N', pos.clone(), vel.clone().add(new THREE.Vector3(0, -0.02, 0)), THREE);
+                  for (let i = 0; i < 3; i++) createFragment('H', pos.clone(), new THREE.Vector3((Math.random()-0.5)*0.06, (Math.random()-0.5)*0.06, (Math.random()-0.5)*0.06), THREE);
                 }
 
                 scene.remove(mol);
@@ -670,33 +795,70 @@ const PECVDSimulator = () => {
       {/* 시뮬레이터 영역 */}
       <div className="h-screen flex flex-col">
         <div className="bg-gray-800 border-b border-gray-700 p-3">
-          <h1 className="text-xl font-bold text-white">🔬 PECVD SiO₂ 교육 시뮬레이터</h1>
-          <p className="text-gray-400 text-xs">가스 비율과 온도가 막질에 미치는 영향을 학습합니다</p>
+          <h1 className="text-xl font-bold text-white">🔬 PECVD 3D 분자 시뮬레이터</h1>
+          <p className="text-gray-400 text-xs">플라즈마 화학 기상 증착 공정을 3D로 시각화합니다</p>
         </div>
 
-        {/* 시나리오 탭 */}
+        {/* 공정 선택 */}
         <div className="bg-gray-800 border-b border-gray-600 p-2 flex gap-2">
+          <span className="text-gray-400 text-sm py-2 px-2">공정 선택:</span>
           <button
-            onClick={() => { setActiveScenario('scenario1'); handleReset(); setGasRatio(14); }}
+            onClick={() => { setSelectedProcess('a-Si'); handleReset(); }}
             className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
-              activeScenario === 'scenario1'
+              selectedProcess === 'a-Si'
+                ? 'bg-gray-500 text-white'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+            }`}
+          >
+            a-Si
+          </button>
+          <button
+            onClick={() => { setSelectedProcess('SiNx'); handleReset(); }}
+            className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+              selectedProcess === 'SiNx'
                 ? 'bg-blue-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
-            📊 시나리오1: 굴절률 맞추기
+            SiNx
           </button>
           <button
-            onClick={() => { setActiveScenario('scenario2'); handleReset(); setTemperature(350); }}
+            onClick={() => { setSelectedProcess('SiO2'); handleReset(); }}
             className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
-              activeScenario === 'scenario2'
-                ? 'bg-orange-600 text-white'
+              selectedProcess === 'SiO2'
+                ? 'bg-red-600 text-white'
                 : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
             }`}
           >
-            🌡️ 시나리오2: 저온 vs 고온
+            SiO₂
           </button>
         </div>
+
+        {/* 시나리오 탭 (SiO2 전용) */}
+        {selectedProcess === 'SiO2' && (
+          <div className="bg-gray-800 border-b border-gray-600 p-2 flex gap-2">
+            <button
+              onClick={() => { setActiveScenario('scenario1'); handleReset(); setGasRatio(14); }}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                activeScenario === 'scenario1'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              📊 시나리오1: 굴절률 맞추기
+            </button>
+            <button
+              onClick={() => { setActiveScenario('scenario2'); handleReset(); setTemperature(350); }}
+              className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${
+                activeScenario === 'scenario2'
+                  ? 'bg-orange-600 text-white'
+                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              }`}
+            >
+              🌡️ 시나리오2: 저온 vs 고온
+            </button>
+          </div>
+        )}
 
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 relative bg-black">
@@ -768,8 +930,66 @@ const PECVDSimulator = () => {
           {/* 사이드 패널 */}
           <div className="w-80 bg-gray-800 border-l border-gray-700 overflow-y-auto p-3 space-y-3">
 
-            {/* 시나리오1: 굴절률 맞추기 */}
-            {activeScenario === 'scenario1' && (
+            {/* a-Si 공정 */}
+            {selectedProcess === 'a-Si' && (
+              <>
+                <div className="bg-gray-700/50 rounded-lg p-4 border border-gray-500">
+                  <h3 className="font-bold text-gray-200 mb-2">🔬 a-Si 비정질 실리콘</h3>
+                  <p className="text-gray-400 text-sm">
+                    SiH₄ + H₂ → a-Si:H<br/>
+                    태양전지, TFT에 사용
+                  </p>
+                </div>
+                <div className="bg-gray-900 rounded-lg p-3 border border-gray-600 text-xs">
+                  <h4 className="text-sm font-bold text-white mb-2">가스 유량</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-black/40 p-2 rounded">
+                      <div className="text-gray-400">SiH₄</div>
+                      <div className="text-cyan-400 font-bold">{gasFlows.silane} sccm</div>
+                    </div>
+                    <div className="bg-black/40 p-2 rounded">
+                      <div className="text-gray-400">H₂</div>
+                      <div className="text-cyan-400 font-bold">{gasFlows.hydrogen} sccm</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-gray-400">
+                    온도: <span className="text-yellow-400 font-bold">{processPresets['a-Si'].temperature}°C</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* SiNx 공정 */}
+            {selectedProcess === 'SiNx' && (
+              <>
+                <div className="bg-blue-900/50 rounded-lg p-4 border border-blue-500">
+                  <h3 className="font-bold text-blue-300 mb-2">🔬 SiNx 질화규소</h3>
+                  <p className="text-gray-300 text-sm">
+                    SiH₄ + NH₃ → SiNx:H<br/>
+                    패시베이션, 절연막에 사용
+                  </p>
+                </div>
+                <div className="bg-gray-900 rounded-lg p-3 border border-gray-600 text-xs">
+                  <h4 className="text-sm font-bold text-white mb-2">가스 유량</h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-black/40 p-2 rounded">
+                      <div className="text-gray-400">SiH₄</div>
+                      <div className="text-cyan-400 font-bold">{gasFlows.silane} sccm</div>
+                    </div>
+                    <div className="bg-black/40 p-2 rounded">
+                      <div className="text-gray-400">NH₃</div>
+                      <div className="text-cyan-400 font-bold">{gasFlows.ammonia} sccm</div>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-gray-400">
+                    NH₃/SiH₄ 비율: <span className="text-blue-400 font-bold">8:1</span>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* 시나리오1: 굴절률 맞추기 (SiO2 전용) */}
+            {selectedProcess === 'SiO2' && activeScenario === 'scenario1' && (
               <>
                 <div className="bg-blue-900/50 rounded-lg p-4 border border-blue-500">
                   <h3 className="font-bold text-blue-300 mb-2">🎯 미션: 굴절률 맞추기</h3>
@@ -820,8 +1040,8 @@ const PECVDSimulator = () => {
               </>
             )}
 
-            {/* 시나리오2: 온도 비교 */}
-            {activeScenario === 'scenario2' && (
+            {/* 시나리오2: 온도 비교 (SiO2 전용) */}
+            {selectedProcess === 'SiO2' && activeScenario === 'scenario2' && (
               <>
                 <div className="bg-orange-900/50 rounded-lg p-4 border border-orange-500">
                   <h3 className="font-bold text-orange-300 mb-2">🌡️ 미션: 온도 영향 관찰</h3>
@@ -934,7 +1154,7 @@ const PECVDSimulator = () => {
               {rfPowerOn ? '⚡ RF OFF' : '⚡ RF ON - 증착 시작'}
             </button>
 
-            {activeScenario === 'scenario1' && (
+            {selectedProcess === 'SiO2' && activeScenario === 'scenario1' && (
               <button
                 onClick={handleMeasureRI}
                 disabled={depositionThickness < 5}
@@ -969,7 +1189,8 @@ const PECVDSimulator = () => {
         </div>
       </div>
 
-      {/* 교육 설명 섹션 */}
+      {/* 교육 설명 섹션 (SiO2 전용) */}
+      {selectedProcess === 'SiO2' && (
       <div className="bg-gray-800 border-t border-gray-700 p-6">
         <h2 className="text-xl font-bold text-white mb-4">📚 SiO₂ PECVD 공정 학습 가이드</h2>
 
@@ -1073,6 +1294,7 @@ const PECVDSimulator = () => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
