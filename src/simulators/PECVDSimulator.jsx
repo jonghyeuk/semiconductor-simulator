@@ -11,15 +11,23 @@ const PECVDSimulator = () => {
   // 공정 선택
   const [selectedProcess, setSelectedProcess] = useState('SiO2'); // 'a-Si', 'SiNx', 'SiO2'
 
-  // 시나리오 모드 (SiO2 전용)
+  // 시나리오 모드
   const [activeScenario, setActiveScenario] = useState('scenario1'); // scenario1, scenario2
 
-  // 시나리오1: 굴절률 맞추기 - N2O/SiH4 비율 조절
+  // SiO2 시나리오1: 굴절률 맞추기 - N2O/SiH4 비율 조절
   const [gasRatio, setGasRatio] = useState(14); // N2O/SiH4 ratio (5~25)
   const [showRefractiveIndex, setShowRefractiveIndex] = useState(false);
 
-  // 시나리오2: 온도 비교
+  // SiO2 시나리오2: 온도 비교
   const [temperature, setTemperature] = useState(350); // 200~450°C
+
+  // a-Si: H2 희석 비율
+  const [h2Dilution, setH2Dilution] = useState(10); // H2/SiH4 ratio (0~30)
+  const [showDanglingBond, setShowDanglingBond] = useState(false);
+
+  // SiNx: NH3/SiH4 비율
+  const [nh3Ratio, setNh3Ratio] = useState(8); // NH3/SiH4 ratio (2~15)
+  const [showSiNxRI, setShowSiNxRI] = useState(false);
 
   // 공정별 프리셋
   const processPresets = {
@@ -73,6 +81,39 @@ const PECVDSimulator = () => {
     return Math.min(100, 60 + temp * 0.1);
   };
 
+  // a-Si: H2 희석에 따른 댕글링 본드 밀도 계산
+  const calculateDanglingBondDensity = (dilution) => {
+    // H2/SiH4 비율에 따른 댕글링 본드 밀도 (×10^16 cm^-3)
+    // dilution 0 → ~10 (많음), dilution 10 → ~3 (적정), dilution 20+ → ~1 (적음, 하지만 증착률↓)
+    if (dilution < 5) return 10 - dilution * 0.8;
+    if (dilution < 15) return 6 - (dilution - 5) * 0.3;
+    return Math.max(0.5, 3 - (dilution - 15) * 0.15);
+  };
+
+  // a-Si: H2 희석에 따른 H 함량 계산
+  const calculateaSiHContent = (dilution) => {
+    // dilution 0 → ~5%, dilution 10 → ~12%, dilution 20 → ~18%, dilution 30 → ~20%
+    return Math.min(22, 5 + dilution * 0.5);
+  };
+
+  // SiNx: NH3/SiH4 비율에 따른 굴절률 계산
+  const calculateSiNxRefractiveIndex = (ratio) => {
+    // ratio 2 → n ≈ 2.3 (Si-rich, 태양전지 ARC용)
+    // ratio 8 → n ≈ 2.0 (stoichiometric Si3N4)
+    // ratio 15 → n ≈ 1.85 (N-rich, 패시베이션용)
+    if (ratio < 5) return 2.3 - (ratio - 2) * 0.06;
+    if (ratio < 10) return 2.12 - (ratio - 5) * 0.024;
+    return 2.0 - (ratio - 10) * 0.03;
+  };
+
+  // SiNx: 비율에 따른 N/Si 원자비 계산
+  const calculateNSiRatio = (ratio) => {
+    // ratio 2 → N/Si ≈ 0.8 (Si-rich)
+    // ratio 8 → N/Si ≈ 1.33 (stoichiometric)
+    // ratio 15 → N/Si ≈ 1.5 (N-rich)
+    return Math.min(1.6, 0.6 + ratio * 0.07);
+  };
+
   const [gasFlows, setGasFlows] = useState({ silane: 50, hydrogen: 0, ammonia: 0, nitrousoxide: 710 });
   const [processPressure, setProcessPressure] = useState(1000);
   const [substrateTemp, setSubstrateTemp] = useState(350);
@@ -95,6 +136,8 @@ const PECVDSimulator = () => {
   const gasRatioRef = useRef(gasRatio);
   const temperatureRef = useRef(temperature);
   const selectedProcessRef = useRef(selectedProcess);
+  const h2DilutionRef = useRef(h2Dilution);
+  const nh3RatioRef = useRef(nh3Ratio);
 
   useEffect(() => { rfPowerOnRef.current = rfPowerOn; }, [rfPowerOn]);
   useEffect(() => { gasFlowsRef.current = gasFlows; }, [gasFlows]);
@@ -102,6 +145,8 @@ const PECVDSimulator = () => {
   useEffect(() => { gasRatioRef.current = gasRatio; }, [gasRatio]);
   useEffect(() => { temperatureRef.current = temperature; }, [temperature]);
   useEffect(() => { selectedProcessRef.current = selectedProcess; }, [selectedProcess]);
+  useEffect(() => { h2DilutionRef.current = h2Dilution; }, [h2Dilution]);
+  useEffect(() => { nh3RatioRef.current = nh3Ratio; }, [nh3Ratio]);
 
   // 공정 선택 변경 시 가스 유량 업데이트
   useEffect(() => {
@@ -109,10 +154,18 @@ const PECVDSimulator = () => {
       const silane = 50;
       const n2o = Math.round(silane * gasRatio);
       setGasFlows({ silane, hydrogen: 0, ammonia: 0, nitrousoxide: n2o });
+    } else if (selectedProcess === 'a-Si') {
+      const silane = 30;
+      const h2 = Math.round(silane * h2Dilution);
+      setGasFlows({ silane, hydrogen: h2, ammonia: 0, nitrousoxide: 0 });
+    } else if (selectedProcess === 'SiNx') {
+      const silane = 10;
+      const nh3 = Math.round(silane * nh3Ratio);
+      setGasFlows({ silane, hydrogen: 0, ammonia: nh3, nitrousoxide: 0 });
     } else {
       setGasFlows(processPresets[selectedProcess].gases);
     }
-  }, [selectedProcess, gasRatio]);
+  }, [selectedProcess, gasRatio, h2Dilution, nh3Ratio]);
 
   useEffect(() => {
     const script = document.createElement('script');
@@ -454,11 +507,13 @@ const PECVDSimulator = () => {
           const ratio = gasRatioRef.current;
           type = Math.random() < (1 / (ratio + 1)) ? 'SiH4' : 'N2O';
         } else if (process === 'a-Si') {
-          // SiH4:H2 = 30:200 비율
-          type = Math.random() < 0.13 ? 'SiH4' : 'H2';
+          // H2/SiH4 비율에 따라 동적 계산
+          const dilution = h2DilutionRef.current;
+          type = Math.random() < (1 / (dilution + 1)) ? 'SiH4' : 'H2';
         } else if (process === 'SiNx') {
-          // SiH4:NH3 = 10:80 비율
-          type = Math.random() < 0.11 ? 'SiH4' : 'NH3';
+          // NH3/SiH4 비율에 따라 동적 계산
+          const ratio = nh3RatioRef.current;
+          type = Math.random() < (1 / (ratio + 1)) ? 'SiH4' : 'NH3';
         }
 
         const mol = createMolecule(type, new THREE.Vector3(x, 9.7, z), THREE);
@@ -670,6 +725,22 @@ const PECVDSimulator = () => {
     setDepositionThickness(0);
     setDissociationCount(0);
     setShowRefractiveIndex(false);
+    setShowDanglingBond(false);
+    setShowSiNxRI(false);
+  };
+
+  // a-Si 댕글링 본드 측정
+  const handleMeasureDanglingBond = () => {
+    setIsPaused(true);
+    setRfPowerOn(false);
+    setShowDanglingBond(true);
+  };
+
+  // SiNx 굴절률 측정
+  const handleMeasureSiNxRI = () => {
+    setIsPaused(true);
+    setRfPowerOn(false);
+    setShowSiNxRI(true);
   };
 
   const handleMeasureRI = () => {
@@ -698,10 +769,21 @@ const PECVDSimulator = () => {
 
   if (!threeLoaded) return <div className="w-full h-screen flex items-center justify-center bg-gray-900 text-white text-xl">로딩 중...</div>;
 
+  // SiO2 계산
   const currentRI = calculateRefractiveIndex(gasRatio);
   const currentH = calculateHydrogenContent(temperature);
   const currentDensity = calculateFilmDensity(temperature);
   const isRIGood = Math.abs(currentRI - 1.46) < 0.02;
+
+  // a-Si 계산
+  const currentDanglingBond = calculateDanglingBondDensity(h2Dilution);
+  const currentaSiH = calculateaSiHContent(h2Dilution);
+  const isDanglingBondGood = currentDanglingBond <= 3 && currentDanglingBond >= 1;
+
+  // SiNx 계산
+  const currentSiNxRI = calculateSiNxRefractiveIndex(nh3Ratio);
+  const currentNSiRatio = calculateNSiRatio(nh3Ratio);
+  const isSiNxRIGood = Math.abs(currentSiNxRI - 2.0) < 0.05;
 
   return (
     <div className="w-full bg-gray-900">
@@ -790,6 +872,88 @@ const PECVDSimulator = () => {
           box-shadow: 0 3px 8px rgba(234, 88, 12, 0.6);
           cursor: pointer;
         }
+
+        /* a-Si 슬라이더 (회색) */
+        input[type="range"].slider-asi {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        input[type="range"].slider-asi::-webkit-slider-runnable-track {
+          background: #d1d5db;
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #4b5563;
+        }
+        input[type="range"].slider-asi::-moz-range-track {
+          background: #d1d5db;
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #4b5563;
+        }
+        input[type="range"].slider-asi::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -8px;
+          background: linear-gradient(145deg, #6b7280, #4b5563);
+          height: 28px;
+          width: 28px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(75, 85, 99, 0.6);
+          cursor: pointer;
+        }
+        input[type="range"].slider-asi::-moz-range-thumb {
+          background: linear-gradient(145deg, #6b7280, #4b5563);
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(75, 85, 99, 0.6);
+          cursor: pointer;
+        }
+
+        /* SiNx 슬라이더 (파란색) */
+        input[type="range"].slider-sinx {
+          -webkit-appearance: none;
+          appearance: none;
+          background: transparent;
+          cursor: pointer;
+        }
+        input[type="range"].slider-sinx::-webkit-slider-runnable-track {
+          background: #bfdbfe;
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #2563eb;
+        }
+        input[type="range"].slider-sinx::-moz-range-track {
+          background: #bfdbfe;
+          height: 12px;
+          border-radius: 6px;
+          border: 3px solid #2563eb;
+        }
+        input[type="range"].slider-sinx::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          appearance: none;
+          margin-top: -8px;
+          background: linear-gradient(145deg, #3b82f6, #2563eb);
+          height: 28px;
+          width: 28px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(37, 99, 235, 0.6);
+          cursor: pointer;
+        }
+        input[type="range"].slider-sinx::-moz-range-thumb {
+          background: linear-gradient(145deg, #3b82f6, #2563eb);
+          height: 24px;
+          width: 24px;
+          border-radius: 50%;
+          border: 4px solid white;
+          box-shadow: 0 3px 8px rgba(37, 99, 235, 0.6);
+          cursor: pointer;
+        }
       `}</style>
 
       {/* 시뮬레이터 영역 */}
@@ -871,7 +1035,7 @@ const PECVDSimulator = () => {
               <div className="text-xs text-gray-400 mt-1">분해: <span className="text-purple-400">{dissociationCount}</span></div>
             </div>
 
-            {/* 굴절률 측정 결과 팝업 */}
+            {/* SiO2 굴절률 측정 결과 팝업 */}
             {showRefractiveIndex && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/70">
                 <div className="bg-gray-800 rounded-xl p-6 border-2 border-blue-500 max-w-md">
@@ -914,6 +1078,104 @@ const PECVDSimulator = () => {
               </div>
             )}
 
+            {/* a-Si 댕글링 본드 측정 결과 팝업 */}
+            {showDanglingBond && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                <div className="bg-gray-800 rounded-xl p-6 border-2 border-gray-500 max-w-md">
+                  <h3 className="text-xl font-bold text-white mb-4">📊 댕글링 본드 측정 결과</h3>
+                  <div className="text-center mb-4">
+                    <div className="text-4xl font-bold mb-2" style={{ color: isDanglingBondGood ? '#22c55e' : '#ef4444' }}>
+                      {currentDanglingBond.toFixed(1)} ×10¹⁶ cm⁻³
+                    </div>
+                    <div className="text-gray-400">목표: 1~3 ×10¹⁶ cm⁻³</div>
+                  </div>
+
+                  <div className="text-center mb-4">
+                    <div className="text-2xl font-bold text-cyan-400 mb-1">
+                      H 함량: {currentaSiH.toFixed(1)}%
+                    </div>
+                  </div>
+
+                  {isDanglingBondGood ? (
+                    <div className="bg-green-900/50 border border-green-500 rounded-lg p-3 mb-4">
+                      <div className="text-green-400 font-bold">✅ 성공!</div>
+                      <div className="text-green-300 text-sm">양호한 전기적 특성의 a-Si:H 막입니다.</div>
+                    </div>
+                  ) : currentDanglingBond > 3 ? (
+                    <div className="bg-red-900/50 border border-red-500 rounded-lg p-3 mb-4">
+                      <div className="text-red-400 font-bold">⚠️ 댕글링 본드 과다</div>
+                      <div className="text-red-300 text-sm">H₂ 희석 비율을 높여보세요.</div>
+                    </div>
+                  ) : (
+                    <div className="bg-yellow-900/50 border border-yellow-500 rounded-lg p-3 mb-4">
+                      <div className="text-yellow-400 font-bold">⚠️ 과도한 H₂ 희석</div>
+                      <div className="text-yellow-300 text-sm">증착률이 낮아지고 에칭이 발생할 수 있습니다.</div>
+                    </div>
+                  )}
+
+                  <div className="text-xs text-gray-400 mb-4">
+                    현재 설정: H₂/SiH₄ = {h2Dilution}:1
+                  </div>
+
+                  <button
+                    onClick={() => setShowDanglingBond(false)}
+                    className="w-full py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-500"
+                  >
+                    확인
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* SiNx 굴절률 측정 결과 팝업 */}
+            {showSiNxRI && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/70">
+                <div className="bg-gray-800 rounded-xl p-6 border-2 border-blue-500 max-w-md">
+                  <h3 className="text-xl font-bold text-white mb-4">📊 굴절률 측정 결과</h3>
+                  <div className="text-center mb-4">
+                    <div className="text-5xl font-bold mb-2" style={{ color: isSiNxRIGood ? '#22c55e' : '#3b82f6' }}>
+                      n = {currentSiNxRI.toFixed(2)}
+                    </div>
+                    <div className="text-gray-400">목표: n = 2.00 ± 0.05</div>
+                  </div>
+
+                  <div className="text-center mb-4">
+                    <div className="text-2xl font-bold text-cyan-400 mb-1">
+                      N/Si = {currentNSiRatio.toFixed(2)}
+                    </div>
+                  </div>
+
+                  {isSiNxRIGood ? (
+                    <div className="bg-green-900/50 border border-green-500 rounded-lg p-3 mb-4">
+                      <div className="text-green-400 font-bold">✅ 성공!</div>
+                      <div className="text-green-300 text-sm">화학양론적 Si₃N₄ 막입니다.</div>
+                    </div>
+                  ) : currentSiNxRI > 2.05 ? (
+                    <div className="bg-yellow-900/50 border border-yellow-500 rounded-lg p-3 mb-4">
+                      <div className="text-yellow-400 font-bold">🔶 Si-rich SiNx</div>
+                      <div className="text-yellow-300 text-sm">NH₃ 비율을 높여보세요. (태양전지 ARC용으로는 적합)</div>
+                    </div>
+                  ) : (
+                    <div className="bg-blue-900/50 border border-blue-500 rounded-lg p-3 mb-4">
+                      <div className="text-blue-400 font-bold">🔷 N-rich SiNx</div>
+                      <div className="text-blue-300 text-sm">패시베이션 특성은 좋으나 증착률이 낮습니다.</div>
+                    </div>
+                  )}
+
+                  <div className="text-xs text-gray-400 mb-4">
+                    현재 설정: NH₃/SiH₄ = {nh3Ratio}:1
+                  </div>
+
+                  <button
+                    onClick={() => setShowSiNxRI(false)}
+                    className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
+                  >
+                    확인
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* 범례 */}
             <div className="absolute bottom-3 right-3 bg-gray-800/95 rounded-lg p-2 backdrop-blur text-xs">
               <div className="text-gray-400 mb-1">범례</div>
@@ -934,14 +1196,35 @@ const PECVDSimulator = () => {
             {selectedProcess === 'a-Si' && (
               <>
                 <div className="bg-gray-700/50 rounded-lg p-4 border border-gray-500">
-                  <h3 className="font-bold text-gray-200 mb-2">🔬 a-Si 비정질 실리콘</h3>
+                  <h3 className="font-bold text-gray-200 mb-2">🎯 미션: 댕글링 본드 최소화</h3>
                   <p className="text-gray-400 text-sm">
-                    SiH₄ + H₂ → a-Si:H<br/>
-                    태양전지, TFT에 사용
+                    H₂ 희석 비율을 조절하여<br/>
+                    <span className="text-yellow-400 font-bold">댕글링 본드 밀도 1~3 ×10¹⁶ cm⁻³</span>을 달성하세요!
                   </p>
                 </div>
+
+                <div className="bg-gray-900 rounded-lg p-4 border border-gray-600">
+                  <label className="block text-sm font-bold mb-3 text-gray-300">
+                    🧪 H₂ / SiH₄ 희석 비율: {h2Dilution}:1
+                  </label>
+                  <input
+                    type="range"
+                    min="0"
+                    max="30"
+                    step="1"
+                    value={h2Dilution}
+                    onChange={(e) => setH2Dilution(parseInt(e.target.value))}
+                    className="w-full slider-asi"
+                    disabled={rfPowerOn}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>0 (희석 없음)</span>
+                    <span className="text-green-400">10</span>
+                    <span>30 (고희석)</span>
+                  </div>
+                </div>
+
                 <div className="bg-gray-900 rounded-lg p-3 border border-gray-600 text-xs">
-                  <h4 className="text-sm font-bold text-white mb-2">가스 유량</h4>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-black/40 p-2 rounded">
                       <div className="text-gray-400">SiH₄</div>
@@ -952,9 +1235,73 @@ const PECVDSimulator = () => {
                       <div className="text-cyan-400 font-bold">{gasFlows.hydrogen} sccm</div>
                     </div>
                   </div>
-                  <div className="mt-2 text-gray-400">
-                    온도: <span className="text-yellow-400 font-bold">{processPresets['a-Si'].temperature}°C</span>
+                </div>
+
+                <div className="bg-gray-900 rounded-lg p-3 border border-gray-600">
+                  <h4 className="text-sm font-bold text-white mb-2">📊 막 특성 예측</h4>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">댕글링 본드 밀도</span>
+                        <span className={`font-bold ${isDanglingBondGood ? 'text-green-400' : 'text-red-400'}`}>
+                          {currentDanglingBond.toFixed(1)} ×10¹⁶ cm⁻³
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className={`h-2 rounded-full ${isDanglingBondGood ? 'bg-green-500' : 'bg-red-500'}`}
+                          style={{ width: `${Math.min(100, currentDanglingBond * 10)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">막 내 H 함량</span>
+                        <span className="text-cyan-400 font-bold">{currentaSiH.toFixed(1)}%</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="h-2 rounded-full bg-cyan-500"
+                          style={{ width: `${currentaSiH * 4}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
+                </div>
+
+                <div className={`rounded-lg p-3 border text-xs ${
+                  h2Dilution < 5 ? 'bg-red-900/30 border-red-500' :
+                  h2Dilution > 20 ? 'bg-yellow-900/30 border-yellow-500' :
+                  'bg-green-900/30 border-green-500'
+                }`}>
+                  {h2Dilution < 5 ? (
+                    <>
+                      <div className="font-bold text-red-400">⚠️ 낮은 H₂ 희석</div>
+                      <div className="text-red-200 mt-1">
+                        • 댕글링 본드 많음<br/>
+                        • 전기적 특성 불량<br/>
+                        • TFT/태양전지 효율↓
+                      </div>
+                    </>
+                  ) : h2Dilution > 20 ? (
+                    <>
+                      <div className="font-bold text-yellow-400">⚠️ 과도한 H₂ 희석</div>
+                      <div className="text-yellow-200 mt-1">
+                        • 댕글링 본드 적음 ✓<br/>
+                        • 증착률 급감<br/>
+                        • 에칭 효과 발생 가능
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-bold text-green-400">✅ 최적 H₂ 희석 범위</div>
+                      <div className="text-green-200 mt-1">
+                        • 적절한 댕글링 본드<br/>
+                        • 좋은 전기적 특성<br/>
+                        • 적정 증착률 유지
+                      </div>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -963,14 +1310,35 @@ const PECVDSimulator = () => {
             {selectedProcess === 'SiNx' && (
               <>
                 <div className="bg-blue-900/50 rounded-lg p-4 border border-blue-500">
-                  <h3 className="font-bold text-blue-300 mb-2">🔬 SiNx 질화규소</h3>
+                  <h3 className="font-bold text-blue-300 mb-2">🎯 미션: 굴절률 조절</h3>
                   <p className="text-gray-300 text-sm">
-                    SiH₄ + NH₃ → SiNx:H<br/>
-                    패시베이션, 절연막에 사용
+                    NH₃/SiH₄ 비율을 조절하여<br/>
+                    <span className="text-yellow-400 font-bold">굴절률 n = 2.0 ± 0.05</span>를 달성하세요!
                   </p>
                 </div>
+
+                <div className="bg-gray-900 rounded-lg p-4 border border-gray-600">
+                  <label className="block text-sm font-bold mb-3 text-blue-300">
+                    🧪 NH₃ / SiH₄ 비율: {nh3Ratio}:1
+                  </label>
+                  <input
+                    type="range"
+                    min="2"
+                    max="15"
+                    step="1"
+                    value={nh3Ratio}
+                    onChange={(e) => setNh3Ratio(parseInt(e.target.value))}
+                    className="w-full slider-sinx"
+                    disabled={rfPowerOn}
+                  />
+                  <div className="flex justify-between text-xs text-gray-500 mt-2">
+                    <span>2:1 (Si-rich)</span>
+                    <span className="text-green-400">8:1</span>
+                    <span>15:1 (N-rich)</span>
+                  </div>
+                </div>
+
                 <div className="bg-gray-900 rounded-lg p-3 border border-gray-600 text-xs">
-                  <h4 className="text-sm font-bold text-white mb-2">가스 유량</h4>
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-black/40 p-2 rounded">
                       <div className="text-gray-400">SiH₄</div>
@@ -981,9 +1349,73 @@ const PECVDSimulator = () => {
                       <div className="text-cyan-400 font-bold">{gasFlows.ammonia} sccm</div>
                     </div>
                   </div>
-                  <div className="mt-2 text-gray-400">
-                    NH₃/SiH₄ 비율: <span className="text-blue-400 font-bold">8:1</span>
+                </div>
+
+                <div className="bg-gray-900 rounded-lg p-3 border border-gray-600">
+                  <h4 className="text-sm font-bold text-white mb-2">📊 막 특성 예측</h4>
+                  <div className="space-y-2">
+                    <div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">굴절률 (n)</span>
+                        <span className={`font-bold ${isSiNxRIGood ? 'text-green-400' : 'text-yellow-400'}`}>
+                          n ≈ {currentSiNxRI.toFixed(2)}
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className={`h-2 rounded-full ${isSiNxRIGood ? 'bg-green-500' : 'bg-blue-500'}`}
+                          style={{ width: `${Math.min(100, (currentSiNxRI - 1.8) * 200)}%` }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-400">N/Si 원자비</span>
+                        <span className="text-cyan-400 font-bold">{currentNSiRatio.toFixed(2)}</span>
+                      </div>
+                      <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="h-2 rounded-full bg-cyan-500"
+                          style={{ width: `${currentNSiRatio * 60}%` }}
+                        />
+                      </div>
+                    </div>
                   </div>
+                </div>
+
+                <div className={`rounded-lg p-3 border text-xs ${
+                  nh3Ratio < 5 ? 'bg-yellow-900/30 border-yellow-500' :
+                  nh3Ratio > 12 ? 'bg-blue-900/30 border-blue-500' :
+                  'bg-green-900/30 border-green-500'
+                }`}>
+                  {nh3Ratio < 5 ? (
+                    <>
+                      <div className="font-bold text-yellow-400">🔶 Si-rich SiNx</div>
+                      <div className="text-yellow-200 mt-1">
+                        • 굴절률 n {">"} 2.1<br/>
+                        • 태양전지 ARC 코팅용<br/>
+                        • 절연 특성 낮음
+                      </div>
+                    </>
+                  ) : nh3Ratio > 12 ? (
+                    <>
+                      <div className="font-bold text-blue-400">🔷 N-rich SiNx</div>
+                      <div className="text-blue-200 mt-1">
+                        • 굴절률 n {"<"} 1.9<br/>
+                        • 우수한 패시베이션<br/>
+                        • 증착률 감소
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="font-bold text-green-400">✅ 화학양론적 Si₃N₄</div>
+                      <div className="text-green-200 mt-1">
+                        • 굴절률 n ≈ 2.0<br/>
+                        • 좋은 절연 특성<br/>
+                        • 균형잡힌 특성
+                      </div>
+                    </>
+                  )}
                 </div>
               </>
             )}
@@ -1162,6 +1594,34 @@ const PECVDSimulator = () => {
                   depositionThickness < 5
                     ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
                     : 'bg-purple-600 text-white hover:bg-purple-500'
+                }`}
+              >
+                {depositionThickness < 5 ? '📊 5nm 이상 증착 필요' : '📊 굴절률 측정하기'}
+              </button>
+            )}
+
+            {selectedProcess === 'a-Si' && (
+              <button
+                onClick={handleMeasureDanglingBond}
+                disabled={depositionThickness < 5}
+                className={`w-full py-3 rounded-lg font-bold text-sm transition-all ${
+                  depositionThickness < 5
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-600 text-white hover:bg-gray-500'
+                }`}
+              >
+                {depositionThickness < 5 ? '📊 5nm 이상 증착 필요' : '📊 댕글링 본드 측정하기'}
+              </button>
+            )}
+
+            {selectedProcess === 'SiNx' && (
+              <button
+                onClick={handleMeasureSiNxRI}
+                disabled={depositionThickness < 5}
+                className={`w-full py-3 rounded-lg font-bold text-sm transition-all ${
+                  depositionThickness < 5
+                    ? 'bg-gray-700 text-gray-500 cursor-not-allowed'
+                    : 'bg-blue-600 text-white hover:bg-blue-500'
                 }`}
               >
                 {depositionThickness < 5 ? '📊 5nm 이상 증착 필요' : '📊 굴절률 측정하기'}
