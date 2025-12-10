@@ -83,17 +83,27 @@ const PECVDSimulator = () => {
 
   // a-Si: H2 희석에 따른 댕글링 본드 밀도 계산
   const calculateDanglingBondDensity = (dilution) => {
-    // H2/SiH4 비율에 따른 댕글링 본드 밀도 (×10^16 cm^-3)
-    // dilution 0 → ~10 (많음), dilution 10 → ~3 (적정), dilution 20+ → ~1 (적음, 하지만 증착률↓)
-    if (dilution < 5) return 10 - dilution * 0.8;
-    if (dilution < 15) return 6 - (dilution - 5) * 0.3;
-    return Math.max(0.5, 3 - (dilution - 15) * 0.15);
+    // H2/SiH4 비율에 따른 댕글링 본드 밀도 (×10^15 cm^-3)
+    // 디바이스급 a-Si:H 목표: ~10^15 cm^-3
+    // dilution 0-3 → ~50 (5×10^16, 결함 많음)
+    // dilution 5-10 → ~15-20 (1.5-2×10^16, 중간)
+    // dilution 15-30 → ~3-8 (3-8×10^15, 디바이스급)
+    if (dilution < 3) return 50 - dilution * 5;
+    if (dilution < 10) return 35 - (dilution - 3) * 2.5;
+    if (dilution < 20) return 17.5 - (dilution - 10) * 1.0;
+    return Math.max(3, 7.5 - (dilution - 20) * 0.3);
   };
 
   // a-Si: H2 희석에 따른 H 함량 계산
   const calculateaSiHContent = (dilution) => {
-    // dilution 0 → ~5%, dilution 10 → ~12%, dilution 20 → ~18%, dilution 30 → ~20%
-    return Math.min(22, 5 + dilution * 0.5);
+    // 실제 PECVD a-Si:H: 기판온도 200-300°C에서 H 함량 10-15 at%
+    // H2 희석↑ → etching 효과로 H 함량 오히려 감소하는 경향
+    // dilution 0 → ~15% (SiH4에서 오는 H)
+    // dilution 5-10 → ~12% (최적)
+    // dilution 20+ → ~9-10% (etching으로 감소)
+    if (dilution < 5) return 15 - dilution * 0.4;
+    if (dilution < 15) return 13 - (dilution - 5) * 0.2;
+    return Math.max(8, 11 - (dilution - 15) * 0.1);
   };
 
   // SiNx: NH3/SiH4 비율에 따른 굴절률 계산
@@ -778,7 +788,8 @@ const PECVDSimulator = () => {
   // a-Si 계산
   const currentDanglingBond = calculateDanglingBondDensity(h2Dilution);
   const currentaSiH = calculateaSiHContent(h2Dilution);
-  const isDanglingBondGood = currentDanglingBond <= 3 && currentDanglingBond >= 1;
+  // 디바이스급 a-Si:H: 3~10 ×10^15 cm^-3
+  const isDanglingBondGood = currentDanglingBond <= 10 && currentDanglingBond >= 3;
 
   // SiNx 계산
   const currentSiNxRI = calculateSiNxRefractiveIndex(nh3Ratio);
@@ -1085,9 +1096,9 @@ const PECVDSimulator = () => {
                   <h3 className="text-xl font-bold text-white mb-4">📊 댕글링 본드 측정 결과</h3>
                   <div className="text-center mb-4">
                     <div className="text-4xl font-bold mb-2" style={{ color: isDanglingBondGood ? '#22c55e' : '#ef4444' }}>
-                      {currentDanglingBond.toFixed(1)} ×10¹⁶ cm⁻³
+                      {currentDanglingBond.toFixed(1)} ×10¹⁵ cm⁻³
                     </div>
-                    <div className="text-gray-400">목표: 1~3 ×10¹⁶ cm⁻³</div>
+                    <div className="text-gray-400">목표: 3~10 ×10¹⁵ cm⁻³ (디바이스급)</div>
                   </div>
 
                   <div className="text-center mb-4">
@@ -1101,15 +1112,15 @@ const PECVDSimulator = () => {
                       <div className="text-green-400 font-bold">✅ 성공!</div>
                       <div className="text-green-300 text-sm">양호한 전기적 특성의 a-Si:H 막입니다.</div>
                     </div>
-                  ) : currentDanglingBond > 3 ? (
+                  ) : currentDanglingBond > 10 ? (
                     <div className="bg-red-900/50 border border-red-500 rounded-lg p-3 mb-4">
                       <div className="text-red-400 font-bold">⚠️ 댕글링 본드 과다</div>
-                      <div className="text-red-300 text-sm">H₂ 희석 비율을 높여보세요.</div>
+                      <div className="text-red-300 text-sm">H₂ 희석 비율을 높여보세요 (R≥10 권장).</div>
                     </div>
                   ) : (
                     <div className="bg-yellow-900/50 border border-yellow-500 rounded-lg p-3 mb-4">
                       <div className="text-yellow-400 font-bold">⚠️ 과도한 H₂ 희석</div>
-                      <div className="text-yellow-300 text-sm">증착률이 낮아지고 에칭이 발생할 수 있습니다.</div>
+                      <div className="text-yellow-300 text-sm">증착률이 낮아지고 에칭이 발생할 수 있습니다. (µc-Si 영역 진입)</div>
                     </div>
                   )}
 
@@ -1199,7 +1210,7 @@ const PECVDSimulator = () => {
                   <h3 className="font-bold text-gray-200 mb-2">🎯 미션: 댕글링 본드 최소화</h3>
                   <p className="text-gray-400 text-sm">
                     H₂ 희석 비율을 조절하여<br/>
-                    <span className="text-yellow-400 font-bold">댕글링 본드 밀도 1~3 ×10¹⁶ cm⁻³</span>을 달성하세요!
+                    <span className="text-yellow-400 font-bold">댕글링 본드 밀도 3~10 ×10¹⁵ cm⁻³</span>을 달성하세요!
                   </p>
                 </div>
 
@@ -1218,9 +1229,9 @@ const PECVDSimulator = () => {
                     disabled={rfPowerOn}
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-2">
-                    <span>0 (희석 없음)</span>
-                    <span className="text-green-400">10</span>
-                    <span>30 (고희석)</span>
+                    <span>0 (결함↑)</span>
+                    <span className="text-green-400">10~20 (최적)</span>
+                    <span>30 (µc-Si)</span>
                   </div>
                 </div>
 
@@ -1244,13 +1255,13 @@ const PECVDSimulator = () => {
                       <div className="flex justify-between text-xs">
                         <span className="text-gray-400">댕글링 본드 밀도</span>
                         <span className={`font-bold ${isDanglingBondGood ? 'text-green-400' : 'text-red-400'}`}>
-                          {currentDanglingBond.toFixed(1)} ×10¹⁶ cm⁻³
+                          {currentDanglingBond.toFixed(1)} ×10¹⁵ cm⁻³
                         </span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
                         <div
                           className={`h-2 rounded-full ${isDanglingBondGood ? 'bg-green-500' : 'bg-red-500'}`}
-                          style={{ width: `${Math.min(100, currentDanglingBond * 10)}%` }}
+                          style={{ width: `${Math.min(100, currentDanglingBond * 2)}%` }}
                         />
                       </div>
                     </div>
@@ -1270,35 +1281,35 @@ const PECVDSimulator = () => {
                 </div>
 
                 <div className={`rounded-lg p-3 border text-xs ${
-                  h2Dilution < 5 ? 'bg-red-900/30 border-red-500' :
-                  h2Dilution > 20 ? 'bg-yellow-900/30 border-yellow-500' :
+                  h2Dilution < 10 ? 'bg-red-900/30 border-red-500' :
+                  h2Dilution > 25 ? 'bg-yellow-900/30 border-yellow-500' :
                   'bg-green-900/30 border-green-500'
                 }`}>
-                  {h2Dilution < 5 ? (
+                  {h2Dilution < 10 ? (
                     <>
-                      <div className="font-bold text-red-400">⚠️ 낮은 H₂ 희석</div>
+                      <div className="font-bold text-red-400">⚠️ 낮은 H₂ 희석 (R{"<"}10)</div>
                       <div className="text-red-200 mt-1">
-                        • 댕글링 본드 많음<br/>
+                        • 댕글링 본드 밀도 높음<br/>
                         • 전기적 특성 불량<br/>
                         • TFT/태양전지 효율↓
                       </div>
                     </>
-                  ) : h2Dilution > 20 ? (
+                  ) : h2Dilution > 25 ? (
                     <>
-                      <div className="font-bold text-yellow-400">⚠️ 과도한 H₂ 희석</div>
+                      <div className="font-bold text-yellow-400">⚠️ 고희석 (µc-Si 영역)</div>
                       <div className="text-yellow-200 mt-1">
-                        • 댕글링 본드 적음 ✓<br/>
+                        • 댕글링 본드 매우 낮음 ✓<br/>
                         • 증착률 급감<br/>
-                        • 에칭 효과 발생 가능
+                        • 미세결정 Si 전이 가능
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="font-bold text-green-400">✅ 최적 H₂ 희석 범위</div>
+                      <div className="font-bold text-green-400">✅ 디바이스급 a-Si:H 범위</div>
                       <div className="text-green-200 mt-1">
-                        • 적절한 댕글링 본드<br/>
-                        • 좋은 전기적 특성<br/>
-                        • 적정 증착률 유지
+                        • 댕글링 본드 ~10¹⁵ cm⁻³<br/>
+                        • 양호한 전기적 특성<br/>
+                        • H 함량 10-12%
                       </div>
                     </>
                   )}
