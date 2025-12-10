@@ -1766,6 +1766,305 @@ const PECVDSimulator = () => {
         </div>
       </div>
       )}
+
+      {/* a-Si 교육 설명 섹션 */}
+      {selectedProcess === 'a-Si' && (
+      <div className="bg-gray-800 border-t border-gray-700 p-6">
+        <h2 className="text-xl font-bold text-white mb-4">📚 a-Si:H (비정질 실리콘) 학습 가이드</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 댕글링 본드란? */}
+          <div className="bg-gray-900 rounded-lg p-4 border border-gray-600">
+            <h3 className="text-gray-300 font-bold mb-3 text-lg">🔗 댕글링 본드(Dangling Bond)란?</h3>
+            <div className="text-gray-300 text-sm space-y-3">
+              <p>
+                <span className="text-yellow-400 font-bold">결정 실리콘 vs 비정질 실리콘</span><br/>
+                결정질 Si는 모든 원자가 4개의 이웃과 완벽히 결합합니다.<br/>
+                비정질 Si는 <span className="text-red-400">불규칙한 구조</span> 때문에 결합하지 못한 전자가 생깁니다.
+              </p>
+              <div className="bg-black/30 p-3 rounded">
+                <div className="text-xs">
+                  <div className="text-cyan-400 font-bold">댕글링 본드 = 결합하지 못한 Si 전자</div>
+                  <div className="text-gray-400 mt-2">
+                    • 전자/정공을 잡아먹는 <span className="text-red-400">"트랩(trap)"</span> 역할<br/>
+                    • 많으면 → 전류가 흐르지 않음 → 소자 불량
+                  </div>
+                </div>
+              </div>
+              <p>
+                <span className="text-green-400 font-bold">해결책: 수소(H)로 패시베이션!</span><br/>
+                H 원자가 댕글링 본드에 붙어서 비활성화시킵니다.<br/>
+                그래서 <span className="text-cyan-400">a-Si:H</span> (수소화 비정질 실리콘)라고 부릅니다.
+              </p>
+            </div>
+          </div>
+
+          {/* H2 희석의 역할 */}
+          <div className="bg-gray-900 rounded-lg p-4 border border-gray-600">
+            <h3 className="text-gray-300 font-bold mb-3 text-lg">💨 H₂ 희석은 왜 필요한가요?</h3>
+            <div className="text-gray-300 text-sm space-y-3">
+              <p>
+                <span className="text-yellow-400 font-bold">SiH₄만 쓰면 안 되나요?</span><br/>
+                SiH₄만 쓰면 막이 너무 빨리 자라서 <span className="text-red-400">결함이 많이</span> 생깁니다.<br/>
+                H₂를 섞으면 성장 속도가 느려지고 막 품질이 좋아집니다.
+              </p>
+              <div className="bg-black/30 p-3 rounded text-xs">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-gray-400">
+                      <th className="text-left">H₂/SiH₄</th>
+                      <th className="text-center">댕글링 본드</th>
+                      <th className="text-center">증착률</th>
+                      <th className="text-right">용도</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-white">
+                    <tr>
+                      <td className="text-red-400">{"<"}5</td>
+                      <td className="text-center text-red-400">많음</td>
+                      <td className="text-center text-green-400">빠름</td>
+                      <td className="text-right text-xs">품질↓</td>
+                    </tr>
+                    <tr>
+                      <td className="text-green-400">10~20</td>
+                      <td className="text-center text-green-400">적정</td>
+                      <td className="text-center text-yellow-400">중간</td>
+                      <td className="text-right text-xs">TFT/태양전지</td>
+                    </tr>
+                    <tr>
+                      <td className="text-yellow-400">{">"}30</td>
+                      <td className="text-center text-green-400">매우 적음</td>
+                      <td className="text-center text-red-400">매우 느림</td>
+                      <td className="text-right text-xs">µc-Si 전이</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                <span className="text-cyan-400 font-bold">주의:</span> H₂가 너무 많으면<br/>
+                에칭 효과로 막이 잘 안 자라고, <span className="text-yellow-400">미세결정 Si(µc-Si)</span>로 바뀝니다!
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 핵심 요약 */}
+        <div className="mt-6 bg-gradient-to-r from-gray-700/50 to-gray-600/50 rounded-lg p-4 border border-gray-500">
+          <h3 className="text-gray-200 font-bold mb-2">💡 핵심 요약</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-300">
+            <div>
+              <span className="text-red-400 font-bold">문제:</span>
+              <div className="mt-1 text-xs">
+                비정질 구조 → 댕글링 본드 발생<br/>
+                → 전자 트랩 → 소자 성능 저하
+              </div>
+            </div>
+            <div>
+              <span className="text-green-400 font-bold">해결:</span>
+              <div className="mt-1 text-xs">
+                H₂ 희석으로 막 품질 개선<br/>
+                H 원자가 댕글링 본드 패시베이션
+              </div>
+            </div>
+            <div>
+              <span className="text-yellow-400 font-bold">목표:</span>
+              <div className="mt-1 text-xs">
+                댕글링 본드: ~10¹⁵ cm⁻³<br/>
+                H 함량: 10~12 at%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 실제 응용 */}
+        <div className="mt-4 bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+          <h3 className="text-gray-200 font-bold mb-2">🏭 a-Si:H는 어디에 쓰이나요?</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">📺</div>
+              <div className="text-gray-300 font-bold">LCD TFT</div>
+              <div className="text-gray-500">디스플레이 구동</div>
+            </div>
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">☀️</div>
+              <div className="text-gray-300 font-bold">태양전지</div>
+              <div className="text-gray-500">박막 태양광</div>
+            </div>
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">📷</div>
+              <div className="text-gray-300 font-bold">이미지 센서</div>
+              <div className="text-gray-500">X-ray 검출</div>
+            </div>
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">🖨️</div>
+              <div className="text-gray-300 font-bold">복사기 드럼</div>
+              <div className="text-gray-500">감광체</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      )}
+
+      {/* SiNx 교육 설명 섹션 */}
+      {selectedProcess === 'SiNx' && (
+      <div className="bg-gray-800 border-t border-gray-700 p-6">
+        <h2 className="text-xl font-bold text-white mb-4">📚 SiNx (질화규소) 학습 가이드</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 굴절률이란? */}
+          <div className="bg-gray-900 rounded-lg p-4 border border-blue-800">
+            <h3 className="text-blue-400 font-bold mb-3 text-lg">🔍 굴절률(n)이 왜 중요한가요?</h3>
+            <div className="text-gray-300 text-sm space-y-3">
+              <p>
+                <span className="text-yellow-400 font-bold">굴절률 = 막의 조성을 알려주는 지표!</span><br/>
+                SiNx의 굴절률은 Si와 N의 비율에 따라 달라집니다.
+              </p>
+              <div className="bg-black/30 p-3 rounded">
+                <div className="text-xs space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-yellow-400">n {">"} 2.1</span>
+                    <span className="text-gray-400">→</span>
+                    <span>Si-rich (Si 과잉)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-green-400">n ≈ 2.0</span>
+                    <span className="text-gray-400">→</span>
+                    <span>Si₃N₄ (화학양론적)</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-400">n {"<"} 1.9</span>
+                    <span className="text-gray-400">→</span>
+                    <span>N-rich (N 과잉)</span>
+                  </div>
+                </div>
+              </div>
+              <p>
+                <span className="text-cyan-400 font-bold">측정 방법:</span><br/>
+                엘립소미터(Ellipsometer)로 빛의 반사를 측정해서 굴절률을 알아냅니다.
+              </p>
+            </div>
+          </div>
+
+          {/* NH3/SiH4 비율 */}
+          <div className="bg-gray-900 rounded-lg p-4 border border-blue-800">
+            <h3 className="text-blue-400 font-bold mb-3 text-lg">⚗️ NH₃/SiH₄ 비율의 효과</h3>
+            <div className="text-gray-300 text-sm space-y-3">
+              <p>
+                <span className="text-yellow-400 font-bold">왜 비율 조절이 필요한가요?</span><br/>
+                용도에 따라 최적의 조성이 다릅니다!
+              </p>
+              <div className="bg-black/30 p-3 rounded text-xs">
+                <table className="w-full">
+                  <thead>
+                    <tr className="text-gray-400">
+                      <th className="text-left">NH₃/SiH₄</th>
+                      <th className="text-center">굴절률</th>
+                      <th className="text-center">특성</th>
+                      <th className="text-right">용도</th>
+                    </tr>
+                  </thead>
+                  <tbody className="text-white">
+                    <tr>
+                      <td className="text-yellow-400">2~4</td>
+                      <td className="text-center">2.1~2.3</td>
+                      <td className="text-center">Si-rich</td>
+                      <td className="text-right text-xs">태양전지 ARC</td>
+                    </tr>
+                    <tr>
+                      <td className="text-green-400">6~10</td>
+                      <td className="text-center">1.95~2.05</td>
+                      <td className="text-center">화학양론</td>
+                      <td className="text-right text-xs">절연막</td>
+                    </tr>
+                    <tr>
+                      <td className="text-blue-400">12~15</td>
+                      <td className="text-center">1.85~1.9</td>
+                      <td className="text-center">N-rich</td>
+                      <td className="text-right text-xs">패시베이션</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p>
+                <span className="text-red-400 font-bold">주의:</span> NH₃가 너무 많으면<br/>
+                증착률이 급격히 떨어지고 막 스트레스가 변합니다.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 핵심 요약 */}
+        <div className="mt-6 bg-gradient-to-r from-blue-900/30 to-blue-800/30 rounded-lg p-4 border border-blue-700">
+          <h3 className="text-blue-300 font-bold mb-2">💡 핵심 요약</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-300">
+            <div>
+              <span className="text-yellow-400 font-bold">Si-rich (n{">"}2.1):</span>
+              <div className="mt-1 text-xs">
+                • 높은 굴절률<br/>
+                • 태양전지 반사방지막(ARC)용<br/>
+                • 빛 흡수 최소화
+              </div>
+            </div>
+            <div>
+              <span className="text-green-400 font-bold">Si₃N₄ (n≈2.0):</span>
+              <div className="mt-1 text-xs">
+                • 화학양론적 조성<br/>
+                • 우수한 절연 특성<br/>
+                • 게이트 절연막
+              </div>
+            </div>
+            <div>
+              <span className="text-blue-400 font-bold">N-rich (n{"<"}1.9):</span>
+              <div className="mt-1 text-xs">
+                • 높은 N 함량<br/>
+                • 표면 패시베이션 우수<br/>
+                • 태양전지 후면용
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 실제 응용 */}
+        <div className="mt-4 bg-gray-900/50 rounded-lg p-4 border border-gray-700">
+          <h3 className="text-blue-200 font-bold mb-2">🏭 SiNx는 어디에 쓰이나요?</h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">☀️</div>
+              <div className="text-blue-300 font-bold">태양전지 ARC</div>
+              <div className="text-gray-500">반사 방지 코팅</div>
+            </div>
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">🛡️</div>
+              <div className="text-blue-300 font-bold">패시베이션</div>
+              <div className="text-gray-500">표면 보호</div>
+            </div>
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">⚡</div>
+              <div className="text-blue-300 font-bold">게이트 절연막</div>
+              <div className="text-gray-500">TFT/MOSFET</div>
+            </div>
+            <div className="bg-black/30 p-2 rounded text-center">
+              <div className="text-2xl mb-1">💾</div>
+              <div className="text-blue-300 font-bold">하드마스크</div>
+              <div className="text-gray-500">식각 보호층</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 화학 반응식 */}
+        <div className="mt-4 bg-black/30 rounded-lg p-4">
+          <h3 className="text-gray-300 font-bold mb-2">🧪 PECVD SiNx 반응</h3>
+          <div className="font-mono text-sm text-center">
+            <span className="text-cyan-400">SiH₄</span> + <span className="text-green-400">NH₃</span>
+            <span className="text-gray-500 mx-2">→ 플라즈마 →</span>
+            <span className="text-blue-400">SiNₓ:H</span> + <span className="text-gray-400">H₂</span>
+          </div>
+          <div className="text-xs text-gray-500 text-center mt-2">
+            * PECVD SiNx에는 항상 수소(H)가 포함되어 있어서 SiNₓ:H라고 표기합니다
+          </div>
+        </div>
+      </div>
+      )}
     </div>
   );
 };
