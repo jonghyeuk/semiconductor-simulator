@@ -924,34 +924,23 @@ const MetallizationEDSPackagingSimulator = () => {
                 </>
               )}
 
-              {/* Step 3: ECP Cu Fill (Trench 채움 + 오버플로우) */}
+              {/* Step 3: ECP Cu Fill (Trench 채움) */}
               {damasceneStep >= 3 && (
                 <>
-                  {/* Trench 내부 Cu 채움 */}
+                  {/* Trench 내부 Cu 채움 (Barrier, Cu Seed 안쪽) */}
                   <rect x="47" y="30" width="26" height="33" fill="#CD7F32" />
                   <rect x="137" y="30" width="26" height="33" fill="#CD7F32" />
                   <rect x="227" y="30" width="26" height="33" fill="#CD7F32" />
-                  {/* 오버플로우 - 전체 표면 덮음 */}
-                  <rect x="0" y="15" width="300" height="15" fill="#CD7F32" opacity="0.85" />
                 </>
               )}
 
-              {/* Step 4: CMP 평탄화 (오버플로우 제거, 깔끔한 패턴) */}
-              {damasceneStep >= 4 && (
-                <>
-                  {/* 오버플로우 제거 - ILD 표면 복원 */}
-                  <rect x="0" y="15" width="300" height="15" fill="#718096" />
-                  {/* Trench 위쪽 표면도 평탄화 */}
-                  <rect x="0" y="26" width="40" height="4" fill="#718096" />
-                  <rect x="80" y="26" width="50" height="4" fill="#718096" />
-                  <rect x="170" y="26" width="50" height="4" fill="#718096" />
-                  <rect x="260" y="26" width="40" height="4" fill="#718096" />
-                  {/* 깔끔하게 채워진 Cu 배선만 남음 */}
-                  <rect x="40" y="30" width="40" height="40" fill="#CD7F32" />
-                  <rect x="130" y="30" width="40" height="40" fill="#CD7F32" />
-                  <rect x="220" y="30" width="40" height="40" fill="#CD7F32" />
-                </>
+              {/* Step 3에서만: 오버플로우 표시 (CMP 전) */}
+              {damasceneStep === 3 && (
+                <rect x="0" y="15" width="300" height="15" fill="#CD7F32" opacity="0.85" />
               )}
+
+              {/* Step 4: CMP 후 - 오버플로우 제거됨, Barrier/Cu Seed/Cu Fill 유지 */}
+              {/* 별도 그릴 필요 없음 - 오버플로우만 사라지고 기존 층들은 그대로 유지 */}
 
               <text x="150" y="90" textAnchor="middle" fill="white" fontSize="8">ILD (절연층) / Lower Metal</text>
             </svg>
