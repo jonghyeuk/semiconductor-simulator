@@ -679,13 +679,13 @@ const MetallizationEDSPackagingSimulator = () => {
     </div>
   );
 
-  // Damascene 공정 단계별 설명
+  // Damascene 공정 단계별 설명 (Single Damascene)
   const damasceneStepDetails = [
     {
-      name: 'Via/Trench 형성',
-      short: 'Via/Trench',
-      desc: '절연체(ILD)에 홈(Trench)과 구멍(Via)을 식각으로 만듭니다.',
-      detail: '포토리소그라피로 패턴을 형성하고, RIE(Reactive Ion Etching)로 Low-k 절연막을 식각합니다. Dual Damascene에서는 Via와 Trench를 한 번에 만들어 공정을 단축합니다.'
+      name: 'Trench 형성',
+      short: 'Trench',
+      desc: '절연체(ILD)에 홈(Trench)을 식각으로 만듭니다.',
+      detail: '포토리소그라피로 패턴을 형성하고, RIE(Reactive Ion Etching)로 Low-k 절연막을 식각합니다. Single Damascene에서는 Trench만 형성하며, Via는 별도 공정으로 진행합니다.'
     },
     {
       name: 'Barrier 증착',
@@ -739,21 +739,12 @@ const MetallizationEDSPackagingSimulator = () => {
         <p className="text-xs text-gray-500 mt-2">※ 마치 <strong>도장 만들기</strong>와 비슷합니다: 나무에 글자를 새기고(홈), 잉크를 바른 후(Cu), 표면을 닦아내면(CMP) 글자만 남습니다.</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        {['single', 'dual'].map((type) => (
-          <button
-            key={type}
-            onClick={() => setDamasceneType(type)}
-            className={`p-3 rounded-lg border-2 transition ${
-              damasceneType === type ? 'border-orange-500 bg-orange-50' : 'border-gray-200'
-            }`}
-          >
-            <div className="font-bold capitalize">{type} Damascene</div>
-            <div className="text-xs text-gray-500">
-              {type === 'single' ? 'Via와 Trench 별도 공정 (단순)' : 'Via + Trench 동시 형성 (효율적)'}
-            </div>
-          </button>
-        ))}
+      {/* Single Damascene 설명 */}
+      <div className="p-3 bg-orange-50 rounded-lg border border-orange-200">
+        <div className="font-bold text-orange-800">Single Damascene</div>
+        <div className="text-xs text-gray-600 mt-1">
+          Via와 Trench를 별도로 형성하는 기본 공정입니다. 각 층마다 CMP가 필요하여 공정 횟수가 많지만, 구조가 단순하여 이해하기 쉽습니다.
+        </div>
       </div>
 
       <div className="p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
@@ -800,7 +791,7 @@ const MetallizationEDSPackagingSimulator = () => {
 
       <div className="bg-white border-2 border-orange-300 rounded-lg p-4">
         <div className="flex justify-between items-center mb-3">
-          <h4 className="font-bold text-sm">🔄 {damasceneType === 'dual' ? 'Dual' : 'Single'} Damascene 공정 시뮬레이션</h4>
+          <h4 className="font-bold text-sm">🔄 Single Damascene 공정 시뮬레이션</h4>
           {damasceneStep < 0 ? (
             <button
               onClick={startDamasceneProcess}
@@ -872,54 +863,97 @@ const MetallizationEDSPackagingSimulator = () => {
               <p className="text-xs text-gray-600 bg-white p-2 rounded">{damasceneStepDetails[damasceneStep].detail}</p>
             </div>
 
-            {/* 시각화 */}
+            {/* 시각화 - Single Damascene */}
             <svg viewBox="0 0 300 100" className="w-full h-48 bg-gray-900 rounded border border-gray-300 mb-3">
+              {/* 기판 및 ILD 절연층 */}
               <rect x="0" y="70" width="300" height="30" fill="#4A5568" />
-              <rect x="0" y="50" width="300" height="20" fill="#718096" />
+              <rect x="0" y="30" width="300" height="40" fill="#718096" />
 
+              {/* Step 0: Trench 형성 (Single Damascene - Trench만) */}
               {damasceneStep >= 0 && (
                 <>
-                  <rect x="40" y="20" width="40" height="50" fill="#1A202C" />
-                  <rect x="120" y="20" width="40" height="50" fill="#1A202C" />
-                  <rect x="200" y="20" width="40" height="50" fill="#1A202C" />
-                  <rect x="55" y="50" width="10" height="20" fill="#1A202C" />
-                  <rect x="135" y="50" width="10" height="20" fill="#1A202C" />
-                  <rect x="215" y="50" width="10" height="20" fill="#1A202C" />
+                  <rect x="40" y="30" width="40" height="40" fill="#1A202C" />
+                  <rect x="130" y="30" width="40" height="40" fill="#1A202C" />
+                  <rect x="220" y="30" width="40" height="40" fill="#1A202C" />
                 </>
               )}
 
+              {/* Step 1: Barrier 증착 (U자형 코팅 - 벽면과 바닥만) */}
               {damasceneStep >= 1 && (
                 <>
-                  <rect x="40" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
-                  <rect x="120" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
-                  <rect x="200" y="20" width="40" height="50" fill="none" stroke="#8B5CF6" strokeWidth="3" />
+                  {/* Trench 1 - Barrier U자형 */}
+                  <rect x="40" y="30" width="4" height="40" fill="#8B5CF6" />
+                  <rect x="76" y="30" width="4" height="40" fill="#8B5CF6" />
+                  <rect x="40" y="66" width="40" height="4" fill="#8B5CF6" />
+                  {/* Trench 2 */}
+                  <rect x="130" y="30" width="4" height="40" fill="#8B5CF6" />
+                  <rect x="166" y="30" width="4" height="40" fill="#8B5CF6" />
+                  <rect x="130" y="66" width="40" height="4" fill="#8B5CF6" />
+                  {/* Trench 3 */}
+                  <rect x="220" y="30" width="4" height="40" fill="#8B5CF6" />
+                  <rect x="256" y="30" width="4" height="40" fill="#8B5CF6" />
+                  <rect x="220" y="66" width="40" height="4" fill="#8B5CF6" />
+                  {/* 상단 표면에도 Barrier */}
+                  <rect x="0" y="26" width="40" height="4" fill="#8B5CF6" />
+                  <rect x="80" y="26" width="50" height="4" fill="#8B5CF6" />
+                  <rect x="170" y="26" width="50" height="4" fill="#8B5CF6" />
+                  <rect x="260" y="26" width="40" height="4" fill="#8B5CF6" />
                 </>
               )}
 
+              {/* Step 2: Cu Seed 증착 (Barrier 위에 U자형) */}
               {damasceneStep >= 2 && (
                 <>
-                  <rect x="43" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
-                  <rect x="123" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
-                  <rect x="203" y="23" width="34" height="44" fill="none" stroke="#B87333" strokeWidth="2" />
+                  {/* Trench 1 - Cu Seed */}
+                  <rect x="44" y="30" width="3" height="36" fill="#B87333" />
+                  <rect x="73" y="30" width="3" height="36" fill="#B87333" />
+                  <rect x="44" y="63" width="32" height="3" fill="#B87333" />
+                  {/* Trench 2 */}
+                  <rect x="134" y="30" width="3" height="36" fill="#B87333" />
+                  <rect x="163" y="30" width="3" height="36" fill="#B87333" />
+                  <rect x="134" y="63" width="32" height="3" fill="#B87333" />
+                  {/* Trench 3 */}
+                  <rect x="224" y="30" width="3" height="36" fill="#B87333" />
+                  <rect x="253" y="30" width="3" height="36" fill="#B87333" />
+                  <rect x="224" y="63" width="32" height="3" fill="#B87333" />
+                  {/* 상단 표면 Cu Seed */}
+                  <rect x="0" y="23" width="40" height="3" fill="#B87333" />
+                  <rect x="80" y="23" width="50" height="3" fill="#B87333" />
+                  <rect x="170" y="23" width="50" height="3" fill="#B87333" />
+                  <rect x="260" y="23" width="40" height="3" fill="#B87333" />
                 </>
               )}
 
+              {/* Step 3: ECP Cu Fill (Trench 채움 + 오버플로우) */}
               {damasceneStep >= 3 && (
                 <>
-                  <rect x="43" y="23" width="34" height="44" fill="#B87333" />
-                  <rect x="123" y="23" width="34" height="44" fill="#B87333" />
-                  <rect x="203" y="23" width="34" height="44" fill="#B87333" />
-                  {damasceneStep === 3 && (
-                    <rect x="0" y="0" width="300" height="20" fill="#B87333" opacity="0.5" />
-                  )}
+                  {/* Trench 내부 Cu 채움 */}
+                  <rect x="47" y="30" width="26" height="33" fill="#CD7F32" />
+                  <rect x="137" y="30" width="26" height="33" fill="#CD7F32" />
+                  <rect x="227" y="30" width="26" height="33" fill="#CD7F32" />
+                  {/* 오버플로우 - 전체 표면 덮음 */}
+                  <rect x="0" y="15" width="300" height="15" fill="#CD7F32" opacity="0.85" />
                 </>
               )}
 
+              {/* Step 4: CMP 평탄화 (오버플로우 제거, 깔끔한 패턴) */}
               {damasceneStep >= 4 && (
-                <rect x="0" y="0" width="300" height="20" fill="#E2E8F0" />
+                <>
+                  {/* 오버플로우 제거 - ILD 표면 복원 */}
+                  <rect x="0" y="15" width="300" height="15" fill="#718096" />
+                  {/* Trench 위쪽 표면도 평탄화 */}
+                  <rect x="0" y="26" width="40" height="4" fill="#718096" />
+                  <rect x="80" y="26" width="50" height="4" fill="#718096" />
+                  <rect x="170" y="26" width="50" height="4" fill="#718096" />
+                  <rect x="260" y="26" width="40" height="4" fill="#718096" />
+                  {/* 깔끔하게 채워진 Cu 배선만 남음 */}
+                  <rect x="40" y="30" width="40" height="40" fill="#CD7F32" />
+                  <rect x="130" y="30" width="40" height="40" fill="#CD7F32" />
+                  <rect x="220" y="30" width="40" height="40" fill="#CD7F32" />
+                </>
               )}
 
-              <text x="150" y="90" textAnchor="middle" fill="white" fontSize="8">Lower Metal / ILD (절연층)</text>
+              <text x="150" y="90" textAnchor="middle" fill="white" fontSize="8">ILD (절연층) / Lower Metal</text>
             </svg>
 
             {/* 이전/다음 버튼 */}
