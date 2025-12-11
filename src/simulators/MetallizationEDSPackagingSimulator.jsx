@@ -893,7 +893,12 @@ const MetallizationEDSPackagingSimulator = () => {
                   <rect x="220" y="30" width="4" height="40" fill="#8B5CF6" />
                   <rect x="256" y="30" width="4" height="40" fill="#8B5CF6" />
                   <rect x="220" y="66" width="40" height="4" fill="#8B5CF6" />
-                  {/* 상단 표면에도 Barrier */}
+                </>
+              )}
+
+              {/* 상단 표면 Barrier - CMP 전까지만 표시 */}
+              {damasceneStep >= 1 && damasceneStep < 4 && (
+                <>
                   <rect x="0" y="26" width="40" height="4" fill="#8B5CF6" />
                   <rect x="80" y="26" width="50" height="4" fill="#8B5CF6" />
                   <rect x="170" y="26" width="50" height="4" fill="#8B5CF6" />
@@ -916,7 +921,12 @@ const MetallizationEDSPackagingSimulator = () => {
                   <rect x="224" y="30" width="3" height="36" fill="#B87333" />
                   <rect x="253" y="30" width="3" height="36" fill="#B87333" />
                   <rect x="224" y="63" width="32" height="3" fill="#B87333" />
-                  {/* 상단 표면 Cu Seed */}
+                </>
+              )}
+
+              {/* 상단 표면 Cu Seed - CMP 전까지만 표시 */}
+              {damasceneStep >= 2 && damasceneStep < 4 && (
+                <>
                   <rect x="0" y="23" width="40" height="3" fill="#B87333" />
                   <rect x="80" y="23" width="50" height="3" fill="#B87333" />
                   <rect x="170" y="23" width="50" height="3" fill="#B87333" />
