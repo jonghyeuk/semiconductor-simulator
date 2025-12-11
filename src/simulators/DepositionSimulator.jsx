@@ -3,6 +3,7 @@ import SputteringSimulator from './SputteringSimulator';
 import EvaporatorSimulator from './EvaporatorSimulator';
 import ALDSimulator from './ALDSimulator';
 import PECVDSimulator from './PECVDSimulator';
+import LPCVDSimulator from './LPCVDSimulator';
 
 // Icon components
 const PlayIcon = () => (
@@ -841,91 +842,8 @@ const DepositionSimulator = () => {
   );
 
   const renderThermalCVDTab = () => (
-    <div className="space-y-6 p-6">
-      <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg">
-        <h2 className="text-2xl font-bold text-red-800 mb-4">
-          🌡️ CVD (Thermal CVD) - 열 화학기상증착
-        </h2>
-        <p className="text-gray-700 text-lg">
-          순수한 열에너지를 이용하여 전구체 가스를 분해하고 기판 표면에서 화학반응을 통해 막을 형성하는 방법입니다.
-        </p>
-      </div>
-
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h3 className="text-lg font-semibold mb-4">🔥 열분해 메커니즘</h3>
-        <div className="bg-red-50 rounded-lg p-6">
-          <div className="text-center mb-6">
-            <div className="text-4xl mb-2">🌡️</div>
-            <div className="font-mono text-xl font-bold text-red-800">SiH₄ → Si + 2H₂</div>
-            <div className="text-sm text-gray-600 mt-2">600-1000°C</div>
-          </div>
-
-          <div className="grid grid-cols-4 gap-2 text-xs">
-            <div className="bg-white p-2 rounded text-center">
-              <div className="font-bold">가열</div>
-              <div>챔버 고온</div>
-            </div>
-            <div className="bg-white p-2 rounded text-center">
-              <div className="font-bold">분해</div>
-              <div>열에너지</div>
-            </div>
-            <div className="bg-white p-2 rounded text-center">
-              <div className="font-bold">확산</div>
-              <div>표면 이동</div>
-            </div>
-            <div className="bg-white p-2 rounded text-center">
-              <div className="font-bold">성장</div>
-              <div>막 형성</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-4">
-        <div className="bg-orange-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-orange-800 mb-2">📊 주요 특성</h4>
-          <div className="grid grid-cols-2 gap-2 text-sm">
-            <div>
-              <div className="font-medium">온도</div>
-              <div className="text-red-600">고온</div>
-            </div>
-            <div>
-              <div className="font-medium">막질</div>
-              <div className="text-green-600">매우 우수</div>
-            </div>
-            <div>
-              <div className="font-medium">Step Coverage</div>
-              <div className="text-green-600">우수</div>
-            </div>
-            <div>
-              <div className="font-medium">증착속도</div>
-              <div className="text-blue-600">중간</div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-yellow-50 p-4 rounded-lg">
-          <h4 className="font-semibold text-yellow-800 mb-2">⚖️ 장단점</h4>
-          <div className="text-sm space-y-2">
-            <div>
-              <span className="font-medium text-green-600">장점:</span>
-              <ul className="ml-4 list-disc text-xs">
-                <li>매우 높은 막질과 순도</li>
-                <li>우수한 Step Coverage</li>
-                <li>안정적이고 재현성 좋음</li>
-              </ul>
-            </div>
-            <div>
-              <span className="font-medium text-red-600">단점:</span>
-              <ul className="ml-4 list-disc text-xs">
-                <li>고온으로 인한 열 손상</li>
-                <li>느린 증착속도</li>
-                <li>높은 에너지 소모</li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="w-full">
+      <LPCVDSimulator />
     </div>
   );
 
