@@ -344,7 +344,7 @@ const LPCVDSimulator = () => {
             size: 1.5 + Math.random()
           });
         }
-        setMolecules(prev => [...prev, ...newMolecules].slice(-100));
+        setMolecules(prev => [...prev, ...newMolecules]);
       }
 
       // Move molecules
