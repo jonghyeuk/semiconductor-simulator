@@ -1,11 +1,43 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
+// CSS styles for animations
+const styles = `
+  @keyframes slideIn {
+    from {
+      transform: translateX(400px);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.6;
+    }
+  }
+
+  .value-changing {
+    animation: pulse 0.5s ease-in-out;
+  }
+
+  .alert-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+`;
+
 const LPCVDSimulator = () => {
   // State variables
   const [currentMode, setCurrentMode] = useState('SiO2');
   const [isRunning, setIsRunning] = useState(false);
   const [depositionThickness, setDepositionThickness] = useState(0);
   const [molecules, setMolecules] = useState([]);
+  const [valuesChanged, setValuesChanged] = useState(false);
   const [gases, setGases] = useState({
     SiH4: { on: false, flow: 100 },
     O2: { on: false, flow: 200 },
@@ -115,7 +147,15 @@ const LPCVDSimulator = () => {
     setTimeout(() => setShowAlert(false), 3000);
   }, []);
 
+  // Trigger value-changing animation
+  const triggerValueChange = useCallback(() => {
+    setValuesChanged(true);
+    setTimeout(() => setValuesChanged(false), 500);
+  }, []);
+
   const updateProcessResults = useCallback(() => {
+    let changed = false;
+
     setProcessResults(prev => {
       const newResults = { ...prev };
 
@@ -128,7 +168,9 @@ const LPCVDSimulator = () => {
         } else {
           newRI = 1.46 + (2 - o2Ratio) * 0.2;
         }
-        newResults.refractiveIndex = Math.min(2.0, Math.max(1.46, newRI));
+        const calcRI = Math.min(2.0, Math.max(1.46, newRI));
+        if (Math.abs(calcRI - prev.refractiveIndex) > 0.001) changed = true;
+        newResults.refractiveIndex = calcRI;
         newResults.density = 2.2 + Math.min(o2Ratio / 10, 0.1);
 
         if (!gases.SiH4.on) {
@@ -143,7 +185,9 @@ const LPCVDSimulator = () => {
       // SiN mode
       if (currentMode === 'SiN' && gases.SiH2Cl2 && gases.NH3) {
         const nh3Ratio = gases.NH3.flow / Math.max(gases.SiH2Cl2.flow, 1);
-        newResults.stress = (nh3Ratio - 5) * 50;
+        const newStress = (nh3Ratio - 5) * 50;
+        if (Math.abs(newStress - prev.stress) > 5) changed = true;
+        newResults.stress = newStress;
         newResults.siNRatio = Math.max(0.5, Math.min(1.0, 0.75 - (nh3Ratio - 5) * 0.05));
 
         if (nh3Ratio < 3) {
@@ -159,7 +203,9 @@ const LPCVDSimulator = () => {
       // PolySi mode
       if (currentMode === 'PolySi') {
         const avgTemp = zones.reduce((s, z) => s + z.current, 0) / 4;
-        newResults.conductivity = Math.max(0, (avgTemp - 580) / 100);
+        const newConductivity = Math.max(0, (avgTemp - 580) / 100);
+        if (Math.abs(newConductivity - prev.conductivity) > 0.1) changed = true;
+        newResults.conductivity = newConductivity;
         newResults.grainSize = Math.max(0, (avgTemp - 580) * 2);
         newResults.crystallinity = Math.min(100, Math.max(0, (avgTemp - 580) / 0.7));
 
@@ -180,7 +226,9 @@ const LPCVDSimulator = () => {
         const zoneDiff = Math.max(...activeZones.map(z => Math.abs(z.current - z.target)));
         const tempRange = Math.max(...activeZones.map(z => z.current)) -
                         Math.min(...activeZones.map(z => z.current));
-        newResults.uniformity = Math.max(85, 100 - zoneDiff / 5 - tempRange / 10);
+        const newUniformity = Math.max(85, 100 - zoneDiff / 5 - tempRange / 10);
+        if (Math.abs(newUniformity - prev.uniformity) > 1) changed = true;
+        newResults.uniformity = newUniformity;
       } else {
         newResults.uniformity = 0;
       }
@@ -191,7 +239,11 @@ const LPCVDSimulator = () => {
 
       return newResults;
     });
-  }, [currentMode, gases, zones]);
+
+    if (changed) {
+      triggerValueChange();
+    }
+  }, [currentMode, gases, zones, triggerValueChange]);
 
   const setMode = (mode) => {
     setCurrentMode(mode);
@@ -394,9 +446,12 @@ const LPCVDSimulator = () => {
       padding: '20px',
       minHeight: '100%'
     }}>
+      {/* Inject CSS styles */}
+      <style>{styles}</style>
+
       {/* Alert */}
       {showAlert && (
-        <div style={{
+        <div className="alert-slide-in" style={{
           position: 'fixed',
           top: '20px',
           right: '20px',
@@ -406,8 +461,7 @@ const LPCVDSimulator = () => {
           borderRadius: '10px',
           fontWeight: 'bold',
           boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-          zIndex: 1000,
-          animation: 'slideIn 0.3s ease-out'
+          zIndex: 1000
         }}>
           {processAlert}
         </div>
@@ -421,7 +475,7 @@ const LPCVDSimulator = () => {
           textShadow: '0 0 20px rgba(0, 255, 136, 0.5)',
           marginBottom: '30px'
         }}>
-          LPCVD Interactive Simulator
+          🔬 LPCVD Interactive Simulator
         </h1>
 
         <div style={{
@@ -443,7 +497,7 @@ const LPCVDSimulator = () => {
               borderBottom: '2px solid #4a5568',
               paddingBottom: '10px'
             }}>
-              Controls
+              ⚙️ Controls
             </div>
 
             <h3 style={{ color: '#a8dadc', marginBottom: '10px' }}>공정 모드</h3>
@@ -598,7 +652,7 @@ const LPCVDSimulator = () => {
               borderBottom: '2px solid #4a5568',
               paddingBottom: '10px'
             }}>
-              Chamber View
+              🔬 Chamber View
             </div>
             <svg viewBox="0 0 800 900" style={{
               width: '100%',
@@ -763,7 +817,7 @@ const LPCVDSimulator = () => {
               borderBottom: '2px solid #4a5568',
               paddingBottom: '10px'
             }}>
-              Monitor
+              📊 Monitor
             </div>
 
             {/* Experiment Guide */}
@@ -774,7 +828,7 @@ const LPCVDSimulator = () => {
               marginBottom: '15px'
             }}>
               <h4 style={{ color: '#00ff88', textAlign: 'center', marginBottom: '10px' }}>
-                실험 가이드
+                🧪 실험 가이드
               </h4>
               <div style={{
                 background: 'rgba(0, 255, 136, 0.05)',
@@ -814,7 +868,7 @@ const LPCVDSimulator = () => {
               marginBottom: '15px'
             }}>
               <h4 style={{ color: '#00ff88', textAlign: 'center', marginBottom: '10px' }}>
-                공정 결과
+                📈 공정 결과
               </h4>
               {modes[currentMode].properties.map(prop => (
                 <div key={prop} style={{
@@ -826,11 +880,14 @@ const LPCVDSimulator = () => {
                   marginBottom: '8px'
                 }}>
                   <span style={{ color: '#a8dadc' }}>{labels[prop]}</span>
-                  <span style={{
-                    color: getResultColor(prop, processResults[prop]),
-                    fontWeight: 'bold',
-                    fontFamily: 'monospace'
-                  }}>
+                  <span
+                    className={valuesChanged ? 'value-changing' : ''}
+                    style={{
+                      color: getResultColor(prop, processResults[prop]),
+                      fontWeight: 'bold',
+                      fontFamily: 'monospace'
+                    }}
+                  >
                     {processResults[prop].toFixed(2)}
                   </span>
                 </div>
@@ -844,11 +901,14 @@ const LPCVDSimulator = () => {
                 marginBottom: '8px'
               }}>
                 <span style={{ color: '#a8dadc' }}>{labels.uniformity}</span>
-                <span style={{
-                  color: getResultColor('uniformity', processResults.uniformity),
-                  fontWeight: 'bold',
-                  fontFamily: 'monospace'
-                }}>
+                <span
+                  className={valuesChanged ? 'value-changing' : ''}
+                  style={{
+                    color: getResultColor('uniformity', processResults.uniformity),
+                    fontWeight: 'bold',
+                    fontFamily: 'monospace'
+                  }}
+                >
                   {processResults.uniformity.toFixed(1)}%
                 </span>
               </div>
@@ -960,7 +1020,7 @@ const LPCVDSimulator = () => {
             marginBottom: '25px',
             fontSize: '1.8em'
           }}>
-            왜 공정 모드마다 온도가 다를까요?
+            📚 왜 공정 모드마다 온도가 다를까요?
           </h2>
 
           <div style={{
@@ -976,7 +1036,7 @@ const LPCVDSimulator = () => {
               border: '2px solid #3498db'
             }}>
               <h3 style={{ color: '#3498db', marginBottom: '15px', fontSize: '1.3em', textAlign: 'center' }}>
-                SiO₂ (400-500°C)
+                🔵 SiO₂ (400-500°C)
               </h3>
               <div style={{
                 background: 'rgba(0,0,0,0.3)',
@@ -984,7 +1044,7 @@ const LPCVDSimulator = () => {
                 borderRadius: '8px',
                 marginBottom: '15px'
               }}>
-                <div style={{ fontWeight: 'bold', color: '#5dade2', marginBottom: '8px' }}>주요 반응:</div>
+                <div style={{ fontWeight: 'bold', color: '#5dade2', marginBottom: '8px' }}>💨 주요 반응:</div>
                 <code style={{ color: '#e8e8e8', fontSize: '0.95em' }}>SiH₄ + O₂ → SiO₂ + 2H₂</code>
               </div>
               <div style={{ lineHeight: 1.8, color: '#cbd5e0', fontSize: '0.95em' }}>
@@ -993,6 +1053,12 @@ const LPCVDSimulator = () => {
                   실레인(SiH₄)은 <span style={{ color: '#00ff88' }}>열적으로 매우 불안정</span>한 가스입니다.
                   산소(O₂)와 함께 있으면 <span style={{ color: '#ffd93d' }}>400°C만 되어도 쉽게 분해</span>되어
                   SiO₂를 형성합니다.
+                </p>
+                <p style={{ marginBottom: '12px' }}>
+                  <strong style={{ color: '#5dade2' }}>⚗️ 분해 메커니즘:</strong><br/>
+                  • 400°C: SiH₄의 Si-H 결합이 끊어지기 시작<br/>
+                  • O₂와 즉시 반응하여 Si-O 결합 형성<br/>
+                  • 산소가 반응을 촉진하는 역할
                 </p>
                 <div style={{
                   background: 'rgba(52, 152, 219, 0.15)',
@@ -1004,7 +1070,7 @@ const LPCVDSimulator = () => {
                   <span style={{ fontSize: '0.9em' }}>
                     • 너무 낮으면 (&lt;350°C): 반응 느림<br/>
                     • 적정 온도 (400-500°C): 균일한 막질<br/>
-                    • 너무 높으면 (&gt;600°C): 입자 형성
+                    • 너무 높으면 (&gt;600°C): 입자 형성, 거친 표면
                   </span>
                 </div>
               </div>
@@ -1018,7 +1084,7 @@ const LPCVDSimulator = () => {
               border: '2px solid #e74c3c'
             }}>
               <h3 style={{ color: '#e74c3c', marginBottom: '15px', fontSize: '1.3em', textAlign: 'center' }}>
-                Si₃N₄ (700-780°C)
+                🔴 Si₃N₄ (700-780°C)
               </h3>
               <div style={{
                 background: 'rgba(0,0,0,0.3)',
@@ -1026,15 +1092,22 @@ const LPCVDSimulator = () => {
                 borderRadius: '8px',
                 marginBottom: '15px'
               }}>
-                <div style={{ fontWeight: 'bold', color: '#ff6b6b', marginBottom: '8px' }}>주요 반응:</div>
+                <div style={{ fontWeight: 'bold', color: '#ff6b6b', marginBottom: '8px' }}>💨 주요 반응:</div>
                 <code style={{ color: '#e8e8e8', fontSize: '0.85em' }}>3SiH₂Cl₂ + 4NH₃ → Si₃N₄ + 6HCl + 6H₂</code>
               </div>
               <div style={{ lineHeight: 1.8, color: '#cbd5e0', fontSize: '0.95em' }}>
                 <p style={{ marginBottom: '12px' }}>
                   <strong style={{ color: '#ff6b6b' }}>🌡️ 높은 온도가 필요한 이유:</strong><br/>
                   디클로로실레인(SiH₂Cl₂)과 암모니아(NH₃)의 반응은
-                  <span style={{ color: '#ffd93d' }}>Si-Cl과 N-H 결합을 끊고</span>
-                  <span style={{ color: '#00ff88' }}>강한 Si-N 결합을 만들어야</span> 합니다.
+                  <span style={{ color: '#ffd93d' }}> Si-Cl과 N-H 결합을 끊고</span>
+                  <span style={{ color: '#00ff88' }}> 강한 Si-N 결합을 만들어야</span> 합니다.
+                </p>
+                <p style={{ marginBottom: '12px' }}>
+                  <strong style={{ color: '#ff6b6b' }}>⚗️ 분해 메커니즘:</strong><br/>
+                  • 700°C: Si-Cl 결합 분해 시작 (강한 결합)<br/>
+                  • NH₃도 N-H 분해로 활성 N 생성<br/>
+                  • Si와 N이 만나 <span style={{ color: '#00ff88' }}>매우 안정한 Si₃N₄</span> 형성<br/>
+                  • HCl, H₂는 부산물로 배출
                 </p>
                 <div style={{
                   background: 'rgba(231, 76, 60, 0.15)',
@@ -1060,7 +1133,7 @@ const LPCVDSimulator = () => {
               border: '2px solid #9b59b6'
             }}>
               <h3 style={{ color: '#9b59b6', marginBottom: '15px', fontSize: '1.3em', textAlign: 'center' }}>
-                Poly-Si (580-650°C)
+                🟣 Poly-Si (580-650°C)
               </h3>
               <div style={{
                 background: 'rgba(0,0,0,0.3)',
@@ -1068,7 +1141,7 @@ const LPCVDSimulator = () => {
                 borderRadius: '8px',
                 marginBottom: '15px'
               }}>
-                <div style={{ fontWeight: 'bold', color: '#c39bd3', marginBottom: '8px' }}>주요 반응:</div>
+                <div style={{ fontWeight: 'bold', color: '#c39bd3', marginBottom: '8px' }}>💨 주요 반응:</div>
                 <code style={{ color: '#e8e8e8', fontSize: '0.95em' }}>SiH₄ → Si + 2H₂</code>
               </div>
               <div style={{ lineHeight: 1.8, color: '#cbd5e0', fontSize: '0.95em' }}>
@@ -1076,7 +1149,14 @@ const LPCVDSimulator = () => {
                   <strong style={{ color: '#c39bd3' }}>🌡️ 중간 온도의 이유:</strong><br/>
                   산소 없이 <span style={{ color: '#ffd93d' }}>SiH₄만 열분해</span>하여
                   순수 실리콘을 얻습니다. 온도에 따라
-                  <span style={{ color: '#00ff88' }}>결정 구조가 결정</span>됩니다!
+                  <span style={{ color: '#00ff88' }}> 결정 구조가 결정</span>됩니다!
+                </p>
+                <p style={{ marginBottom: '12px' }}>
+                  <strong style={{ color: '#c39bd3' }}>⚗️ 분해 메커니즘:</strong><br/>
+                  • 580°C: SiH₄ → SiH₂ → Si (순차 분해)<br/>
+                  • H₂는 기체로 배출<br/>
+                  • 증착된 Si 원자들이 <span style={{ color: '#00ff88' }}>결정화</span><br/>
+                  • 온도↑ → 결정립(grain) 크기↑
                 </p>
                 <div style={{
                   background: 'rgba(155, 89, 182, 0.15)',
@@ -1086,9 +1166,9 @@ const LPCVDSimulator = () => {
                 }}>
                   <strong style={{ color: '#9b59b6' }}>💡 온도 영향:</strong><br/>
                   <span style={{ fontSize: '0.9em' }}>
-                    • 낮은 온도 (&lt;580°C): 비정질(a-Si)<br/>
-                    • 중간 온도 (580-650°C): 다결정<br/>
-                    • 높은 온도 (&gt;650°C): 큰 결정립
+                    • 낮은 온도 (&lt;580°C): 비정질(a-Si), 낮은 전도도<br/>
+                    • 중간 온도 (580-650°C): 다결정, 적당한 전도도<br/>
+                    • 높은 온도 (&gt;650°C): 큰 결정립, 높은 전도도
                   </span>
                 </div>
               </div>
