@@ -330,26 +330,28 @@ const LPCVDSimulator = () => {
         return zone;
       }));
 
-      // Generate molecules
+      // Generate and move molecules in a single update
       const activeGases = Object.entries(gases).filter(([_, g]) => g.on);
-      if (activeGases.length > 0 && Math.random() > 0.1) {
-        const newMolecules = [];
-        for (let i = 0; i < 5; i++) {
-          newMolecules.push({
-            id: Date.now() + Math.random(),
-            x: 260 + Math.random() * 280,
-            y: 55 + Math.random() * 50,
-            vx: (Math.random() - 0.5) * 2,
-            vy: 3 + Math.random() * 2,
-            size: 1.5 + Math.random()
-          });
-        }
-        setMolecules(prev => [...prev, ...newMolecules]);
-      }
 
-      // Move molecules
       setMolecules(prev => {
-        return prev.map(mol => {
+        let updatedMolecules = [...prev];
+
+        // Add new molecules
+        if (activeGases.length > 0 && Math.random() > 0.1) {
+          for (let i = 0; i < 5; i++) {
+            updatedMolecules.push({
+              id: Date.now() + Math.random(),
+              x: 260 + Math.random() * 280,
+              y: 55 + Math.random() * 50,
+              vx: (Math.random() - 0.5) * 2,
+              vy: 3 + Math.random() * 2,
+              size: 1.5 + Math.random()
+            });
+          }
+        }
+
+        // Move molecules
+        return updatedMolecules.map(mol => {
           let newX = mol.x + mol.vx;
           let newY = mol.y + mol.vy;
           let newVx = mol.vx;
