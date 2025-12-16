@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>왜 시뮬레이션(수치해석)이 필요한가?</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a1a2a 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.05); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(102, 68, 255, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(102, 68, 255, 0.8), 0 0 60px rgba(102, 68, 255, 0.4); }
+        }
+
+        @keyframes particleFloat {
+            0% { transform: translateY(100%) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100%) translateX(20px); opacity: 0; }
+        }
+
+        @keyframes electronMove {
+            0% { transform: translate(0, 0); }
+            25% { transform: translate(10px, -5px); }
+            50% { transform: translate(0, -10px); }
+            75% { transform: translate(-10px, -5px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        @keyframes ionBombard {
+            0% { transform: translateY(-50px); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateY(50px); opacity: 0; }
+        }
+
+        @keyframes waveMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            background: linear-gradient(135deg, #00ff88 0%, #00ccff 50%, #ff66ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .header .subtitle {
+            font-size: 1.3em;
+            color: #a8dadc;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .highlight {
+            color: #ffd93d;
+            font-weight: bold;
+        }
+
+        /* Main Question */
+        .main-question {
+            background: linear-gradient(135deg, rgba(102, 68, 255, 0.2) 0%, rgba(0, 204, 255, 0.1) 100%);
+            border: 2px solid rgba(102, 68, 255, 0.5);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+            text-align: center;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        .main-question h2 {
+            font-size: 2em;
+            color: #00ff88;
+            margin-bottom: 20px;
+        }
+
+        .main-question p {
+            font-size: 1.2em;
+            line-height: 1.8;
+            color: #e2e8f0;
+        }
+
+        /* Comparison Section */
+        .comparison {
+            display: grid;
+            grid-template-columns: 1fr 100px 1fr;
+            gap: 20px;
+            margin-bottom: 60px;
+            align-items: stretch;
+        }
+
+        .comparison-card {
+            background: rgba(26, 32, 44, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            border: 2px solid #4a5568;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .comparison-card.experiment {
+            border-color: #e74c3c;
+        }
+
+        .comparison-card.simulation {
+            border-color: #00ff88;
+        }
+
+        .comparison-card h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .comparison-card.experiment h3 {
+            color: #e74c3c;
+        }
+
+        .comparison-card.simulation h3 {
+            color: #00ff88;
+        }
+
+        .comparison-vs {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd93d;
+        }
+
+        .comparison-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+        }
+
+        .comparison-item .icon {
+            font-size: 2em;
+        }
+
+        .comparison-item .text {
+            flex: 1;
+        }
+
+        .comparison-item .text strong {
+            display: block;
+            color: #a8dadc;
+            margin-bottom: 5px;
+        }
+
+        /* Visualization Section */
+        .visualization-section {
+            margin-bottom: 60px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2em;
+            color: #00ccff;
+            margin-bottom: 40px;
+        }
+
+        /* Plasma Chamber Visualization */
+        .plasma-chamber {
+            background: linear-gradient(180deg, #0a0a2a 0%, #1a1a4a 100%);
+            border: 3px solid #4a5568;
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            height: 500px;
+            margin-bottom: 40px;
+        }
+
+        .chamber-label {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 255, 136, 0.2);
+            border: 1px solid #00ff88;
+            padding: 10px 20px;
+            border-radius: 10px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+
+        /* Plasma Zone */
+        .plasma-zone {
+            position: absolute;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 150px;
+            background: radial-gradient(ellipse at center, rgba(102, 68, 255, 0.4) 0%, rgba(102, 68, 255, 0.1) 50%, transparent 70%);
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        /* Wafer */
+        .wafer {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 30px;
+            background: linear-gradient(180deg, #606060 0%, #404040 100%);
+            border-radius: 5px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .wafer::before {
+            content: 'Si Wafer';
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: #a8dadc;
+            font-size: 0.9em;
+        }
+
+        /* Particles */
+        .particles-container {
+            position: absolute;
+            top: 100px;
+            left: 10%;
+            width: 80%;
+            height: 300px;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: particleFloat 3s ease-in-out infinite;
+        }
+
+        .particle.electron {
+            background: #00ccff;
+            box-shadow: 0 0 10px #00ccff;
+            width: 6px;
+            height: 6px;
+        }
+
+        .particle.ion {
+            background: #ff6b6b;
+            box-shadow: 0 0 10px #ff6b6b;
+            width: 10px;
+            height: 10px;
+        }
+
+        .particle.radical {
+            background: #00ff88;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .particle.neutral {
+            background: #ffd93d;
+            box-shadow: 0 0 5px #ffd93d;
+            width: 12px;
+            height: 12px;
+        }
+
+        /* Multi-Physics Grid */
+        .multiphysics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 60px;
+        }
+
+        .physics-card {
+            background: rgba(26, 32, 44, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .physics-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--card-color);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .physics-card .icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .physics-card h4 {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .physics-card p {
+            color: #a8dadc;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        .physics-card.plasma { --card-color: #6644ff; }
+        .physics-card.plasma h4 { color: #a88eff; }
+
+        .physics-card.thermal { --card-color: #ff6b6b; }
+        .physics-card.thermal h4 { color: #ff8a8a; }
+
+        .physics-card.chemical { --card-color: #00ff88; }
+        .physics-card.chemical h4 { color: #66ffaa; }
+
+        .physics-card.mechanical { --card-color: #00ccff; }
+        .physics-card.mechanical h4 { color: #66ddff; }
+
+        /* Benefits Section */
+        .benefits-section {
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1) 0%, rgba(0, 204, 255, 0.1) 100%);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+        }
+
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .benefit-card {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border-left: 4px solid;
+        }
+
+        .benefit-card.cost { border-left-color: #ff6b6b; }
+        .benefit-card.time { border-left-color: #ffd93d; }
+        .benefit-card.insight { border-left-color: #00ff88; }
+
+        .benefit-card .number {
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .benefit-card.cost .number { color: #ff6b6b; }
+        .benefit-card.time .number { color: #ffd93d; }
+        .benefit-card.insight .number { color: #00ff88; }
+
+        .benefit-card h4 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+
+        .benefit-card p {
+            color: #a8dadc;
+            line-height: 1.6;
+        }
+
+        /* Equation Display */
+        .equation-section {
+            background: rgba(26, 32, 44, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 60px;
+            border: 2px solid #4a5568;
+        }
+
+        .equation-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .equation-box {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 4px solid #00ccff;
+        }
+
+        .equation-box h4 {
+            color: #00ccff;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .equation-box .equation {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1em;
+            color: #ffd93d;
+            background: rgba(255, 217, 61, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .equation-box p {
+            color: #a8dadc;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px;
+            border-top: 1px solid #4a5568;
+        }
+
+        .footer p {
+            color: #718096;
+            margin-bottom: 10px;
+        }
+
+        .footer .cta {
+            display: inline-block;
+            background: linear-gradient(135deg, #00ff88 0%, #00ccff 100%);
+            color: #1a202c;
+            padding: 15px 40px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.1em;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .footer .cta:hover {
+            transform: scale(1.05);
+        }
+
+        /* Legend */
+        .legend {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.85em;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .legend-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.electron { background: #00ccff; }
+        .legend-dot.ion { background: #ff6b6b; }
+        .legend-dot.radical { background: #00ff88; }
+        .legend-dot.neutral { background: #ffd93d; }
+
+        /* Animation for connection lines */
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: waveMove 2s linear infinite;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .multiphysics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .comparison {
+                grid-template-columns: 1fr;
+            }
+
+            .comparison-vs {
+                padding: 20px 0;
+            }
+
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .equation-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .multiphysics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🔬 왜 시뮬레이션(수치해석)이 필요한가?</h1>
+            <p class="subtitle">
+                반도체 공정에서 <span class="highlight">실제 측정으로 어렵거나 시간/비용이 많이 드는 문제</span>를
+                모델링하고, <span class="highlight">본질적인 원인</span>을 파악하기 위해
+                <span class="highlight">멀티 피직스(Multi-Physics)</span>를 고려한 수치해석이 필요합니다.
+            </p>
+        </header>
+
+        <!-- Main Question -->
+        <section class="main-question">
+            <h2>🤔 실험만으로 충분하지 않을까요?</h2>
+            <p>
+                반도체 공정은 <strong>나노미터 스케일</strong>에서 <strong>플라즈마, 열, 화학반응, 응력</strong> 등
+                여러 물리 현상이 <strong>동시에</strong> 일어납니다.<br><br>
+                이 복잡한 현상을 실험만으로 이해하기엔 <span class="highlight">비용이 너무 높고</span>,
+                <span class="highlight">시간이 오래 걸리며</span>,
+                <span class="highlight">내부를 직접 볼 수 없습니다</span>.
+            </p>
+        </section>
+
+        <!-- Comparison: Real Experiment vs Simulation -->
+        <section class="comparison">
+            <div class="comparison-card experiment">
+                <h3>🧪 실제 실험</h3>
+
+                <div class="comparison-item">
+                    <div class="icon">💰</div>
+                    <div class="text">
+                        <strong>높은 비용</strong>
+                        웨이퍼 1장당 수십~수백만 원, 장비 가동 비용 추가
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">⏰</div>
+                    <div class="text">
+                        <strong>긴 시간</strong>
+                        1회 실험에 수 시간~수 일, 결과 분석까지 수 주
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">🔒</div>
+                    <div class="text">
+                        <strong>제한된 관찰</strong>
+                        공정 중 내부 관찰 불가, 결과만 확인 가능
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">⚠️</div>
+                    <div class="text">
+                        <strong>위험 요소</strong>
+                        유독가스, 고온, 플라즈마 등 안전 문제
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">🎯</div>
+                    <div class="text">
+                        <strong>시행착오</strong>
+                        최적 조건을 찾기 위해 수십~수백 회 반복 필요
+                    </div>
+                </div>
+            </div>
+
+            <div class="comparison-vs">VS</div>
+
+            <div class="comparison-card simulation">
+                <h3>💻 시뮬레이션</h3>
+
+                <div class="comparison-item">
+                    <div class="icon">💵</div>
+                    <div class="text">
+                        <strong>낮은 비용</strong>
+                        컴퓨터 자원만 사용, 재료비 없음
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">⚡</div>
+                    <div class="text">
+                        <strong>빠른 속도</strong>
+                        수 분~수 시간 내 결과 확인, 병렬 처리 가능
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">👁️</div>
+                    <div class="text">
+                        <strong>완전한 가시성</strong>
+                        모든 변수를 실시간으로 시각화, 내부 관찰 가능
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">✅</div>
+                    <div class="text">
+                        <strong>안전한 환경</strong>
+                        위험 없이 극한 조건도 테스트 가능
+                    </div>
+                </div>
+
+                <div class="comparison-item">
+                    <div class="icon">🎛️</div>
+                    <div class="text">
+                        <strong>체계적 최적화</strong>
+                        DOE, 민감도 분석으로 효율적인 최적 조건 탐색
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Plasma Chamber Visualization -->
+        <section class="visualization-section">
+            <h2 class="section-title">⚡ 플라즈마 공정 시뮬레이션 예시</h2>
+
+            <div class="plasma-chamber" id="plasmaChamber">
+                <div class="chamber-label">Plasma Etching Chamber</div>
+
+                <!-- Plasma Zone -->
+                <div class="plasma-zone"></div>
+
+                <!-- Wafer -->
+                <div class="wafer"></div>
+
+                <!-- Particles Container -->
+                <div class="particles-container" id="particlesContainer">
+                    <!-- Particles will be added by JavaScript -->
+                </div>
+
+                <!-- Legend -->
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-dot electron"></div>
+                        <span>전자 (e⁻)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot ion"></div>
+                        <span>이온 (Ar⁺, F⁺)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot radical"></div>
+                        <span>라디칼 (F*, Cl*)</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-dot neutral"></div>
+                        <span>중성 분자</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Multi-Physics Section -->
+        <section class="visualization-section">
+            <h2 class="section-title">🔗 멀티 피직스 (Multi-Physics) 시뮬레이션</h2>
+            <p style="text-align: center; color: #a8dadc; margin-bottom: 30px; font-size: 1.1em;">
+                반도체 공정에서는 여러 물리 현상이 <span class="highlight">동시에, 서로 영향</span>을 주며 발생합니다.
+            </p>
+
+            <div class="multiphysics-grid">
+                <div class="physics-card plasma">
+                    <div class="icon">⚡</div>
+                    <h4>플라즈마 물리</h4>
+                    <p>
+                        전자 밀도, 이온 에너지, 쉬스 전압<br>
+                        RF 전력, 주파수 의존성<br>
+                        이온화율, 재결합율
+                    </p>
+                </div>
+
+                <div class="physics-card thermal">
+                    <div class="icon">🔥</div>
+                    <h4>열 전달</h4>
+                    <p>
+                        웨이퍼 온도 분포<br>
+                        플라즈마 가열, 복사 냉각<br>
+                        열팽창, 온도 구배
+                    </p>
+                </div>
+
+                <div class="physics-card chemical">
+                    <div class="icon">🧪</div>
+                    <h4>화학 반응</h4>
+                    <p>
+                        표면 반응 속도<br>
+                        식각/증착 선택비<br>
+                        라디칼 생성/소멸
+                    </p>
+                </div>
+
+                <div class="physics-card mechanical">
+                    <div class="icon">⚙️</div>
+                    <h4>기계적 응력</h4>
+                    <p>
+                        박막 내부 응력<br>
+                        열 응력, 격자 불일치<br>
+                        균열, 박리 예측
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Equations -->
+        <section class="equation-section">
+            <h2 class="section-title">📐 핵심 지배 방정식</h2>
+
+            <div class="equation-grid">
+                <div class="equation-box">
+                    <h4>볼츠만 수송 방정식 (Plasma)</h4>
+                    <div class="equation">∂f/∂t + v·∇f + (F/m)·∇ᵥf = (∂f/∂t)_coll</div>
+                    <p>플라즈마 내 전자와 이온의 분포 함수 변화를 기술합니다. 전기장, 충돌, 이온화를 모두 고려합니다.</p>
+                </div>
+
+                <div class="equation-box">
+                    <h4>나비에-스토크스 방정식 (Flow)</h4>
+                    <div class="equation">ρ(∂v/∂t + v·∇v) = -∇p + μ∇²v + f</div>
+                    <p>챔버 내 가스 유동을 계산합니다. 압력, 점성, 외력의 영향을 포함합니다.</p>
+                </div>
+
+                <div class="equation-box">
+                    <h4>열 전도 방정식 (Thermal)</h4>
+                    <div class="equation">ρcₚ(∂T/∂t) = ∇·(k∇T) + Q</div>
+                    <p>웨이퍼와 챔버의 온도 분포를 계산합니다. 열원(플라즈마)과 냉각을 고려합니다.</p>
+                </div>
+
+                <div class="equation-box">
+                    <h4>표면 반응 속도 (Etching)</h4>
+                    <div class="equation">R = k₀ · exp(-Eₐ/kT) · Γ · (1-θ)</div>
+                    <p>식각 속도를 계산합니다. 온도, 이온 플럭스, 표면 피복률에 따라 달라집니다.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Benefits Section -->
+        <section class="benefits-section">
+            <h2 class="section-title">💡 시뮬레이션의 핵심 가치</h2>
+
+            <div class="benefits-grid">
+                <div class="benefit-card cost">
+                    <div class="number">1/100</div>
+                    <h4>비용 절감</h4>
+                    <p>
+                        실험 비용의 1/100 수준으로<br>
+                        동일한 인사이트 획득 가능<br>
+                        <strong>연간 수억 원 절감 효과</strong>
+                    </p>
+                </div>
+
+                <div class="benefit-card time">
+                    <div class="number">10x</div>
+                    <h4>개발 속도 향상</h4>
+                    <p>
+                        최적 공정 조건을 10배 빠르게 탐색<br>
+                        Time-to-Market 단축<br>
+                        <strong>경쟁사 대비 선점 우위</strong>
+                    </p>
+                </div>
+
+                <div class="benefit-card insight">
+                    <div class="number">∞</div>
+                    <h4>깊은 통찰력</h4>
+                    <p>
+                        실험으로 볼 수 없는 현상 관찰<br>
+                        본질적 원인 파악<br>
+                        <strong>근본적 문제 해결 가능</strong>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>시뮬레이션은 실험을 대체하는 것이 아니라, <strong>실험의 효율을 극대화</strong>하는 도구입니다.</p>
+            <p>💡 <span class="highlight">"시뮬레이션으로 방향을 잡고, 실험으로 검증한다"</span></p>
+            <a href="/" class="cta">🚀 시뮬레이터 체험하기</a>
+        </footer>
+    </div>
+
+    <script>
+        // Particle Animation
+        const particlesContainer = document.getElementById('particlesContainer');
+        const particleTypes = ['electron', 'ion', 'radical', 'neutral'];
+
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.className = 'particle ' + particleTypes[Math.floor(Math.random() * particleTypes.length)];
+
+            // Random position
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+
+            // Random animation duration and delay
+            const duration = 2 + Math.random() * 3;
+            const delay = Math.random() * 2;
+            particle.style.animationDuration = duration + 's';
+            particle.style.animationDelay = delay + 's';
+
+            particlesContainer.appendChild(particle);
+
+            // Remove particle after animation
+            setTimeout(() => {
+                particle.remove();
+            }, (duration + delay) * 1000);
+        }
+
+        // Create particles periodically
+        setInterval(createParticle, 200);
+
+        // Initial particles
+        for (let i = 0; i < 30; i++) {
+            setTimeout(createParticle, i * 100);
+        }
+
+        // Intersection Observer for scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe all cards
+        document.querySelectorAll('.physics-card, .benefit-card, .equation-box, .comparison-card').forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
