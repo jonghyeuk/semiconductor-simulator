@@ -1218,6 +1218,21 @@ const VacuumSimulator = () => {
                         <stop offset="0%" stopColor="#fd79a8"/>
                         <stop offset="100%" stopColor="#e84393"/>
                       </linearGradient>
+                      {/* TMP 블레이드 그라데이션 */}
+                      <linearGradient id="bladeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="#ffeaa7"/>
+                        <stop offset="50%" stopColor="#fdcb6e"/>
+                        <stop offset="100%" stopColor="#e17055"/>
+                      </linearGradient>
+                      {/* 가스 입자 그라데이션 */}
+                      <radialGradient id="gasParticle" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#74b9ff"/>
+                        <stop offset="100%" stopColor="#0984e3"/>
+                      </radialGradient>
+                      <radialGradient id="gasParticleGreen" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="#55efc4"/>
+                        <stop offset="100%" stopColor="#00b894"/>
+                      </radialGradient>
                     </defs>
                     <rect width="500" height="480" fill="url(#grid)"/>
                     {/* === CHAMBER === */}
@@ -1257,38 +1272,67 @@ const VacuumSimulator = () => {
                       <rect x="160" y="215" width="180" height="80" rx="4" fill="#fff" fillOpacity="0.3"/>
                       <text x="250" y="232" textAnchor="middle" fontSize="11" fontWeight="bold" fill="#2d3436">TURBO MOLECULAR PUMP</text>
 
-                      <circle cx="250" cy="270" r="35" fill="#1a1a2e" stroke="#2d3436" strokeWidth="2"/>
-                      <circle cx="250" cy="270" r="30" fill="#2d3436"/>
+                      {/* TMP 외부 케이싱 */}
+                      <circle cx="250" cy="270" r="38" fill="#0a0a15" stroke="#2d3436" strokeWidth="3"/>
+                      <circle cx="250" cy="270" r="34" fill="#1a1a2e" stroke="#16213e" strokeWidth="2"/>
 
+                      {/* TMP 블레이드 - 다중 레이어 터빈 */}
                       <g transform="translate(250, 270)">
+                        {/* 외부 블레이드 레이어 (8개) */}
                         <g>
                           {(isManualMode ? tmpOn : (isPlaying && apcValveOpen && turboSpeed > 0)) && (
                             <animateTransform attributeName="transform" type="rotate" from="0" to="360"
-                              dur={turboSpeed > 100 ? "0.08s" : turboSpeed > 50 ? "0.15s" : "0.4s"} repeatCount="indefinite"/>
+                              dur={turboSpeed > 100 ? "0.05s" : turboSpeed > 50 ? "0.1s" : "0.3s"} repeatCount="indefinite"/>
                           )}
-                          <line x1="0" y1="0" x2="25" y2="0" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="17.68" y2="17.68" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="0" y2="25" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="-17.68" y2="17.68" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="-25" y2="0" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="-17.68" y2="-17.68" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="0" y2="-25" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="17.68" y2="-17.68" stroke="#fdcb6e" strokeWidth="4" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="10.6" y2="10.6" stroke="#f39c12" strokeWidth="3" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="-10.6" y2="10.6" stroke="#f39c12" strokeWidth="3" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="-10.6" y2="-10.6" stroke="#f39c12" strokeWidth="3" strokeLinecap="round"/>
-                          <line x1="0" y1="0" x2="10.6" y2="-10.6" stroke="#f39c12" strokeWidth="3" strokeLinecap="round"/>
+                          {[0, 45, 90, 135, 180, 225, 270, 315].map((angle) => (
+                            <path key={angle}
+                              d={`M 0 0 L 8 -28 Q 12 -30 10 -26 L 4 -8 Z`}
+                              transform={`rotate(${angle})`}
+                              fill="url(#bladeGrad)"
+                              stroke="#c9a227"
+                              strokeWidth="0.5"
+                            />
+                          ))}
                         </g>
+
+                        {/* 내부 블레이드 레이어 (6개) - 반대 방향 */}
+                        <g>
+                          {(isManualMode ? tmpOn : (isPlaying && apcValveOpen && turboSpeed > 0)) && (
+                            <animateTransform attributeName="transform" type="rotate" from="360" to="0"
+                              dur={turboSpeed > 100 ? "0.07s" : turboSpeed > 50 ? "0.14s" : "0.4s"} repeatCount="indefinite"/>
+                          )}
+                          {[0, 60, 120, 180, 240, 300].map((angle) => (
+                            <path key={angle}
+                              d={`M 0 0 L 5 -18 Q 8 -20 6 -16 L 3 -5 Z`}
+                              transform={`rotate(${angle})`}
+                              fill="#e0b030"
+                              stroke="#b8960f"
+                              strokeWidth="0.5"
+                            />
+                          ))}
+                        </g>
+
+                        {/* 중심 허브 */}
+                        <circle r="8" fill="#2d3436" stroke="#1a1a2e" strokeWidth="2"/>
+                        <circle r="4" fill={(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) ? "#00ff00" : "#636e72"}>
+                          {(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) && (
+                            <animate attributeName="opacity" values="1;0.5;1" dur="0.5s" repeatCount="indefinite"/>
+                          )}
+                        </circle>
                       </g>
 
-                      <circle cx="250" cy="270" r="6" fill={(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) ? "#00ff00" : "#636e72"} stroke="#1a1a2e" strokeWidth="2"/>
-
+                      {/* RPM/Speed 디스플레이 */}
                       <text x="365" y="240" fontSize="10" fill="#636e72">RPM</text>
                       <text x="365" y="255" fontSize="12" fill="#2d3436" fontWeight="bold">{(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) ? Math.round(turboSpeed * 200) : 0}</text>
                       <text x="365" y="275" fontSize="10" fill="#636e72">Speed</text>
                       <text x="365" y="290" fontSize="12" fill="#2d3436" fontWeight="bold">{Math.round(turboSpeed)} L/s</text>
 
-                      <circle cx="170" cy="290" r="8" fill={(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) ? "#00b894" : "#636e72"} stroke="#2d3436" strokeWidth="1"/>
+                      {/* ON/OFF 인디케이터 */}
+                      <circle cx="170" cy="290" r="8" fill={(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) ? "#00b894" : "#636e72"} stroke="#2d3436" strokeWidth="1">
+                        {(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) && (
+                          <animate attributeName="fill" values="#00b894;#55efc4;#00b894" dur="1s" repeatCount="indefinite"/>
+                        )}
+                      </circle>
                       <text x="182" y="294" fontSize="10" fill="#2d3436" fontWeight="bold">{(isManualMode ? tmpOn : (isPlaying && apcValveOpen)) ? "ON" : "OFF"}</text>
                     </g>
 
@@ -1344,19 +1388,102 @@ const VacuumSimulator = () => {
                       <text x="335" y="380" fontSize="9" fill="#636e72">Foreline</text>
                     </g>
                         
-                    {/* === 플로우 애니메이션 === */}
+                    {/* === 플로우 애니메이션 - 러핑 라인 (다중 입자) === */}
                     {isPlaying && roughingValveOpen && !apcValveOpen && (
                       <g>
-                        <circle r="4" fill="#74b9ff">
-                          <animateMotion dur="2s" repeatCount="indefinite" path="M 125 70 L 80 70 L 80 410 L 250 410"/>
-                        </circle>
+                        {/* 챔버 내 가스 분자들 */}
+                        {[...Array(8)].map((_, i) => (
+                          <circle key={`chamber-gas-${i}`} r={2 + Math.random()} fill="url(#gasParticle)" opacity={0.7}>
+                            <animateMotion
+                              dur={`${1.5 + i * 0.2}s`}
+                              repeatCount="indefinite"
+                              begin={`${i * 0.15}s`}
+                              path="M 180 60 Q 200 50 220 65 Q 250 80 280 60 Q 300 45 320 70 Q 340 90 300 85 Q 260 75 220 85 Q 180 95 180 60"
+                            />
+                          </circle>
+                        ))}
+                        {/* 러핑 라인으로 빠져나가는 입자들 */}
+                        {[...Array(12)].map((_, i) => (
+                          <circle key={`roughing-${i}`} r={3 - i * 0.15} fill="url(#gasParticle)" opacity={0.8 - i * 0.03}>
+                            <animateMotion
+                              dur={`${1.8 + i * 0.1}s`}
+                              repeatCount="indefinite"
+                              begin={`${i * 0.15}s`}
+                              path="M 125 70 L 80 70 L 80 200 L 80 410 L 200 410"
+                            />
+                          </circle>
+                        ))}
+                        {/* 드라이펌프로 들어가는 입자들 */}
+                        {[...Array(6)].map((_, i) => (
+                          <circle key={`dry-pump-${i}`} r={2} fill="#fd79a8" opacity={0.6}>
+                            <animateMotion
+                              dur="0.8s"
+                              repeatCount="indefinite"
+                              begin={`${i * 0.13}s`}
+                              path="M 200 410 L 250 420 L 250 450"
+                            />
+                          </circle>
+                        ))}
                       </g>
                     )}
+
+                    {/* === 플로우 애니메이션 - TMP 라인 (다중 입자) === */}
                     {isPlaying && apcValveOpen && forelineValveOpen && (isManualMode ? tmpOn : true) && turboSpeed > 50 && (
                       <g>
-                        <circle r="3" fill="#55efc4">
-                          <animateMotion dur="1s" repeatCount="indefinite" path="M 250 120 L 250 410"/>
-                        </circle>
+                        {/* 챔버에서 APC로 빠져나가는 입자들 */}
+                        {[...Array(10)].map((_, i) => (
+                          <circle key={`apc-flow-${i}`} r={2.5 - i * 0.1} fill="url(#gasParticleGreen)" opacity={0.8}>
+                            <animateMotion
+                              dur={`${0.6 + i * 0.05}s`}
+                              repeatCount="indefinite"
+                              begin={`${i * 0.06}s`}
+                              path="M 250 100 L 250 145 L 250 165"
+                            />
+                          </circle>
+                        ))}
+                        {/* TMP 통과하는 입자들 (빠른 속도) */}
+                        {[...Array(15)].map((_, i) => (
+                          <circle key={`tmp-flow-${i}`} r={2} fill="url(#gasParticleGreen)" opacity={0.9 - i * 0.03}>
+                            <animateMotion
+                              dur={`${0.4 + i * 0.02}s`}
+                              repeatCount="indefinite"
+                              begin={`${i * 0.027}s`}
+                              path="M 250 185 L 250 250 L 250 305"
+                            />
+                          </circle>
+                        ))}
+                        {/* 포라인으로 빠져나가는 입자들 */}
+                        {[...Array(8)].map((_, i) => (
+                          <circle key={`foreline-flow-${i}`} r={2} fill="#55efc4" opacity={0.7}>
+                            <animateMotion
+                              dur={`${0.5 + i * 0.05}s`}
+                              repeatCount="indefinite"
+                              begin={`${i * 0.06}s`}
+                              path="M 250 355 L 250 410 L 250 440"
+                            />
+                          </circle>
+                        ))}
+                      </g>
+                    )}
+
+                    {/* === 챔버 내 잔류 가스 분자 (압력에 따라 밀도 변화) === */}
+                    {isPlaying && animationPressure > 0.001 && (
+                      <g>
+                        {[...Array(Math.min(20, Math.ceil(Math.log10(animationPressure + 1) * 5 + 10)))].map((_, i) => (
+                          <circle
+                            key={`residual-${i}`}
+                            r={1.5}
+                            fill="#74b9ff"
+                            opacity={0.4}
+                          >
+                            <animateMotion
+                              dur={`${2 + (i % 5) * 0.5}s`}
+                              repeatCount="indefinite"
+                              begin={`${(i * 0.3) % 2}s`}
+                              path={`M ${150 + (i * 17) % 200} ${40 + (i * 13) % 60} Q ${180 + (i * 23) % 140} ${50 + (i * 7) % 50} ${160 + (i * 19) % 180} ${35 + (i * 11) % 70} T ${150 + (i * 17) % 200} ${40 + (i * 13) % 60}`}
+                            />
+                          </circle>
+                        ))}
                       </g>
                     )}
                   </svg>
