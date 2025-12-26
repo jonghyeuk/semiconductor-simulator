@@ -749,11 +749,27 @@ const VacuumSimulator = () => {
           }
           setForelinePressure(Math.max(0.01, newP * 50));
         }
-        // 케이스 3: TMP ON but F/V 닫힘 (위험 - 압력 정체)
+        // 케이스 3: APC 열림 + TMP OFF = 역류! (포라인 고진공 → 챔버로)
+        else if (apcValveOpen && !tmpOn) {
+          // 포라인이 챔버보다 진공이 높으면 역류 (압력 평형으로 수렴)
+          if (forelinePressure < prev) {
+            const avgPressure = (prev + forelinePressure) / 2;
+            newP = prev * 0.95 + avgPressure * 0.05; // 챔버 압력 하강
+            setForelinePressure(fp => fp * 0.95 + avgPressure * 0.05); // 포라인 압력 상승
+          }
+          setTurboSpeed(ts => Math.max(0, ts - 3)); // TMP 감속
+        }
+        // 케이스 4: F/V만 열림 (TMP 없이) - 드라이펌프가 포라인 펌핑
+        else if (forelineValveOpen && !apcValveOpen && !tmpOn) {
+          // 포라인만 펌핑 (챔버는 영향 없음)
+          setForelinePressure(fp => Math.max(0.01, fp * 0.95));
+          setTurboSpeed(ts => Math.max(0, ts - 2));
+        }
+        // 케이스 5: TMP ON but F/V 닫힘 (위험 - 압력 정체)
         else if (tmpOn && !forelineValveOpen) {
           setTurboSpeed(ts => Math.min(100, ts + 1));
         }
-        // 케이스 4: 아무것도 안함 (미세 누설로 압력 상승)
+        // 케이스 6: 아무것도 안함 (미세 누설로 압력 상승)
         else {
           newP = Math.min(760, prev * 1.0005);
           if (!tmpOn) setTurboSpeed(ts => Math.max(0, ts - 5));
@@ -899,6 +915,16 @@ const VacuumSimulator = () => {
 
   // 수동 모드 밸브 조작 핸들러
   const handleValveWithWarning = (valveName, newState, setterFn) => {
+    // 인터락 체크: R/V와 F/V 동시 개방 금지
+    if (valveName === 'R/V' && newState && forelineValveOpen) {
+      addLog("🚫 인터락: R/V와 F/V 동시 개방 불가!", "error");
+      return; // 동작 차단
+    }
+    if (valveName === 'F/V' && newState && roughingValveOpen) {
+      addLog("🚫 인터락: F/V와 R/V 동시 개방 불가!", "error");
+      return; // 동작 차단
+    }
+
     setterFn(newState);
     addLog(`${valveName} ${newState ? 'OPEN' : 'CLOSE'}`, 'action');
 
@@ -915,16 +941,24 @@ const VacuumSimulator = () => {
     if (valveName === 'APC' && newState && roughingValveOpen) {
       addLog("⚠️ 주의: R/V와 APC 동시 개방", "warning");
     }
+    // APC 열 때 TMP가 안 돌고 있으면 역류 경고
+    if (valveName === 'APC' && newState && !tmpOn && forelinePressure < animationPressure) {
+      addLog("⚠️ 위험: 포라인 고진공이 챔버로 역류합니다!", "error");
+    }
   };
 
   // 수동 모드 현재 상태 표시
   const getManualPhase = () => {
-    if (!roughingValveOpen && !apcValveOpen && !tmpOn) return '⏸️ 대기 중 - 밸브를 조작하세요';
+    if (!roughingValveOpen && !apcValveOpen && !tmpOn && !forelineValveOpen) return '⏸️ 대기 중 - 밸브를 조작하세요';
     if (roughingValveOpen && !apcValveOpen) return '🔄 러핑 펌프 배기 중';
     if (apcValveOpen && forelineValveOpen && tmpOn && turboSpeed > 50) return '🚀 TMP 고진공 생성 중';
     if (apcValveOpen && forelineValveOpen && tmpOn) return '⚡ TMP 가속 중...';
     if (tmpOn && !forelineValveOpen) return '⚠️ 경고: F/V 닫힘!';
-    if (apcValveOpen && !tmpOn) return '⏳ APC 열림 - TMP를 켜세요';
+    // 역류 상태
+    if (apcValveOpen && !tmpOn && forelinePressure < animationPressure) return '🔴 역류 중! 포라인→챔버';
+    if (apcValveOpen && !tmpOn) return '⚠️ APC 열림 - TMP 없이 위험!';
+    // F/V만 열린 상태 (안전)
+    if (forelineValveOpen && !apcValveOpen && !tmpOn) return '✅ 포라인 펌핑 중 (안전)';
     if (apcValveOpen && !forelineValveOpen) return '⏳ F/V를 여세요';
     return '⏸️ 대기 중';
   };
