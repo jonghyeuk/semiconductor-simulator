@@ -734,10 +734,10 @@ const VacuumSimulator = () => {
       setAnimationPressure(prev => {
         let newP = prev;
 
-        // 케이스 1: R/V만 열림 (러핑 펌프 배기)
+        // 케이스 1: R/V만 열림 (러핑 펌프 배기) - 속도 향상
         if (roughingValveOpen && !apcValveOpen) {
           if (prev > 0.05) {
-            newP = prev * Math.exp(-0.03 / scale);
+            newP = prev * Math.exp(-0.12 / scale);
           }
           setForelinePressure(prev);
         }
