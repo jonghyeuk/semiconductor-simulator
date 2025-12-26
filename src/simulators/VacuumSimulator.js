@@ -1184,7 +1184,7 @@ const VacuumSimulator = () => {
           {activeTab === 'pumping-simulation' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
               <div className="lg:col-span-2 bg-white rounded-lg p-4 border">
-                <div className="flex justify-between items-center mb-4">
+                <div className="flex justify-between items-center mb-2">
                   <h3 className="font-bold text-lg text-indigo-800">DRY PUMP WITH TMP 시뮬레이션</h3>
                   <div className="flex items-center gap-2">
                     <span className={`text-sm ${!isManualMode ? 'font-bold text-blue-600' : 'text-gray-500'}`}>자동</span>
@@ -1197,6 +1197,21 @@ const VacuumSimulator = () => {
                     </button>
                     <span className={`text-sm ${isManualMode ? 'font-bold text-green-600' : 'text-gray-500'}`}>수동</span>
                   </div>
+                </div>
+
+                {/* 모드 설명 */}
+                <div className={`mb-3 p-3 rounded-lg text-sm ${isManualMode ? 'bg-green-50 border border-green-200' : 'bg-blue-50 border border-blue-200'}`}>
+                  {isManualMode ? (
+                    <div className="text-green-800">
+                      <span className="font-bold">🎮 수동 모드:</span> 실제 장비처럼 밸브를 직접 조작해보세요!
+                      <span className="block mt-1 text-green-600">왜? → 진공 펌핑의 순서와 원리를 몸으로 익히기 위해. 잘못된 순서로 밸브를 열면 경고가 나옵니다.</span>
+                    </div>
+                  ) : (
+                    <div className="text-blue-800">
+                      <span className="font-bold">🤖 자동 모드:</span> 시스템이 최적의 순서로 자동 운전합니다.
+                      <span className="block mt-1 text-blue-600">왜? → 전체 펌핑 과정을 한눈에 관찰하고 압력 변화 패턴을 이해하기 위해.</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="relative bg-gradient-to-b from-gray-100 to-gray-200 rounded-lg p-2">
@@ -1694,8 +1709,15 @@ const VacuumSimulator = () => {
                 <div className="bg-white p-4 rounded-lg border">
                   <h4 className="font-bold mb-2 text-gray-800">⚙️ 챔버 설정</h4>
                   <label className="text-sm text-gray-600">체적 (L)</label>
-                  <input type="range" min="10" max="1000" value={chamberVolume} onChange={handleChamberVolumeChange} className="w-full"/>
-                  <p className="text-center font-bold text-indigo-600">{chamberVolume} L</p>
+                  <input
+                    type="range"
+                    min="10"
+                    max="1000"
+                    value={chamberVolume}
+                    onChange={handleChamberVolumeChange}
+                    className="w-full h-3 bg-gradient-to-r from-indigo-200 to-purple-300 rounded-lg appearance-none cursor-pointer shadow-inner border-2 border-indigo-400"
+                  />
+                  <p className="text-center font-bold text-indigo-600 mt-1">{chamberVolume} L</p>
                 </div>
               </div>
             </div>
