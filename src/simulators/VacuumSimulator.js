@@ -80,7 +80,55 @@ const VacuumSimulator = () => {
   const [showResult, setShowResult] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [userAnswers, setUserAnswers] = useState([]);
-  
+
+  // 트러블슈팅 상태들
+  const [troubleScenario, setTroubleScenario] = useState(1);
+  const [troubleStarted, setTroubleStarted] = useState(false);
+  const [troubleTriggered, setTroubleTriggered] = useState(false);
+  const [troubleLogMessages, setTroubleLogMessages] = useState([]);
+  const [troubleElapsedTime, setTroubleElapsedTime] = useState(0);
+  const [troublePressure, setTroublePressure] = useState(1e-5);
+  const [troubleTurboSpeed, setTroubleTurboSpeed] = useState(300);
+  const [troubleApcOpen, setTroubleApcOpen] = useState(true);
+  const [troubleFvOpen, setTroubleFvOpen] = useState(true);
+  const [troubleRvOpen, setTroubleRvOpen] = useState(false);
+  const [troubleTmpOn, setTroubleTmpOn] = useState(true);
+  const [troubleSuccess, setTroubleSuccess] = useState(false);
+  const [troubleFailed, setTroubleFailed] = useState(false);
+  const [tmpTemperature, setTmpTemperature] = useState(55);
+  const [dryPumpCurrent, setDryPumpCurrent] = useState(15);
+  const [dryPumpExhaust, setDryPumpExhaust] = useState(100);
+  const [dryPumpOn, setDryPumpOn] = useState(true);
+  const [scenario2Step, setScenario2Step] = useState(0);
+  const [gasLineN2, setGasLineN2] = useState(true);
+  const [gasLineAr, setGasLineAr] = useState(true);
+  const [gasLineO2, setGasLineO2] = useState(true);
+  const [gasLineMain, setGasLineMain] = useState(true);
+  const [leakSource, setLeakSource] = useState('Ar');
+  const [troubleSituationText, setTroubleSituationText] = useState('');
+  const [rfOn, setRfOn] = useState(true);
+  const [rfPower, setRfPower] = useState(300);
+  const [matcherTemp, setMatcherTemp] = useState(45);
+  const [sih4Flow, setSih4Flow] = useState(100);
+  const [nh3Flow, setNh3Flow] = useState(200);
+  const [n2Flow, setN2Flow] = useState(500);
+  const [gasSupplyMain, setGasSupplyMain] = useState(true);
+  const [sih4Valve, setSih4Valve] = useState(true);
+  const [rfBreaker, setRfBreaker] = useState(true);
+  const [matcherSmoke, setMatcherSmoke] = useState(0);
+  const [scenario4Step, setScenario4Step] = useState(0);
+  const [evacuating, setEvacuating] = useState(false);
+  const [scenario4Warnings, setScenario4Warnings] = useState([]);
+  const [scenario4VacuumTouched, setScenario4VacuumTouched] = useState(false);
+  const [scenario5Phase, setScenario5Phase] = useState('roughing');
+  const [scenario5FaultLocation, setScenario5FaultLocation] = useState('bellows');
+  const [scenario5Checked, setScenario5Checked] = useState({ bellows: false, oring: false, clamp: false, fvSeal: false });
+  const [scenario5Found, setScenario5Found] = useState(false);
+  const [troubleForelinePressure, setTroubleForelinePressure] = useState(0.01);
+  const [scenario5BackflowWarning, setScenario5BackflowWarning] = useState(false);
+  const [situationIndex, setSituationIndex] = useState(0);
+  const [showSituation, setShowSituation] = useState(false);
+
   // 탭 정의
   const tabs = [
     { id: 'theory', name: '이론', icon: '🎬' },
@@ -89,6 +137,7 @@ const VacuumSimulator = () => {
     { id: 'process-control', name: '공정 압력 세팅 실험', icon: '🔧' },
     { id: 'conductance-relation', name: 'Conductance & 압력 관계', icon: '🔄' },
     { id: 'pipe-design', name: '배관 설계 최적화', icon: '🏗️' },
+    { id: 'troubleshooting', name: '트러블슈팅', icon: '🔧' },
     { id: 'quiz', name: '진공 기술 퀴즈', icon: '🎯' }
   ];
   
@@ -1042,6 +1091,231 @@ const VacuumSimulator = () => {
     if (percentage >= 60) return '보통! 조금 더 학습하면 완벽해집니다! 📚';
     return '부족! 시뮬레이터를 다시 체험해보세요! 💪';
   };
+
+  // 트러블슈팅 시나리오 데이터
+  const troubleSituationMessages = {
+    1: ["🏭 정상 가동 중... 챔버 압력 10⁻⁵ Torr 유지","⚙️ TMP 정상 회전 중 (60,000 RPM)","🌡️ 갑자기 TMP 온도가 상승하기 시작합니다!","⚠️ 경고: TMP 온도 85°C! 정상 범위(60°C) 초과!","🚨 즉시 조치가 필요합니다! 과열 시 베어링 손상 위험!"],
+    2: ["🏭 정상 가동 중... 챔버 압력 10⁻⁵ Torr 유지","⚡ 드라이펌프 전류 모니터링 중...","📈 이상 감지! 드라이펌프 전류가 42A로 급상승! (정상: 15A)","📊 배기량이 180%로 비정상 상승, TMP RPM 소폭 하락 관찰","🚨 드라이펌프 모터 과부하! 순서대로 셧다운 필요!"],
+    3: ["🏭 펌핑 시작... 목표 압력 10⁻⁶ Torr","⏳ 10분 경과... 압력이 5×10⁻⁴ Torr에서 정체","🤔 이상하다... TMP는 정상인데 왜 진공이 안 올라가지?","🔍 가스라인 VCR 피팅 어딘가에서 누설 의심!","💡 O2, Ar, N2 밸브를 하나씩 닫아 원인을 찾아보세요!"],
+    4: ["🏭 PECVD SiN 증착 공정 진행 중...","⚡ RF 13.56MHz 300W 인가, SiH4 + NH3 + N2 가스 흐르는 중","🔥 뭔가 탄 냄새가 난다! Matcher 쪽에서!","😱 타는 냄새 점점 강해짐! 연기 보임!","🚨 EMO 버튼을 눌렀는데... 안 눌린다?! 고장!","☠️ SiH4(실란) 계속 흐르는 중! 자연발화 위험! 수동 셧다운 필요!"],
+    5: ["🏭 챔버 러핑 펌핑 중...","✅ R/V 열고 러핑 중... 760 Torr → 8×10⁻³ Torr 도달!","⚙️ 좋아, TMP 가속 시작... 60,000 RPM 정상 도달","🔄 이제 포라인으로 전환하자. R/V 닫고, F/V 열고...","😕 어? TMP 정상인데 압력이 5×10⁻⁴에서 안 내려가네?","🤔 러핑은 멀쩡했는데... 포라인 라인 어딘가 문제인가?","🔍 F/V와 DRY 펌프 사이를 점검해보자!"]
+  };
+
+  const troubleScenarios = {
+    1: { name: "TMP 과열 경고", icon: "🌡️", color: "from-orange-500 to-red-600", description: "TMP 온도 상승! 안전 셧다운 필요", isDetective: false },
+    2: { name: "드라이펌프 전류 이상", icon: "⚡", color: "from-yellow-500 to-orange-600", description: "드라이펌프 전류 급상승! 순서대로 셧다운", isDetective: false },
+    3: { name: "가스라인 피팅 누설", icon: "🔍", color: "from-blue-500 to-purple-600", description: "VCR 피팅 누설! 라인별로 원인 파악", isDetective: true },
+    4: { name: "공정 중 탄냄새 발생", icon: "🔥", color: "from-red-600 to-red-900", description: "Matcher에서 탄냄새! EMO 고장! 수동 대응!", isDetective: false, critical: true },
+    5: { name: "포라인 배관 이상", icon: "🔧", color: "from-cyan-500 to-blue-700", description: "러핑 OK, 포라인 전환 후 안됨! 배관 점검", isDetective: true }
+  };
+
+  const handleTroubleStart = () => {
+    setTroubleStarted(true);
+    setTroubleTriggered(false);
+    setTroubleLogMessages([]);
+    setTroubleElapsedTime(0);
+    setTroubleTurboSpeed(300);
+    setTroubleApcOpen(true);
+    setTroubleFvOpen(true);
+    setTroubleRvOpen(false);
+    setTroubleTmpOn(true);
+    setTroubleSuccess(false);
+    setTroubleFailed(false);
+    setTmpTemperature(55);
+    setDryPumpCurrent(15);
+    setDryPumpExhaust(100);
+    setDryPumpOn(true);
+    setScenario2Step(0);
+    setGasLineN2(true);
+    setGasLineAr(true);
+    setGasLineO2(true);
+    setGasLineMain(true);
+    setTroubleSituationText('');
+    setSituationIndex(0);
+    setShowSituation(true);
+    setLeakSource(['N2','Ar','O2'][Math.floor(Math.random()*3)]);
+    setTroublePressure(troubleScenario === 3 ? 5e-4 : troubleScenario === 4 ? 1.5 : 1e-5);
+    setRfOn(true);
+    setRfPower(300);
+    setMatcherTemp(45);
+    setSih4Flow(100);
+    setNh3Flow(200);
+    setN2Flow(500);
+    setGasSupplyMain(true);
+    setSih4Valve(true);
+    setRfBreaker(true);
+    setMatcherSmoke(0);
+    setScenario4Step(0);
+    setEvacuating(false);
+    setScenario4Warnings([]);
+    setScenario4VacuumTouched(false);
+    setScenario5Phase('roughing');
+    setScenario5FaultLocation(['bellows','oring','clamp'][Math.floor(Math.random()*3)]);
+    setScenario5Checked({ bellows: false, oring: false, clamp: false, fvSeal: false });
+    setScenario5Found(false);
+    setTroubleForelinePressure(0.01);
+    setScenario5BackflowWarning(false);
+    if (troubleScenario === 5) {
+      setTroubleRvOpen(true);
+      setTroubleFvOpen(false);
+      setTroublePressure(8e-3);
+    }
+  };
+
+  const handleTroubleReset = () => {
+    setTroubleStarted(false);
+    setTroubleTriggered(false);
+    setTroubleLogMessages([]);
+    setTroubleSuccess(false);
+    setTroubleFailed(false);
+    setShowSituation(false);
+    setTroubleSituationText('');
+    setSituationIndex(0);
+  };
+
+  const addScenario4Warning = (msg) => {
+    setScenario4Warnings(prev => [...prev.slice(-4), { msg, id: Date.now() }]);
+  };
+
+  const handleVacuumButtonInScenario4 = (buttonName) => {
+    if (troubleScenario === 4 && troubleTriggered && !troubleSuccess) {
+      setScenario4VacuumTouched(true);
+      if (buttonName === 'APC' && troubleApcOpen) {
+        addScenario4Warning(`⚠️ APC 닫으면 안됨! 챔버 내 SiH4 배기 불가!`);
+      } else if (buttonName === 'APC' && !troubleApcOpen) {
+        addScenario4Warning(`✓ APC 다시 열었습니다. 배기 유지!`);
+      } else if (buttonName === 'TMP') {
+        addScenario4Warning(`⚠️ TMP는 건드리지 마세요! 지금은 RF/가스가 우선!`);
+      } else if (buttonName === 'FV') {
+        addScenario4Warning(`⚠️ F/V 조작 불필요! 배기 라인 유지하세요!`);
+      } else if (buttonName === 'RV') {
+        addScenario4Warning(`⚠️ R/V는 지금 필요없습니다!`);
+      } else if (buttonName === 'DRY') {
+        addScenario4Warning(`⚠️ 드라이펌프는 계속 가동! 끄면 배기 안됨!`);
+      }
+    }
+  };
+
+  const isTroublePumping = troubleStarted && troubleTmpOn && troubleApcOpen && troubleFvOpen;
+
+  // 트러블슈팅 상황 텍스트 타이핑 효과
+  useEffect(() => {
+    if (!troubleStarted || !showSituation) return;
+    const messages = troubleSituationMessages[troubleScenario];
+    if (!messages) return;
+    const currentFullText = messages.slice(0, situationIndex + 1).join('\n');
+    if (troubleSituationText.length < currentFullText.length) {
+      const timer = setTimeout(() => setTroubleSituationText(currentFullText.slice(0, troubleSituationText.length + 1)), 30);
+      return () => clearTimeout(timer);
+    } else if (situationIndex < messages.length - 1) {
+      const timer = setTimeout(() => setSituationIndex(prev => prev + 1), 800);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setTroubleTriggered(true);
+        if (troubleScenario === 1) setTmpTemperature(85);
+        if (troubleScenario === 2) { setDryPumpCurrent(42); setDryPumpExhaust(180); setTroubleTurboSpeed(280); }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [troubleStarted, showSituation, troubleSituationText, situationIndex, troubleScenario]);
+
+  // 트러블슈팅 시뮬레이션 메인 로직
+  useEffect(() => {
+    if (!troubleStarted || !troubleTriggered) return;
+    const interval = setInterval(() => {
+      setTroubleElapsedTime(prev => prev + 0.1);
+      if (troubleSuccess || troubleFailed) return;
+
+      // 시나리오 1: TMP 과열
+      if (troubleScenario === 1) {
+        if (troubleTmpOn) setTmpTemperature(prev => Math.min(130, prev + 0.8));
+        else { setTmpTemperature(prev => Math.max(55, prev - 0.3)); setTroubleTurboSpeed(prev => Math.max(0, prev - 2)); }
+        if (tmpTemperature > 120) setTroubleFailed(true);
+        if (!troubleApcOpen && !troubleTmpOn) setTroubleSuccess(true);
+      }
+
+      // 시나리오 2: 드라이펌프 과전류
+      if (troubleScenario === 2) {
+        if (dryPumpOn) { setDryPumpCurrent(prev => Math.min(60, prev + 0.1)); setDryPumpExhaust(prev => Math.min(250, prev + 0.5)); }
+        if (!troubleTmpOn) setTroubleTurboSpeed(prev => Math.max(0, prev - 2));
+        if (dryPumpCurrent > 55) setTroubleFailed(true);
+        if (scenario2Step === 0 && !troubleFvOpen) setScenario2Step(1);
+        if (scenario2Step === 1 && !dryPumpOn) setScenario2Step(2);
+        if (scenario2Step === 2 && !troubleTmpOn) setScenario2Step(3);
+        if (scenario2Step === 3 && !troubleApcOpen) setTroubleSuccess(true);
+      }
+
+      // 시나리오 3: 가스 누설
+      if (troubleScenario === 3) {
+        const mainClosed = !gasLineMain;
+        const n2Closed = !gasLineN2 || mainClosed;
+        const arClosed = !gasLineAr || mainClosed;
+        const o2Closed = !gasLineO2 || mainClosed;
+        const hasLeak = (leakSource==='N2' && !n2Closed) || (leakSource==='Ar' && !arClosed) || (leakSource==='O2' && !o2Closed);
+        if (hasLeak) setTroublePressure(prev => prev + (5e-4 - prev) * 0.1);
+        else setTroublePressure(prev => Math.max(1e-7, prev * 0.92));
+      }
+
+      // 시나리오 4: Matcher 아크
+      if (troubleScenario === 4) {
+        if (rfOn && rfBreaker) {
+          setMatcherTemp(prev => Math.min(250, prev + 1.5));
+          setMatcherSmoke(prev => Math.min(100, prev + 0.8));
+        } else {
+          setMatcherTemp(prev => Math.max(45, prev - 0.5));
+          setMatcherSmoke(prev => Math.max(0, prev - 1));
+        }
+        if (!gasSupplyMain || !sih4Valve) {
+          setSih4Flow(prev => Math.max(0, prev - 20));
+          setNh3Flow(prev => Math.max(0, prev - 40));
+          setN2Flow(prev => Math.max(0, prev - 100));
+        }
+        if (evacuating && sih4Flow === 0) {
+          setTroublePressure(prev => Math.max(0.01, prev * 0.9));
+        }
+        if (matcherTemp >= 240) setTroubleFailed(true);
+        if (scenario4Step === 0 && !rfBreaker) setScenario4Step(1);
+        if (scenario4Step === 1 && (!gasSupplyMain || !sih4Valve)) setScenario4Step(2);
+        if (scenario4Step === 2 && sih4Flow === 0 && matcherTemp < 100) setScenario4Step(3);
+        if (scenario4Step === 3) setTroubleSuccess(true);
+      }
+
+      // 시나리오 5: 포라인 배관
+      if (troubleScenario === 5) {
+        if (troubleRvOpen && !troubleFvOpen) {
+          setScenario5Phase('roughing');
+          setScenario5BackflowWarning(false);
+          setTroublePressure(prev => Math.max(8e-3, prev * 0.95));
+        } else if (!troubleRvOpen && troubleFvOpen) {
+          setScenario5Phase('foreline');
+          setScenario5BackflowWarning(false);
+          if (!scenario5Found) {
+            if (troublePressure > 5e-4) {
+              setTroublePressure(prev => Math.max(5e-4, prev * 0.92));
+            } else {
+              setTroublePressure(prev => 5e-4 + (Math.random() - 0.5) * 1e-5);
+            }
+          } else {
+            setTroublePressure(prev => Math.max(1e-6, prev * 0.9));
+            if (troublePressure < 1e-5) setTroubleSuccess(true);
+          }
+        } else if (troubleRvOpen && troubleFvOpen) {
+          setScenario5Phase('switching');
+          setScenario5BackflowWarning(true);
+          setTroublePressure(prev => Math.min(0.5, prev * 1.15));
+        } else {
+          setScenario5Phase('switching');
+          setScenario5BackflowWarning(false);
+          setTroublePressure(prev => Math.min(0.1, prev * 1.02));
+        }
+        if (troubleFvOpen && troubleTmpOn) {
+          setTroubleForelinePressure(prev => scenario5Found ? Math.max(0.001, prev * 0.95) : 0.05 + Math.random() * 0.02);
+        }
+      }
+    }, 100);
+    return () => clearInterval(interval);
+  }, [troubleStarted, troubleTriggered, troubleScenario, troubleTmpOn, troubleFvOpen, troubleApcOpen, troubleRvOpen, troubleSuccess, troubleFailed, tmpTemperature, dryPumpCurrent, dryPumpOn, scenario2Step, gasLineN2, gasLineAr, gasLineO2, gasLineMain, leakSource, rfOn, rfBreaker, gasSupplyMain, sih4Valve, sih4Flow, matcherTemp, scenario4Step, evacuating, scenario5Found, troublePressure]);
 
   // Theory Tab Component
   const TheoryTab = () => (
@@ -3211,6 +3485,275 @@ const VacuumSimulator = () => {
                     <p className="text-sm text-gray-500">
                       틀린 문제가 있다면 해당 시뮬레이션 탭에서 다시 학습해보세요!
                     </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 트러블슈팅 탭 */}
+          {activeTab === 'troubleshooting' && (
+            <div className="space-y-4">
+              {!troubleStarted ? (
+                <div className="bg-white rounded-lg p-6 shadow">
+                  <h2 className="text-xl font-bold mb-4">🚨 트러블 시나리오 선택</h2>
+                  <p className="text-gray-600 mb-4">실제 현장에서 발생할 수 있는 트러블 상황을 체험하고 대응 방법을 학습하세요!</p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
+                    {Object.entries(troubleScenarios).map(([id, s]) => (
+                      <button key={id} onClick={() => setTroubleScenario(Number(id))}
+                        className={`p-4 rounded-lg border-2 text-left transition-all ${troubleScenario === Number(id) ? 'border-blue-500 bg-blue-50 shadow-md' : 'border-gray-200 hover:border-gray-400'}`}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-2xl">{s.icon}</span>
+                          <span className="font-bold">{s.name}</span>
+                        </div>
+                        <p className="text-sm text-gray-600">{s.description}</p>
+                        {s.isDetective && <span className="inline-block mt-2 text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded">🔍 탐정모드</span>}
+                        {s.critical && <span className="inline-block mt-2 ml-1 text-xs bg-red-100 text-red-700 px-2 py-1 rounded">⚠️ 위험</span>}
+                      </button>
+                    ))}
+                  </div>
+                  <button onClick={handleTroubleStart} className={`w-full py-4 rounded-lg font-bold text-xl text-white bg-gradient-to-r ${troubleScenarios[troubleScenario].color} hover:opacity-90`}>
+                    🚨 시나리오 시작
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                  <div className="lg:col-span-2 bg-white rounded-lg p-4 shadow">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-lg font-bold">{troubleScenarios[troubleScenario].icon} {troubleScenarios[troubleScenario].name}</h2>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm bg-gray-200 px-2 py-1 rounded">{formatTime(troubleElapsedTime)}</span>
+                        {isTroublePumping && <span className="text-sm bg-green-500 text-white px-2 py-1 rounded">🔄 배기중</span>}
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-50 rounded-lg p-2 mb-4">
+                      <svg viewBox="0 0 500 450" className="w-full max-w-lg mx-auto">
+                        <defs>
+                          <linearGradient id="tChamber" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#a8e6cf"/><stop offset="100%" stopColor="#88d8b0"/></linearGradient>
+                          <linearGradient id="tTmp" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#ffeaa7"/><stop offset="100%" stopColor="#fdcb6e"/></linearGradient>
+                          <linearGradient id="tDry" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stopColor="#fd79a8"/><stop offset="100%" stopColor="#e84393"/></linearGradient>
+                        </defs>
+
+                        {/* 시나리오 3: 가스박스 */}
+                        {troubleScenario === 3 && (
+                          <g>
+                            <rect x="380" y="15" width="115" height="130" rx="4" fill="#2a2a3e" stroke="#555" strokeWidth="2"/>
+                            <text x="440" y="32" textAnchor="middle" fontSize="9" fontWeight="bold" fill="#aaa">GAS BOX</text>
+                            <rect x="455" y="40" width="35" height="18" rx="2" fill="#ef4444"/><text x="472" y="52" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">O2</text>
+                            <rect x="428" y="42" width="22" height="14" rx="2" fill={gasLineO2?"#22c55e":"#666"} stroke="#333"/><text x="439" y="52" textAnchor="middle" fontSize="6" fill="white">{gasLineO2?"O":"C"}</text>
+                            <rect x="455" y="62" width="35" height="18" rx="2" fill="#8b5cf6"/><text x="472" y="74" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">Ar</text>
+                            <rect x="428" y="64" width="22" height="14" rx="2" fill={gasLineAr?"#22c55e":"#666"} stroke="#333"/><text x="439" y="74" textAnchor="middle" fontSize="6" fill="white">{gasLineAr?"O":"C"}</text>
+                            <rect x="455" y="84" width="35" height="18" rx="2" fill="#3b82f6"/><text x="472" y="96" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">N2</text>
+                            <rect x="428" y="86" width="22" height="14" rx="2" fill={gasLineN2?"#22c55e":"#666"} stroke="#333"/><text x="439" y="96" textAnchor="middle" fontSize="6" fill="white">{gasLineN2?"O":"C"}</text>
+                            <rect x="385" y="60" width="15" height="22" rx="3" fill={gasLineMain?"#f59e0b":"#666"} stroke="#333" strokeWidth="2"/><text x="392" y="74" textAnchor="middle" fontSize="5" fill="white" fontWeight="bold">{gasLineMain?"O":"C"}</text>
+                            <text x="392" y="90" textAnchor="middle" fontSize="6" fill="#f59e0b">MAIN</text>
+                          </g>
+                        )}
+
+                        {/* 시나리오 4: RF/Matcher */}
+                        {troubleScenario === 4 && (
+                          <g>
+                            <rect x="20" y="20" width="80" height="50" rx="4" fill={rfBreaker?"#dc2626":"#374151"} stroke="#555" strokeWidth="2"/>
+                            <text x="60" y="38" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white">RF GEN</text>
+                            <text x="60" y="62" textAnchor="middle" fontSize="9" fill={rfBreaker?"#fef08a":"#666"}>{rfBreaker?`${rfPower}W`:"OFF"}</text>
+                            <rect x="100" y="80" width="60" height="45" rx="4" fill={matcherTemp>100?"#991b1b":"#1e3a5f"} stroke={matcherTemp>80?"#ef4444":"#555"} strokeWidth="2"/>
+                            {matcherSmoke > 20 && <ellipse cx="130" cy="75" rx="15" ry="8" fill="#888" opacity={matcherSmoke/100}><animate attributeName="cy" values="75;60;45" dur="2s" repeatCount="indefinite"/></ellipse>}
+                            <text x="130" y="98" textAnchor="middle" fontSize="8" fontWeight="bold" fill="white">MATCHER</text>
+                            <text x="130" y="110" textAnchor="middle" fontSize="7" fill={matcherTemp>100?"#fef08a":"#aaa"}>🌡️{matcherTemp.toFixed(0)}°C</text>
+                            <circle cx="50" cy="400" r="25" fill="#7f1d1d" stroke="#991b1b" strokeWidth="3"/>
+                            <text x="50" y="395" textAnchor="middle" fontSize="7" fill="#fca5a5">EMO</text>
+                            <text x="50" y="408" textAnchor="middle" fontSize="8" fill="#fca5a5">고장!</text>
+                            <line x1="30" y1="380" x2="70" y2="420" stroke="#ef4444" strokeWidth="3"/>
+                            <line x1="70" y1="380" x2="30" y2="420" stroke="#ef4444" strokeWidth="3"/>
+                          </g>
+                        )}
+
+                        {/* 챔버 */}
+                        <rect x="155" y="20" width="200" height="80" rx="6" fill="url(#tChamber)" stroke="#2d3436" strokeWidth="2"/>
+                        <text x="255" y="45" textAnchor="middle" fontSize="12" fontWeight="bold">CHAMBER</text>
+                        <rect x="290" y="50" width="55" height="22" rx="3" fill="#1a1a2e"/>
+                        <text x="318" y="65" textAnchor="middle" fontSize="9" fill={troublePressure>1e-3?"#ff6b6b":"#00ff00"} fontFamily="monospace">
+                          {troublePressure>=1?troublePressure.toFixed(1):troublePressure.toExponential(1)}
+                        </text>
+
+                        {/* APC */}
+                        <rect x="245" y="100" width="20" height="25" fill="#636e72"/>
+                        <rect x="205" y="125" width="100" height="32" rx="4" fill={troubleApcOpen?"#00b894":"#d63031"} stroke="#2d3436" strokeWidth="2"/>
+                        <text x="255" y="145" textAnchor="middle" fontSize="10" fill="white" fontWeight="bold">APC {troubleApcOpen?"OPEN":"CLOSE"}</text>
+                        <rect x="245" y="157" width="20" height="23" fill="#636e72"/>
+
+                        {/* TMP */}
+                        <rect x="175" y="180" width="160" height="85" rx="6" fill="url(#tTmp)" stroke="#2d3436" strokeWidth="2"/>
+                        <text x="255" y="200" textAnchor="middle" fontSize="11" fontWeight="bold">TMP</text>
+                        <circle cx="255" cy="232" r="28" fill="#1a1a2e" stroke="#333" strokeWidth="2"/>
+                        <circle cx="255" cy="232" r="22" fill="#2d3436"/>
+                        <g>{troubleTurboSpeed > 5 && <animateTransform attributeName="transform" type="rotate" from="0 255 232" to="360 255 232" dur={troubleTurboSpeed>250?"0.05s":troubleTurboSpeed>150?"0.1s":"0.3s"} repeatCount="indefinite"/>}{[0,45,90,135,180,225,270,315].map((a,i) => (<line key={i} x1="255" y1="232" x2={255+Math.cos(a*Math.PI/180)*18} y2={232+Math.sin(a*Math.PI/180)*18} stroke="#fdcb6e" strokeWidth="3" strokeLinecap="round"/>))}</g>
+                        <circle cx="255" cy="232" r="5" fill={troubleTmpOn?"#00ff00":"#666"}/>
+                        <text x="345" y="210" fontSize="8" fill="#666">{Math.round(troubleTurboSpeed*200)} RPM</text>
+                        {troubleScenario===1 && <text x="345" y="234" fontSize="8" fill={tmpTemperature>80?"#d63031":"#27ae60"}>🌡️{tmpTemperature.toFixed(0)}°C</text>}
+
+                        {/* F/V */}
+                        <rect x="245" y="265" width="20" height="20" fill="#636e72"/>
+                        <rect x="210" y="285" width="90" height="28" rx="4" fill={troubleFvOpen?"#00b894":"#d63031"} stroke="#2d3436" strokeWidth="2"/>
+                        <text x="255" y="303" textAnchor="middle" fontSize="9" fill="white" fontWeight="bold">F/V {troubleFvOpen?"OPEN":"CLOSE"}</text>
+                        <rect x="245" y="313" width="20" height="22" fill="#636e72"/>
+
+                        {/* R/V 라인 */}
+                        <path d="M 155 55 L 105 55 L 105 165" stroke="#636e72" strokeWidth="14" fill="none" strokeLinecap="round"/>
+                        <rect x="80" y="165" width="50" height="28" rx="4" fill={troubleRvOpen?"#00b894":"#d63031"} stroke="#2d3436" strokeWidth="2"/>
+                        <text x="105" y="183" textAnchor="middle" fontSize="8" fill="white" fontWeight="bold">R/V</text>
+                        <path d="M 105 193 L 105 375 L 175 375" stroke="#636e72" strokeWidth="14" fill="none" strokeLinecap="round"/>
+
+                        {/* DRY PUMP */}
+                        <rect x="175" y="335" width="160" height="55" rx="6" fill="url(#tDry)" stroke="#2d3436" strokeWidth="2"/>
+                        <text x="255" y="360" textAnchor="middle" fontSize="11" fontWeight="bold" fill="white">DRY PUMP</text>
+                        <text x="255" y="378" textAnchor="middle" fontSize="8" fill="white">{troubleScenario===2 ? `⚡${dryPumpCurrent.toFixed(0)}A | ${dryPumpOn?"ON":"OFF"}` : "정상 15A"}</text>
+
+                        {/* 성공/실패 오버레이 */}
+                        {troubleSuccess && troubleScenario !== 3 && <g><rect x="150" y="180" width="200" height="60" rx="8" fill="rgba(34,197,94,0.95)"/><text x="250" y="218" textAnchor="middle" fontSize="18" fill="white" fontWeight="bold">🎉 성공!</text></g>}
+                        {troubleFailed && <g><rect x="150" y="180" width="200" height="60" rx="8" fill="rgba(239,68,68,0.95)"/><text x="250" y="218" textAnchor="middle" fontSize="18" fill="white" fontWeight="bold">❌ 실패!</text></g>}
+                      </svg>
+                    </div>
+
+                    {/* 상황 브리핑 */}
+                    {showSituation && (
+                      <div className="bg-gray-900 rounded-lg p-4 mb-4 border-2 border-yellow-500">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-yellow-400 font-bold">📋 상황 브리핑</span>
+                          {!troubleTriggered && <span className="animate-pulse text-yellow-400">●</span>}
+                          {troubleTriggered && <span className="text-green-400 text-sm">✓ 조치 가능</span>}
+                        </div>
+                        <div className="font-mono text-sm text-green-400 whitespace-pre-line min-h-24">
+                          {troubleSituationText}{!troubleTriggered && <span className="animate-pulse">▌</span>}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 시나리오별 컨트롤 패널 */}
+                    {troubleTriggered && !troubleSuccess && !troubleFailed && (
+                      <div className="bg-gray-800 rounded-lg p-4 space-y-3">
+                        {/* 시나리오 3: 가스라인 */}
+                        {troubleScenario === 3 && (
+                          <div className="space-y-3">
+                            <div className="text-white text-sm mb-2">🔧 가스라인 공압밸브 제어</div>
+                            <div className="grid grid-cols-4 gap-2">
+                              <button onClick={() => setGasLineO2(!gasLineO2)} className={`p-3 rounded font-bold text-sm ${gasLineO2?'bg-red-500':'bg-gray-600'} text-white`}>O2<br/><span className="text-xs">{gasLineO2?'OPEN':'CLOSE'}</span></button>
+                              <button onClick={() => setGasLineAr(!gasLineAr)} className={`p-3 rounded font-bold text-sm ${gasLineAr?'bg-purple-500':'bg-gray-600'} text-white`}>Ar<br/><span className="text-xs">{gasLineAr?'OPEN':'CLOSE'}</span></button>
+                              <button onClick={() => setGasLineN2(!gasLineN2)} className={`p-3 rounded font-bold text-sm ${gasLineN2?'bg-blue-500':'bg-gray-600'} text-white`}>N2<br/><span className="text-xs">{gasLineN2?'OPEN':'CLOSE'}</span></button>
+                              <button onClick={() => setGasLineMain(!gasLineMain)} className={`p-3 rounded font-bold text-sm ${gasLineMain?'bg-yellow-500':'bg-gray-600'} text-white border-2 ${gasLineMain?'border-yellow-300':'border-gray-500'}`}>MAIN<br/><span className="text-xs">{gasLineMain?'OPEN':'CLOSE'}</span></button>
+                            </div>
+                            <div className="bg-gray-700 rounded p-3">
+                              <div className="text-yellow-400 text-xs mb-2">📊 압력 변화 관찰</div>
+                              <div className="flex items-center gap-3">
+                                <div className="flex-1 bg-gray-800 rounded p-2">
+                                  <div className="text-xs text-gray-400">현재 압력</div>
+                                  <div className={`text-lg font-mono font-bold ${troublePressure < 1e-5 ? 'text-green-400' : troublePressure < 1e-4 ? 'text-yellow-400' : 'text-red-400'}`}>{troublePressure.toExponential(1)} Torr</div>
+                                </div>
+                                <div className="text-2xl">{troublePressure < 1e-5 ? '📉' : troublePressure > 4e-4 ? '📈' : '➡️'}</div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 시나리오 4: Matcher 화재 */}
+                        {troubleScenario === 4 && (
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-red-400 font-bold animate-pulse">🔥 긴급상황! 수동 셧다운 필요!</div>
+                            <div className="bg-red-900/50 rounded p-3 border border-red-500">
+                              <div className="text-yellow-300 text-xs mb-2">⚠️ 조치 순서</div>
+                              <div className="text-white text-sm space-y-1">
+                                <div className={scenario4Step >= 1 ? 'text-green-400' : ''}>1️⃣ RF 차단기 OFF {scenario4Step >= 1 && '✓'}</div>
+                                <div className={scenario4Step >= 2 ? 'text-green-400' : ''}>2️⃣ 가스 메인 or SiH4 밸브 차단 {scenario4Step >= 2 && '✓'}</div>
+                                <div className={scenario4Step >= 3 ? 'text-green-400' : ''}>3️⃣ N2 퍼지 & 배기 확인 {scenario4Step >= 3 && '✓'}</div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-2">
+                              <button onClick={() => setRfBreaker(!rfBreaker)} className={`p-4 rounded font-bold ${rfBreaker?'bg-red-600 animate-pulse':'bg-gray-600'} text-white border-2 border-yellow-400`}>
+                                ⚡ RF 차단기<br/><span className="text-xs">{rfBreaker?'ON':'OFF ✓'}</span>
+                              </button>
+                              <button onClick={() => setGasSupplyMain(!gasSupplyMain)} className={`p-4 rounded font-bold ${gasSupplyMain?'bg-orange-600':'bg-gray-600'} text-white`}>
+                                🔧 가스 메인<br/><span className="text-xs">{gasSupplyMain?'OPEN':'CLOSE ✓'}</span>
+                              </button>
+                              <button onClick={() => setSih4Valve(!sih4Valve)} className={`p-4 rounded font-bold ${sih4Valve?'bg-yellow-600':'bg-gray-600'} text-white`}>
+                                ☠️ SiH4 밸브<br/><span className="text-xs">{sih4Valve?'OPEN':'CLOSE ✓'}</span>
+                              </button>
+                              <button onClick={() => setEvacuating(!evacuating)} className={`p-4 rounded font-bold ${evacuating?'bg-blue-600':'bg-gray-600'} text-white`}>
+                                💨 배기/퍼지<br/><span className="text-xs">{evacuating?'진행중':'시작'}</span>
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* 시나리오 5: 포라인 */}
+                        {troubleScenario === 5 && (
+                          <div className="space-y-3">
+                            <div className={`p-3 rounded font-bold text-center ${scenario5BackflowWarning ? 'bg-red-600 animate-pulse' : scenario5Phase === 'roughing' ? 'bg-blue-600' : scenario5Phase === 'foreline' ? (scenario5Found ? 'bg-green-600' : 'bg-orange-600') : 'bg-yellow-600'} text-white`}>
+                              {scenario5BackflowWarning && '🚨 역류 위험! R/V와 F/V 동시 개방!'}
+                              {!scenario5BackflowWarning && scenario5Phase === 'roughing' && '📍 러핑 모드 - 정상 배기 중'}
+                              {!scenario5BackflowWarning && scenario5Phase === 'foreline' && (scenario5Found ? '✅ 포라인 모드 - 문제 해결됨!' : '⚠️ 포라인 모드 - 압력 정체!')}
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
+                              <button onClick={() => setTroubleRvOpen(!troubleRvOpen)} className={`p-3 rounded font-bold ${troubleRvOpen?'bg-green-500':'bg-gray-600'} text-white`}>R/V<br/><span className="text-xs">{troubleRvOpen?'OPEN':'CLOSE'}</span></button>
+                              <button onClick={() => setTroubleApcOpen(!troubleApcOpen)} className={`p-3 rounded font-bold ${troubleApcOpen?'bg-green-500':'bg-gray-600'} text-white`}>APC<br/><span className="text-xs">{troubleApcOpen?'OPEN':'CLOSE'}</span></button>
+                              <button onClick={() => setTroubleFvOpen(!troubleFvOpen)} className={`p-3 rounded font-bold ${troubleFvOpen?'bg-green-500':'bg-gray-600'} text-white`}>F/V<br/><span className="text-xs">{troubleFvOpen?'OPEN':'CLOSE'}</span></button>
+                              <button onClick={() => setTroubleTmpOn(!troubleTmpOn)} className={`p-3 rounded font-bold ${troubleTmpOn?'bg-orange-500':'bg-gray-600'} text-white`}>TMP<br/><span className="text-xs">{troubleTmpOn?'ON':'OFF'}</span></button>
+                            </div>
+                            {scenario5Phase === 'foreline' && !scenario5Found && (
+                              <div className="bg-red-900/30 rounded p-3 border border-red-500">
+                                <div className="text-red-300 text-sm mb-2">🔍 F/V ~ DRY 사이 배관 점검</div>
+                                <div className="grid grid-cols-2 gap-2">
+                                  <button onClick={() => { setScenario5Checked(prev => ({...prev, bellows: true})); if (scenario5FaultLocation === 'bellows') setScenario5Found(true); }} className={`p-3 rounded text-sm ${scenario5Checked.bellows ? (scenario5FaultLocation==='bellows'?'bg-green-600':'bg-gray-500') : 'bg-cyan-700'} text-white`}>🔧 벨로우즈<br/><span className="text-xs">{scenario5Checked.bellows ? (scenario5FaultLocation==='bellows'?'⚠️ 크랙!':'이상없음') : '점검'}</span></button>
+                                  <button onClick={() => { setScenario5Checked(prev => ({...prev, oring: true})); if (scenario5FaultLocation === 'oring') setScenario5Found(true); }} className={`p-3 rounded text-sm ${scenario5Checked.oring ? (scenario5FaultLocation==='oring'?'bg-green-600':'bg-gray-500') : 'bg-cyan-700'} text-white`}>⭕ O-ring<br/><span className="text-xs">{scenario5Checked.oring ? (scenario5FaultLocation==='oring'?'⚠️ 손상!':'이상없음') : '점검'}</span></button>
+                                  <button onClick={() => { setScenario5Checked(prev => ({...prev, clamp: true})); if (scenario5FaultLocation === 'clamp') setScenario5Found(true); }} className={`p-3 rounded text-sm ${scenario5Checked.clamp ? (scenario5FaultLocation==='clamp'?'bg-green-600':'bg-gray-500') : 'bg-cyan-700'} text-white`}>🔩 클램프<br/><span className="text-xs">{scenario5Checked.clamp ? (scenario5FaultLocation==='clamp'?'⚠️ 헐거움!':'이상없음') : '점검'}</span></button>
+                                  <button onClick={() => setScenario5Checked(prev => ({...prev, fvSeal: true}))} className={`p-3 rounded text-sm ${scenario5Checked.fvSeal ? 'bg-gray-500' : 'bg-cyan-700'} text-white`}>🚪 F/V 씰<br/><span className="text-xs">{scenario5Checked.fvSeal ? '이상없음' : '점검'}</span></button>
+                                </div>
+                              </div>
+                            )}
+                            {scenario5Found && <div className="bg-green-900/30 rounded p-3 border border-green-500"><div className="text-green-300 font-bold">✅ 원인 발견! 수리 중...</div></div>}
+                          </div>
+                        )}
+
+                        {/* 시나리오 1, 2: 기본 밸브 컨트롤 */}
+                        {(troubleScenario === 1 || troubleScenario === 2) && (
+                          <div className={`grid ${troubleScenario===2?'grid-cols-5':'grid-cols-4'} gap-2`}>
+                            <button onClick={() => setTroubleRvOpen(!troubleRvOpen)} className={`p-3 rounded font-bold ${troubleRvOpen?'bg-green-500':'bg-gray-600'} text-white`}>R/V</button>
+                            <button onClick={() => setTroubleApcOpen(!troubleApcOpen)} className={`p-3 rounded font-bold ${troubleApcOpen?'bg-green-500':'bg-gray-600'} text-white`}>APC</button>
+                            <button onClick={() => setTroubleFvOpen(!troubleFvOpen)} className={`p-3 rounded font-bold ${troubleFvOpen?'bg-green-500':'bg-gray-600'} text-white`}>F/V</button>
+                            <button onClick={() => setTroubleTmpOn(!troubleTmpOn)} className={`p-3 rounded font-bold ${troubleTmpOn?'bg-orange-500':'bg-gray-600'} text-white`}>TMP</button>
+                            {troubleScenario === 2 && <button onClick={() => setDryPumpOn(!dryPumpOn)} className={`p-3 rounded font-bold ${dryPumpOn?'bg-pink-500':'bg-gray-600'} text-white`}>DRY</button>}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    <button onClick={handleTroubleReset} className="mt-4 w-full py-3 bg-gray-500 text-white rounded-lg font-bold hover:bg-gray-600">🔄 시나리오 선택으로</button>
+                  </div>
+
+                  {/* 우측 상태 패널 */}
+                  <div className="space-y-4">
+                    <div className="bg-white rounded-lg p-4 shadow">
+                      <h3 className="font-bold mb-3">📊 실시간 상태</h3>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between"><span>챔버 압력</span><span className="font-mono">{troublePressure>=1?troublePressure.toFixed(1):troublePressure.toExponential(1)} Torr</span></div>
+                        <div className="flex justify-between"><span>TMP 속도</span><span>{Math.round(troubleTurboSpeed)} L/s</span></div>
+                        {troubleScenario===1 && <div className="flex justify-between"><span>TMP 온도</span><span className={tmpTemperature>80?'text-red-600 font-bold':''}>{tmpTemperature.toFixed(0)}°C</span></div>}
+                        {troubleScenario===2 && <div className="flex justify-between"><span>드라이 전류</span><span className={dryPumpCurrent>40?'text-red-600 font-bold':''}>{dryPumpCurrent.toFixed(0)}A</span></div>}
+                        {troubleScenario===4 && <div className="flex justify-between"><span>Matcher 온도</span><span className={matcherTemp>100?'text-red-600 font-bold':''}>{matcherTemp.toFixed(0)}°C</span></div>}
+                        {troubleScenario===4 && <div className="flex justify-between"><span>SiH4 유량</span><span className={sih4Flow>0?'text-red-600':'text-green-600'}>{sih4Flow.toFixed(0)} sccm</span></div>}
+                        {troubleScenario===5 && <div className="flex justify-between"><span>모드</span><span>{scenario5Phase==='roughing'?'러핑':scenario5Phase==='foreline'?'포라인':'전환중'}</span></div>}
+                      </div>
+                    </div>
+                    <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                      <h3 className="font-bold text-yellow-800 mb-2">💡 힌트</h3>
+                      <p className="text-sm text-yellow-700">
+                        {troubleScenario===1 && "APC 닫아 챔버 격리 → TMP OFF!"}
+                        {troubleScenario===2 && "① F/V 닫기 → ② 드라이 OFF → ③ TMP OFF → ④ APC 닫기"}
+                        {troubleScenario===3 && "밸브를 하나씩 닫아보며 압력 변화를 관찰하세요!"}
+                        {troubleScenario===4 && "① RF 차단기 먼저! ② 가스 차단 ③ 배기/퍼지"}
+                        {troubleScenario===5 && "러핑 OK → 포라인 NG? F/V~DRY 사이 점검!"}
+                      </p>
+                    </div>
                   </div>
                 </div>
               )}
