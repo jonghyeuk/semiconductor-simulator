@@ -65,12 +65,56 @@ const OxidationSimulator = () => {
   const [simPressure, setSimPressure] = useState(1);
   const [showSimResult, setShowSimResult] = useState(false);
 
+  // Troubleshooting states
+  const [troubleActiveScenario, setTroubleActiveScenario] = useState(1);
+  const [troubleIsStarted, setTroubleIsStarted] = useState(false);
+  const [troubleIsTriggered, setTroubleIsTriggered] = useState(false);
+  const [troubleElapsedTime, setTroubleElapsedTime] = useState(0);
+  const [troubleIsSuccess, setTroubleIsSuccess] = useState(false);
+  const [troubleIsFailed, setTroubleIsFailed] = useState(false);
+
+  const [troubleSituationText, setTroubleSituationText] = useState('');
+  const [troubleSituationIndex, setTroubleSituationIndex] = useState(0);
+  const [troubleShowSituation, setTroubleShowSituation] = useState(false);
+
+  const [troubleZoneTemps, setTroubleZoneTemps] = useState([1000, 1000, 1000, 1000, 1000, 1000]);
+  const [troubleZoneCurrents, setTroubleZoneCurrents] = useState([45, 45, 45, 45, 45, 45]);
+  const [troubleGasFlows, setTroubleGasFlows] = useState({ O2: 100, N2: 200, H2: 50 });
+  const [troubleChamberPressure, setTroubleChamberPressure] = useState(0.005);
+  const [troubleWaferLoaded, setTroubleWaferLoaded] = useState(true);
+
+  const [troubleHeaterZones, setTroubleHeaterZones] = useState([true, true, true, true, true, true]);
+
+  const [troubleAutoGasInterlock, setTroubleAutoGasInterlock] = useState(true);
+  const [troubleMfcValves, setTroubleMfcValves] = useState({ O2: true, N2: true, H2: true });
+  const [troubleManualValves, setTroubleManualValves] = useState({ O2: true, N2: true, H2: true });
+  const [troubleTotalGasValve, setTroubleTotalGasValve] = useState(true);
+  const [troublePumpRunning, setTroublePumpRunning] = useState(true);
+  const [troubleExhaustValve, setTroubleExhaustValve] = useState(true);
+  const [troublePumpRepaired, setTroublePumpRepaired] = useState(false);
+
+  const [troubleScenario1Step, setTroubleScenario1Step] = useState(0);
+  const [troubleOverheatingZone, setTroubleOverheatingZone] = useState(2);
+
+  const [troubleScenario2FaultZone, setTroubleScenario2FaultZone] = useState(0);
+  const [troubleScenario2OpenedBoxes, setTroubleScenario2OpenedBoxes] = useState([false, false, false, false, false, false]);
+  const [troubleScenario2Found, setTroubleScenario2Found] = useState(false);
+  const [troubleScenario2Repaired, setTroubleScenario2Repaired] = useState(false);
+  const [troubleUniformity, setTroubleUniformity] = useState(85);
+  const [troubleNormalCurrent, setTroubleNormalCurrent] = useState(45);
+  const [troubleFaultCurrent, setTroubleFaultCurrent] = useState(0);
+
+  const [troubleScenario3Step, setTroubleScenario3Step] = useState(0);
+  const [troubleScenario3Warnings, setTroubleScenario3Warnings] = useState([]);
+  const [troubleTriedMfc, setTroubleTriedMfc] = useState({ O2: false, N2: false, H2: false });
+
   const tabs = [
     { id: 'theory', name: '이론', icon: '🎬' },
     { id: 'overview', name: '산화 공정 개요', icon: '🔥' },
     { id: 'thermal', name: '열산화 실험', icon: '🌡️' },
     { id: 'analysis', name: '산화 영향 인자', icon: '📊' },
-    { id: 'quiz', name: '산화 평가', icon: '📝' }
+    { id: 'quiz', name: '산화 평가', icon: '📝' },
+    { id: 'troubleshooting', name: '트러블슈팅', icon: '🔧' }
   ];
 
   const calculateOxideGrowth = (temp, time, atm, gasFlowRate = 100) => {
@@ -454,6 +498,304 @@ const OxidationSimulator = () => {
       setShowResults(true);
     }
   };
+
+  // Troubleshooting scenarios data
+  const troubleScenarios = {
+    1: {
+      name: "히팅존 과열",
+      icon: "🔥",
+      color: "from-orange-500 to-red-600",
+      description: "Zone 온도가 급상승 중! 순서대로 긴급 조치 필요",
+      isDetective: false
+    },
+    2: {
+      name: "TC 센서 오류",
+      icon: "🔍",
+      color: "from-blue-500 to-purple-600",
+      description: "산화막 불균일 - 모든 Zone 정상 표시인데 뭔가 이상하다?",
+      isDetective: true
+    },
+    3: {
+      name: "펌프 고장 + 인터락 실패",
+      icon: "⚡",
+      color: "from-yellow-500 to-orange-600",
+      description: "펌프 정지했는데 가스 인터락이 작동 안 함! 수동 차단 필요!",
+      isDetective: false
+    }
+  };
+
+  const troubleSituationMessages = {
+    1: [
+      "🏭 열산화 공정 정상 진행 중...",
+      "📊 Zone1~6 온도: 1000°C 균일 유지",
+      "⚠️ 경고! Zone TC(열전대) 이상 감지!",
+      "🔥 온도 급상승! 1050°C 초과!",
+      "🚨 긴급 조치가 필요합니다!"
+    ],
+    2: [
+      "🏭 산화 공정 완료, 웨이퍼 측정 중...",
+      "📊 막두께 측정 결과... 불균일 발생!",
+      "🤔 이상하다... 모든 Zone이 1000°C 표시인데?",
+      "💭 TC 센서가 잘못된 값을 읽고 있나?",
+      "🔧 컨트롤 박스를 열어 실제 전류를 확인하세요!"
+    ],
+    3: [
+      "🏭 Pyrogenic 산화 공정 진행 중...",
+      "⚡ H₂/O₂/N₂ 가스 공급 중...",
+      "🔔 펌프 이상 경보! 배기펌프 정지!",
+      "⚠️ 배기밸브 자동 차단됨...",
+      "🚨 그런데 가스가 계속 나온다?! 인터락 고장!",
+      "━━━━━━━━━━━━━━━━━━━━━━",
+      "📋 복구 지령:",
+      "  1️⃣ 가스 밸브 모두 차단 (수동밸브 or 토탈밸브)",
+      "  2️⃣ 펌프 수리",
+      "  3️⃣ 배기밸브 열고 진공 배기",
+      "  4️⃣ 챔버 내 잔류가스 제거 (5×10⁻³ Torr 이하)"
+    ]
+  };
+
+  const formatTroublePressure = (p) => {
+    if (p < 0.01) return p.toExponential(1) + ' Torr';
+    if (p < 1) return p.toFixed(3) + ' Torr';
+    return p.toFixed(0) + ' Torr';
+  };
+
+  const formatTroubleTime = (s) => `${Math.floor(s/60)}:${(Math.floor(s%60)).toString().padStart(2,'0')}`;
+
+  const addTroubleWarning = (msg) => {
+    setTroubleScenario3Warnings(prev => [...prev.slice(-3), { msg, id: Date.now() }]);
+  };
+
+  const getTroubleActualGasFlow = (gas) => {
+    if (!troubleTotalGasValve) return 0;
+    if (!troubleManualValves[gas]) return 0;
+    if (!troubleMfcValves[gas]) return 0;
+    return troubleGasFlows[gas];
+  };
+
+  const getTroubleTotalGasSupply = () => {
+    return getTroubleActualGasFlow('O2') + getTroubleActualGasFlow('N2') + getTroubleActualGasFlow('H2');
+  };
+
+  const handleTroubleStart = () => {
+    setTroubleIsStarted(true);
+    setTroubleIsTriggered(false);
+    setTroubleElapsedTime(0);
+    setTroubleIsSuccess(false);
+    setTroubleIsFailed(false);
+    setTroubleSituationText('');
+    setTroubleSituationIndex(0);
+    setTroubleShowSituation(true);
+
+    setTroubleZoneTemps([1000, 1000, 1000, 1000, 1000, 1000]);
+    setTroubleGasFlows({ O2: 100, N2: 200, H2: 50 });
+    setTroubleChamberPressure(0.005);
+    setTroubleWaferLoaded(true);
+
+    setTroubleHeaterZones([true, true, true, true, true, true]);
+    setTroubleAutoGasInterlock(true);
+    setTroubleMfcValves({ O2: true, N2: true, H2: true });
+    setTroubleManualValves({ O2: true, N2: true, H2: true });
+    setTroubleTotalGasValve(true);
+    setTroublePumpRunning(true);
+    setTroubleExhaustValve(true);
+    setTroublePumpRepaired(false);
+
+    setTroubleScenario1Step(0);
+    setTroubleOverheatingZone(Math.floor(Math.random() * 6));
+
+    const faultZone = Math.floor(Math.random() * 6);
+    setTroubleScenario2FaultZone(faultZone);
+    setTroubleScenario2OpenedBoxes([false, false, false, false, false, false]);
+    setTroubleScenario2Found(false);
+    setTroubleScenario2Repaired(false);
+    setTroubleUniformity(85);
+
+    const normalA = 43 + Math.random() * 6;
+    setTroubleNormalCurrent(normalA);
+    const isTooHigh = Math.random() > 0.5;
+    const faultA = isTooHigh ? (65 + Math.random() * 10) : (15 + Math.random() * 10);
+    setTroubleFaultCurrent(faultA);
+
+    const currents = [0,1,2,3,4,5].map(i =>
+      i === faultZone ? faultA : (normalA + (Math.random() - 0.5) * 4)
+    );
+    setTroubleZoneCurrents(currents);
+
+    setTroubleScenario3Step(0);
+    setTroubleScenario3Warnings([]);
+    setTroubleTriedMfc({ O2: false, N2: false, H2: false });
+  };
+
+  const handleTroubleReset = () => {
+    setTroubleIsStarted(false);
+    setTroubleIsTriggered(false);
+    setTroubleIsSuccess(false);
+    setTroubleIsFailed(false);
+    setTroubleShowSituation(false);
+    setTroubleSituationText('');
+    setTroubleSituationIndex(0);
+  };
+
+  const openTroubleControlBox = (zoneIndex) => {
+    setTroubleScenario2OpenedBoxes(prev => {
+      const newOpened = [...prev];
+      newOpened[zoneIndex] = true;
+      return newOpened;
+    });
+  };
+
+  const replaceTroubleTC = (zoneIndex) => {
+    if (zoneIndex === troubleScenario2FaultZone) {
+      setTroubleScenario2Found(true);
+      setTroubleScenario2Repaired(true);
+      setTroubleZoneCurrents(prev => prev.map((c, i) =>
+        i === zoneIndex ? troubleNormalCurrent : c
+      ));
+    }
+  };
+
+  const tryTroubleMfcValve = (gas) => {
+    setTroubleTriedMfc(prev => ({ ...prev, [gas]: true }));
+    addTroubleWarning(`⚠️ ${gas} MFC 밸브 응답 없음! 솔레노이드 고장!`);
+  };
+
+  const toggleTroubleManualValve = (gas) => {
+    setTroubleManualValves(prev => ({ ...prev, [gas]: !prev[gas] }));
+    if (troubleManualValves[gas]) {
+      addTroubleWarning(`✓ ${gas} 수동밸브 차단 완료`);
+    }
+  };
+
+  const repairTroublePump = () => {
+    if (troubleScenario3Step >= 1) {
+      setTroublePumpRepaired(true);
+    } else {
+      addTroubleWarning('⚠️ 가스를 먼저 차단하세요! 위험합니다!');
+    }
+  };
+
+  const openTroubleExhaustValve = () => {
+    if (troublePumpRunning) {
+      setTroubleExhaustValve(true);
+    } else {
+      addTroubleWarning('⚠️ 펌프가 정지 상태입니다!');
+    }
+  };
+
+  const isTroubleCurrentAbnormal = (current) => current > 60 || current < 30;
+
+  // Troubleshooting typing effect
+  useEffect(() => {
+    if (!troubleIsStarted || !troubleShowSituation) return;
+
+    const messages = troubleSituationMessages[troubleActiveScenario];
+    if (!messages) return;
+
+    const currentFullText = messages.slice(0, troubleSituationIndex + 1).join('\n');
+
+    if (troubleSituationText.length < currentFullText.length) {
+      const timer = setTimeout(() => {
+        setTroubleSituationText(currentFullText.slice(0, troubleSituationText.length + 1));
+      }, 25);
+      return () => clearTimeout(timer);
+    } else if (troubleSituationIndex < messages.length - 1) {
+      const timer = setTimeout(() => {
+        setTroubleSituationIndex(prev => prev + 1);
+      }, 600);
+      return () => clearTimeout(timer);
+    } else {
+      const timer = setTimeout(() => {
+        setTroubleIsTriggered(true);
+        if (troubleActiveScenario === 1) {
+          setTroubleZoneTemps(prev => prev.map((t, i) => i === troubleOverheatingZone ? 1050 : t));
+        }
+        if (troubleActiveScenario === 3) {
+          setTroublePumpRunning(false);
+          setTroubleExhaustValve(false);
+          setTroubleAutoGasInterlock(false);
+          setTroubleChamberPressure(100);
+        }
+      }, 800);
+      return () => clearTimeout(timer);
+    }
+  }, [troubleIsStarted, troubleShowSituation, troubleSituationText, troubleSituationIndex, troubleActiveScenario, troubleOverheatingZone]);
+
+  // Troubleshooting main simulation loop
+  useEffect(() => {
+    if (!troubleIsStarted || !troubleIsTriggered) return;
+
+    const interval = setInterval(() => {
+      setTroubleElapsedTime(prev => prev + 0.1);
+
+      if (troubleIsSuccess || troubleIsFailed) return;
+
+      // Scenario 1: Heater zone overheating
+      if (troubleActiveScenario === 1) {
+        setTroubleZoneTemps(prev => prev.map((t, i) => {
+          if (i === troubleOverheatingZone) {
+            if (!troubleHeaterZones[i]) return Math.max(800, t - 5);
+            return Math.min(1200, t + 2);
+          }
+          if (!troubleHeaterZones[i]) return Math.max(25, t - 3);
+          return t;
+        }));
+
+        if (troubleZoneTemps[troubleOverheatingZone] >= 1200) setTroubleIsFailed(true);
+
+        if (troubleScenario1Step === 0 && !troubleHeaterZones[troubleOverheatingZone]) setTroubleScenario1Step(1);
+        if (troubleScenario1Step === 1 && troubleManualValves.N2 && troubleGasFlows.N2 >= 300) setTroubleScenario1Step(2);
+        if (troubleScenario1Step === 2 && troubleZoneTemps[troubleOverheatingZone] <= 900) setTroubleScenario1Step(3);
+        if (troubleScenario1Step === 3) setTroubleIsSuccess(true);
+      }
+
+      // Scenario 2: TC error
+      if (troubleActiveScenario === 2) {
+        if (!troubleScenario2Repaired) {
+          setTroubleUniformity(85);
+          if (troubleElapsedTime > 300) setTroubleIsFailed(true);
+        } else {
+          setTroubleUniformity(prev => Math.min(98, prev + 0.3));
+          if (troubleUniformity >= 95) setTroubleIsSuccess(true);
+        }
+      }
+
+      // Scenario 3: Pump failure + interlock failure
+      if (troubleActiveScenario === 3) {
+        const gasSupply = getTroubleTotalGasSupply();
+
+        if (!troubleExhaustValve && gasSupply > 0) {
+          setTroubleChamberPressure(prev => Math.min(2000, prev + gasSupply * 0.015));
+        } else if (troubleExhaustValve && troublePumpRunning) {
+          setTroubleChamberPressure(prev => Math.max(760, prev - 8));
+        }
+
+        if (troubleChamberPressure >= 2000) setTroubleIsFailed(true);
+
+        if (troubleScenario3Step === 0 && gasSupply === 0) {
+          setTroubleScenario3Step(1);
+        }
+        if (troubleScenario3Step === 1 && troublePumpRepaired) {
+          setTroublePumpRunning(true);
+          setTroubleScenario3Step(2);
+        }
+        if (troubleScenario3Step === 2 && troubleExhaustValve) {
+          setTroubleScenario3Step(3);
+        }
+        if (troubleScenario3Step === 3 && getTroubleActualGasFlow('N2') > 0 &&
+            getTroubleActualGasFlow('O2') === 0 && getTroubleActualGasFlow('H2') === 0 &&
+            troubleChamberPressure <= 780) {
+          setTroubleIsSuccess(true);
+        }
+      }
+
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [troubleIsStarted, troubleIsTriggered, troubleActiveScenario, troubleHeaterZones, troubleManualValves, troubleMfcValves,
+      troubleTotalGasValve, troubleGasFlows, troubleZoneTemps, troubleOverheatingZone, troubleChamberPressure,
+      troubleExhaustValve, troublePumpRunning, troubleIsSuccess, troubleIsFailed, troubleScenario1Step,
+      troubleScenario2Repaired, troubleScenario3Step, troublePumpRepaired, troubleElapsedTime, troubleUniformity]);
 
   const renderTabContent = () => {
     switch (activeTab) {
@@ -1937,6 +2279,484 @@ const OxidationSimulator = () => {
                 </button>
               </div>
             )}
+          </div>
+        );
+
+      case 'troubleshooting':
+        return (
+          <div className="min-h-screen bg-gray-900 text-white p-3 rounded-lg">
+            <div className="max-w-7xl mx-auto">
+              <h1 className="text-xl font-bold mb-3 text-orange-400">🔧 열산화 장비 트러블슈팅 시뮬레이터</h1>
+
+              {!troubleIsStarted ? (
+                <div className="bg-gray-800 rounded-lg p-5 shadow-xl">
+                  <h2 className="text-lg font-bold mb-3 text-yellow-400">🚨 트러블 시나리오 선택</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+                    {Object.entries(troubleScenarios).map(([id, s]) => (
+                      <button
+                        key={id}
+                        onClick={() => setTroubleActiveScenario(Number(id))}
+                        className={`p-3 rounded-lg border-2 text-left transition-all ${
+                          troubleActiveScenario === Number(id)
+                            ? 'border-orange-500 bg-orange-900/30'
+                            : 'border-gray-600 hover:border-gray-400 bg-gray-700/50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-2xl">{s.icon}</span>
+                          <span className="font-bold">{s.name}</span>
+                        </div>
+                        <p className="text-xs text-gray-300">{s.description}</p>
+                        {s.isDetective && (
+                          <span className="inline-block mt-1 text-xs bg-purple-600 px-2 py-0.5 rounded">🔍 탐정모드</span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    onClick={handleTroubleStart}
+                    className={`w-full py-3 rounded-lg font-bold text-lg text-white bg-gradient-to-r ${troubleScenarios[troubleActiveScenario].color}`}
+                  >
+                    🚨 시나리오 시작
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                  <div className="lg:col-span-2 bg-gray-800 rounded-lg p-3 shadow-xl">
+                    <div className="flex justify-between items-center mb-3">
+                      <h2 className="text-base font-bold text-orange-400">
+                        {troubleScenarios[troubleActiveScenario].icon} {troubleScenarios[troubleActiveScenario].name}
+                      </h2>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs bg-gray-700 px-2 py-1 rounded font-mono">⏱️ {formatTroubleTime(troubleElapsedTime)}</span>
+                        {troubleIsTriggered && !troubleIsSuccess && !troubleIsFailed && (
+                          <span className="text-xs bg-red-600 px-2 py-1 rounded animate-pulse">⚠️ 이상</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* SVG */}
+                    <div className="bg-gray-900 rounded-lg p-2 mb-3">
+                      <svg viewBox="0 0 700 340" className="w-full">
+                        <defs>
+                          <linearGradient id="troubleTubeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" stopColor="#374151"/>
+                            <stop offset="50%" stopColor="#1f2937"/>
+                            <stop offset="100%" stopColor="#374151"/>
+                          </linearGradient>
+                        </defs>
+
+                        {/* Gas supply system */}
+                        <g>
+                          {/* Total gas valve */}
+                          <rect x="10" y="20" width="40" height="25" rx="3" fill={troubleTotalGasValve ? "#166534" : "#7f1d1d"} stroke="#4b5563" strokeWidth="1"/>
+                          <text x="30" y="30" textAnchor="middle" fontSize="7" fill="white">TOTAL</text>
+                          <text x="30" y="40" textAnchor="middle" fontSize="6" fill="white">{troubleTotalGasValve ? 'OPEN' : 'CLOSE'}</text>
+
+                          {/* Main gas line */}
+                          <path d="M 50 32 L 70 32" stroke={troubleTotalGasValve ? "#4ade80" : "#6b7280"} strokeWidth="3"/>
+
+                          {/* Individual gas lines */}
+                          {[
+                            { gas: 'O2', x: 70, color: '#3b82f6', label: 'O₂' },
+                            { gas: 'N2', x: 120, color: '#6b7280', label: 'N₂' },
+                            { gas: 'H2', x: 170, color: '#22c55e', label: 'H₂' }
+                          ].map(({ gas, x, color, label }) => (
+                            <g key={gas}>
+                              {/* Manual valve */}
+                              <rect x={x} y="15" width="30" height="18" rx="2"
+                                fill={troubleManualValves[gas] ? "#374151" : "#7f1d1d"}
+                                stroke={troubleManualValves[gas] ? "#6b7280" : "#ef4444"} strokeWidth="1"/>
+                              <text x={x+15} y="22" textAnchor="middle" fontSize="6" fill="#9ca3af">수동</text>
+                              <text x={x+15} y="30" textAnchor="middle" fontSize="5" fill="white">
+                                {troubleManualValves[gas] ? 'OPEN' : 'CLOSE'}
+                              </text>
+
+                              {/* MFC */}
+                              <rect x={x} y="38" width="30" height="22" rx="2" fill={color} stroke="#4b5563" strokeWidth="1"/>
+                              <text x={x+15} y="47" textAnchor="middle" fontSize="7" fill="white" fontWeight="bold">{label}</text>
+                              <text x={x+15} y="56" textAnchor="middle" fontSize="6" fill="white">{troubleGasFlows[gas]}</text>
+
+                              {/* MFC outlet valve */}
+                              <rect x={x} y="65" width="30" height="15" rx="2"
+                                fill={troubleMfcValves[gas] ? "#166534" : "#7f1d1d"}
+                                stroke={troubleActiveScenario === 3 && !troubleAutoGasInterlock ? "#ef4444" : "#4b5563"} strokeWidth="1"/>
+                              <text x={x+15} y="75" textAnchor="middle" fontSize="5" fill="white">
+                                {troubleMfcValves[gas] ? 'OPEN' : 'CLOSE'}
+                              </text>
+                              {troubleActiveScenario === 3 && !troubleAutoGasInterlock && troubleMfcValves[gas] && (
+                                <text x={x+15} y="88" textAnchor="middle" fontSize="6" fill="#ef4444" className="animate-pulse">고장!</text>
+                              )}
+
+                              {/* Gas flow indicator */}
+                              <path d={`M ${x+15} 80 L ${x+15} 95 L 160 95`}
+                                stroke={getTroubleActualGasFlow(gas) > 0 ? color : "#374151"}
+                                strokeWidth="2" fill="none" strokeDasharray={getTroubleActualGasFlow(gas) > 0 ? "none" : "3,3"}/>
+                            </g>
+                          ))}
+                        </g>
+
+                        {/* Furnace */}
+                        <rect x="150" y="105" width="380" height="130" rx="6" fill="#1f2937" stroke="#4b5563" strokeWidth="2"/>
+
+                        {/* Heating zones (top) */}
+                        {[0, 1, 2].map(i => (
+                          <g key={`top-${i}`}>
+                            <rect
+                              x={165 + i * 125} y={112} width="110" height="22" rx="3"
+                              fill={troubleActiveScenario === 2 ? "#ea580c" : troubleHeaterZones[i] ? (troubleZoneTemps[i] > 1100 ? "#dc2626" : "#ea580c") : "#374151"}
+                              className={troubleActiveScenario !== 2 && troubleHeaterZones[i] && troubleZoneTemps[i] > 1050 ? "animate-pulse" : ""}
+                            />
+                            <text x={220 + i * 125} y={127} textAnchor="middle" fontSize="9" fill="white" fontWeight="bold">
+                              Z{i + 1}: {troubleActiveScenario === 2 ? "1000" : troubleZoneTemps[i].toFixed(0)}°C
+                            </text>
+                          </g>
+                        ))}
+
+                        {/* Quartz tube */}
+                        <rect x="160" y="140" width="360" height="50" rx="5" fill="url(#troubleTubeGrad)" fillOpacity="0.5" stroke="#6b7280" strokeWidth="1"/>
+                        <text x="340" y="158" textAnchor="middle" fontSize="10" fill="#9ca3af">Quartz Tube</text>
+                        <text x="340" y="175" textAnchor="middle" fontSize="11"
+                          fill={troubleChamberPressure > 1500 ? "#ef4444" : troubleChamberPressure > 100 ? "#fbbf24" : "#60a5fa"} fontWeight="bold">
+                          {formatTroublePressure(troubleChamberPressure)}
+                        </text>
+
+                        {/* Wafer */}
+                        {troubleWaferLoaded && (
+                          <g>
+                            <rect x="240" y="178" width="160" height="10" rx="2" fill="#8b5cf6"/>
+                            {[...Array(8)].map((_, i) => (
+                              <rect key={i} x={250 + i * 18} y={172} width="2" height="8" fill="#a78bfa"/>
+                            ))}
+                          </g>
+                        )}
+
+                        {/* Heating zones (bottom) */}
+                        {[3, 4, 5].map(i => (
+                          <g key={`bottom-${i}`}>
+                            <rect
+                              x={165 + (i - 3) * 125} y={198} width="110" height="22" rx="3"
+                              fill={troubleActiveScenario === 2 ? "#ea580c" : troubleHeaterZones[i] ? (troubleZoneTemps[i] > 1100 ? "#dc2626" : "#ea580c") : "#374151"}
+                            />
+                            <text x={220 + (i - 3) * 125} y={213} textAnchor="middle" fontSize="9" fill="white" fontWeight="bold">
+                              Z{i + 1}: {troubleActiveScenario === 2 ? "1000" : troubleZoneTemps[i].toFixed(0)}°C
+                            </text>
+                          </g>
+                        ))}
+
+                        {/* Exhaust system */}
+                        <path d="M 530 165 L 560 165 L 560 270 L 590 270"
+                          stroke={troubleExhaustValve ? "#4b5563" : "#7f1d1d"} strokeWidth="3" fill="none"/>
+
+                        <g>
+                          <rect x="555" y="250" width="35" height="40" rx="3"
+                            fill={troubleExhaustValve ? "#374151" : "#7f1d1d"}
+                            stroke={troubleExhaustValve ? "#6b7280" : "#ef4444"} strokeWidth="1"/>
+                          <text x="572" y="265" textAnchor="middle" fontSize="7" fill="white">배기</text>
+                          <text x="572" y="278" textAnchor="middle" fontSize="6" fill={troubleExhaustValve ? "#4ade80" : "#ef4444"}>
+                            {troubleExhaustValve ? 'OPEN' : 'CLOSE'}
+                          </text>
+                        </g>
+
+                        <g>
+                          <rect x="600" y="245" width="55" height="50" rx="4"
+                            fill={troublePumpRunning ? "#1e40af" : "#7f1d1d"}
+                            stroke={troublePumpRunning ? "#3b82f6" : "#ef4444"} strokeWidth="2"/>
+                          <text x="627" y="265" textAnchor="middle" fontSize="9" fill="white" fontWeight="bold">PUMP</text>
+                          <text x="627" y="280" textAnchor="middle" fontSize="8" fill={troublePumpRunning ? "#4ade80" : "#ef4444"}>
+                            {troublePumpRunning ? "RUN" : "STOP"}
+                          </text>
+                          {!troublePumpRunning && <text x="627" y="305" textAnchor="middle" fontSize="8" fill="#ef4444">⚠️ 고장</text>}
+                        </g>
+
+                        {/* Status display */}
+                        {troubleActiveScenario === 2 && troubleIsTriggered && (
+                          <g>
+                            <rect x="540" y="110" width="80" height="30" rx="3" fill={troubleUniformity < 90 ? "#7f1d1d" : "#166534"} stroke="#4b5563"/>
+                            <text x="580" y="122" textAnchor="middle" fontSize="8" fill="#fbbf24">균일도</text>
+                            <text x="580" y="135" textAnchor="middle" fontSize="11" fill={troubleUniformity >= 95 ? "#4ade80" : "#ef4444"} fontWeight="bold">
+                              {troubleUniformity.toFixed(1)}%
+                            </text>
+                          </g>
+                        )}
+
+                        {troubleActiveScenario === 3 && troubleIsTriggered && (
+                          <g>
+                            <rect x="540" y="110" width="80" height="30" rx="3"
+                              fill={troubleChamberPressure > 1500 ? "#7f1d1d" : troubleChamberPressure > 1000 ? "#854d0e" : "#1e3a8a"} stroke="#4b5563"/>
+                            <text x="580" y="122" textAnchor="middle" fontSize="8" fill="#fbbf24">압력</text>
+                            <text x="580" y="135" textAnchor="middle" fontSize="11"
+                              fill={troubleChamberPressure > 1500 ? "#ef4444" : "#60a5fa"} fontWeight="bold">
+                              {formatTroublePressure(troubleChamberPressure)}
+                            </text>
+                          </g>
+                        )}
+
+                        {/* Success/Fail */}
+                        {troubleIsSuccess && (
+                          <g>
+                            <rect x="180" y="135" width="280" height="70" rx="8" fill="rgba(34,197,94,0.95)"/>
+                            <text x="320" y="168" textAnchor="middle" fontSize="20" fill="white" fontWeight="bold">🎉 트러블 해결!</text>
+                            <text x="320" y="190" textAnchor="middle" fontSize="10" fill="white">소요 시간: {formatTroubleTime(troubleElapsedTime)}</text>
+                          </g>
+                        )}
+                        {troubleIsFailed && (
+                          <g>
+                            <rect x="180" y="135" width="280" height="70" rx="8" fill="rgba(220,38,38,0.95)"/>
+                            <text x="320" y="168" textAnchor="middle" fontSize="20" fill="white" fontWeight="bold">
+                              {troubleActiveScenario === 3 ? "💥 챔버 손상!" : troubleActiveScenario === 2 ? "⏰ 시간 초과!" : "❌ 장비 손상!"}
+                            </text>
+                          </g>
+                        )}
+                      </svg>
+                    </div>
+
+                    {/* Situation briefing */}
+                    {troubleShowSituation && (
+                      <div className="bg-gray-950 rounded p-3 mb-3 border border-yellow-500">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-yellow-400 font-bold text-sm">📋 상황 브리핑</span>
+                          {troubleIsTriggered && <span className="text-green-400 text-xs">✓ 조치 가능</span>}
+                        </div>
+                        <div className="font-mono text-xs text-green-400 whitespace-pre-line min-h-20">
+                          {troubleSituationText}
+                          {!troubleIsTriggered && <span className="animate-pulse">▌</span>}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Control panel */}
+                    {troubleIsTriggered && !troubleIsSuccess && !troubleIsFailed && (
+                      <div className="bg-gray-950 rounded p-3 space-y-3">
+
+                        {/* Scenario 1 */}
+                        {troubleActiveScenario === 1 && (
+                          <>
+                            <div className="bg-red-900/50 rounded p-2 border border-red-500">
+                              <div className="text-yellow-300 text-xs mb-1">⚠️ 긴급 조치</div>
+                              <div className="text-white text-xs space-y-0.5">
+                                <div className={troubleScenario1Step >= 1 ? 'text-green-400' : ''}>1. Zone{troubleOverheatingZone + 1} 히터 OFF {troubleScenario1Step >= 1 && '✓'}</div>
+                                <div className={troubleScenario1Step >= 2 ? 'text-green-400' : ''}>2. N₂ 300+ sccm {troubleScenario1Step >= 2 && '✓'}</div>
+                                <div className={troubleScenario1Step >= 3 ? 'text-green-400' : ''}>3. 온도 900°C 이하 {troubleScenario1Step >= 3 && '✓'}</div>
+                              </div>
+                            </div>
+                            <div className="grid grid-cols-6 gap-1">
+                              {troubleHeaterZones.map((on, i) => (
+                                <button key={i}
+                                  onClick={() => setTroubleHeaterZones(prev => prev.map((v, idx) => idx === i ? !v : v))}
+                                  className={`p-1.5 rounded text-xs font-bold ${on ? (troubleZoneTemps[i] > 1050 ? 'bg-red-600 animate-pulse' : 'bg-orange-600') : 'bg-gray-600'} text-white`}
+                                >
+                                  Z{i + 1} {on ? 'ON' : 'OFF'}
+                                </button>
+                              ))}
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-400 mb-1">N₂: {troubleGasFlows.N2} sccm</div>
+                              <input type="range" min="100" max="500" step="50" value={troubleGasFlows.N2}
+                                onChange={(e) => setTroubleGasFlows(prev => ({ ...prev, N2: Number(e.target.value) }))}
+                                className="w-full h-2"
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        {/* Scenario 2 */}
+                        {troubleActiveScenario === 2 && (
+                          <>
+                            <div className="bg-blue-900/50 rounded p-2 border border-blue-500">
+                              <div className="text-cyan-300 text-xs">🔍 TC 오류: 전류값으로 고장 Zone 찾기</div>
+                              <div className="text-[10px] text-gray-400">정상: 43~49A / 이상: {"<30A 또는 >60A"}</div>
+                            </div>
+                            {!troubleScenario2Found ? (
+                              <div className="grid grid-cols-3 gap-2">
+                                {[0,1,2,3,4,5].map(i => (
+                                  <div key={i} className="bg-gray-800 rounded p-2 border border-gray-600">
+                                    <div className="text-center text-xs font-bold text-gray-300 mb-1">Zone {i+1}</div>
+                                    {!troubleScenario2OpenedBoxes[i] ? (
+                                      <button onClick={() => openTroubleControlBox(i)}
+                                        className="w-full py-1.5 bg-gray-700 hover:bg-gray-600 rounded text-xs">📦 박스 열기</button>
+                                    ) : (
+                                      <div className="space-y-1">
+                                        <div className={`text-center py-1 rounded ${isTroubleCurrentAbnormal(troubleZoneCurrents[i]) ? 'bg-red-900 border border-red-500' : 'bg-green-900'}`}>
+                                          <div className={`text-base font-mono font-bold ${isTroubleCurrentAbnormal(troubleZoneCurrents[i]) ? 'text-red-400' : 'text-green-400'}`}>
+                                            {troubleZoneCurrents[i].toFixed(1)}A
+                                          </div>
+                                          {isTroubleCurrentAbnormal(troubleZoneCurrents[i]) && <div className="text-[10px] text-red-300">⚠️ 이상!</div>}
+                                        </div>
+                                        {isTroubleCurrentAbnormal(troubleZoneCurrents[i]) && (
+                                          <button onClick={() => replaceTroubleTC(i)}
+                                            className="w-full py-1 bg-yellow-600 hover:bg-yellow-500 rounded text-xs font-bold">🔧 TC 교체</button>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="bg-green-900/50 rounded p-3 border border-green-500">
+                                <div className="text-green-300 font-bold">✅ TC 교체 완료!</div>
+                                <p className="text-sm text-white">Zone{troubleScenario2FaultZone + 1} 수리됨. 균일도: {troubleUniformity.toFixed(1)}%</p>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* Scenario 3 */}
+                        {troubleActiveScenario === 3 && (
+                          <>
+                            <div className="bg-red-900/50 rounded p-2 border border-red-500">
+                              <div className="text-yellow-300 text-xs font-bold mb-1">🚨 인터락 실패! 수동 조치 필요!</div>
+                              <div className="text-white text-[10px] space-y-0.5">
+                                <div className={troubleScenario3Step >= 1 ? 'text-green-400' : ''}>1. 가스 밸브 모두 차단 {troubleScenario3Step >= 1 && '✓'}</div>
+                                <div className={troubleScenario3Step >= 2 ? 'text-green-400' : ''}>2. 펌프 수리 {troubleScenario3Step >= 2 && '✓'}</div>
+                                <div className={troubleScenario3Step >= 3 ? 'text-green-400' : ''}>3. 배기밸브 열기 {troubleScenario3Step >= 3 && '✓'}</div>
+                                <div className={troubleChamberPressure <= 0.01 ? 'text-green-400' : ''}>4. 진공 배기 (5×10⁻³ Torr 이하) - 현재: {formatTroublePressure(troubleChamberPressure)}</div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-2">
+                              {/* Gas control */}
+                              <div className="bg-gray-800 p-2 rounded">
+                                <div className="text-xs text-gray-400 mb-2">가스 밸브 (위→아래: 수동→MFC)</div>
+
+                                {/* Total valve */}
+                                <button onClick={() => setTroubleTotalGasValve(!troubleTotalGasValve)}
+                                  className={`w-full mb-2 py-1.5 rounded text-xs font-bold ${troubleTotalGasValve ? 'bg-green-700' : 'bg-red-700'} text-white`}>
+                                  TOTAL GAS {troubleTotalGasValve ? 'OPEN' : 'CLOSED'}
+                                </button>
+
+                                <div className="grid grid-cols-3 gap-1">
+                                  {['O2', 'N2', 'H2'].map(gas => (
+                                    <div key={gas} className="space-y-1">
+                                      <div className="text-center text-[10px] text-gray-400">{gas}</div>
+                                      {/* Manual valve */}
+                                      <button onClick={() => toggleTroubleManualValve(gas)}
+                                        className={`w-full py-1 rounded text-[10px] ${troubleManualValves[gas] ? 'bg-gray-600' : 'bg-red-700'}`}>
+                                        수동 {troubleManualValves[gas] ? 'O' : 'X'}
+                                      </button>
+                                      {/* MFC valve (broken) */}
+                                      <button onClick={() => tryTroubleMfcValve(gas)}
+                                        disabled={troubleTriedMfc[gas]}
+                                        className={`w-full py-1 rounded text-[10px] ${
+                                          troubleTriedMfc[gas] ? 'bg-red-900 text-red-400' : 'bg-yellow-700'
+                                        }`}>
+                                        MFC {troubleTriedMfc[gas] ? '고장!' : '시도'}
+                                      </button>
+                                      {/* Actual flow */}
+                                      <div className={`text-center text-[10px] font-mono ${getTroubleActualGasFlow(gas) > 0 ? 'text-green-400' : 'text-gray-500'}`}>
+                                        {getTroubleActualGasFlow(gas)}
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+
+                              {/* Pump/Exhaust */}
+                              <div className="bg-gray-800 p-2 rounded">
+                                <div className="text-xs text-gray-400 mb-2">펌프 / 배기</div>
+                                <button onClick={repairTroublePump} disabled={troublePumpRepaired}
+                                  className={`w-full mb-2 py-2 rounded text-xs font-bold ${troublePumpRepaired ? 'bg-green-700' : 'bg-yellow-600 hover:bg-yellow-500'}`}>
+                                  🔧 펌프 {troublePumpRepaired ? '수리완료' : '수리'}
+                                </button>
+                                <button onClick={openTroubleExhaustValve} disabled={troubleExhaustValve}
+                                  className={`w-full py-2 rounded text-xs font-bold ${troubleExhaustValve ? 'bg-green-700' : 'bg-purple-600 hover:bg-purple-500'}`}>
+                                  🚪 배기밸브 {troubleExhaustValve ? 'OPEN' : 'CLOSED'}
+                                </button>
+
+                                {/* Pressure bar */}
+                                <div className="mt-2">
+                                  <div className="flex justify-between text-[10px] text-gray-400">
+                                    <span>압력</span>
+                                    <span className={troubleChamberPressure > 1500 ? 'text-red-400' : troubleChamberPressure <= 0.01 ? 'text-green-400' : 'text-yellow-400'}>
+                                      {formatTroublePressure(troubleChamberPressure)}
+                                    </span>
+                                  </div>
+                                  <div className="w-full bg-gray-700 rounded h-2 mt-1">
+                                    <div className={`h-2 rounded transition-all ${
+                                      troubleChamberPressure > 1500 ? 'bg-red-500' :
+                                      troubleChamberPressure > 100 ? 'bg-yellow-500' :
+                                      troubleChamberPressure > 0.01 ? 'bg-blue-500' : 'bg-green-500'
+                                    }`}
+                                      style={{ width: `${Math.max(Math.min((Math.log10(troubleChamberPressure + 0.001) + 3) / 6.3 * 100, 100), 2)}%` }}/>
+                                  </div>
+                                  <div className="flex justify-between text-[8px] text-gray-500 mt-0.5">
+                                    <span>10⁻³</span>
+                                    <span>1</span>
+                                    <span>760</span>
+                                    <span>2000</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {troubleScenario3Warnings.length > 0 && (
+                              <div className="bg-gray-800 rounded p-2 border border-yellow-600 max-h-20 overflow-y-auto">
+                                {troubleScenario3Warnings.map(w => (
+                                  <div key={w.id} className="text-xs text-yellow-200">{w.msg}</div>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    <button onClick={handleTroubleReset} className="mt-3 w-full py-2 bg-gray-600 rounded font-bold hover:bg-gray-500 text-sm">
+                      🔄 시나리오 선택으로
+                    </button>
+                  </div>
+
+                  {/* Right side status */}
+                  <div className="space-y-3">
+                    <div className="bg-gray-800 rounded p-3">
+                      <h3 className="font-bold mb-2 text-cyan-400 text-sm">📊 실시간 상태</h3>
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">압력</span>
+                          <span className={`font-mono ${troubleChamberPressure > 100 ? 'text-red-400' : 'text-cyan-400'}`}>{formatTroublePressure(troubleChamberPressure)}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">펌프</span>
+                          <span className={`font-mono ${troublePumpRunning ? 'text-green-400' : 'text-red-400'}`}>{troublePumpRunning ? 'RUN' : 'STOP'}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">배기밸브</span>
+                          <span className={`font-mono ${troubleExhaustValve ? 'text-green-400' : 'text-red-400'}`}>{troubleExhaustValve ? 'OPEN' : 'CLOSED'}</span>
+                        </div>
+                        <hr className="border-gray-700 my-1"/>
+                        <div className="text-[10px] text-gray-500">가스 공급량 (sccm)</div>
+                        <div className="grid grid-cols-3 gap-1 text-xs">
+                          {['O2', 'N2', 'H2'].map(gas => (
+                            <div key={gas} className={`text-center p-1 rounded ${getTroubleActualGasFlow(gas) > 0 ? 'bg-green-900' : 'bg-gray-700'}`}>
+                              {gas}: {getTroubleActualGasFlow(gas)}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-yellow-900/30 rounded p-3 border border-yellow-600">
+                      <h3 className="font-bold text-yellow-400 mb-1 text-sm">💡 힌트</h3>
+                      <p className="text-xs text-yellow-100">
+                        {troubleActiveScenario === 1 && `Zone${troubleOverheatingZone + 1} 히터 OFF → N₂ 퍼지 증가`}
+                        {troubleActiveScenario === 2 && "전류가 비정상(< 30A 또는 > 60A)인 Zone을 찾으세요"}
+                        {troubleActiveScenario === 3 && "MFC 밸브가 고장! 수동밸브나 토탈밸브로 가스 차단 후 진공 배기!"}
+                      </p>
+                    </div>
+
+                    {troubleActiveScenario === 3 && troubleIsTriggered && (
+                      <div className="bg-purple-900/30 rounded p-3 border border-purple-600">
+                        <h3 className="font-bold text-purple-400 mb-1 text-sm">📚 가스 제어 계층</h3>
+                        <p className="text-[10px] text-purple-200">
+                          <strong>토탈밸브</strong> → <strong>수동밸브</strong> → <strong>MFC</strong> → <strong>MFC출구밸브</strong><br/><br/>
+                          MFC 출구밸브(솔레노이드)가 고장나면 수동밸브나 토탈밸브로 차단해야 합니다.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         );
 
