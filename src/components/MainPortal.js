@@ -5,7 +5,7 @@ const MainPortal = ({ activeSimulator, onSimulatorChange }) => {
   const simulators = simulatorRegistry.getAllSimulators();
   
   return (
-    <div className="w-64 bg-white shadow-lg border-r border-gray-200">
+    <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col h-full">
       {/* 헤더 */}
       <div className="p-4 border-b border-gray-200">
         <h1 className="text-xl font-bold text-gray-800">
@@ -17,14 +17,14 @@ const MainPortal = ({ activeSimulator, onSimulatorChange }) => {
       </div>
 
       {/* 네비게이션 메뉴 */}
-      <nav className="mt-4">
+      <nav className="mt-4 flex-1 overflow-y-auto">
         {simulators.map((simulator) => (
           <div
             key={simulator.id}
             onClick={() => simulator.available && onSimulatorChange(simulator.id)}
             className={`px-4 py-3 mx-2 rounded-lg cursor-pointer transition-colors ${
               activeSimulator === simulator.id && simulator.available
-                ? 'bg-blue-100 text-blue-800 border-l-4 border-blue-500' 
+                ? 'bg-blue-100 text-blue-800 border-l-4 border-blue-500'
                 : simulator.available
                 ? 'text-gray-600 hover:bg-gray-100'
                 : 'text-gray-400 bg-gray-50 opacity-50 cursor-not-allowed'
@@ -47,6 +47,19 @@ const MainPortal = ({ activeSimulator, onSimulatorChange }) => {
           </div>
         ))}
       </nav>
+
+      {/* 정식 버전 링크 */}
+      <div className="p-3 border-t border-gray-200">
+        <a
+          href="https://kr.semifabai.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center text-xs text-gray-400 hover:text-gray-600 transition-colors"
+        >
+          <span className="mr-1.5">→</span>
+          정식 버전 바로가기
+        </a>
+      </div>
     </div>
   );
 };
