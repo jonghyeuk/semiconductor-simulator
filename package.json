@@ -4,23 +4,24 @@
   "description": "반도체 공정 교육용 시뮬레이터",
   "private": true,
   "dependencies": {
+    "@testing-library/jest-dom": "^5.16.4",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "firebase": "^12.11.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.15.0",
     "recharts": "^2.8.0",
     "three": "^0.160.0",
-    "web-vitals": "^3.4.0",
-    "@testing-library/jest-dom": "^5.16.4",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0"
+    "web-vitals": "^3.4.0"
   },
   "devDependencies": {
-    "react-scripts": "5.0.1",
-    "tailwindcss": "^3.3.0",
+    "@tailwindcss/forms": "^0.5.7",
+    "@tailwindcss/typography": "^0.5.10",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
-    "@tailwindcss/forms": "^0.5.7",
-    "@tailwindcss/typography": "^0.5.10"
+    "react-scripts": "5.0.1",
+    "tailwindcss": "^3.3.0"
   },
   "scripts": {
     "start": "react-scripts start",
