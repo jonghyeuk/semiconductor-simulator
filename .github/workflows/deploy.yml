@@ -27,6 +27,7 @@ jobs:
       run: npm run build
       env:
         CI: false
+        REACT_APP_ADMIN_PASSWORD: ${{ secrets.REACT_APP_ADMIN_PASSWORD }}
         
     - name: Deploy to Firebase Hosting
       uses: FirebaseExtended/action-hosting-deploy@v0
