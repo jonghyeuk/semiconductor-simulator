@@ -5,15 +5,104 @@
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#1976d2" />
-    <meta name="description" content="반도체 공정 교육용 시뮬레이터 - 진공, 세정, 식각, 증착 등 다양한 공정을 체험할 수 있습니다" />
-    <meta name="keywords" content="반도체, 시뮬레이터, 교육, 진공, 공정, semiconductor, simulator, education" />
+    <meta name="description" content="반도체 공정 교육용 시뮬레이터 - 진공, 세정, 산화, 리소그래피, 플라즈마, 식각, 증착, 이온주입, 배선 패키징까지 11개 반도체 제조 공정을 브라우저에서 직접 시뮬레이션하고 체험할 수 있는 무료 교육 플랫폼" />
+    <meta name="keywords" content="반도체 시뮬레이터, 반도체 공정, semiconductor simulator, 반도체 교육, 진공 시뮬레이션, 플라즈마 시뮬레이션, 식각 공정, 증착 공정, 이온주입, RTA 어닐링, 리소그래피, 웨이퍼 세정, semiconductor process education, fab simulation, 반도체 제조, 반도체 공정 시뮬레이션" />
     <meta name="author" content="Semiconductor Simulator Team" />
-    
+    <link rel="canonical" href="https://semiconductor-edu-simul.web.app/" />
+
     <!-- Open Graph tags for social sharing -->
-    <meta property="og:title" content="반도체 공정 시뮬레이터" />
-    <meta property="og:description" content="반도체 제조 공정을 체험할 수 있는 교육용 시뮬레이터" />
+    <meta property="og:title" content="반도체 공정 시뮬레이터 | Semiconductor Process Simulator" />
+    <meta property="og:description" content="진공, 세정, 산화, 리소그래피, 플라즈마, 식각, 증착, 이온주입 등 11개 반도체 제조 공정을 브라우저에서 직접 체험하세요. 무료 교육용 시뮬레이터." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://semiconductor-edu-simul.web.app" />
+    <meta property="og:url" content="https://semiconductor-edu-simul.web.app/" />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:site_name" content="반도체 공정 시뮬레이터" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="반도체 공정 시뮬레이터 | Semiconductor Process Simulator" />
+    <meta name="twitter:description" content="11개 반도체 제조 공정을 브라우저에서 직접 시뮬레이션. 무료 교육용 플랫폼." />
+
+    <!-- Structured Data for SEO + GEO -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "반도체 공정 시뮬레이터",
+      "alternateName": "Semiconductor Process Simulator",
+      "description": "반도체 제조 공정을 브라우저에서 직접 체험할 수 있는 교육용 시뮬레이터. 진공, 세정, 산화, 리소그래피, 플라즈마, 식각, 증착, 이온주입, 배선, 패키징까지 11개 공정을 시뮬레이션합니다.",
+      "url": "https://semiconductor-edu-simul.web.app",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KRW"
+      },
+      "inLanguage": ["ko", "en"],
+      "isAccessibleForFree": true,
+      "educationalLevel": "University",
+      "about": [
+        {
+          "@type": "Thing",
+          "name": "Semiconductor manufacturing",
+          "description": "반도체 제조 공정 전반에 대한 시뮬레이션 교육"
+        },
+        {
+          "@type": "Thing",
+          "name": "Plasma etching",
+          "description": "플라즈마 식각 공정 시뮬레이션"
+        },
+        {
+          "@type": "Thing",
+          "name": "Chemical vapor deposition",
+          "description": "화학 기상 증착 공정 시뮬레이션"
+        },
+        {
+          "@type": "Thing",
+          "name": "Ion implantation",
+          "description": "이온주입 도핑 공정 시뮬레이션"
+        },
+        {
+          "@type": "Thing",
+          "name": "Photolithography",
+          "description": "포토리소그래피 공정 시뮬레이션"
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "반도체 공정 시뮬레이터란 무엇인가요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "반도체 공정 시뮬레이터는 반도체 제조에 사용되는 진공, 세정, 산화, 리소그래피, 플라즈마, 식각, 증착, 이온주입 등의 공정을 웹 브라우저에서 직접 시뮬레이션하고 학습할 수 있는 무료 교육 플랫폼입니다."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "어떤 반도체 공정을 시뮬레이션할 수 있나요?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "진공 펌핑, 웨이퍼 세정(RCA), 열산화, 포토리소그래피, 플라즈마 시뮬레이션(ICP 포함), 건식/습식 식각, 박막 증착(CVD/PVD), 이온주입 및 RTA 어닐링, 금속배선, EDS 검사, 패키징까지 총 11개 공정을 체험할 수 있습니다."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What is this semiconductor process simulator?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "This is a free, web-based educational simulator that allows users to experience and learn about semiconductor manufacturing processes including vacuum, cleaning, oxidation, lithography, plasma, etching, deposition, ion implantation, metallization, and packaging — all 11 key fabrication steps."
+          }
+        }
+      ]
+    }
+    </script>
     
     <!-- Apple touch icon -->
     <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
