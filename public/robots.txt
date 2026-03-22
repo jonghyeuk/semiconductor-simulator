@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap location
-Sitemap: https://semiconductor-edu-simul.web.app/sitemap.xml
+Sitemap: https://demo.semifabai.com/sitemap.xml
 
 # Allow AI search engines and LLM crawlers (GEO - Generative Engine Optimization)
 User-agent: GPTBot
