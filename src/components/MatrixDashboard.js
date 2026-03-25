@@ -467,29 +467,124 @@ const MatrixDashboard = ({ onNavigate }) => {
             </div>
           </section>
 
-          {/* ====== CTA: 정식 버전 유도 ====== */}
-          <section className="pb-8">
-            <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 rounded-2xl p-6 text-center shadow-xl">
-              <div className="flex items-center justify-center gap-2 mb-2">
-                <span className="text-2xl">🔓</span>
-                <h3 className="text-lg font-bold text-white">
-                  고급 기능을 포함한 전체 시뮬레이션을 체험하세요
-                </h3>
+          {/* ====== 3센터 예고 블록 ====== */}
+          <section>
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl border border-slate-200 p-6">
+              {/* 상단 안내 문구 */}
+              <div className="text-center mb-6">
+                <p className="text-sm text-slate-500 mb-1">
+                  이 데모는 Education Center의 핵심 시뮬레이션을 먼저 체험하는 버전입니다
+                </p>
+                <p className="text-xs text-slate-400">
+                  전체 플랫폼은 3개의 학습 센터로 구성됩니다
+                </p>
               </div>
-              <p className="text-slate-400 text-sm mb-4">
-                Conductance 분석, 배관 설계, RF 매칭, PECVD, ALD, RTA 등 {advancedCards.length}개 고급 콘텐츠가 포함됩니다
-              </p>
-              <a
-                href="https://kr.semifabai.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-              >
-                <span>전체 기능 보기</span>
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-              </a>
+
+              {/* 3센터 카드 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {/* Education Center - 활성 */}
+                <div className="relative rounded-xl border-2 border-teal-400 bg-gradient-to-br from-teal-50 to-cyan-50 p-5 shadow-md ring-2 ring-teal-200/50">
+                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 text-[10px] font-bold bg-teal-500 text-white rounded-full shadow-sm">
+                    지금 체험 중
+                  </span>
+                  <div className="flex items-center gap-3 mb-3 mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-teal-500 flex items-center justify-center text-white text-xl shadow-sm">
+                      🎓
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-teal-900">Education Center</h4>
+                      <p className="text-[11px] text-teal-600">반도체 8대공정 기초 학습</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-teal-700 leading-relaxed">
+                    핵심 시뮬레이션과 이론 학습을 통해 반도체 공정의 원리를 이해합니다
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    <span className="px-1.5 py-0.5 text-[9px] bg-teal-100 text-teal-700 rounded font-medium">Vacuum</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-teal-100 text-teal-700 rounded font-medium">Cleaning</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-teal-100 text-teal-700 rounded font-medium">Oxidation</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-teal-100 text-teal-700 rounded font-medium">Lithography</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-teal-100 text-teal-700 rounded font-medium">+6 more</span>
+                  </div>
+                </div>
+
+                {/* Training Center - 잠금 */}
+                <div className="relative rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50/50 to-yellow-50/50 p-5 opacity-60">
+                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 text-[10px] font-bold bg-gray-400 text-white rounded-full shadow-sm">
+                    🔒 정식 버전
+                  </span>
+                  <div className="flex items-center gap-3 mb-3 mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-amber-400 flex items-center justify-center text-white text-xl shadow-sm grayscale-[30%]">
+                      🏭
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-600">Virtual Training Center</h4>
+                      <p className="text-[11px] text-gray-400">실제 장비 운용형 실습</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    실제 반도체 장비를 가상으로 운용하며 실전 감각을 훈련합니다
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">LPCVD</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">PECVD</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">Sputtering</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">Evaporator</span>
+                  </div>
+                </div>
+
+                {/* Plasma Lab - 잠금 */}
+                <div className="relative rounded-xl border border-pink-200 bg-gradient-to-br from-pink-50/50 to-red-50/50 p-5 opacity-60">
+                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 text-[10px] font-bold bg-gray-400 text-white rounded-full shadow-sm">
+                    🔒 정식 버전
+                  </span>
+                  <div className="flex items-center gap-3 mb-3 mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-pink-500 flex items-center justify-center text-white text-xl shadow-sm grayscale-[30%]">
+                      ⚡
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-600">Plasma Advanced Lab</h4>
+                      <p className="text-[11px] text-gray-400">고급 플라즈마 분석</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 leading-relaxed">
+                    RF-DC 특성, IEDF 분석, 고급 플라즈마 물리를 심화 탐구합니다
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">RF/DC</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">IEDF</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">ICP/CCP</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">Matching</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ====== CTA: 전체 플랫폼 유도 ====== */}
+          <section className="pb-8">
+            <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 rounded-2xl p-6 shadow-xl">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="text-center md:text-left">
+                  <h3 className="text-lg font-bold text-white mb-1">
+                    Education / Training / Plasma — 전체 센터 이용
+                  </h3>
+                  <p className="text-slate-400 text-sm">
+                    접속 코드 등록 후 3개 학습 센터와 {advancedCards.length}개 고급 콘텐츠에 입장할 수 있습니다
+                  </p>
+                </div>
+                <a
+                  href="https://kr.semifabai.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+                >
+                  <span>전체 플랫폼 보기</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                  </svg>
+                </a>
+              </div>
             </div>
           </section>
 
