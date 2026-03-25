@@ -20,8 +20,8 @@ const LightbulbIcon = () => (
   </svg>
 );
 
-const PhotolithographySimulator = () => {
-  const [activeTab, setActiveTab] = useState('theory');
+const PhotolithographySimulator = ({ initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || 'theory');
   const [processStep, setProcessStep] = useState(0);
 
   // Theory tab state

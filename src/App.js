@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import MainPortal from './components/MainPortal';
+import MatrixDashboard from './components/MatrixDashboard';
 import EmailGate from './components/EmailGate';
 import AdminPage from './components/AdminPage';
 import { simulatorRegistry } from './utils/simulatorRegistry';
@@ -7,7 +8,8 @@ import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './utils/firebase';
 
 const App = () => {
-  const [activeSimulator, setActiveSimulator] = useState('vacuum');
+  const [activeSimulator, setActiveSimulator] = useState(null); // null = 매트릭스 대시보드
+  const [activeTab, setActiveTab] = useState(null);
   const [emailVerified, setEmailVerified] = useState(
     () => !!localStorage.getItem('simulator_email')
   );
@@ -30,8 +32,6 @@ const App = () => {
       const email = localStorage.getItem('simulator_email');
       if (!email) return;
 
-      // sendBeacon으로 체류시간 업데이트는 Firestore REST API가 복잡하므로
-      // 대신 새 문서로 기록
       navigator.sendBeacon?.(
         `https://firestore.googleapis.com/v1/projects/${
           process.env.REACT_APP_FIREBASE_PROJECT_ID || 'semiconductor-edu-simul'
@@ -50,8 +50,33 @@ const App = () => {
     return () => window.removeEventListener('beforeunload', recordDuration);
   }, [emailVerified]);
 
+  // 매트릭스에서 카드 클릭 시 해당 시뮬레이터+탭으로 이동
+  const handleMatrixNavigate = (simulatorId, tabId) => {
+    setActiveSimulator(simulatorId);
+    setActiveTab(tabId);
+  };
+
+  // 사이드바에서 시뮬레이터 클릭 시
+  const handleSimulatorChange = (simulatorId) => {
+    setActiveSimulator(simulatorId);
+    setActiveTab(null); // 탭 리셋
+  };
+
   // 현재 활성화된 시뮬레이터 컴포넌트 가져오기
-  const CurrentSimulator = simulatorRegistry.getSimulator(activeSimulator);
+  const CurrentSimulator = activeSimulator
+    ? simulatorRegistry.getSimulator(activeSimulator)
+    : null;
+
+  // 매트릭스 대시보드 모드
+  if (!activeSimulator) {
+    return (
+      <>
+        {!emailVerified && <EmailGate onComplete={() => setEmailVerified(true)} />}
+        {showAdmin && <AdminPage onClose={() => setShowAdmin(false)} />}
+        <MatrixDashboard onNavigate={handleMatrixNavigate} />
+      </>
+    );
+  }
 
   return (
     <>
@@ -63,14 +88,15 @@ const App = () => {
         {/* 좌측 사이드바 */}
         <MainPortal
           activeSimulator={activeSimulator}
-          onSimulatorChange={setActiveSimulator}
+          onSimulatorChange={handleSimulatorChange}
           onAdminClick={() => setShowAdmin(true)}
+          onBackToDashboard={() => setActiveSimulator(null)}
         />
 
         {/* 메인 컨텐츠 영역 */}
         <div className="flex-1 flex flex-col">
           {CurrentSimulator ? (
-            <CurrentSimulator />
+            <CurrentSimulator initialTab={activeTab} />
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">

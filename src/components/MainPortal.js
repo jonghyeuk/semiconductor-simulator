@@ -1,19 +1,32 @@
 import React from 'react';
 import { simulatorRegistry } from '../utils/simulatorRegistry';
 
-const MainPortal = ({ activeSimulator, onSimulatorChange, onAdminClick }) => {
+const MainPortal = ({ activeSimulator, onSimulatorChange, onAdminClick, onBackToDashboard }) => {
   const simulators = simulatorRegistry.getAllSimulators();
-  
+
   return (
     <div className="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col h-full">
       {/* 헤더 */}
       <div className="p-4 border-b border-gray-200">
-        <h1 className="text-xl font-bold text-gray-800">
-          반도체 공정 시뮬레이터
-        </h1>
-        <p className="text-sm text-gray-600 mt-1">
-          v1.1 | 교육용 시뮬레이터
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-gray-800">
+              반도체 공정 시뮬레이터
+            </h1>
+            <p className="text-sm text-gray-600 mt-1">
+              v1.1 | 교육용 시뮬레이터
+            </p>
+          </div>
+        </div>
+        {onBackToDashboard && (
+          <button
+            onClick={onBackToDashboard}
+            className="mt-2 w-full flex items-center justify-center gap-1.5 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-medium rounded-lg transition-colors"
+          >
+            <span>◀</span>
+            <span>매트릭스 대시보드</span>
+          </button>
+        )}
       </div>
 
       {/* 네비게이션 메뉴 */}

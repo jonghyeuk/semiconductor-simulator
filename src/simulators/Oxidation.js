@@ -20,8 +20,8 @@ const LightbulbIcon = () => (
   </svg>
 );
 
-const OxidationSimulator = () => {
-  const [activeTab, setActiveTab] = useState('theory');
+const OxidationSimulator = ({ initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || 'theory');
   const [temperature, setTemperature] = useState(1000);
   const [time, setTime] = useState(60);
   const [pressure, setPressure] = useState(1);

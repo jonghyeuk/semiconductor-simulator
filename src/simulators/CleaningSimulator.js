@@ -20,8 +20,8 @@ const LightbulbIcon = () => (
   </svg>
 );
 
-const CleaningSimulator = () => {
-  const [activeTab, setActiveTab] = useState('theory');
+const CleaningSimulator = ({ initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || 'theory');
   
   // 세정 공정 상태들
   const [wetCleaningParams, setWetCleaningParams] = useState({

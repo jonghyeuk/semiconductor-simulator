@@ -792,9 +792,9 @@ const IonBeamSystemDiagram = () => {
   );
 };
 
-const DopingProcessSimulator = () => {
+const DopingProcessSimulator = ({ initialTab }) => {
   // State management
-  const [activeTab, setActiveTab] = useState('theory');
+  const [activeTab, setActiveTab] = useState(initialTab || 'theory');
 
   // Diffusion states
   const [diffProcessType, setDiffProcessType] = useState('predeposition');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react';
 
-const MetallizationEDSPackagingSimulator = () => {
-  const [activeTab, setActiveTab] = useState('overview');
+const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || 'overview');
 
   // 개요 탭 상태
   const [isPlaying, setIsPlaying] = useState(false);

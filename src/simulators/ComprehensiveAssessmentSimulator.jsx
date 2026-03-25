@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 
-const ComprehensiveAssessmentSimulator = () => {
-  const [activeLevel, setActiveLevel] = useState(null); // null, 'basic', 'advanced'
+const ComprehensiveAssessmentSimulator = ({ initialTab }) => {
+  const [activeLevel, setActiveLevel] = useState(initialTab || null); // null, 'basic', 'advanced'
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [showResult, setShowResult] = useState(false);

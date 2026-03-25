@@ -53,8 +53,8 @@ const Atom = ({ x, y, element, size = 8 }) => {
   );
 };
 
-const DepositionSimulator = () => {
-  const [activeTab, setActiveTab] = useState('theory');
+const DepositionSimulator = ({ initialTab }) => {
+  const [activeTab, setActiveTab] = useState(initialTab || 'theory');
   const [isSimulating, setIsSimulating] = useState(false);
   const [animationStep, setAnimationStep] = useState(0);
   const [theoryStep, setTheoryStep] = useState(0);

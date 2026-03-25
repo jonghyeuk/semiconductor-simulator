@@ -1570,9 +1570,9 @@ const SiliconEtchingSimulator = () => {
 // EtchSimulator Main Component
 // ============================================================
 
-const EtchSimulator = () => {
+const EtchSimulator = ({ initialTab }) => {
   // 탭 상태 관리
-  const [activeTab, setActiveTab] = useState('theory');
+  const [activeTab, setActiveTab] = useState(initialTab || 'theory');
 
   // 기본 공정 파라미터 상태들 (실제 식각 파라미터)
   const [pressure, setPressure] = useState(100); // mTorr
