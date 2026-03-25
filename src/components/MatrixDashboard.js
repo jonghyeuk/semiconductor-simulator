@@ -1,7 +1,20 @@
 import React, { useState } from 'react';
 
-// 전체 매트릭스 데이터: 공정(행) × 탭(열)
-// tier: 'core' = 🔥핵심/추천, 'basic' = 🧪체험/기본, 'advanced' = 🔒고급/확장
+// 콘텐츠 유형 태그
+const contentTypes = {
+  simulation: { label: '시뮬레이션', color: 'bg-red-500 text-white', textColor: 'text-red-600' },
+  theory: { label: '이론', color: 'bg-slate-400 text-white', textColor: 'text-slate-500' },
+  experiment: { label: '실험', color: 'bg-emerald-500 text-white', textColor: 'text-emerald-600' },
+  quiz: { label: '평가', color: 'bg-violet-500 text-white', textColor: 'text-violet-600' },
+  overview: { label: '개요', color: 'bg-sky-400 text-white', textColor: 'text-sky-500' },
+  analysis: { label: '분석', color: 'bg-amber-500 text-white', textColor: 'text-amber-600' },
+  troubleshooting: { label: '트러블슈팅', color: 'bg-gray-500 text-white', textColor: 'text-gray-500' },
+  guide: { label: '가이드', color: 'bg-teal-500 text-white', textColor: 'text-teal-600' },
+};
+
+// 전체 매트릭스 데이터
+// type: 콘텐츠 유형 (simulation/theory/experiment/quiz/overview/analysis/troubleshooting/guide)
+// coreReason: 핵심 추천 이유 (core tier만)
 const matrixData = [
   {
     id: 'vacuum',
@@ -9,14 +22,14 @@ const matrixData = [
     icon: '⚡',
     color: '#1976d2',
     tabs: [
-      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic' },
-      { id: 'pumping-simulation', name: '펌핑 시뮬레이션', icon: '⚡', tier: 'core' },
-      { id: 'performance-analysis', name: '성능 특성 곡선', icon: '📊', tier: 'core' },
-      { id: 'process-control', name: '압력 세팅 실험', icon: '🔧', tier: 'basic' },
-      { id: 'conductance-relation', name: 'Conductance', icon: '🔄', tier: 'advanced' },
-      { id: 'pipe-design', name: '배관 설계', icon: '🏗️', tier: 'advanced' },
-      { id: 'troubleshooting', name: '트러블슈팅', icon: '🔧', tier: 'advanced' },
-      { id: 'quiz', name: '퀴즈', icon: '🎯', tier: 'basic' },
+      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
+      { id: 'pumping-simulation', name: '펌핑 시뮬레이션', icon: '⚡', tier: 'core', type: 'simulation', coreReason: '실시간 진공 펌핑을 직접 조작' },
+      { id: 'performance-analysis', name: '성능 특성 곡선', icon: '📊', tier: 'core', type: 'simulation', coreReason: '펌프 성능을 그래프로 체험' },
+      { id: 'process-control', name: '압력 세팅 실험', icon: '🔧', tier: 'basic', type: 'experiment' },
+      { id: 'conductance-relation', name: 'Conductance', icon: '🔄', tier: 'advanced', type: 'analysis' },
+      { id: 'pipe-design', name: '배관 설계', icon: '🏗️', tier: 'advanced', type: 'simulation' },
+      { id: 'troubleshooting', name: '트러블슈팅', icon: '🔧', tier: 'advanced', type: 'troubleshooting' },
+      { id: 'quiz', name: '퀴즈', icon: '🎯', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -25,12 +38,12 @@ const matrixData = [
     icon: '🧽',
     color: '#4caf50',
     tabs: [
-      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic' },
-      { id: 'overview', name: '세정 공정 개요', icon: '🔄', tier: 'basic' },
-      { id: 'wet-cleaning', name: '습식 세정', icon: '💧', tier: 'core' },
-      { id: 'dry-cleaning', name: '건식 세정', icon: '⚡', tier: 'core' },
-      { id: 'ultrasonic', name: '초음파 세정', icon: '🌊', tier: 'basic' },
-      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic' },
+      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
+      { id: 'overview', name: '세정 공정 개요', icon: '🔄', tier: 'basic', type: 'overview' },
+      { id: 'wet-cleaning', name: '습식 세정', icon: '💧', tier: 'core', type: 'simulation', coreReason: 'RCA 세정 과정 실시간 시각화' },
+      { id: 'dry-cleaning', name: '건식 세정', icon: '⚡', tier: 'core', type: 'simulation', coreReason: '건식 vs 습식 차이를 직접 비교' },
+      { id: 'ultrasonic', name: '초음파 세정', icon: '🌊', tier: 'basic', type: 'experiment' },
+      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -39,12 +52,12 @@ const matrixData = [
     icon: '🔥',
     color: '#ff5722',
     tabs: [
-      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic' },
-      { id: 'overview', name: '산화 공정 개요', icon: '🔥', tier: 'basic' },
-      { id: 'thermal', name: '열산화 실험', icon: '🌡️', tier: 'core' },
-      { id: 'analysis', name: '산화 영향 인자', icon: '📊', tier: 'core' },
-      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic' },
-      { id: 'troubleshooting', name: '트러블슈팅', icon: '🔧', tier: 'advanced' },
+      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
+      { id: 'overview', name: '산화 공정 개요', icon: '🔥', tier: 'basic', type: 'overview' },
+      { id: 'thermal', name: '열산화 실험', icon: '🌡️', tier: 'core', type: 'simulation', coreReason: '온도/시간별 산화막 성장 시뮬' },
+      { id: 'analysis', name: '산화 영향 인자', icon: '📊', tier: 'core', type: 'analysis', coreReason: 'Deal-Grove 모델 실시간 분석' },
+      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
+      { id: 'troubleshooting', name: '트러블슈팅', icon: '🔧', tier: 'advanced', type: 'troubleshooting' },
     ]
   },
   {
@@ -53,12 +66,12 @@ const matrixData = [
     icon: '💡',
     color: '#9c27b0',
     tabs: [
-      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic' },
-      { id: 'overview1', name: '공정 개요 1', icon: '📋', tier: 'basic' },
-      { id: 'overview2', name: '공정 개요 2', icon: '📷', tier: 'basic' },
-      { id: 'process', name: 'PR Coating', icon: '⚙️', tier: 'core' },
-      { id: 'exposure', name: '노광 방식 비교', icon: '💡', tier: 'core' },
-      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic' },
+      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
+      { id: 'overview1', name: '공정 개요 1', icon: '📋', tier: 'basic', type: 'overview' },
+      { id: 'overview2', name: '공정 개요 2', icon: '📷', tier: 'basic', type: 'overview' },
+      { id: 'process', name: 'PR Coating', icon: '⚙️', tier: 'core', type: 'simulation', coreReason: 'RPM 파라미터로 코팅 실험' },
+      { id: 'exposure', name: '노광 방식 비교', icon: '💡', tier: 'core', type: 'simulation', coreReason: 'DUV vs EUV 차이를 체감' },
+      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -67,12 +80,12 @@ const matrixData = [
     icon: '⚡',
     color: '#2196f3',
     tabs: [
-      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic' },
-      { id: 'plasma-basics', name: '플라즈마 기본', icon: '⚡', tier: 'core' },
-      { id: 'plasma-principle1', name: '발생원리 1', icon: '🔬', tier: 'core' },
-      { id: 'plasma-principle2', name: '발생원리 2', icon: '📈', tier: 'basic' },
-      { id: 'rf-matching', name: 'RF 매칭', icon: '📡', tier: 'advanced' },
-      { id: 'system-structure', name: 'CCP 구조', icon: '🏗️', tier: 'advanced' },
+      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
+      { id: 'plasma-basics', name: '플라즈마 기본', icon: '⚡', tier: 'core', type: 'simulation', coreReason: '플라즈마 생성 과정 시각화' },
+      { id: 'plasma-principle1', name: '발생원리 1', icon: '🔬', tier: 'core', type: 'simulation', coreReason: '파션커브 인터랙티브 실험' },
+      { id: 'plasma-principle2', name: '발생원리 2', icon: '📈', tier: 'basic', type: 'theory' },
+      { id: 'rf-matching', name: 'RF 매칭', icon: '📡', tier: 'advanced', type: 'analysis' },
+      { id: 'system-structure', name: 'CCP 구조', icon: '🏗️', tier: 'advanced', type: 'analysis' },
     ]
   },
   {
@@ -81,12 +94,12 @@ const matrixData = [
     icon: '🔬',
     color: '#3f51b5',
     tabs: [
-      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic' },
-      { id: 'system-structure-icp', name: 'ICP 구조', icon: '🔬', tier: 'core' },
-      { id: 'etching-process', name: '식각 공정', icon: '⚙️', tier: 'core' },
-      { id: 'deposition-process', name: '증착 공정', icon: '🏗️', tier: 'basic' },
-      { id: 'equipment-application', name: '장비 응용', icon: '🏭', tier: 'advanced' },
-      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic' },
+      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
+      { id: 'system-structure-icp', name: 'ICP 구조', icon: '🔬', tier: 'core', type: 'simulation', coreReason: 'ICP 4단계 프로세스 체험' },
+      { id: 'etching-process', name: '식각 공정', icon: '⚙️', tier: 'core', type: 'simulation', coreReason: 'Synergy Effect 실험' },
+      { id: 'deposition-process', name: '증착 공정', icon: '🏗️', tier: 'basic', type: 'theory' },
+      { id: 'equipment-application', name: '장비 응용', icon: '🏭', tier: 'advanced', type: 'guide' },
+      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -95,12 +108,12 @@ const matrixData = [
     icon: '⚗️',
     color: '#607d8b',
     tabs: [
-      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic' },
-      { id: 'overview', name: '식각 공정 개요', icon: '📋', tier: 'basic' },
-      { id: 'etch-elements', name: '식각 요소', icon: '🔬', tier: 'core' },
-      { id: 'process', name: '식각 원리', icon: '🧪', tier: 'core' },
-      { id: 'analysis', name: 'Si식각메커니즘', icon: '📊', tier: 'advanced' },
-      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic' },
+      { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
+      { id: 'overview', name: '식각 공정 개요', icon: '📋', tier: 'basic', type: 'overview' },
+      { id: 'etch-elements', name: '식각 요소', icon: '🔬', tier: 'core', type: 'experiment', coreReason: 'RIE 가스별 식각 비교 실험' },
+      { id: 'process', name: '식각 원리', icon: '🧪', tier: 'core', type: 'simulation', coreReason: '3D 실리콘 식각 시뮬레이션' },
+      { id: 'analysis', name: 'Si식각메커니즘', icon: '📊', tier: 'advanced', type: 'analysis' },
+      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -109,13 +122,13 @@ const matrixData = [
     icon: '📦',
     color: '#795548',
     tabs: [
-      { id: 'theory', name: '개요', icon: '📚', tier: 'basic' },
-      { id: 'pvd-evap', name: 'PVD (증발)', icon: '🔥', tier: 'core' },
-      { id: 'pvd-sputtering', name: 'PVD (스퍼터링)', icon: '🎯', tier: 'core' },
-      { id: 'cvd-thermal', name: 'CVD (Thermal)', icon: '🌡️', tier: 'basic' },
-      { id: 'cvd-pecvd', name: 'PECVD', icon: '⚡', tier: 'advanced' },
-      { id: 'ald', name: 'ALD', icon: '⚛️', tier: 'advanced' },
-      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic' },
+      { id: 'theory', name: '개요', icon: '📚', tier: 'basic', type: 'overview' },
+      { id: 'pvd-evap', name: 'PVD (증발)', icon: '🔥', tier: 'core', type: 'simulation', coreReason: '증발 분자 운동 3D 시뮬레이션' },
+      { id: 'pvd-sputtering', name: 'PVD (스퍼터링)', icon: '🎯', tier: 'core', type: 'simulation', coreReason: '스퍼터링 3D 분자 시각화' },
+      { id: 'cvd-thermal', name: 'CVD (Thermal)', icon: '🌡️', tier: 'basic', type: 'theory' },
+      { id: 'cvd-pecvd', name: 'PECVD', icon: '⚡', tier: 'advanced', type: 'simulation' },
+      { id: 'ald', name: 'ALD', icon: '⚛️', tier: 'advanced', type: 'simulation' },
+      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -124,14 +137,14 @@ const matrixData = [
     icon: '⚛️',
     color: '#3f51b5',
     tabs: [
-      { id: 'theory', name: '이론', icon: '📖', tier: 'basic' },
-      { id: 'diffusion', name: '확산 공정', icon: '📈', tier: 'core' },
-      { id: 'implantation', name: '이온 주입', icon: '🎯', tier: 'core' },
-      { id: 'comparison', name: '공정 비교', icon: '🔄', tier: 'basic' },
-      { id: 'temperature', name: 'Annealing', icon: '🌡️', tier: 'basic' },
-      { id: 'rta', name: 'RTA', icon: '⚙️', tier: 'advanced' },
-      { id: 'application', name: '적용 가이드', icon: '💡', tier: 'advanced' },
-      { id: 'quiz', name: '퀴즈', icon: '🏆', tier: 'basic' },
+      { id: 'theory', name: '이론', icon: '📖', tier: 'basic', type: 'theory' },
+      { id: 'diffusion', name: '확산 공정', icon: '📈', tier: 'core', type: 'simulation', coreReason: '확산 프로파일 실시간 시뮬' },
+      { id: 'implantation', name: '이온 주입', icon: '🎯', tier: 'core', type: 'simulation', coreReason: 'Gaussian 분포 이온주입 실험' },
+      { id: 'comparison', name: '공정 비교', icon: '🔄', tier: 'basic', type: 'analysis' },
+      { id: 'temperature', name: 'Annealing', icon: '🌡️', tier: 'basic', type: 'experiment' },
+      { id: 'rta', name: 'RTA', icon: '⚙️', tier: 'advanced', type: 'simulation' },
+      { id: 'application', name: '적용 가이드', icon: '💡', tier: 'advanced', type: 'guide' },
+      { id: 'quiz', name: '퀴즈', icon: '🏆', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -140,13 +153,13 @@ const matrixData = [
     icon: '🔌',
     color: '#ff9800',
     tabs: [
-      { id: 'overview', name: '개요', icon: '📚', tier: 'basic' },
-      { id: 'metallization', name: '금속배선', icon: '🔌', tier: 'core' },
-      { id: 'damascene', name: 'Damascene', icon: '⚙️', tier: 'core' },
-      { id: 'eds', name: 'EDS', icon: '🔍', tier: 'basic' },
-      { id: 'packaging', name: '패키징', icon: '📦', tier: 'basic' },
-      { id: 'bonding', name: '본딩', icon: '🔗', tier: 'advanced' },
-      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic' },
+      { id: 'overview', name: '개요', icon: '📚', tier: 'basic', type: 'overview' },
+      { id: 'metallization', name: '금속배선', icon: '🔌', tier: 'core', type: 'simulation', coreReason: '다층 금속배선 구조 시각화' },
+      { id: 'damascene', name: 'Damascene', icon: '⚙️', tier: 'core', type: 'simulation', coreReason: 'Single/Dual Damascene 시뮬' },
+      { id: 'eds', name: 'EDS', icon: '🔍', tier: 'basic', type: 'experiment' },
+      { id: 'packaging', name: '패키징', icon: '📦', tier: 'basic', type: 'theory' },
+      { id: 'bonding', name: '본딩', icon: '🔗', tier: 'advanced', type: 'analysis' },
+      { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
   {
@@ -155,217 +168,256 @@ const matrixData = [
     icon: '🏆',
     color: '#e91e63',
     tabs: [
-      { id: 'basic', name: '기초 평가', icon: '📝', tier: 'core' },
-      { id: 'advanced', name: '심화 평가', icon: '🏆', tier: 'advanced' },
+      { id: 'basic', name: '기초 평가', icon: '📝', tier: 'core', type: 'quiz', coreReason: '전체 공정 통합 기초 테스트' },
+      { id: 'advanced', name: '심화 평가', icon: '🏆', tier: 'advanced', type: 'quiz' },
     ]
   },
 ];
 
-// 티어별 스타일 설정
-const tierStyles = {
-  core: {
-    border: 'border-orange-300',
-    bg: 'bg-gradient-to-br from-orange-50 to-red-50',
-    hoverBg: 'hover:from-orange-100 hover:to-red-100',
-    badge: 'bg-orange-500 text-white',
-    badgeText: '추천',
-    shadow: 'shadow-md shadow-orange-100',
-    hoverShadow: 'hover:shadow-lg hover:shadow-orange-200',
-    ring: 'ring-2 ring-orange-200',
-  },
-  basic: {
-    border: 'border-blue-200',
-    bg: 'bg-gradient-to-br from-blue-50 to-gray-50',
-    hoverBg: 'hover:from-blue-100 hover:to-gray-100',
-    badge: 'bg-blue-400 text-white',
-    badgeText: '기본',
-    shadow: 'shadow-sm',
-    hoverShadow: 'hover:shadow-md',
-    ring: '',
-  },
-  advanced: {
-    border: 'border-gray-200',
-    bg: 'bg-gradient-to-br from-gray-50 to-gray-100',
-    hoverBg: 'hover:from-gray-100 hover:to-gray-150',
-    badge: 'bg-gray-400 text-white',
-    badgeText: '고급',
-    shadow: 'shadow-sm',
-    hoverShadow: 'hover:shadow-md',
-    ring: '',
-    opacity: 'opacity-70 hover:opacity-100',
-  },
+// 데이터 추출 헬퍼
+const getAllCards = (tier) => {
+  const cards = [];
+  matrixData.forEach(process => {
+    process.tabs.forEach(tab => {
+      if (!tier || tab.tier === tier) {
+        cards.push({ ...tab, processId: process.id, processName: process.name, processIcon: process.icon, processColor: process.color });
+      }
+    });
+  });
+  return cards;
 };
 
 const MatrixDashboard = ({ onNavigate }) => {
-  const [filterTier, setFilterTier] = useState('all');
-  const [hoveredCell, setHoveredCell] = useState(null);
+  const [showLockedTooltip, setShowLockedTooltip] = useState(null);
 
-  const filteredData = matrixData.map(process => ({
-    ...process,
-    tabs: filterTier === 'all'
-      ? process.tabs
-      : process.tabs.filter(tab => tab.tier === filterTier)
-  }));
-
-  // 전체 셀 수 계산
-  const totalCells = matrixData.reduce((sum, p) => sum + p.tabs.length, 0);
-  const coreCells = matrixData.reduce((sum, p) => sum + p.tabs.filter(t => t.tier === 'core').length, 0);
-  const basicCells = matrixData.reduce((sum, p) => sum + p.tabs.filter(t => t.tier === 'basic').length, 0);
-  const advancedCells = matrixData.reduce((sum, p) => sum + p.tabs.filter(t => t.tier === 'advanced').length, 0);
+  const coreCards = getAllCards('core');
+  const basicCards = getAllCards('basic');
+  const advancedCards = getAllCards('advanced');
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
-      {/* 헤더 */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              반도체 8대공정 학습 매트릭스
-            </h1>
-            <p className="text-sm text-gray-500 mt-1">
-              공정별 학습 콘텐츠를 한눈에 보고 원하는 항목을 클릭하세요 — 총 {totalCells}개 콘텐츠
-            </p>
+      {/* ====== 상단 안내 배너 ====== */}
+      <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 px-6 py-4 text-white">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <span className="text-3xl">🔥</span>
+            <div>
+              <h1 className="text-xl font-bold tracking-tight">
+                추천 시뮬레이션부터 체험해보세요
+              </h1>
+              <p className="text-sm text-orange-100 mt-0.5">
+                반도체 8대공정 | 직접 조작하는 인터랙티브 시뮬레이터 {coreCards.length + basicCards.length + advancedCards.length}개
+              </p>
+            </div>
           </div>
-
-          {/* 필터 버튼 */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setFilterTier('all')}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
-                filterTier === 'all'
-                  ? 'bg-gray-800 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              전체 ({totalCells})
-            </button>
-            <button
-              onClick={() => setFilterTier('core')}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
-                filterTier === 'core'
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-orange-50 text-orange-700 hover:bg-orange-100'
-              }`}
-            >
-              <span>🔥</span> 핵심 ({coreCells})
-            </button>
-            <button
-              onClick={() => setFilterTier('basic')}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
-                filterTier === 'basic'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-              }`}
-            >
-              <span>🧪</span> 체험 ({basicCells})
-            </button>
-            <button
-              onClick={() => setFilterTier('advanced')}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-all flex items-center gap-1 ${
-                filterTier === 'advanced'
-                  ? 'bg-gray-500 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              <span>🔒</span> 고급 ({advancedCells})
-            </button>
+          <div className="flex items-center gap-4 text-sm">
+            <span className="flex items-center gap-1.5 bg-white/20 px-3 py-1 rounded-full">
+              <span className="w-2.5 h-2.5 rounded-full bg-orange-300 animate-pulse"></span>
+              핵심 {coreCards.length}개
+            </span>
+            <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full">
+              기본 {basicCards.length}개
+            </span>
+            <span className="flex items-center gap-1.5 bg-white/10 px-3 py-1 rounded-full">
+              🔒 고급 {advancedCards.length}개
+            </span>
           </div>
         </div>
       </div>
 
-      {/* 매트릭스 그리드 */}
-      <div className="flex-1 overflow-auto p-6">
-        <div className="space-y-4 max-w-7xl mx-auto">
-          {filteredData.map((process) => (
-            process.tabs.length > 0 && (
-              <div key={process.id} className="group">
-                {/* 공정 행 헤더 */}
-                <div className="flex items-center gap-3 mb-2">
-                  <div
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-white text-sm font-bold min-w-[160px]"
-                    style={{ backgroundColor: process.color }}
-                  >
-                    <span className="text-lg">{process.icon}</span>
-                    <span>{process.name}</span>
-                  </div>
-                  <div className="flex-1 h-px bg-gray-200"></div>
-                  <span className="text-xs text-gray-400">{process.tabs.length}개</span>
-                </div>
+      {/* ====== 메인 콘텐츠 ====== */}
+      <div className="flex-1 overflow-auto">
+        <div className="max-w-6xl mx-auto px-6 py-6 space-y-10">
 
-                {/* 탭 카드 그리드 */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-3 pl-2">
-                  {process.tabs.map((tab) => {
-                    const style = tierStyles[tab.tier];
-                    const cellKey = `${process.id}-${tab.id}`;
-                    const isHovered = hoveredCell === cellKey;
-
-                    return (
-                      <button
-                        key={tab.id}
-                        onClick={() => onNavigate(process.id, tab.id)}
-                        onMouseEnter={() => setHoveredCell(cellKey)}
-                        onMouseLeave={() => setHoveredCell(null)}
-                        className={`
-                          relative flex flex-col items-center justify-center
-                          p-3 rounded-xl border-2 cursor-pointer
-                          transition-all duration-200 ease-out
-                          ${style.border} ${style.bg} ${style.hoverBg}
-                          ${style.shadow} ${style.hoverShadow}
-                          ${style.ring || ''}
-                          ${style.opacity || ''}
-                          ${isHovered ? 'scale-105 -translate-y-1' : ''}
-                          min-h-[100px]
-                        `}
-                      >
-                        {/* 티어 뱃지 */}
-                        {tab.tier === 'core' && (
-                          <span className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-orange-500 text-white shadow-sm">
-                            🔥 추천
-                          </span>
-                        )}
-                        {tab.tier === 'advanced' && (
-                          <span className="absolute -top-2 -right-2 px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-gray-400 text-white shadow-sm">
-                            🔒
-                          </span>
-                        )}
-
-                        {/* 아이콘 */}
-                        <span className="text-2xl mb-1.5">{tab.icon}</span>
-
-                        {/* 공정명-탭명 */}
-                        <div className="text-center">
-                          <div className="text-[11px] font-medium text-gray-400 leading-tight">
-                            {process.name}
-                          </div>
-                          <div className="text-xs font-bold text-gray-700 leading-tight mt-0.5">
-                            {tab.name}
-                          </div>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+          {/* ====== 섹션 1: 🔥 핵심 시뮬레이션 ====== */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl shadow-md">
+                <span className="text-lg">🔥</span>
+                <span className="font-bold">핵심 시뮬레이션</span>
               </div>
-            )
-          ))}
-        </div>
+              <span className="text-sm text-orange-600 font-medium">
+                — 먼저 이것부터! 직접 조작하며 원리를 체험하세요
+              </span>
+              <div className="flex-1 h-px bg-orange-200"></div>
+            </div>
 
-        {/* 범례 */}
-        <div className="mt-8 max-w-7xl mx-auto">
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-gradient-to-br from-orange-100 to-red-100 border-2 border-orange-300"></div>
-              <span>🔥 핵심 / 추천 — 무조건 클릭!</span>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+              {coreCards.map((card) => (
+                <button
+                  key={`${card.processId}-${card.id}`}
+                  onClick={() => onNavigate(card.processId, card.id)}
+                  className="group relative flex flex-col p-4 rounded-2xl border-2 border-orange-300 bg-gradient-to-br from-orange-50 via-white to-red-50 shadow-md shadow-orange-100 ring-2 ring-orange-200/50 cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-200 text-left min-h-[130px]"
+                >
+                  {/* 콘텐츠 유형 태그 */}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md ${contentTypes[card.type].color}`}>
+                      {contentTypes[card.type].label}
+                    </span>
+                    <span className="text-[10px] font-bold text-orange-500 bg-orange-100 px-1.5 py-0.5 rounded">
+                      🔥 핵심
+                    </span>
+                  </div>
+
+                  {/* 아이콘 + 이름 */}
+                  <div className="flex items-start gap-2 flex-1">
+                    <span className="text-2xl flex-shrink-0">{card.icon}</span>
+                    <div className="min-w-0">
+                      <div className="text-[11px] font-medium leading-tight" style={{ color: card.processColor }}>
+                        {card.processName}
+                      </div>
+                      <div className="text-sm font-bold text-gray-800 leading-tight mt-0.5">
+                        {card.name}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 추천 이유 */}
+                  {card.coreReason && (
+                    <div className="mt-2 pt-2 border-t border-orange-200/50">
+                      <p className="text-[11px] text-orange-700 leading-snug">
+                        👉 {card.coreReason}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Hover 화살표 */}
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity text-orange-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </button>
+              ))}
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-gradient-to-br from-blue-50 to-gray-50 border-2 border-blue-200"></div>
-              <span>🧪 체험 / 기본</span>
+          </section>
+
+          {/* ====== 섹션 2: 🧪 체험 / 기본 ====== */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-xl shadow-sm">
+                <span className="text-lg">🧪</span>
+                <span className="font-bold">체험 / 기본</span>
+              </div>
+              <span className="text-sm text-blue-600 font-medium">
+                — 이론 학습과 기초 실험
+              </span>
+              <div className="flex-1 h-px bg-blue-200"></div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="w-4 h-4 rounded bg-gradient-to-br from-gray-50 to-gray-100 border-2 border-gray-200 opacity-70"></div>
-              <span>🔒 고급 / 확장</span>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {basicCards.map((card) => (
+                <button
+                  key={`${card.processId}-${card.id}`}
+                  onClick={() => onNavigate(card.processId, card.id)}
+                  className="group relative flex flex-col p-3 rounded-xl border border-blue-200 bg-gradient-to-br from-blue-50/80 to-white shadow-sm cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:-translate-y-0.5 hover:shadow-md hover:border-blue-300 text-left min-h-[100px]"
+                >
+                  {/* 콘텐츠 유형 태그 */}
+                  <span className={`self-start px-1.5 py-0.5 text-[9px] font-bold rounded ${contentTypes[card.type].color} mb-1.5`}>
+                    {contentTypes[card.type].label}
+                  </span>
+
+                  {/* 아이콘 + 이름 */}
+                  <div className="flex items-start gap-1.5 flex-1">
+                    <span className="text-xl flex-shrink-0">{card.icon}</span>
+                    <div className="min-w-0">
+                      <div className="text-[10px] font-medium leading-tight" style={{ color: card.processColor }}>
+                        {card.processName}
+                      </div>
+                      <div className="text-xs font-bold text-gray-700 leading-tight mt-0.5">
+                        {card.name}
+                      </div>
+                    </div>
+                  </div>
+                </button>
+              ))}
             </div>
-          </div>
+          </section>
+
+          {/* ====== 섹션 3: 🔒 고급 기능 (잠금) ====== */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-400 text-white rounded-xl shadow-sm">
+                <span className="text-lg">🔒</span>
+                <span className="font-bold">고급 / 확장</span>
+              </div>
+              <span className="text-sm text-gray-500 font-medium">
+                — 정식 버전에서 이용 가능합니다
+              </span>
+              <div className="flex-1 h-px bg-gray-200"></div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {advancedCards.map((card) => {
+                const cellKey = `${card.processId}-${card.id}`;
+                return (
+                  <div
+                    key={cellKey}
+                    className="group relative flex flex-col p-3 rounded-xl border border-gray-200 bg-gradient-to-br from-gray-100 to-gray-50 shadow-sm cursor-not-allowed select-none min-h-[100px] opacity-60 hover:opacity-80 transition-all duration-200"
+                    onClick={() => setShowLockedTooltip(showLockedTooltip === cellKey ? null : cellKey)}
+                  >
+                    {/* 잠금 오버레이 */}
+                    <div className="absolute inset-0 rounded-xl bg-gray-900/5 flex items-center justify-center z-10">
+                      {showLockedTooltip === cellKey && (
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[11px] px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap z-20">
+                          정식 버전에서 이용 가능합니다
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-800"></div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* 콘텐츠 유형 태그 */}
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="px-1.5 py-0.5 text-[9px] font-bold rounded bg-gray-300 text-gray-600">
+                        {contentTypes[card.type].label}
+                      </span>
+                      <span className="text-sm">🔒</span>
+                    </div>
+
+                    {/* 아이콘 + 이름 */}
+                    <div className="flex items-start gap-1.5 flex-1">
+                      <span className="text-xl flex-shrink-0 grayscale">{card.icon}</span>
+                      <div className="min-w-0">
+                        <div className="text-[10px] font-medium text-gray-400 leading-tight">
+                          {card.processName}
+                        </div>
+                        <div className="text-xs font-bold text-gray-500 leading-tight mt-0.5">
+                          {card.name}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* ====== CTA: 정식 버전 유도 ====== */}
+          <section className="pb-8">
+            <div className="bg-gradient-to-r from-slate-800 via-slate-900 to-slate-800 rounded-2xl p-6 text-center shadow-xl">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <span className="text-2xl">🔓</span>
+                <h3 className="text-lg font-bold text-white">
+                  고급 기능을 포함한 전체 시뮬레이션을 체험하세요
+                </h3>
+              </div>
+              <p className="text-slate-400 text-sm mb-4">
+                Conductance 분석, 배관 설계, RF 매칭, PECVD, ALD, RTA 등 {advancedCards.length}개 고급 콘텐츠가 포함됩니다
+              </p>
+              <a
+                href="https://kr.semifabai.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-red-500 text-white font-bold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+              >
+                <span>전체 기능 보기</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                </svg>
+              </a>
+            </div>
+          </section>
+
         </div>
       </div>
     </div>
