@@ -23,7 +23,7 @@ const matrixData = [
     color: '#1976d2',
     tabs: [
       { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
-      { id: 'pumping-simulation', name: '펌핑 시뮬레이션', icon: '⚡', tier: 'core', type: 'simulation', coreReason: '진공 형성 과정을 직접 조작하며 이해' },
+      { id: 'pumping-simulation', name: '펌핑 시뮬레이션', icon: '⚡', tier: 'core', type: 'simulation', best: true, coreReason: '진공 형성 과정을 직접 조작하며 이해' },
       { id: 'performance-analysis', name: '성능 특성 곡선', icon: '📊', tier: 'core', type: 'simulation', coreReason: '펌프 특성을 곡선으로 읽는 눈을 키움' },
       { id: 'process-control', name: '압력 세팅 실험', icon: '🔧', tier: 'basic', type: 'experiment' },
       { id: 'conductance-relation', name: 'Conductance', icon: '🔄', tier: 'advanced', type: 'analysis' },
@@ -82,7 +82,7 @@ const matrixData = [
     tabs: [
       { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
       { id: 'plasma-basics', name: '플라즈마 기본', icon: '⚡', tier: 'core', type: 'simulation', coreReason: '전자-이온 충돌이 만드는 플라즈마를 체감' },
-      { id: 'plasma-principle1', name: '발생원리 1', icon: '🔬', tier: 'core', type: 'simulation', coreReason: '파션커브를 조작하며 방전 조건을 이해' },
+      { id: 'plasma-principle1', name: '발생원리 1', icon: '🔬', tier: 'core', type: 'simulation', best: true, coreReason: '파션커브를 조작하며 방전 조건을 이해' },
       { id: 'plasma-principle2', name: '발생원리 2', icon: '📈', tier: 'basic', type: 'theory' },
       { id: 'rf-matching', name: 'RF 매칭', icon: '📡', tier: 'advanced', type: 'analysis' },
       { id: 'system-structure', name: 'CCP 구조', icon: '🏗️', tier: 'advanced', type: 'analysis' },
@@ -112,7 +112,7 @@ const matrixData = [
       { id: 'overview', name: '식각 공정 개요', icon: '📋', tier: 'basic', type: 'overview' },
       { id: 'etch-elements', name: '식각 요소', icon: '🔬', tier: 'core', type: 'experiment', coreReason: 'RIE 가스 조건 차이를 비교하며 체험' },
       { id: 'process', name: '식각 원리', icon: '🧪', tier: 'core', type: 'simulation', coreReason: '3D로 실리콘이 깎이는 과정을 눈으로 확인' },
-      { id: 'analysis', name: 'Si식각메커니즘', icon: '📊', tier: 'advanced', type: 'analysis' },
+      { id: 'analysis', name: 'Si식각메커니즘', icon: '📊', tier: 'core', type: 'simulation', best: true, coreReason: 'Si 표면에서 일어나는 식각 반응을 단계별로 이해' },
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
@@ -123,11 +123,11 @@ const matrixData = [
     color: '#795548',
     tabs: [
       { id: 'theory', name: '개요', icon: '📚', tier: 'basic', type: 'overview' },
-      { id: 'pvd-evap', name: 'PVD (증발)', icon: '🔥', tier: 'core', type: 'simulation', coreReason: '증발 분자가 기판에 닿는 과정을 3D로 체험' },
-      { id: 'pvd-sputtering', name: 'PVD (스퍼터링)', icon: '🎯', tier: 'core', type: 'simulation', coreReason: '아르곤 이온 충돌 → 박막 형성을 시각 확인' },
-      { id: 'cvd-thermal', name: 'CVD (Thermal)', icon: '🌡️', tier: 'basic', type: 'theory' },
+      { id: 'pvd-evap', name: 'PVD (증발)', icon: '🔥', tier: 'core', type: 'simulation', best: true, coreReason: '증발 분자가 기판에 닿는 과정을 3D로 체험' },
+      { id: 'pvd-sputtering', name: 'PVD (스퍼터링)', icon: '🎯', tier: 'core', type: 'simulation', best: true, coreReason: '아르곤 이온 충돌 → 박막 형성을 시각 확인' },
+      { id: 'cvd-thermal', name: 'CVD (Thermal)', icon: '🌡️', tier: 'core', type: 'simulation', best: true, coreReason: '고온 열분해로 박막이 쌓이는 메커니즘을 체득' },
       { id: 'cvd-pecvd', name: 'PECVD', icon: '⚡', tier: 'advanced', type: 'simulation' },
-      { id: 'ald', name: 'ALD', icon: '⚛️', tier: 'advanced', type: 'simulation' },
+      { id: 'ald', name: 'ALD', icon: '⚛️', tier: 'core', type: 'simulation', best: true, coreReason: '원자 한 층씩 쌓는 ALD 사이클을 직접 돌려봄' },
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
@@ -141,8 +141,8 @@ const matrixData = [
       { id: 'diffusion', name: '확산 공정', icon: '📈', tier: 'core', type: 'simulation', coreReason: '온도/시간에 따른 도펀트 확산 패턴을 읽음' },
       { id: 'implantation', name: '이온 주입', icon: '🎯', tier: 'core', type: 'simulation', coreReason: '에너지/도즈를 바꾸며 프로파일 변화를 체득' },
       { id: 'comparison', name: '공정 비교', icon: '🔄', tier: 'basic', type: 'analysis' },
-      { id: 'temperature', name: 'Annealing', icon: '🌡️', tier: 'basic', type: 'experiment' },
-      { id: 'rta', name: 'RTA', icon: '⚙️', tier: 'advanced', type: 'simulation' },
+      { id: 'temperature', name: 'Annealing 효과', icon: '🌡️', tier: 'core', type: 'simulation', best: true, coreReason: '어닐링 온도가 결정 회복에 미치는 영향을 확인' },
+      { id: 'rta', name: 'RTA', icon: '⚙️', tier: 'core', type: 'simulation', best: true, coreReason: '급속 열처리로 도펀트 활성화 과정을 체험' },
       { id: 'application', name: '적용 가이드', icon: '💡', tier: 'advanced', type: 'guide' },
       { id: 'quiz', name: '퀴즈', icon: '🏆', tier: 'basic', type: 'quiz' },
     ]
