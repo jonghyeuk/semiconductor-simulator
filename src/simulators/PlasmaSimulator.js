@@ -20,8 +20,8 @@ const LightbulbIcon = () => (
   </svg>
 );
 
-const PlasmaSimulator = () => {
-  const [activeTheme, setActiveTheme] = useState('theory');
+const PlasmaSimulator = ({ initialTab }) => {
+  const [activeTheme, setActiveTheme] = useState(initialTab || 'theory');
 
   // Theory tab state
   const [theoryStep, setTheoryStep] = useState(0);

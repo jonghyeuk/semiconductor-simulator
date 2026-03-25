@@ -20,9 +20,9 @@ const LightbulbIcon = () => (
   </svg>
 );
 
-const VacuumSimulator = () => {
+const VacuumSimulator = ({ initialTab }) => {
   // 탭 상태
-  const [activeTab, setActiveTab] = useState('theory');
+  const [activeTab, setActiveTab] = useState(initialTab || 'theory');
   const [selectedModel, setSelectedModel] = useState(2); // 모델 2가 기본값
   const [targetPressure, setTargetPressure] = useState(5); // 목표 압력 (슬라이더로 설정)
 
