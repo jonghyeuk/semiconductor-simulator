@@ -26,6 +26,10 @@ const App = () => {
     const simParam = params.get('sim');
     if (simParam && simulatorRegistry.getSimulator(simParam)) {
       setActiveSimulator(simParam);
+      const tabParam = params.get('tab');
+      if (tabParam) {
+        setActiveTab(tabParam);
+      }
     }
   }, []);
 
