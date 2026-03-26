@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vacuum 기초 시뮬레이터 - 반도체 공정 시뮬레이터 | SemiFabAI</title>
+  <meta name="description" content="반도체 공정의 기본이 되는 진공 시스템의 원리와 펌핑 메커니즘을 인터랙티브 시뮬레이션으로 학습합니다.">
+  <meta name="keywords" content="진공 시뮬레이터, 반도체 진공, vacuum pump, 펌핑 시뮬레이션, 터보 펌프, 로터리 펌프, conductance, 반도체 교육">
+  <meta property="og:title" content="Vacuum 기초 시뮬레이터 - 반도체 공정 시뮬레이터">
+  <meta property="og:description" content="반도체 공정의 기본이 되는 진공 시스템의 원리와 펌핑 메커니즘을 인터랙티브 시뮬레이션으로 학습합니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://demo.semifabai.com/guide/vacuum.html">
+  <link rel="canonical" href="https://demo.semifabai.com/guide/vacuum.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "Vacuum 기초 시뮬레이터",
+    "description": "반도체 공정의 기본이 되는 진공 시스템의 원리와 펌핑 메커니즘을 인터랙티브 시뮬레이션으로 학습합니다.",
+    "educationalLevel": "입문~중급 (반도체 공정 초보자도 가능)",
+    "learningResourceType": "Interactive Simulation",
+    "about": {
+      "@type": "Thing",
+      "name": "Vacuum 기초",
+      "description": "진공(Vacuum)은 반도체 제조의 거의 모든 공정에서 필수적인 환경 조건입니다. CVD, PVD, 식각, 이온주입 등 대부분의 공정이 진공 상태에서 이루어지며, 진공도에 따라 공정 품질이 크게 달라집니다. 이 시뮬레이터에서는 진공 펌프의 동작 원리, 펌핑 속도와 도달 압력의 관계, 배관 설계가 진공 성능에 미치는 영향 등을 직접 조작하며 학습할 수 있습니다."
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "SemiFabAI",
+      "url": "https://kr.semifabai.com"
+    },
+    "inLanguage": "ko",
+    "keywords": "진공 시뮬레이터, 반도체 진공, vacuum pump, 펌핑 시뮬레이션, 터보 펌프, 로터리 펌프, conductance, 반도체 교육"
+  }
+  </script>
+  <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; line-height: 1.7; background: #f8f9fa; }
+  a { color: #1976d2; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 16px 0; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header h1 a { color: #1a1a1a; }
+  header nav a { font-size: 14px; margin-left: 20px; color: #555; }
+  header nav a:hover { color: #1976d2; }
+  .breadcrumb { font-size: 13px; color: #888; padding: 12px 0; }
+  .breadcrumb a { color: #888; }
+  .hero { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 48px 0 40px; }
+  .hero .icon { font-size: 48px; margin-bottom: 12px; }
+  .hero h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .hero .summary { font-size: 17px; color: #555; max-width: 640px; }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  main { padding: 40px 0 60px; }
+  section { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 32px; margin-bottom: 24px; }
+  section h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  section ul { padding-left: 20px; }
+  section li { margin-bottom: 8px; }
+  .context-box { background: #f0f7ff; border-left: 4px solid #1976d2; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 15px; color: #333; }
+  .demo-scope { background: #f0faf0; border-left: 4px solid #4caf50; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .full-version { background: #fff8e1; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .cta-box { text-align: center; padding: 40px 32px; background: linear-gradient(135deg, #1976d2, #1565c0); color: #fff; border-radius: 12px; margin: 32px 0; }
+  .cta-box h3 { color: #fff; border: none; margin-bottom: 12px; }
+  .cta-box p { color: rgba(255,255,255,0.85); margin-bottom: 20px; }
+  .cta-btn { display: inline-block; padding: 12px 32px; background: #fff; color: #1976d2; border-radius: 8px; font-weight: 700; font-size: 15px; }
+  .cta-btn:hover { text-decoration: none; background: #f5f5f5; }
+  .cta-btn-outline { display: inline-block; padding: 12px 32px; border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: 700; font-size: 15px; margin-left: 12px; }
+  .cta-btn-outline:hover { text-decoration: none; background: rgba(255,255,255,0.1); }
+  .nav-bottom { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-top: 1px solid #e0e0e0; margin-top: 20px; }
+  .nav-bottom a { font-size: 14px; }
+  .nav-prev::before { content: '← '; }
+  .nav-next::after { content: ' →'; }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .related-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; transition: box-shadow 0.2s; }
+  .related-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-decoration: none; }
+  .related-card .r-icon { font-size: 28px; margin-bottom: 8px; }
+  .related-card .r-name { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+  .related-card .r-desc { font-size: 13px; color: #777; margin-top: 4px; }
+  footer { background: #fff; border-top: 1px solid #e0e0e0; padding: 32px 0; text-align: center; font-size: 13px; color: #999; }
+  footer a { color: #999; }
+  .path-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .path-item { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; }
+  .path-item.current { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .path-item a { color: inherit; }
+  .index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 24px 0; }
+  .index-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: box-shadow 0.2s, transform 0.2s; }
+  .index-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); text-decoration: none; }
+  .index-card .i-icon { font-size: 36px; margin-bottom: 8px; }
+  .index-card .i-name { font-weight: 700; font-size: 17px; color: #1a1a1a; margin-bottom: 6px; }
+  .index-card .i-summary { font-size: 14px; color: #666; line-height: 1.5; }
+  .index-card .i-level { font-size: 12px; color: #999; margin-top: 10px; }
+  @media (max-width: 640px) { .hero h2 { font-size: 24px; } section { padding: 24px 16px; } .cta-btn-outline { margin-left: 0; margin-top: 8px; } }
+</style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><a href="https://demo.semifabai.com">반도체 공정 시뮬레이터</a></h1>
+      <nav>
+        <a href="./index.html">전체 가이드</a>
+        <a href="https://kr.semifabai.com">정식 버전</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="./index.html">가이드</a> &gt; Vacuum 기초
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="container">
+      <div class="icon">⚡</div>
+      <h2>Vacuum 기초 시뮬레이터</h2>
+      <p class="summary">반도체 공정의 기본이 되는 진공 시스템의 원리와 펌핑 메커니즘을 인터랙티브 시뮬레이션으로 학습합니다.</p>
+      <div style="margin-top: 16px;">
+        <span class="badge" style="background: #1976d2; color: #fff;">입문~중급 (반도체 공정 초보자도 가능)</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section>
+        <h3>이 시뮬레이터는 무엇인가</h3>
+        <p>진공(Vacuum)은 반도체 제조의 거의 모든 공정에서 필수적인 환경 조건입니다. CVD, PVD, 식각, 이온주입 등 대부분의 공정이 진공 상태에서 이루어지며, 진공도에 따라 공정 품질이 크게 달라집니다. 이 시뮬레이터에서는 진공 펌프의 동작 원리, 펌핑 속도와 도달 압력의 관계, 배관 설계가 진공 성능에 미치는 영향 등을 직접 조작하며 학습할 수 있습니다.</p>
+        <div class="context-box">
+          <strong>공정 흐름에서의 위치:</strong> 진공은 세정 이후 거의 모든 공정(산화, 증착, 식각, 이온주입)의 전제 조건이 됩니다.
+        </div>
+      </section>
+
+      <section>
+        <h3>무엇을 배울 수 있나</h3>
+        <ul>
+          <li>진공의 정의와 반도체 공정에서의 중요성 이해</li>
+          <li>로터리 펌프, 터보 펌프 등 진공 펌프의 동작 원리 학습</li>
+          <li>펌핑 속도, 도달 압력, 가스 부하의 관계 파악</li>
+          <li>Conductance와 배관 설계가 진공 성능에 미치는 영향 분석</li>
+          <li>공정별 요구 진공도(저진공~초고진공) 이해</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>학습 경로</h3>
+        <p>반도체 8대 공정 순서에 따른 학습 경로입니다. 순서대로 학습하면 공정 간 연관성을 이해하는 데 효과적입니다.</p>
+        <div class="path-list">
+          <span class="path-item current">⚡ Vacuum 기초</span>
+          <a href="./cleaning.html" class="path-item">🧽 웨이퍼 세정</a>
+          <a href="./oxidation.html" class="path-item">🔥 Oxidation</a>
+          <a href="./lithography.html" class="path-item">💡 Lithography</a>
+          <a href="./plasma.html" class="path-item">⚡ Plasma</a>
+          <a href="./etching.html" class="path-item">⚗️ Etching</a>
+          <a href="./deposition.html" class="path-item">📦 Deposition</a>
+          <a href="./implantation.html" class="path-item">⚛️ Implantation</a>
+          <a href="./packaging.html" class="path-item">🔌 배선검사패키징</a>
+        </div>
+      </section>
+
+      <section>
+        <h3>데모에서 체험 가능한 기능</h3>
+        <div class="demo-scope">
+          실시간 펌핑 시뮬레이션, 성능 특성 곡선 분석, 압력 세팅 실험, Conductance 계산, 배관 설계 최적화, 퀴즈
+        </div>
+      </section>
+
+      <section>
+        <h3>정식 버전에서 확장되는 기능</h3>
+        <div class="full-version">
+          다중 펌프 조합 시뮬레이션, 리크 테스트 시나리오, 실제 장비 파라미터 기반 시뮬레이션, 공정 연계 진공 설계
+        </div>
+        <p style="margin-top: 12px; font-size: 14px; color: #888;">정식 버전에서는 100개 이상의 시뮬레이터와 심화 학습 콘텐츠를 제공합니다.</p>
+      </section>
+
+      <div class="cta-box">
+        <h3>직접 체험해 보세요</h3>
+        <p>Vacuum 기초 시뮬레이터를 지금 바로 사용해 볼 수 있습니다.</p>
+        <a href="https://demo.semifabai.com/" class="cta-btn">데모 체험하기</a>
+        <a href="https://kr.semifabai.com" class="cta-btn-outline">정식 버전 알아보기</a>
+      </div>
+
+      
+      <section>
+        <h3>관련 시뮬레이터</h3>
+        <div class="related-grid">
+          
+          <a href="./cleaning.html" class="related-card">
+            <div class="r-icon">🧽</div>
+            <div class="r-name">웨이퍼 세정</div>
+            <div class="r-desc">RCA 세정법을 중심으로 습식·건식 세정 공정의 원리와 오염 제거 메커니즘을 시각적으로 학습합니다.…</div>
+          </a>
+          <a href="./plasma.html" class="related-card">
+            <div class="r-icon">⚡</div>
+            <div class="r-name">Plasma</div>
+            <div class="r-desc">CCP/ICP 플라즈마 시스템의 발생 원리, RF 매칭, Synergy Effect를 시뮬레이션으로 학습합니…</div>
+          </a>
+        </div>
+      </section>
+
+      <div class="nav-bottom">
+        <div></div>
+        <a href="./index.html">전체 목록</a>
+        <div><a href="./cleaning.html" class="nav-next">웨이퍼 세정</a></div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>반도체 공정 시뮬레이터 데모 | <a href="https://kr.semifabai.com">SemiFabAI 정식 버전</a></p>
+      <p style="margin-top: 8px;">교육 목적의 인터랙티브 시뮬레이터 플랫폼</p>
+    </div>
+  </footer>
+</body>
+</html>
