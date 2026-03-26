@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oxidation 시뮬레이터 - 반도체 공정 시뮬레이터 | SemiFabAI</title>
+  <meta name="description" content="열산화 공정의 원리와 Deal-Grove 모델을 기반으로 산화막 성장을 시뮬레이션합니다.">
+  <meta name="keywords" content="산화 공정, thermal oxidation, Deal-Grove 모델, 게이트 산화막, SiO2, 건식 산화, 습식 산화, 반도체 산화">
+  <meta property="og:title" content="Oxidation 시뮬레이터 - 반도체 공정 시뮬레이터">
+  <meta property="og:description" content="열산화 공정의 원리와 Deal-Grove 모델을 기반으로 산화막 성장을 시뮬레이션합니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://demo.semifabai.com/guide/oxidation.html">
+  <link rel="canonical" href="https://demo.semifabai.com/guide/oxidation.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "Oxidation 시뮬레이터",
+    "description": "열산화 공정의 원리와 Deal-Grove 모델을 기반으로 산화막 성장을 시뮬레이션합니다.",
+    "educationalLevel": "중급",
+    "learningResourceType": "Interactive Simulation",
+    "about": {
+      "@type": "Thing",
+      "name": "Oxidation",
+      "description": "산화(Oxidation)는 실리콘 웨이퍼 표면에 SiO₂ 절연막을 형성하는 공정으로, 게이트 절연막, 소자 분리, 표면 보호 등 다양한 목적으로 사용됩니다. 건식 산화(Dry Oxidation)는 얇고 치밀한 막을, 습식 산화(Wet Oxidation)는 빠르게 두꺼운 막을 형성합니다. 이 시뮬레이터에서는 온도, 시간, 산화 방식에 따른 산화막 두께 변화를 Deal-Grove 모델 기반으로 직접 실험하고 분석합니다."
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "SemiFabAI",
+      "url": "https://kr.semifabai.com"
+    },
+    "inLanguage": "ko",
+    "keywords": "산화 공정, thermal oxidation, Deal-Grove 모델, 게이트 산화막, SiO2, 건식 산화, 습식 산화, 반도체 산화"
+  }
+  </script>
+  <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; line-height: 1.7; background: #f8f9fa; }
+  a { color: #1976d2; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 16px 0; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header h1 a { color: #1a1a1a; }
+  header nav a { font-size: 14px; margin-left: 20px; color: #555; }
+  header nav a:hover { color: #1976d2; }
+  .breadcrumb { font-size: 13px; color: #888; padding: 12px 0; }
+  .breadcrumb a { color: #888; }
+  .hero { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 48px 0 40px; }
+  .hero .icon { font-size: 48px; margin-bottom: 12px; }
+  .hero h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .hero .summary { font-size: 17px; color: #555; max-width: 640px; }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  main { padding: 40px 0 60px; }
+  section { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 32px; margin-bottom: 24px; }
+  section h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  section ul { padding-left: 20px; }
+  section li { margin-bottom: 8px; }
+  .context-box { background: #f0f7ff; border-left: 4px solid #1976d2; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 15px; color: #333; }
+  .demo-scope { background: #f0faf0; border-left: 4px solid #4caf50; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .full-version { background: #fff8e1; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .cta-box { text-align: center; padding: 40px 32px; background: linear-gradient(135deg, #1976d2, #1565c0); color: #fff; border-radius: 12px; margin: 32px 0; }
+  .cta-box h3 { color: #fff; border: none; margin-bottom: 12px; }
+  .cta-box p { color: rgba(255,255,255,0.85); margin-bottom: 20px; }
+  .cta-btn { display: inline-block; padding: 12px 32px; background: #fff; color: #1976d2; border-radius: 8px; font-weight: 700; font-size: 15px; }
+  .cta-btn:hover { text-decoration: none; background: #f5f5f5; }
+  .cta-btn-outline { display: inline-block; padding: 12px 32px; border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: 700; font-size: 15px; margin-left: 12px; }
+  .cta-btn-outline:hover { text-decoration: none; background: rgba(255,255,255,0.1); }
+  .nav-bottom { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-top: 1px solid #e0e0e0; margin-top: 20px; }
+  .nav-bottom a { font-size: 14px; }
+  .nav-prev::before { content: '← '; }
+  .nav-next::after { content: ' →'; }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .related-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; transition: box-shadow 0.2s; }
+  .related-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-decoration: none; }
+  .related-card .r-icon { font-size: 28px; margin-bottom: 8px; }
+  .related-card .r-name { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+  .related-card .r-desc { font-size: 13px; color: #777; margin-top: 4px; }
+  footer { background: #fff; border-top: 1px solid #e0e0e0; padding: 32px 0; text-align: center; font-size: 13px; color: #999; }
+  footer a { color: #999; }
+  .path-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .path-item { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; }
+  .path-item.current { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .path-item a { color: inherit; }
+  .index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 24px 0; }
+  .index-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: box-shadow 0.2s, transform 0.2s; }
+  .index-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); text-decoration: none; }
+  .index-card .i-icon { font-size: 36px; margin-bottom: 8px; }
+  .index-card .i-name { font-weight: 700; font-size: 17px; color: #1a1a1a; margin-bottom: 6px; }
+  .index-card .i-summary { font-size: 14px; color: #666; line-height: 1.5; }
+  .index-card .i-level { font-size: 12px; color: #999; margin-top: 10px; }
+  @media (max-width: 640px) { .hero h2 { font-size: 24px; } section { padding: 24px 16px; } .cta-btn-outline { margin-left: 0; margin-top: 8px; } }
+</style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><a href="https://demo.semifabai.com">반도체 공정 시뮬레이터</a></h1>
+      <nav>
+        <a href="./index.html">전체 가이드</a>
+        <a href="https://kr.semifabai.com">정식 버전</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="./index.html">가이드</a> &gt; Oxidation
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="container">
+      <div class="icon">🔥</div>
+      <h2>Oxidation 시뮬레이터</h2>
+      <p class="summary">열산화 공정의 원리와 Deal-Grove 모델을 기반으로 산화막 성장을 시뮬레이션합니다.</p>
+      <div style="margin-top: 16px;">
+        <span class="badge" style="background: #ff5722; color: #fff;">중급</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section>
+        <h3>이 시뮬레이터는 무엇인가</h3>
+        <p>산화(Oxidation)는 실리콘 웨이퍼 표면에 SiO₂ 절연막을 형성하는 공정으로, 게이트 절연막, 소자 분리, 표면 보호 등 다양한 목적으로 사용됩니다. 건식 산화(Dry Oxidation)는 얇고 치밀한 막을, 습식 산화(Wet Oxidation)는 빠르게 두꺼운 막을 형성합니다. 이 시뮬레이터에서는 온도, 시간, 산화 방식에 따른 산화막 두께 변화를 Deal-Grove 모델 기반으로 직접 실험하고 분석합니다.</p>
+        <div class="context-box">
+          <strong>공정 흐름에서의 위치:</strong> 산화는 세정 후 수행되며, 형성된 산화막은 리소그래피에서 패턴을 전사할 기판이 됩니다.
+        </div>
+      </section>
+
+      <section>
+        <h3>무엇을 배울 수 있나</h3>
+        <ul>
+          <li>건식 산화와 습식 산화의 차이점과 적용 분야 이해</li>
+          <li>Deal-Grove 모델의 선형/포물선 영역 개념 학습</li>
+          <li>온도·시간·분위기가 산화막 두께에 미치는 영향 분석</li>
+          <li>게이트 산화막의 품질 요구사항 이해</li>
+          <li>산화 공정의 트러블슈팅 능력 배양</li>
+        </ul>
+      </section>
+
+      <section>
+        <h3>학습 경로</h3>
+        <p>반도체 8대 공정 순서에 따른 학습 경로입니다. 순서대로 학습하면 공정 간 연관성을 이해하는 데 효과적입니다.</p>
+        <div class="path-list">
+          <a href="./vacuum.html" class="path-item">⚡ Vacuum 기초</a>
+          <a href="./cleaning.html" class="path-item">🧽 웨이퍼 세정</a>
+          <span class="path-item current">🔥 Oxidation</span>
+          <a href="./lithography.html" class="path-item">💡 Lithography</a>
+          <a href="./plasma.html" class="path-item">⚡ Plasma</a>
+          <a href="./etching.html" class="path-item">⚗️ Etching</a>
+          <a href="./deposition.html" class="path-item">📦 Deposition</a>
+          <a href="./implantation.html" class="path-item">⚛️ Implantation</a>
+          <a href="./packaging.html" class="path-item">🔌 배선검사패키징</a>
+        </div>
+      </section>
+
+      <section>
+        <h3>데모에서 체험 가능한 기능</h3>
+        <div class="demo-scope">
+          산화 공정 개요, 열산화 실험 시뮬레이션, Deal-Grove 모델 기반 산화 영향 인자 분석, 트러블슈팅, 퀴즈
+        </div>
+      </section>
+
+      <section>
+        <h3>정식 버전에서 확장되는 기능</h3>
+        <div class="full-version">
+          다층 산화막 시뮬레이션, LOCOS/STI 소자 분리 공정, 고유전율 물질(High-k) 비교, 실제 레시피 기반 실험
+        </div>
+        <p style="margin-top: 12px; font-size: 14px; color: #888;">정식 버전에서는 100개 이상의 시뮬레이터와 심화 학습 콘텐츠를 제공합니다.</p>
+      </section>
+
+      <div class="cta-box">
+        <h3>직접 체험해 보세요</h3>
+        <p>Oxidation 시뮬레이터를 지금 바로 사용해 볼 수 있습니다.</p>
+        <a href="https://demo.semifabai.com/" class="cta-btn">데모 체험하기</a>
+        <a href="https://kr.semifabai.com" class="cta-btn-outline">정식 버전 알아보기</a>
+      </div>
+
+      
+      <section>
+        <h3>관련 시뮬레이터</h3>
+        <div class="related-grid">
+          
+          <a href="./cleaning.html" class="related-card">
+            <div class="r-icon">🧽</div>
+            <div class="r-name">웨이퍼 세정</div>
+            <div class="r-desc">RCA 세정법을 중심으로 습식·건식 세정 공정의 원리와 오염 제거 메커니즘을 시각적으로 학습합니다.…</div>
+          </a>
+          <a href="./lithography.html" class="related-card">
+            <div class="r-icon">💡</div>
+            <div class="r-name">Lithography</div>
+            <div class="r-desc">포토리소그래피 8단계 공정과 PR 코팅, DUV/EUV 노광 기술을 인터랙티브하게 학습합니다.…</div>
+          </a>
+        </div>
+      </section>
+
+      <div class="nav-bottom">
+        <div><a href="./cleaning.html" class="nav-prev">웨이퍼 세정</a></div>
+        <a href="./index.html">전체 목록</a>
+        <div><a href="./lithography.html" class="nav-next">Lithography</a></div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>반도체 공정 시뮬레이터 데모 | <a href="https://kr.semifabai.com">SemiFabAI 정식 버전</a></p>
+      <p style="margin-top: 8px;">교육 목적의 인터랙티브 시뮬레이터 플랫폼</p>
+    </div>
+  </footer>
+</body>
+</html>
