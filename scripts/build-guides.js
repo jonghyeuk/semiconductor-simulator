@@ -114,10 +114,22 @@ function buildSimulatorPage(sim) {
     "description": "${sim.summary}",
     "educationalLevel": "${sim.targetLevel}",
     "learningResourceType": "Interactive Simulation",
+    "datePublished": "${new Date().toISOString().split('T')[0]}",
+    "dateModified": "${new Date().toISOString().split('T')[0]}",
     "about": {
       "@type": "Thing",
       "name": "${sim.shortName}",
       "description": "${sim.description.replace(/"/g, '\\"')}"
+    },
+    "isPartOf": {
+      "@type": "Course",
+      "name": "반도체 공정 시뮬레이터",
+      "url": "${guideDomain}/guide/",
+      "provider": {
+        "@type": "Organization",
+        "name": "SemiFabAI",
+        "url": "${mainPlatformUrl}"
+      }
     },
     "provider": {
       "@type": "Organization",
@@ -126,6 +138,17 @@ function buildSimulatorPage(sim) {
     },
     "inLanguage": "ko",
     "keywords": "${sim.keywords.join(', ')}"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "홈", "item": "${guideDomain}/"},
+      {"@type": "ListItem", "position": 2, "name": "가이드", "item": "${guideDomain}/guide/"},
+      {"@type": "ListItem", "position": 3, "name": "${sim.shortName}", "item": "${guideDomain}/guide/${sim.id}.html"}
+    ]
   }
   </script>
   <style>${commonCSS}</style>
@@ -270,6 +293,8 @@ function buildIndexPage() {
       "url": "${mainPlatformUrl}"
     },
     "inLanguage": "ko",
+    "datePublished": "${new Date().toISOString().split('T')[0]}",
+    "dateModified": "${new Date().toISOString().split('T')[0]}",
     "numberOfCredits": ${simulators.length},
     "hasCourseInstance": {
       "@type": "CourseInstance",
