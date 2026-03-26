@@ -18,8 +18,14 @@ const App = () => {
 
   // URL에 ?admin 붙으면 관리자 페이지 표시
   useEffect(() => {
-    if (window.location.search.includes('admin')) {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('admin')) {
       setShowAdmin(true);
+    }
+    // ?sim=vacuum 등으로 특정 시뮬레이터 바로 열기
+    const simParam = params.get('sim');
+    if (simParam && simulatorRegistry.getSimulator(simParam)) {
+      setActiveSimulator(simParam);
     }
   }, []);
 

@@ -230,7 +230,7 @@ function buildSimulatorPage(sim) {
       <div class="cta-box">
         <h3>직접 체험해 보세요</h3>
         <p>${sim.shortName} 시뮬레이터를 지금 바로 사용해 볼 수 있습니다.</p>
-        <a href="${guideDomain}/" class="cta-btn">데모 체험하기</a>
+        <a href="${guideDomain}/?sim=${simAppId}" class="cta-btn">${sim.shortName} 체험하기</a>
         <a href="${mainPlatformUrl}" class="cta-btn-outline">정식 버전 알아보기</a>
       </div>
 
