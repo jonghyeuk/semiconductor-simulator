@@ -17,8 +17,9 @@ const LOCKED_TABS = new Set([
 
 // 시뮬레이터별 탭 오버레이 위치 (top: 타이틀 아래부터, height: 탭 바 높이)
 const TAB_OVERLAY = {
-  'plasma':    { top: 57, height: 48 },
-  'plasma-ii': { top: 57, height: 48 },
+  'plasma':                   { top: 73, height: 56 },
+  'plasma-ii':                { top: 73, height: 56 },
+  'comprehensive-assessment': { top: 0, height: 0 },
 };
 const DEFAULT_TAB_OVERLAY = { top: 0, height: 58 };
 

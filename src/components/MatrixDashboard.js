@@ -8,6 +8,7 @@ const contentTypes = {
   quiz: { label: '평가', color: 'bg-violet-500 text-white', textColor: 'text-violet-600' },
   overview: { label: '개요', color: 'bg-sky-400 text-white', textColor: 'text-sky-500' },
   analysis: { label: '분석', color: 'bg-amber-500 text-white', textColor: 'text-amber-600' },
+  summary: { label: '요점정리', color: 'bg-indigo-500 text-white', textColor: 'text-indigo-600' },
   troubleshooting: { label: '트러블슈팅', color: 'bg-gray-500 text-white', textColor: 'text-gray-500' },
   guide: { label: '가이드', color: 'bg-teal-500 text-white', textColor: 'text-teal-600' },
 };
@@ -41,7 +42,7 @@ const matrixData = [
       { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
       { id: 'overview', name: '세정 공정 개요', icon: '🔄', tier: 'basic', type: 'overview' },
       { id: 'wet-cleaning', name: '습식 세정', icon: '💧', tier: 'core', type: 'simulation', coreReason: 'RCA 세정 흐름을 단계별로 시각 확인' },
-      { id: 'dry-cleaning', name: '건식 세정', icon: '⚡', tier: 'core', type: 'simulation', coreReason: '건식/습식 차이를 눈으로 비교하며 체득' },
+      { id: 'dry-cleaning', name: '건식 세정', icon: '⚡', tier: 'core', type: 'summary', coreReason: '건식/습식 차이를 눈으로 비교하며 체득' },
       { id: 'ultrasonic', name: '초음파 세정', icon: '🌊', tier: 'basic', type: 'experiment' },
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
@@ -70,7 +71,7 @@ const matrixData = [
       { id: 'overview1', name: '공정 개요 1', icon: '📋', tier: 'basic', type: 'overview' },
       { id: 'overview2', name: '공정 개요 2', icon: '📷', tier: 'basic', type: 'overview' },
       { id: 'process', name: 'PR Coating', icon: '⚙️', tier: 'core', type: 'simulation', coreReason: 'RPM을 직접 바꾸며 코팅 균일도를 느낌' },
-      { id: 'exposure', name: '노광 방식 비교', icon: '💡', tier: 'core', type: 'simulation', coreReason: 'DUV vs EUV 해상도 차이를 눈으로 확인' },
+      { id: 'exposure', name: '노광 방식 비교', icon: '💡', tier: 'core', type: 'summary', coreReason: 'DUV vs EUV 해상도 차이를 눈으로 확인' },
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
@@ -81,7 +82,7 @@ const matrixData = [
     color: '#2196f3',
     tabs: [
       { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
-      { id: 'plasma-basics', name: '플라즈마 기본', icon: '⚡', tier: 'core', type: 'simulation', coreReason: '전자-이온 충돌이 만드는 플라즈마를 체감' },
+      { id: 'plasma-basics', name: '플라즈마 기본', icon: '⚡', tier: 'core', type: 'summary', coreReason: '전자-이온 충돌이 만드는 플라즈마를 체감' },
       { id: 'plasma-principle1', name: '발생원리 1', icon: '🔬', tier: 'core', type: 'simulation', best: true, coreReason: '파션커브를 조작하며 방전 조건을 이해' },
       { id: 'plasma-principle2', name: '발생원리 2', icon: '📈', tier: 'basic', type: 'theory' },
       { id: 'rf-matching', name: 'RF 매칭', icon: '📡', tier: 'advanced', type: 'analysis' },
@@ -95,7 +96,7 @@ const matrixData = [
     color: '#3f51b5',
     tabs: [
       { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
-      { id: 'system-structure-icp', name: 'ICP 구조', icon: '🔬', tier: 'core', type: 'simulation', coreReason: 'ICP 4단계를 따라가며 유도결합 원리 습득' },
+      { id: 'system-structure-icp', name: 'ICP 구조', icon: '🔬', tier: 'core', type: 'summary', coreReason: 'ICP 4단계를 따라가며 유도결합 원리 습득' },
       { id: 'etching-process', name: '식각 공정', icon: '⚙️', tier: 'core', type: 'simulation', coreReason: 'Ion+Radical Synergy가 왜 중요한지 체험' },
       { id: 'deposition-process', name: '증착 공정', icon: '🏗️', tier: 'basic', type: 'theory' },
       { id: 'equipment-application', name: '장비 응용', icon: '🏭', tier: 'advanced', type: 'guide' },
@@ -110,7 +111,7 @@ const matrixData = [
     tabs: [
       { id: 'theory', name: '이론', icon: '🎬', tier: 'basic', type: 'theory' },
       { id: 'overview', name: '식각 공정 개요', icon: '📋', tier: 'basic', type: 'overview' },
-      { id: 'etch-elements', name: '식각 요소', icon: '🔬', tier: 'core', type: 'experiment', coreReason: 'RIE 가스 조건 차이를 비교하며 체험' },
+      { id: 'etch-elements', name: '식각 요소', icon: '🔬', tier: 'core', type: 'summary', coreReason: 'RIE 가스 조건 차이를 비교하며 체험' },
       { id: 'process', name: '식각 원리', icon: '🧪', tier: 'core', type: 'simulation', coreReason: '3D로 실리콘이 깎이는 과정을 눈으로 확인' },
       { id: 'analysis', name: 'Si식각메커니즘', icon: '📊', tier: 'core', type: 'simulation', best: true, coreReason: 'Si 표면에서 일어나는 식각 반응을 단계별로 이해' },
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
@@ -155,7 +156,7 @@ const matrixData = [
     tabs: [
       { id: 'overview', name: '개요', icon: '📚', tier: 'basic', type: 'overview' },
       { id: 'metallization', name: '금속배선', icon: '🔌', tier: 'core', type: 'simulation', coreReason: '다층 배선이 왜 필요한지 구조로 이해' },
-      { id: 'damascene', name: 'Damascene', icon: '⚙️', tier: 'core', type: 'simulation', coreReason: 'Single vs Dual 공정 차이를 단계별 확인' },
+      { id: 'damascene', name: 'Damascene', icon: '⚙️', tier: 'core', type: 'summary', coreReason: 'Single vs Dual 공정 차이를 단계별 확인' },
       { id: 'eds', name: 'EDS', icon: '🔍', tier: 'basic', type: 'experiment' },
       { id: 'packaging', name: '패키징', icon: '📦', tier: 'basic', type: 'theory' },
       { id: 'bonding', name: '본딩', icon: '🔗', tier: 'advanced', type: 'analysis' },
