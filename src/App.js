@@ -16,9 +16,10 @@ const LOCKED_TABS = new Set([
 ]);
 
 // 시뮬레이터별 탭 오버레이 위치 (top: 타이틀 아래부터, height: 탭 바 높이)
+// height: 0 → 오버레이 안 씌움 (탭 전환 허용)
 const TAB_OVERLAY = {
-  'plasma':                   { top: 73, height: 56 },
-  'plasma-ii':                { top: 73, height: 56 },
+  'plasma':                   { top: 0, height: 0 },
+  'plasma-ii':                { top: 0, height: 0 },
   'comprehensive-assessment': { top: 0, height: 0 },
 };
 const DEFAULT_TAB_OVERLAY = { top: 0, height: 58 };
@@ -135,12 +136,12 @@ const App = () => {
               {/* 탭 네비게이션 비활성화 오버레이 (타이틀은 보이고, 탭 바만 덮음) */}
               {activeTab && (() => {
                 const overlay = TAB_OVERLAY[activeSimulator] || DEFAULT_TAB_OVERLAY;
+                if (overlay.height === 0) return null;
                 return (
                   <div className="absolute left-0 right-0 z-40 bg-white" style={{ top: `${overlay.top}px`, height: `${overlay.height}px` }}>
                   </div>
                 );
               })()}
-              )}
               {/* 잠금 오버레이 */}
               {LOCKED_TABS.has(`${activeSimulator}:${activeTab}`) && (
                 <div className="absolute inset-0 z-50 flex items-center justify-center"
