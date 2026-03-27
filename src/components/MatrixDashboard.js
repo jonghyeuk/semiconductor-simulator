@@ -310,12 +310,12 @@ const MatrixDashboard = ({ onNavigate }) => {
             </section>
           )}
 
-          {/* ====== 섹션 1: 🔥 핵심 시뮬레이션 ====== */}
+          {/* ====== 섹션 1: 🔥 핵심 실습 ====== */}
           <section>
             <div className="flex items-center gap-3 mb-4">
               <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl shadow-md">
                 <span className="text-lg">🔥</span>
-                <span className="font-bold">핵심 시뮬레이션</span>
+                <span className="font-bold">핵심 실습</span>
               </div>
               <span className="text-sm text-orange-600 font-medium">
                 — 직접 조작하며 원리를 체험하세요
@@ -485,7 +485,7 @@ const MatrixDashboard = ({ onNavigate }) => {
               {/* 상단 안내 문구 */}
               <div className="text-center mb-6">
                 <p className="text-sm text-slate-500 mb-1">
-                  이 데모는 Education Center의 핵심 시뮬레이션을 먼저 체험하는 버전입니다
+                  이 데모는 Education Center의 핵심 실습을 먼저 체험하는 버전입니다
                 </p>
                 <p className="text-xs text-slate-400">
                   전체 플랫폼은 3개의 학습 센터로 구성됩니다
@@ -509,7 +509,7 @@ const MatrixDashboard = ({ onNavigate }) => {
                     </div>
                   </div>
                   <p className="text-xs text-teal-700 leading-relaxed">
-                    핵심 시뮬레이션과 이론 학습을 통해 반도체 공정의 원리를 이해합니다
+                    핵심 실습과 이론 학습을 통해 반도체 공정의 원리를 이해합니다
                   </p>
                   <div className="mt-3 flex flex-wrap gap-1">
                     <span className="px-1.5 py-0.5 text-[9px] bg-teal-100 text-teal-700 rounded font-medium">Vacuum</span>
