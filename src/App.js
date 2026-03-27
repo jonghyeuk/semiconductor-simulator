@@ -114,8 +114,8 @@ const App = () => {
             onAdminClick={() => setShowAdmin(true)}
             onBackToDashboard={() => setActiveSimulator(null)}
           />
-          {/* 사이드바 시뮬레이터 목록 비활성화 (하단 정식버전/관리자 제외) */}
-          <div className="absolute inset-0 z-40" style={{ bottom: '56px', backgroundColor: 'rgba(255,255,255,0.5)' }}>
+          {/* 사이드바 시뮬레이터 목록 비활성화 (헤더+대시보드 버튼, 하단 정식버전/관리자 제외) */}
+          <div className="absolute left-0 right-0 z-40" style={{ top: '105px', bottom: '56px', backgroundColor: 'rgba(255,255,255,0.5)' }}>
           </div>
         </div>
 
