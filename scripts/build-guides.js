@@ -158,7 +158,7 @@ function buildSimulatorPage(sim) {
     <div class="container">
       <h1><a href="${guideDomain}">반도체 공정 시뮬레이터</a></h1>
       <nav>
-        <a href="./index.html">전체 가이드</a>
+        <a href="${guideDomain}/guide/">전체 가이드</a>
         <a href="${mainPlatformUrl}">정식 버전</a>
       </nav>
     </div>
@@ -166,7 +166,7 @@ function buildSimulatorPage(sim) {
 
   <div class="container">
     <div class="breadcrumb">
-      <a href="./index.html">가이드</a> &gt; ${sim.shortName}
+      <a href="${guideDomain}/guide/">가이드</a> &gt; ${sim.shortName}
     </div>
   </div>
 
@@ -207,7 +207,7 @@ function buildSimulatorPage(sim) {
             const ps = simulators.find(s => s.id === pid);
             if (!ps) return '';
             if (pid === sim.id) return `<span class="path-item current">${ps.icon} ${ps.shortName}</span>`;
-            return `<a href="./${pid}.html" class="path-item">${ps.icon} ${ps.shortName}</a>`;
+            return `<a href="${guideDomain}/guide/${pid}.html" class="path-item">${ps.icon} ${ps.shortName}</a>`;
           }).join('\n          ')}
         </div>
       </section>
@@ -239,7 +239,7 @@ function buildSimulatorPage(sim) {
         <h3>관련 시뮬레이터</h3>
         <div class="related-grid">
           ${related.map(r => `
-          <a href="./${r.id}.html" class="related-card">
+          <a href="${guideDomain}/guide/${r.id}.html" class="related-card">
             <div class="r-icon">${r.icon}</div>
             <div class="r-name">${r.shortName}</div>
             <div class="r-desc">${r.summary.substring(0, 60)}…</div>
@@ -248,9 +248,9 @@ function buildSimulatorPage(sim) {
       </section>` : ''}
 
       <div class="nav-bottom">
-        <div>${prev ? `<a href="./${prev.id}.html" class="nav-prev">${prev.shortName}</a>` : ''}</div>
-        <a href="./index.html">전체 목록</a>
-        <div>${next ? `<a href="./${next.id}.html" class="nav-next">${next.shortName}</a>` : ''}</div>
+        <div>${prev ? `<a href="${guideDomain}/guide/${prev.id}.html" class="nav-prev">${prev.shortName}</a>` : ''}</div>
+        <a href="${guideDomain}/guide/">전체 목록</a>
+        <div>${next ? `<a href="${guideDomain}/guide/${next.id}.html" class="nav-next">${next.shortName}</a>` : ''}</div>
       </div>
 
     </div>
@@ -333,7 +333,7 @@ function buildIndexPage() {
           ${learningPath.map((pid, i) => {
             const ps = simulators.find(s => s.id === pid);
             if (!ps) return '';
-            return `<a href="./${pid}.html" class="path-item">${i + 1}. ${ps.icon} ${ps.shortName}</a>`;
+            return `<a href="${guideDomain}/guide/${pid}.html" class="path-item">${i + 1}. ${ps.icon} ${ps.shortName}</a>`;
           }).join('\n          ')}
         </div>
       </section>
@@ -342,7 +342,7 @@ function buildIndexPage() {
         <h3>전체 시뮬레이터 (${simulators.length}개)</h3>
         <div class="index-grid">
           ${simulators.map(sim => `
-          <a href="./${sim.id}.html" class="index-card">
+          <a href="${guideDomain}/guide/${sim.id}.html" class="index-card">
             <div class="i-icon">${sim.icon}</div>
             <div class="i-name">${sim.shortName}</div>
             <div class="i-summary">${sim.summary}</div>
