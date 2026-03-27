@@ -125,9 +125,9 @@ const matrixData = [
       { id: 'theory', name: '개요', icon: '📚', tier: 'basic', type: 'overview' },
       { id: 'pvd-evap', name: 'PVD (증발)', icon: '🔥', tier: 'core', type: 'simulation', best: true, coreReason: '증발 분자가 기판에 닿는 과정을 3D로 체험' },
       { id: 'pvd-sputtering', name: 'PVD (스퍼터링)', icon: '🎯', tier: 'core', type: 'simulation', best: true, coreReason: '아르곤 이온 충돌 → 박막 형성을 시각 확인' },
-      { id: 'cvd-thermal', name: 'CVD (Thermal)', icon: '🌡️', tier: 'core', type: 'simulation', best: true, coreReason: '고온 열분해로 박막이 쌓이는 메커니즘을 체득' },
-      { id: 'cvd-pecvd', name: 'PECVD', icon: '⚡', tier: 'advanced', type: 'simulation' },
-      { id: 'ald', name: 'ALD', icon: '⚛️', tier: 'core', type: 'simulation', best: true, coreReason: '원자 한 층씩 쌓는 ALD 사이클을 직접 돌려봄' },
+      { id: 'cvd-thermal', name: 'CVD (Thermal)', icon: '🌡️', tier: 'core', type: 'simulation', best: true, coreReason: '고온 열분해로 박막이 쌓이는 메커니즘을 체득', locked: true },
+      { id: 'cvd-pecvd', name: 'PECVD', icon: '⚡', tier: 'advanced', type: 'simulation', locked: true },
+      { id: 'ald', name: 'ALD', icon: '⚛️', tier: 'core', type: 'simulation', best: true, coreReason: '원자 한 층씩 쌓는 ALD 사이클을 직접 돌려봄', locked: true },
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
@@ -257,9 +257,15 @@ const MatrixDashboard = ({ onNavigate }) => {
                       <span className="px-2.5 py-1 text-xs font-extrabold rounded-lg bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-md">
                         🏆 BEST {bestCards.length > 1 ? `#${idx + 1}` : ''}
                       </span>
-                      <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-orange-100 text-orange-700">
-                        입문 추천
-                      </span>
+                      {card.locked ? (
+                        <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-gray-100 text-gray-500">
+                          미리보기
+                        </span>
+                      ) : (
+                        <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-orange-100 text-orange-700">
+                          입문 추천
+                        </span>
+                      )}
                     </div>
 
                     {/* 콘텐츠 유형 태그 */}
@@ -329,9 +335,15 @@ const MatrixDashboard = ({ onNavigate }) => {
                     <span className={`px-2 py-0.5 text-[10px] font-bold rounded-md ${contentTypes[card.type].color}`}>
                       {contentTypes[card.type].label}
                     </span>
-                    <span className="text-[10px] font-bold text-orange-500 bg-orange-100 px-1.5 py-0.5 rounded">
-                      🔥 핵심
-                    </span>
+                    {card.locked ? (
+                      <span className="text-[10px] font-bold text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">
+                        미리보기
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold text-orange-500 bg-orange-100 px-1.5 py-0.5 rounded">
+                        🔥 핵심
+                      </span>
+                    )}
                   </div>
 
                   {/* 아이콘 + 이름 */}

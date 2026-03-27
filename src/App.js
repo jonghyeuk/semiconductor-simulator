@@ -7,6 +7,13 @@ import { simulatorRegistry } from './utils/simulatorRegistry';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './utils/firebase';
 
+// 잠금 탭 정의 (시뮬레이터:탭)
+const LOCKED_TABS = new Set([
+  'deposition:cvd-thermal',
+  'deposition:cvd-pecvd',
+  'deposition:ald',
+]);
+
 const App = () => {
   const [activeSimulator, setActiveSimulator] = useState(null); // null = 매트릭스 대시보드
   const [activeTab, setActiveTab] = useState(null);
@@ -104,9 +111,43 @@ const App = () => {
         />
 
         {/* 메인 컨텐츠 영역 */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col relative">
           {CurrentSimulator ? (
-            <CurrentSimulator initialTab={activeTab} />
+            <>
+              <CurrentSimulator initialTab={activeTab} />
+              {/* 잠금 오버레이 */}
+              {LOCKED_TABS.has(`${activeSimulator}:${activeTab}`) && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center"
+                     style={{ backgroundColor: 'rgba(255,255,255,0.75)', backdropFilter: 'blur(2px)' }}>
+                  <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md text-center mx-4">
+                    <div className="text-5xl mb-4">🔬</div>
+                    <h3 className="text-xl font-bold text-gray-800 mb-2">
+                      정식 버전에서 체험할 수 있습니다
+                    </h3>
+                    <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+                      이 시뮬레이션의 전체 기능은 정식 버전에서 이용 가능합니다.<br/>
+                      100개 이상의 시뮬레이터와 심화 학습 콘텐츠를 만나보세요.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <a
+                        href="https://kr.semifabai.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-xl shadow hover:shadow-lg hover:scale-105 transition-all duration-200"
+                      >
+                        정식 버전 알아보기
+                      </a>
+                      <button
+                        onClick={() => setActiveTab(null)}
+                        className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors"
+                      >
+                        다른 탭 둘러보기
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center">
