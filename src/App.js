@@ -84,6 +84,9 @@ const App = () => {
     ? simulatorRegistry.getSimulator(activeSimulator)
     : null;
 
+  // 현재 잠금 상태인지
+  const isLocked = LOCKED_TABS.has(`${activeSimulator}:${activeTab}`);
+
   // 매트릭스 대시보드 모드
   if (!activeSimulator) {
     return (
@@ -103,12 +106,19 @@ const App = () => {
 
       <div className="flex h-screen bg-gray-100">
         {/* 좌측 사이드바 */}
-        <MainPortal
-          activeSimulator={activeSimulator}
-          onSimulatorChange={handleSimulatorChange}
-          onAdminClick={() => setShowAdmin(true)}
-          onBackToDashboard={() => setActiveSimulator(null)}
-        />
+        <div className="relative">
+          <MainPortal
+            activeSimulator={activeSimulator}
+            onSimulatorChange={handleSimulatorChange}
+            onAdminClick={() => setShowAdmin(true)}
+            onBackToDashboard={() => setActiveSimulator(null)}
+          />
+          {/* 잠금 시 사이드바 비활성화 (하단 링크 제외) */}
+          {isLocked && (
+            <div className="absolute inset-0 z-40" style={{ bottom: '56px', backgroundColor: 'rgba(255,255,255,0.5)' }}>
+            </div>
+          )}
+        </div>
 
         {/* 메인 컨텐츠 영역 */}
         <div className="flex-1 flex flex-col relative">
@@ -138,10 +148,10 @@ const App = () => {
                         정식 버전 알아보기
                       </a>
                       <button
-                        onClick={() => setActiveTab(null)}
+                        onClick={() => { setActiveSimulator(null); setActiveTab(null); }}
                         className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-colors"
                       >
-                        다른 탭 둘러보기
+                        데모 첫 화면으로
                       </button>
                     </div>
                   </div>
