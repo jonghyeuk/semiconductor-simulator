@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 
 // 콘텐츠 유형 태그
 const contentTypes = {
-  simulation: { label: '시뮬레이션', color: 'bg-red-500 text-white', textColor: 'text-red-600' },
+  simulation: { label: '실습', color: 'bg-red-500 text-white', textColor: 'text-red-600' },
   theory: { label: '이론', color: 'bg-slate-400 text-white', textColor: 'text-slate-500' },
   experiment: { label: '실험', color: 'bg-emerald-500 text-white', textColor: 'text-emerald-600' },
   quiz: { label: '평가', color: 'bg-violet-500 text-white', textColor: 'text-violet-600' },
