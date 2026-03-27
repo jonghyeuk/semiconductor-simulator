@@ -9,6 +9,7 @@ import { db } from './utils/firebase';
 
 // 잠금 탭 정의 (시뮬레이터:탭)
 const LOCKED_TABS = new Set([
+  'deposition:pvd-sputtering',
   'deposition:cvd-thermal',
   'deposition:cvd-pecvd',
   'deposition:ald',
@@ -113,11 +114,9 @@ const App = () => {
             onAdminClick={() => setShowAdmin(true)}
             onBackToDashboard={() => setActiveSimulator(null)}
           />
-          {/* 잠금 시 사이드바 비활성화 (하단 링크 제외) */}
-          {isLocked && (
-            <div className="absolute inset-0 z-40" style={{ bottom: '56px', backgroundColor: 'rgba(255,255,255,0.5)' }}>
-            </div>
-          )}
+          {/* 사이드바 시뮬레이터 목록 비활성화 (하단 정식버전/관리자 제외) */}
+          <div className="absolute inset-0 z-40" style={{ bottom: '56px', backgroundColor: 'rgba(255,255,255,0.5)' }}>
+          </div>
         </div>
 
         {/* 메인 컨텐츠 영역 */}
