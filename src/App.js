@@ -126,7 +126,7 @@ const App = () => {
               <CurrentSimulator initialTab={activeTab} />
               {/* 탭 네비게이션 비활성화 오버레이 (선택된 탭만 사용 가능하도록) */}
               {activeTab && (
-                <div className="absolute top-0 left-0 right-0 z-40" style={{ height: '52px' }}>
+                <div className="absolute top-0 left-0 right-0 z-40 bg-white" style={{ height: '52px' }}>
                 </div>
               )}
               {/* 잠금 오버레이 */}
