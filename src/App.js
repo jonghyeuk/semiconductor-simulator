@@ -15,6 +15,13 @@ const LOCKED_TABS = new Set([
   'deposition:ald',
 ]);
 
+// 시뮬레이터별 탭 오버레이 위치 (top: 타이틀 아래부터, height: 탭 바 높이)
+const TAB_OVERLAY = {
+  'plasma':    { top: 57, height: 48 },
+  'plasma-ii': { top: 57, height: 48 },
+};
+const DEFAULT_TAB_OVERLAY = { top: 0, height: 58 };
+
 const App = () => {
   const [activeSimulator, setActiveSimulator] = useState(null); // null = 매트릭스 대시보드
   const [activeTab, setActiveTab] = useState(null);
@@ -124,10 +131,14 @@ const App = () => {
           {CurrentSimulator ? (
             <>
               <CurrentSimulator initialTab={activeTab} />
-              {/* 탭 네비게이션 비활성화 오버레이 (선택된 탭만 사용 가능하도록) */}
-              {activeTab && (
-                <div className="absolute top-0 left-0 right-0 z-40 bg-white" style={{ height: '120px' }}>
-                </div>
+              {/* 탭 네비게이션 비활성화 오버레이 (타이틀은 보이고, 탭 바만 덮음) */}
+              {activeTab && (() => {
+                const overlay = TAB_OVERLAY[activeSimulator] || DEFAULT_TAB_OVERLAY;
+                return (
+                  <div className="absolute left-0 right-0 z-40 bg-white" style={{ top: `${overlay.top}px`, height: `${overlay.height}px` }}>
+                  </div>
+                );
+              })()}
               )}
               {/* 잠금 오버레이 */}
               {LOCKED_TABS.has(`${activeSimulator}:${activeTab}`) && (
