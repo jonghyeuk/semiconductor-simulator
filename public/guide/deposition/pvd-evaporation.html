@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PVD 증발 시뮬레이션 - Deposition | 반도체 공정 시뮬레이터</title>
+  <meta name="description" content="열 증발(Thermal Evaporation) 방식의 분자 거동과 박막 형성 과정을 3D로 체험합니다.">
+  <meta name="keywords" content="PVD 증발, thermal evaporation, 열 증발법, 증발 분자 시뮬레이션, 박막 증착 PVD">
+  <meta property="og:title" content="PVD 증발 시뮬레이션 - Deposition 시뮬레이터">
+  <meta property="og:description" content="열 증발(Thermal Evaporation) 방식의 분자 거동과 박막 형성 과정을 3D로 체험합니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://demo.semifabai.com/guide/deposition/pvd-evaporation.html">
+  <link rel="canonical" href="https://demo.semifabai.com/guide/deposition/pvd-evaporation.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "PVD 증발 시뮬레이션 - Deposition",
+    "description": "열 증발(Thermal Evaporation) 방식의 분자 거동과 박막 형성 과정을 3D로 체험합니다.",
+    "educationalLevel": "중급",
+    "learningResourceType": "Interactive Simulation",
+    "datePublished": "2026-03-27",
+    "dateModified": "2026-03-27",
+    "isPartOf": {
+      "@type": "LearningResource",
+      "name": "Deposition 시뮬레이터",
+      "url": "https://demo.semifabai.com/guide/deposition.html"
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "SemiFabAI",
+      "url": "https://kr.semifabai.com"
+    },
+    "inLanguage": "ko",
+    "keywords": "PVD 증발, thermal evaporation, 열 증발법, 증발 분자 시뮬레이션, 박막 증착 PVD"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://demo.semifabai.com/"},
+      {"@type": "ListItem", "position": 2, "name": "가이드", "item": "https://demo.semifabai.com/guide/"},
+      {"@type": "ListItem", "position": 3, "name": "Deposition", "item": "https://demo.semifabai.com/guide/deposition.html"},
+      {"@type": "ListItem", "position": 4, "name": "PVD 증발 시뮬레이션", "item": "https://demo.semifabai.com/guide/deposition/pvd-evaporation.html"}
+    ]
+  }
+  </script>
+  <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; line-height: 1.7; background: #f8f9fa; }
+  a { color: #1976d2; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 16px 0; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header h1 a { color: #1a1a1a; }
+  header nav a { font-size: 14px; margin-left: 20px; color: #555; }
+  header nav a:hover { color: #1976d2; }
+  .breadcrumb { font-size: 13px; color: #888; padding: 12px 0; }
+  .breadcrumb a { color: #888; }
+  .hero { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 48px 0 40px; }
+  .hero .icon { font-size: 48px; margin-bottom: 12px; }
+  .hero h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .hero .summary { font-size: 17px; color: #555; max-width: 640px; }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  main { padding: 40px 0 60px; }
+  section { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 32px; margin-bottom: 24px; }
+  section h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  section ul { padding-left: 20px; }
+  section li { margin-bottom: 8px; }
+  .context-box { background: #f0f7ff; border-left: 4px solid #1976d2; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 15px; color: #333; }
+  .demo-scope { background: #f0faf0; border-left: 4px solid #4caf50; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .full-version { background: #fff8e1; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .cta-box { text-align: center; padding: 40px 32px; background: linear-gradient(135deg, #1976d2, #1565c0); color: #fff; border-radius: 12px; margin: 32px 0; }
+  .cta-box h3 { color: #fff; border: none; margin-bottom: 12px; }
+  .cta-box p { color: rgba(255,255,255,0.85); margin-bottom: 20px; }
+  .cta-btn { display: inline-block; padding: 12px 32px; background: #fff; color: #1976d2; border-radius: 8px; font-weight: 700; font-size: 15px; }
+  .cta-btn:hover { text-decoration: none; background: #f5f5f5; }
+  .cta-btn-outline { display: inline-block; padding: 12px 32px; border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: 700; font-size: 15px; margin-left: 12px; }
+  .cta-btn-outline:hover { text-decoration: none; background: rgba(255,255,255,0.1); }
+  .nav-bottom { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-top: 1px solid #e0e0e0; margin-top: 20px; }
+  .nav-bottom a { font-size: 14px; }
+  .nav-prev::before { content: '← '; }
+  .nav-next::after { content: ' →'; }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .related-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; transition: box-shadow 0.2s; }
+  .related-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-decoration: none; }
+  .related-card .r-icon { font-size: 28px; margin-bottom: 8px; }
+  .related-card .r-name { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+  .related-card .r-desc { font-size: 13px; color: #777; margin-top: 4px; }
+  footer { background: #fff; border-top: 1px solid #e0e0e0; padding: 32px 0; text-align: center; font-size: 13px; color: #999; }
+  footer a { color: #999; }
+  .path-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .path-item { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; }
+  .path-item.current { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .path-item a { color: inherit; }
+  .index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 24px 0; }
+  .index-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: box-shadow 0.2s, transform 0.2s; }
+  .index-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); text-decoration: none; }
+  .index-card .i-icon { font-size: 36px; margin-bottom: 8px; }
+  .index-card .i-name { font-weight: 700; font-size: 17px; color: #1a1a1a; margin-bottom: 6px; }
+  .index-card .i-summary { font-size: 14px; color: #666; line-height: 1.5; }
+  .index-card .i-level { font-size: 12px; color: #999; margin-top: 10px; }
+  @media (max-width: 640px) { .hero h2 { font-size: 24px; } section { padding: 24px 16px; } .cta-btn-outline { margin-left: 0; margin-top: 8px; } }
+
+  .tab-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .tab-link { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; background: #fff; transition: all 0.2s; }
+  .tab-link:hover { border-color: #ff9800; color: #ff9800; text-decoration: none; }
+  .tab-link.current { background: #ff9800; color: #fff; border-color: #ff9800; }
+  .learning-point { display: flex; align-items: flex-start; margin-bottom: 12px; }
+  .learning-point::before { content: '✓'; color: #ff9800; font-weight: 700; margin-right: 10px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><a href="https://demo.semifabai.com">반도체 공정 시뮬레이터</a></h1>
+      <nav>
+        <a href="https://demo.semifabai.com/guide/">전체 가이드</a>
+        <a href="https://kr.semifabai.com">정식 버전</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="https://demo.semifabai.com/guide/">가이드</a> &gt; <a href="https://demo.semifabai.com/guide/deposition.html">Deposition</a> &gt; PVD 증발 시뮬레이션
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="container">
+      <div class="icon">🔥</div>
+      <h2>PVD 증발 시뮬레이션</h2>
+      <p class="summary">열 증발(Thermal Evaporation) 방식의 분자 거동과 박막 형성 과정을 3D로 체험합니다.</p>
+      <div style="margin-top: 16px;">
+        <span class="badge" style="background: #ff9800; color: #fff;">Deposition</span>
+        <span class="badge" style="background: #f5f5f5; color: #555; margin-left: 8px;">중급</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section>
+        <h3>상세 설명</h3>
+        <p>열 증발법은 도가니(crucible)에서 물질을 가열하여 증기화시킨 뒤, 증기 분자가 기판에 도달하여 박막을 형성하는 PVD 기술입니다. 이 시뮬레이터에서는 증발 분자의 비행 경로, 기판 위치에 따른 두께 분포, 증발원 온도와 증착 속도의 관계를 시각적으로 관찰합니다. 코사인 법칙에 따른 방향성 분포도 확인합니다.</p>
+      </section>
+
+      <section>
+        <h3>이 탭에서 배울 수 있는 것</h3>
+        <div class="learning-point">열 증발법의 기본 원리와 증발원 구조</div>
+        <div class="learning-point">증발 분자의 코사인 방향 분포(cosine law)</div>
+        <div class="learning-point">기판 위치에 따른 막 두께 균일도 변화</div>
+        <div class="learning-point">증발원 온도와 증착 속도의 관계</div>
+      </section>
+
+      <div class="cta-box">
+        <h3>직접 체험해 보세요</h3>
+        <p>Deposition의 PVD 증발 시뮬레이션을(를) 지금 바로 사용해 볼 수 있습니다.</p>
+        <a href="https://demo.semifabai.com/?sim=deposition&tab=pvd-evap" class="cta-btn">PVD 증발 시뮬레이션 체험하기</a>
+        <a href="https://kr.semifabai.com" class="cta-btn-outline">정식 버전 알아보기</a>
+      </div>
+
+      
+      <section>
+        <h3>Deposition의 다른 학습 탭</h3>
+        <div class="tab-nav">
+          <span class="tab-link current">🔥 PVD 증발 시뮬레이션</span>
+          <a href="https://demo.semifabai.com/guide/deposition/pvd-sputtering.html" class="tab-link">🎯 PVD 스퍼터링</a>
+          <a href="https://demo.semifabai.com/guide/deposition/cvd-thermal.html" class="tab-link">🌡️ Thermal CVD 시뮬레이션</a>
+          <a href="https://demo.semifabai.com/guide/deposition/pecvd.html" class="tab-link">⚡ PECVD 시뮬레이션</a>
+          <a href="https://demo.semifabai.com/guide/deposition/ald.html" class="tab-link">⚛️ ALD 사이클 시뮬레이션</a>
+        </div>
+      </section>
+
+      <div class="nav-bottom">
+        <a href="https://demo.semifabai.com/guide/deposition.html">📦 Deposition 전체 가이드</a>
+        <a href="https://demo.semifabai.com/guide/">전체 목록</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>반도체 공정 시뮬레이터 데모 | <a href="https://kr.semifabai.com">SemiFabAI 정식 버전</a></p>
+      <p style="margin-top: 8px;">교육 목적의 인터랙티브 시뮬레이터 플랫폼</p>
+    </div>
+  </footer>
+</body>
+</html>
