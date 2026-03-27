@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이온주입 적용 가이드 - Implantation | 반도체 공정 시뮬레이터</title>
+  <meta name="description" content="트랜지스터 구조별 이온주입 적용 사례와 최적 조건을 학습합니다.">
+  <meta name="keywords" content="이온주입 적용, MOSFET 도핑, 채널 도핑, LDD 이온주입, 이온주입 가이드">
+  <meta property="og:title" content="이온주입 적용 가이드 - Implantation 시뮬레이터">
+  <meta property="og:description" content="트랜지스터 구조별 이온주입 적용 사례와 최적 조건을 학습합니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://demo.semifabai.com/guide/implantation/application-guide.html">
+  <link rel="canonical" href="https://demo.semifabai.com/guide/implantation/application-guide.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "이온주입 적용 가이드 - Implantation",
+    "description": "트랜지스터 구조별 이온주입 적용 사례와 최적 조건을 학습합니다.",
+    "educationalLevel": "중급~고급",
+    "learningResourceType": "Interactive Simulation",
+    "datePublished": "2026-03-27",
+    "dateModified": "2026-03-27",
+    "isPartOf": {
+      "@type": "LearningResource",
+      "name": "Implantation 시뮬레이터",
+      "url": "https://demo.semifabai.com/guide/implantation.html"
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "SemiFabAI",
+      "url": "https://kr.semifabai.com"
+    },
+    "inLanguage": "ko",
+    "keywords": "이온주입 적용, MOSFET 도핑, 채널 도핑, LDD 이온주입, 이온주입 가이드"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://demo.semifabai.com/"},
+      {"@type": "ListItem", "position": 2, "name": "가이드", "item": "https://demo.semifabai.com/guide/"},
+      {"@type": "ListItem", "position": 3, "name": "Implantation", "item": "https://demo.semifabai.com/guide/implantation.html"},
+      {"@type": "ListItem", "position": 4, "name": "이온주입 적용 가이드", "item": "https://demo.semifabai.com/guide/implantation/application-guide.html"}
+    ]
+  }
+  </script>
+  <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; line-height: 1.7; background: #f8f9fa; }
+  a { color: #1976d2; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 16px 0; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header h1 a { color: #1a1a1a; }
+  header nav a { font-size: 14px; margin-left: 20px; color: #555; }
+  header nav a:hover { color: #1976d2; }
+  .breadcrumb { font-size: 13px; color: #888; padding: 12px 0; }
+  .breadcrumb a { color: #888; }
+  .hero { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 48px 0 40px; }
+  .hero .icon { font-size: 48px; margin-bottom: 12px; }
+  .hero h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .hero .summary { font-size: 17px; color: #555; max-width: 640px; }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  main { padding: 40px 0 60px; }
+  section { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 32px; margin-bottom: 24px; }
+  section h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  section ul { padding-left: 20px; }
+  section li { margin-bottom: 8px; }
+  .context-box { background: #f0f7ff; border-left: 4px solid #1976d2; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 15px; color: #333; }
+  .demo-scope { background: #f0faf0; border-left: 4px solid #4caf50; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .full-version { background: #fff8e1; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .cta-box { text-align: center; padding: 40px 32px; background: linear-gradient(135deg, #1976d2, #1565c0); color: #fff; border-radius: 12px; margin: 32px 0; }
+  .cta-box h3 { color: #fff; border: none; margin-bottom: 12px; }
+  .cta-box p { color: rgba(255,255,255,0.85); margin-bottom: 20px; }
+  .cta-btn { display: inline-block; padding: 12px 32px; background: #fff; color: #1976d2; border-radius: 8px; font-weight: 700; font-size: 15px; }
+  .cta-btn:hover { text-decoration: none; background: #f5f5f5; }
+  .cta-btn-outline { display: inline-block; padding: 12px 32px; border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: 700; font-size: 15px; margin-left: 12px; }
+  .cta-btn-outline:hover { text-decoration: none; background: rgba(255,255,255,0.1); }
+  .nav-bottom { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-top: 1px solid #e0e0e0; margin-top: 20px; }
+  .nav-bottom a { font-size: 14px; }
+  .nav-prev::before { content: '← '; }
+  .nav-next::after { content: ' →'; }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .related-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; transition: box-shadow 0.2s; }
+  .related-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-decoration: none; }
+  .related-card .r-icon { font-size: 28px; margin-bottom: 8px; }
+  .related-card .r-name { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+  .related-card .r-desc { font-size: 13px; color: #777; margin-top: 4px; }
+  footer { background: #fff; border-top: 1px solid #e0e0e0; padding: 32px 0; text-align: center; font-size: 13px; color: #999; }
+  footer a { color: #999; }
+  .path-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .path-item { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; }
+  .path-item.current { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .path-item a { color: inherit; }
+  .index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 24px 0; }
+  .index-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: box-shadow 0.2s, transform 0.2s; }
+  .index-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); text-decoration: none; }
+  .index-card .i-icon { font-size: 36px; margin-bottom: 8px; }
+  .index-card .i-name { font-weight: 700; font-size: 17px; color: #1a1a1a; margin-bottom: 6px; }
+  .index-card .i-summary { font-size: 14px; color: #666; line-height: 1.5; }
+  .index-card .i-level { font-size: 12px; color: #999; margin-top: 10px; }
+  @media (max-width: 640px) { .hero h2 { font-size: 24px; } section { padding: 24px 16px; } .cta-btn-outline { margin-left: 0; margin-top: 8px; } }
+
+  .tab-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .tab-link { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; background: #fff; transition: all 0.2s; }
+  .tab-link:hover { border-color: #00bcd4; color: #00bcd4; text-decoration: none; }
+  .tab-link.current { background: #00bcd4; color: #fff; border-color: #00bcd4; }
+  .learning-point { display: flex; align-items: flex-start; margin-bottom: 12px; }
+  .learning-point::before { content: '✓'; color: #00bcd4; font-weight: 700; margin-right: 10px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><a href="https://demo.semifabai.com">반도체 공정 시뮬레이터</a></h1>
+      <nav>
+        <a href="https://demo.semifabai.com/guide/">전체 가이드</a>
+        <a href="https://kr.semifabai.com">정식 버전</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="https://demo.semifabai.com/guide/">가이드</a> &gt; <a href="https://demo.semifabai.com/guide/implantation.html">Implantation</a> &gt; 이온주입 적용 가이드
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="container">
+      <div class="icon">💡</div>
+      <h2>이온주입 적용 가이드</h2>
+      <p class="summary">트랜지스터 구조별 이온주입 적용 사례와 최적 조건을 학습합니다.</p>
+      <div style="margin-top: 16px;">
+        <span class="badge" style="background: #00bcd4; color: #fff;">Implantation</span>
+        <span class="badge" style="background: #f5f5f5; color: #555; margin-left: 8px;">중급~고급</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section>
+        <h3>상세 설명</h3>
+        <p>MOSFET 제조에서 이온주입은 웰(Well) 형성, 채널 도핑(Vth 조절), 소스/드레인 도핑, LDD(Lightly Doped Drain) 형성 등 다양한 목적으로 사용됩니다. 각 용도에 따라 이온 종류, 에너지, 도즈가 다르게 설정됩니다. 이 탭에서는 MOSFET 구조의 각 도핑 영역별 이온주입 조건과 설계 기준을 종합적으로 학습합니다.</p>
+      </section>
+
+      <section>
+        <h3>이 탭에서 배울 수 있는 것</h3>
+        <div class="learning-point">MOSFET 구조별 이온주입 적용 영역(Well, 채널, S/D, LDD)</div>
+        <div class="learning-point">각 영역의 이온 종류, 에너지, 도즈 설정 기준</div>
+        <div class="learning-point">Vth 조절을 위한 채널 도핑 최적화</div>
+        <div class="learning-point">LDD 구조의 필요성과 이온주입 조건</div>
+      </section>
+
+      <div class="cta-box">
+        <h3>직접 체험해 보세요</h3>
+        <p>Implantation의 이온주입 적용 가이드을(를) 지금 바로 사용해 볼 수 있습니다.</p>
+        <a href="https://demo.semifabai.com/?sim=implantation&tab=application" class="cta-btn">이온주입 적용 가이드 체험하기</a>
+        <a href="https://kr.semifabai.com" class="cta-btn-outline">정식 버전 알아보기</a>
+      </div>
+
+      
+      <section>
+        <h3>Implantation의 다른 학습 탭</h3>
+        <div class="tab-nav">
+          <span class="tab-link current">💡 이온주입 적용 가이드</span>
+          <a href="https://demo.semifabai.com/guide/implantation/diffusion.html" class="tab-link">📈 확산 공정 시뮬레이션</a>
+          <a href="https://demo.semifabai.com/guide/implantation/ion-implantation.html" class="tab-link">🎯 이온주입 프로파일 시뮬레이션</a>
+          <a href="https://demo.semifabai.com/guide/implantation/process-comparison.html" class="tab-link">🔄 확산 vs 이온주입 비교</a>
+          <a href="https://demo.semifabai.com/guide/implantation/annealing.html" class="tab-link">🌡️ Annealing 효과 시뮬레이션</a>
+          <a href="https://demo.semifabai.com/guide/implantation/rta.html" class="tab-link">⚙️ RTA(급속 열처리) 시뮬레이션</a>
+        </div>
+      </section>
+
+      <div class="nav-bottom">
+        <a href="https://demo.semifabai.com/guide/implantation.html">⚛️ Implantation 전체 가이드</a>
+        <a href="https://demo.semifabai.com/guide/">전체 목록</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>반도체 공정 시뮬레이터 데모 | <a href="https://kr.semifabai.com">SemiFabAI 정식 버전</a></p>
+      <p style="margin-top: 8px;">교육 목적의 인터랙티브 시뮬레이터 플랫폼</p>
+    </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>파션 커브 시뮬레이션 - Plasma | 반도체 공정 시뮬레이터</title>
+  <meta name="description" content="파션 커브(Paschen Curve)를 조작하며 가스 방전 조건을 이해합니다.">
+  <meta name="keywords" content="파션 커브, Paschen curve, 가스 방전, 항복 전압, 플라즈마 점화 조건">
+  <meta property="og:title" content="파션 커브 시뮬레이션 - Plasma 시뮬레이터">
+  <meta property="og:description" content="파션 커브(Paschen Curve)를 조작하며 가스 방전 조건을 이해합니다.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://demo.semifabai.com/guide/plasma/paschen-curve.html">
+  <link rel="canonical" href="https://demo.semifabai.com/guide/plasma/paschen-curve.html">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "파션 커브 시뮬레이션 - Plasma",
+    "description": "파션 커브(Paschen Curve)를 조작하며 가스 방전 조건을 이해합니다.",
+    "educationalLevel": "중급~고급",
+    "learningResourceType": "Interactive Simulation",
+    "datePublished": "2026-03-27",
+    "dateModified": "2026-03-27",
+    "isPartOf": {
+      "@type": "LearningResource",
+      "name": "Plasma 시뮬레이터",
+      "url": "https://demo.semifabai.com/guide/plasma.html"
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "SemiFabAI",
+      "url": "https://kr.semifabai.com"
+    },
+    "inLanguage": "ko",
+    "keywords": "파션 커브, Paschen curve, 가스 방전, 항복 전압, 플라즈마 점화 조건"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "홈", "item": "https://demo.semifabai.com/"},
+      {"@type": "ListItem", "position": 2, "name": "가이드", "item": "https://demo.semifabai.com/guide/"},
+      {"@type": "ListItem", "position": 3, "name": "Plasma", "item": "https://demo.semifabai.com/guide/plasma.html"},
+      {"@type": "ListItem", "position": 4, "name": "파션 커브 시뮬레이션", "item": "https://demo.semifabai.com/guide/plasma/paschen-curve.html"}
+    ]
+  }
+  </script>
+  <style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #1a1a1a; line-height: 1.7; background: #f8f9fa; }
+  a { color: #1976d2; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 860px; margin: 0 auto; padding: 0 24px; }
+  header { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 16px 0; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  header h1 { font-size: 18px; font-weight: 700; }
+  header h1 a { color: #1a1a1a; }
+  header nav a { font-size: 14px; margin-left: 20px; color: #555; }
+  header nav a:hover { color: #1976d2; }
+  .breadcrumb { font-size: 13px; color: #888; padding: 12px 0; }
+  .breadcrumb a { color: #888; }
+  .hero { background: #fff; border-bottom: 1px solid #e0e0e0; padding: 48px 0 40px; }
+  .hero .icon { font-size: 48px; margin-bottom: 12px; }
+  .hero h2 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .hero .summary { font-size: 17px; color: #555; max-width: 640px; }
+  .badge { display: inline-block; font-size: 12px; padding: 3px 10px; border-radius: 12px; font-weight: 600; }
+  main { padding: 40px 0 60px; }
+  section { background: #fff; border-radius: 12px; border: 1px solid #e0e0e0; padding: 32px; margin-bottom: 24px; }
+  section h3 { font-size: 20px; font-weight: 700; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid #f0f0f0; }
+  section ul { padding-left: 20px; }
+  section li { margin-bottom: 8px; }
+  .context-box { background: #f0f7ff; border-left: 4px solid #1976d2; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0; font-size: 15px; color: #333; }
+  .demo-scope { background: #f0faf0; border-left: 4px solid #4caf50; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .full-version { background: #fff8e1; border-left: 4px solid #ff9800; padding: 16px 20px; border-radius: 0 8px 8px 0; }
+  .cta-box { text-align: center; padding: 40px 32px; background: linear-gradient(135deg, #1976d2, #1565c0); color: #fff; border-radius: 12px; margin: 32px 0; }
+  .cta-box h3 { color: #fff; border: none; margin-bottom: 12px; }
+  .cta-box p { color: rgba(255,255,255,0.85); margin-bottom: 20px; }
+  .cta-btn { display: inline-block; padding: 12px 32px; background: #fff; color: #1976d2; border-radius: 8px; font-weight: 700; font-size: 15px; }
+  .cta-btn:hover { text-decoration: none; background: #f5f5f5; }
+  .cta-btn-outline { display: inline-block; padding: 12px 32px; border: 2px solid #fff; color: #fff; border-radius: 8px; font-weight: 700; font-size: 15px; margin-left: 12px; }
+  .cta-btn-outline:hover { text-decoration: none; background: rgba(255,255,255,0.1); }
+  .nav-bottom { display: flex; justify-content: space-between; align-items: center; padding: 24px 0; border-top: 1px solid #e0e0e0; margin-top: 20px; }
+  .nav-bottom a { font-size: 14px; }
+  .nav-prev::before { content: '← '; }
+  .nav-next::after { content: ' →'; }
+  .related-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  .related-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; transition: box-shadow 0.2s; }
+  .related-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); text-decoration: none; }
+  .related-card .r-icon { font-size: 28px; margin-bottom: 8px; }
+  .related-card .r-name { font-weight: 700; font-size: 15px; color: #1a1a1a; }
+  .related-card .r-desc { font-size: 13px; color: #777; margin-top: 4px; }
+  footer { background: #fff; border-top: 1px solid #e0e0e0; padding: 32px 0; text-align: center; font-size: 13px; color: #999; }
+  footer a { color: #999; }
+  .path-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .path-item { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; }
+  .path-item.current { background: #1976d2; color: #fff; border-color: #1976d2; }
+  .path-item a { color: inherit; }
+  .index-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 24px 0; }
+  .index-card { background: #fff; border: 1px solid #e0e0e0; border-radius: 12px; padding: 24px; transition: box-shadow 0.2s, transform 0.2s; }
+  .index-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.08); transform: translateY(-2px); text-decoration: none; }
+  .index-card .i-icon { font-size: 36px; margin-bottom: 8px; }
+  .index-card .i-name { font-weight: 700; font-size: 17px; color: #1a1a1a; margin-bottom: 6px; }
+  .index-card .i-summary { font-size: 14px; color: #666; line-height: 1.5; }
+  .index-card .i-level { font-size: 12px; color: #999; margin-top: 10px; }
+  @media (max-width: 640px) { .hero h2 { font-size: 24px; } section { padding: 24px 16px; } .cta-btn-outline { margin-left: 0; margin-top: 8px; } }
+
+  .tab-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .tab-link { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; background: #fff; transition: all 0.2s; }
+  .tab-link:hover { border-color: #2196f3; color: #2196f3; text-decoration: none; }
+  .tab-link.current { background: #2196f3; color: #fff; border-color: #2196f3; }
+  .learning-point { display: flex; align-items: flex-start; margin-bottom: 12px; }
+  .learning-point::before { content: '✓'; color: #2196f3; font-weight: 700; margin-right: 10px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><a href="https://demo.semifabai.com">반도체 공정 시뮬레이터</a></h1>
+      <nav>
+        <a href="https://demo.semifabai.com/guide/">전체 가이드</a>
+        <a href="https://kr.semifabai.com">정식 버전</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="https://demo.semifabai.com/guide/">가이드</a> &gt; <a href="https://demo.semifabai.com/guide/plasma.html">Plasma</a> &gt; 파션 커브 시뮬레이션
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="container">
+      <div class="icon">🔬</div>
+      <h2>파션 커브 시뮬레이션</h2>
+      <p class="summary">파션 커브(Paschen Curve)를 조작하며 가스 방전 조건을 이해합니다.</p>
+      <div style="margin-top: 16px;">
+        <span class="badge" style="background: #2196f3; color: #fff;">Plasma</span>
+        <span class="badge" style="background: #f5f5f5; color: #555; margin-left: 8px;">중급~고급</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section>
+        <h3>상세 설명</h3>
+        <p>파션 커브는 기체의 항복 전압(breakdown voltage)이 압력×거리(pd)의 곱에 따라 어떻게 변하는지를 나타내는 곡선입니다. 최소 항복 전압이 존재하는 특징적인 U자 형태를 가지며, 이를 이해하면 플라즈마 점화 조건을 예측할 수 있습니다. 이 시뮬레이터에서는 가스 종류, 압력, 전극 간격을 바꾸며 파션 커브의 변화를 직접 관찰합니다.</p>
+      </section>
+
+      <section>
+        <h3>이 탭에서 배울 수 있는 것</h3>
+        <div class="learning-point">파션 커브의 U자 형태와 최소 항복 전압의 의미</div>
+        <div class="learning-point">압력×거리(pd)가 방전 조건을 결정하는 원리</div>
+        <div class="learning-point">가스 종류(Ar, N₂, O₂ 등)별 파션 커브 특성 차이</div>
+        <div class="learning-point">실제 플라즈마 점화 시 파션 커브의 활용</div>
+      </section>
+
+      <div class="cta-box">
+        <h3>직접 체험해 보세요</h3>
+        <p>Plasma의 파션 커브 시뮬레이션을(를) 지금 바로 사용해 볼 수 있습니다.</p>
+        <a href="https://demo.semifabai.com/?sim=plasma&tab=plasma-principle1" class="cta-btn">파션 커브 시뮬레이션 체험하기</a>
+        <a href="https://kr.semifabai.com" class="cta-btn-outline">정식 버전 알아보기</a>
+      </div>
+
+      
+      <section>
+        <h3>Plasma의 다른 학습 탭</h3>
+        <div class="tab-nav">
+          <span class="tab-link current">🔬 파션 커브 시뮬레이션</span>
+          <a href="https://demo.semifabai.com/guide/plasma/basics.html" class="tab-link">⚡ 플라즈마 기본 개념</a>
+          <a href="https://demo.semifabai.com/guide/plasma/rf-matching.html" class="tab-link">📡 RF 매칭 네트워크</a>
+          <a href="https://demo.semifabai.com/guide/plasma/ccp-structure.html" class="tab-link">🏗️ CCP 시스템 구조</a>
+          <a href="https://demo.semifabai.com/guide/plasma/icp-structure.html" class="tab-link">🔬 ICP 시스템 구조</a>
+          <a href="https://demo.semifabai.com/guide/plasma/synergy-effect.html" class="tab-link">⚙️ Synergy Effect 실험</a>
+          <a href="https://demo.semifabai.com/guide/plasma/industry-application.html" class="tab-link">🏭 플라즈마 장비 산업 응용</a>
+        </div>
+      </section>
+
+      <div class="nav-bottom">
+        <a href="https://demo.semifabai.com/guide/plasma.html">⚡ Plasma 전체 가이드</a>
+        <a href="https://demo.semifabai.com/guide/">전체 목록</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>반도체 공정 시뮬레이터 데모 | <a href="https://kr.semifabai.com">SemiFabAI 정식 버전</a></p>
+      <p style="margin-top: 8px;">교육 목적의 인터랙티브 시뮬레이터 플랫폼</p>
+    </div>
+  </footer>
+</body>
+</html>

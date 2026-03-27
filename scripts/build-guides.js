@@ -227,6 +227,20 @@ function buildSimulatorPage(sim) {
         <p style="margin-top: 12px; font-size: 14px; color: #888;">정식 버전에서는 100개 이상의 시뮬레이터와 심화 학습 콘텐츠를 제공합니다.</p>
       </section>
 
+      ${sim.tabs && sim.tabs.length > 0 ? `
+      <section>
+        <h3>탭별 상세 가이드</h3>
+        <p>${sim.shortName} 시뮬레이터의 각 탭별 학습 내용을 자세히 알아보세요.</p>
+        <div class="related-grid" style="margin-top: 16px;">
+          ${sim.tabs.map(tab => `
+          <a href="${guideDomain}/guide/${sim.id}/${tab.slug}.html" class="related-card">
+            <div class="r-icon">${tab.icon}</div>
+            <div class="r-name">${tab.name}</div>
+            <div class="r-desc">${tab.summary.substring(0, 60)}…</div>
+          </a>`).join('')}
+        </div>
+      </section>` : ''}
+
       <div class="cta-box">
         <h3>직접 체험해 보세요</h3>
         <p>${sim.shortName} 시뮬레이터를 지금 바로 사용해 볼 수 있습니다.</p>
@@ -421,6 +435,146 @@ function buildIndexPage() {
 </html>`;
 }
 
+// 탭별 가이드 HTML 생성
+function buildTabPage(sim, tab) {
+  const appId = tab.appId || sim.appId || sim.id;
+  const tabUrl = `${guideDomain}/guide/${sim.id}/${tab.slug}.html`;
+  const otherTabs = (sim.tabs || []).filter(t => t.id !== tab.id);
+
+  return `<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>${tab.name} - ${sim.shortName} | 반도체 공정 시뮬레이터</title>
+  <meta name="description" content="${tab.summary}">
+  <meta name="keywords" content="${tab.keywords.join(', ')}">
+  <meta property="og:title" content="${tab.name} - ${sim.shortName} 시뮬레이터">
+  <meta property="og:description" content="${tab.summary}">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="${tabUrl}">
+  <link rel="canonical" href="${tabUrl}">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "name": "${tab.name} - ${sim.shortName}",
+    "description": "${tab.summary}",
+    "educationalLevel": "${sim.targetLevel}",
+    "learningResourceType": "Interactive Simulation",
+    "datePublished": "${new Date().toISOString().split('T')[0]}",
+    "dateModified": "${new Date().toISOString().split('T')[0]}",
+    "isPartOf": {
+      "@type": "LearningResource",
+      "name": "${sim.name}",
+      "url": "${guideDomain}/guide/${sim.id}.html"
+    },
+    "provider": {
+      "@type": "Organization",
+      "name": "SemiFabAI",
+      "url": "${mainPlatformUrl}"
+    },
+    "inLanguage": "ko",
+    "keywords": "${tab.keywords.join(', ')}"
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      {"@type": "ListItem", "position": 1, "name": "홈", "item": "${guideDomain}/"},
+      {"@type": "ListItem", "position": 2, "name": "가이드", "item": "${guideDomain}/guide/"},
+      {"@type": "ListItem", "position": 3, "name": "${sim.shortName}", "item": "${guideDomain}/guide/${sim.id}.html"},
+      {"@type": "ListItem", "position": 4, "name": "${tab.name}", "item": "${tabUrl}"}
+    ]
+  }
+  </script>
+  <style>${commonCSS}
+  .tab-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+  .tab-link { padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; border: 1px solid #e0e0e0; color: #555; background: #fff; transition: all 0.2s; }
+  .tab-link:hover { border-color: ${sim.color}; color: ${sim.color}; text-decoration: none; }
+  .tab-link.current { background: ${sim.color}; color: #fff; border-color: ${sim.color}; }
+  .learning-point { display: flex; align-items: flex-start; margin-bottom: 12px; }
+  .learning-point::before { content: '✓'; color: ${sim.color}; font-weight: 700; margin-right: 10px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1><a href="${guideDomain}">반도체 공정 시뮬레이터</a></h1>
+      <nav>
+        <a href="${guideDomain}/guide/">전체 가이드</a>
+        <a href="${mainPlatformUrl}">정식 버전</a>
+      </nav>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="${guideDomain}/guide/">가이드</a> &gt; <a href="${guideDomain}/guide/${sim.id}.html">${sim.shortName}</a> &gt; ${tab.name}
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="container">
+      <div class="icon">${tab.icon}</div>
+      <h2>${tab.name}</h2>
+      <p class="summary">${tab.summary}</p>
+      <div style="margin-top: 16px;">
+        <span class="badge" style="background: ${sim.color}; color: #fff;">${sim.shortName}</span>
+        <span class="badge" style="background: #f5f5f5; color: #555; margin-left: 8px;">${sim.targetLevel}</span>
+      </div>
+    </div>
+  </div>
+
+  <main>
+    <div class="container">
+
+      <section>
+        <h3>상세 설명</h3>
+        <p>${tab.description}</p>
+      </section>
+
+      <section>
+        <h3>이 탭에서 배울 수 있는 것</h3>
+        ${tab.learningPoints.map(p => `<div class="learning-point">${p}</div>`).join('\n        ')}
+      </section>
+
+      <div class="cta-box">
+        <h3>직접 체험해 보세요</h3>
+        <p>${sim.shortName}의 ${tab.name}을(를) 지금 바로 사용해 볼 수 있습니다.</p>
+        <a href="${guideDomain}/?sim=${appId}&tab=${tab.id}" class="cta-btn">${tab.name} 체험하기</a>
+        <a href="${mainPlatformUrl}" class="cta-btn-outline">정식 버전 알아보기</a>
+      </div>
+
+      ${otherTabs.length > 0 ? `
+      <section>
+        <h3>${sim.shortName}의 다른 학습 탭</h3>
+        <div class="tab-nav">
+          <span class="tab-link current">${tab.icon} ${tab.name}</span>
+          ${otherTabs.map(t => `<a href="${guideDomain}/guide/${sim.id}/${t.slug}.html" class="tab-link">${t.icon} ${t.name}</a>`).join('\n          ')}
+        </div>
+      </section>` : ''}
+
+      <div class="nav-bottom">
+        <a href="${guideDomain}/guide/${sim.id}.html">${sim.icon} ${sim.shortName} 전체 가이드</a>
+        <a href="${guideDomain}/guide/">전체 목록</a>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>반도체 공정 시뮬레이터 데모 | <a href="${mainPlatformUrl}">SemiFabAI 정식 버전</a></p>
+      <p style="margin-top: 8px;">교육 목적의 인터랙티브 시뮬레이터 플랫폼</p>
+    </div>
+  </footer>
+</body>
+</html>`;
+}
+
 // 생성 실행
 console.log('🔨 GEO 가이드 페이지 생성 시작...\n');
 
@@ -429,9 +583,23 @@ fs.writeFileSync(path.join(outputDir, 'index.html'), buildIndexPage());
 console.log('  ✅ guide/index.html');
 
 // 개별 시뮬레이터 페이지
+let tabCount = 0;
 simulators.forEach(sim => {
   fs.writeFileSync(path.join(outputDir, `${sim.id}.html`), buildSimulatorPage(sim));
   console.log(`  ✅ guide/${sim.id}.html`);
+
+  // 탭별 가이드 페이지
+  if (sim.tabs && sim.tabs.length > 0) {
+    const simTabDir = path.join(outputDir, sim.id);
+    if (!fs.existsSync(simTabDir)) {
+      fs.mkdirSync(simTabDir, { recursive: true });
+    }
+    sim.tabs.forEach(tab => {
+      fs.writeFileSync(path.join(simTabDir, `${tab.slug}.html`), buildTabPage(sim, tab));
+      console.log(`  ✅ guide/${sim.id}/${tab.slug}.html`);
+      tabCount++;
+    });
+  }
 });
 
-console.log(`\n🎉 완료! ${simulators.length + 1}개 HTML 생성 → public/guide/`);
+console.log(`\n🎉 완료! ${simulators.length + 1}개 시뮬레이터 + ${tabCount}개 탭 가이드 HTML 생성 → public/guide/`);
