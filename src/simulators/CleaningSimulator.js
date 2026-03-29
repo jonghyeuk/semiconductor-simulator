@@ -525,10 +525,16 @@ const CleaningSimulator = ({ initialTab }) => {
       return solutions.find(sol => sol.name === wetCleaningParams.solution);
     };
 
-    const timeData = Array.from({ length: 20 }, (_, i) => ({
-      time: i + 1,
-      efficiency: Math.min(98, 15 + Math.log(i + 1) * 20 + (wetCleaningParams.solution === 'BOE' ? 15 : 0))
-    }));
+    const timeData = Array.from({ length: 20 }, (_, i) => {
+      const t = (i + 1) * (wetCleaningParams.time / 20);
+      const tempFactor = 1 + (wetCleaningParams.temperature - 25) / 100;
+      const concFactor = 1 + wetCleaningParams.concentration / 15;
+      const solBonus = wetCleaningParams.solution === 'BOE' ? 1.3
+        : wetCleaningParams.solution === 'HF' ? 1.1
+        : wetCleaningParams.solution === 'SC1' ? 1.0 : 0.9;
+      const base = Math.log(t + 1) * 18 * tempFactor * concFactor * solBonus;
+      return { time: Math.round(t * 10) / 10, efficiency: Math.min(98, Math.round(base * 10) / 10) };
+    });
 
     const startProcessing = () => {
       // 세정 시작시 현재 조건으로 효율 계산하고 고정
