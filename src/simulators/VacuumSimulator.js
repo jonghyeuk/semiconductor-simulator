@@ -1464,12 +1464,12 @@ const VacuumSimulator = ({ initialTab }) => {
     <div className="flex-1 flex flex-col">
       {/* 상단 탭 네비게이션 */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="flex space-x-1 p-2">
+        <div className="flex space-x-1 p-2 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors ${
+              className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-blue-500 text-white shadow-md'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'

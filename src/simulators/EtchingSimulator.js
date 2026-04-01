@@ -4758,12 +4758,12 @@ const EtchSimulator = ({ initialTab }) => {
       `}</style>
       {/* 탭 네비게이션 */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="flex space-x-1 p-1">
+        <div className="flex space-x-1 p-1 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all ${
+              className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-blue-100 text-blue-800 shadow-sm'
                   : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
