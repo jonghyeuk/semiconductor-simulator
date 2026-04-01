@@ -1677,12 +1677,12 @@ const CleaningSimulator = ({ initialTab }) => {
     <div className="flex-1 flex flex-col">
       {/* 상단 탭 네비게이션 */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="flex space-x-1 p-2">
+        <div className="flex space-x-1 p-2 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-green-100 text-green-800 font-medium'
                   : 'text-gray-600 hover:bg-gray-100'
