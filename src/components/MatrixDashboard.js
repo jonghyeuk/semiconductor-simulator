@@ -200,20 +200,22 @@ const MatrixDashboard = ({ onNavigate }) => {
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       {/* ====== 상단 안내 배너 ====== */}
-      <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 px-6 py-4 text-white">
+      <div className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 px-4 sm:px-6 py-3 sm:py-4 text-white">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-3xl">🔥</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-2xl sm:text-3xl">🔥</span>
             <div>
-              <h1 className="text-xl font-bold tracking-tight">
-                추천 시뮬레이션부터 체험해보세요
+              <h1 className="text-base sm:text-xl font-bold tracking-tight">
+                <span className="hidden sm:inline">추천 시뮬레이션부터 체험해보세요</span>
+                <span className="sm:hidden">추천 시뮬레이션</span>
               </h1>
-              <p className="text-sm text-orange-100 mt-0.5">
-                반도체 8대공정 | 직접 조작하는 인터랙티브 시뮬레이터 {bestCards.length + coreCards.length + basicCards.length + advancedCards.length}개
+              <p className="text-xs sm:text-sm text-orange-100 mt-0.5">
+                <span className="hidden sm:inline">반도체 8대공정 | 직접 조작하는 인터랙티브 시뮬레이터 {bestCards.length + coreCards.length + basicCards.length + advancedCards.length}개</span>
+                <span className="sm:hidden">8대공정 시뮬레이터 {bestCards.length + coreCards.length + basicCards.length + advancedCards.length}개</span>
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4 text-sm">
+          <div className="hidden sm:flex items-center gap-4 text-sm">
             <span className="flex items-center gap-1.5 bg-white/20 px-3 py-1 rounded-full">
               <span className="w-2.5 h-2.5 rounded-full bg-orange-300 animate-pulse"></span>
               핵심 {bestCards.length + coreCards.length}개
@@ -230,23 +232,67 @@ const MatrixDashboard = ({ onNavigate }) => {
 
       {/* ====== 메인 콘텐츠 ====== */}
       <div className="flex-1 overflow-auto">
-        <div className="max-w-6xl mx-auto px-6 py-6 space-y-10">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-4 sm:py-6 space-y-6 sm:space-y-10">
 
           {/* ====== BEST 대표작 (최상단) ====== */}
           {bestCards.length > 0 && (
             <section>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white rounded-xl shadow-lg animate-pulse-slow">
-                  <span className="text-lg">🏆</span>
-                  <span className="font-extrabold tracking-tight">BEST — 처음이라면 여기부터</span>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+                <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 text-white rounded-xl shadow-lg animate-pulse-slow">
+                  <span className="text-base sm:text-lg">🏆</span>
+                  <span className="font-extrabold tracking-tight text-sm sm:text-base">BEST — 처음이라면 여기부터</span>
                 </div>
-                <span className="text-sm text-orange-600 font-medium">
+                <span className="text-xs sm:text-sm text-orange-600 font-medium hidden sm:inline">
                   가장 많이 체험하는 입문 시뮬레이션
                 </span>
-                <div className="flex-1 h-px bg-orange-300"></div>
+                <div className="flex-1 h-px bg-orange-300 hidden sm:block"></div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                {/* ====== 1일차 체험하기 특별 카드 ====== */}
+                <a
+                  href="https://kredu.semifabai.com/?trial=true"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative flex flex-col p-5 rounded-2xl border-2 border-emerald-400 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 shadow-lg shadow-emerald-200 ring-2 ring-emerald-300/60 cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-300 text-left min-h-[160px]"
+                >
+                  <div className="absolute -top-3 -left-2 flex items-center gap-1">
+                    <span className="px-2.5 py-1 text-xs font-extrabold rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md animate-pulse">
+                      🎓 1일차 무료체험
+                    </span>
+                    <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-emerald-100 text-emerald-700">
+                      FREE
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-end mb-3 mt-1">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-emerald-500 text-white">
+                      교육과정
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3 flex-1">
+                    <span className="text-4xl flex-shrink-0">🚀</span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold leading-tight text-emerald-600">
+                        진공 교육 1단계
+                      </div>
+                      <div className="text-lg font-extrabold text-gray-900 leading-tight mt-0.5">
+                        1일차 체험하기
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-emerald-200">
+                    <p className="text-sm text-emerald-800 font-medium leading-snug">
+                      👉 무료로 진공 교육 1일차를 체험해보세요
+                    </p>
+                  </div>
+                  <div className="absolute bottom-4 right-4 flex items-center gap-1 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-xs font-bold">체험하기</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </a>
+
                 {bestCards.map((card, idx) => (
                   <button
                     key={`${card.processId}-${card.id}`}
@@ -313,15 +359,15 @@ const MatrixDashboard = ({ onNavigate }) => {
 
           {/* ====== 섹션 1: 🔥 핵심 실습 ====== */}
           <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl shadow-md">
-                <span className="text-lg">🔥</span>
-                <span className="font-bold">핵심 실습</span>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-xl shadow-md">
+                <span className="text-base sm:text-lg">🔥</span>
+                <span className="font-bold text-sm sm:text-base">핵심 실습</span>
               </div>
-              <span className="text-sm text-orange-600 font-medium">
+              <span className="text-xs sm:text-sm text-orange-600 font-medium hidden sm:inline">
                 — 직접 조작하며 원리를 체험하세요
               </span>
-              <div className="flex-1 h-px bg-orange-200"></div>
+              <div className="flex-1 h-px bg-orange-200 hidden sm:block"></div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
@@ -382,15 +428,15 @@ const MatrixDashboard = ({ onNavigate }) => {
 
           {/* ====== 섹션 2: 🧪 체험 / 기본 ====== */}
           <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-xl shadow-sm">
-                <span className="text-lg">🧪</span>
-                <span className="font-bold">체험 / 기본</span>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gradient-to-r from-blue-500 to-sky-500 text-white rounded-xl shadow-sm">
+                <span className="text-base sm:text-lg">🧪</span>
+                <span className="font-bold text-sm sm:text-base">체험 / 기본</span>
               </div>
-              <span className="text-sm text-blue-600 font-medium">
+              <span className="text-xs sm:text-sm text-blue-600 font-medium hidden sm:inline">
                 — 이론 학습과 기초 실험
               </span>
-              <div className="flex-1 h-px bg-blue-200"></div>
+              <div className="flex-1 h-px bg-blue-200 hidden sm:block"></div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -424,15 +470,15 @@ const MatrixDashboard = ({ onNavigate }) => {
 
           {/* ====== 섹션 3: 🔒 고급 기능 (잠금) ====== */}
           <section>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-400 text-white rounded-xl shadow-sm">
-                <span className="text-lg">🔒</span>
-                <span className="font-bold">고급 / 확장</span>
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+              <div className="flex items-center gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-gray-400 text-white rounded-xl shadow-sm">
+                <span className="text-base sm:text-lg">🔒</span>
+                <span className="font-bold text-sm sm:text-base">고급 / 확장</span>
               </div>
-              <span className="text-sm text-gray-500 font-medium">
+              <span className="text-xs sm:text-sm text-gray-500 font-medium hidden sm:inline">
                 — 정식 버전에서 이용 가능합니다
               </span>
-              <div className="flex-1 h-px bg-gray-200"></div>
+              <div className="flex-1 h-px bg-gray-200 hidden sm:block"></div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">

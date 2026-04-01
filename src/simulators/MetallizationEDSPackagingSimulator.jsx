@@ -1,4 +1,5 @@
 import React, { useState, useEffect, Fragment } from 'react';
+import MobileDesktopNotice from '../components/MobileDesktopNotice';
 
 const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
   const [activeTab, setActiveTab] = useState(initialTab || 'overview');
@@ -2070,6 +2071,7 @@ const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
+      <MobileDesktopNotice />
       <style>{`
         /* 슬라이더 기본 스타일 */
         input[type="range"].slider-thumb-red,

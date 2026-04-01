@@ -31,6 +31,7 @@ const App = () => {
     () => !!localStorage.getItem('simulator_email')
   );
   const [showAdmin, setShowAdmin] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const sessionStart = useRef(Date.now());
 
   // URL에 ?admin 붙으면 관리자 페이지 표시
@@ -115,21 +116,51 @@ const App = () => {
       {showAdmin && <AdminPage onClose={() => setShowAdmin(false)} />}
 
       <div className="flex h-screen bg-gray-100">
+        {/* 모바일 상단 헤더바 */}
+        <div className="fixed top-0 left-0 right-0 z-30 bg-white border-b border-gray-200 flex items-center px-3 py-2 md:hidden">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="p-2 rounded-lg hover:bg-gray-100 text-gray-600"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <span className="ml-2 text-sm font-bold text-gray-800 truncate">
+            {simulatorRegistry.getSimulatorInfo(activeSimulator)?.icon}{' '}
+            {simulatorRegistry.getSimulatorInfo(activeSimulator)?.name}
+          </span>
+        </div>
+
         {/* 좌측 사이드바 */}
-        <div className="relative">
+        <div className="relative hidden md:block">
           <MainPortal
             activeSimulator={activeSimulator}
             onSimulatorChange={handleSimulatorChange}
             onAdminClick={() => setShowAdmin(true)}
             onBackToDashboard={() => setActiveSimulator(null)}
+            isOpen={true}
+            onClose={() => {}}
           />
           {/* 사이드바 시뮬레이터 목록 비활성화 (헤더+대시보드 버튼, 하단 정식버전/관리자 제외) */}
           <div className="absolute left-0 right-0 z-40" style={{ top: '105px', bottom: '56px', backgroundColor: 'rgba(255,255,255,0.5)' }}>
           </div>
         </div>
 
+        {/* 모바일 사이드바 (오버레이) */}
+        <div className="md:hidden">
+          <MainPortal
+            activeSimulator={activeSimulator}
+            onSimulatorChange={handleSimulatorChange}
+            onAdminClick={() => setShowAdmin(true)}
+            onBackToDashboard={() => { setActiveSimulator(null); setSidebarOpen(false); }}
+            isOpen={sidebarOpen}
+            onClose={() => setSidebarOpen(false)}
+          />
+        </div>
+
         {/* 메인 컨텐츠 영역 */}
-        <div className="flex-1 flex flex-col relative">
+        <div className="flex-1 flex flex-col relative pt-12 md:pt-0">
           {CurrentSimulator ? (
             <>
               <CurrentSimulator initialTab={activeTab} />
@@ -138,7 +169,7 @@ const App = () => {
                 const overlay = TAB_OVERLAY[activeSimulator] || DEFAULT_TAB_OVERLAY;
                 if (overlay.height === 0) return null;
                 return (
-                  <div className="absolute left-0 right-0 z-40 bg-white" style={{ top: `${overlay.top}px`, height: `${overlay.height}px` }}>
+                  <div className="absolute left-0 right-0 z-40 bg-white hidden md:block" style={{ top: `${overlay.top}px`, height: `${overlay.height}px` }}>
                   </div>
                 );
               })()}

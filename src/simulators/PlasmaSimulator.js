@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
+import MobileDesktopNotice from '../components/MobileDesktopNotice';
 
 // Icon components
 const PlayIcon = () => (
@@ -906,6 +907,7 @@ const PlasmaSimulator = ({ initialTab }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <MobileDesktopNotice />
       <style>{`
         /* 슬라이더 커스텀 스타일 */
         input[type="range"] {

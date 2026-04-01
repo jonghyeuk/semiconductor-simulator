@@ -3,6 +3,7 @@ import SputteringSimulator from './SputteringSimulator';
 import EvaporatorSimulator from './EvaporatorSimulator';
 import ALDSimulator from './ALDSimulator';
 import PECVDSimulator from './PECVDSimulator';
+import MobileDesktopNotice from '../components/MobileDesktopNotice';
 import LPCVDSimulator from './LPCVDSimulator';
 
 // Icon components
@@ -1220,6 +1221,7 @@ const DepositionSimulator = ({ initialTab }) => {
 
   return (
     <div className="flex-1 flex flex-col min-h-screen bg-gray-50">
+      <MobileDesktopNotice />
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="flex space-x-1 p-1 overflow-x-auto">
           {tabs.map((tab) => (
