@@ -1317,6 +1317,178 @@ const VacuumSimulator = ({ initialTab }) => {
     return () => clearInterval(interval);
   }, [troubleStarted, troubleTriggered, troubleScenario, troubleTmpOn, troubleFvOpen, troubleApcOpen, troubleRvOpen, troubleSuccess, troubleFailed, tmpTemperature, dryPumpCurrent, dryPumpOn, scenario2Step, gasLineN2, gasLineAr, gasLineO2, gasLineMain, leakSource, rfOn, rfBreaker, gasSupplyMain, sih4Valve, sih4Flow, matcherTemp, scenario4Step, evacuating, scenario5Found, troublePressure]);
 
+  // SVG diagrams for each theory step
+  const getTheorySVG = (step) => {
+    switch(step) {
+      case 0: return (
+        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+          <defs>
+            <linearGradient id="vac_bg0" x1="0" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="340" fill="url(#vac_bg0)" rx="12"/>
+          <text x="200" y="30" textAnchor="middle" fill="#fbbf24" fontSize="17" fontWeight="bold">진공 압력 범위</text>
+          <rect x="20" y="48" width="360" height="40" rx="6" fill="rgba(239,68,68,0.15)" stroke="#ef4444"/>
+          <text x="30" y="72" fill="#fca5a5" fontSize="14" fontWeight="bold">대기압</text>
+          <text x="200" y="72" textAnchor="middle" fill="#e2e8f0" fontSize="13">760 Torr (1 atm)</text>
+          <text x="200" y="100" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="20" y="108" width="360" height="40" rx="6" fill="rgba(251,146,60,0.15)" stroke="#fb923c"/>
+          <text x="30" y="132" fill="#fdba74" fontSize="14" fontWeight="bold">저진공</text>
+          <text x="200" y="132" textAnchor="middle" fill="#e2e8f0" fontSize="13">760 ~ 1 Torr</text>
+          <text x="200" y="160" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="20" y="168" width="360" height="40" rx="6" fill="rgba(59,130,246,0.15)" stroke="#3b82f6"/>
+          <text x="30" y="192" fill="#93c5fd" fontSize="14" fontWeight="bold">중진공</text>
+          <text x="200" y="192" textAnchor="middle" fill="#e2e8f0" fontSize="13">1 ~ 10⁻³ Torr</text>
+          <text x="200" y="220" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="20" y="228" width="360" height="40" rx="6" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6"/>
+          <text x="30" y="252" fill="#c4b5fd" fontSize="14" fontWeight="bold">고진공</text>
+          <text x="200" y="252" textAnchor="middle" fill="#e2e8f0" fontSize="13">10⁻³ ~ 10⁻⁹ Torr</text>
+          <text x="370" y="252" textAnchor="end" fill="#c4b5fd" fontSize="11">⭐ 반도체</text>
+          <text x="200" y="280" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="20" y="288" width="360" height="40" rx="6" fill="rgba(34,211,238,0.15)" stroke="#22d3ee"/>
+          <text x="30" y="312" fill="#67e8f9" fontSize="14" fontWeight="bold">초고진공</text>
+          <text x="200" y="312" textAnchor="middle" fill="#e2e8f0" fontSize="13">{'<'} 10⁻⁹ Torr</text>
+          <text x="370" y="312" textAnchor="end" fill="#67e8f9" fontSize="11">⭐ EUV</text>
+        </svg>
+      );
+      case 1: return (
+        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+          <defs>
+            <linearGradient id="vac_bg1" x1="0" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="340" fill="url(#vac_bg1)" rx="12"/>
+          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">2단계 진공 펌핑 시스템</text>
+          <rect x="30" y="42" width="150" height="110" rx="8" fill="rgba(251,146,60,0.15)" stroke="#fb923c" strokeWidth="1.5"/>
+          <text x="105" y="62" textAnchor="middle" fill="#fdba74" fontSize="14" fontWeight="bold">1단계: Roughing</text>
+          <rect x="55" y="72" width="100" height="40" rx="6" fill="#1e293b" stroke="#fb923c"/>
+          <text x="105" y="90" textAnchor="middle" fill="#fdba74" fontSize="11">Rotary Vane</text>
+          <text x="105" y="105" textAnchor="middle" fill="#fdba74" fontSize="11">Pump</text>
+          <text x="105" y="130" textAnchor="middle" fill="#e2e8f0" fontSize="11">760 → 10⁻³ Torr</text>
+          <text x="105" y="145" textAnchor="middle" fill="#fb923c" fontSize="11" fontWeight="bold">빠른 배기</text>
+          <text x="200" y="100" fill="#fbbf24" fontSize="20" textAnchor="middle">→</text>
+          <rect x="220" y="42" width="150" height="110" rx="8" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6" strokeWidth="1.5"/>
+          <text x="295" y="62" textAnchor="middle" fill="#c4b5fd" fontSize="14" fontWeight="bold">2단계: High Vac</text>
+          <rect x="245" y="72" width="100" height="40" rx="6" fill="#1e293b" stroke="#8b5cf6"/>
+          <text x="295" y="90" textAnchor="middle" fill="#c4b5fd" fontSize="11">Turbo Molecular</text>
+          <text x="295" y="105" textAnchor="middle" fill="#c4b5fd" fontSize="11">Pump (TMP)</text>
+          <text x="295" y="130" textAnchor="middle" fill="#e2e8f0" fontSize="11">10⁻³ → 10⁻⁹ Torr</text>
+          <text x="295" y="145" textAnchor="middle" fill="#8b5cf6" fontSize="11" fontWeight="bold">극한 진공</text>
+          <rect x="30" y="165" width="340" height="65" rx="8" fill="rgba(34,197,94,0.15)" stroke="#22c55e"/>
+          <text x="200" y="185" textAnchor="middle" fill="#86efac" fontSize="14" fontWeight="bold">3단계: 압력 제어</text>
+          <text x="200" y="205" textAnchor="middle" fill="#e2e8f0" fontSize="12">APC (Auto Pressure Controller) + Gate Valve</text>
+          <text x="200" y="222" textAnchor="middle" fill="#86efac" fontSize="12">공정 압력 정밀 유지</text>
+          <rect x="30" y="245" width="340" height="82" rx="8" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" strokeWidth="0.5" strokeDasharray="4"/>
+          <text x="200" y="268" textAnchor="middle" fill="#fbbf24" fontSize="14" fontWeight="bold">펌프 비교</text>
+          <text x="40" y="290" fill="#fdba74" fontSize="12">🔧 Rotary: 기계적 압축 → 빠르지만 한계 있음</text>
+          <text x="40" y="310" fill="#c4b5fd" fontSize="12">🚀 TMP: 60,000 RPM 회전 → 분자 운동량 전달</text>
+        </svg>
+      );
+      case 2: return (
+        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+          <defs>
+            <linearGradient id="vac_bg2" x1="0" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="340" fill="url(#vac_bg2)" rx="12"/>
+          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">진공 기술 발전 역사</text>
+          <line x1="80" y1="45" x2="80" y2="270" stroke="#475569" strokeWidth="2"/>
+          <circle cx="80" cy="65" r="8" fill="#fb923c" stroke="#fdba74" strokeWidth="2"/>
+          <text x="100" y="60" fill="#fdba74" fontSize="14" fontWeight="bold">1970년대</text>
+          <text x="100" y="78" fill="#e2e8f0" fontSize="12">μm 공정 · 10⁻⁵ Torr · 회전 펌프</text>
+          <rect x="100" y="84" width="80" height="4" rx="2" fill="#fb923c" opacity="0.4"/>
+          <circle cx="80" cy="120" r="8" fill="#3b82f6" stroke="#60a5fa" strokeWidth="2"/>
+          <text x="100" y="115" fill="#93c5fd" fontSize="14" fontWeight="bold">2000년대</text>
+          <text x="100" y="133" fill="#e2e8f0" fontSize="12">90→32nm · 10⁻⁷ Torr · TMP+Cryo</text>
+          <rect x="100" y="139" width="180" height="4" rx="2" fill="#3b82f6" opacity="0.4"/>
+          <circle cx="80" cy="175" r="8" fill="#8b5cf6" stroke="#a78bfa" strokeWidth="2"/>
+          <text x="100" y="170" fill="#c4b5fd" fontSize="14" fontWeight="bold">2020년대</text>
+          <text x="100" y="188" fill="#e2e8f0" fontSize="12">3nm EUV · 10⁻⁹ Torr · 극한 진공</text>
+          <rect x="100" y="194" width="290" height="4" rx="2" fill="#8b5cf6" opacity="0.4"/>
+          <rect x="30" y="215" width="340" height="55" rx="8" fill="rgba(34,211,238,0.1)" stroke="#22d3ee" strokeWidth="0.5"/>
+          <text x="200" y="235" textAnchor="middle" fill="#67e8f9" fontSize="13" fontWeight="bold">핵심 응용</text>
+          <text x="40" y="255" fill="#e2e8f0" fontSize="12">EUV 노광 | 원자층 증착(ALD) | 이온 주입</text>
+          <rect x="30" y="280" width="340" height="48" rx="8" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" strokeWidth="0.5" strokeDasharray="4"/>
+          <text x="200" y="300" textAnchor="middle" fill="#fbbf24" fontSize="14" fontWeight="bold">📈 50년간 진공도 1만 배↑</text>
+          <text x="200" y="320" textAnchor="middle" fill="#e2e8f0" fontSize="12">💰 진공 시스템 = 장비 가격의 30% (수십억 원)</text>
+        </svg>
+      );
+      case 3: return (
+        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+          <defs>
+            <linearGradient id="vac_bg3" x1="0" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="340" fill="url(#vac_bg3)" rx="12"/>
+          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">진공 응용 분야</text>
+          <circle cx="200" cy="170" r="38" fill="rgba(14,165,233,0.3)" stroke="#0ea5e9" strokeWidth="2"/>
+          <text x="200" y="166" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">진공</text>
+          <text x="200" y="182" textAnchor="middle" fill="#7dd3fc" fontSize="11">Vacuum</text>
+          <line x1="170" y1="140" x2="85" y2="68" stroke="#f87171" strokeWidth="1.5"/>
+          <rect x="15" y="42" width="130" height="42" rx="6" fill="rgba(239,68,68,0.15)" stroke="#f87171"/>
+          <text x="80" y="60" textAnchor="middle" fill="#fca5a5" fontSize="13" fontWeight="bold">1. 박막 증착</text>
+          <text x="80" y="76" textAnchor="middle" fill="#e2e8f0" fontSize="10">CVD, PVD, ALD</text>
+          <line x1="230" y1="140" x2="315" y2="68" stroke="#60a5fa" strokeWidth="1.5"/>
+          <rect x="255" y="42" width="130" height="42" rx="6" fill="rgba(59,130,246,0.15)" stroke="#60a5fa"/>
+          <text x="320" y="60" textAnchor="middle" fill="#93c5fd" fontSize="13" fontWeight="bold">2. 플라즈마 에칭</text>
+          <text x="320" y="76" textAnchor="middle" fill="#e2e8f0" fontSize="10">RIE, ICP</text>
+          <line x1="162" y1="170" x2="70" y2="170" stroke="#4ade80" strokeWidth="1.5"/>
+          <rect x="5" y="149" width="120" height="42" rx="6" fill="rgba(34,197,94,0.15)" stroke="#4ade80"/>
+          <text x="65" y="167" textAnchor="middle" fill="#86efac" fontSize="13" fontWeight="bold">3. 이온 주입</text>
+          <text x="65" y="183" textAnchor="middle" fill="#e2e8f0" fontSize="10">10⁻⁶ Torr</text>
+          <line x1="238" y1="170" x2="330" y2="170" stroke="#fbbf24" strokeWidth="1.5"/>
+          <rect x="275" y="149" width="120" height="42" rx="6" fill="rgba(251,191,36,0.15)" stroke="#fbbf24"/>
+          <text x="335" y="167" textAnchor="middle" fill="#fde68a" fontSize="13" fontWeight="bold">4. EUV 노광</text>
+          <text x="335" y="183" textAnchor="middle" fill="#e2e8f0" fontSize="10">10⁻⁸ Torr↓</text>
+          <line x1="200" y1="208" x2="200" y2="275" stroke="#c084fc" strokeWidth="1.5"/>
+          <rect x="115" y="278" width="170" height="42" rx="6" fill="rgba(192,132,252,0.15)" stroke="#c084fc"/>
+          <text x="200" y="296" textAnchor="middle" fill="#d8b4fe" fontSize="13" fontWeight="bold">5. 검사/분석</text>
+          <text x="200" y="312" textAnchor="middle" fill="#e2e8f0" fontSize="10">SEM, SIMS</text>
+        </svg>
+      );
+      case 4: return (
+        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+          <defs>
+            <linearGradient id="vac_bg4" x1="0" y1="0" x2="0.5" y2="1">
+              <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
+            </linearGradient>
+          </defs>
+          <rect width="400" height="340" fill="url(#vac_bg4)" rx="12"/>
+          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">시뮬레이터 학습 로드맵</text>
+          <rect x="25" y="42" width="350" height="42" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6"/>
+          <circle cx="50" cy="63" r="14" fill="#3b82f6" opacity="0.8"/><text x="50" y="68" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">1</text>
+          <text x="74" y="58" fill="#93c5fd" fontSize="13" fontWeight="bold">실시간 펌핑 시뮬레이션</text>
+          <text x="74" y="74" fill="#cbd5e1" fontSize="10">760→10⁻⁹ Torr 압력 변화 체험</text>
+          <text x="200" y="95" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="25" y="100" width="350" height="42" rx="8" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6"/>
+          <circle cx="50" cy="121" r="14" fill="#8b5cf6" opacity="0.8"/><text x="50" y="126" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">2</text>
+          <text x="74" y="116" fill="#c4b5fd" fontSize="13" fontWeight="bold">성능 특성 곡선 분석</text>
+          <text x="74" y="132" fill="#cbd5e1" fontSize="10">4가지 펌프 모델 비교</text>
+          <text x="200" y="153" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="25" y="158" width="350" height="42" rx="8" fill="rgba(249,115,22,0.15)" stroke="#f97316"/>
+          <circle cx="50" cy="179" r="14" fill="#f97316" opacity="0.8"/><text x="50" y="184" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">3</text>
+          <text x="74" y="174" fill="#fdba74" fontSize="13" fontWeight="bold">공정 압력 세팅 실험</text>
+          <text x="74" y="190" fill="#cbd5e1" fontSize="10">APC 정밀 압력 제어</text>
+          <text x="200" y="211" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="25" y="216" width="350" height="42" rx="8" fill="rgba(236,72,153,0.15)" stroke="#ec4899"/>
+          <circle cx="50" cy="237" r="14" fill="#ec4899" opacity="0.8"/><text x="50" y="242" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">4</text>
+          <text x="74" y="232" fill="#f9a8d4" fontSize="13" fontWeight="bold">Conductance & 압력 관계</text>
+          <text x="74" y="248" fill="#cbd5e1" fontSize="10">Q = S × P 실시간 시각화</text>
+          <text x="200" y="269" textAnchor="middle" fill="#fbbf24" fontSize="14">▼</text>
+          <rect x="25" y="274" width="350" height="42" rx="8" fill="rgba(34,197,94,0.15)" stroke="#22c55e"/>
+          <circle cx="50" cy="295" r="14" fill="#22c55e" opacity="0.8"/><text x="50" y="300" textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">5</text>
+          <text x="74" y="290" fill="#86efac" fontSize="13" fontWeight="bold">배관 설계 최적화</text>
+          <text x="74" y="306" fill="#cbd5e1" fontSize="10">1/Seff = 1/Spump + 1/C</text>
+        </svg>
+      );
+      default: return null;
+    }
+  };
+
   // Theory Tab Component
   const TheoryTab = () => (
     <div className="space-y-6">
@@ -1358,27 +1530,37 @@ const VacuumSimulator = ({ initialTab }) => {
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-8 mb-6 overflow-y-auto">
+              {/* Content - Two Column Layout */}
+              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 mb-6 overflow-y-auto">
                 <div className="flex items-center gap-3 mb-4">
                   <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
                   <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
                 </div>
 
-                <div className="text-lg leading-relaxed mb-6 whitespace-pre-line">
-                  {typedText}
-                  {typedText.length < theorySteps[theoryStep].content.length && (
-                    <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
-                  )}
-                </div>
-
-                {typedText.length === theorySteps[theoryStep].content.length && (
-                  <div className="mt-6 p-4 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
-                    <p className="text-yellow-100 font-medium">
-                      💡 {theorySteps[theoryStep].highlight}
-                    </p>
+                <div className="flex gap-5">
+                  {/* Left: SVG Diagram */}
+                  <div className="w-1/2 flex-shrink-0">
+                    {getTheorySVG(theoryStep)}
                   </div>
-                )}
+
+                  {/* Right: Text Content */}
+                  <div className="w-1/2 overflow-y-auto max-h-[450px]">
+                    <div className="text-base leading-relaxed mb-4 whitespace-pre-line">
+                      {typedText}
+                      {typedText.length < theorySteps[theoryStep].content.length && (
+                        <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                      )}
+                    </div>
+
+                    {typedText.length === theorySteps[theoryStep].content.length && (
+                      <div className="mt-4 p-3 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                        <p className="text-yellow-100 font-medium text-sm">
+                          💡 {theorySteps[theoryStep].highlight}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {/* Navigation buttons */}
