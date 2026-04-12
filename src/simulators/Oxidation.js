@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 
 // Simple icon components
@@ -57,6 +57,7 @@ const OxidationSimulator = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+  const storyContentRef = useRef(null);
 
   const [simOrientation, setSimOrientation] = useState('100');
   const [simDopingLevel, setSimDopingLevel] = useState(0);
@@ -390,6 +391,13 @@ const OxidationSimulator = ({ initialTab }) => {
   }, [isTheoryPlaying, theoryStep]);
 
   // Theory control functions
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
+
   const startTheoryAnimation = () => {
     setIsTheoryPlaying(true);
     setTheoryStep(0);
@@ -799,9 +807,10 @@ const OxidationSimulator = ({ initialTab }) => {
 
   // SVG diagrams for each theory step
   const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
     switch(step) {
       case 0: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="ox_bg0" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
@@ -831,7 +840,7 @@ const OxidationSimulator = ({ initialTab }) => {
         </svg>
       );
       case 1: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="ox_bg1" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
@@ -867,7 +876,7 @@ const OxidationSimulator = ({ initialTab }) => {
         </svg>
       );
       case 2: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="ox_bg2" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
@@ -908,7 +917,7 @@ const OxidationSimulator = ({ initialTab }) => {
         </svg>
       );
       case 3: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="ox_bg3" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
@@ -943,7 +952,7 @@ const OxidationSimulator = ({ initialTab }) => {
         </svg>
       );
       case 4: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="ox_bg4" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
@@ -1023,40 +1032,38 @@ const OxidationSimulator = ({ initialTab }) => {
                       </div>
                     </div>
 
-                    <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-5 mb-6 overflow-y-auto">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="text-5xl">{theorySteps[theoryStep].icon}</span>
-                        <h3 className="text-2xl font-bold">
-                          {theorySteps[theoryStep].title}
-                        </h3>
+                    {/* Content area - Left SVG + Right Text */}
+                    <div className="flex-1 min-h-0 flex gap-4 mb-6">
+                      {/* Left SVG Panel */}
+                      <div className="w-1/2 flex-shrink-0 bg-white/5 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                        {getTheorySVG(theoryStep)}
                       </div>
-
-                      <div className="flex gap-5">
-                        {/* Left: SVG Diagram */}
-                        <div className="w-1/2 flex-shrink-0">
-                          {getTheorySVG(theoryStep)}
+                      {/* Right Text Panel */}
+                      <div ref={storyContentRef} className="flex-1 min-w-0 bg-white/10 backdrop-blur-sm rounded-xl p-6 overflow-y-auto">
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                          <h3 className="text-xl font-bold">
+                            {theorySteps[theoryStep].title}
+                          </h3>
                         </div>
 
-                        {/* Right: Text Content */}
-                        <div className="w-1/2 overflow-y-auto max-h-[450px]">
-                          <div className="text-base leading-relaxed whitespace-pre-line mb-4 font-medium">
-                            {typedText}
-                            {typedText.length < theorySteps[theoryStep].content.length && (
-                              <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
-                            )}
-                          </div>
-
-                          {typedText.length >= theorySteps[theoryStep].content.length && (
-                            <div className="mt-4 p-3 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
-                              <div className="flex items-start gap-2 text-yellow-300">
-                                <LightbulbIcon />
-                                <p className="text-yellow-100 font-semibold text-sm">
-                                  {theorySteps[theoryStep].highlight}
-                                </p>
-                              </div>
-                            </div>
+                        <div className="text-base leading-relaxed whitespace-pre-line mb-4 font-medium">
+                          {typedText}
+                          {typedText.length < theorySteps[theoryStep].content.length && (
+                            <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
                           )}
                         </div>
+
+                        {typedText.length >= theorySteps[theoryStep].content.length && (
+                          <div className="mt-4 p-3 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
+                            <div className="flex items-start gap-2 text-yellow-300">
+                              <LightbulbIcon />
+                              <p className="text-yellow-100 font-semibold text-sm">
+                                {theorySteps[theoryStep].highlight}
+                              </p>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
 

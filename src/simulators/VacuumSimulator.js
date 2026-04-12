@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Icon components
@@ -31,7 +31,8 @@ const VacuumSimulator = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
-  
+  const storyContentRef = useRef(null);
+
   // 기존 상태들
   const [pumpingSpeed, setPumpingSpeed] = useState(1800);
   const [gasFlowRate, setGasFlowRate] = useState(10);
@@ -639,6 +640,13 @@ const VacuumSimulator = ({ initialTab }) => {
   }, [theoryStep, isTheoryPlaying]);
 
   // Theory control functions
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
+
   const startTheoryAnimation = () => {
     setIsTheoryPlaying(true);
     setTheoryStep(0);
@@ -1319,9 +1327,10 @@ const VacuumSimulator = ({ initialTab }) => {
 
   // SVG diagrams for each theory step
   const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
     switch(step) {
       case 0: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="vac_bg0" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
@@ -1353,7 +1362,7 @@ const VacuumSimulator = ({ initialTab }) => {
         </svg>
       );
       case 1: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="vac_bg1" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
@@ -1387,7 +1396,7 @@ const VacuumSimulator = ({ initialTab }) => {
         </svg>
       );
       case 2: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="vac_bg2" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
@@ -1417,7 +1426,7 @@ const VacuumSimulator = ({ initialTab }) => {
         </svg>
       );
       case 3: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="vac_bg3" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
@@ -1451,7 +1460,7 @@ const VacuumSimulator = ({ initialTab }) => {
         </svg>
       );
       case 4: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
+        <svg viewBox="0 0 280 280" className={svgClass}>
           <defs>
             <linearGradient id="vac_bg4" x1="0" y1="0" x2="0.5" y2="1">
               <stop offset="0%" stopColor="#0c4a6e"/><stop offset="100%" stopColor="#0f172a"/>
@@ -1530,36 +1539,33 @@ const VacuumSimulator = ({ initialTab }) => {
                 </div>
               </div>
 
-              {/* Content - Two Column Layout */}
-              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 mb-6 overflow-y-auto">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
-                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+              {/* Content area - Left SVG + Right Text */}
+              <div className="flex-1 min-h-0 flex gap-4 mb-6">
+                {/* Left SVG Panel */}
+                <div className="w-1/2 flex-shrink-0 bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                  {getTheorySVG(theoryStep)}
                 </div>
-
-                <div className="flex gap-5">
-                  {/* Left: SVG Diagram */}
-                  <div className="w-1/2 flex-shrink-0">
-                    {getTheorySVG(theoryStep)}
+                {/* Right Text Panel */}
+                <div ref={storyContentRef} className="flex-1 min-w-0 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 overflow-y-auto">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                    <h3 className="text-xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
                   </div>
 
-                  {/* Right: Text Content */}
-                  <div className="w-1/2 overflow-y-auto max-h-[450px]">
-                    <div className="text-base leading-relaxed mb-4 whitespace-pre-line">
-                      {typedText}
-                      {typedText.length < theorySteps[theoryStep].content.length && (
-                        <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
-                      )}
-                    </div>
-
-                    {typedText.length === theorySteps[theoryStep].content.length && (
-                      <div className="mt-4 p-3 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
-                        <p className="text-yellow-100 font-medium text-sm">
-                          💡 {theorySteps[theoryStep].highlight}
-                        </p>
-                      </div>
+                  <div className="text-base leading-relaxed mb-4 whitespace-pre-line">
+                    {typedText}
+                    {typedText.length < theorySteps[theoryStep].content.length && (
+                      <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
                     )}
                   </div>
+
+                  {typedText.length === theorySteps[theoryStep].content.length && (
+                    <div className="mt-4 p-3 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                      <p className="text-yellow-100 font-medium text-sm">
+                        💡 {theorySteps[theoryStep].highlight}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 

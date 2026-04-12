@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
 
@@ -29,6 +29,7 @@ const PlasmaSimulator = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+  const storyContentRef = useRef(null);
 
   const [gasPressure, setGasPressure] = useState(1.0);
   const [plasmaEnergy, setPlasmaEnergy] = useState(100);
@@ -360,6 +361,13 @@ const PlasmaSimulator = ({ initialTab }) => {
 
     return () => clearInterval(typingInterval);
   }, [theoryStep, isTheoryPlaying]);
+
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
 
   // Theory control functions
   const startTheoryAnimation = () => {
@@ -764,209 +772,129 @@ const PlasmaSimulator = ({ initialTab }) => {
 
   // SVG diagrams for each theory step
   const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
     switch(step) {
       case 0: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
-          <defs>
-            <linearGradient id="plasma_bg0" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#1e1b4b"/><stop offset="100%" stopColor="#0f172a"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#plasma_bg0)" rx="12"/>
-          <text x="200" y="32" textAnchor="middle" fill="#fbbf24" fontSize="17" fontWeight="bold">물질의 4가지 상태</text>
-          <rect x="10" y="48" width="88" height="105" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6"/>
-          <text x="54" y="68" textAnchor="middle" fill="#93c5fd" fontSize="14" fontWeight="bold">고체</text>
-          <circle cx="30" cy="85" r="7" fill="#3b82f6"/><circle cx="54" cy="85" r="7" fill="#3b82f6"/><circle cx="78" cy="85" r="7" fill="#3b82f6"/>
-          <circle cx="30" cy="105" r="7" fill="#3b82f6"/><circle cx="54" cy="105" r="7" fill="#3b82f6"/><circle cx="78" cy="105" r="7" fill="#3b82f6"/>
-          <circle cx="30" cy="125" r="7" fill="#3b82f6"/><circle cx="54" cy="125" r="7" fill="#3b82f6"/><circle cx="78" cy="125" r="7" fill="#3b82f6"/>
-          <text x="54" y="148" textAnchor="middle" fill="#93c5fd" fontSize="10">규칙 배열</text>
-          <text x="104" y="105" fill="#fbbf24" fontSize="20">→</text>
-          <rect x="112" y="48" width="88" height="105" rx="8" fill="rgba(6,182,212,0.15)" stroke="#06b6d4"/>
-          <text x="156" y="68" textAnchor="middle" fill="#67e8f9" fontSize="14" fontWeight="bold">액체</text>
-          <circle cx="132" cy="88" r="7" fill="#06b6d4"/><circle cx="156" cy="96" r="7" fill="#06b6d4"/><circle cx="178" cy="84" r="7" fill="#06b6d4"/>
-          <circle cx="140" cy="114" r="7" fill="#06b6d4"/><circle cx="168" cy="120" r="7" fill="#06b6d4"/><circle cx="152" cy="138" r="7" fill="#06b6d4"/>
-          <text x="156" y="148" textAnchor="middle" fill="#67e8f9" fontSize="10">유동적</text>
-          <text x="206" y="105" fill="#fbbf24" fontSize="20">→</text>
-          <rect x="214" y="48" width="88" height="105" rx="8" fill="rgba(34,197,94,0.15)" stroke="#22c55e"/>
-          <text x="258" y="68" textAnchor="middle" fill="#86efac" fontSize="14" fontWeight="bold">기체</text>
-          <circle cx="235" cy="90" r="5" fill="#22c55e"/><circle cx="275" cy="102" r="5" fill="#22c55e"/>
-          <circle cx="248" cy="120" r="5" fill="#22c55e"/><circle cx="270" cy="84" r="5" fill="#22c55e"/><circle cx="252" cy="138" r="5" fill="#22c55e"/>
-          <text x="258" y="148" textAnchor="middle" fill="#86efac" fontSize="10">자유 운동</text>
-          <text x="308" y="105" fill="#fbbf24" fontSize="20">→</text>
-          <rect x="316" y="48" width="78" height="105" rx="8" fill="rgba(239,68,68,0.15)" stroke="#ef4444"/>
-          <text x="355" y="68" textAnchor="middle" fill="#fca5a5" fontSize="13" fontWeight="bold">플라즈마</text>
-          <circle cx="335" cy="90" r="7" fill="#ef4444" opacity="0.7"/><text x="335" y="94" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">+</text>
-          <circle cx="375" cy="112" r="7" fill="#ef4444" opacity="0.7"/><text x="375" y="116" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">+</text>
-          <circle cx="345" cy="130" r="7" fill="#ef4444" opacity="0.7"/><text x="345" y="134" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">+</text>
-          <circle cx="358" cy="85" r="3.5" fill="#fbbf24"/><circle cx="330" cy="115" r="3.5" fill="#fbbf24"/>
-          <circle cx="368" cy="132" r="3.5" fill="#fbbf24"/><circle cx="380" cy="92" r="3.5" fill="#fbbf24"/>
-          <text x="355" y="148" textAnchor="middle" fill="#fca5a5" fontSize="10">이온화</text>
-          <line x1="30" y1="168" x2="370" y2="168" stroke="#fbbf24" strokeWidth="1.5"/>
-          <polygon points="370,164 382,168 370,172" fill="#fbbf24"/>
-          <text x="200" y="184" textAnchor="middle" fill="#fbbf24" fontSize="13">에너지 증가 →</text>
-          <rect x="15" y="196" width="370" height="132" rx="8" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" strokeWidth="0.5" strokeDasharray="4"/>
-          <text x="200" y="218" textAnchor="middle" fill="#fbbf24" fontSize="15" fontWeight="bold">반도체 플라즈마 특징</text>
-          <text x="30" y="242" fill="#e2e8f0" fontSize="13">⚡ 전기 전도성 — 자유 전자와 이온</text>
-          <text x="30" y="262" fill="#e2e8f0" fontSize="13">🔄 집단 거동 — 전체가 함께 움직임</text>
-          <text x="30" y="282" fill="#e2e8f0" fontSize="13">⚖️ 준중성 — 전자 밀도 ≈ 이온 밀도</text>
-          <text x="30" y="302" fill="#e2e8f0" fontSize="13">🌡️ 저온 플라즈마: 이온화율 0.001~1%</text>
-          <text x="30" y="322" fill="#e2e8f0" fontSize="13">🌟 우주의 99%가 플라즈마!</text>
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">물질의 제4상태: 플라즈마</text>
+          {[
+            { y: 45, w: 60, label: '플라즈마', color: '#F59E0B', bg: '#78350F' },
+            { y: 80, w: 100, label: '기체', color: '#22C55E', bg: '#14532D' },
+            { y: 115, w: 140, label: '액체', color: '#3B82F6', bg: '#1E3A8A' },
+            { y: 150, w: 180, label: '고체', color: '#9CA3AF', bg: '#374151' },
+          ].map((s, i) => (
+            <g key={`state${i}`}>
+              <rect x={140 - s.w/2} y={s.y} width={s.w} height={28} rx="6" fill={s.bg} fillOpacity="0.6" stroke={s.color} strokeWidth={i === 0 ? 2 : 1}/>
+              <text x="140" y={s.y + 18} textAnchor="middle" fill={s.color} fontSize="10" fontWeight="bold">{s.label}</text>
+            </g>
+          ))}
+          <text x="240" y="58" fill="#b45309" fontSize="7">↑ 에너지</text>
+          <rect x="20" y="190" width="240" height="80" rx="8" fill="white" fillOpacity="0.06"/>
+          <text x="140" y="210" textAnchor="middle" fill="#b45309" fontSize="10" fontWeight="bold">반도체 저온 플라즈마</text>
+          <text x="70" y="230" textAnchor="middle" fill="#dc2626" fontSize="8">전자: 1~10 eV</text>
+          <text x="70" y="245" textAnchor="middle" fill="#dc2626" fontSize="7">(1만~10만 K)</text>
+          <text x="200" y="230" textAnchor="middle" fill="#2563eb" fontSize="8">이온: 0.03 eV</text>
+          <text x="200" y="245" textAnchor="middle" fill="#2563eb" fontSize="7">(300~500 K)</text>
+          <text x="140" y="262" textAnchor="middle" fill="#374151" fontSize="7">이온화율: 0.001~1%</text>
         </svg>
       );
       case 1: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
-          <defs>
-            <linearGradient id="plasma_bg1" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#1e1b4b"/><stop offset="100%" stopColor="#0f172a"/>
-            </linearGradient>
-            <linearGradient id="plasma_glow" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#c084fc" stopOpacity="0.3"/><stop offset="50%" stopColor="#e879f9" stopOpacity="0.5"/><stop offset="100%" stopColor="#c084fc" stopOpacity="0.3"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#plasma_bg1)" rx="12"/>
-          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">RF 플라즈마 생성 원리</text>
-          <rect x="80" y="42" width="240" height="215" rx="6" fill="#1e293b" stroke="#475569" strokeWidth="2"/>
-          <rect x="100" y="52" width="200" height="14" rx="3" fill="#94a3b8"/><text x="200" y="63" textAnchor="middle" fill="#1e293b" fontSize="10" fontWeight="bold">상부 전극</text>
-          <rect x="100" y="237" width="200" height="14" rx="3" fill="#94a3b8"/><text x="200" y="248" textAnchor="middle" fill="#1e293b" fontSize="10" fontWeight="bold">하부 전극</text>
-          <rect x="130" y="230" width="140" height="7" rx="2" fill="#3b82f6" stroke="#60a5fa"/>
-          <text x="200" y="228" textAnchor="middle" fill="#60a5fa" fontSize="9">웨이퍼</text>
-          <rect x="105" y="76" width="190" height="148" rx="4" fill="url(#plasma_glow)"/>
-          <circle cx="150" cy="115" r="8" fill="rgba(239,68,68,0.6)" stroke="#f87171"/><text x="150" y="119" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">+</text>
-          <circle cx="230" cy="155" r="8" fill="rgba(239,68,68,0.6)" stroke="#f87171"/><text x="230" y="159" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">+</text>
-          <circle cx="260" cy="105" r="8" fill="rgba(239,68,68,0.6)" stroke="#f87171"/><text x="260" y="109" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">+</text>
-          <circle cx="180" cy="190" r="8" fill="rgba(239,68,68,0.6)" stroke="#f87171"/><text x="180" y="194" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">+</text>
-          <circle cx="170" cy="100" r="4" fill="#fbbf24"/><circle cx="200" cy="135" r="4" fill="#fbbf24"/><circle cx="245" cy="125" r="4" fill="#fbbf24"/>
-          <circle cx="145" cy="165" r="4" fill="#fbbf24"/><circle cx="275" cy="175" r="4" fill="#fbbf24"/><circle cx="210" cy="200" r="4" fill="#fbbf24"/>
-          <circle cx="130" cy="140" r="5" fill="rgba(148,163,184,0.4)" stroke="#94a3b8"/>
-          <circle cx="250" cy="195" r="5" fill="rgba(148,163,184,0.4)" stroke="#94a3b8"/>
-          <circle cx="280" cy="145" r="5" fill="rgba(148,163,184,0.4)" stroke="#94a3b8"/>
-          <line x1="200" y1="42" x2="200" y2="18" stroke="#fbbf24" strokeWidth="2"/>
-          <text x="200" y="14" textAnchor="middle" fill="#fbbf24" fontSize="12" fontWeight="bold">⚡ RF 13.56 MHz</text>
-          <line x1="80" y1="90" x2="50" y2="90" stroke="#22d3ee" strokeWidth="2"/>
-          <text x="47" y="86" textAnchor="end" fill="#67e8f9" fontSize="11">Gas In</text>
-          <text x="47" y="99" textAnchor="end" fill="#67e8f9" fontSize="10">(Ar, CF₄)</text>
-          <line x1="320" y1="237" x2="350" y2="237" stroke="#94a3b8" strokeWidth="2"/>
-          <text x="353" y="241" fill="#94a3b8" fontSize="11">Pump</text>
-          <rect x="15" y="270" width="370" height="58" rx="6" fill="rgba(255,255,255,0.05)"/>
-          <circle cx="40" cy="288" r="6" fill="rgba(239,68,68,0.6)"/><text x="40" y="292" textAnchor="middle" fill="white" fontSize="8" fontWeight="bold">+</text>
-          <text x="52" y="292" fill="#e2e8f0" fontSize="12">이온(Ar⁺)</text>
-          <circle cx="135" cy="288" r="3.5" fill="#fbbf24"/><text x="145" y="292" fill="#e2e8f0" fontSize="12">전자(e⁻)</text>
-          <circle cx="225" cy="288" r="4" fill="rgba(148,163,184,0.4)" stroke="#94a3b8"/><text x="235" y="292" fill="#e2e8f0" fontSize="12">중성원자</text>
-          <text x="200" y="318" textAnchor="middle" fill="#c084fc" fontSize="13" fontWeight="bold">e⁻ + Ar → Ar⁺ + 2e⁻ (눈사태 이온화)</text>
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">플라즈마 생성 5단계</text>
+          {[
+            { y: 38, label: '1. RF 전력 인가', desc: '13.56 MHz 전기장', color: '#3B82F6' },
+            { y: 83, label: '2. 전자 가속', desc: '이온보다 1800배 가벼움', color: '#8B5CF6' },
+            { y: 128, label: '3. 충돌 이온화', desc: 'e⁻ + Ar → Ar⁺ + 2e⁻', color: '#EC4899' },
+            { y: 173, label: '4. 플라즈마 유지', desc: '생성률 = 손실률', color: '#F59E0B' },
+            { y: 218, label: '5. 화학 반응', desc: '라디칼, 이온 → 식각/증착', color: '#22C55E' },
+          ].map((s, i) => (
+            <g key={`gen${i}`}>
+              <rect x="20" y={s.y} width="240" height="38" rx="8" fill={s.color} fillOpacity="0.12" stroke={s.color} strokeWidth="1"/>
+              <circle cx="42" cy={s.y + 19} r="11" fill={s.color} fillOpacity="0.3"/>
+              <text x="42" y={s.y + 23} textAnchor="middle" fill="#374151" fontSize="10" fontWeight="bold">{i + 1}</text>
+              <text x="60" y={s.y + 15} fill="#374151" fontSize="9" fontWeight="bold">{s.label}</text>
+              <text x="60" y={s.y + 30} fill="#374151" fontSize="7">{s.desc}</text>
+            </g>
+          ))}
+          {[76, 121, 166, 211].map((y, i) => (
+            <line key={`conn${i}`} x1="140" y1={y} x2="140" y2={y + 7} stroke="#6366F1" strokeWidth="2" strokeDasharray="3"/>
+          ))}
+          <text x="140" y="270" textAnchor="middle" fill="#b45309" fontSize="8">Paschen's Law: 최적 p×d 조건</text>
         </svg>
       );
       case 2: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
-          <defs>
-            <linearGradient id="plasma_bg2" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#1e1b4b"/><stop offset="100%" stopColor="#0f172a"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#plasma_bg2)" rx="12"/>
-          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">플라즈마 기술 발전사</text>
-          <line x1="80" y1="45" x2="80" y2="300" stroke="#475569" strokeWidth="2"/>
-          <circle cx="80" cy="60" r="8" fill="#3b82f6" stroke="#60a5fa" strokeWidth="2"/>
-          <text x="80" y="64" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">1</text>
-          <text x="100" y="56" fill="#93c5fd" fontSize="14" fontWeight="bold">1960년대</text>
-          <text x="100" y="72" fill="#e2e8f0" fontSize="12">DC 플라즈마 — 단순 스퍼터링</text>
-          <rect x="100" y="78" width="100" height="4" rx="2" fill="#3b82f6" opacity="0.4"/>
-          <circle cx="80" cy="110" r="8" fill="#8b5cf6" stroke="#a78bfa" strokeWidth="2"/>
-          <text x="80" y="114" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">2</text>
-          <text x="100" y="106" fill="#c4b5fd" fontSize="14" fontWeight="bold">1980년대</text>
-          <text x="100" y="122" fill="#e2e8f0" fontSize="12">RF CCP — RIE 도입</text>
-          <rect x="100" y="128" width="160" height="4" rx="2" fill="#8b5cf6" opacity="0.4"/>
-          <circle cx="80" cy="160" r="8" fill="#ec4899" stroke="#f472b6" strokeWidth="2"/>
-          <text x="80" y="164" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">3</text>
-          <text x="100" y="156" fill="#f9a8d4" fontSize="14" fontWeight="bold">1990년대</text>
-          <text x="100" y="172" fill="#e2e8f0" fontSize="12">ICP 고밀도 — 밀도 10배↑</text>
-          <rect x="100" y="178" width="220" height="4" rx="2" fill="#ec4899" opacity="0.4"/>
-          <circle cx="80" cy="210" r="8" fill="#f97316" stroke="#fb923c" strokeWidth="2"/>
-          <text x="80" y="214" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">4</text>
-          <text x="100" y="206" fill="#fdba74" fontSize="14" fontWeight="bold">2000년대</text>
-          <text x="100" y="222" fill="#e2e8f0" fontSize="12">Dual Frequency & Pulsed Plasma</text>
-          <rect x="100" y="228" width="260" height="4" rx="2" fill="#f97316" opacity="0.4"/>
-          <circle cx="80" cy="260" r="8" fill="#ef4444" stroke="#f87171" strokeWidth="2"/>
-          <text x="80" y="264" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">5</text>
-          <text x="100" y="256" fill="#fca5a5" fontSize="14" fontWeight="bold">2010년대~</text>
-          <text x="100" y="272" fill="#e2e8f0" fontSize="12">ALE 원자층 제어 &lt;1nm/cycle</text>
-          <rect x="100" y="278" width="290" height="4" rx="2" fill="#ef4444" opacity="0.4"/>
-          <rect x="30" y="300" width="340" height="32" rx="6" fill="rgba(251,191,36,0.1)" stroke="#fbbf24" strokeWidth="0.5"/>
-          <text x="200" y="321" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">📈 밀도 1000배↑ · 압력 1/100↓ · 선택비 100배↑</text>
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">플라즈마 기술 발전</text>
+          <line x1="45" y1="40" x2="45" y2="260" stroke="#6366F1" strokeWidth="2" strokeDasharray="4"/>
+          {[
+            { y: 48, era: '1960s', label: 'DC 플라즈마', desc: '고압 스퍼터링', color: '#6B7280' },
+            { y: 90, era: '1980s', label: 'RF CCP', desc: 'RIE 도입, 10-100 mTorr', color: '#3B82F6' },
+            { y: 132, era: '1990s', label: 'ICP 고밀도', desc: '밀도 10배↑, 1-10 mTorr', color: '#8B5CF6' },
+            { y: 174, era: '2000s', label: 'Dual Frequency', desc: '밀도/에너지 독립 제어', color: '#EC4899' },
+            { y: 216, era: '2010s+', label: 'ALE 원자층', desc: '<1nm/cycle, 5nm 공정', color: '#F59E0B' },
+          ].map((item, i) => (
+            <g key={`era${i}`}>
+              <circle cx="45" cy={item.y + 12} r="6" fill={item.color}/>
+              <text x="60" y={item.y + 8} fill={item.color} fontSize="9" fontWeight="bold">{item.era}</text>
+              <text x="60" y={item.y + 20} fill="#374151" fontSize="8" fontWeight="bold">{item.label}</text>
+              <text x="60" y={item.y + 32} fill="#374151" fontSize="7">{item.desc}</text>
+            </g>
+          ))}
+          <rect x="130" y="250" width="140" height="22" rx="4" fill="#FCD34D" fillOpacity="0.1"/>
+          <text x="200" y="265" textAnchor="middle" fill="#b45309" fontSize="7">밀도 1000배↑ 압력 1/100↓</text>
         </svg>
       );
       case 3: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
-          <defs>
-            <linearGradient id="plasma_bg3" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#1e1b4b"/><stop offset="100%" stopColor="#0f172a"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#plasma_bg3)" rx="12"/>
-          <text x="200" y="24" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">플라즈마 응용 분야</text>
-          <circle cx="200" cy="170" r="38" fill="rgba(168,85,247,0.3)" stroke="#a855f7" strokeWidth="2"/>
-          <text x="200" y="166" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">플라즈마</text>
-          <text x="200" y="182" textAnchor="middle" fill="#c4b5fd" fontSize="11">Plasma</text>
-          <line x1="170" y1="140" x2="85" y2="68" stroke="#f87171" strokeWidth="1.5"/>
-          <rect x="15" y="42" width="130" height="42" rx="6" fill="rgba(239,68,68,0.15)" stroke="#f87171"/>
-          <text x="80" y="60" textAnchor="middle" fill="#fca5a5" fontSize="13" fontWeight="bold">1. 식각 (RIE)</text>
-          <text x="80" y="76" textAnchor="middle" fill="#e2e8f0" fontSize="10">Deep Trench, 3D NAND</text>
-          <line x1="230" y1="140" x2="315" y2="68" stroke="#60a5fa" strokeWidth="1.5"/>
-          <rect x="255" y="42" width="130" height="42" rx="6" fill="rgba(59,130,246,0.15)" stroke="#60a5fa"/>
-          <text x="320" y="60" textAnchor="middle" fill="#93c5fd" fontSize="13" fontWeight="bold">2. 증착 (PECVD)</text>
-          <text x="320" y="76" textAnchor="middle" fill="#e2e8f0" fontSize="10">SiO₂, SiN 저온</text>
-          <line x1="162" y1="170" x2="70" y2="170" stroke="#4ade80" strokeWidth="1.5"/>
-          <rect x="5" y="149" width="120" height="42" rx="6" fill="rgba(34,197,94,0.15)" stroke="#4ade80"/>
-          <text x="65" y="167" textAnchor="middle" fill="#86efac" fontSize="13" fontWeight="bold">3. 세정</text>
-          <text x="65" y="183" textAnchor="middle" fill="#e2e8f0" fontSize="10">O₂ Ashing, PR 제거</text>
-          <line x1="238" y1="170" x2="330" y2="170" stroke="#fbbf24" strokeWidth="1.5"/>
-          <rect x="275" y="149" width="120" height="42" rx="6" fill="rgba(251,191,36,0.15)" stroke="#fbbf24"/>
-          <text x="335" y="167" textAnchor="middle" fill="#fde68a" fontSize="13" fontWeight="bold">4. 표면처리</text>
-          <text x="335" y="183" textAnchor="middle" fill="#e2e8f0" fontSize="10">친수/소수성 개질</text>
-          <line x1="170" y1="200" x2="85" y2="270" stroke="#c084fc" strokeWidth="1.5"/>
-          <rect x="15" y="252" width="130" height="42" rx="6" fill="rgba(192,132,252,0.15)" stroke="#c084fc"/>
-          <text x="80" y="270" textAnchor="middle" fill="#d8b4fe" fontSize="13" fontWeight="bold">5. PVD 스퍼터링</text>
-          <text x="80" y="286" textAnchor="middle" fill="#e2e8f0" fontSize="10">Al, Cu, Ti, W 금속막</text>
-          <line x1="230" y1="200" x2="315" y2="270" stroke="#22d3ee" strokeWidth="1.5"/>
-          <rect x="255" y="252" width="130" height="42" rx="6" fill="rgba(34,211,238,0.15)" stroke="#22d3ee"/>
-          <text x="320" y="270" textAnchor="middle" fill="#67e8f9" fontSize="13" fontWeight="bold">6. 디스플레이</text>
-          <text x="320" y="286" textAnchor="middle" fill="#e2e8f0" fontSize="10">LCD/OLED TFT</text>
-          <line x1="200" y1="208" x2="200" y2="302" stroke="#fb923c" strokeWidth="1.5"/>
-          <rect x="135" y="304" width="130" height="30" rx="6" fill="rgba(251,146,60,0.15)" stroke="#fb923c"/>
-          <text x="200" y="324" textAnchor="middle" fill="#fdba74" fontSize="13" fontWeight="bold">7. 의료 & 환경</text>
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">플라즈마 7대 응용</text>
+          <circle cx="140" cy="140" r="30" fill="#8B5CF6" fillOpacity="0.15" stroke="#8B5CF6" strokeWidth="1.5"/>
+          <text x="140" y="137" textAnchor="middle" fill="#7c3aed" fontSize="8" fontWeight="bold">플라즈마</text>
+          <text x="140" y="150" textAnchor="middle" fill="#7c3aed" fontSize="7">공정</text>
+          {[
+            { angle: -90, label: '식각', desc: 'RIE', color: '#F87171' },
+            { angle: -38, label: '증착', desc: 'PECVD', color: '#34D399' },
+            { angle: 14, label: '세정', desc: 'Ashing', color: '#60A5FA' },
+            { angle: 65, label: '표면처리', desc: 'Activation', color: '#FBBF24' },
+            { angle: 115, label: 'PVD', desc: 'Sputtering', color: '#A78BFA' },
+            { angle: 167, label: '디스플레이', desc: 'TFT', color: '#F472B6' },
+            { angle: 218, label: '의료/환경', desc: '멸균', color: '#38BDF8' },
+          ].map((app, i) => {
+            const rad = (app.angle * Math.PI) / 180;
+            const cx = 140 + Math.cos(rad) * 85;
+            const cy = 140 + Math.sin(rad) * 85;
+            return (
+              <g key={`app${i}`}>
+                <line x1={140 + Math.cos(rad) * 30} y1={140 + Math.sin(rad) * 30} x2={cx - Math.cos(rad) * 22} y2={cy - Math.sin(rad) * 22} stroke={app.color} strokeWidth="1" strokeDasharray="3" opacity="0.5"/>
+                <circle cx={cx} cy={cy} r="22" fill={app.color} fillOpacity="0.12" stroke={app.color} strokeWidth="1"/>
+                <text x={cx} y={cy - 3} textAnchor="middle" fill="#374151" fontSize="7" fontWeight="bold">{app.label}</text>
+                <text x={cx} y={cy + 8} textAnchor="middle" fill="#374151" fontSize="5">{app.desc}</text>
+              </g>
+            );
+          })}
         </svg>
       );
       case 4: return (
-        <svg viewBox="0 0 400 340" className="w-full h-auto rounded-lg">
-          <defs>
-            <linearGradient id="plasma_bg4" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#1e1b4b"/><stop offset="100%" stopColor="#0f172a"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#plasma_bg4)" rx="12"/>
-          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">시뮬레이터 학습 로드맵</text>
-          <rect x="30" y="42" width="340" height="50" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6"/>
-          <circle cx="56" cy="67" r="16" fill="#3b82f6" opacity="0.8"/><text x="56" y="72" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">1</text>
-          <text x="82" y="61" fill="#93c5fd" fontSize="13" fontWeight="bold">플라즈마 기본 특성</text>
-          <text x="82" y="78" fill="#cbd5e1" fontSize="11">전자 온도, 밀도, Debye Length</text>
-          <text x="200" y="104" textAnchor="middle" fill="#fbbf24" fontSize="16">▼</text>
-          <rect x="30" y="108" width="340" height="50" rx="8" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6"/>
-          <circle cx="56" cy="133" r="16" fill="#8b5cf6" opacity="0.8"/><text x="56" y="138" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">2</text>
-          <text x="82" y="127" fill="#c4b5fd" fontSize="13" fontWeight="bold">플라즈마 발생원리 1</text>
-          <text x="82" y="144" fill="#cbd5e1" fontSize="11">압력·전력 조건, Weak/Strong 구분</text>
-          <text x="200" y="170" textAnchor="middle" fill="#fbbf24" fontSize="16">▼</text>
-          <rect x="30" y="174" width="340" height="50" rx="8" fill="rgba(236,72,153,0.15)" stroke="#ec4899"/>
-          <circle cx="56" cy="199" r="16" fill="#ec4899" opacity="0.8"/><text x="56" y="204" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">3</text>
-          <text x="82" y="193" fill="#f9a8d4" fontSize="13" fontWeight="bold">플라즈마 발생원리 2</text>
-          <text x="82" y="210" fill="#cbd5e1" fontSize="11">Paschen Law, 5가지 가스 비교</text>
-          <text x="200" y="236" textAnchor="middle" fill="#fbbf24" fontSize="16">▼</text>
-          <rect x="30" y="240" width="340" height="50" rx="8" fill="rgba(249,115,22,0.15)" stroke="#f97316"/>
-          <circle cx="56" cy="265" r="16" fill="#f97316" opacity="0.8"/><text x="56" y="270" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">4</text>
-          <text x="82" y="259" fill="#fdba74" fontSize="13" fontWeight="bold">RF 및 매칭</text>
-          <text x="82" y="276" fill="#cbd5e1" fontSize="11">임피던스 매칭, L-C 네트워크</text>
-          <text x="200" y="302" textAnchor="middle" fill="#fbbf24" fontSize="16">▼</text>
-          <rect x="30" y="306" width="340" height="28" rx="8" fill="rgba(239,68,68,0.15)" stroke="#ef4444"/>
-          <circle cx="56" cy="320" r="12" fill="#ef4444" opacity="0.8"/><text x="56" y="325" textAnchor="middle" fill="white" fontSize="12" fontWeight="bold">5</text>
-          <text x="82" y="325" fill="#fca5a5" fontSize="13" fontWeight="bold">시스템 구조 (CCP vs ICP)</text>
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">시뮬레이터 학습 구조</text>
+          {[
+            { y: 38, label: '플라즈마 기본 특성', desc: 'Te, Ti, 밀도, Debye Length', color: '#3B82F6' },
+            { y: 80, label: '발생원리 1', desc: '압력/전력 → 플라즈마 발생', color: '#8B5CF6' },
+            { y: 122, label: '발생원리 2 (Paschen)', desc: '5가지 가스, p×d 최적화', color: '#EC4899' },
+            { y: 164, label: 'RF 및 매칭', desc: 'L-C 매칭, 반사 전력 최소화', color: '#F59E0B' },
+            { y: 206, label: 'CCP 시스템 구조', desc: 'CCP vs ICP, Sheath, 이온 충격', color: '#22C55E' },
+          ].map((tab, i) => (
+            <g key={`tab${i}`}>
+              <rect x="20" y={tab.y} width="240" height="35" rx="8" fill={tab.color} fillOpacity="0.12" stroke={tab.color} strokeWidth="1"/>
+              <circle cx="40" cy={tab.y + 17} r="10" fill={tab.color} fillOpacity="0.3"/>
+              <text x="40" y={tab.y + 21} textAnchor="middle" fill="#374151" fontSize="10" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={tab.y + 13} fill="#374151" fontSize="9" fontWeight="bold">{tab.label}</text>
+              <text x="58" y={tab.y + 27} fill="#374151" fontSize="7">{tab.desc}</text>
+            </g>
+          ))}
+          {[73, 115, 157, 199].map((y, i) => (
+            <line key={`c${i}`} x1="140" y1={y} x2="140" y2={y + 7} stroke="#6366F1" strokeWidth="2" strokeDasharray="3"/>
+          ))}
+          <text x="140" y="257" textAnchor="middle" fill="#b45309" fontSize="8">+ ICP 심화 (이론 탭)</text>
         </svg>
       );
       default: return null;
@@ -1014,36 +942,33 @@ const PlasmaSimulator = ({ initialTab }) => {
                 </div>
               </div>
 
-              {/* Content - Two Column Layout */}
-              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 mb-6 overflow-y-auto">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
-                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+              {/* Content area - Left SVG + Right Text */}
+              <div className="flex-1 min-h-0 flex gap-4 mb-6">
+                {/* Left SVG Panel */}
+                <div className="w-1/2 flex-shrink-0 bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                  {getTheorySVG(theoryStep)}
                 </div>
-
-                <div className="flex gap-5">
-                  {/* Left: SVG Diagram */}
-                  <div className="w-1/2 flex-shrink-0">
-                    {getTheorySVG(theoryStep)}
+                {/* Right Text Panel */}
+                <div ref={storyContentRef} className="flex-1 min-w-0 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 overflow-y-auto">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                    <h3 className="text-xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
                   </div>
 
-                  {/* Right: Text Content */}
-                  <div className="w-1/2 overflow-y-auto max-h-[450px]">
-                    <div className="text-base leading-relaxed mb-4 whitespace-pre-line">
-                      {typedText}
-                      {typedText.length < theorySteps[theoryStep].content.length && (
-                        <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
-                      )}
-                    </div>
-
-                    {typedText.length === theorySteps[theoryStep].content.length && (
-                      <div className="mt-4 p-3 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
-                        <p className="text-yellow-100 font-medium text-sm">
-                          💡 {theorySteps[theoryStep].highlight}
-                        </p>
-                      </div>
+                  <div className="text-base leading-relaxed mb-4 whitespace-pre-line">
+                    {typedText}
+                    {typedText.length < theorySteps[theoryStep].content.length && (
+                      <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
                     )}
                   </div>
+
+                  {typedText.length === theorySteps[theoryStep].content.length && (
+                    <div className="mt-4 p-3 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                      <p className="text-yellow-100 font-medium text-sm">
+                        💡 {theorySteps[theoryStep].highlight}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
