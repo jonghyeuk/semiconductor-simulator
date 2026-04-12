@@ -778,98 +778,102 @@ const PlasmaSimulator = ({ initialTab }) => {
     switch(step) {
       case 0: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">물질의 제4상태: 플라즈마</text>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">물질의 제4상태: 플라즈마</text>
           {[
-            { y: 45, w: 60, label: '플라즈마', color: '#F59E0B', bg: '#78350F' },
-            { y: 80, w: 100, label: '기체', color: '#22C55E', bg: '#14532D' },
-            { y: 115, w: 140, label: '액체', color: '#3B82F6', bg: '#1E3A8A' },
-            { y: 150, w: 180, label: '고체', color: '#9CA3AF', bg: '#374151' },
+            { y: 45, w: 60, label: '플라즈마', color: '#FCD34D', bg: '#78350F' },
+            { y: 80, w: 100, label: '기체', color: '#86EFAC', bg: '#14532D' },
+            { y: 115, w: 140, label: '액체', color: '#93C5FD', bg: '#1E3A8A' },
+            { y: 150, w: 180, label: '고체', color: '#E5E7EB', bg: '#374151' },
           ].map((s, i) => (
             <g key={`state${i}`}>
-              <rect x={140 - s.w/2} y={s.y} width={s.w} height={28} rx="6" fill={s.bg} fillOpacity="0.6" stroke={s.color} strokeWidth={i === 0 ? 2 : 1}/>
-              <text x="140" y={s.y + 18} textAnchor="middle" fill={s.color} fontSize="10" fontWeight="bold">{s.label}</text>
+              <rect x={140 - s.w/2} y={s.y} width={s.w} height={28} rx="6" fill={s.bg} fillOpacity="0.8" stroke={s.color} strokeWidth={i === 0 ? 2 : 1}/>
+              <text x="140" y={s.y + 18} textAnchor="middle" fill={s.color} fontSize="11" fontWeight="bold">{s.label}</text>
             </g>
           ))}
-          <text x="240" y="58" fill="#fde68a" fontSize="7">↑ 에너지</text>
-          <rect x="20" y="190" width="240" height="80" rx="8" fill="white" fillOpacity="0.06"/>
-          <text x="140" y="210" textAnchor="middle" fill="#fde68a" fontSize="10" fontWeight="bold">반도체 저온 플라즈마</text>
-          <text x="70" y="230" textAnchor="middle" fill="#dc2626" fontSize="8">전자: 1~10 eV</text>
-          <text x="70" y="245" textAnchor="middle" fill="#dc2626" fontSize="7">(1만~10만 K)</text>
-          <text x="200" y="230" textAnchor="middle" fill="#2563eb" fontSize="8">이온: 0.03 eV</text>
-          <text x="200" y="245" textAnchor="middle" fill="#2563eb" fontSize="7">(300~500 K)</text>
-          <text x="140" y="262" textAnchor="middle" fill="#e2e8f0" fontSize="7">이온화율: 0.001~1%</text>
+          <text x="245" y="60" fill="#fde047" fontSize="8" fontWeight="bold">↑ 에너지</text>
+          <rect x="20" y="190" width="240" height="82" rx="8" fill="#1e293b" fillOpacity="0.8" stroke="#fbbf24" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="210" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">반도체 저온 플라즈마</text>
+          <text x="70" y="230" textAnchor="middle" fill="#fca5a5" fontSize="9" fontWeight="bold">전자: 1~10 eV</text>
+          <text x="70" y="244" textAnchor="middle" fill="#fca5a5" fontSize="8">(1만~10만 K)</text>
+          <text x="200" y="230" textAnchor="middle" fill="#93c5fd" fontSize="9" fontWeight="bold">이온: 0.03 eV</text>
+          <text x="200" y="244" textAnchor="middle" fill="#93c5fd" fontSize="8">(300~500 K)</text>
+          <text x="140" y="262" textAnchor="middle" fill="#ffffff" fontSize="9" fontWeight="bold">이온화율: 0.001~1%</text>
         </svg>
       );
       case 1: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">플라즈마 생성 5단계</text>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">플라즈마 생성 5단계</text>
           {[
-            { y: 38, label: '1. RF 전력 인가', desc: '13.56 MHz 전기장', color: '#3B82F6' },
-            { y: 83, label: '2. 전자 가속', desc: '이온보다 1800배 가벼움', color: '#8B5CF6' },
-            { y: 128, label: '3. 충돌 이온화', desc: 'e⁻ + Ar → Ar⁺ + 2e⁻', color: '#EC4899' },
-            { y: 173, label: '4. 플라즈마 유지', desc: '생성률 = 손실률', color: '#F59E0B' },
-            { y: 218, label: '5. 화학 반응', desc: '라디칼, 이온 → 식각/증착', color: '#22C55E' },
+            { y: 38, label: '1. RF 전력 인가', desc: '13.56 MHz 전기장', color: '#93C5FD' },
+            { y: 83, label: '2. 전자 가속', desc: '이온보다 1800배 가벼움', color: '#C4B5FD' },
+            { y: 128, label: '3. 충돌 이온화', desc: 'e⁻ + Ar → Ar⁺ + 2e⁻', color: '#F9A8D4' },
+            { y: 173, label: '4. 플라즈마 유지', desc: '생성률 = 손실률', color: '#FCD34D' },
+            { y: 218, label: '5. 화학 반응', desc: '라디칼 → 식각/증착', color: '#86EFAC' },
           ].map((s, i) => (
             <g key={`gen${i}`}>
-              <rect x="20" y={s.y} width="240" height="38" rx="8" fill={s.color} fillOpacity="0.12" stroke={s.color} strokeWidth="1"/>
-              <circle cx="42" cy={s.y + 19} r="11" fill={s.color} fillOpacity="0.3"/>
-              <text x="42" y={s.y + 23} textAnchor="middle" fill="#e2e8f0" fontSize="10" fontWeight="bold">{i + 1}</text>
-              <text x="60" y={s.y + 15} fill="#e2e8f0" fontSize="9" fontWeight="bold">{s.label}</text>
-              <text x="60" y={s.y + 30} fill="#e2e8f0" fontSize="7">{s.desc}</text>
+              <rect x="20" y={s.y} width="240" height="38" rx="8" fill="#1e293b" fillOpacity="0.7" stroke={s.color} strokeWidth="1.5"/>
+              <circle cx="42" cy={s.y + 19} r="12" fill={s.color} fillOpacity="0.9"/>
+              <text x="42" y={s.y + 24} textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">{i + 1}</text>
+              <text x="62" y={s.y + 16} fill={s.color} fontSize="11" fontWeight="bold">{s.label}</text>
+              <text x="62" y={s.y + 31} fill="#ffffff" fontSize="9">{s.desc}</text>
             </g>
           ))}
           {[76, 121, 166, 211].map((y, i) => (
-            <line key={`conn${i}`} x1="140" y1={y} x2="140" y2={y + 7} stroke="#6366F1" strokeWidth="2" strokeDasharray="3"/>
+            <line key={`conn${i}`} x1="140" y1={y} x2="140" y2={y + 7} stroke="#fde047" strokeWidth="2" strokeDasharray="3"/>
           ))}
-          <text x="140" y="270" textAnchor="middle" fill="#fde68a" fontSize="8">Paschen's Law: 최적 p×d 조건</text>
+          <text x="140" y="270" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">Paschen Law: 최적 p×d 조건</text>
         </svg>
       );
       case 2: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">플라즈마 기술 발전</text>
-          <line x1="45" y1="40" x2="45" y2="260" stroke="#6366F1" strokeWidth="2" strokeDasharray="4"/>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">플라즈마 기술 발전</text>
+          <line x1="45" y1="40" x2="45" y2="250" stroke="#94a3b8" strokeWidth="2" strokeDasharray="4"/>
           {[
-            { y: 48, era: '1960s', label: 'DC 플라즈마', desc: '고압 스퍼터링', color: '#6B7280' },
-            { y: 90, era: '1980s', label: 'RF CCP', desc: 'RIE 도입, 10-100 mTorr', color: '#3B82F6' },
-            { y: 132, era: '1990s', label: 'ICP 고밀도', desc: '밀도 10배↑, 1-10 mTorr', color: '#8B5CF6' },
-            { y: 174, era: '2000s', label: 'Dual Frequency', desc: '밀도/에너지 독립 제어', color: '#EC4899' },
-            { y: 216, era: '2010s+', label: 'ALE 원자층', desc: '<1nm/cycle, 5nm 공정', color: '#F59E0B' },
+            { y: 48, era: '1960s', label: 'DC 플라즈마', desc: '고압 스퍼터링', color: '#CBD5E1' },
+            { y: 90, era: '1980s', label: 'RF CCP', desc: 'RIE 도입, 10-100 mTorr', color: '#93C5FD' },
+            { y: 132, era: '1990s', label: 'ICP 고밀도', desc: '밀도 10배↑, 1-10 mTorr', color: '#C4B5FD' },
+            { y: 174, era: '2000s', label: 'Dual Frequency', desc: '밀도/에너지 독립 제어', color: '#F9A8D4' },
+            { y: 216, era: '2010s+', label: 'ALE 원자층', desc: '<1nm/cycle, 5nm 공정', color: '#FCD34D' },
           ].map((item, i) => (
             <g key={`era${i}`}>
-              <circle cx="45" cy={item.y + 12} r="6" fill={item.color}/>
-              <text x="60" y={item.y + 8} fill={item.color} fontSize="9" fontWeight="bold">{item.era}</text>
-              <text x="60" y={item.y + 20} fill="#e2e8f0" fontSize="8" fontWeight="bold">{item.label}</text>
-              <text x="60" y={item.y + 32} fill="#e2e8f0" fontSize="7">{item.desc}</text>
+              <circle cx="45" cy={item.y + 12} r="7" fill={item.color} stroke="#0f172a" strokeWidth="1.5"/>
+              <text x="60" y={item.y + 8} fill={item.color} fontSize="11" fontWeight="bold">{item.era}</text>
+              <text x="60" y={item.y + 22} fill="#ffffff" fontSize="10" fontWeight="bold">{item.label}</text>
+              <text x="60" y={item.y + 34} fill="#e2e8f0" fontSize="8">{item.desc}</text>
             </g>
           ))}
-          <rect x="130" y="250" width="140" height="22" rx="4" fill="#FCD34D" fillOpacity="0.1"/>
-          <text x="200" y="265" textAnchor="middle" fill="#fde68a" fontSize="7">밀도 1000배↑ 압력 1/100↓</text>
+          <rect x="15" y="256" width="250" height="20" rx="4" fill="#1e293b" fillOpacity="0.8" stroke="#fde047" strokeWidth="0.5"/>
+          <text x="140" y="270" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">📈 밀도 1000배↑ · 압력 1/100↓</text>
         </svg>
       );
       case 3: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">플라즈마 7대 응용</text>
-          <circle cx="140" cy="140" r="30" fill="#8B5CF6" fillOpacity="0.15" stroke="#8B5CF6" strokeWidth="1.5"/>
-          <text x="140" y="137" textAnchor="middle" fill="#7c3aed" fontSize="8" fontWeight="bold">플라즈마</text>
-          <text x="140" y="150" textAnchor="middle" fill="#7c3aed" fontSize="7">공정</text>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">플라즈마 7대 응용</text>
+          <circle cx="140" cy="140" r="32" fill="#7c3aed" fillOpacity="0.8" stroke="#c4b5fd" strokeWidth="2"/>
+          <text x="140" y="137" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">플라즈마</text>
+          <text x="140" y="151" textAnchor="middle" fill="#ddd6fe" fontSize="8">Plasma</text>
           {[
-            { angle: -90, label: '식각', desc: 'RIE', color: '#F87171' },
-            { angle: -38, label: '증착', desc: 'PECVD', color: '#34D399' },
-            { angle: 14, label: '세정', desc: 'Ashing', color: '#60A5FA' },
-            { angle: 65, label: '표면처리', desc: 'Activation', color: '#FBBF24' },
-            { angle: 115, label: 'PVD', desc: 'Sputtering', color: '#A78BFA' },
-            { angle: 167, label: '디스플레이', desc: 'TFT', color: '#F472B6' },
-            { angle: 218, label: '의료/환경', desc: '멸균', color: '#38BDF8' },
+            { angle: -90, label: '식각', desc: 'RIE', color: '#FCA5A5' },
+            { angle: -38, label: '증착', desc: 'PECVD', color: '#86EFAC' },
+            { angle: 14, label: '세정', desc: 'Ashing', color: '#93C5FD' },
+            { angle: 65, label: '표면처리', desc: 'Activation', color: '#FCD34D' },
+            { angle: 115, label: 'PVD', desc: 'Sputtering', color: '#C4B5FD' },
+            { angle: 167, label: '디스플레이', desc: 'TFT', color: '#F9A8D4' },
+            { angle: 218, label: '의료/환경', desc: '멸균', color: '#7DD3FC' },
           ].map((app, i) => {
             const rad = (app.angle * Math.PI) / 180;
             const cx = 140 + Math.cos(rad) * 85;
             const cy = 140 + Math.sin(rad) * 85;
             return (
               <g key={`app${i}`}>
-                <line x1={140 + Math.cos(rad) * 30} y1={140 + Math.sin(rad) * 30} x2={cx - Math.cos(rad) * 22} y2={cy - Math.sin(rad) * 22} stroke={app.color} strokeWidth="1" strokeDasharray="3" opacity="0.5"/>
-                <circle cx={cx} cy={cy} r="22" fill={app.color} fillOpacity="0.12" stroke={app.color} strokeWidth="1"/>
-                <text x={cx} y={cy - 3} textAnchor="middle" fill="#e2e8f0" fontSize="7" fontWeight="bold">{app.label}</text>
-                <text x={cx} y={cy + 8} textAnchor="middle" fill="#e2e8f0" fontSize="5">{app.desc}</text>
+                <line x1={140 + Math.cos(rad) * 32} y1={140 + Math.sin(rad) * 32} x2={cx - Math.cos(rad) * 22} y2={cy - Math.sin(rad) * 22} stroke={app.color} strokeWidth="1.2" strokeDasharray="2"/>
+                <circle cx={cx} cy={cy} r="22" fill="#1e293b" fillOpacity="0.85" stroke={app.color} strokeWidth="1.5"/>
+                <text x={cx} y={cy - 2} textAnchor="middle" fill={app.color} fontSize="9" fontWeight="bold">{app.label}</text>
+                <text x={cx} y={cy + 10} textAnchor="middle" fill="#ffffff" fontSize="7">{app.desc}</text>
               </g>
             );
           })}
@@ -877,26 +881,27 @@ const PlasmaSimulator = ({ initialTab }) => {
       );
       case 4: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">시뮬레이터 학습 구조</text>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">시뮬레이터 학습 구조</text>
           {[
-            { y: 38, label: '플라즈마 기본 특성', desc: 'Te, Ti, 밀도, Debye Length', color: '#3B82F6' },
-            { y: 80, label: '발생원리 1', desc: '압력/전력 → 플라즈마 발생', color: '#8B5CF6' },
-            { y: 122, label: '발생원리 2 (Paschen)', desc: '5가지 가스, p×d 최적화', color: '#EC4899' },
-            { y: 164, label: 'RF 및 매칭', desc: 'L-C 매칭, 반사 전력 최소화', color: '#F59E0B' },
-            { y: 206, label: 'CCP 시스템 구조', desc: 'CCP vs ICP, Sheath, 이온 충격', color: '#22C55E' },
+            { y: 38, label: '플라즈마 기본 특성', desc: 'Te, Ti, 밀도, Debye', color: '#93C5FD' },
+            { y: 80, label: '발생원리 1', desc: '압력/전력 조건', color: '#C4B5FD' },
+            { y: 122, label: '발생원리 2 (Paschen)', desc: '5가지 가스, p×d', color: '#F9A8D4' },
+            { y: 164, label: 'RF 및 매칭', desc: 'L-C 매칭', color: '#FCD34D' },
+            { y: 206, label: 'CCP 시스템 구조', desc: 'CCP vs ICP, Sheath', color: '#86EFAC' },
           ].map((tab, i) => (
             <g key={`tab${i}`}>
-              <rect x="20" y={tab.y} width="240" height="35" rx="8" fill={tab.color} fillOpacity="0.12" stroke={tab.color} strokeWidth="1"/>
-              <circle cx="40" cy={tab.y + 17} r="10" fill={tab.color} fillOpacity="0.3"/>
-              <text x="40" y={tab.y + 21} textAnchor="middle" fill="#e2e8f0" fontSize="10" fontWeight="bold">{i + 1}</text>
-              <text x="58" y={tab.y + 13} fill="#e2e8f0" fontSize="9" fontWeight="bold">{tab.label}</text>
-              <text x="58" y={tab.y + 27} fill="#e2e8f0" fontSize="7">{tab.desc}</text>
+              <rect x="20" y={tab.y} width="240" height="36" rx="8" fill="#1e293b" fillOpacity="0.8" stroke={tab.color} strokeWidth="1.5"/>
+              <circle cx="42" cy={tab.y + 18} r="12" fill={tab.color} fillOpacity="0.9"/>
+              <text x="42" y={tab.y + 22} textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">{i + 1}</text>
+              <text x="62" y={tab.y + 16} fill={tab.color} fontSize="11" fontWeight="bold">{tab.label}</text>
+              <text x="62" y={tab.y + 29} fill="#ffffff" fontSize="9">{tab.desc}</text>
             </g>
           ))}
-          {[73, 115, 157, 199].map((y, i) => (
-            <line key={`c${i}`} x1="140" y1={y} x2="140" y2={y + 7} stroke="#6366F1" strokeWidth="2" strokeDasharray="3"/>
+          {[74, 116, 158, 200].map((y, i) => (
+            <line key={`c${i}`} x1="140" y1={y} x2="140" y2={y + 6} stroke="#fde047" strokeWidth="2" strokeDasharray="2"/>
           ))}
-          <text x="140" y="257" textAnchor="middle" fill="#fde68a" fontSize="8">+ ICP 심화 (이론 탭)</text>
+          <text x="140" y="260" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">+ ICP 심화 (이론 탭)</text>
         </svg>
       );
       default: return null;
