@@ -811,174 +811,160 @@ const OxidationSimulator = ({ initialTab }) => {
     switch(step) {
       case 0: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <defs>
-            <linearGradient id="ox_bg0" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#ox_bg0)" rx="12"/>
-          <text x="200" y="30" textAnchor="middle" fill="#fbbf24" fontSize="17" fontWeight="bold">열산화 공정 개요</text>
-          <rect x="30" y="50" width="140" height="100" rx="8" fill="rgba(59,130,246,0.2)" stroke="#3b82f6"/>
-          <text x="100" y="72" textAnchor="middle" fill="#93c5fd" fontSize="14" fontWeight="bold">Si 웨이퍼</text>
-          <rect x="50" y="80" width="100" height="50" rx="4" fill="#475569"/>
-          <text x="100" y="110" textAnchor="middle" fill="#e2e8f0" fontSize="12">Silicon</text>
-          <text x="200" y="100" fill="#fbbf24" fontSize="22" textAnchor="middle">+  O₂</text>
-          <text x="200" y="118" fill="#fbbf24" fontSize="16" textAnchor="middle">→</text>
-          <rect x="230" y="50" width="140" height="100" rx="8" fill="rgba(251,146,60,0.2)" stroke="#fb923c"/>
-          <text x="300" y="72" textAnchor="middle" fill="#fdba74" fontSize="14" fontWeight="bold">SiO₂ 산화막</text>
-          <rect x="250" y="105" width="100" height="25" rx="3" fill="#f97316" opacity="0.6"/>
-          <text x="300" y="122" textAnchor="middle" fill="white" fontSize="11" fontWeight="bold">SiO₂</text>
-          <rect x="250" y="80" width="100" height="25" rx="3" fill="#475569"/>
-          <text x="300" y="97" textAnchor="middle" fill="#e2e8f0" fontSize="11">Si</text>
-          <text x="200" y="174" textAnchor="middle" fill="#fbbf24" fontSize="14" fontWeight="bold">🔥 고온 (900~1200°C)</text>
-          <rect x="20" y="195" width="360" height="130" rx="8" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" strokeWidth="0.5" strokeDasharray="4"/>
-          <text x="200" y="218" textAnchor="middle" fill="#fbbf24" fontSize="14" fontWeight="bold">SiO₂ 특성</text>
-          <text x="35" y="242" fill="#e2e8f0" fontSize="13">⚡ 절연파괴 전압: 1,000만 V/cm 이상</text>
-          <text x="35" y="262" fill="#e2e8f0" fontSize="13">🔗 Si와 계면 결함 밀도: 10¹⁰/cm²</text>
-          <text x="35" y="282" fill="#e2e8f0" fontSize="13">🌡️ 열팽창 계수 Si와 유사 → 스트레스 ↓</text>
-          <text x="35" y="302" fill="#e2e8f0" fontSize="13">🛡️ 게이트 절연막, 소자 격리, 패시베이션</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fef3c7" fontSize="13" fontWeight="bold">열산화 공정 개요</text>
+          {/* Si 웨이퍼 */}
+          <rect x="15" y="40" width="100" height="70" rx="6" fill="rgba(59,130,246,0.25)" stroke="#93c5fd" strokeWidth="1.5"/>
+          <text x="65" y="58" textAnchor="middle" fill="#dbeafe" fontSize="11" fontWeight="bold">Si 웨이퍼</text>
+          <rect x="30" y="65" width="70" height="35" rx="3" fill="#475569"/>
+          <text x="65" y="87" textAnchor="middle" fill="#e2e8f0" fontSize="10">Silicon</text>
+          {/* + O₂ */}
+          <text x="140" y="72" textAnchor="middle" fill="#fde68a" fontSize="14" fontWeight="bold">+ O₂</text>
+          <text x="140" y="92" textAnchor="middle" fill="#fde68a" fontSize="16" fontWeight="bold">→</text>
+          {/* SiO₂ 산화막 */}
+          <rect x="165" y="40" width="100" height="70" rx="6" fill="rgba(251,146,60,0.25)" stroke="#fdba74" strokeWidth="1.5"/>
+          <text x="215" y="58" textAnchor="middle" fill="#fed7aa" fontSize="11" fontWeight="bold">SiO₂ 산화막</text>
+          <rect x="180" y="65" width="70" height="18" rx="2" fill="#f97316" opacity="0.7"/>
+          <text x="215" y="78" textAnchor="middle" fill="white" fontSize="9" fontWeight="bold">SiO₂</text>
+          <rect x="180" y="83" width="70" height="17" rx="2" fill="#475569"/>
+          <text x="215" y="96" textAnchor="middle" fill="#e2e8f0" fontSize="9">Si</text>
+          {/* 고온 */}
+          <text x="140" y="128" textAnchor="middle" fill="#fde68a" fontSize="12" fontWeight="bold">🔥 고온 (900~1200°C)</text>
+          {/* 특성 박스 */}
+          <rect x="15" y="142" width="250" height="128" rx="8" fill="rgba(255,255,255,0.08)" stroke="#fde68a" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="162" textAnchor="middle" fill="#fde68a" fontSize="12" fontWeight="bold">SiO₂ 특성</text>
+          <text x="25" y="184" fill="#fef3c7" fontSize="10">⚡ 절연파괴 전압: 1,000만 V/cm↑</text>
+          <text x="25" y="204" fill="#fef3c7" fontSize="10">🔗 계면 결함 밀도: 10¹⁰/cm²</text>
+          <text x="25" y="224" fill="#fef3c7" fontSize="10">🌡️ 열팽창 계수 Si와 유사</text>
+          <text x="25" y="244" fill="#fef3c7" fontSize="10">🛡️ 게이트 절연막, 소자 격리</text>
+          <text x="25" y="264" fill="#fef3c7" fontSize="10">✨ 반도체 산업의 근간</text>
         </svg>
       );
       case 1: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <defs>
-            <linearGradient id="ox_bg1" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#ox_bg1)" rx="12"/>
-          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">건식 vs 습식 산화 비교</text>
-          <rect x="15" y="40" width="175" height="175" rx="8" fill="rgba(59,130,246,0.12)" stroke="#3b82f6"/>
-          <text x="102" y="62" textAnchor="middle" fill="#93c5fd" fontSize="15" fontWeight="bold">🔵 건식 산화</text>
-          <text x="102" y="82" textAnchor="middle" fill="#e2e8f0" fontSize="12">Si + O₂ → SiO₂</text>
-          <text x="30" y="105" fill="#cbd5e1" fontSize="12">🌡️ 900~1,200°C</text>
-          <text x="30" y="125" fill="#cbd5e1" fontSize="12">⏱️ 느림 (10~100 nm/hr)</text>
-          <text x="30" y="145" fill="#cbd5e1" fontSize="12">✨ 치밀·고품질</text>
-          <text x="30" y="165" fill="#93c5fd" fontSize="12" fontWeight="bold">→ 게이트 산화막</text>
-          <rect x="30" y="178" width="145" height="20" rx="4" fill="#3b82f6" opacity="0.3"/>
-          <rect x="30" y="178" width="30" height="20" rx="4" fill="#3b82f6" opacity="0.7"/>
-          <text x="102" y="193" textAnchor="middle" fill="#93c5fd" fontSize="10">성장 속도 느림</text>
-          <rect x="210" y="40" width="175" height="175" rx="8" fill="rgba(239,68,68,0.12)" stroke="#ef4444"/>
-          <text x="297" y="62" textAnchor="middle" fill="#fca5a5" fontSize="15" fontWeight="bold">🔴 습식 산화</text>
-          <text x="297" y="82" textAnchor="middle" fill="#e2e8f0" fontSize="12">Si + 2H₂O → SiO₂ + 2H₂</text>
-          <text x="225" y="105" fill="#cbd5e1" fontSize="12">🌡️ 900~1,100°C</text>
-          <text x="225" y="125" fill="#cbd5e1" fontSize="12">⏱️ 빠름 (5~10배)</text>
-          <text x="225" y="145" fill="#cbd5e1" fontSize="12">📦 다소 성김</text>
-          <text x="225" y="165" fill="#fca5a5" fontSize="12" fontWeight="bold">→ 필드 산화막</text>
-          <rect x="225" y="178" width="145" height="20" rx="4" fill="#ef4444" opacity="0.3"/>
-          <rect x="225" y="178" width="120" height="20" rx="4" fill="#ef4444" opacity="0.7"/>
-          <text x="297" y="193" textAnchor="middle" fill="#fca5a5" fontSize="10">성장 속도 빠름</text>
-          <rect x="20" y="230" width="360" height="98" rx="8" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" strokeWidth="0.5"/>
-          <text x="200" y="252" textAnchor="middle" fill="#fbbf24" fontSize="14" fontWeight="bold">용도별 선택 기준</text>
-          <text x="35" y="274" fill="#93c5fd" fontSize="13">🔵 게이트 산화막 (2~10nm) → 건식</text>
-          <text x="35" y="296" fill="#fca5a5" fontSize="13">🔴 두꺼운 절연막 (300~500nm) → 습식</text>
-          <text x="35" y="318" fill="#d8b4fe" fontSize="13">🟣 Pyrogenic: H₂+O₂→H₂O (고순도)</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fef3c7" fontSize="13" fontWeight="bold">건식 vs 습식 산화</text>
+          {/* 건식 */}
+          <rect x="10" y="35" width="125" height="140" rx="6" fill="rgba(147,197,253,0.18)" stroke="#93c5fd" strokeWidth="1.5"/>
+          <text x="72" y="55" textAnchor="middle" fill="#dbeafe" fontSize="12" fontWeight="bold">🔵 건식 산화</text>
+          <text x="72" y="72" textAnchor="middle" fill="#fef3c7" fontSize="9">Si + O₂ → SiO₂</text>
+          <text x="18" y="92" fill="#e2e8f0" fontSize="9">🌡️ 900~1200°C</text>
+          <text x="18" y="108" fill="#e2e8f0" fontSize="9">⏱️ 느림 (10~100 nm/hr)</text>
+          <text x="18" y="124" fill="#e2e8f0" fontSize="9">✨ 치밀·고품질</text>
+          <text x="18" y="140" fill="#dbeafe" fontSize="9" fontWeight="bold">→ 게이트 산화막</text>
+          <rect x="18" y="150" width="109" height="12" rx="2" fill="#93c5fd" opacity="0.3"/>
+          <rect x="18" y="150" width="25" height="12" rx="2" fill="#93c5fd" opacity="0.8"/>
+          <text x="72" y="169" textAnchor="middle" fill="#dbeafe" fontSize="8">성장 속도 느림</text>
+          {/* 습식 */}
+          <rect x="145" y="35" width="125" height="140" rx="6" fill="rgba(252,165,165,0.18)" stroke="#fca5a5" strokeWidth="1.5"/>
+          <text x="207" y="55" textAnchor="middle" fill="#fee2e2" fontSize="12" fontWeight="bold">🔴 습식 산화</text>
+          <text x="207" y="72" textAnchor="middle" fill="#fef3c7" fontSize="9">Si + 2H₂O → SiO₂</text>
+          <text x="153" y="92" fill="#e2e8f0" fontSize="9">🌡️ 900~1100°C</text>
+          <text x="153" y="108" fill="#e2e8f0" fontSize="9">⏱️ 빠름 (5~10배↑)</text>
+          <text x="153" y="124" fill="#e2e8f0" fontSize="9">📦 다소 성김</text>
+          <text x="153" y="140" fill="#fee2e2" fontSize="9" fontWeight="bold">→ 필드 산화막</text>
+          <rect x="153" y="150" width="109" height="12" rx="2" fill="#fca5a5" opacity="0.3"/>
+          <rect x="153" y="150" width="95" height="12" rx="2" fill="#fca5a5" opacity="0.8"/>
+          <text x="207" y="169" textAnchor="middle" fill="#fee2e2" fontSize="8">성장 속도 빠름</text>
+          {/* 용도 박스 */}
+          <rect x="10" y="185" width="260" height="85" rx="8" fill="rgba(255,255,255,0.08)" stroke="#fde68a" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="204" textAnchor="middle" fill="#fde68a" fontSize="11" fontWeight="bold">용도별 선택 기준</text>
+          <text x="20" y="224" fill="#dbeafe" fontSize="10">🔵 게이트 산화막 (2~10nm) → 건식</text>
+          <text x="20" y="242" fill="#fee2e2" fontSize="10">🔴 두꺼운 절연막 (300~500nm) → 습식</text>
+          <text x="20" y="260" fill="#ddd6fe" fontSize="10">🟣 Pyrogenic: H₂+O₂→H₂O</text>
         </svg>
       );
       case 2: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <defs>
-            <linearGradient id="ox_bg2" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#ox_bg2)" rx="12"/>
-          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">Deal-Grove 산화 모델</text>
-          <text x="200" y="58" textAnchor="middle" fill="#c084fc" fontSize="14" fontWeight="bold">x² + Ax = B(t + τ)</text>
-          <rect x="20" y="72" width="110" height="90" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6"/>
-          <text x="75" y="92" textAnchor="middle" fill="#93c5fd" fontSize="13" fontWeight="bold">1단계</text>
-          <text x="75" y="110" textAnchor="middle" fill="#e2e8f0" fontSize="11">산화제 확산</text>
-          <text x="75" y="128" textAnchor="middle" fill="#e2e8f0" fontSize="11">O₂ → 표면</text>
-          <text x="75" y="146" textAnchor="middle" fill="#60a5fa" fontSize="18">☁️→</text>
-          <text x="148" y="120" fill="#fbbf24" fontSize="16">→</text>
-          <rect x="160" y="72" width="110" height="90" rx="8" fill="rgba(168,85,247,0.15)" stroke="#a855f7"/>
-          <text x="215" y="92" textAnchor="middle" fill="#c4b5fd" fontSize="13" fontWeight="bold">2단계</text>
-          <text x="215" y="110" textAnchor="middle" fill="#e2e8f0" fontSize="11">막 내부 확산</text>
-          <text x="215" y="128" textAnchor="middle" fill="#e2e8f0" fontSize="11">SiO₂ 통과</text>
-          <text x="215" y="146" textAnchor="middle" fill="#a855f7" fontSize="14">⏳ 속도제한</text>
-          <text x="288" y="120" fill="#fbbf24" fontSize="16">→</text>
-          <rect x="300" y="72" width="85" height="90" rx="8" fill="rgba(239,68,68,0.15)" stroke="#ef4444"/>
-          <text x="342" y="92" textAnchor="middle" fill="#fca5a5" fontSize="13" fontWeight="bold">3단계</text>
-          <text x="342" y="110" textAnchor="middle" fill="#e2e8f0" fontSize="11">계면 반응</text>
-          <text x="342" y="128" textAnchor="middle" fill="#e2e8f0" fontSize="11">Si+O₂</text>
-          <text x="342" y="146" textAnchor="middle" fill="#ef4444" fontSize="14">🔥</text>
-          <rect x="20" y="178" width="360" height="70" rx="8" fill="rgba(255,255,255,0.05)"/>
-          <line x1="40" y1="230" x2="360" y2="230" stroke="#475569" strokeWidth="1"/>
-          <line x1="40" y1="195" x2="40" y2="235" stroke="#475569" strokeWidth="1"/>
-          <text x="35" y="192" textAnchor="end" fill="#cbd5e1" fontSize="10">두께</text>
-          <text x="200" y="244" textAnchor="middle" fill="#cbd5e1" fontSize="10">시간</text>
-          <path d="M 45 228 Q 100 220 160 210 Q 250 198 355 192" fill="none" stroke="#f97316" strokeWidth="2.5"/>
-          <text x="90" y="218" fill="#93c5fd" fontSize="10">선형 영역</text>
-          <text x="280" y="198" fill="#fca5a5" fontSize="10">포물선 영역</text>
-          <rect x="20" y="258" width="360" height="72" rx="8" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" strokeWidth="0.5" strokeDasharray="4"/>
-          <text x="200" y="280" textAnchor="middle" fill="#fbbf24" fontSize="14" fontWeight="bold">핵심 파라미터</text>
-          <text x="35" y="300" fill="#e2e8f0" fontSize="12">A: 선형 속도 상수 (계면 반응) | B: 포물선 속도 상수 (확산)</text>
-          <text x="35" y="320" fill="#e2e8f0" fontSize="12">🌡️ 온도 100°C↑ → 성장 속도 2~3배↑ (Arrhenius)</text>
+          <text x="140" y="20" textAnchor="middle" fill="#fef3c7" fontSize="13" fontWeight="bold">Deal-Grove 산화 모델</text>
+          <text x="140" y="40" textAnchor="middle" fill="#ddd6fe" fontSize="12" fontWeight="bold">x² + Ax = B(t + τ)</text>
+          {/* 3단계 박스 */}
+          <rect x="8" y="52" width="80" height="68" rx="6" fill="rgba(147,197,253,0.18)" stroke="#93c5fd" strokeWidth="1"/>
+          <text x="48" y="70" textAnchor="middle" fill="#dbeafe" fontSize="11" fontWeight="bold">1단계</text>
+          <text x="48" y="86" textAnchor="middle" fill="#fef3c7" fontSize="9">산화제 확산</text>
+          <text x="48" y="100" textAnchor="middle" fill="#fef3c7" fontSize="9">O₂ → 표면</text>
+          <text x="48" y="114" textAnchor="middle" fill="#93c5fd" fontSize="11">☁️</text>
+          <text x="94" y="90" fill="#fde68a" fontSize="12">→</text>
+          <rect x="104" y="52" width="80" height="68" rx="6" fill="rgba(196,181,253,0.18)" stroke="#c4b5fd" strokeWidth="1"/>
+          <text x="144" y="70" textAnchor="middle" fill="#ddd6fe" fontSize="11" fontWeight="bold">2단계</text>
+          <text x="144" y="86" textAnchor="middle" fill="#fef3c7" fontSize="9">막 내부 확산</text>
+          <text x="144" y="100" textAnchor="middle" fill="#fef3c7" fontSize="9">SiO₂ 통과</text>
+          <text x="144" y="114" textAnchor="middle" fill="#c4b5fd" fontSize="9">⏳ 속도제한</text>
+          <text x="190" y="90" fill="#fde68a" fontSize="12">→</text>
+          <rect x="200" y="52" width="72" height="68" rx="6" fill="rgba(252,165,165,0.18)" stroke="#fca5a5" strokeWidth="1"/>
+          <text x="236" y="70" textAnchor="middle" fill="#fee2e2" fontSize="11" fontWeight="bold">3단계</text>
+          <text x="236" y="86" textAnchor="middle" fill="#fef3c7" fontSize="9">계면 반응</text>
+          <text x="236" y="100" textAnchor="middle" fill="#fef3c7" fontSize="9">Si + O₂</text>
+          <text x="236" y="114" textAnchor="middle" fill="#fca5a5" fontSize="11">🔥</text>
+          {/* 그래프 영역 */}
+          <rect x="10" y="130" width="260" height="70" rx="6" fill="rgba(255,255,255,0.06)"/>
+          <line x1="30" y1="188" x2="260" y2="188" stroke="#cbd5e1" strokeWidth="0.8"/>
+          <line x1="30" y1="140" x2="30" y2="192" stroke="#cbd5e1" strokeWidth="0.8"/>
+          <text x="25" y="148" textAnchor="end" fill="#e2e8f0" fontSize="8">두께</text>
+          <text x="140" y="200" textAnchor="middle" fill="#e2e8f0" fontSize="8">시간</text>
+          <path d="M 35 186 Q 90 178 140 168 Q 200 156 255 148" fill="none" stroke="#fb923c" strokeWidth="2"/>
+          <text x="65" y="178" fill="#93c5fd" fontSize="8">선형</text>
+          <text x="200" y="158" fill="#fca5a5" fontSize="8">포물선</text>
+          {/* 핵심 파라미터 */}
+          <rect x="10" y="208" width="260" height="62" rx="6" fill="rgba(255,255,255,0.08)" stroke="#fde68a" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="226" textAnchor="middle" fill="#fde68a" fontSize="11" fontWeight="bold">핵심 파라미터</text>
+          <text x="20" y="244" fill="#fef3c7" fontSize="9">A: 선형 속도 상수 (계면 반응)</text>
+          <text x="20" y="258" fill="#fef3c7" fontSize="9">B: 포물선 속도 상수 (확산)</text>
+          <text x="20" y="270" fill="#fef3c7" fontSize="8">🌡️ 온도 100°C↑ → 속도 2~3배↑</text>
         </svg>
       );
       case 3: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <defs>
-            <linearGradient id="ox_bg3" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#ox_bg3)" rx="12"/>
-          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">산화 공정 산업 응용</text>
-          <rect x="15" y="42" width="175" height="68" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6"/>
-          <text x="102" y="62" textAnchor="middle" fill="#93c5fd" fontSize="14" fontWeight="bold">🖥️ Logic (CPU/GPU)</text>
-          <text x="102" y="80" textAnchor="middle" fill="#e2e8f0" fontSize="11">게이트 산화막 2~10nm</text>
-          <text x="102" y="96" textAnchor="middle" fill="#e2e8f0" fontSize="11">3nm: High-k (HfO₂)</text>
-          <rect x="210" y="42" width="175" height="68" rx="8" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6"/>
-          <text x="297" y="62" textAnchor="middle" fill="#c4b5fd" fontSize="14" fontWeight="bold">💾 메모리</text>
-          <text x="297" y="80" textAnchor="middle" fill="#e2e8f0" fontSize="11">ONO구조 (Flash)</text>
-          <text x="297" y="96" textAnchor="middle" fill="#e2e8f0" fontSize="11">터널 산화막 8~10nm</text>
-          <rect x="15" y="122" width="175" height="68" rx="8" fill="rgba(34,197,94,0.15)" stroke="#22c55e"/>
-          <text x="102" y="142" textAnchor="middle" fill="#86efac" fontSize="14" fontWeight="bold">📱 파워 반도체</text>
-          <text x="102" y="160" textAnchor="middle" fill="#e2e8f0" fontSize="11">두꺼운 산화막 50~100nm</text>
-          <text x="102" y="176" textAnchor="middle" fill="#e2e8f0" fontSize="11">SiC 차세대 전기차</text>
-          <rect x="210" y="122" width="175" height="68" rx="8" fill="rgba(236,72,153,0.15)" stroke="#ec4899"/>
-          <text x="297" y="142" textAnchor="middle" fill="#f9a8d4" fontSize="14" fontWeight="bold">🌐 MEMS/센서</text>
-          <text x="297" y="160" textAnchor="middle" fill="#e2e8f0" fontSize="11">희생층 공정</text>
-          <text x="297" y="176" textAnchor="middle" fill="#e2e8f0" fontSize="11">보호막·구조층</text>
-          <rect x="15" y="205" width="370" height="125" rx="8" fill="rgba(251,191,36,0.08)" stroke="#fbbf24" strokeWidth="0.5" strokeDasharray="4"/>
-          <text x="200" y="228" textAnchor="middle" fill="#fbbf24" fontSize="14" fontWeight="bold">🔧 엔지니어 핵심 관리 항목</text>
-          <rect x="35" y="240" width="330" height="25" rx="4" fill="rgba(59,130,246,0.1)"/>
-          <text x="200" y="257" textAnchor="middle" fill="#93c5fd" fontSize="13">온도·시간·분위기 최적화 → 목표 두께 달성</text>
-          <rect x="35" y="272" width="330" height="25" rx="4" fill="rgba(34,197,94,0.1)"/>
-          <text x="200" y="289" textAnchor="middle" fill="#86efac" fontSize="13">균일도(Uniformity) ±1% 이내 관리</text>
-          <rect x="35" y="304" width="330" height="20" rx="4" fill="rgba(239,68,68,0.1)"/>
-          <text x="200" y="319" textAnchor="middle" fill="#fca5a5" fontSize="13">결함 밀도 최소화 → 수율 향상</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fef3c7" fontSize="13" fontWeight="bold">산화 공정 산업 응용</text>
+          {/* Logic */}
+          <rect x="10" y="38" width="125" height="56" rx="6" fill="rgba(147,197,253,0.18)" stroke="#93c5fd" strokeWidth="1"/>
+          <text x="72" y="56" textAnchor="middle" fill="#dbeafe" fontSize="11" fontWeight="bold">🖥️ Logic</text>
+          <text x="72" y="72" textAnchor="middle" fill="#fef3c7" fontSize="9">게이트막 2~10nm</text>
+          <text x="72" y="86" textAnchor="middle" fill="#fef3c7" fontSize="9">3nm: HfO₂ (High-k)</text>
+          {/* 메모리 */}
+          <rect x="145" y="38" width="125" height="56" rx="6" fill="rgba(196,181,253,0.18)" stroke="#c4b5fd" strokeWidth="1"/>
+          <text x="207" y="56" textAnchor="middle" fill="#ddd6fe" fontSize="11" fontWeight="bold">💾 메모리</text>
+          <text x="207" y="72" textAnchor="middle" fill="#fef3c7" fontSize="9">ONO (Flash)</text>
+          <text x="207" y="86" textAnchor="middle" fill="#fef3c7" fontSize="9">터널막 8~10nm</text>
+          {/* 파워 */}
+          <rect x="10" y="104" width="125" height="56" rx="6" fill="rgba(134,239,172,0.18)" stroke="#86efac" strokeWidth="1"/>
+          <text x="72" y="122" textAnchor="middle" fill="#dcfce7" fontSize="11" fontWeight="bold">📱 파워 반도체</text>
+          <text x="72" y="138" textAnchor="middle" fill="#fef3c7" fontSize="9">두꺼운 막 50~100nm</text>
+          <text x="72" y="152" textAnchor="middle" fill="#fef3c7" fontSize="9">SiC 전기차용</text>
+          {/* MEMS */}
+          <rect x="145" y="104" width="125" height="56" rx="6" fill="rgba(249,168,212,0.18)" stroke="#f9a8d4" strokeWidth="1"/>
+          <text x="207" y="122" textAnchor="middle" fill="#fce7f3" fontSize="11" fontWeight="bold">🌐 MEMS/센서</text>
+          <text x="207" y="138" textAnchor="middle" fill="#fef3c7" fontSize="9">희생층 공정</text>
+          <text x="207" y="152" textAnchor="middle" fill="#fef3c7" fontSize="9">보호막·구조층</text>
+          {/* 엔지니어 관리 */}
+          <rect x="10" y="172" width="260" height="100" rx="6" fill="rgba(255,255,255,0.08)" stroke="#fde68a" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="192" textAnchor="middle" fill="#fde68a" fontSize="11" fontWeight="bold">🔧 엔지니어 핵심 관리</text>
+          <rect x="20" y="202" width="240" height="18" rx="3" fill="rgba(147,197,253,0.15)"/>
+          <text x="140" y="215" textAnchor="middle" fill="#dbeafe" fontSize="9">온도·시간 최적화 → 목표 두께</text>
+          <rect x="20" y="226" width="240" height="18" rx="3" fill="rgba(134,239,172,0.15)"/>
+          <text x="140" y="239" textAnchor="middle" fill="#dcfce7" fontSize="9">균일도(Uniformity) ±1%</text>
+          <rect x="20" y="250" width="240" height="18" rx="3" fill="rgba(252,165,165,0.15)"/>
+          <text x="140" y="263" textAnchor="middle" fill="#fee2e2" fontSize="9">결함 밀도 최소화 → 수율↑</text>
         </svg>
       );
       case 4: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <defs>
-            <linearGradient id="ox_bg4" x1="0" y1="0" x2="0.5" y2="1">
-              <stop offset="0%" stopColor="#7c2d12"/><stop offset="100%" stopColor="#431407"/>
-            </linearGradient>
-          </defs>
-          <rect width="400" height="340" fill="url(#ox_bg4)" rx="12"/>
-          <text x="200" y="28" textAnchor="middle" fill="#fbbf24" fontSize="16" fontWeight="bold">시뮬레이터 학습 로드맵</text>
-          <rect x="30" y="44" width="340" height="55" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6"/>
-          <circle cx="58" cy="71" r="16" fill="#3b82f6" opacity="0.8"/><text x="58" y="76" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">1</text>
-          <text x="84" y="65" fill="#93c5fd" fontSize="13" fontWeight="bold">개요 (Overview)</text>
-          <text x="84" y="82" fill="#cbd5e1" fontSize="11">산화 기초, 건식 vs 습식 비교</text>
-          <text x="200" y="112" textAnchor="middle" fill="#fbbf24" fontSize="16">▼</text>
-          <rect x="30" y="118" width="340" height="55" rx="8" fill="rgba(249,115,22,0.15)" stroke="#f97316"/>
-          <circle cx="58" cy="145" r="16" fill="#f97316" opacity="0.8"/><text x="58" y="150" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">2</text>
-          <text x="84" y="139" fill="#fdba74" fontSize="13" fontWeight="bold">열산화 실험 (Thermal)</text>
-          <text x="84" y="156" fill="#cbd5e1" fontSize="11">온도·시간 설정, 실시간 성장 관찰</text>
-          <text x="200" y="186" textAnchor="middle" fill="#fbbf24" fontSize="16">▼</text>
-          <rect x="30" y="192" width="340" height="55" rx="8" fill="rgba(168,85,247,0.15)" stroke="#a855f7"/>
-          <circle cx="58" cy="219" r="16" fill="#a855f7" opacity="0.8"/><text x="58" y="224" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">3</text>
-          <text x="84" y="213" fill="#c4b5fd" fontSize="13" fontWeight="bold">산화 영향 인자 (Analysis)</text>
-          <text x="84" y="230" fill="#cbd5e1" fontSize="11">결정방향, 도핑, 온도·압력 효과</text>
-          <text x="200" y="260" textAnchor="middle" fill="#fbbf24" fontSize="16">▼</text>
-          <rect x="30" y="266" width="340" height="55" rx="8" fill="rgba(34,197,94,0.15)" stroke="#22c55e"/>
-          <circle cx="58" cy="293" r="16" fill="#22c55e" opacity="0.8"/><text x="58" y="298" textAnchor="middle" fill="white" fontSize="14" fontWeight="bold">4</text>
-          <text x="84" y="287" fill="#86efac" fontSize="13" fontWeight="bold">평가 (Quiz)</text>
-          <text x="84" y="304" fill="#cbd5e1" fontSize="11">학습 내용 점검 및 평가</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fef3c7" fontSize="13" fontWeight="bold">학습 로드맵</text>
+          {[
+            { y: 38, label: '개요 (Overview)', desc: '산화 기초, 건식 vs 습식', color: '#93c5fd', fill: 'rgba(147,197,253,0.18)' },
+            { y: 96, label: '열산화 실험 (Thermal)', desc: '온도·시간, 실시간 성장', color: '#fdba74', fill: 'rgba(253,186,116,0.18)' },
+            { y: 154, label: '산화 영향 인자 (Analysis)', desc: '결정방향, 도핑, 온도·압력', color: '#c4b5fd', fill: 'rgba(196,181,253,0.18)' },
+            { y: 212, label: '평가 (Quiz)', desc: '학습 내용 점검', color: '#86efac', fill: 'rgba(134,239,172,0.18)' },
+          ].map((tab, i) => (
+            <g key={`t${i}`}>
+              <rect x="15" y={tab.y} width="250" height="46" rx="6" fill={tab.fill} stroke={tab.color} strokeWidth="1"/>
+              <circle cx="40" cy={tab.y + 23} r="14" fill={tab.color} fillOpacity="0.4" stroke={tab.color}/>
+              <text x="40" y={tab.y + 28} textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">{i + 1}</text>
+              <text x="62" y={tab.y + 20} fill={tab.color} fontSize="11" fontWeight="bold">{tab.label}</text>
+              <text x="62" y={tab.y + 36} fill="#fef3c7" fontSize="9">{tab.desc}</text>
+            </g>
+          ))}
+          {[86, 144, 202].map((y, i) => (
+            <text key={`a${i}`} x="140" y={y} textAnchor="middle" fill="#fde68a" fontSize="12">▼</text>
+          ))}
         </svg>
       );
       default: return null;
@@ -989,9 +975,9 @@ const OxidationSimulator = ({ initialTab }) => {
     switch (activeTab) {
       case 'theory':
         return (
-          <div className="space-y-6">
+          <div className="flex-1 min-h-0 flex flex-col">
             {!showDetailedTheory ? (
-              <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+              <div className="bg-gradient-to-br from-orange-600 via-red-500 to-pink-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col" style={{minHeight: '600px', maxHeight: 'calc(100vh - 200px)'}}>
                 {!isTheoryPlaying ? (
                   <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
                     <div className="text-6xl mb-4">🎬</div>
@@ -1014,8 +1000,8 @@ const OxidationSimulator = ({ initialTab }) => {
                     </p>
                   </div>
                 ) : (
-                  <div className="flex-1 flex flex-col">
-                    <div className="mb-6">
+                  <div className="flex-1 min-h-0 flex flex-col">
+                    <div className="mb-4 flex-shrink-0">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-semibold">
                           Step {theoryStep + 1} / {theorySteps.length}
@@ -1033,9 +1019,9 @@ const OxidationSimulator = ({ initialTab }) => {
                     </div>
 
                     {/* Content area - Left SVG + Right Text */}
-                    <div className="flex-1 min-h-0 flex gap-4 mb-6">
+                    <div className="flex-1 min-h-0 flex gap-4 mb-4">
                       {/* Left SVG Panel */}
-                      <div className="w-1/2 flex-shrink-0 bg-white/5 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                      <div className="w-1/2 flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
                         {getTheorySVG(theoryStep)}
                       </div>
                       {/* Right Text Panel */}
@@ -1067,7 +1053,7 @@ const OxidationSimulator = ({ initialTab }) => {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-shrink-0">
                       <button
                         onClick={prevTheoryStep}
                         disabled={theoryStep === 0}

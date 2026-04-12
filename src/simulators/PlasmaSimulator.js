@@ -905,9 +905,9 @@ const PlasmaSimulator = ({ initialTab }) => {
 
   // Theory Tab Component
   const TheoryTab = () => (
-    <div className="space-y-6">
+    <div className="flex-1 min-h-0 flex flex-col">
       {!showDetailedTheory ? (
-        <div className="bg-gradient-to-br from-red-600 via-orange-600 to-yellow-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col">
+        <div className="bg-gradient-to-br from-red-600 via-orange-600 to-yellow-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col" style={{minHeight: '600px', maxHeight: 'calc(100vh - 200px)'}}>
           {!isTheoryPlaying ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
               <div className="text-6xl mb-4">🎬</div>
