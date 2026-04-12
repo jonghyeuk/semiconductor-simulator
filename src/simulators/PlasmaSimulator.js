@@ -382,12 +382,14 @@ const PlasmaSimulator = ({ initialTab }) => {
 
   const nextTheoryStep = () => {
     if (theoryStep < theorySteps.length - 1) {
+      setTypedText('');
       setTheoryStep(theoryStep + 1);
     }
   };
 
   const prevTheoryStep = () => {
     if (theoryStep > 0) {
+      setTypedText('');
       setTheoryStep(theoryStep - 1);
     }
   };
@@ -776,7 +778,7 @@ const PlasmaSimulator = ({ initialTab }) => {
     switch(step) {
       case 0: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">물질의 제4상태: 플라즈마</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">물질의 제4상태: 플라즈마</text>
           {[
             { y: 45, w: 60, label: '플라즈마', color: '#F59E0B', bg: '#78350F' },
             { y: 80, w: 100, label: '기체', color: '#22C55E', bg: '#14532D' },
@@ -788,19 +790,19 @@ const PlasmaSimulator = ({ initialTab }) => {
               <text x="140" y={s.y + 18} textAnchor="middle" fill={s.color} fontSize="10" fontWeight="bold">{s.label}</text>
             </g>
           ))}
-          <text x="240" y="58" fill="#b45309" fontSize="7">↑ 에너지</text>
+          <text x="240" y="58" fill="#fde68a" fontSize="7">↑ 에너지</text>
           <rect x="20" y="190" width="240" height="80" rx="8" fill="white" fillOpacity="0.06"/>
-          <text x="140" y="210" textAnchor="middle" fill="#b45309" fontSize="10" fontWeight="bold">반도체 저온 플라즈마</text>
+          <text x="140" y="210" textAnchor="middle" fill="#fde68a" fontSize="10" fontWeight="bold">반도체 저온 플라즈마</text>
           <text x="70" y="230" textAnchor="middle" fill="#dc2626" fontSize="8">전자: 1~10 eV</text>
           <text x="70" y="245" textAnchor="middle" fill="#dc2626" fontSize="7">(1만~10만 K)</text>
           <text x="200" y="230" textAnchor="middle" fill="#2563eb" fontSize="8">이온: 0.03 eV</text>
           <text x="200" y="245" textAnchor="middle" fill="#2563eb" fontSize="7">(300~500 K)</text>
-          <text x="140" y="262" textAnchor="middle" fill="#374151" fontSize="7">이온화율: 0.001~1%</text>
+          <text x="140" y="262" textAnchor="middle" fill="#e2e8f0" fontSize="7">이온화율: 0.001~1%</text>
         </svg>
       );
       case 1: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">플라즈마 생성 5단계</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">플라즈마 생성 5단계</text>
           {[
             { y: 38, label: '1. RF 전력 인가', desc: '13.56 MHz 전기장', color: '#3B82F6' },
             { y: 83, label: '2. 전자 가속', desc: '이온보다 1800배 가벼움', color: '#8B5CF6' },
@@ -811,20 +813,20 @@ const PlasmaSimulator = ({ initialTab }) => {
             <g key={`gen${i}`}>
               <rect x="20" y={s.y} width="240" height="38" rx="8" fill={s.color} fillOpacity="0.12" stroke={s.color} strokeWidth="1"/>
               <circle cx="42" cy={s.y + 19} r="11" fill={s.color} fillOpacity="0.3"/>
-              <text x="42" y={s.y + 23} textAnchor="middle" fill="#374151" fontSize="10" fontWeight="bold">{i + 1}</text>
-              <text x="60" y={s.y + 15} fill="#374151" fontSize="9" fontWeight="bold">{s.label}</text>
-              <text x="60" y={s.y + 30} fill="#374151" fontSize="7">{s.desc}</text>
+              <text x="42" y={s.y + 23} textAnchor="middle" fill="#e2e8f0" fontSize="10" fontWeight="bold">{i + 1}</text>
+              <text x="60" y={s.y + 15} fill="#e2e8f0" fontSize="9" fontWeight="bold">{s.label}</text>
+              <text x="60" y={s.y + 30} fill="#e2e8f0" fontSize="7">{s.desc}</text>
             </g>
           ))}
           {[76, 121, 166, 211].map((y, i) => (
             <line key={`conn${i}`} x1="140" y1={y} x2="140" y2={y + 7} stroke="#6366F1" strokeWidth="2" strokeDasharray="3"/>
           ))}
-          <text x="140" y="270" textAnchor="middle" fill="#b45309" fontSize="8">Paschen's Law: 최적 p×d 조건</text>
+          <text x="140" y="270" textAnchor="middle" fill="#fde68a" fontSize="8">Paschen's Law: 최적 p×d 조건</text>
         </svg>
       );
       case 2: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">플라즈마 기술 발전</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">플라즈마 기술 발전</text>
           <line x1="45" y1="40" x2="45" y2="260" stroke="#6366F1" strokeWidth="2" strokeDasharray="4"/>
           {[
             { y: 48, era: '1960s', label: 'DC 플라즈마', desc: '고압 스퍼터링', color: '#6B7280' },
@@ -836,17 +838,17 @@ const PlasmaSimulator = ({ initialTab }) => {
             <g key={`era${i}`}>
               <circle cx="45" cy={item.y + 12} r="6" fill={item.color}/>
               <text x="60" y={item.y + 8} fill={item.color} fontSize="9" fontWeight="bold">{item.era}</text>
-              <text x="60" y={item.y + 20} fill="#374151" fontSize="8" fontWeight="bold">{item.label}</text>
-              <text x="60" y={item.y + 32} fill="#374151" fontSize="7">{item.desc}</text>
+              <text x="60" y={item.y + 20} fill="#e2e8f0" fontSize="8" fontWeight="bold">{item.label}</text>
+              <text x="60" y={item.y + 32} fill="#e2e8f0" fontSize="7">{item.desc}</text>
             </g>
           ))}
           <rect x="130" y="250" width="140" height="22" rx="4" fill="#FCD34D" fillOpacity="0.1"/>
-          <text x="200" y="265" textAnchor="middle" fill="#b45309" fontSize="7">밀도 1000배↑ 압력 1/100↓</text>
+          <text x="200" y="265" textAnchor="middle" fill="#fde68a" fontSize="7">밀도 1000배↑ 압력 1/100↓</text>
         </svg>
       );
       case 3: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">플라즈마 7대 응용</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">플라즈마 7대 응용</text>
           <circle cx="140" cy="140" r="30" fill="#8B5CF6" fillOpacity="0.15" stroke="#8B5CF6" strokeWidth="1.5"/>
           <text x="140" y="137" textAnchor="middle" fill="#7c3aed" fontSize="8" fontWeight="bold">플라즈마</text>
           <text x="140" y="150" textAnchor="middle" fill="#7c3aed" fontSize="7">공정</text>
@@ -866,8 +868,8 @@ const PlasmaSimulator = ({ initialTab }) => {
               <g key={`app${i}`}>
                 <line x1={140 + Math.cos(rad) * 30} y1={140 + Math.sin(rad) * 30} x2={cx - Math.cos(rad) * 22} y2={cy - Math.sin(rad) * 22} stroke={app.color} strokeWidth="1" strokeDasharray="3" opacity="0.5"/>
                 <circle cx={cx} cy={cy} r="22" fill={app.color} fillOpacity="0.12" stroke={app.color} strokeWidth="1"/>
-                <text x={cx} y={cy - 3} textAnchor="middle" fill="#374151" fontSize="7" fontWeight="bold">{app.label}</text>
-                <text x={cx} y={cy + 8} textAnchor="middle" fill="#374151" fontSize="5">{app.desc}</text>
+                <text x={cx} y={cy - 3} textAnchor="middle" fill="#e2e8f0" fontSize="7" fontWeight="bold">{app.label}</text>
+                <text x={cx} y={cy + 8} textAnchor="middle" fill="#e2e8f0" fontSize="5">{app.desc}</text>
               </g>
             );
           })}
@@ -875,7 +877,7 @@ const PlasmaSimulator = ({ initialTab }) => {
       );
       case 4: return (
         <svg viewBox="0 0 280 280" className={svgClass}>
-          <text x="140" y="22" textAnchor="middle" fill="#1e3a5f" fontSize="13" fontWeight="bold">시뮬레이터 학습 구조</text>
+          <text x="140" y="22" textAnchor="middle" fill="#fbbf24" fontSize="13" fontWeight="bold">시뮬레이터 학습 구조</text>
           {[
             { y: 38, label: '플라즈마 기본 특성', desc: 'Te, Ti, 밀도, Debye Length', color: '#3B82F6' },
             { y: 80, label: '발생원리 1', desc: '압력/전력 → 플라즈마 발생', color: '#8B5CF6' },
@@ -886,15 +888,15 @@ const PlasmaSimulator = ({ initialTab }) => {
             <g key={`tab${i}`}>
               <rect x="20" y={tab.y} width="240" height="35" rx="8" fill={tab.color} fillOpacity="0.12" stroke={tab.color} strokeWidth="1"/>
               <circle cx="40" cy={tab.y + 17} r="10" fill={tab.color} fillOpacity="0.3"/>
-              <text x="40" y={tab.y + 21} textAnchor="middle" fill="#374151" fontSize="10" fontWeight="bold">{i + 1}</text>
-              <text x="58" y={tab.y + 13} fill="#374151" fontSize="9" fontWeight="bold">{tab.label}</text>
-              <text x="58" y={tab.y + 27} fill="#374151" fontSize="7">{tab.desc}</text>
+              <text x="40" y={tab.y + 21} textAnchor="middle" fill="#e2e8f0" fontSize="10" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={tab.y + 13} fill="#e2e8f0" fontSize="9" fontWeight="bold">{tab.label}</text>
+              <text x="58" y={tab.y + 27} fill="#e2e8f0" fontSize="7">{tab.desc}</text>
             </g>
           ))}
           {[73, 115, 157, 199].map((y, i) => (
             <line key={`c${i}`} x1="140" y1={y} x2="140" y2={y + 7} stroke="#6366F1" strokeWidth="2" strokeDasharray="3"/>
           ))}
-          <text x="140" y="257" textAnchor="middle" fill="#b45309" fontSize="8">+ ICP 심화 (이론 탭)</text>
+          <text x="140" y="257" textAnchor="middle" fill="#fde68a" fontSize="8">+ ICP 심화 (이론 탭)</text>
         </svg>
       );
       default: return null;
@@ -905,7 +907,7 @@ const PlasmaSimulator = ({ initialTab }) => {
   const TheoryTab = () => (
     <div className="space-y-6">
       {!showDetailedTheory ? (
-        <div className="bg-gradient-to-br from-red-600 via-orange-600 to-yellow-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+        <div className="bg-gradient-to-br from-red-600 via-orange-600 to-yellow-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col">
           {!isTheoryPlaying ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
               <div className="text-6xl mb-4">🎬</div>
@@ -923,9 +925,9 @@ const PlasmaSimulator = ({ initialTab }) => {
               </button>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 min-h-0 flex flex-col">
               {/* Progress bar */}
-              <div className="mb-6">
+              <div className="mb-4 flex-shrink-0">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-red-100">
                     진행률: {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}%
@@ -943,9 +945,9 @@ const PlasmaSimulator = ({ initialTab }) => {
               </div>
 
               {/* Content area - Left SVG + Right Text */}
-              <div className="flex-1 min-h-0 flex gap-4 mb-6">
+              <div className="flex-1 min-h-0 flex gap-4 mb-4">
                 {/* Left SVG Panel */}
-                <div className="w-1/2 flex-shrink-0 bg-white bg-opacity-5 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                <div className="w-1/2 flex-shrink-0 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
                   {getTheorySVG(theoryStep)}
                 </div>
                 {/* Right Text Panel */}
@@ -973,7 +975,7 @@ const PlasmaSimulator = ({ initialTab }) => {
               </div>
 
               {/* Navigation buttons */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-shrink-0">
                 <button
                   onClick={stopTheoryAnimation}
                   className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
@@ -2054,9 +2056,9 @@ const PlasmaSimulator = ({ initialTab }) => {
                     <path d="M185,230 Q192,220 200,230 Q208,240 215,230" fill="none" stroke="#374151" strokeWidth="2"/>
                     
                     {/* RF 소스 라벨 */}
-                    <text x="200" y="280" textAnchor="middle" fontSize="12" fill="#374151" fontWeight="bold">RF Power</text>
-                    <text x="200" y="295" textAnchor="middle" fontSize="10" fill="#374151" fontWeight="bold">13.56 MHz</text>
-                    <text x="200" y="310" textAnchor="middle" fontSize="10" fill="#374151">Capacitive Coupling</text>
+                    <text x="200" y="280" textAnchor="middle" fontSize="12" fill="#e2e8f0" fontWeight="bold">RF Power</text>
+                    <text x="200" y="295" textAnchor="middle" fontSize="10" fill="#e2e8f0" fontWeight="bold">13.56 MHz</text>
+                    <text x="200" y="310" textAnchor="middle" fontSize="10" fill="#e2e8f0">Capacitive Coupling</text>
                     
                     {/* RF 연결선 (챔버 외부에서 하부 전극으로) */}
                     <line x1="200" y1="165" x2="200" y2="212" stroke="#374151" strokeWidth="3"/>
@@ -2087,11 +2089,11 @@ const PlasmaSimulator = ({ initialTab }) => {
                     {/* 가스 시스템 - 우측 상단 */}
                     {/* 가스통 3개 */}
                     <rect x="350" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
-                    <text x="357" y="25" fontSize="12" fill="#374151" fontWeight="bold">CF4</text>
+                    <text x="357" y="25" fontSize="12" fill="#e2e8f0" fontWeight="bold">CF4</text>
                     <rect x="370" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
-                    <text x="378" y="25" fontSize="12" fill="#374151" fontWeight="bold">Ar</text>
+                    <text x="378" y="25" fontSize="12" fill="#e2e8f0" fontWeight="bold">Ar</text>
                     <rect x="390" y="30" width="15" height="40" fill="#e5e7eb" stroke="#374151" strokeWidth="2" rx="3"/>
-                    <text x="397" y="25" fontSize="12" fill="#374151" fontWeight="bold">O2</text>
+                    <text x="397" y="25" fontSize="12" fill="#e2e8f0" fontWeight="bold">O2</text>
                     
                     {/* 가스밸브 3개 */}
                     <circle cx="357" cy="80" r="5" fill="white" stroke="#374151" strokeWidth="2"/>
@@ -2103,11 +2105,11 @@ const PlasmaSimulator = ({ initialTab }) => {
                     
                     {/* MFC 3개 */}
                     <rect x="350" y="95" width="15" height="10" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1"/>
-                    <text x="352" y="103" fontSize="8" fill="#374151">MFC</text>
+                    <text x="352" y="103" fontSize="8" fill="#e2e8f0">MFC</text>
                     <rect x="370" y="95" width="15" height="10" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1"/>
-                    <text x="372" y="103" fontSize="8" fill="#374151">MFC</text>
+                    <text x="372" y="103" fontSize="8" fill="#e2e8f0">MFC</text>
                     <rect x="390" y="95" width="15" height="10" fill="#fbbf24" stroke="#f59e0b" strokeWidth="1"/>
-                    <text x="392" y="103" fontSize="8" fill="#374151">MFC</text>
+                    <text x="392" y="103" fontSize="8" fill="#e2e8f0">MFC</text>
                     
                     {/* 가스라인 연결 */}
                     <line x1="357" y1="70" x2="357" y2="75" stroke="#10b981" strokeWidth="2"/>
