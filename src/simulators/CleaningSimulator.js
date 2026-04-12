@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
 
 // Simple icon components
@@ -55,6 +55,7 @@ const CleaningSimulator = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+  const storyContentRef = useRef(null);
 
   // 탭 정의
   const tabs = [
@@ -1533,11 +1534,157 @@ const CleaningSimulator = ({ initialTab }) => {
     }
   };
 
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
+
+  // SVG diagrams for each theory step
+  const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
+    switch(step) {
+      case 0: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">세정이란? 오염물질 제거</text>
+          {/* 웨이퍼 */}
+          <ellipse cx="140" cy="80" rx="90" ry="18" fill="#475569" stroke="#cbd5e1" strokeWidth="1.5"/>
+          <text x="140" y="84" textAnchor="middle" fill="#f1f5f9" fontSize="10" fontWeight="bold">Si 웨이퍼</text>
+          {/* 오염 입자들 */}
+          <circle cx="90" cy="70" r="3" fill="#ef4444"/>
+          <circle cx="120" cy="68" r="2.5" fill="#fbbf24"/>
+          <circle cx="160" cy="72" r="3" fill="#a855f7"/>
+          <circle cx="190" cy="68" r="2" fill="#22c55e"/>
+          <circle cx="100" cy="90" r="2" fill="#ec4899"/>
+          <circle cx="180" cy="88" r="2.5" fill="#f97316"/>
+          <text x="140" y="118" textAnchor="middle" fill="#fca5a5" fontSize="9" fontWeight="bold">⚠️ 0.1μm 입자도 치명적!</text>
+          {/* 오염물 박스 */}
+          <rect x="15" y="132" width="250" height="140" rx="6" fill="#1e293b" fillOpacity="0.8" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="152" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">4가지 오염물질</text>
+          <circle cx="30" cy="172" r="4" fill="#ef4444"/>
+          <text x="42" y="176" fill="#fca5a5" fontSize="10" fontWeight="bold">입자 (Particles)</text>
+          <text x="150" y="176" fill="#ffffff" fontSize="9">먼지, 미세 파편</text>
+          <circle cx="30" cy="194" r="4" fill="#fbbf24"/>
+          <text x="42" y="198" fill="#fde047" fontSize="10" fontWeight="bold">유기물 (Organics)</text>
+          <text x="150" y="198" fill="#ffffff" fontSize="9">PR 잔류물, 오일</text>
+          <circle cx="30" cy="216" r="4" fill="#a855f7"/>
+          <text x="42" y="220" fill="#c4b5fd" fontSize="10" fontWeight="bold">금속 (Metals)</text>
+          <text x="150" y="220" fill="#ffffff" fontSize="9">Fe, Cu, Na 이온</text>
+          <circle cx="30" cy="238" r="4" fill="#22c55e"/>
+          <text x="42" y="242" fill="#86efac" fontSize="10" fontWeight="bold">자연 산화막</text>
+          <text x="150" y="242" fill="#ffffff" fontSize="9">Native SiO₂</text>
+          <text x="140" y="262" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">💡 전체 공정의 30% 이상!</text>
+        </svg>
+      );
+      case 1: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">습식 vs 건식 세정</text>
+          {/* 습식 */}
+          <rect x="10" y="35" width="125" height="130" rx="6" fill="#1e293b" fillOpacity="0.8" stroke="#60a5fa" strokeWidth="1.5"/>
+          <text x="72" y="55" textAnchor="middle" fill="#93c5fd" fontSize="12" fontWeight="bold">💧 습식 세정</text>
+          <text x="18" y="76" fill="#ffffff" fontSize="9" fontWeight="bold">RCA 세정:</text>
+          <text x="18" y="90" fill="#e0e7ff" fontSize="8">• SC-1: NH₄OH+H₂O₂</text>
+          <text x="18" y="102" fill="#e0e7ff" fontSize="8">  (입자, 유기물)</text>
+          <text x="18" y="116" fill="#e0e7ff" fontSize="8">• SC-2: HCl+H₂O₂</text>
+          <text x="18" y="128" fill="#e0e7ff" fontSize="8">  (금속 이온)</text>
+          <text x="18" y="144" fill="#ffffff" fontSize="9" fontWeight="bold">HF: 산화막 제거</text>
+          <text x="18" y="158" fill="#ffffff" fontSize="9" fontWeight="bold">SPM: 강력 유기물</text>
+          {/* 건식 */}
+          <rect x="145" y="35" width="125" height="130" rx="6" fill="#1e293b" fillOpacity="0.8" stroke="#c4b5fd" strokeWidth="1.5"/>
+          <text x="207" y="55" textAnchor="middle" fill="#c4b5fd" fontSize="12" fontWeight="bold">⚡ 건식 세정</text>
+          <text x="153" y="76" fill="#ffffff" fontSize="9" fontWeight="bold">플라즈마 세정:</text>
+          <text x="153" y="90" fill="#ddd6fe" fontSize="8">• O₂, Ar, N₂, H₂</text>
+          <text x="153" y="104" fill="#ddd6fe" fontSize="8">  플라즈마</text>
+          <text x="153" y="122" fill="#ffffff" fontSize="9" fontWeight="bold">UV/오존:</text>
+          <text x="153" y="136" fill="#ddd6fe" fontSize="8">• 유기물 분해</text>
+          <text x="153" y="152" fill="#ffffff" fontSize="9" fontWeight="bold">초임계 CO₂:</text>
+          <text x="153" y="164" fill="#86efac" fontSize="8">• 친환경</text>
+          {/* 요약 박스 */}
+          <rect x="10" y="178" width="260" height="90" rx="6" fill="#1e293b" fillOpacity="0.8" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="196" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">선택 기준</text>
+          <text x="20" y="216" fill="#93c5fd" fontSize="10">💧 대부분: 습식 (높은 제거 효율)</text>
+          <text x="20" y="234" fill="#c4b5fd" fontSize="10">⚡ 미세 패턴: 건식 병행</text>
+          <text x="20" y="252" fill="#86efac" fontSize="10">🌱 친환경: 초임계 CO₂</text>
+        </svg>
+      );
+      case 2: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">세정 기술 발전사</text>
+          <line x1="45" y1="40" x2="45" y2="250" stroke="#94a3b8" strokeWidth="2" strokeDasharray="3"/>
+          {[
+            { y: 42, era: '1970s', label: 'RCA 세정', desc: 'Werner Kern 표준법', color: '#CBD5E1' },
+            { y: 84, era: '1980~90s', label: '메가소닉', desc: '900 kHz~1 MHz 초음파', color: '#93C5FD' },
+            { y: 126, era: '2000s', label: 'Single Wafer', desc: '매엽식 정밀 제어', color: '#C4B5FD' },
+            { y: 168, era: '2010s', label: '환경 친화', desc: 'DIW, Ozonated water', color: '#86EFAC' },
+            { y: 210, era: '현재', label: 'EUV 대응', desc: '원자층 청정도', color: '#FCD34D' },
+          ].map((item, i) => (
+            <g key={`era${i}`}>
+              <circle cx="45" cy={item.y + 10} r="7" fill={item.color} stroke="#0f172a" strokeWidth="1.5"/>
+              <text x="60" y={item.y + 5} fill={item.color} fontSize="10" fontWeight="bold">{item.era}</text>
+              <text x="60" y={item.y + 19} fill="#ffffff" fontSize="10" fontWeight="bold">{item.label}</text>
+              <text x="60" y={item.y + 31} fill="#e2e8f0" fontSize="8">{item.desc}</text>
+            </g>
+          ))}
+          <rect x="10" y="256" width="260" height="18" rx="4" fill="#1e293b" fillOpacity="0.8" stroke="#fde047" strokeWidth="0.5"/>
+          <text x="140" y="269" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">📊 세정 장비 시장 $60억 (2024)</text>
+        </svg>
+      );
+      case 3: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">공정 단계별 세정</text>
+          {[
+            { y: 36, label: '1. Pre-diffusion', desc: 'RCA + HF dip', color: '#93C5FD' },
+            { y: 82, label: '2. Post-Etch', desc: '폴리머 잔류물 제거', color: '#FCA5A5' },
+            { y: 128, label: '3. Pre-Deposition', desc: 'HF 마지막 처리', color: '#C4B5FD' },
+            { y: 174, label: '4. Post-CMP', desc: '슬러리 제거', color: '#FCD34D' },
+            { y: 220, label: '5. Final Clean', desc: '패키징 전 처리', color: '#86EFAC' },
+          ].map((step, i) => (
+            <g key={`step${i}`}>
+              <rect x="15" y={step.y} width="250" height="38" rx="6" fill="#1e293b" fillOpacity="0.85" stroke={step.color} strokeWidth="1.5"/>
+              <circle cx="38" cy={step.y + 19} r="12" fill={step.color} fillOpacity="0.9"/>
+              <text x="38" y={step.y + 23} textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={step.y + 17} fill={step.color} fontSize="11" fontWeight="bold">{step.label}</text>
+              <text x="58" y={step.y + 31} fill="#ffffff" fontSize="9">{step.desc}</text>
+            </g>
+          ))}
+          <text x="140" y="270" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">Logic 30~40회 · Memory 50~60회</text>
+        </svg>
+      );
+      case 4: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="22" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">학습 로드맵</text>
+          {[
+            { y: 38, label: '개요 (Overview)', desc: '오염물질과 중요성', color: '#93C5FD' },
+            { y: 86, label: '습식 세정', desc: 'SC-1, SC-2 레시피', color: '#60A5FA' },
+            { y: 134, label: '건식 세정', desc: '플라즈마 O₂/Ar/N₂', color: '#C4B5FD' },
+            { y: 182, label: '초음파 세정', desc: '캐비테이션 현상', color: '#FCD34D' },
+            { y: 230, label: '평가 (Quiz)', desc: '학습 점검', color: '#86EFAC' },
+          ].map((tab, i) => (
+            <g key={`tab${i}`}>
+              <rect x="15" y={tab.y} width="250" height="40" rx="6" fill="#1e293b" fillOpacity="0.85" stroke={tab.color} strokeWidth="1.5"/>
+              <circle cx="38" cy={tab.y + 20} r="12" fill={tab.color} fillOpacity="0.9"/>
+              <text x="38" y={tab.y + 25} textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={tab.y + 18} fill={tab.color} fontSize="11" fontWeight="bold">{tab.label}</text>
+              <text x="58" y={tab.y + 32} fill="#ffffff" fontSize="9">{tab.desc}</text>
+            </g>
+          ))}
+        </svg>
+      );
+      default: return null;
+    }
+  };
+
   // Theory Tab Component
   const TheoryTab = () => (
-    <div className="space-y-6">
+    <div className="flex-1 min-h-0 flex flex-col">
       {!showDetailedTheory ? (
-        <div className="bg-gradient-to-br from-green-600 via-teal-600 to-cyan-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+        <div className="bg-gradient-to-br from-green-600 via-teal-600 to-cyan-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col" style={{minHeight: '600px', maxHeight: 'calc(100vh - 200px)'}}>
           {!isTheoryPlaying ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
               <div className="text-6xl mb-4">🎬</div>
@@ -1560,8 +1707,8 @@ const CleaningSimulator = ({ initialTab }) => {
               </p>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
-              <div className="mb-6">
+            <div className="flex-1 min-h-0 flex flex-col">
+              <div className="mb-4 flex-shrink-0">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-semibold">
                     Step {theoryStep + 1} / {theorySteps.length}
@@ -1578,34 +1725,40 @@ const CleaningSimulator = ({ initialTab }) => {
                 </div>
               </div>
 
-              <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6 overflow-y-auto">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-5xl">{theorySteps[theoryStep].icon}</span>
-                  <h3 className="text-2xl font-bold">
-                    {theorySteps[theoryStep].title}
-                  </h3>
+              {/* Content area - Left SVG + Right Text */}
+              <div className="flex-1 min-h-0 flex gap-4 mb-4">
+                <div className="w-1/2 flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                  {getTheorySVG(theoryStep)}
                 </div>
+                <div ref={storyContentRef} className="flex-1 min-w-0 bg-white/10 backdrop-blur-sm rounded-xl p-6 overflow-y-auto">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                    <h3 className="text-xl font-bold">
+                      {theorySteps[theoryStep].title}
+                    </h3>
+                  </div>
 
-                <div className="text-lg leading-relaxed whitespace-pre-line mb-6 font-medium">
-                  {typedText}
-                  {typedText.length < theorySteps[theoryStep].content.length && (
-                    <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                  <div className="text-base leading-relaxed whitespace-pre-line mb-4 font-medium">
+                    {typedText}
+                    {typedText.length < theorySteps[theoryStep].content.length && (
+                      <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                    )}
+                  </div>
+
+                  {typedText.length >= theorySteps[theoryStep].content.length && (
+                    <div className="mt-4 p-3 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
+                      <div className="flex items-start gap-2 text-yellow-300">
+                        <LightbulbIcon />
+                        <p className="text-yellow-100 font-semibold text-sm">
+                          {theorySteps[theoryStep].highlight}
+                        </p>
+                      </div>
+                    </div>
                   )}
                 </div>
-
-                {typedText.length >= theorySteps[theoryStep].content.length && (
-                  <div className="mt-6 p-4 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
-                    <div className="flex items-start gap-2 text-yellow-300">
-                      <LightbulbIcon />
-                      <p className="text-yellow-100 font-semibold">
-                        {theorySteps[theoryStep].highlight}
-                      </p>
-                    </div>
-                  </div>
-                )}
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between flex-shrink-0">
                 <button
                   onClick={prevTheoryStep}
                   disabled={theoryStep === 0}
@@ -1657,17 +1810,6 @@ const CleaningSimulator = ({ initialTab }) => {
             <h3 className="text-2xl font-bold mb-4">상세 이론</h3>
             <p>상세 이론 내용이 여기에 들어갑니다.</p>
           </div>
-        </div>
-      )}
-
-      {!isTheoryPlaying && !showDetailedTheory && (
-        <div className="text-center">
-          <button
-            onClick={() => setShowDetailedTheory(true)}
-            className="px-6 py-3 bg-white text-green-600 rounded-lg hover:bg-gray-50 transition-all font-semibold shadow-lg border-2 border-green-600"
-          >
-            📚 상세 이론 보기
-          </button>
         </div>
       )}
     </div>
