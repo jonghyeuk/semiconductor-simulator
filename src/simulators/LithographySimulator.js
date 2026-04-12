@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
 
 // Icon components
@@ -29,6 +29,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+  const storyContentRef = useRef(null);
   const [prType, setPrType] = useState('positive');
   const [maskType, setMaskType] = useState('binary');
   const [exposureType, setExposureType] = useState('contact');
@@ -311,12 +312,14 @@ const PhotolithographySimulator = ({ initialTab }) => {
 
   const nextTheoryStep = () => {
     if (theoryStep < theorySteps.length - 1) {
+      setTypedText('');
       setTheoryStep(theoryStep + 1);
     }
   };
 
   const prevTheoryStep = () => {
     if (theoryStep > 0) {
+      setTypedText('');
       setTheoryStep(theoryStep - 1);
     }
   };
@@ -2977,11 +2980,188 @@ const PhotolithographySimulator = ({ initialTab }) => {
     }
   };
 
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
+
+  // SVG diagrams for each theory step
+  const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
+    switch(step) {
+      case 0: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">포토리소그라피 5단계</text>
+          {/* 1. PR 도포 */}
+          <g>
+            <rect x="15" y="36" width="60" height="34" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#93c5fd" strokeWidth="1.5"/>
+            <text x="45" y="50" textAnchor="middle" fill="#93c5fd" fontSize="9" fontWeight="bold">1. PR 도포</text>
+            <rect x="22" y="55" width="46" height="3" fill="#60a5fa"/>
+            <rect x="22" y="58" width="46" height="8" fill="#475569"/>
+            <text x="45" y="78" textAnchor="middle" fill="#ffffff" fontSize="7">Spin Coat</text>
+          </g>
+          <text x="79" y="56" fill="#fde047" fontSize="11">→</text>
+          {/* 2. 노광 */}
+          <g>
+            <rect x="95" y="36" width="60" height="34" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#fcd34d" strokeWidth="1.5"/>
+            <text x="125" y="50" textAnchor="middle" fill="#fcd34d" fontSize="9" fontWeight="bold">2. 노광</text>
+            <line x1="110" y1="55" x2="115" y2="63" stroke="#fde047" strokeWidth="1"/>
+            <line x1="120" y1="55" x2="125" y2="63" stroke="#fde047" strokeWidth="1"/>
+            <line x1="130" y1="55" x2="135" y2="63" stroke="#fde047" strokeWidth="1"/>
+            <line x1="140" y1="55" x2="145" y2="63" stroke="#fde047" strokeWidth="1"/>
+            <rect x="102" y="63" width="46" height="3" fill="#60a5fa"/>
+            <text x="125" y="78" textAnchor="middle" fill="#ffffff" fontSize="7">UV/EUV</text>
+          </g>
+          <text x="159" y="56" fill="#fde047" fontSize="11">→</text>
+          {/* 3. 현상 */}
+          <g>
+            <rect x="175" y="36" width="60" height="34" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#86efac" strokeWidth="1.5"/>
+            <text x="205" y="50" textAnchor="middle" fill="#86efac" fontSize="9" fontWeight="bold">3. 현상</text>
+            <rect x="182" y="58" width="10" height="5" fill="#60a5fa"/>
+            <rect x="200" y="58" width="10" height="5" fill="#60a5fa"/>
+            <rect x="218" y="58" width="10" height="5" fill="#60a5fa"/>
+            <rect x="182" y="63" width="46" height="3" fill="#475569"/>
+            <text x="205" y="78" textAnchor="middle" fill="#ffffff" fontSize="7">Develop</text>
+          </g>
+          {/* 4. 식각 */}
+          <g>
+            <rect x="55" y="108" width="70" height="34" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#fca5a5" strokeWidth="1.5"/>
+            <text x="90" y="122" textAnchor="middle" fill="#fca5a5" fontSize="9" fontWeight="bold">4. 식각</text>
+            <rect x="62" y="128" width="10" height="6" fill="#ef4444"/>
+            <rect x="80" y="128" width="10" height="6" fill="#ef4444"/>
+            <rect x="98" y="128" width="10" height="6" fill="#ef4444"/>
+            <text x="90" y="148" textAnchor="middle" fill="#ffffff" fontSize="7">Etch/Implant</text>
+          </g>
+          <text x="129" y="128" fill="#fde047" fontSize="11">→</text>
+          <g>
+            <rect x="145" y="108" width="70" height="34" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#c4b5fd" strokeWidth="1.5"/>
+            <text x="180" y="122" textAnchor="middle" fill="#c4b5fd" fontSize="9" fontWeight="bold">5. PR Strip</text>
+            <rect x="152" y="128" width="56" height="6" fill="#475569"/>
+            <text x="180" y="148" textAnchor="middle" fill="#ffffff" fontSize="7">제거</text>
+          </g>
+          {/* 파장 정보 */}
+          <rect x="15" y="162" width="250" height="105" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="180" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">빛의 파장과 공정 노드</text>
+          <text x="25" y="200" fill="#93c5fd" fontSize="9">▪ g-line 436nm</text>
+          <text x="150" y="200" fill="#ffffff" fontSize="9">→ 2~5 μm</text>
+          <text x="25" y="216" fill="#93c5fd" fontSize="9">▪ i-line 365nm</text>
+          <text x="150" y="216" fill="#ffffff" fontSize="9">→ 0.35 μm</text>
+          <text x="25" y="232" fill="#c4b5fd" fontSize="9">▪ KrF 248nm</text>
+          <text x="150" y="232" fill="#ffffff" fontSize="9">→ 0.18 μm</text>
+          <text x="25" y="248" fill="#fcd34d" fontSize="9">▪ ArF 193nm</text>
+          <text x="150" y="248" fill="#ffffff" fontSize="9">→ 45~10 nm</text>
+          <text x="25" y="264" fill="#86efac" fontSize="9" fontWeight="bold">▪ EUV 13.5nm</text>
+          <text x="150" y="264" fill="#ffffff" fontSize="9" fontWeight="bold">→ 3 nm 이하</text>
+        </svg>
+      );
+      case 1: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">포토리소 세부 공정 5단계</text>
+          {[
+            { y: 36, label: 'Step 1: PR Coating', desc: '스핀 3000~5000 RPM', temp: 'Soft Bake 90~110°C', color: '#93C5FD' },
+            { y: 84, label: 'Step 2: Exposure', desc: 'Contact/Stepper/Scanner/EUV', temp: '13.5~365nm 파장', color: '#FCD34D' },
+            { y: 132, label: 'Step 3: PEB', desc: 'Post Exposure Bake', temp: '110~130°C', color: '#C4B5FD' },
+            { y: 180, label: 'Step 4: Develop', desc: 'Positive/Negative PR', temp: 'TMAH 2.38%', color: '#86EFAC' },
+            { y: 228, label: 'Step 5: Hard Bake', desc: '식각 내성 강화', temp: '120~140°C', color: '#FCA5A5' },
+          ].map((s, i) => (
+            <g key={`s${i}`}>
+              <rect x="15" y={s.y} width="250" height="40" rx="6" fill="#1e293b" fillOpacity="0.85" stroke={s.color} strokeWidth="1.5"/>
+              <circle cx="38" cy={s.y + 20} r="12" fill={s.color} fillOpacity="0.9"/>
+              <text x="38" y={s.y + 25} textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={s.y + 17} fill={s.color} fontSize="11" fontWeight="bold">{s.label}</text>
+              <text x="58" y={s.y + 29} fill="#ffffff" fontSize="8">{s.desc}</text>
+              <text x="200" y={s.y + 29} fill="#e2e8f0" fontSize="8">{s.temp}</text>
+            </g>
+          ))}
+        </svg>
+      );
+      case 2: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">리소그라피 발전사</text>
+          <line x1="45" y1="36" x2="45" y2="248" stroke="#94a3b8" strokeWidth="2" strokeDasharray="3"/>
+          {[
+            { y: 38, era: '1970s', label: 'Contact 방식', desc: '365nm, 2~5μm', color: '#CBD5E1' },
+            { y: 80, era: '1990s', label: 'KrF Stepper', desc: '248nm, 0.35~0.18μm', color: '#93C5FD' },
+            { y: 122, era: '2000s', label: 'ArF 액침', desc: '193nm, 45~10nm', color: '#C4B5FD' },
+            { y: 164, era: '2010s', label: 'Multi Patterning', desc: '193nm로 7nm', color: '#F9A8D4' },
+            { y: 206, era: '2020s', label: 'EUV 혁명', desc: '13.5nm, 3nm 이하', color: '#FCD34D' },
+          ].map((item, i) => (
+            <g key={`era${i}`}>
+              <circle cx="45" cy={item.y + 10} r="7" fill={item.color} stroke="#0f172a" strokeWidth="1.5"/>
+              <text x="60" y={item.y + 6} fill={item.color} fontSize="10" fontWeight="bold">{item.era}</text>
+              <text x="60" y={item.y + 20} fill="#ffffff" fontSize="10" fontWeight="bold">{item.label}</text>
+              <text x="60" y={item.y + 32} fill="#e2e8f0" fontSize="8">{item.desc}</text>
+            </g>
+          ))}
+          <rect x="10" y="254" width="260" height="20" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5"/>
+          <text x="140" y="268" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">📈 50년간 5000배↑ · EUV $2000억</text>
+        </svg>
+      );
+      case 3: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">포토리소 응용 분야</text>
+          <circle cx="140" cy="140" r="32" fill="#ec4899" fillOpacity="0.8" stroke="#f9a8d4" strokeWidth="2"/>
+          <text x="140" y="137" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">포토리소</text>
+          <text x="140" y="151" textAnchor="middle" fill="#fce7f3" fontSize="8">Photolithography</text>
+          {[
+            { angle: -90, label: '트랜지스터', desc: 'Gate, FinFET', color: '#FCA5A5' },
+            { angle: -38, label: '배선', desc: 'BEOL, Cu', color: '#86EFAC' },
+            { angle: 14, label: '메모리', desc: 'DRAM, 3D NAND', color: '#93C5FD' },
+            { angle: 65, label: 'Packaging', desc: 'TSV, RDL', color: '#FCD34D' },
+            { angle: 115, label: 'MEMS', desc: '센서', color: '#C4B5FD' },
+            { angle: 167, label: '디스플레이', desc: 'TFT', color: '#F9A8D4' },
+            { angle: 218, label: '광학 IC', desc: 'Photonic', color: '#7DD3FC' },
+          ].map((app, i) => {
+            const rad = (app.angle * Math.PI) / 180;
+            const cx = 140 + Math.cos(rad) * 85;
+            const cy = 140 + Math.sin(rad) * 85;
+            return (
+              <g key={`app${i}`}>
+                <line x1={140 + Math.cos(rad) * 32} y1={140 + Math.sin(rad) * 32} x2={cx - Math.cos(rad) * 22} y2={cy - Math.sin(rad) * 22} stroke={app.color} strokeWidth="1.2" strokeDasharray="2"/>
+                <circle cx={cx} cy={cy} r="22" fill="#1e293b" fillOpacity="0.85" stroke={app.color} strokeWidth="1.5"/>
+                <text x={cx} y={cy - 2} textAnchor="middle" fill={app.color} fontSize="9" fontWeight="bold">{app.label}</text>
+                <text x={cx} y={cy + 10} textAnchor="middle" fill="#ffffff" fontSize="6">{app.desc}</text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+      case 4: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">학습 로드맵</text>
+          {[
+            { y: 36, label: '공정 개요 1', desc: '전체 플로우, PR 종류', color: '#93C5FD' },
+            { y: 84, label: '공정 개요 2', desc: '마스크 종류, OPC', color: '#C4B5FD' },
+            { y: 132, label: 'PR Coating', desc: '스핀 RPM, Recipe', color: '#F9A8D4' },
+            { y: 180, label: '노광 방식 비교', desc: 'Contact/Stepper/Scanner/EUV', color: '#FCD34D' },
+            { y: 228, label: '학습 평가', desc: '종합 평가', color: '#86EFAC' },
+          ].map((tab, i) => (
+            <g key={`tab${i}`}>
+              <rect x="15" y={tab.y} width="250" height="40" rx="6" fill="#1e293b" fillOpacity="0.85" stroke={tab.color} strokeWidth="1.5"/>
+              <circle cx="38" cy={tab.y + 20} r="12" fill={tab.color} fillOpacity="0.9"/>
+              <text x="38" y={tab.y + 25} textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={tab.y + 17} fill={tab.color} fontSize="11" fontWeight="bold">{tab.label}</text>
+              <text x="58" y={tab.y + 31} fill="#ffffff" fontSize="9">{tab.desc}</text>
+            </g>
+          ))}
+        </svg>
+      );
+      default: return null;
+    }
+  };
+
   // Theory Tab Component
   const TheoryTab = () => (
-    <div className="space-y-6">
+    <div className="flex-1 min-h-0 flex flex-col">
       {!showDetailedTheory ? (
-        <div className="bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+        <div className="bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col" style={{minHeight: '600px', maxHeight: 'calc(100vh - 200px)'}}>
           {!isTheoryPlaying ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
               <div className="text-6xl mb-4">🎬</div>
@@ -2999,9 +3179,9 @@ const PhotolithographySimulator = ({ initialTab }) => {
               </button>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 min-h-0 flex flex-col">
               {/* Progress bar */}
-              <div className="mb-6">
+              <div className="mb-4 flex-shrink-0">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-purple-100">
                     진행률: {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}%
@@ -3018,31 +3198,36 @@ const PhotolithographySimulator = ({ initialTab }) => {
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-8 mb-6 overflow-y-auto">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
-                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+              {/* Content area - Left SVG + Right Text */}
+              <div className="flex-1 min-h-0 flex gap-4 mb-4">
+                <div className="w-1/2 flex-shrink-0 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                  {getTheorySVG(theoryStep)}
                 </div>
+                <div ref={storyContentRef} className="flex-1 min-w-0 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 overflow-y-auto">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                    <h3 className="text-xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+                  </div>
 
-                <div className="text-lg leading-relaxed mb-6 whitespace-pre-line">
-                  {typedText}
-                  {typedText.length < theorySteps[theoryStep].content.length && (
-                    <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                  <div className="text-base leading-relaxed mb-4 whitespace-pre-line">
+                    {typedText}
+                    {typedText.length < theorySteps[theoryStep].content.length && (
+                      <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                    )}
+                  </div>
+
+                  {typedText.length === theorySteps[theoryStep].content.length && (
+                    <div className="mt-4 p-3 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                      <p className="text-yellow-100 font-medium text-sm">
+                        💡 {theorySteps[theoryStep].highlight}
+                      </p>
+                    </div>
                   )}
                 </div>
-
-                {typedText.length === theorySteps[theoryStep].content.length && (
-                  <div className="mt-6 p-4 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
-                    <p className="text-yellow-100 font-medium">
-                      💡 {theorySteps[theoryStep].highlight}
-                    </p>
-                  </div>
-                )}
               </div>
 
               {/* Navigation buttons */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-shrink-0">
                 <button
                   onClick={stopTheoryAnimation}
                   className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
@@ -3064,20 +3249,12 @@ const PhotolithographySimulator = ({ initialTab }) => {
                     ← 이전
                   </button>
 
-                  {theoryStep < theorySteps.length - 1 ? (
+                  {theoryStep < theorySteps.length - 1 && (
                     <button
                       onClick={nextTheoryStep}
                       className="bg-yellow-400 hover:bg-yellow-300 text-purple-900 px-6 py-3 rounded-lg font-medium transition-all"
                     >
                       다음 →
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setShowDetailedTheory(true)}
-                      className="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
-                    >
-                      <LightbulbIcon />
-                      상세 이론 보기
                     </button>
                   )}
                 </div>

@@ -1107,17 +1107,6 @@ const OxidationSimulator = ({ initialTab }) => {
                 </div>
               </div>
             )}
-
-            {!isTheoryPlaying && !showDetailedTheory && (
-              <div className="text-center">
-                <button
-                  onClick={() => setShowDetailedTheory(true)}
-                  className="px-6 py-3 bg-white text-orange-600 rounded-lg hover:bg-gray-50 transition-all font-semibold shadow-lg border-2 border-orange-600"
-                >
-                  📚 상세 이론 보기
-                </button>
-              </div>
-            )}
           </div>
         );
 
