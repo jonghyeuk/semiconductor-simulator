@@ -1623,6 +1623,7 @@ const EtchSimulator = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+  const storyContentRef = useRef(null);
 
   // 분석 탭용 시뮬레이션 파라미터들
   const [analysisPressure, setAnalysisPressure] = useState(100);
@@ -1948,6 +1949,162 @@ const EtchSimulator = ({ initialTab }) => {
     setIsTheoryPlaying(false);
   };
 
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
+
+  // SVG diagrams for each theory step
+  const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
+    switch(step) {
+      case 0: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">식각이란?</text>
+          {/* 식각 전 */}
+          <text x="70" y="42" textAnchor="middle" fill="#93c5fd" fontSize="10" fontWeight="bold">식각 전</text>
+          <rect x="25" y="52" width="90" height="6" fill="#fbbf24"/>
+          <rect x="25" y="58" width="90" height="18" fill="#60a5fa"/>
+          <rect x="25" y="76" width="90" height="12" fill="#475569"/>
+          <text x="125" y="62" fill="#fde047" fontSize="8">Mask(PR)</text>
+          <text x="125" y="72" fill="#93c5fd" fontSize="8">Target</text>
+          <text x="125" y="82" fill="#e2e8f0" fontSize="8">Si Sub</text>
+          {/* 화살표 */}
+          <text x="140" y="106" textAnchor="middle" fill="#fde047" fontSize="12" fontWeight="bold">↓ 식각</text>
+          {/* 식각 후 */}
+          <text x="70" y="126" textAnchor="middle" fill="#86efac" fontSize="10" fontWeight="bold">식각 후</text>
+          <rect x="25" y="136" width="20" height="6" fill="#fbbf24"/>
+          <rect x="55" y="136" width="20" height="6" fill="#fbbf24"/>
+          <rect x="85" y="136" width="20" height="6" fill="#fbbf24"/>
+          <rect x="25" y="142" width="20" height="18" fill="#60a5fa"/>
+          <rect x="55" y="142" width="20" height="18" fill="#60a5fa"/>
+          <rect x="85" y="142" width="20" height="18" fill="#60a5fa"/>
+          <rect x="25" y="160" width="90" height="12" fill="#475569"/>
+          <text x="125" y="148" fill="#86efac" fontSize="8">패턴 형성!</text>
+          {/* 정밀도 박스 */}
+          <rect x="15" y="186" width="250" height="86" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="204" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">나노미터 초정밀</text>
+          <text x="25" y="222" fill="#ffffff" fontSize="9">💡 3nm 공정:</text>
+          <text x="25" y="236" fill="#fca5a5" fontSize="9">  머리카락의 30,000분의 1</text>
+          <text x="25" y="252" fill="#ffffff" fontSize="9">🎯 용도:</text>
+          <text x="25" y="266" fill="#93c5fd" fontSize="9">  트랜지스터, 배선, 절연층</text>
+        </svg>
+      );
+      case 1: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">습식 vs 건식 식각</text>
+          {/* 습식 */}
+          <rect x="10" y="32" width="125" height="130" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#60a5fa" strokeWidth="1.5"/>
+          <text x="72" y="50" textAnchor="middle" fill="#93c5fd" fontSize="11" fontWeight="bold">💧 습식 식각</text>
+          <text x="18" y="70" fill="#ffffff" fontSize="9">• 화학 용액 담금</text>
+          <text x="18" y="86" fill="#86efac" fontSize="9">✓ 간단·저렴</text>
+          <text x="18" y="100" fill="#86efac" fontSize="9">✓ 대면적 처리</text>
+          <text x="18" y="116" fill="#fca5a5" fontSize="9">✗ 등방성 식각</text>
+          <text x="18" y="132" fill="#fca5a5" fontSize="9">✗ 미세 패턴 불가</text>
+          {/* 등방성 그림 */}
+          <rect x="22" y="140" width="40" height="3" fill="#fbbf24"/>
+          <path d="M 22 143 Q 32 153 42 143" fill="none" stroke="#60a5fa" strokeWidth="1.5"/>
+          <path d="M 42 143 Q 52 153 62 143" fill="none" stroke="#60a5fa" strokeWidth="1.5"/>
+          <text x="80" y="150" fill="#93c5fd" fontSize="8">등방성</text>
+          {/* 건식 */}
+          <rect x="145" y="32" width="125" height="130" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#c4b5fd" strokeWidth="1.5"/>
+          <text x="207" y="50" textAnchor="middle" fill="#c4b5fd" fontSize="11" fontWeight="bold">⚡ 건식 식각</text>
+          <text x="153" y="70" fill="#ffffff" fontSize="9">• 플라즈마 이온</text>
+          <text x="153" y="86" fill="#86efac" fontSize="9">✓ 이방성 식각</text>
+          <text x="153" y="100" fill="#86efac" fontSize="9">✓ 정밀 패턴</text>
+          <text x="153" y="116" fill="#86efac" fontSize="9">✓ 3nm 공정</text>
+          <text x="153" y="132" fill="#c4b5fd" fontSize="9">RIE, ICP, CCP</text>
+          {/* 이방성 그림 */}
+          <rect x="157" y="140" width="40" height="3" fill="#fbbf24"/>
+          <rect x="157" y="143" width="5" height="10" fill="#c4b5fd"/>
+          <rect x="192" y="143" width="5" height="10" fill="#c4b5fd"/>
+          <text x="215" y="150" fill="#c4b5fd" fontSize="8">이방성</text>
+          {/* 결론 */}
+          <rect x="15" y="176" width="250" height="94" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="194" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">선택 기준</text>
+          <text x="25" y="214" fill="#93c5fd" fontSize="10">💧 습식: 세정, 간단 패터닝</text>
+          <text x="25" y="232" fill="#c4b5fd" fontSize="10">⚡ 건식: 나노 공정 필수</text>
+          <text x="25" y="252" fill="#86efac" fontSize="10">🎯 3nm↓: 100% 건식</text>
+        </svg>
+      );
+      case 2: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">식각 기술 발전사</text>
+          <line x1="45" y1="36" x2="45" y2="256" stroke="#94a3b8" strokeWidth="2" strokeDasharray="3"/>
+          {[
+            { y: 38, era: '1970s', label: '습식 식각', desc: '10μm 이상', color: '#CBD5E1' },
+            { y: 76, era: '1980s', label: '플라즈마', desc: '1μm 시대', color: '#93C5FD' },
+            { y: 114, era: '1990s', label: 'ICP 등장', desc: '100nm 돌파', color: '#C4B5FD' },
+            { y: 152, era: '2000s', label: '고종횡비', desc: 'FinFET', color: '#F9A8D4' },
+            { y: 190, era: '2010s', label: 'ALE 개발', desc: '원자층', color: '#FCD34D' },
+            { y: 228, era: '2020s', label: '3nm GAA', desc: '단원자층', color: '#86EFAC' },
+          ].map((item, i) => (
+            <g key={`era${i}`}>
+              <circle cx="45" cy={item.y + 10} r="7" fill={item.color} stroke="#0f172a" strokeWidth="1.5"/>
+              <text x="60" y={item.y + 6} fill={item.color} fontSize="10" fontWeight="bold">{item.era}</text>
+              <text x="60" y={item.y + 18} fill="#ffffff" fontSize="10" fontWeight="bold">{item.label}</text>
+              <text x="180" y={item.y + 18} fill="#e2e8f0" fontSize="9">{item.desc}</text>
+            </g>
+          ))}
+          <rect x="10" y="260" width="260" height="16" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5"/>
+          <text x="140" y="272" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">📊 식각 장비 시장 $200억 (2024)</text>
+        </svg>
+      );
+      case 3: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">식각 산업 응용</text>
+          {/* CPU/GPU */}
+          <rect x="15" y="36" width="250" height="68" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#93c5fd" strokeWidth="1.5"/>
+          <text x="140" y="54" textAnchor="middle" fill="#93c5fd" fontSize="12" fontWeight="bold">🖥️ CPU/GPU 제조</text>
+          <text x="25" y="72" fill="#ffffff" fontSize="9">• FinFET, GAA 3D 구조</text>
+          <text x="25" y="86" fill="#ffffff" fontSize="9">• 다층 배선 (10층 이상)</text>
+          <text x="25" y="100" fill="#86efac" fontSize="9">• 삼성 3nm / TSMC 2nm</text>
+          {/* 메모리 */}
+          <rect x="15" y="112" width="250" height="68" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#c4b5fd" strokeWidth="1.5"/>
+          <text x="140" y="130" textAnchor="middle" fill="#c4b5fd" fontSize="12" fontWeight="bold">💾 메모리 제조</text>
+          <text x="25" y="148" fill="#ffffff" fontSize="9">• 3D NAND 200층+ 수직 홀</text>
+          <text x="25" y="162" fill="#ffffff" fontSize="9">• DRAM 고종횡비 (1:40↑)</text>
+          <text x="25" y="176" fill="#86efac" fontSize="9">• SK하이닉스 238층 NAND</text>
+          {/* 모바일 */}
+          <rect x="15" y="188" width="250" height="50" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fcd34d" strokeWidth="1.5"/>
+          <text x="140" y="206" textAnchor="middle" fill="#fcd34d" fontSize="12" fontWeight="bold">📱 모바일/AI 칩</text>
+          <text x="25" y="224" fill="#ffffff" fontSize="9">• Apple A17, Snapdragon, H100</text>
+          {/* 엔지니어 */}
+          <rect x="15" y="246" width="250" height="26" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#86efac" strokeWidth="1.5"/>
+          <text x="140" y="263" textAnchor="middle" fill="#86efac" fontSize="10" fontWeight="bold">👨‍🔬 식각 엔지니어: 수율 향상의 핵심</text>
+        </svg>
+      );
+      case 4: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">학습 로드맵</text>
+          {[
+            { y: 36, label: '개요 (Overview)', desc: '식각 공정 기초', color: '#93C5FD' },
+            { y: 84, label: '핵심 요소', desc: '선택성, 균일성', color: '#C4B5FD' },
+            { y: 132, label: '식각 원리', desc: 'Si/SiO₂/PR 조건', color: '#F9A8D4' },
+            { y: 180, label: 'Si 메커니즘 (3D)', desc: 'SF₆/CF₄/Cl₂/HBr', color: '#FCD34D' },
+            { y: 228, label: '평가 (Quiz)', desc: '학습 점검', color: '#86EFAC' },
+          ].map((tab, i) => (
+            <g key={`tab${i}`}>
+              <rect x="15" y={tab.y} width="250" height="40" rx="6" fill="#1e293b" fillOpacity="0.85" stroke={tab.color} strokeWidth="1.5"/>
+              <circle cx="38" cy={tab.y + 20} r="12" fill={tab.color} fillOpacity="0.9"/>
+              <text x="38" y={tab.y + 25} textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={tab.y + 17} fill={tab.color} fontSize="11" fontWeight="bold">{tab.label}</text>
+              <text x="58" y={tab.y + 31} fill="#ffffff" fontSize="9">{tab.desc}</text>
+            </g>
+          ))}
+        </svg>
+      );
+      default: return null;
+    }
+  };
+
   const nextTheoryStep = () => {
     if (theoryStep < theorySteps.length - 1) {
       setTheoryStep(prev => prev + 1);
@@ -2046,9 +2203,9 @@ const EtchSimulator = ({ initialTab }) => {
     switch (activeTab) {
       case 'theory':
         return (
-          <div className="space-y-6">
+          <div className="flex-1 min-h-0 flex flex-col">
             {!showDetailedTheory ? (
-              <div className="bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+              <div className="bg-gradient-to-br from-orange-600 via-red-600 to-pink-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col" style={{minHeight: '600px', maxHeight: 'calc(100vh - 200px)'}}>
                 {!isTheoryPlaying ? (
                   // Initial welcome screen
                   <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
@@ -2073,9 +2230,9 @@ const EtchSimulator = ({ initialTab }) => {
                   </div>
                 ) : (
                   // Animation playing
-                  <div className="flex-1 flex flex-col">
+                  <div className="flex-1 min-h-0 flex flex-col">
                     {/* Progress bar */}
-                    <div className="mb-6">
+                    <div className="mb-4 flex-shrink-0">
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-semibold">
                           Step {theoryStep + 1} / {theorySteps.length}
@@ -2092,36 +2249,41 @@ const EtchSimulator = ({ initialTab }) => {
                       </div>
                     </div>
 
-                    {/* Content area */}
-                    <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6 overflow-y-auto">
-                      <div className="flex items-center gap-3 mb-4">
-                        <span className="text-5xl">{theorySteps[theoryStep].icon}</span>
-                        <h3 className="text-2xl font-bold">
-                          {theorySteps[theoryStep].title}
-                        </h3>
+                    {/* Content area - Left SVG + Right Text */}
+                    <div className="flex-1 min-h-0 flex gap-4 mb-4">
+                      <div className="w-1/2 flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                        {getTheorySVG(theoryStep)}
                       </div>
+                      <div ref={storyContentRef} className="flex-1 min-w-0 bg-white/10 backdrop-blur-sm rounded-xl p-6 overflow-y-auto">
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                          <h3 className="text-xl font-bold">
+                            {theorySteps[theoryStep].title}
+                          </h3>
+                        </div>
 
-                      <div className="text-lg leading-relaxed whitespace-pre-line mb-6 font-medium">
-                        {typedText}
-                        {typedText.length < theorySteps[theoryStep].content.length && (
-                          <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                        <div className="text-base leading-relaxed whitespace-pre-line mb-4 font-medium">
+                          {typedText}
+                          {typedText.length < theorySteps[theoryStep].content.length && (
+                            <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                          )}
+                        </div>
+
+                        {typedText.length >= theorySteps[theoryStep].content.length && (
+                          <div className="mt-4 p-3 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
+                            <div className="flex items-start gap-2 text-yellow-300">
+                              <LightbulbIcon />
+                              <p className="text-yellow-100 font-semibold text-sm">
+                                {theorySteps[theoryStep].highlight}
+                              </p>
+                            </div>
+                          </div>
                         )}
                       </div>
-
-                      {typedText.length >= theorySteps[theoryStep].content.length && (
-                        <div className="mt-6 p-4 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
-                          <div className="flex items-start gap-2 text-yellow-300">
-                            <LightbulbIcon />
-                            <p className="text-yellow-100 font-semibold">
-                              {theorySteps[theoryStep].highlight}
-                            </p>
-                          </div>
-                        </div>
-                      )}
                     </div>
 
                     {/* Navigation buttons */}
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between flex-shrink-0">
                       <button
                         onClick={prevTheoryStep}
                         disabled={theoryStep === 0}
@@ -2175,18 +2337,6 @@ const EtchSimulator = ({ initialTab }) => {
                   <h3 className="text-2xl font-bold mb-4">상세 이론</h3>
                   <p>상세 이론 내용이 여기에 들어갑니다.</p>
                 </div>
-              </div>
-            )}
-
-            {/* Toggle detailed theory button */}
-            {!isTheoryPlaying && !showDetailedTheory && (
-              <div className="text-center">
-                <button
-                  onClick={() => setShowDetailedTheory(true)}
-                  className="px-6 py-3 bg-white text-red-600 rounded-lg hover:bg-gray-50 transition-all font-semibold shadow-lg border-2 border-red-600"
-                >
-                  📚 상세 이론 보기
-                </button>
               </div>
             )}
           </div>
