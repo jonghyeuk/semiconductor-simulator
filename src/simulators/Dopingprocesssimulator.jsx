@@ -823,7 +823,8 @@ const DopingProcessSimulator = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
-  
+  const storyContentRef = useRef(null);
+
   // Quiz states
   const [quizAnswers, setQuizAnswers] = useState({});
   const [showQuizResults, setShowQuizResults] = useState(false);
@@ -981,6 +982,183 @@ const DopingProcessSimulator = ({ initialTab }) => {
       icon: "🎓"
     }
   ];
+
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
+
+  // SVG diagrams for each theory step
+  const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
+    switch(step) {
+      case 0: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">도핑이란?</text>
+          {/* 순수 Si */}
+          <rect x="15" y="36" width="115" height="96" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#93c5fd" strokeWidth="1.5"/>
+          <text x="72" y="54" textAnchor="middle" fill="#93c5fd" fontSize="11" fontWeight="bold">순수 Si</text>
+          {[0,1,2].map(r => [0,1,2,3].map(c => (
+            <circle key={`s${r}${c}`} cx={30+c*20} cy={70+r*18} r="6" fill="#60a5fa" stroke="#93c5fd" strokeWidth="0.5"/>
+          )))}
+          <text x="72" y="125" textAnchor="middle" fill="#fca5a5" fontSize="8">전기 X</text>
+          {/* 화살표 */}
+          <text x="140" y="88" textAnchor="middle" fill="#fde047" fontSize="14" fontWeight="bold">→</text>
+          <text x="140" y="102" textAnchor="middle" fill="#fde047" fontSize="8">도핑</text>
+          {/* 도핑 Si */}
+          <rect x="150" y="36" width="115" height="96" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#86efac" strokeWidth="1.5"/>
+          <text x="207" y="54" textAnchor="middle" fill="#86efac" fontSize="11" fontWeight="bold">도핑 Si</text>
+          {[0,1,2].map(r => [0,1,2,3].map(c => (
+            <circle key={`d${r}${c}`} cx={165+c*20} cy={70+r*18} r="6" fill="#60a5fa" stroke="#93c5fd" strokeWidth="0.5"/>
+          )))}
+          {/* 도펀트 */}
+          <circle cx="185" cy="70" r="6" fill="#ef4444" stroke="#fca5a5" strokeWidth="1"/>
+          <text x="185" y="74" textAnchor="middle" fill="#ffffff" fontSize="8" fontWeight="bold">P</text>
+          <circle cx="225" cy="106" r="6" fill="#ef4444" stroke="#fca5a5" strokeWidth="1"/>
+          <text x="225" y="110" textAnchor="middle" fill="#ffffff" fontSize="8" fontWeight="bold">P</text>
+          <text x="207" y="125" textAnchor="middle" fill="#86efac" fontSize="8">전기 흐름!</text>
+          {/* 설명 박스 */}
+          <rect x="15" y="144" width="250" height="128" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="162" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">핵심 원리</text>
+          <text x="25" y="182" fill="#ffffff" fontSize="9">💡 실리콘 10억 개 중</text>
+          <text x="25" y="196" fill="#fde047" fontSize="9" fontWeight="bold">   단 1개만 바꿔도 OK!</text>
+          <text x="25" y="218" fill="#ffffff" fontSize="9">🎯 불순물 주입 → 전자/정공 생성</text>
+          <text x="25" y="234" fill="#ffffff" fontSize="9">⚡ 전기 전도성 제어 가능</text>
+          <text x="25" y="254" fill="#86efac" fontSize="9" fontWeight="bold">✅ 반도체의 가장 핵심 공정!</text>
+        </svg>
+      );
+      case 1: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">확산 vs 이온 주입</text>
+          {/* 확산 */}
+          <rect x="10" y="36" width="125" height="130" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#60a5fa" strokeWidth="1.5"/>
+          <text x="72" y="54" textAnchor="middle" fill="#93c5fd" fontSize="11" fontWeight="bold">💧 확산 (Diffusion)</text>
+          <text x="20" y="72" fill="#ffffff" fontSize="9">• 고온 스며들기</text>
+          <text x="20" y="88" fill="#fca5a5" fontSize="9">🌡️ 900~1200°C</text>
+          <text x="20" y="104" fill="#ffffff" fontSize="9">• 잉크 퍼지듯</text>
+          <text x="20" y="120" fill="#e2e8f0" fontSize="8">1950~70년대</text>
+          {/* 확산 시각화 */}
+          <rect x="20" y="130" width="105" height="4" fill="#475569"/>
+          <circle cx="30" cy="128" r="2" fill="#ef4444" opacity="0.9"/>
+          <circle cx="45" cy="128" r="2" fill="#ef4444" opacity="0.7"/>
+          <circle cx="60" cy="128" r="2" fill="#ef4444" opacity="0.5"/>
+          <circle cx="75" cy="128" r="2" fill="#ef4444" opacity="0.4"/>
+          <circle cx="90" cy="128" r="2" fill="#ef4444" opacity="0.3"/>
+          <circle cx="105" cy="128" r="2" fill="#ef4444" opacity="0.2"/>
+          <text x="72" y="152" textAnchor="middle" fill="#93c5fd" fontSize="8">점진적 확산</text>
+          {/* 이온 주입 */}
+          <rect x="145" y="36" width="125" height="130" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fcd34d" strokeWidth="1.5"/>
+          <text x="207" y="54" textAnchor="middle" fill="#fcd34d" fontSize="11" fontWeight="bold">🎯 이온 주입</text>
+          <text x="155" y="72" fill="#ffffff" fontSize="9">• 이온 고속 충돌</text>
+          <text x="155" y="88" fill="#86efac" fontSize="9">🎯 정밀 제어</text>
+          <text x="155" y="104" fill="#ffffff" fontSize="9">• 다트 던지듯</text>
+          <text x="155" y="120" fill="#e2e8f0" fontSize="8">1980~현재 표준</text>
+          {/* 이온 주입 시각화 */}
+          <rect x="155" y="130" width="105" height="4" fill="#475569"/>
+          <line x1="165" y1="116" x2="170" y2="128" stroke="#fcd34d" strokeWidth="1.5" markerEnd=""/>
+          <line x1="185" y1="116" x2="190" y2="128" stroke="#fcd34d" strokeWidth="1.5"/>
+          <line x1="205" y1="116" x2="210" y2="128" stroke="#fcd34d" strokeWidth="1.5"/>
+          <line x1="225" y1="116" x2="230" y2="128" stroke="#fcd34d" strokeWidth="1.5"/>
+          <line x1="245" y1="116" x2="250" y2="128" stroke="#fcd34d" strokeWidth="1.5"/>
+          <circle cx="170" cy="132" r="2" fill="#ef4444"/>
+          <circle cx="190" cy="132" r="2" fill="#ef4444"/>
+          <circle cx="210" cy="132" r="2" fill="#ef4444"/>
+          <circle cx="230" cy="132" r="2" fill="#ef4444"/>
+          <circle cx="250" cy="132" r="2" fill="#ef4444"/>
+          <text x="207" y="152" textAnchor="middle" fill="#fcd34d" fontSize="8">정확한 위치</text>
+          {/* 비교 박스 */}
+          <rect x="10" y="180" width="260" height="90" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="198" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">비교 포인트</text>
+          <text x="20" y="218" fill="#93c5fd" fontSize="9">💧 확산: 단순·저비용</text>
+          <text x="20" y="234" fill="#93c5fd" fontSize="9">  └ 깊은 영역 형성에 유리</text>
+          <text x="20" y="252" fill="#fcd34d" fontSize="9">🎯 이온 주입: 정밀·제어</text>
+          <text x="20" y="268" fill="#fcd34d" fontSize="9">  └ 현대 공정의 표준</text>
+        </svg>
+      );
+      case 2: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">왜 이온 주입이 표준?</text>
+          {/* 시대 비교 */}
+          <rect x="10" y="36" width="125" height="80" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#93c5fd" strokeWidth="1.5"/>
+          <text x="72" y="54" textAnchor="middle" fill="#93c5fd" fontSize="10" fontWeight="bold">~1970년대</text>
+          <text x="72" y="74" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="bold">μm 단위</text>
+          <text x="72" y="94" textAnchor="middle" fill="#e2e8f0" fontSize="8">확산으로 충분</text>
+          <text x="72" y="108" textAnchor="middle" fill="#86efac" fontSize="8">대충 OK</text>
+          <rect x="145" y="36" width="125" height="80" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fcd34d" strokeWidth="1.5"/>
+          <text x="207" y="54" textAnchor="middle" fill="#fcd34d" fontSize="10" fontWeight="bold">2020년대</text>
+          <text x="207" y="74" textAnchor="middle" fill="#ffffff" fontSize="12" fontWeight="bold">nm 단위</text>
+          <text x="207" y="94" textAnchor="middle" fill="#e2e8f0" fontSize="8">정밀 제어 필수</text>
+          <text x="207" y="108" textAnchor="middle" fill="#fca5a5" fontSize="8">1nm 오차도 치명</text>
+          {/* 이온 주입 장점 */}
+          <rect x="10" y="128" width="260" height="144" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="146" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">🎯 이온 주입의 장점</text>
+          <text x="20" y="166" fill="#86efac" fontSize="9" fontWeight="bold">✓ 정확한 Dose 제어</text>
+          <text x="30" y="180" fill="#ffffff" fontSize="8">몇 개를 넣었는지 정확히 안다</text>
+          <text x="20" y="198" fill="#86efac" fontSize="9" fontWeight="bold">✓ 정확한 깊이 제어</text>
+          <text x="30" y="212" fill="#ffffff" fontSize="8">에너지로 깊이 조절</text>
+          <text x="20" y="230" fill="#86efac" fontSize="9" fontWeight="bold">✓ 저온 공정</text>
+          <text x="30" y="244" fill="#ffffff" fontSize="8">PR 마스크 사용 가능</text>
+          <text x="20" y="262" fill="#86efac" fontSize="9" fontWeight="bold">✓ 재현성 우수</text>
+        </svg>
+      );
+      case 3: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">산업 응용</text>
+          {/* AP */}
+          <rect x="10" y="36" width="125" height="68" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#93c5fd" strokeWidth="1.5"/>
+          <text x="72" y="54" textAnchor="middle" fill="#93c5fd" fontSize="11" fontWeight="bold">📱 스마트폰 AP</text>
+          <text x="72" y="70" textAnchor="middle" fill="#ffffff" fontSize="9">수십 번 이온 주입</text>
+          <text x="72" y="86" textAnchor="middle" fill="#e2e8f0" fontSize="8">Apple A17, Snapdragon</text>
+          {/* 메모리 */}
+          <rect x="145" y="36" width="125" height="68" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#c4b5fd" strokeWidth="1.5"/>
+          <text x="207" y="54" textAnchor="middle" fill="#c4b5fd" fontSize="11" fontWeight="bold">💾 메모리</text>
+          <text x="207" y="70" textAnchor="middle" fill="#ffffff" fontSize="9">DRAM, NAND</text>
+          <text x="207" y="86" textAnchor="middle" fill="#e2e8f0" fontSize="8">셀 특성 정밀 제어</text>
+          {/* 전력반도체 */}
+          <rect x="10" y="114" width="260" height="62" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fcd34d" strokeWidth="1.5"/>
+          <text x="140" y="132" textAnchor="middle" fill="#fcd34d" fontSize="11" fontWeight="bold">🚗 전력반도체 (IGBT, SiC)</text>
+          <text x="140" y="148" textAnchor="middle" fill="#ffffff" fontSize="9">고온 확산으로 깊은 영역</text>
+          <text x="140" y="164" textAnchor="middle" fill="#86efac" fontSize="9">전기차·인버터 핵심</text>
+          {/* 엔지니어 역할 */}
+          <rect x="10" y="186" width="260" height="86" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="204" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">👨‍🔬 엔지니어 역할</text>
+          <text x="20" y="222" fill="#ffffff" fontSize="9">• TCAD 시뮬레이션으로 최적화</text>
+          <text x="20" y="238" fill="#ffffff" fontSize="9">• SIMS로 프로파일 측정/검증</text>
+          <text x="20" y="254" fill="#ffffff" fontSize="9">• 조건 미세조정 → 수율 향상</text>
+          <text x="140" y="268" textAnchor="middle" fill="#86efac" fontSize="9" fontWeight="bold">💰 10% 성능↑ → 수억 달러 매출</text>
+        </svg>
+      );
+      case 4: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">학습 로드맵</text>
+          {[
+            { y: 34, label: '확산 시뮬레이터', desc: '온도·시간 프로파일', color: '#93C5FD' },
+            { y: 74, label: '이온 주입 시뮬레이터', desc: '에너지·Dose 제어', color: '#FCD34D' },
+            { y: 114, label: '공정 비교', desc: '두 방법 프로파일 비교', color: '#C4B5FD' },
+            { y: 154, label: '온도 영향 분석', desc: 'Arrhenius·RTA', color: '#F9A8D4' },
+            { y: 194, label: '실무 가이드', desc: '공정 선택 트리', color: '#FCA5A5' },
+            { y: 234, label: '퀴즈', desc: '이해도 점검', color: '#86EFAC' },
+          ].map((tab, i) => (
+            <g key={`tab${i}`}>
+              <rect x="15" y={tab.y} width="250" height="34" rx="5" fill="#1e293b" fillOpacity="0.85" stroke={tab.color} strokeWidth="1.5"/>
+              <circle cx="35" cy={tab.y + 17} r="11" fill={tab.color} fillOpacity="0.9"/>
+              <text x="35" y={tab.y + 21} textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">{i + 1}</text>
+              <text x="54" y={tab.y + 15} fill={tab.color} fontSize="11" fontWeight="bold">{tab.label}</text>
+              <text x="54" y={tab.y + 28} fill="#ffffff" fontSize="8">{tab.desc}</text>
+            </g>
+          ))}
+        </svg>
+      );
+      default: return null;
+    }
+  };
 
   // Typing animation effect for theory
   useEffect(() => {
@@ -1969,10 +2147,10 @@ const DopingProcessSimulator = ({ initialTab }) => {
         <div className="p-6">
           {/* Theory Tab - Opening Animation */}
           {activeTab === 'theory' && (
-            <div className="space-y-6">
+            <div className="flex-1 min-h-0 flex flex-col">
               {/* Main Animation Area */}
               {!showDetailedTheory ? (
-                <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+                <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col" style={{minHeight: '600px', maxHeight: 'calc(100vh - 200px)'}}>
                   {!isTheoryPlaying ? (
                     // Initial welcome screen
                     <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
@@ -1981,7 +2159,7 @@ const DopingProcessSimulator = ({ initialTab }) => {
                     반도체 도핑공정
                   </h2>
                   <p className="text-xl text-blue-100 max-w-2xl">
-                    이 시뮬레이터는 반도체 제조의 핵심 공정인 도핑에 대해 
+                    이 시뮬레이터는 반도체 제조의 핵심 공정인 도핑에 대해
                     단계별로 설명해드립니다.
                   </p>
                   <button
@@ -1997,9 +2175,9 @@ const DopingProcessSimulator = ({ initialTab }) => {
                 </div>
               ) : (
                 // Animation playing
-                <div className="flex-1 flex flex-col">
+                <div className="flex-1 min-h-0 flex flex-col">
                   {/* Progress bar */}
-                  <div className="mb-6">
+                  <div className="mb-4 flex-shrink-0">
                     <div className="flex justify-between items-center mb-2">
                       <span className="text-sm font-semibold">
                         Step {theoryStep + 1} / {theorySteps.length}
@@ -2009,43 +2187,48 @@ const DopingProcessSimulator = ({ initialTab }) => {
                       </span>
                     </div>
                     <div className="w-full bg-white/30 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-white h-2 rounded-full transition-all duration-500"
                         style={{ width: `${((theoryStep + 1) / theorySteps.length) * 100}%` }}
                       />
                     </div>
                   </div>
 
-                  {/* Content area */}
-                  <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-6 mb-6 overflow-y-auto">
-                    <div className="flex items-center gap-3 mb-4">
-                      <span className="text-5xl">{theorySteps[theoryStep].icon}</span>
-                      <h3 className="text-2xl font-bold">
-                        {theorySteps[theoryStep].title}
-                      </h3>
+                  {/* Content area - Left SVG + Right Text */}
+                  <div className="flex-1 min-h-0 flex gap-4 mb-4">
+                    <div className="w-1/2 flex-shrink-0 bg-white/10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                      {getTheorySVG(theoryStep)}
                     </div>
-                    
-                    <div className="text-lg leading-relaxed whitespace-pre-line mb-6 font-medium">
-                      {typedText}
-                      {typedText.length < theorySteps[theoryStep].content.length && (
-                        <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                    <div ref={storyContentRef} className="flex-1 min-w-0 bg-white/10 backdrop-blur-sm rounded-xl p-6 overflow-y-auto">
+                      <div className="flex items-center gap-3 mb-4">
+                        <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                        <h3 className="text-xl font-bold">
+                          {theorySteps[theoryStep].title}
+                        </h3>
+                      </div>
+
+                      <div className="text-base leading-relaxed whitespace-pre-line mb-4 font-medium">
+                        {typedText}
+                        {typedText.length < theorySteps[theoryStep].content.length && (
+                          <span className="inline-block w-2 h-6 bg-white ml-1 animate-pulse" />
+                        )}
+                      </div>
+
+                      {typedText.length >= theorySteps[theoryStep].content.length && (
+                        <div className="mt-4 p-3 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
+                          <div className="flex items-start gap-2">
+                            <Lightbulb className="w-5 h-5 text-yellow-300 flex-shrink-0 mt-0.5" />
+                            <p className="text-yellow-100 font-semibold text-sm">
+                              {theorySteps[theoryStep].highlight}
+                            </p>
+                          </div>
+                        </div>
                       )}
                     </div>
-
-                    {typedText.length >= theorySteps[theoryStep].content.length && (
-                      <div className="mt-6 p-4 bg-yellow-400/20 border-2 border-yellow-300 rounded-lg transition-all duration-500 opacity-100">
-                        <div className="flex items-start gap-2">
-                          <Lightbulb className="w-6 h-6 text-yellow-300 flex-shrink-0 mt-1" />
-                          <p className="text-yellow-100 font-semibold">
-                            {theorySteps[theoryStep].highlight}
-                          </p>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
                   {/* Navigation buttons */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between flex-shrink-0">
                     <button
                       onClick={prevTheoryStep}
                       disabled={theoryStep === 0}
@@ -2309,18 +2492,6 @@ const DopingProcessSimulator = ({ initialTab }) => {
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Toggle detailed theory button */}
-          {!isTheoryPlaying && !showDetailedTheory && (
-            <div className="text-center">
-              <button
-                onClick={() => setShowDetailedTheory(true)}
-                className="px-6 py-3 bg-white text-blue-600 rounded-lg hover:bg-blue-50 transition-all font-semibold shadow-lg"
-              >
-                📚 상세 이론 보기
-              </button>
             </div>
           )}
             </div>

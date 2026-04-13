@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
 
@@ -29,6 +29,7 @@ const PlasmaSimulatorII = ({ initialTab }) => {
   const [isTheoryPlaying, setIsTheoryPlaying] = useState(false);
   const [typedText, setTypedText] = useState('');
   const [showDetailedTheory, setShowDetailedTheory] = useState(false);
+  const storyContentRef = useRef(null);
 
   const [etchPower, setEtchPower] = useState(200);
   const [etchPressure, setEtchPressure] = useState(10);
@@ -680,13 +681,161 @@ const PlasmaSimulatorII = ({ initialTab }) => {
 
   const nextTheoryStep = () => {
     if (theoryStep < theorySteps.length - 1) {
+      setTypedText('');
       setTheoryStep(theoryStep + 1);
     }
   };
 
   const prevTheoryStep = () => {
     if (theoryStep > 0) {
+      setTypedText('');
       setTheoryStep(theoryStep - 1);
+    }
+  };
+
+  // Auto-scroll storytelling content
+  useEffect(() => {
+    if (storyContentRef.current && isTheoryPlaying) {
+      storyContentRef.current.scrollTop = storyContentRef.current.scrollHeight;
+    }
+  }, [typedText, isTheoryPlaying]);
+
+  // SVG diagrams for each theory step
+  const getTheorySVG = (step) => {
+    const svgClass = "w-full h-full max-h-96";
+    switch(step) {
+      case 0: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">ICP 구조</text>
+          {/* RF 코일 */}
+          <ellipse cx="140" cy="45" rx="80" ry="8" fill="none" stroke="#fcd34d" strokeWidth="2"/>
+          <ellipse cx="140" cy="52" rx="80" ry="8" fill="none" stroke="#fcd34d" strokeWidth="2"/>
+          <text x="140" y="38" textAnchor="middle" fill="#fcd34d" fontSize="9" fontWeight="bold">RF 코일 (13.56 MHz)</text>
+          {/* 챔버 */}
+          <rect x="50" y="60" width="180" height="130" rx="4" fill="none" stroke="#94a3b8" strokeWidth="2"/>
+          {/* 플라즈마 */}
+          <ellipse cx="140" cy="120" rx="70" ry="40" fill="#c084fc" fillOpacity="0.35" stroke="#c4b5fd" strokeWidth="1"/>
+          <text x="140" y="118" textAnchor="middle" fill="#fde047" fontSize="10" fontWeight="bold">고밀도 플라즈마</text>
+          <text x="140" y="130" textAnchor="middle" fill="#e2e8f0" fontSize="8">10¹¹~10¹² cm⁻³</text>
+          {/* 이온/전자 */}
+          <circle cx="110" cy="100" r="2.5" fill="#ef4444"/><text x="110" y="103" textAnchor="middle" fill="#ffffff" fontSize="6">+</text>
+          <circle cx="160" cy="105" r="2.5" fill="#ef4444"/><text x="160" y="108" textAnchor="middle" fill="#ffffff" fontSize="6">+</text>
+          <circle cx="130" cy="140" r="2.5" fill="#ef4444"/><text x="130" y="143" textAnchor="middle" fill="#ffffff" fontSize="6">+</text>
+          <circle cx="170" cy="135" r="1.5" fill="#fde047"/>
+          <circle cx="100" cy="130" r="1.5" fill="#fde047"/>
+          <circle cx="150" cy="115" r="1.5" fill="#fde047"/>
+          {/* 웨이퍼 */}
+          <rect x="70" y="170" width="140" height="8" fill="#475569"/>
+          <rect x="90" y="166" width="100" height="4" fill="#60a5fa"/>
+          <text x="140" y="186" textAnchor="middle" fill="#60a5fa" fontSize="8" fontWeight="bold">웨이퍼 (Bias RF)</text>
+          {/* 비교 박스 */}
+          <rect x="15" y="202" width="250" height="70" rx="6" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5" strokeDasharray="3"/>
+          <text x="140" y="220" textAnchor="middle" fill="#fde047" fontSize="11" fontWeight="bold">CCP vs ICP</text>
+          <text x="25" y="238" fill="#fca5a5" fontSize="9">• CCP: 10⁹~10¹⁰ cm⁻³</text>
+          <text x="155" y="238" fill="#86efac" fontSize="9">• ICP: 10¹¹~10¹² cm⁻³</text>
+          <text x="25" y="254" fill="#fca5a5" fontSize="9">• 압력 50~100 mTorr</text>
+          <text x="155" y="254" fill="#86efac" fontSize="9">• 압력 1~10 mTorr</text>
+          <text x="140" y="268" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">⭐ 독립 제어: 밀도 vs 에너지</text>
+        </svg>
+      );
+      case 1: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">ICP 동작 6단계</text>
+          {[
+            { y: 32, label: 'Step 1: RF 코일 전류', desc: '13.56 MHz AC', color: '#93C5FD' },
+            { y: 72, label: 'Step 2: 시변 자기장', desc: 'B-field (앙페르 법칙)', color: '#C4B5FD' },
+            { y: 112, label: 'Step 3: 유도 전기장', desc: '원형 E-field (패러데이)', color: '#F9A8D4' },
+            { y: 152, label: 'Step 4: Cyclotron Motion', desc: '전자 원형 가속', color: '#FCD34D' },
+            { y: 192, label: 'Step 5: 충돌 이온화', desc: 'e⁻+Ar → Ar⁺+2e⁻', color: '#FCA5A5' },
+            { y: 232, label: 'Step 6: Bias 제어', desc: 'Source + Bias 분리', color: '#86EFAC' },
+          ].map((s, i) => (
+            <g key={`s${i}`}>
+              <rect x="15" y={s.y} width="250" height="32" rx="5" fill="#1e293b" fillOpacity="0.85" stroke={s.color} strokeWidth="1.5"/>
+              <circle cx="34" cy={s.y + 16} r="11" fill={s.color} fillOpacity="0.9"/>
+              <text x="34" y={s.y + 20} textAnchor="middle" fill="#0f172a" fontSize="11" fontWeight="bold">{i + 1}</text>
+              <text x="52" y={s.y + 14} fill={s.color} fontSize="10" fontWeight="bold">{s.label}</text>
+              <text x="52" y={s.y + 26} fill="#ffffff" fontSize="8">{s.desc}</text>
+            </g>
+          ))}
+        </svg>
+      );
+      case 2: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">ICP 기술 발전사</text>
+          <line x1="45" y1="36" x2="45" y2="248" stroke="#94a3b8" strokeWidth="2" strokeDasharray="3"/>
+          {[
+            { y: 38, era: '1980s', label: 'CCP 한계', desc: '10⁹~10¹⁰, 고압', color: '#CBD5E1' },
+            { y: 80, era: '1990s', label: 'ICP 상용화', desc: '10~100배 증가', color: '#93C5FD' },
+            { y: 122, era: '2000s', label: 'Dual Frequency', desc: 'Source+Bias 분리', color: '#C4B5FD' },
+            { y: 164, era: '2010s', label: 'Pulsed & ALE', desc: '원자층 식각', color: '#F9A8D4' },
+            { y: 206, era: '2020s', label: '극한 ICP', desc: 'Multi-freq, AI', color: '#FCD34D' },
+          ].map((item, i) => (
+            <g key={`era${i}`}>
+              <circle cx="45" cy={item.y + 10} r="7" fill={item.color} stroke="#0f172a" strokeWidth="1.5"/>
+              <text x="60" y={item.y + 6} fill={item.color} fontSize="10" fontWeight="bold">{item.era}</text>
+              <text x="60" y={item.y + 20} fill="#ffffff" fontSize="10" fontWeight="bold">{item.label}</text>
+              <text x="60" y={item.y + 32} fill="#e2e8f0" fontSize="8">{item.desc}</text>
+            </g>
+          ))}
+          <rect x="10" y="254" width="260" height="20" rx="4" fill="#1e293b" fillOpacity="0.85" stroke="#fde047" strokeWidth="0.5"/>
+          <text x="140" y="268" textAnchor="middle" fill="#fde047" fontSize="9" fontWeight="bold">📈 0.35μm → 2nm (175배↑)</text>
+        </svg>
+      );
+      case 3: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">ICP 응용 분야</text>
+          <circle cx="140" cy="140" r="32" fill="#8b5cf6" fillOpacity="0.8" stroke="#c4b5fd" strokeWidth="2"/>
+          <text x="140" y="140" textAnchor="middle" fill="#ffffff" fontSize="10" fontWeight="bold">ICP</text>
+          <text x="140" y="152" textAnchor="middle" fill="#ddd6fe" fontSize="7">Plasma</text>
+          {[
+            { angle: -90, label: '식각', desc: 'Poly-Si, Deep Trench', color: '#FCA5A5' },
+            { angle: -38, label: '증착', desc: 'PECVD SiO₂/SiN', color: '#86EFAC' },
+            { angle: 14, label: '애싱', desc: 'O₂ PR 제거', color: '#93C5FD' },
+            { angle: 65, label: '표면 개질', desc: '질화/산화', color: '#FCD34D' },
+            { angle: 115, label: '도핑 (PLAD)', desc: 'S/D junction', color: '#C4B5FD' },
+            { angle: 167, label: 'ALE', desc: '원자층 식각', color: '#F9A8D4' },
+            { angle: 218, label: '신소재', desc: 'GaN, SiC', color: '#7DD3FC' },
+          ].map((app, i) => {
+            const rad = (app.angle * Math.PI) / 180;
+            const cx = 140 + Math.cos(rad) * 85;
+            const cy = 140 + Math.sin(rad) * 85;
+            return (
+              <g key={`app${i}`}>
+                <line x1={140 + Math.cos(rad) * 32} y1={140 + Math.sin(rad) * 32} x2={cx - Math.cos(rad) * 22} y2={cy - Math.sin(rad) * 22} stroke={app.color} strokeWidth="1.2" strokeDasharray="2"/>
+                <circle cx={cx} cy={cy} r="22" fill="#1e293b" fillOpacity="0.85" stroke={app.color} strokeWidth="1.5"/>
+                <text x={cx} y={cy - 2} textAnchor="middle" fill={app.color} fontSize="9" fontWeight="bold">{app.label}</text>
+                <text x={cx} y={cy + 9} textAnchor="middle" fill="#ffffff" fontSize="6">{app.desc}</text>
+              </g>
+            );
+          })}
+        </svg>
+      );
+      case 4: return (
+        <svg viewBox="0 0 280 280" className={svgClass}>
+          <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
+          <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">학습 로드맵</text>
+          {[
+            { y: 36, label: '시스템 구조 (ICP)', desc: '4단계 생성, Cyclotron', color: '#93C5FD' },
+            { y: 84, label: '식각 공정 (기본)', desc: '5가지 가스, ARDE', color: '#FCA5A5' },
+            { y: 132, label: '증착 공정 (기본)', desc: 'PECVD, Step Coverage', color: '#86EFAC' },
+            { y: 180, label: '장비 응용', desc: 'Deep Trench, 3D NAND', color: '#FCD34D' },
+            { y: 228, label: '개념 확인 퀴즈', desc: '3단계 난이도', color: '#C4B5FD' },
+          ].map((tab, i) => (
+            <g key={`tab${i}`}>
+              <rect x="15" y={tab.y} width="250" height="40" rx="6" fill="#1e293b" fillOpacity="0.85" stroke={tab.color} strokeWidth="1.5"/>
+              <circle cx="38" cy={tab.y + 20} r="12" fill={tab.color} fillOpacity="0.9"/>
+              <text x="38" y={tab.y + 25} textAnchor="middle" fill="#0f172a" fontSize="12" fontWeight="bold">{i + 1}</text>
+              <text x="58" y={tab.y + 17} fill={tab.color} fontSize="11" fontWeight="bold">{tab.label}</text>
+              <text x="58" y={tab.y + 31} fill="#ffffff" fontSize="9">{tab.desc}</text>
+            </g>
+          ))}
+        </svg>
+      );
+      default: return null;
     }
   };
 
@@ -820,9 +969,9 @@ const PlasmaSimulatorII = ({ initialTab }) => {
 
   // Theory Tab Component
   const TheoryTab = () => (
-    <div className="space-y-6">
+    <div className="flex-1 min-h-0 flex flex-col">
       {!showDetailedTheory ? (
-        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl p-8 text-white min-h-[600px] flex flex-col">
+        <div className="bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 rounded-xl shadow-2xl p-6 text-white flex-1 min-h-0 flex flex-col" style={{minHeight: '600px', maxHeight: 'calc(100vh - 200px)'}}>
           {!isTheoryPlaying ? (
             <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6">
               <div className="text-6xl mb-4">🎬</div>
@@ -840,9 +989,9 @@ const PlasmaSimulatorII = ({ initialTab }) => {
               </button>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
+            <div className="flex-1 min-h-0 flex flex-col">
               {/* Progress bar */}
-              <div className="mb-6">
+              <div className="mb-4 flex-shrink-0">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-sm font-medium text-indigo-100">
                     진행률: {Math.round(((theoryStep + 1) / theorySteps.length) * 100)}%
@@ -859,31 +1008,36 @@ const PlasmaSimulatorII = ({ initialTab }) => {
                 </div>
               </div>
 
-              {/* Content */}
-              <div className="flex-1 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-8 mb-6 overflow-y-auto">
-                <div className="flex items-center gap-3 mb-4">
-                  <span className="text-4xl">{theorySteps[theoryStep].icon}</span>
-                  <h3 className="text-2xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+              {/* Content area - Left SVG + Right Text */}
+              <div className="flex-1 min-h-0 flex gap-4 mb-4">
+                <div className="w-1/2 flex-shrink-0 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-4 flex items-center justify-center">
+                  {getTheorySVG(theoryStep)}
                 </div>
+                <div ref={storyContentRef} className="flex-1 min-w-0 bg-white bg-opacity-10 backdrop-blur-sm rounded-lg p-6 overflow-y-auto">
+                  <div className="flex items-center gap-3 mb-4">
+                    <span className="text-3xl">{theorySteps[theoryStep].icon}</span>
+                    <h3 className="text-xl font-bold text-yellow-300">{theorySteps[theoryStep].title}</h3>
+                  </div>
 
-                <div className="text-lg leading-relaxed mb-6 whitespace-pre-line">
-                  {typedText}
-                  {typedText.length < theorySteps[theoryStep].content.length && (
-                    <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                  <div className="text-base leading-relaxed mb-4 whitespace-pre-line">
+                    {typedText}
+                    {typedText.length < theorySteps[theoryStep].content.length && (
+                      <span className="inline-block w-1 h-5 bg-yellow-300 ml-1 animate-pulse" />
+                    )}
+                  </div>
+
+                  {typedText.length === theorySteps[theoryStep].content.length && (
+                    <div className="mt-4 p-3 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
+                      <p className="text-yellow-100 font-medium text-sm">
+                        💡 {theorySteps[theoryStep].highlight}
+                      </p>
+                    </div>
                   )}
                 </div>
-
-                {typedText.length === theorySteps[theoryStep].content.length && (
-                  <div className="mt-6 p-4 bg-yellow-400 bg-opacity-20 border-l-4 border-yellow-300 rounded">
-                    <p className="text-yellow-100 font-medium">
-                      💡 {theorySteps[theoryStep].highlight}
-                    </p>
-                  </div>
-                )}
               </div>
 
               {/* Navigation buttons */}
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center flex-shrink-0">
                 <button
                   onClick={stopTheoryAnimation}
                   className="bg-red-500 bg-opacity-80 hover:bg-opacity-100 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
@@ -905,20 +1059,12 @@ const PlasmaSimulatorII = ({ initialTab }) => {
                     ← 이전
                   </button>
 
-                  {theoryStep < theorySteps.length - 1 ? (
+                  {theoryStep < theorySteps.length - 1 && (
                     <button
                       onClick={nextTheoryStep}
                       className="bg-yellow-400 hover:bg-yellow-300 text-indigo-900 px-6 py-3 rounded-lg font-medium transition-all"
                     >
                       다음 →
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => setShowDetailedTheory(true)}
-                      className="bg-green-500 hover:bg-green-400 text-white px-6 py-3 rounded-lg font-medium transition-all flex items-center gap-2"
-                    >
-                      <LightbulbIcon />
-                      상세 이론 보기
                     </button>
                   )}
                 </div>
