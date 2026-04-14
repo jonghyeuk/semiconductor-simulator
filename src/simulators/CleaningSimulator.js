@@ -204,137 +204,140 @@ const CleaningSimulator = ({ initialTab }) => {
         </div>
         
         <svg width="400" height="300" viewBox="0 0 400 300" className="mx-auto">
-          {/* 세정조 배경 */}
-          <rect x="50" y="80" width="300" height="150" fill="#f0f0f0" stroke="#999" strokeWidth="2" rx="5"/>
-          <rect x="55" y="85" width="290" height="140" fill={solutionColors[solution]} stroke="none" rx="3"/>
-          
-          {/* 세정액 표시 */}
-          <text x="200" y="105" textAnchor="middle" className="text-sm font-medium">{solution} Solution</text>
-          
-          {/* 웨이퍼 단면 (확대된 뷰) */}
-          <g transform="translate(150, 130)">
-            {/* 실리콘 기판 */}
-            <rect x="0" y="20" width="100" height="40" fill="#696969" stroke="#333" strokeWidth="1"/>
-            <text x="50" y="45" textAnchor="middle" className="text-xs fill-white font-semibold">Si 기판</text>
-            
+          <defs>
+            {/* 세정액 그라디언트 (글래스 효과) */}
+            <linearGradient id={`bathGrad-${solution}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={solutionColors[solution]} stopOpacity="0.55"/>
+              <stop offset="40%" stopColor={solutionColors[solution]} stopOpacity="0.95"/>
+              <stop offset="100%" stopColor={solutionColors[solution]} stopOpacity="0.78"/>
+            </linearGradient>
+            {/* 실리콘 기판 그라디언트 */}
+            <linearGradient id="siGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor="#8c8c8c"/>
+              <stop offset="55%" stopColor="#555555"/>
+              <stop offset="100%" stopColor="#2f2f2f"/>
+            </linearGradient>
+            {/* 타겟 레이어 그라디언트 */}
+            <linearGradient id={`layerGrad-${solution}`} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={targetInfo.layerColor} stopOpacity="0.95"/>
+              <stop offset="100%" stopColor={targetInfo.layerColor} stopOpacity="0.55"/>
+            </linearGradient>
+            {/* 유리 반사 하이라이트 */}
+            <linearGradient id="glassShine" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#ffffff" stopOpacity="0.35"/>
+              <stop offset="18%" stopColor="#ffffff" stopOpacity="0.06"/>
+              <stop offset="100%" stopColor="#ffffff" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+
+          {/* 세정조 유리 외곽 */}
+          <rect x="40" y="55" width="320" height="185" fill="#edf1f5" stroke="#3e4a5a" strokeWidth="2" rx="6"/>
+          {/* 세정액 본체 */}
+          <rect x="44" y="59" width="312" height="177" fill={`url(#bathGrad-${solution})`} rx="4"/>
+          {/* 유리 하이라이트 */}
+          <rect x="44" y="59" width="312" height="177" fill="url(#glassShine)" rx="4"/>
+          {/* 액면선 */}
+          <line x1="44" y1="70" x2="356" y2="70" stroke="#ffffff" strokeOpacity="0.7" strokeWidth="1.5" strokeDasharray="4,3"/>
+          <text x="358" y="74" fontSize="9" fill="#4a5568">액면</text>
+
+          {/* 세정액 태그 */}
+          <rect x="54" y="80" width="96" height="24" fill="#ffffff" fillOpacity="0.92" stroke="#3e4a5a" strokeWidth="0.8" rx="4"/>
+          <text x="102" y="97" textAnchor="middle" fontSize="12" fontWeight="700" fill="#1e293b">{solution} 용액</text>
+
+          {/* ===== 웨이퍼 단면 확대뷰 ===== */}
+          <g transform="translate(130, 135)">
+            {/* Si 기판 */}
+            <rect x="0" y="25" width="140" height="50" fill="url(#siGrad)" stroke="#1e1e1e" strokeWidth="1"/>
+            {/* 결정격자 힌트 */}
+            {[0,1,2,3,4].map(i => (
+              <line key={`lat-${i}`} x1={10 + i*30} y1="30" x2={10 + i*30} y2="70" stroke="#ffffff" strokeOpacity="0.12" strokeWidth="0.6"/>
+            ))}
+            <text x="70" y="56" textAnchor="middle" fontSize="11" fontWeight="700" fill="#ffffff">Si substrate</text>
+
             {/* 타겟 레이어 (제거 효율에 따라 두께 변화) */}
-            <rect 
-              x="0" 
-              y={20 - currentThickness} 
-              width="100" 
-              height={currentThickness} 
-              fill={targetInfo.layerColor}
-              fillOpacity="0.7"
-              stroke={targetInfo.layerColor} 
-              strokeWidth="0.5"
+            <rect
+              x="0"
+              y={25 - currentThickness * 2}
+              width="140"
+              height={currentThickness * 2}
+              fill={`url(#layerGrad-${solution})`}
+              stroke={targetInfo.layerColor}
+              strokeWidth="0.8"
             />
-            
-            {/* 두께 측정 선 */}
-            <line x1="-10" y1={20 - initialThickness} x2="-10" y2="20" stroke="#666" strokeWidth="1"/>
-            <line x1="-12" y1={20 - initialThickness} x2="-8" y2={20 - initialThickness} stroke="#666" strokeWidth="1"/>
-            <line x1="-12" y1="20" x2="-8" y2="20" stroke="#666" strokeWidth="1"/>
-            <text x="-20" y={20 - initialThickness/2} textAnchor="end" className="text-xs">초기</text>
-            
-            {/* 현재 남은 두께 표시 */}
-            <line x1="110" y1={20 - currentThickness} x2="110" y2="20" stroke="#e74c3c" strokeWidth="2"/>
-            <line x1="108" y1={20 - currentThickness} x2="112" y2={20 - currentThickness} stroke="#e74c3c" strokeWidth="2"/>
-            <line x1="108" y1="20" x2="112" y2="20" stroke="#e74c3c" strokeWidth="2"/>
-            <text x="120" y={20 - currentThickness/2} className="text-xs font-semibold fill-red-600">
-              {solution === 'BOE' ? 
-                `남은 두께: ${Math.round(500 * (1 - removalEfficiency / 100))}Å` :
-                `남은 오염: ${(100 - removalEfficiency).toFixed(1)}%`
-              }
-            </text>
-            
-            {/* 제거된 두께 표시 */}
-            <text x="120" y={20 - initialThickness - 8} className="text-xs font-semibold fill-green-600">
-              {solution === 'BOE' ? 
-                `제거된 두께: ${Math.round(500 * (removalEfficiency / 100))}Å` :
-                `제거된 오염: ${removalEfficiency.toFixed(1)}%`
-              }
+
+            {/* 오염/층 표면 아이콘 (제거되지 않은 부분만 잔류) */}
+            {solution === 'SC1' && Array.from({length: Math.max(0, Math.ceil(9 * (1 - removalEfficiency/100)))}, (_, i) => (
+              <circle key={`sc1-p-${i}`} cx={10 + i*16} cy={25 - currentThickness*2 - 2.5} r="2.3" fill="#4a2a0c" stroke="#2a1a00" strokeWidth="0.4"/>
+            ))}
+            {solution === 'SC2' && Array.from({length: Math.max(0, Math.ceil(10 * (1 - removalEfficiency/100)))}, (_, i) => (
+              <g key={`sc2-ion-${i}`}>
+                <circle cx={10 + i*14} cy={25 - currentThickness*2 - 1.5} r="1.7" fill="#c04800"/>
+                <text x={10 + i*14} y={25 - currentThickness*2 - 4.5} textAnchor="middle" fontSize="7" fontWeight="700" fill="#8a3000">+</text>
+              </g>
+            ))}
+            {solution === 'SPM' && Array.from({length: Math.max(0, Math.ceil(6 * (1 - removalEfficiency/100)))}, (_, i) => (
+              <path key={`spm-org-${i}`} d={`M${10 + i*22},${25 - currentThickness*2 - 1} q4,-4 8,0 q4,-4 8,0`} stroke="#6a1a1a" strokeWidth="1.3" fill="none"/>
+            ))}
+            {solution === 'BOE' && currentThickness > 0.3 && (
+              <line x1="0" y1={25 - currentThickness*2} x2="140" y2={25 - currentThickness*2} stroke="#ffffff" strokeOpacity="0.55" strokeWidth="0.7"/>
+            )}
+
+            {/* 두께 측정 - 왼쪽 (초기) */}
+            <line x1="-18" y1={25 - initialThickness*2} x2="-18" y2="25" stroke="#555" strokeWidth="1"/>
+            <line x1="-21" y1={25 - initialThickness*2} x2="-15" y2={25 - initialThickness*2} stroke="#555" strokeWidth="1"/>
+            <line x1="-21" y1="25" x2="-15" y2="25" stroke="#555" strokeWidth="1"/>
+            <text x="-23" y={25 - initialThickness + 3} textAnchor="end" fontSize="9" fill="#555">초기</text>
+
+            {/* 두께 측정 - 오른쪽 (현재) */}
+            <line x1="158" y1={25 - currentThickness*2} x2="158" y2="25" stroke="#e11d48" strokeWidth="2"/>
+            <line x1="155" y1={25 - currentThickness*2} x2="161" y2={25 - currentThickness*2} stroke="#e11d48" strokeWidth="2"/>
+            <line x1="155" y1="25" x2="161" y2="25" stroke="#e11d48" strokeWidth="2"/>
+            <text x="163" y={25 - currentThickness + 3} fontSize="9" fontWeight="700" fill="#be123c">현재</text>
+
+            {/* 수치 요약 (한 줄) */}
+            <text x="70" y="93" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#15803d">
+              {solution === 'BOE'
+                ? `제거 ${Math.round(500 * removalEfficiency / 100)}Å  ·  남음 ${Math.round(500 * (1 - removalEfficiency / 100))}Å`
+                : `제거 ${removalEfficiency.toFixed(1)}%  ·  남음 ${(100 - removalEfficiency).toFixed(1)}%`}
             </text>
           </g>
-          
-          {/* 세정액과 타겟 레이어 표면에서의 화학 반응 표시 */}
-          {isProcessing && (
-            <g>
-              {/* 반응 분자들이 세정액에서 표면으로 접근 */}
-              {Array.from({length: 6}, (_, i) => (
-                <g key={i}>
-                  <circle 
-                    cx={160 + i * 15} 
-                    cy={120 + Math.sin(i + Date.now() / 800) * 8} 
-                    r="2" 
-                    fill="#ff6b35" 
-                    opacity="0.8"
-                  >
-                    <animate attributeName="cy" 
-                             values={`${110 + Math.sin(i) * 8};${135 + Math.sin(i) * 5};${110 + Math.sin(i) * 8}`} 
-                             dur="3s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.3;0.9;0.3" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  <text x={160 + i * 15} y={118 + Math.sin(i + Date.now() / 800) * 8} 
-                        textAnchor="middle" className="text-xs font-bold" fill="#ff4500" opacity="0.8">
-                    {solution === 'BOE' ? 'HF' : solution === 'SPM' ? 'H₂SO₄' : solution === 'SC1' ? 'NH₄OH' : 'HCl'}
-                  </text>
-                </g>
-              ))}
-              
-              {/* 표면에서의 반응 스파크 효과 */}
-              {Array.from({length: 4}, (_, i) => (
-                <circle 
-                  key={`spark-${i}`}
-                  cx={155 + i * 22} 
-                  cy={150 + (20 - currentThickness)} 
-                  r="1" 
-                  fill="#ffff00" 
-                  opacity="0.7"
-                >
-                  <animate attributeName="r" values="0.5;3;0.5" dur="1.5s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
-                  <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.5s" repeatCount="indefinite" begin={`${i * 0.3}s`} />
+
+          {/* 반응물 분자 하강 (처리 중) */}
+          {isProcessing && Array.from({length: 5}, (_, i) => {
+            const xBase = 168 + i * 18;
+            const rxLabel = solution === 'BOE' ? 'HF' : solution === 'SPM' ? 'H₂SO₄' : solution === 'SC1' ? 'NH₄OH' : 'HCl';
+            return (
+              <g key={`rx-${i}`}>
+                <circle cx={xBase} cy="108" r="9" fill={targetInfo.layerColor} fillOpacity="0.18" stroke={targetInfo.layerColor} strokeOpacity="0.7" strokeWidth="0.9">
+                  <animate attributeName="cy" values="108;150;108" dur="3s" repeatCount="indefinite" begin={`${i * 0.4}s`}/>
+                  <animate attributeName="fillOpacity" values="0.85;0.25;0.85" dur="3s" repeatCount="indefinite" begin={`${i * 0.4}s`}/>
                 </circle>
-              ))}
-            </g>
-          )}
-          
-          {/* 제거된 물질들이 세정액으로 확산 */}
-          {isProcessing && (
-            <g>
-              {Array.from({length: Math.floor(removalEfficiency / 15)}, (_, i) => (
-                <circle 
-                  key={`dissolved-${i}`}
-                  cx={170 + (i % 5) * 14} 
-                  cy={110 + Math.floor(i / 5) * 12 + Math.sin(i + Date.now() / 1000) * 4} 
-                  r="1.5" 
-                  fill="#87ceeb" 
-                  opacity="0.6"
-                >
-                  <animate attributeName="cy" 
-                           values={`${150 + (20 - currentThickness)};${100 + Math.floor(i / 5) * 12};${90 + Math.floor(i / 5) * 12}`} 
-                           dur="4s" repeatCount="indefinite" begin={`${i * 0.2}s`} />
-                  <animate attributeName="opacity" values="0.8;0.4;0.1" dur="4s" repeatCount="indefinite" begin={`${i * 0.2}s`} />
-                </circle>
-              ))}
-              <text x="200" y="95" textAnchor="middle" className="text-xs text-blue-600" opacity="0.7">
-                제거된 {targetInfo.layerName.split(' ').pop()}이 세정액으로 확산
-              </text>
-            </g>
-          )}
-          
-          {/* 공정 상태 표시 */}
-          {isProcessing ? (
-            <text x="200" y="250" textAnchor="middle" className="text-sm font-medium text-blue-600">
-              {targetInfo.layerName} 제거 진행 중... ({removalEfficiency.toFixed(1)}% 완료)
-            </text>
-          ) : (
-            <text x="200" y="250" textAnchor="middle" className="text-sm font-medium text-gray-600">
-              제거 효율: {removalEfficiency.toFixed(1)}%
-            </text>
-          )}
-          
-          {/* 화학 반응식 */}
-          <text x="200" y="270" textAnchor="middle" className="text-xs text-gray-500">
+                <text x={xBase} y="111" textAnchor="middle" fontSize="8" fontWeight="700" fill={targetInfo.layerColor}>
+                  <animate attributeName="y" values="111;153;111" dur="3s" repeatCount="indefinite" begin={`${i * 0.4}s`}/>
+                  {rxLabel}
+                </text>
+              </g>
+            );
+          })}
+
+          {/* 용해 생성물 상승 (처리 중) */}
+          {isProcessing && Array.from({length: Math.max(1, Math.floor(removalEfficiency / 12))}, (_, i) => (
+            <circle key={`dis-${i}`} cx={160 + (i % 6) * 16} cy="155" r="1.8" fill="#5aa3c7" fillOpacity="0.75">
+              <animate attributeName="cy" values="155;90" dur={`${3 + (i % 3)}s`} repeatCount="indefinite" begin={`${i * 0.25}s`}/>
+              <animate attributeName="fillOpacity" values="0.9;0.35;0" dur={`${3 + (i % 3)}s`} repeatCount="indefinite" begin={`${i * 0.25}s`}/>
+            </circle>
+          ))}
+
+          {/* 반응식 */}
+          <text x="200" y="258" textAnchor="middle" fontSize="10" fill="#475569">
             {targetInfo.reactionFormula}
+          </text>
+
+          {/* 공정 상태 */}
+          <text x="200" y="278" textAnchor="middle" fontSize="12" fontWeight="700" fill={isProcessing ? '#2563eb' : '#475569'}>
+            {isProcessing
+              ? `${targetInfo.layerName} 제거 진행 중 · ${removalEfficiency.toFixed(1)}% 완료`
+              : `현재 제거 효율 ${removalEfficiency.toFixed(1)}%`}
           </text>
         </svg>
         
@@ -526,10 +529,28 @@ const CleaningSimulator = ({ initialTab }) => {
       return solutions.find(sol => sol.name === wetCleaningParams.solution);
     };
 
-    const timeData = Array.from({ length: 20 }, (_, i) => ({
-      time: i + 1,
-      efficiency: Math.min(98, 15 + Math.log(i + 1) * 20 + (wetCleaningParams.solution === 'BOE' ? 15 : 0))
-    }));
+    // 용액별 반응 kinetics (공정마다 고유한 반응 모델)
+    //  - SC1/SC2/SPM: 1차 반응에 가까운 지수 포화형 제거
+    //  - BOE: 일정 식각율(Å/min 유사) → 선형 증가 후 완전 제거 시 포화
+    const solutionKinetics = {
+      SC1: { emax: 95, baseRate: 0.30, refTemp: 75,  tempCoeff: 0.025, refConc: 5, model: 'firstOrder' },
+      SC2: { emax: 92, baseRate: 0.18, refTemp: 75,  tempCoeff: 0.022, refConc: 5, model: 'firstOrder' },
+      SPM: { emax: 98, baseRate: 0.45, refTemp: 130, tempCoeff: 0.028, refConc: 5, model: 'firstOrder' },
+      BOE: { emax: 99, baseRate: 7.0,  refTemp: 25,  tempCoeff: 0.010, refConc: 5, model: 'linearEtch' }
+    };
+    const kinetics = solutionKinetics[wetCleaningParams.solution] || solutionKinetics.SC1;
+    // 아레니우스 유사 온도 보정 + 농도 1차 비례
+    const tempFactor = Math.exp(kinetics.tempCoeff * (wetCleaningParams.temperature - kinetics.refTemp));
+    const concFactor = wetCleaningParams.concentration / kinetics.refConc;
+    const kEff = kinetics.baseRate * tempFactor * concFactor;
+
+    const timeData = Array.from({ length: 20 }, (_, i) => {
+      const t = i + 1;
+      const eff = kinetics.model === 'linearEtch'
+        ? Math.min(kinetics.emax, kEff * t)                       // BOE: 선형 식각
+        : kinetics.emax * (1 - Math.exp(-kEff * t));              // 1차 반응: 지수 포화
+      return { time: t, efficiency: parseFloat(eff.toFixed(1)) };
+    });
 
     const startProcessing = () => {
       // 세정 시작시 현재 조건으로 효율 계산하고 고정
