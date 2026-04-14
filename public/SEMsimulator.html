@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>SEM Training Console</title>
+<style>
+:root{--bg:#07101a;--panel:#0c1825;--line:#1b2e44;--soft:#556b88;--text:#e4f0ff;--acc:#4ecfff;--ok:#4fd494;--warn:#ffb84d;--bad:#ff6b6b;--chip:#07111e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR","Malgun Gothic",Arial,sans-serif;font-size:13px;overflow:hidden;height:100vh;display:flex;flex-direction:column}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 14px;background:linear-gradient(180deg,#0d1e30,#08131f);border-bottom:1px solid var(--line);flex-shrink:0}
+.lamp{width:9px;height:9px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px rgba(79,212,148,.8);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.bname{font-size:15px;font-weight:900;letter-spacing:.1em;color:#cce8ff}
+.bsub{font-size:10px;color:var(--soft)}
+.hud-row{display:flex;gap:5px;flex-wrap:wrap}
+.hud{padding:4px 9px;border-radius:5px;background:var(--chip);border:1px solid var(--line);font-size:11px;font-family:monospace;color:#9fd0f8}
+.hud b{color:var(--soft);margin-right:3px}
+.mbtns{display:flex;gap:5px}
+.mbtn{padding:6px 13px;border-radius:7px;border:1px solid var(--line);background:var(--chip);color:#a0c0dc;font-size:12px;font-weight:700;cursor:pointer}
+.mbtn.on{background:rgba(78,207,255,.14);border-color:var(--acc);color:#ddf5ff}
+.layout{display:grid;grid-template-columns:265px 1fr 305px;flex:1;min-height:0;min-width:960px}
+.lp,.rp{background:var(--panel);overflow-y:auto;padding:9px}
+.lp{border-right:1px solid var(--line)}.rp{border-left:1px solid var(--line)}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#1b2e44;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#2a4a66}
+.mod{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:9px;margin-bottom:7px}
+.mh{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;padding-bottom:5px;border-bottom:1px solid rgba(255,255,255,.05)}
+.mh h4{font-size:11px;font-weight:800;letter-spacing:.07em;color:#b8d8f5}
+.mh span{font-size:10px;color:var(--soft);text-transform:uppercase}
+.row{display:flex;justify-content:space-between;align-items:center;margin:4px 0}
+.row label{font-size:11px;color:#a8c4e0;font-weight:700}
+.val{font-size:11px;font-family:monospace;color:var(--acc);font-weight:800;min-width:58px;text-align:right}
+input[type=range]{width:100%;height:3px;accent-color:var(--acc);margin:2px 0 5px}
+select{width:100%;background:var(--chip);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:6px 7px;font-size:11px;margin-bottom:5px}
+button{background:var(--chip);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:6px 7px;cursor:pointer;font-size:11px;transition:.12s}
+button:hover{border-color:var(--acc);color:var(--acc)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.center{background:#060e18;display:flex;flex-direction:column}
+.vh{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;background:rgba(0,0,0,.35);border-bottom:1px solid var(--line)}
+.vt{font-size:11px;font-weight:800;letter-spacing:.1em;color:#7ab8d8}
+.vtools{display:flex;gap:4px}
+.vtb{padding:4px 8px;border-radius:5px;border:1px solid var(--line);background:var(--chip);color:#88aec4;font-size:10px;cursor:pointer}
+.cout{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;background:radial-gradient(circle at center,#09131e,#040b12);min-height:0;overflow:hidden}
+.cshell{position:relative;width:min(100%,680px);aspect-ratio:1/1;max-height:100%;border-radius:10px;overflow:hidden;border:1px solid #192e44;box-shadow:0 0 32px rgba(0,0,0,.8)}
+canvas{width:100%;height:100%;display:block}
+.cshell{cursor:crosshair}
+.ov-tl{position:absolute;top:9px;left:9px;display:flex;flex-direction:column;gap:4px;pointer-events:none}
+.ov-tr{position:absolute;top:9px;right:9px;display:flex;flex-direction:column;gap:4px;align-items:flex-end;pointer-events:none}
+.ov-bl{position:absolute;bottom:9px;left:9px;pointer-events:none}
+.ov-br{position:absolute;bottom:9px;right:9px;pointer-events:none;text-align:right}
+.tag{display:inline-block;padding:3px 7px;border-radius:4px;background:rgba(4,9,16,.85);border:1px solid rgba(80,120,160,.3);font-size:10px;font-family:monospace;color:#a8cce8;white-space:nowrap;backdrop-filter:blur(3px)}
+.tag.ok{border-color:rgba(79,212,148,.45);color:#8ee8bc}
+.tag.ng{border-color:rgba(255,107,107,.45);color:#ffaaaa}
+.cross{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:22px;height:22px;pointer-events:none}
+.cross::before,.cross::after{content:"";position:absolute;background:rgba(255,255,255,.45)}
+.cross::before{left:10px;top:0;width:2px;height:22px}
+.cross::after{left:0;top:10px;width:22px;height:2px}
+.sbar{width:80px;height:3px;background:#fff;border-radius:2px;transition:width .2s ease}
+.slbl{font-size:10px;font-family:monospace;color:#cce8ff}
+.vbot{padding:9px 11px;background:rgba(0,0,0,.2);border-top:1px solid var(--line)}
+.hint{padding:8px 11px;border-radius:8px;background:rgba(255,184,77,.06);border:1px solid rgba(255,184,77,.18);font-size:11px;line-height:1.7;color:#ffe0a8;margin-bottom:7px}
+.hint b{color:#ffcc60}
+.arow{display:flex;gap:5px;flex-wrap:wrap}
+.arow button{padding:6px 10px}
+.scard{border:1px solid rgba(78,207,255,.18);background:rgba(78,207,255,.04);border-radius:10px;padding:10px;margin-bottom:7px}
+.sch{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.sch h4{font-size:12px;font-weight:900;color:#c8ecff}
+.schip{padding:3px 8px;border-radius:99px;background:rgba(4,9,16,.8);border:1px solid rgba(78,207,255,.3);font-size:10px;color:#7ad0ff}
+.stitle{font-size:14px;font-weight:900;color:#e8f8ff;margin-bottom:5px}
+.sdesc{font-size:11px;line-height:1.75;color:#b0cce8}
+.stbox{margin-top:7px;padding:8px 10px;border-radius:8px;background:rgba(0,0,0,.22);border:1px solid rgba(255,255,255,.06)}
+.tlbl{font-size:10px;font-weight:800;color:var(--soft);letter-spacing:.05em;margin-bottom:4px}
+.ttxt{font-size:11px;line-height:1.6;color:#d8eaf8}
+.ctxt{font-size:10px;color:#ffc85a;margin-top:4px;line-height:1.5}
+.sstat{padding:7px 9px;border-radius:7px;font-size:11px;line-height:1.5;margin-top:6px}
+.srlist{margin:5px 0 0 14px;font-size:10px;line-height:1.7;color:#f0c890}
+.srlist li{margin:1px 0}
+.snav{display:flex;gap:5px;margin-top:7px}
+.snav button{flex:1}
+.abtn{width:100%;margin-top:5px;background:rgba(78,207,255,.1);border-color:rgba(78,207,255,.35);color:#b0e8ff;font-weight:800;padding:7px}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.sgrid button{height:40px;font-size:14px;font-weight:800}
+.sreads{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px}
+.sread{padding:7px;border-radius:7px;background:#07111e;border:1px solid var(--line);text-align:center}
+.sread b{display:block;font-size:10px;color:var(--soft);margin-bottom:2px}
+.sread span{font-size:13px;font-weight:900;font-family:monospace}
+.statg{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:5px}
+.sc{padding:7px;border-radius:7px;background:#07111e;border:1px solid var(--line)}
+.sc .sl{font-size:10px;color:var(--soft);margin-bottom:2px;font-weight:700}
+.sc .sv{font-size:14px;font-weight:900}
+.sv.g{color:var(--ok)}.sv.m{color:var(--warn)}.sv.b{color:var(--bad)}
+.interp{font-size:11px;line-height:1.75;color:#b8d0e8}
+.fnote{font-size:10px;color:var(--soft);margin-top:5px;line-height:1.5}
+.mout{font-size:11px;font-family:monospace;color:#c8e8ff;padding:4px 0}
+.mline{position:absolute;background:rgba(255,200,50,.75);pointer-events:none}
+.mtxt{position:absolute;padding:2px 5px;background:rgba(0,0,0,.82);border:1px solid rgba(255,200,50,.55);border-radius:3px;font-size:9px;font-family:monospace;color:#ffe060;pointer-events:none;white-space:nowrap}
+.eds-legend{position:absolute;bottom:38px;right:9px;background:rgba(4,9,16,.9);border:1px solid rgba(78,207,255,.25);border-radius:7px;padding:7px 10px;pointer-events:none;display:none}
+.eds-legend.show{display:block}
+.eds-row{display:flex;align-items:center;gap:6px;margin:2px 0;font-size:10px;font-family:monospace;color:#cce8ff}
+.eds-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.explain-toggle{width:100%;margin-top:8px;padding:5px 9px;border-radius:7px;background:rgba(255,200,100,.07);border:1px solid rgba(255,200,100,.22);color:#ffd98a;font-size:10px;font-weight:800;cursor:pointer;text-align:left;letter-spacing:.04em;display:flex;justify-content:space-between;align-items:center}
+.explain-toggle:hover{border-color:rgba(255,200,100,.5);background:rgba(255,200,100,.12)}
+.explain-arrow{transition:transform .2s}
+.explain-arrow.open{transform:rotate(180deg)}
+.explain-box{display:none;margin-top:5px;padding:9px 11px;border-radius:8px;background:rgba(255,200,80,.04);border:1px solid rgba(255,200,80,.15);font-size:10px;line-height:1.75;color:#ffe8b8}
+.explain-box.open{display:block}
+.explain-box h5{font-size:10px;font-weight:900;color:#ffc860;margin:6px 0 2px;letter-spacing:.05em}
+.explain-box p{margin-bottom:4px}
+.explain-box .kw{color:#7de8ff;font-weight:800}
+.explain-box .warn-kw{color:#ff9f7f;font-weight:800}
+.explain-box .ok-kw{color:#7aedb8;font-weight:800}
+.explain-box ul{margin:3px 0 4px 13px}
+.explain-box li{margin:1px 0}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div style="display:flex;align-items:center;gap:10px">
+    <div class="lamp"></div>
+    <div><div class="bname">SEM TRAINING CONSOLE</div><div class="bsub">식각단면 · 증착두께 · 표면 morphology · 파티클</div></div>
+  </div>
+  <div class="hud-row">
+    <div class="hud"><b>MAG</b><span id="hMag">-</span></div>
+    <div class="hud"><b>HV</b><span id="hHV">-</span></div>
+    <div class="hud"><b>WD</b><span id="hWD">-</span></div>
+    <div class="hud"><b>TILT</b><span id="hTilt">0°</span></div>
+    <div class="hud"><b>DET</b><span id="hDet">SE</span></div>
+  </div>
+  <div class="mbtns">
+    <button class="mbtn on" id="bTut">Tutorial</button>
+    <button class="mbtn" id="bFree">Free Mode</button>
+  </div>
+</header>
+<div class="layout">
+<aside class="lp">
+  <div class="mod">
+    <div class="mh"><h4>Specimen</h4><span>sample · det</span></div>
+    <select id="sample">
+      <option value="etch_v">식각 단면 — 수직 profile (cleave)</option>
+      <option value="etch_taper">식각 단면 — step 구조</option>
+      <option value="film_single">증착 단면 — 단층막</option>
+      <option value="surf_grain">표면 — grain/island (top-down)</option>
+      <option value="surf_particle">표면 — 파티클 오염 (top-down)</option>
+    </select>
+    <select id="detector">
+      <option value="SE">SE — Secondary Electron</option>
+      <option value="BSE">BSE — Backscatter Z-contrast</option>
+      <option value="EDS">EDS Map</option>
+    </select>
+  </div>
+  <div class="mod">
+    <div class="mh"><h4>Beam / Optics</h4><span>core</span></div>
+    <div class="row"><label>Magnification</label><span class="val" id="vMag">-</span></div>
+    <input type="range" id="mag" min="0" max="100" value="8">
+    <div class="row"><label>High Voltage</label><span class="val" id="vHV">-</span></div>
+    <input type="range" id="kv" min="1" max="30" value="8">
+    <div class="row"><label>Working Distance</label><span class="val" id="vWD">-</span></div>
+    <input type="range" id="wd" min="4" max="20" step="0.1" value="13.5">
+    <div class="row"><label>Focus Offset</label><span class="val" id="vFoc">-</span></div>
+    <input type="range" id="focus" min="-40" max="40" value="22">
+    <div class="row"><label>Astigmatism X</label><span class="val" id="vAsX">-</span></div>
+    <input type="range" id="astigX" min="-30" max="30" value="9">
+    <div class="row"><label>Astigmatism Y</label><span class="val" id="vAsY">-</span></div>
+    <input type="range" id="astigY" min="-30" max="30" value="-6">
+  </div>
+  <div class="mod">
+    <div class="mh"><h4>Scan Artifacts</h4><span>noise · disturb</span></div>
+    <div class="row"><label>Vibration</label><span class="val" id="vVib">-</span></div>
+    <input type="range" id="vibration" min="0" max="30" value="4">
+    <div class="row"><label>Drift</label><span class="val" id="vDri">-</span></div>
+    <input type="range" id="drift" min="0" max="30" value="3">
+    <div class="row"><label>Charging</label><span class="val" id="vChg">-</span></div>
+    <input type="range" id="charging" min="0" max="30" value="5">
+    <div class="row"><label>Noise</label><span class="val" id="vNoi">-</span></div>
+    <input type="range" id="noise" min="0" max="30" value="14">
+    <div class="row"><label>Brightness</label><span class="val" id="vBri">-</span></div>
+    <input type="range" id="brightness" min="10" max="90" value="42">
+    <div class="row"><label>Contrast</label><span class="val" id="vCon">-</span></div>
+    <input type="range" id="contrast" min="10" max="90" value="45">
+  </div>
+  <div class="mod">
+    <div class="mh"><h4>Presets</h4><span>demo</span></div>
+    <div class="g2">
+      <button data-p="normal">정상</button>
+      <button data-p="focusbad">초점불량</button>
+      <button data-p="astigbad">난시심함</button>
+      <button data-p="shake">진동</button>
+      <button data-p="chargebad">Charging</button>
+      <button data-p="hvhigh">HV 높음</button>
+      <button data-p="etch_ok">식각정상</button>
+      <button data-p="film_ok">증착정상</button>
+    </div>
+  </div>
+</aside>
+
+<main class="center">
+  <div class="vh">
+    <span class="vt">LIVE IMAGE WINDOW</span>
+    <div class="vtools"><span class="vtb">ACQUIRE</span><span class="vtb">FREEZE</span><span class="vtb">CAPTURE</span></div>
+  </div>
+  <div class="cout">
+    <div class="cshell" id="cshell">
+      <canvas id="cv" width="680" height="680"></canvas>
+      <div class="cross"></div>
+      <div class="ov-tl">
+        <span class="tag" id="ovSmp">-</span>
+        <span class="tag" id="ovStat">-</span>
+      </div>
+      <div class="ov-tr">
+        <span class="tag">DET <span id="ovDet">SE</span></span>
+        <span class="tag">STAGE <span id="ovStg">0/0/0°</span></span>
+      </div>
+      <div class="ov-bl">
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <span class="tag" id="mMag">-</span>
+          <span class="tag" id="mHV">-</span>
+          <span class="tag" id="mWD">-</span>
+          <span class="tag" id="mTilt">-</span>
+        </div>
+      </div>
+      <div class="ov-br">
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px">
+          <div class="sbar"></div>
+          <div class="slbl" id="sclbl">-</div>
+        </div>
+      </div>
+      <div class="eds-legend" id="edsLegend">
+        <div style="font-size:9px;color:#7ab8d8;font-weight:800;margin-bottom:5px;letter-spacing:.06em">EDS 원소 색상</div>
+        <div class="eds-row"><div class="eds-dot" style="background:#ff9b37"></div>금속 (Fe, Al, Cu…)</div>
+        <div class="eds-row"><div class="eds-dot" style="background:#ff4b4b"></div>고원자번호 (W, Ta…)</div>
+        <div class="eds-row"><div class="eds-dot" style="background:#37cdff"></div>저원자번호 (B, C, N…)</div>
+        <div class="eds-row"><div class="eds-dot" style="background:#5ae15a"></div>유기물 (폴리머 등)</div>
+        <div style="font-size:9px;color:#556b88;margin-top:5px">특성 X선 에너지로 원소 구분</div>
+      </div>
+      <div id="mLayer" style="position:absolute;inset:0;pointer-events:none"></div>
+    </div>
+  </div>
+  <div class="vbot">
+    <div class="hint"><b>수업 포인트</b> — <span id="hintTxt">배율을 올려가며 패턴을 찾고, 초점을 맞추고, 측정하십시오.</span></div>
+    <div class="arow">
+      <button id="bAF">Auto Focus</button>
+      <button id="bAS">Auto Stig</button>
+      <button id="bStab">Stabilize</button>
+      <button id="bReset">Reset</button>
+    </div>
+  </div>
+</main>
+
+<aside class="rp">
+  <div id="tutMod">
+    <div class="scard">
+      <div class="sch"><h4>Tutorial Mode</h4><span class="schip" id="schip">STEP 1/8</span></div>
+      <div class="stitle" id="stitle">-</div>
+      <div class="sdesc" id="sdesc">-</div>
+      <div class="stbox">
+        <div class="tlbl">해야 할 일</div>
+        <div class="ttxt" id="stask">-</div>
+        <div class="ctxt" id="scheck">-</div>
+      </div>
+      <div class="sstat" id="sstat" style="background:rgba(255,184,77,.06);border:1px solid rgba(255,184,77,.2);color:#ffe4b5">준비 중</div>
+      <ul class="srlist" id="srlist"></ul>
+      <button class="abtn" id="bApply">이 단계 힌트 적용</button>
+      <div class="snav"><button id="bPrev">◀ 이전</button><button id="bNext">다음 ▶</button></div>
+      <button id="bTutReset" style="width:100%;margin-top:5px;padding:6px;border-radius:7px;background:rgba(255,184,77,.08);border:1px solid rgba(255,184,77,.3);color:#ffe0a8;font-size:11px;cursor:pointer;">↺ 튜토리얼 처음부터</button>
+      <button class="explain-toggle" id="explainToggle">
+        <span>📖 이 단계 용어 · 원리 설명</span>
+        <span class="explain-arrow" id="explainArrow">▼</span>
+      </button>
+      <div class="explain-box" id="explainBox"></div>
+    </div>
+  </div>
+  <div id="freeMod" style="display:none">
+    <div class="mod"><div class="mh"><h4>Free Mode</h4></div>
+      <div class="interp">모든 파라미터를 자유롭게 조절하며 변화를 관찰하십시오.</div>
+    </div>
+  </div>
+  <div class="mod">
+    <div class="mh"><h4>Stage</h4><span>xy · tilt · zoom</span></div>
+    <div class="sgrid">
+      <button data-m="tilt+">T+</button><button data-m="up">↑</button><button data-m="zoom+">Z+</button>
+      <button data-m="left">←</button><button data-m="scan">SCAN</button><button data-m="right">→</button>
+      <button data-m="tilt-">T−</button><button data-m="down">↓</button><button data-m="zoom-">Z−</button>
+    </div>
+    <div class="sreads">
+      <div class="sread"><b>X</b><span id="sX">0</span></div>
+      <div class="sread"><b>Y</b><span id="sY">0</span></div>
+      <div class="sread"><b>TILT</b><span id="sTilt">0°</span></div>
+    </div>
+    <div class="g2" style="margin-top:5px">
+      <button data-t="0">Tilt 0°</button><button data-t="10">Tilt 10°</button>
+      <button data-t="20">Tilt 20°</button><button id="bHome">Home</button>
+    </div>
+  </div>
+  <div class="mod">
+    <div class="mh"><h4>Image Status</h4></div>
+    <div class="statg">
+      <div class="sc"><div class="sl">SHARPNESS</div><div class="sv" id="sSh">-</div></div>
+      <div class="sc"><div class="sl">ASTIG</div><div class="sv" id="sAs">-</div></div>
+      <div class="sc"><div class="sl">STABILITY</div><div class="sv" id="sSt">-</div></div>
+      <div class="sc"><div class="sl">CHARGING</div><div class="sv" id="sCh">-</div></div>
+    </div>
+  </div>
+  <div class="mod">
+    <div class="mh"><h4>Measurement</h4><span>drag to measure</span></div>
+    <div class="mout" id="mout">이미지를 클릭하고 드래그하여 거리를 측정합니다.</div>
+  </div>
+  <div class="mod">
+    <div class="mh"><h4>Interpretation</h4></div>
+    <div class="interp" id="interp">-</div>
+    <div class="fnote" id="fnote"></div>
+  </div>
+</aside>
+</div>
+
+<script>
+var CV = document.getElementById('cv');
+var CTX = CV.getContext('2d');
+var W = CV.width, H = CV.height;
+function $(id){ return document.getElementById(id); }
+
+var els = {
+  sample:$('sample'), detector:$('detector'),
+  mag:$('mag'), kv:$('kv'), wd:$('wd'),
+  focus:$('focus'), astigX:$('astigX'), astigY:$('astigY'),
+  vibration:$('vibration'), drift:$('drift'), charging:$('charging'),
+  noise:$('noise'), brightness:$('brightness'), contrast:$('contrast')
+};
+var stage = {x:0, y:0, tilt:0};
+var scan = true, mode = 'tutorial', step = 0;
+var seen = new Array(10).fill(false);
+var mpts = [];
+var explainOpen = false;
+
+function cl(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function fi(v){ return Math.floor(v); }  /* integer helper - replaces |0 */
+function rn(s){ var x = Math.sin(s+1)*73856; return x - Math.floor(x); }
+
+function magV(raw){
+  var t=[100,200,500,1000,2000,5000,10000,20000,50000,100000,200000,500000];
+  return t[Math.round((raw/100)*(t.length-1))];
+}
+function magLabel(mag){
+  var umPerPx = 25400/mag/W;
+  /* nice round numbers in µm */
+  var nice=[0.001,0.002,0.005,0.01,0.02,0.05,0.1,0.2,0.5,1,2,5,10,20,50,100,200,500,1000,2000,5000];
+  /* pick the nice number whose bar width lands closest to 80 px */
+  var best=nice[0], bestPx=nice[0]/umPerPx;
+  for(var i=1;i<nice.length;i++){
+    var px=nice[i]/umPerPx;
+    if(px>=30 && px<=160){
+      if(Math.abs(px-80)<Math.abs(bestPx-80)){ best=nice[i]; bestPx=px; }
+    }
+  }
+  /* fallback: if nothing landed in range, pick closest anyway */
+  if(bestPx<30||bestPx>160){
+    for(var j=0;j<nice.length;j++){
+      var px2=nice[j]/umPerPx;
+      if(Math.abs(px2-80)<Math.abs(bestPx-80)){ best=nice[j]; bestPx=px2; }
+    }
+  }
+  var sbar=document.querySelector('.sbar');
+  if(sbar) sbar.style.width=cl(bestPx,20,180)+'px';
+  if(best>=1000) return (best/1000)+' mm';
+  if(best>=1) return best+' µm';
+  return (best*1000)+' nm';
+}
+function rgb(r,g,b){ return 'rgb('+fi(r)+','+fi(g)+','+fi(b)+')'; }
+function rgba(r,g,b,a){ return 'rgba('+fi(r)+','+fi(g)+','+fi(b)+','+a+')'; }
+
+function tone(v){
+  var kv = +els.kv.value, wd2 = +els.wd.value;
+  var br = (+els.brightness.value - 50)*2.6;
+  var co = (+els.contrast.value - 50)/50;
+  var det = els.detector.value;
+  var hvLoss = det==='BSE' ? 0 : cl((kv-5)*0.022, 0, 0.55);
+  var wdLoss = cl(Math.abs(wd2-8.0)*0.04, 0, 0.5);
+  return cl((v-128)*(1+co)*(1-hvLoss)*(1-wdLoss)+128+br, 0, 255);
+}
+function magBlur(){
+  var mag = magV(+els.mag.value);
+  if(mag<=100)   return 28;
+  if(mag<=200)   return 22;
+  if(mag<=500)   return 16;
+  if(mag<=1000)  return 11;
+  if(mag<=2000)  return 7;
+  if(mag<=5000)  return 3.5;
+  if(mag<=10000) return 1.5;
+  if(mag<=20000) return 0.5;
+  return 0;
+}
+function wdBlur(){
+  var diff = Math.abs(+els.wd.value - 8.0);
+  return cl(diff*diff*0.72, 0, 28);
+}
+function couponBounds(){
+  var mag = magV(+els.mag.value);
+  var umPerPx = 25400/mag/W;
+  var dxPx = (stage.x*50)/umPerPx/W*W;
+  var dyPx = (stage.y*50)/umPerPx/H*H;
+  var cf = cl(5/(25400/mag), 0, 3);
+  return { cX: W/2-cf*W/2-dxPx, cY: H/2-cf*H*0.85/2-dyPx, cW: cf*W, cH: cf*H*0.85 };
+}
+
+/* ── DRAW OVERVIEW ── */
+function drawOverview(){
+  var mag = magV(+els.mag.value), det = els.detector.value, kv = +els.kv.value, s = els.sample.value;
+  CTX.fillStyle='#03050a'; CTX.fillRect(0,0,W,H);
+  for(var i=0;i<400;i++){
+    var px=rn(i*3.1)*W, py=rn(i*5.7)*H, pv=5+rn(i*2.2)*8;
+    CTX.fillStyle=rgba(pv,pv,pv,0.08); CTX.fillRect(px,py,2,2);
+  }
+  var cb=couponBounds(), cX=cb.cX, cY=cb.cY, cW=cb.cW, cH=cb.cH;
+  if(cX+cW<0||cX>W||cY+cH<0||cY>H){
+    CTX.fillStyle='rgba(255,255,255,.12)'; CTX.font='bold 13px monospace';
+    CTX.fillText('← Stage를 이동하여 쿠폰을 찾으십시오 →', W/2-160, H/2);
+    return;
+  }
+  if(mag>=1500){
+    CTX.fillStyle='rgba(78,207,255,.55)'; CTX.font='bold 11px monospace';
+    CTX.fillText(s.indexOf('surf')===0 ? '▲ 배율을 더 올리면 표면 구조가 확대됩니다' : '▲ cleave 단면 시료: 배율을 더 올리면 단면 구조가 확대됩니다', W/2-210, H-18);
+  }
+  CTX.fillStyle='rgba(0,0,0,.6)'; CTX.fillRect(cX+5, cY+5, cW, cH);
+  var sv = tone(det==='BSE' ? 92 : 75);
+  var sv14 = cl(sv+14,0,255), svm = cl(sv-16,0,255);
+  var cG = CTX.createLinearGradient(cX,cY,cX+cW,cY+cH);
+  cG.addColorStop(0, rgb(sv14,sv14,sv14));
+  cG.addColorStop(0.5, rgb(sv,sv,sv));
+  cG.addColorStop(1, rgb(svm,svm,svm));
+  CTX.fillStyle=cG; CTX.fillRect(cX,cY,cW,cH);
+  if(det==='SE'){
+    CTX.strokeStyle='rgba(255,255,255,'+cl(0.3+(kv-5)*0.015,0.1,0.62)+')';
+    CTX.lineWidth=2; CTX.strokeRect(cX,cY,cW,cH);
+  }
+  if(mag>=200){
+    var alpha = cl((mag-200)/800, 0.02, 0.35);
+    CTX.globalAlpha = alpha;
+    if(s.indexOf('etch')===0){
+      var sw = cl(cW/cl(mag/200,3,20), 8, cW/3);
+      for(var x2=cX+sw*0.6; x2<cX+cW; x2+=sw*2.2){
+        CTX.fillStyle='rgba(0,0,0,1)'; CTX.fillRect(x2, cY+cH*0.1, sw*0.85, cH*0.8);
+      }
+    } else if(s.indexOf('film')===0){
+      for(var i2=0;i2<60;i2++){
+        var fpx=cX+rn(i2*4)*cW, fpy=cY+rn(i2*6)*cH, fr=2+rn(i2*2)*4, fv=40+rn(i2*3)*30;
+        CTX.fillStyle=rgba(fv,fv,fv,0.3); CTX.beginPath(); CTX.arc(fpx,fpy,fr,0,Math.PI*2); CTX.fill();
+      }
+    } else {
+      for(var ys=cY; ys<cY+cH; ys+=8) for(var xs=cX; xs<cX+cW; xs+=8){
+        var sv2=rn(xs*0.1+ys*0.07)*25;
+        CTX.fillStyle=rgba(sv2,sv2,sv2,0.5); CTX.fillRect(xs,ys,8,8);
+      }
+    }
+    CTX.globalAlpha=1;
+  }
+  for(var i3=0;i3<200;i3++){
+    var qx=cX+rn(i3*3.1)*cW, qy=cY+rn(i3*5.3)*cH, qv=20+rn(i3*2)*18;
+    CTX.fillStyle=rgba(qv,qv,qv,0.06); CTX.fillRect(qx,qy,1.5,1.5);
+  }
+}
+
+/* ── DRAW ETCH ── */
+function drawEtch(taper){
+  var mag=magV(+els.mag.value), det=els.detector.value, kv=+els.kv.value;
+  var tiltDeg=stage.tilt;
+  var nmPerPx=25400000/mag/W;
+
+  /* ── STEP (단계) 구조: taper mode ── */
+  if(taper){
+    /* Si-on-Si step structure — 같은 물질, 마스크 제거된 상태 */
+    CTX.fillStyle='#04080f'; CTX.fillRect(0,0,W,H);
+    var stepNm=300;
+    var stepPx=stepNm/nmPerPx;
+    var oyPx2=(stage.y*50*1000)/nmPerPx, oxPx2=(stage.x*50*1000)/nmPerPx;
+    var stepTopY=H/2-stepPx/2-oyPx2*0.35;
+    var floorY2=stepTopY+stepPx;
+    var stepX=W/2-oxPx2*0.35;
+    var eSharp2=cl((Math.log10(mag)-2.7)*1.4,0,1);
+    var hvEB=cl(1+(kv-5)*0.038,0.55,2.2);
+    /* Si material tone — same everywhere */
+    var siV=det==='BSE'?88:68, siHV=det==='BSE'?(kv-5)*1.2:-(kv-5)*0.8;
+    var siBase=cl(siV+siHV,20,200);
+    var siB=tone(siBase);
+    /* single uniform fill — no gradient, one color everywhere */
+    CTX.fillStyle=rgb(siB,siB,siB); CTX.fillRect(0,stepTopY,W,H-stepTopY);
+    /* carve out vacuum (dark) on right side above floor */
+    CTX.fillStyle='#04080f'; CTX.fillRect(stepX,stepTopY,W-stepX,stepPx);
+    /* sidewall edge brightening — only at the cliff face */
+    if(det!=='EDS' && eSharp2>0.08){
+      var ew2=cl(6/nmPerPx,3,18);
+      var swBr=cl(eSharp2*hvEB*0.65,0,0.85);
+      /* cliff face: thin bright line at stepX going down the wall */
+      var gSW=CTX.createLinearGradient(stepX-1,0,stepX+ew2,0);
+      gSW.addColorStop(0,'rgba(255,255,255,'+cl(swBr*0.3,0,0.4)+')');
+      gSW.addColorStop(0.15,'rgba(255,255,255,'+swBr+')');
+      gSW.addColorStop(1,'rgba(0,0,0,0)');
+      CTX.fillStyle=gSW; CTX.fillRect(stepX-1,stepTopY,ew2+1,stepPx);
+      /* top edge — horizontal bright line where step top meets vacuum */
+      CTX.fillStyle='rgba(255,255,255,'+cl(swBr*0.5,0,0.6)+')';
+      CTX.fillRect(stepX-ew2*0.5,stepTopY,ew2*1.5,cl(2/nmPerPx,1,3));
+      /* bottom corner — where wall meets floor */
+      if(eSharp2>0.3){
+        var cg2=cl(eSharp2*hvEB*0.4,0,0.7);
+        var rg3=CTX.createRadialGradient(stepX,floorY2,0,stepX,floorY2,ew2*2);
+        rg3.addColorStop(0,'rgba(255,255,255,'+cl(cg2*0.5,0,0.5)+')'); rg3.addColorStop(1,'rgba(255,255,255,0)');
+        CTX.fillStyle=rg3; CTX.fillRect(stepX-ew2*0.5,floorY2-ew2*0.5,ew2*3,ew2*2);
+      }
+    }
+    /* tilt shadow on floor */
+    if(tiltDeg>2){
+      var shA=cl(tiltDeg*0.02,0,0.45);
+      var shD=cl(tiltDeg*3/nmPerPx,0,stepPx*0.6);
+      var shG3=CTX.createLinearGradient(stepX,0,stepX+shD,0);
+      shG3.addColorStop(0,'rgba(0,0,0,'+shA+')'); shG3.addColorStop(1,'rgba(0,0,0,0)');
+      CTX.fillStyle=shG3; CTX.fillRect(stepX,floorY2,shD,H-floorY2);
+    }
+    /* EDS — same element everywhere (Si) */
+    if(det==='EDS'){
+      CTX.globalAlpha=0.4;
+      CTX.fillStyle='rgba(30,85,210,.5)'; CTX.fillRect(0,stepTopY,W,H-stepTopY);
+      CTX.globalAlpha=1;
+    }
+    /* grain noise */
+    for(var ig2=0;ig2<600;ig2++){
+      var gx2=rn(ig2*3.1)*W, gy2=stepTopY+rn(ig2*7.3)*(H-stepTopY), gv2=22+rn(ig2*4.5)*30;
+      CTX.fillStyle=rgba(gv2,gv2,gv2,0.033); CTX.fillRect(gx2,gy2,1.3,1.3);
+    }
+    /* dark above step */
+    CTX.fillStyle='#04080f'; CTX.fillRect(0,0,W,Math.max(0,stepTopY));
+    return;
+  }
+
+  /* ── PERIODIC TRENCH 구조: etch_v mode ── */
+  var period=500/nmPerPx, trenchW=200/nmPerPx, pillarW=period-trenchW, depth=1500/nmPerPx;
+  var oyPx=(stage.y*50*1000)/nmPerPx;
+  CTX.fillStyle='#04080f'; CTX.fillRect(0,0,W,H);
+  var pillarTop=H/2-depth/2-oyPx*0.35, floorY=pillarTop+depth;
+  var subV=det==='BSE'?88:68, subHV=det==='BSE'?(kv-5)*1.2:-(kv-5)*0.8;
+  var sv=cl(subV+subHV,20,200);
+  var sva=tone(sv+10), svb=tone(sv), svc=tone(sv-22);
+  var sG=CTX.createLinearGradient(0,pillarTop,0,H);
+  sG.addColorStop(0,   rgb(sva,sva,sva));
+  sG.addColorStop(0.35,rgb(svb,svb,svb));
+  sG.addColorStop(1,   rgb(svc,svc,svc));
+  CTX.fillStyle=sG; CTX.fillRect(0,pillarTop,W,H-pillarTop);
+  var stageOffsetX=(stage.x*50*1000/nmPerPx)%period;
+  var centerX=W/2-stageOffsetX;
+  var startX=centerX-Math.ceil(W/period+2)*period;
+  for(var x0=startX; x0<W+period*2; x0+=period){
+    var tL=x0+pillarW/2, tR=tL+trenchW;
+    var sc=mag>=50000?2.2:mag>=20000?0.8:0;
+    CTX.fillStyle='#030508';
+    {
+      CTX.beginPath(); CTX.moveTo(tL,pillarTop);
+      for(var i=0;i<=20;i++){ var sy=pillarTop+(depth/20)*i; CTX.lineTo(tL-Math.sin(i*Math.PI*0.95)*sc,sy); }
+      CTX.lineTo(tL,floorY); CTX.lineTo(tR,floorY);
+      for(var j=20;j>=0;j--){ var sy2=pillarTop+(depth/20)*j; CTX.lineTo(tR+Math.sin(j*Math.PI*0.95)*sc,sy2); }
+      CTX.closePath(); CTX.fill();
+    }
+    var eSharp=cl((Math.log10(mag)-2.7)*1.4,0,1);
+    if(det!=='EDS' && eSharp>0.05){
+      var ew=cl(trenchW*0.24,4,18), tb=tiltDeg*0.022;
+      var hvEdgeBoost=cl(1+(kv-5)*0.038,0.55,2.2);
+      var lB=cl((0.88-tb)*eSharp,0,1), rB=cl((0.88+tb)*eSharp,0,1);
+      var gL=CTX.createLinearGradient(tL,0,tL+ew*1.8,0);
+      gL.addColorStop(0,'rgba(255,255,255,'+cl(lB*hvEdgeBoost*0.62,0,0.95)+')');
+      gL.addColorStop(0.45,'rgba(210,220,235,'+cl(0.28*hvEdgeBoost*eSharp,0,0.5)+')');
+      gL.addColorStop(1,'rgba(0,0,0,0)');
+      CTX.fillStyle=gL; CTX.fillRect(tL,pillarTop,ew*1.8,depth);
+      var gR=CTX.createLinearGradient(tR,0,tR-ew*1.8,0);
+      gR.addColorStop(0,'rgba(255,255,255,'+cl(rB*hvEdgeBoost*0.62,0,0.95)+')');
+      gR.addColorStop(0.45,'rgba(210,220,235,'+cl(0.28*hvEdgeBoost*eSharp,0,0.5)+')');
+      gR.addColorStop(1,'rgba(0,0,0,0)');
+      CTX.fillStyle=gR; CTX.fillRect(tR-ew*1.8,pillarTop,ew*1.8,depth);
+      if(eSharp>0.3){
+        var cg=cl(eSharp*hvEdgeBoost*0.5,0,0.85);
+        var cgL=CTX.createRadialGradient(tL,pillarTop,0,tL,pillarTop,ew*2.2);
+        cgL.addColorStop(0,'rgba(255,255,255,'+cg+')'); cgL.addColorStop(1,'rgba(255,255,255,0)');
+        CTX.fillStyle=cgL; CTX.fillRect(tL-ew,pillarTop-ew*0.5,ew*2.5,ew*2.5);
+        var cgR=CTX.createRadialGradient(tR,pillarTop,0,tR,pillarTop,ew*2.2);
+        cgR.addColorStop(0,'rgba(255,255,255,'+cg+')'); cgR.addColorStop(1,'rgba(255,255,255,0)');
+        CTX.fillStyle=cgR; CTX.fillRect(tR-ew,pillarTop-ew*0.5,ew*2.5,ew*2.5);
+      }
+    }
+    if(tiltDeg>2){
+      var shW=cl(tiltDeg*2.2,0,trenchW*0.65);
+      var shG=CTX.createLinearGradient(tL,0,tL+shW,0);
+      shG.addColorStop(0,'rgba(0,0,0,'+cl(tiltDeg*0.022,0,0.55)+')'); shG.addColorStop(1,'rgba(0,0,0,0)');
+      CTX.fillStyle=shG; CTX.fillRect(tL,pillarTop,shW,depth);
+    } else if(tiltDeg<-2){
+      var shW2=cl(-tiltDeg*2.2,0,trenchW*0.65);
+      var shG2=CTX.createLinearGradient(tR,0,tR-shW2,0);
+      shG2.addColorStop(0,'rgba(0,0,0,'+cl(-tiltDeg*0.022,0,0.55)+')'); shG2.addColorStop(1,'rgba(0,0,0,0)');
+      CTX.fillStyle=shG2; CTX.fillRect(tR-shW2,pillarTop,shW2,depth);
+    }
+    var fda=cl(svb-18,0,255);
+    var fG=CTX.createLinearGradient(0,floorY-16,0,floorY+4);
+    fG.addColorStop(0,'rgba(0,0,0,0)');
+    fG.addColorStop(0.6, rgba(fda,fda,fda,0.55));
+    fG.addColorStop(1,rgba(fda,fda,fda,0.3));
+    CTX.fillStyle = det==='EDS' ? 'rgba(160,120,30,.18)' : fG;
+    CTX.fillRect(tL+1,floorY-16,trenchW-2,22);
+  }
+  CTX.fillStyle='#04080f'; CTX.fillRect(0,0,W,Math.max(0,pillarTop));
+  if(floorY<H){ CTX.fillStyle=rgb(svb,svb,svb); CTX.fillRect(0,floorY,W,H-floorY); }
+  if(det==='EDS'){ CTX.globalAlpha=0.4; CTX.fillStyle='rgba(30,90,210,.5)'; CTX.fillRect(0,pillarTop,W,H-pillarTop); CTX.globalAlpha=1; }
+  for(var ig=0;ig<500;ig++){
+    var gx=rn(ig*3.1)*W, gy=pillarTop+rn(ig*7.3)*(H-pillarTop), gv=22+rn(ig*4.5)*30;
+    CTX.fillStyle=rgba(gv,gv,gv,0.033); CTX.fillRect(gx,gy,1.3,1.3);
+  }
+}
+
+/* ── DRAW FILM ── */
+function drawFilm(multi){
+  var mag=magV(+els.mag.value), det=els.detector.value, kv=+els.kv.value;
+  CTX.fillStyle='#04080f'; CTX.fillRect(0,0,W,H);
+  /* [name, thickness_nm, SE_bright, BSE_bright, EDS_color, Z] */
+  var layers = multi ? [
+    ['Pt cap',100,218,240,'rgba(190,80,230,.6)',78],
+    ['W',      40,205,228,'rgba(60,210,60,.6)', 74],
+    ['TiN',    30,158,172,'rgba(230,165,30,.6)',22],
+    ['SiO2',  500,112,82, 'rgba(30,165,230,.55)',10],
+    ['Si',  10000,65, 96, 'rgba(30,85,210,.45)', 14]
+  ] : [
+    ['Pt cap',100,215,230,'rgba(190,80,230,.5)',78],
+    ['SiO2',  500,108,80, 'rgba(30,165,230,.55)',10],
+    ['Si',  10000,62, 94, 'rgba(30,85,210,.45)', 14]
+  ];
+  var nmPerPx=25400000/mag/W;
+  var oyPx=(stage.y*50*1000)/nmPerPx;
+  /* calculate total visible film thickness to center vertically */
+  var totalFilmPx=0;
+  layers.forEach(function(l){ totalFilmPx+=l[1]/nmPerPx; });
+  var visibleH=Math.min(totalFilmPx, H*0.9);
+  var cy=H/2-visibleH/2-oyPx*0.35;
+  var lSharp=cl((Math.log10(mag)-3.3)*1.6, 0, 1);
+  layers.forEach(function(layer, li){
+    var nm=layer[0],thNm=layer[1],bSE=layer[2],bBSE=layer[3],ec=layer[4],Z=layer[5];
+    var ph=thNm/nmPerPx;
+    if(li===layers.length-1) ph=Math.max(ph, H-cy+10);
+    if(cy+ph<0){ cy+=ph; return; }
+    if(cy>H) return;
+    var bv;
+    if(det==='BSE'){ var bseBase=cl(28+(Z/82)*210,20,248); bv=cl(bseBase+(kv-5)*1.5,20,252); }
+    else bv=bSE;
+    var tv=tone(cl(bv,0,255));
+    var tva=cl(tv+14,0,255), tvb=cl(tv-12,0,255);
+    var gr=CTX.createLinearGradient(0,cy,0,cy+ph);
+    gr.addColorStop(0, rgb(tva,tva,tva));
+    gr.addColorStop(1, rgb(tvb,tvb,tvb));
+    CTX.fillStyle = det==='EDS' ? ec : gr;
+    CTX.fillRect(0,cy,W,ph+1);
+    if(det==='SE' && li>0 && lSharp>0.2){
+      var hvE=cl(1+(kv-5)*0.035,0.6,2.0);
+      var ia=cl(0.6*lSharp*hvE-0.005, 0.05, 0.82);
+      var ig2=CTX.createLinearGradient(0,cy-4,0,cy+5);
+      ig2.addColorStop(0,'rgba(255,255,255,0)'); ig2.addColorStop(0.5,'rgba(255,255,255,'+ia+')'); ig2.addColorStop(1,'rgba(255,255,255,0)');
+      CTX.fillStyle=ig2; CTX.fillRect(0,cy-3,W,8);
+    }
+    if(det==='BSE' && li>0 && lSharp>0.15){
+      var prevZ=layers[li-1][5];
+      var ba=cl(Math.abs(Z-prevZ)/82*1.3*lSharp, 0, 0.75);
+      var bg=CTX.createLinearGradient(0,cy-3,0,cy+3);
+      bg.addColorStop(0,'rgba(255,255,255,0)'); bg.addColorStop(0.5,'rgba(255,255,255,'+ba+')'); bg.addColorStop(1,'rgba(255,255,255,0)');
+      CTX.fillStyle=bg; CTX.fillRect(0,cy-2,W,5);
+    }
+    if(ph>11 && Math.abs(+els.focus.value)<5 && lSharp>0.5){
+      CTX.fillStyle='rgba(255,255,255,.72)'; CTX.font='bold 9px monospace';
+      CTX.fillText(nm+'  '+(thNm>=1000?(thNm/1000).toFixed(2)+'µm':thNm+'nm'), 8, cl(cy+ph/2+4, cy+10, cy+ph-2));
+      CTX.strokeStyle='rgba(78,207,255,.25)'; CTX.lineWidth=1; CTX.setLineDash([3,4]);
+      CTX.beginPath(); CTX.moveTo(0,cy); CTX.lineTo(W,cy); CTX.stroke(); CTX.setLineDash([]);
+    }
+    for(var ig3=0;ig3<cl(160+Math.round(ph),160,500);ig3++){
+      var gx2=rn(ig3*3+li*80)*W, gy2=cy+rn(ig3*7+li*50)*cl(ph,1,H), gv2=38+rn(ig3*4)*52;
+      CTX.fillStyle=rgba(gv2,gv2,gv2,0.03); CTX.fillRect(gx2,gy2,1.3,1.3);
+    }
+    cy+=ph;
+  });
+}
+
+/* ── DRAW SURF ── */
+function drawSurf(type){
+  var mag=magV(+els.mag.value), det=els.detector.value, kv=+els.kv.value;
+  var tiltR=stage.tilt*Math.PI/180;
+  var umPerPx=25400/mag/W;
+  var ox=(stage.x*50)/umPerPx, oy=(stage.y*50)/umPerPx;
+  var zoom=cl(mag/5000, 0.35, 18);
+  var relief=Math.cos(tiltR)*0.55+Math.sin(tiltR)*1.55;
+  var hvSurfSens=cl(1-(kv-5)*0.035, 0.25, 1.2);
+  CTX.fillStyle='#040809'; CTX.fillRect(0,0,W,H);
+  if(type==='surf_smooth'){
+    for(var y=0;y<H;y+=6) for(var x=0;x<W;x+=6){
+      var nx=(x+ox*0.1)/(68/Math.sqrt(zoom)), ny=(y+oy*0.1)/(72/Math.sqrt(zoom));
+      var h=Math.sin(nx)*6+Math.cos(ny*1.1)*5+Math.sin((nx+ny)*0.55)*4+Math.sin(nx*2.2)*2+Math.cos(ny*2.5)*1.8;
+      for(var k=0;k<8;k++) h+=18*Math.exp(-((x-180-rn(k*5.1)*500)*(x-180-rn(k*5.1)*500)+(y-180-rn(k*9.3)*440)*(y-180-rn(k*9.3)*440))/(7000+rn(k*3)*12000));
+      var v=det==='BSE'?98+h*1.1:85+h*3.2*relief*hvSurfSens;
+      var tv=tone(v);
+      CTX.fillStyle = det==='EDS' ? rgb(tone(v*0.4), tone(v*0.8), tv) : rgb(tv,tv,tv);
+      CTX.fillRect(x,y,6.2,6.2);
+    }
+  } else if(type==='surf_grain'){
+    var gd=[];
+    for(var i2=0;i2<75;i2++) gd.push({px:(rn(i2*5.1)*W+ox*0.1+W*3)%W, py:(rn(i2*8.7)*H+oy*0.1+H*3)%H, rx:11+rn(i2*11)*44/Math.sqrt(zoom), ry:10+rn(i2*13)*40/Math.sqrt(zoom), h:20+rn(i2*2)*48});
+    for(var y2=0;y2<H;y2+=5) for(var x2=0;x2<W;x2+=5){
+      var h2=0, d1=1e9, d2_=1e9;
+      gd.forEach(function(g){ var dx=x2-g.px, dy=y2-g.py; var d=Math.sqrt((dx*dx)/(g.rx*g.rx*8)+(dy*dy)/(g.ry*g.ry*8)); h2+=g.h*Math.exp(-d); if(d<d1){d2_=d1;d1=d;}else if(d<d2_)d2_=d; });
+      var ef=cl(1-Math.abs(d1-d2_)*4, 0, 1);
+      var hvE2=cl(1+(kv-5)*0.04, 0.7, 1.9);
+      var v2=det==='BSE'?62+h2*0.82:33+h2*relief*hvSurfSens+ef*55*hvE2;
+      var tv2=tone(v2);
+      CTX.fillStyle = det==='EDS' ? rgb(tone(v2*0.45),tone(v2*0.85),tv2) : rgb(tv2,tv2,tv2);
+      CTX.fillRect(x2,y2,5.2,5.2);
+    }
+  } else {
+    /* rough textured surface background — like real SEM surface morphology */
+    var gd2=[];
+    for(var ig=0;ig<120;ig++) gd2.push({px:(rn(ig*4.3)*W+ox*0.08+W*3)%W, py:(rn(ig*7.9)*H+oy*0.08+H*3)%H, rx:6+rn(ig*9)*28/Math.sqrt(zoom), ry:5+rn(ig*12)*26/Math.sqrt(zoom), h:8+rn(ig*2.5)*35});
+    for(var y3=0;y3<H;y3+=4) for(var x3=0;x3<W;x3+=4){
+      var nx2=(x3+ox*0.08)/(48/Math.sqrt(zoom)), ny2=(y3+oy*0.08)/(52/Math.sqrt(zoom));
+      var h3=Math.sin(nx2*1.3)*5+Math.cos(ny2*1.1)*4+Math.sin((nx2+ny2)*0.7)*3.5+Math.sin(nx2*2.8)*2+Math.cos(ny2*3.1)*1.8+Math.sin((nx2-ny2)*1.9)*2.2;
+      var hg=0, dg1=1e9, dg2=1e9;
+      gd2.forEach(function(g){ var dx=x3-g.px, dy=y3-g.py; var d=Math.sqrt((dx*dx)/(g.rx*g.rx*6)+(dy*dy)/(g.ry*g.ry*6)); hg+=g.h*Math.exp(-d); if(d<dg1){dg2=dg1;dg1=d;}else if(d<dg2)dg2=d; });
+      var ef3=cl(1-Math.abs(dg1-dg2)*3.5,0,1);
+      var hvE4=cl(1+(kv-5)*0.035,0.7,1.8);
+      var v3=det==='BSE'?60+hg*0.6+h3*0.4:30+hg*relief*hvSurfSens*0.7+h3*3.5*relief*hvSurfSens+ef3*35*hvE4;
+      var tv3=tone(cl(v3,10,245));
+      CTX.fillStyle = det==='EDS' ? rgb(tone(v3*0.4),tone(v3*0.75),tv3) : rgb(tv3,tv3,tv3);
+      CTX.fillRect(x3,y3,4.2,4.2);
+    }
+    var pts=[
+      {x:140,y:210,r:12,se:228,Z:26,t:'metal'},
+      {x:395,y:155,r:7, se:198,Z:74,t:'high-Z'},
+      {x:550,y:340,r:18,se:222,Z:6, t:'organic'},
+      {x:255,y:490,r:9, se:218,Z:26,t:'metal'},
+      {x:480,y:520,r:6, se:202,Z:5, t:'low-Z'},
+      {x:325,y:330,r:4, se:212,Z:14,t:'metal'}
+    ];
+    pts.forEach(function(p,pi){
+      var px2=(p.x+ox*0.1+W*3)%W, py2=(p.y+oy*0.1+H*3)%H;
+      var pr=p.r*(1+rn(pi*3)*0.3)*Math.sqrt(zoom)*0.55;
+      var hvE3=cl(1+(kv-5)*0.04, 0.7, 2.0);
+      if(det==='BSE'){
+        var bv=cl(28+(p.Z/82)*210+(kv-5)*2, 20, 252);
+        var bv1=cl(bv-15,0,255), bv2=cl(bv-35,0,255);
+        var pg=CTX.createRadialGradient(px2,py2,0,px2,py2,pr);
+        pg.addColorStop(0,   rgb(bv,bv,bv));
+        pg.addColorStop(0.7, rgb(bv1,bv1,bv1));
+        pg.addColorStop(1,   rgba(bv2,bv2,bv2,0.55));
+        CTX.fillStyle=pg; CTX.beginPath(); CTX.arc(px2,py2,pr,0,Math.PI*2); CTX.fill();
+      } else if(det==='SE'){
+        var sc2=tone(p.se-18), se2=cl(tone(p.se)+50*hvE3,0,255), se3=cl(se2-25,0,255);
+        var pg2=CTX.createRadialGradient(px2-pr*0.3,py2-pr*0.3,0,px2,py2,pr);
+        pg2.addColorStop(0,    rgb(sc2,sc2,sc2));
+        pg2.addColorStop(0.55, rgb(sc2,sc2,sc2));
+        pg2.addColorStop(0.82, rgb(se2,se2,se2));
+        pg2.addColorStop(1,    rgba(se3,se3,se3,0.5));
+        CTX.fillStyle=pg2; CTX.beginPath(); CTX.arc(px2,py2,pr,0,Math.PI*2); CTX.fill();
+      } else {
+        var ecmap={metal:'rgba(255,155,55,.75)','high-Z':'rgba(255,75,75,.75)','low-Z':'rgba(55,205,255,.75)',organic:'rgba(90,225,90,.75)'};
+        CTX.fillStyle=ecmap[p.t]||'rgba(200,200,55,.75)'; CTX.beginPath(); CTX.arc(px2,py2,pr,0,Math.PI*2); CTX.fill();
+      }
+    });
+  }
+}
+
+/* ── FX ── */
+function fxTilt(){
+  var t=stage.tilt;
+  if(Math.abs(t)<1) return;
+  var rad=t*Math.PI/180;
+  var cosT=Math.cos(rad);
+  var compressY=cl(cosT,0.5,1);
+  /* copy current image, clear, redraw with Y compression + perspective */
+  var tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
+  tmp.getContext('2d').drawImage(CV,0,0);
+  CTX.clearRect(0,0,W,H);
+  /* draw compressed: top perspective wider, bottom narrower (or vice versa) */
+  var newH=H*compressY;
+  var yOff=(H-newH)/2;
+  var persp=Math.sin(rad)*0.15;
+  var slices=40;
+  for(var i=0;i<slices;i++){
+    var srcY=Math.round(i*H/slices), srcH2=Math.ceil(H/slices)+1;
+    var frac=i/slices;
+    var dstY=yOff+frac*newH;
+    var dstH2=newH/slices+1;
+    var xShift=(frac-0.5)*persp*W;
+    var sliceW=W*(1+persp*(1-2*frac));
+    var sliceX=(W-sliceW)/2+xShift*0.3;
+    CTX.drawImage(tmp,0,srcY,W,srcH2,sliceX,dstY,sliceW,dstH2);
+  }
+  /* foreshortening shading — top darker when tilted forward */
+  if(t>3){
+    var shG=CTX.createLinearGradient(0,yOff,0,yOff+newH);
+    shG.addColorStop(0,'rgba(0,0,0,'+cl(t*0.008,0,0.25)+')');
+    shG.addColorStop(0.5,'rgba(0,0,0,0)');
+    shG.addColorStop(1,'rgba(255,255,255,'+cl(t*0.004,0,0.1)+')');
+    CTX.fillStyle=shG; CTX.fillRect(0,yOff,W,newH);
+  } else if(t<-3){
+    var shG2=CTX.createLinearGradient(0,yOff,0,yOff+newH);
+    shG2.addColorStop(0,'rgba(255,255,255,'+cl(-t*0.004,0,0.1)+')');
+    shG2.addColorStop(0.5,'rgba(0,0,0,0)');
+    shG2.addColorStop(1,'rgba(0,0,0,'+cl(-t*0.008,0,0.25)+')');
+    CTX.fillStyle=shG2; CTX.fillRect(0,yOff,W,newH);
+  }
+}
+function fxBlur(){
+  var f=Math.abs(+els.focus.value), ax=+els.astigX.value, ay=+els.astigY.value;
+  var baseBlur=f+wdBlur()+magBlur();
+  if(baseBlur>1){
+    var passes=cl(Math.round(baseBlur/6)+1,1,7);
+    for(var p=0;p<passes;p++){
+      CTX.globalAlpha=cl(0.05+baseBlur*0.005,0.02,0.22);
+      CTX.drawImage(CV,0,0); CTX.drawImage(CV,-baseBlur*0.06,-baseBlur*0.06);
+      CTX.globalAlpha=1;
+    }
+  }
+  [ax,ay].forEach(function(a,idx){
+    if(Math.abs(a)<=2) return;
+    var stretch=cl(Math.abs(a)*0.55,0,18), dir=a>0?1:-1;
+    var passes2=cl(Math.round(Math.abs(a)/4)+1,1,6);
+    for(var p2=0;p2<passes2;p2++){
+      CTX.globalAlpha=cl(0.08+Math.abs(a)*0.012,0.04,0.32);
+      if(idx===0){ CTX.drawImage(CV,stretch*dir*(p2+1)*0.4,0); CTX.drawImage(CV,-stretch*dir*(p2+1)*0.4,0); }
+      else        { CTX.drawImage(CV,0,stretch*dir*(p2+1)*0.4); CTX.drawImage(CV,0,-stretch*dir*(p2+1)*0.4); }
+      CTX.globalAlpha=1;
+    }
+  });
+}
+function fxVib(){
+  var v=+els.vibration.value, d=+els.drift.value;
+  if(v<1&&d<1) return;
+  var mag=magV(+els.mag.value);
+  var magScale=cl(Math.log10(mag)/4,0.05,1);
+  var vs=v*magScale, ds=d*magScale;
+  if(vs<0.3&&ds<0.3) return;
+  var tmp=document.createElement('canvas'); tmp.width=W; tmp.height=H;
+  tmp.getContext('2d').drawImage(CV,0,0); CTX.clearRect(0,0,W,H);
+  var t=performance.now()*0.001;
+  for(var vy=0;vy<H;vy++){
+    var w=Math.sin(vy*0.018+t*2.1)*vs*0.6+Math.sin(vy*0.051+t*3.7)*vs*0.25+Math.sin(vy*0.008+t*0.9)*vs*0.4+(Math.sin(vy*0.003+t*8.5)>0.92?vs*0.8*Math.sin(vy*0.15):0);
+    CTX.drawImage(tmp,0,vy,W,1,w+ds*0.15*(vy/H),vy,W,1);
+  }
+  if(vs>8) for(var vy2=0;vy2<H;vy2++){
+    var fl=(rn(vy2*7.3+t*100)-0.5)*vs*0.018;
+    if(Math.abs(fl)>0.005){ CTX.fillStyle='rgba('+(fl>0?'255,255,255':'0,0,0')+','+Math.abs(fl)+')'; CTX.fillRect(0,vy2,W,1); }
+  }
+}
+function fxCharge(){
+  var c=+els.charging.value, kv=+els.kv.value;
+  if(c<1) return;
+  var cs=kv<=3?cl(0.35+kv*0.08,0.35,0.62):kv<=10?cl(0.62+(kv-3)*0.13,0.62,1.55):cl(1.55+(kv-10)*0.08,1.55,2.5);
+  CTX.strokeStyle='rgba(255,255,255,'+cl(c/28*cs,0,0.8)+')'; CTX.lineWidth=1.1;
+  for(var i=0;i<Math.round(c*0.95*cs);i++){
+    var cx2=rn(i*11.7)*W; CTX.beginPath(); CTX.moveTo(cx2,0); CTX.lineTo(cx2+rn(i*3.2)*26-13,H); CTX.stroke();
+  }
+  if(c>10) for(var i2=0;i2<5;i2++){
+    var cpx=rn(i2*22)*W, cpy=rn(i2*17)*H, crd=22+rn(i2*9)*62;
+    var cg=CTX.createRadialGradient(cpx,cpy,0,cpx,cpy,crd);
+    cg.addColorStop(0,'rgba(255,255,255,.2)'); cg.addColorStop(1,'rgba(255,255,255,0)');
+    CTX.fillStyle=cg; CTX.beginPath(); CTX.arc(cpx,cpy,crd,0,Math.PI*2); CTX.fill();
+  }
+  if(kv>12&&c>8){
+    CTX.globalAlpha=cl((kv-12)*0.008*c*0.04,0,0.18);
+    CTX.drawImage(CV,cl((kv-12)*0.4*c*0.04,0,12),0);
+    CTX.globalAlpha=1;
+  }
+}
+function fxNoise(){
+  var total=+els.noise.value+magBlur()*0.4;
+  if(total<1) return;
+  var ns=cl(1+(5-+els.kv.value)*0.04,0.8,1.4);
+  for(var i=0;i<2500+total*90*ns;i++){
+    var nx=rn(i*1.11)*W, ny=rn(i*2.97)*H, nv=72+rn(i*2.3)*122;
+    CTX.fillStyle=rgba(nv,nv,nv,0.02+total*0.002); CTX.fillRect(nx,ny,1.1,1.1);
+  }
+}
+function fxScanHold(){
+  if(!scan){ CTX.fillStyle='rgba(0,0,0,.6)'; CTX.fillRect(0,0,W,H); CTX.fillStyle='#fff'; CTX.font='bold 26px monospace'; CTX.fillText('SCAN HOLD',22,38); }
+}
+
+/* ── MAIN DRAW ── */
+function draw(){
+  updateLabels();
+  var s=els.sample.value, mag=magV(+els.mag.value);
+  CTX.clearRect(0,0,W,H);
+  if(mag<=2000){ drawOverview(); }
+  else if(s==='etch_v')   drawEtch(false);
+  else if(s==='etch_taper') drawEtch(true);
+  else if(s.indexOf('film')===0) drawFilm(s==='film_multi');
+  else drawSurf(s);
+  fxTilt(); fxBlur(); fxVib(); fxCharge(); fxNoise(); fxScanHold();
+  computeStatus(); updateHint(); updateMeasure();
+  $('edsLegend').classList.toggle('show', els.detector.value==='EDS');
+  if(mode==='tutorial') updateTutStatus();
+}
+
+function updateLabels(){
+  var mag=magV(+els.mag.value), kv=+els.kv.value, wd2=+els.wd.value, det=els.detector.value;
+  $('vMag').textContent=mag.toLocaleString()+'×'; $('vHV').textContent=kv+' kV'; $('vWD').textContent=wd2.toFixed(1)+' mm';
+  $('vFoc').textContent=els.focus.value; $('vAsX').textContent=els.astigX.value; $('vAsY').textContent=els.astigY.value;
+  $('vVib').textContent=els.vibration.value; $('vDri').textContent=els.drift.value; $('vChg').textContent=els.charging.value;
+  $('vNoi').textContent=els.noise.value; $('vBri').textContent=els.brightness.value; $('vCon').textContent=els.contrast.value;
+  $('hMag').textContent=mag.toLocaleString()+'×'; $('hHV').textContent=kv+'kV'; $('hWD').textContent=wd2.toFixed(1)+'mm';
+  $('hTilt').textContent=stage.tilt+'°'; $('hDet').textContent=det;
+  $('ovSmp').textContent=els.sample.options[els.sample.selectedIndex].text;
+  $('ovDet').textContent=det; $('ovStg').textContent=stage.x.toFixed(1)+'/'+stage.y.toFixed(1)+'/'+stage.tilt+'°';
+  $('sX').textContent=stage.x.toFixed(2); $('sY').textContent=stage.y.toFixed(2); $('sTilt').textContent=stage.tilt+'°';
+  $('mMag').textContent='MAG '+mag.toLocaleString()+'×'; $('mHV').textContent='HV '+kv+'kV';
+  $('mWD').textContent='WD '+wd2.toFixed(1)+'mm'; $('mTilt').textContent='TILT '+stage.tilt+'°';
+  $('sclbl').textContent=magLabel(mag);
+}
+
+function computeStatus(){
+  var f=Math.abs(+els.focus.value), as=Math.abs(+els.astigX.value)+Math.abs(+els.astigY.value);
+  var v=+els.vibration.value, d=+els.drift.value, c=+els.charging.value, kv=+els.kv.value;
+  var wb=cl((+els.wd.value-8.5)*0.12,0,2.5);
+  var sharp=cl(100-(f+wb)*2.8-as*1.5-v*0.8-d*0.6,0,100);
+  var stab=cl(100-v*3.2-d*2.4,0,100);
+  function sc(id,val){ var e=$( id); e.textContent=val; e.className='sv '+(val==='좋음'||val==='낮음'?'g':val==='보통'?'m':'b'); }
+  sc('sSh',sharp>82?'좋음':sharp>60?'보통':'낮음');
+  sc('sAs',as<6?'낮음':as<16?'보통':'높음');
+  sc('sSt',stab>85?'좋음':stab>62?'보통':'나쁨');
+  sc('sCh',c<7?'낮음':c<16?'보통':'높음');
+  var warn=c>15?'Charging':stab<55?'Unstable':'Stable';
+  var ws=$('ovStat'); ws.textContent=scan?warn:'SCAN HOLD'; ws.className='tag '+(warn==='Stable'&&scan?'ok':'ng');
+  var mag=magV(+els.mag.value);
+  var t='';
+  if(mag<=1000)       t='극저배율 — 쿠폰 top-down. Stage XY로 관심 영역 이동 후 배율을 올리십시오. ';
+  else if(mag<=5000)  t='저배율 — 패턴 반복 확인. 배율을 더 올리십시오. ';
+  else if(mag<=20000) t='중배율 — 구조 형태 파악. 초점을 맞추며 배율을 올리십시오. ';
+  else                t='고배율 — 상세 관찰. 초점/난시를 맞추고 측정하십시오. ';
+  if(kv>12)  t+='⚠ HV '+kv+'kV 높음 → SE 표면대비↓, edge↑. ';
+  else if(kv<=3) t+='ℹ HV '+kv+'kV → 대전 억제, 표면 민감도 최고. ';
+  if(c>8&&kv>10) t+='⚠ 고전압 Charging → 저전압(1~3kV)으로 낮추면 억제 가능. ';
+  if(+els.wd.value>14) t+='⚠ WD 길음. ';
+  if(f>6)  t+='⚠ 초점 불량. '; if(as>10) t+='⚠ 난시. ';
+  if(v>5||d>5) t+='⚠ 스캔 불안정. '; if(c>8) t+='⚠ Charging. ';
+  $('interp').textContent=t||'기본 관찰 상태.';
+  var dn={SE:'SE: 돌출부/모서리 밝음, 오목부 어두움. 저전압에서 표면 민감도 최고.',BSE:'BSE: Z-contrast — W(Z=74) 매우 밝음, SiO2(Z≈10) 매우 어두움.',EDS:'EDS: 원소 분포 지도. 우측 하단 범례 참조.'};
+  $('fnote').textContent=dn[els.detector.value]||'';
+  return{sharp:sharp,stab:stab,astig:as,charge:c};
+}
+
+function updateHint(){
+  var mag=magV(+els.mag.value), s=els.sample.value, kv=+els.kv.value;
+  if(mag<=1000){ $('hintTxt').innerHTML='<b>저배율:</b> 쿠폰 전체가 보입니다. Stage XY로 관심 영역 이동 후 배율을 올리십시오.'; return; }
+  var h={
+    etch_v:'<b>식각 단면:</b> sidewall edge 밝기 = SE 탈출 용이성. HV '+kv+'kV: '+(kv>10?'edge 밝음, 표면대비↓':'저전압 → 표면 선명도 우수')+'.',
+    etch_taper:'<b>Taper 단면:</b> sidewall 직선 여부 확인. tilt로 경사각 측정.',
+    film_single:'<b>단층막:</b> SE↔BSE 전환으로 층 경계 확인.',
+    film_multi:'<b>다층막:</b> BSE에서 W(밝음)↔SiO2(어두움) 차이가 극명합니다.',
+    surf_smooth:'<b>매끈한 표면:</b> 돌출부 가장자리 밝음(edge brightening). Tilt로 음영 강화.',
+    surf_grain:'<b>Grain:</b> grain 경계(edge) 밝음 = SE yield 차이.',
+    surf_particle:'<b>파티클:</b> SE → rim 밝음. BSE → Z값 높은 파티클 밝음. EDS → 원소 지도.'
+  };
+  $('hintTxt').innerHTML=h[s]||'-';
+}
+
+function updateMeasure(){
+  $('mLayer').innerHTML='';
+  if(mpts.length<2) return;
+  var x1=mpts[0][0],y1=mpts[0][1],x2=mpts[1][0],y2=mpts[1][1];
+  var mag=magV(+els.mag.value);
+  var dist=Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+  var real=dist/680*(25400/mag);
+  var lbl=real>=1?real.toFixed(3)+' µm':(real*1000).toFixed(1)+' nm';
+  var ang=Math.atan2(y2-y1,x2-x1)*180/Math.PI;
+  var ln=document.createElement('div'); ln.className='mline';
+  ln.style.cssText='left:'+x1+'px;top:'+y1+'px;width:'+dist+'px;height:2px;transform-origin:0 50%;transform:rotate('+ang+'deg)';
+  $('mLayer').appendChild(ln);
+  var tx=document.createElement('div'); tx.className='mtxt';
+  tx.textContent=lbl; tx.style.left=((x1+x2)/2-18)+'px'; tx.style.top=((y1+y2)/2-17)+'px';
+  $('mLayer').appendChild(tx);
+  $('mout').textContent='측정: '+lbl;
+}
+var measuring=false;
+$('cshell').addEventListener('mousedown',function(e){
+  if(e.button!==0) return;
+  e.preventDefault();
+  var rc=$('cshell').getBoundingClientRect(), sx=680/rc.width, sy=680/rc.height;
+  var px=(e.clientX-rc.left)*sx, py=(e.clientY-rc.top)*sy;
+  mpts=[[px,py]];
+  measuring=true;
+  updateMeasure();
+});
+$('cshell').addEventListener('mousemove',function(e){
+  if(!measuring) return;
+  var rc=$('cshell').getBoundingClientRect(), sx=680/rc.width, sy=680/rc.height;
+  var px=(e.clientX-rc.left)*sx, py=(e.clientY-rc.top)*sy;
+  mpts[1]=[px,py];
+  updateMeasure();
+});
+document.addEventListener('mouseup',function(){
+  if(!measuring) return;
+  measuring=false;
+});
+
+/* ── TUTORIAL INIT ── */
+function initAllProblems(){
+  els.sample.value='etch_v'; els.detector.value='SE';
+  els.mag.value=8; els.kv.value=8; els.wd.value=13.5;
+  els.focus.value=20; els.astigX.value=14; els.astigY.value=-10;
+  els.vibration.value=16; els.drift.value=8; els.charging.value=12;
+  els.noise.value=6; els.brightness.value=46; els.contrast.value=49;
+  stage={x:0,y:0,tilt:0}; scan=true;
+}
+
+/* ── 단계별 용어 설명 ── */
+var STEP_EXPLAINS=[
+  /* 1 */
+  '<h5>📌 지금 이 이미지가 왜 엉망인가?</h5><p>현재 다음 문제들이 동시에 걸려 있습니다.</p><ul><li><span class="warn-kw">WD 13.5mm</span> — 최적 WD(8mm)보다 훨씬 멀어, 렌즈 초점 자체가 뒤로 밀려 있음</li><li><span class="warn-kw">Focus Offset 20</span> — 전자빔 포커스 평면이 시료 표면과 어긋남</li><li><span class="warn-kw">Astig X=14, Y=-10</span> — 전자빔 단면이 비대칭 타원형이 되어 이미지가 한쪽으로 늘어짐</li><li><span class="warn-kw">Vibration=16, Drift=8</span> — 외부/기계 진동이 스캔선을 좌우로 흔듦</li><li><span class="warn-kw">Charging=12</span> — 비전도성 표면에 전하 축적, 흰 줄무늬 노이즈 발생</li></ul><h5>왜 먼저 배율을 올리는가?</h5><p>저배율에서는 구조가 너무 작아 어떤 문제가 얼마나 심한지 알기 어렵습니다. <span class="kw">1,000~2,000×</span> 배율에서 패턴 형체를 확인한 뒤, 한 문제씩 해결해 나가는 것이 실제 SEM 운용 순서입니다.</p>',
+  /* 2 */
+  '<h5>📌 WD (Working Distance) 란?</h5><p><span class="kw">WD</span>는 전자빔을 집속하는 대물렌즈(Objective Lens) 하단 끝면부터 시료 표면까지의 거리입니다.</p><ul><li>SEM 렌즈는 고정된 자기 렌즈입니다. 렌즈 강도(전류)를 조절해 집속점 위치를 바꿉니다.</li><li>WD가 길면(13.5mm) → 렌즈가 먼 곳에 집속 → 시료에서 초점 어긋남 → <span class="warn-kw">Blur 증가</span></li><li>WD가 짧으면(7~9mm) → 렌즈와 시료가 가까워 → 수차(aberration)도 작아져 <span class="ok-kw">해상도 향상</span></li></ul><h5>지금 상태는?</h5><p>현재 WD=<span class="warn-kw">13.5mm</span>. 최적 범위 <span class="ok-kw">7~9mm</span>보다 5mm 이상 멀어, 렌즈 집속 자체가 어긋나 있습니다. WD를 먼저 맞춰야 이후 Focus 조정이 의미있어집니다.</p>',
+  /* 3 */
+  '<h5>📌 왜 배율을 단계적으로 올리는가?</h5><p>SEM에서 배율을 한 번에 높게 올리면 관심 구조를 화면 밖에서 찾기 어렵습니다. 또한 고배율에서는 초점 불량이 훨씬 두드러져 보입니다.</p><ul><li><span class="kw">저배율(5,000~10,000×)</span>: trench 패턴 반복이 확인됩니다. 아직 흐릿해도 됩니다.</li><li>이 단계에서 초점을 완전히 맞추려 하지 말고, <span class="ok-kw">패턴이 보이는지 확인</span>하는 것이 목적입니다.</li></ul><h5>WD와 배율의 관계</h5><p>WD를 맞춘 상태에서 배율을 올리면 렌즈 집속점이 시료 표면에 가까워집니다. WD가 틀어진 채로 고배율로 올리면 흐릿함이 배로 커집니다.</p>',
+  /* 4 */
+  '<h5>📌 Focus Offset 이란?</h5><p>SEM 전자빔은 대물렌즈로 집속됩니다. <span class="kw">Focus Offset</span>은 그 집속점(focal plane)이 시료 표면에서 얼마나 위/아래에 있는지를 나타냅니다.</p><ul><li>Offset=0 → 집속점이 시료 표면 = <span class="ok-kw">선명</span></li><li>Offset이 크면 → 집속점이 표면 위/아래 → 전자빔이 퍼진 채로 시료에 도달 → <span class="warn-kw">흐릿한 이미지</span></li></ul><h5>지금 상태는?</h5><p>현재 Focus=<span class="warn-kw">20</span>으로 집속점이 시료 위에 많이 떠 있습니다. <span class="ok-kw">±3 이내</span>로 조정하면 전자빔이 표면에서 최소 스폿 크기로 집속됩니다. WD를 먼저 맞춰야 Focus 보정 범위가 줄어듭니다.</p>',
+  /* 5 */
+  '<h5>📌 Astigmatism(난시) 란?</h5><p>SEM 전자빔은 이상적으로 원형 단면을 가져야 합니다. 하지만 렌즈 내부의 전기장/자기장 비대칭, 렌즈 오염 등으로 빔 단면이 <span class="warn-kw">타원형</span>으로 왜곡됩니다.</p><ul><li>빔 단면이 타원이면 → X방향과 Y방향 집속 거리가 달라짐 → 이미지가 <span class="warn-kw">한 방향으로 늘어나 보임</span></li><li>Astig X: X축 방향 보정 편향코일 강도</li><li>Astig Y: Y축 방향 보정 편향코일 강도</li></ul><h5>지금 상태는?</h5><p>현재 <span class="warn-kw">X=14, Y=-10</span>으로 빔 단면이 크게 비대칭입니다. 두 값을 <span class="ok-kw">±3 이내</span>로 맞추면 원형 빔으로 복원되어 이미지 왜곡이 사라집니다. Focus를 맞춘 후 Astig을 보정해야 정확합니다.</p>',
+  /* 6 */
+  '<h5>📌 Vibration · Drift 란?</h5><p><span class="kw">Vibration</span>: 건물/장비 진동이 시료 홀더에 전달되어 스캔 중 시료가 미세하게 흔들리는 것입니다.</p><p><span class="kw">Drift</span>: 열팽창, 전기장 불안정 등으로 스캔 기준점이 한 방향으로 서서히 이동하는 것입니다.</p><ul><li>진동 → 스캔선이 좌우로 물결 → sidewall edge가 <span class="warn-kw">흔들려 보임</span></li><li>Drift → 이미지가 한쪽으로 늘어나거나 기울어 보임</li><li>고배율일수록 1nm 진동도 크게 보입니다</li></ul><h5>실제 SEM에서의 대처</h5><p>방진 테이블(anti-vibration table), 에어 서스펜션 기반 격리대, 장비 예열(thermal stabilization)이 사용됩니다. 슬라이더를 <span class="ok-kw">2 이하</span>로 줄이면 sidewall edge가 선명해집니다.</p>',
+  /* 7 */
+  '<h5>📌 Charging(대전) 이란?</h5><p>SEM에서 전자빔을 시료에 쏘면, 입사 전자가 시료 내부에 누적될 수 있습니다. <span class="kw">비전도성 시료</span>(SiO2, 폴리머, 세라믹 등)는 전자를 방출하지 못하고 표면에 <span class="warn-kw">음전하가 축적(charging)</span>됩니다.</p><h5>이미지에 어떻게 나타나는가?</h5><ul><li>표면 음전하 → 새로 입사하는 전자를 밀어냄 → 빔 방향 왜곡</li><li>이미지에 <span class="warn-kw">밝은 흰 줄무늬, 번짐(blooming)</span>이 나타남</li><li>심하면 이미지 전체가 흰색으로 날아가 버림</li></ul><h5>왜 저전압(1~3kV)이 도움이 되는가?</h5><p>전자빔 에너지가 낮으면 시료에서 <span class="kw">2차 전자 방출률(δ)</span>이 높아집니다. 입사 전자수 ≈ 방출 전자수가 되면 전하 균형이 맞아 충전이 억제됩니다. 이를 <span class="ok-kw">charge balance point</span>라 합니다.</p>',
+  /* 8 */
+  '<h5>📌 SEM 측정 원리</h5><p>SEM 이미지에는 좌하단에 <span class="kw">Scale Bar</span>가 표시됩니다. 배율(MAG)과 이미지 너비를 알면 픽셀당 실제 거리를 계산할 수 있습니다.</p><ul><li>이미지 너비(픽셀) = 680px, 실제 시야폭 = 25,400 / MAG (µm)</li><li>드래그 시작점~끝점 픽셀 거리 × (실제 시야폭 / 680) = 실제 물리 거리</li></ul><h5>무엇을 측정하는가?</h5><p><span class="kw">trench 폭</span>(좌측 edge → 우측 edge): 식각 패턴의 CD(Critical Dimension)로, 설계 치수와 일치하는지 확인합니다.<br><span class="kw">trench 깊이</span>(상단 → 바닥): 식각 깊이로, 공정 조건(RF 파워, 압력, 시간)에 따라 달라집니다.</p><h5>선명한 이미지가 필요한 이유</h5><p>edge가 흐릿하면 edge 위치를 정확히 특정할 수 없어 측정 오차가 커집니다. 모든 보정을 마친 후 측정해야 신뢰할 수 있는 CD 값을 얻을 수 있습니다.</p>'
+];
+
+var STEPS=[
+  {title:'[Step 1] 시작 — 문제 파악',
+   desc:'지금 여러 문제가 동시에 걸려 있습니다: WD 틀어짐, Focus 불량, Astig, 진동, Charging. 지금은 배율만 1,000~2,000×로 올려서 패턴 형체를 확인하십시오.',
+   task:'배율을 1,000~2,000×로 올리십시오.',check:'완료 조건: 배율 1,000~2,000×',btnLabel:'전체 문제 상태로 리셋',
+   apply:function(){initAllProblems();},
+   validate:function(){var mag=magV(+els.mag.value),r=[];if(mag<1000||mag>2000)r.push('배율을 1,000~2,000× 범위로 올리십시오.');return{ok:r.length===0,r:r};}},
+  {title:'[Step 2] WD 맞추기',
+   desc:'WD가 13.5mm로 틀어진 상태입니다. 나머지 문제는 아직 남아있지만, WD만 먼저 맞추십시오. 7~9mm로 조정하면 blur가 눈에 띄게 줄어듭니다.',
+   task:'Working Distance를 7~9mm로 조정하십시오.',check:'완료 조건: WD 7~9mm',btnLabel:'힌트: WD만 수정',
+   apply:function(){els.wd.value=8.5;},
+   validate:function(){var r=[];if(+els.wd.value<7||+els.wd.value>9)r.push('WD를 7~9mm로 조정하십시오.');return{ok:r.length===0,r:r};}},
+  {title:'[Step 3] 배율 올리기 — 5,000~10,000×',
+   desc:'WD를 맞췄습니다. 배율을 5,000~10,000×로 올려 trench 반복 패턴을 확인하십시오. 아직 Focus/Astig/진동이 남아 흐릿하지만 패턴 반복은 보입니다.',
+   task:'배율을 5,000~10,000×로 올리십시오.',check:'완료 조건: 배율 5,000~10,000× + WD 7~9mm',btnLabel:'힌트: 배율만 수정',
+   apply:function(){els.mag.value=38;},
+   validate:function(){var mag=magV(+els.mag.value),wd2=+els.wd.value,r=[];if(mag<5000||mag>10000)r.push('배율을 5,000~10,000×로 올리십시오.');if(wd2<7||wd2>9)r.push('먼저 WD를 7~9mm로 맞추십시오.');return{ok:r.length===0,r:r};}},
+  {title:'[Step 4] Focus 맞추기 — 20,000×+',
+   desc:'WD와 배율이 맞춰졌습니다. 배율을 20,000× 이상으로 올리고 Focus Offset을 0 근처로 조정하십시오. Astig/진동/Charging은 아직 남아있습니다.',
+   task:'배율 20,000× 이상 + Focus Offset ±3 이내로 맞추십시오.',check:'완료 조건: 배율 ≥20,000× + Focus ±3 이내',btnLabel:'힌트: Focus만 수정',
+   apply:function(){els.focus.value=0;els.mag.value=55;},
+   validate:function(){var r=[];if(magV(+els.mag.value)<20000)r.push('배율을 20,000× 이상으로 올리십시오.');if(Math.abs(+els.focus.value)>3)r.push('Focus Offset을 ±3 이내로 조정하십시오.');return{ok:r.length===0,r:r};}},
+  {title:'[Step 5] Astig 제거',
+   desc:'WD·Focus가 맞춰졌습니다. Astig X/Y가 남아 이미지가 한 방향으로 늘어져 보입니다. 진동/Charging은 아직 남아있습니다.',
+   task:'Astig X/Y를 각각 ±3 이내로 조정하십시오.',check:'완료 조건: Astig X ±3, Astig Y ±3 이내',btnLabel:'힌트: Astig만 수정',
+   apply:function(){els.astigX.value=0;els.astigY.value=0;},
+   validate:function(){var r=[];if(Math.abs(+els.astigX.value)>3||Math.abs(+els.astigY.value)>3)r.push('Astig X/Y를 ±3 이내로 줄이십시오.');return{ok:r.length===0,r:r};}},
+  {title:'[Step 6] Vibration 잡기',
+   desc:'WD·Focus·Astig이 맞춰졌습니다. 진동과 Drift가 남아 sidewall edge가 물결칩니다. Charging은 아직 남아있습니다.',
+   task:'Vibration과 Drift를 2 이하로 낮추십시오.',check:'완료 조건: Vibration ≤2, Drift ≤2',btnLabel:'힌트: 진동만 수정',
+   apply:function(){els.vibration.value=0;els.drift.value=0;},
+   validate:function(){var r=[];if(+els.vibration.value>2)r.push('Vibration을 2 이하로 낮추십시오.');if(+els.drift.value>2)r.push('Drift를 2 이하로 낮추십시오.');return{ok:r.length===0,r:r};}},
+  {title:'[Step 7] Charging 잡기',
+   desc:'WD·Focus·Astig·진동이 모두 잡혔습니다. Charging만 남아있습니다. Charging 슬라이더를 낮추십시오. HV를 1~3kV로 낮추면 대전 억제 원리도 확인할 수 있습니다.',
+   task:'Charging을 6 이하로 낮추십시오.',check:'완료 조건: Charging ≤6',btnLabel:'힌트: Charging만 수정',
+   apply:function(){els.charging.value=0;},
+   validate:function(){var r=[];if(+els.charging.value>6)r.push('Charging을 6 이하로 낮추십시오.');return{ok:r.length===0,r:r};}},
+  {title:'[Step 8] 직접 측정',
+   desc:'모든 문제가 해결되었습니다! 선명한 이미지에서 마우스를 클릭한 채로 드래그하여 trench 폭(좌 edge→우 edge)과 깊이(상단→바닥)를 직접 측정하십시오.',
+   task:'이미지에서 마우스를 클릭·드래그하여 trench 폭과 깊이를 측정하십시오.',check:'완료 조건: Sharpness 좋음 + 측정 완료',btnLabel:'최적 상태 적용',
+   apply:function(){els.wd.value=8.0;els.focus.value=0;els.astigX.value=0;els.astigY.value=0;els.vibration.value=0;els.drift.value=0;els.charging.value=0;els.kv.value=5;els.noise.value=2;els.brightness.value=50;els.contrast.value=56;els.mag.value=58;},
+   validate:function(m){var r=[];if(m.sharp<80)r.push('먼저 모든 문제를 해결하십시오.');if(mpts.length<2)r.push('이미지를 클릭·드래그하여 측정하십시오.');return{ok:r.length===0,r:r};}}
+];
+
+function renderStep(){
+  var s=STEPS[step];
+  $('schip').textContent='STEP '+(step+1)+'/'+STEPS.length;
+  $('stitle').textContent=s.title; $('sdesc').textContent=s.desc;
+  $('stask').textContent=s.task; $('scheck').textContent=s.check;
+  $('bApply').textContent=s.btnLabel||'힌트 적용';
+  var isReset=s.btnLabel&&s.btnLabel.indexOf('리셋')>-1;
+  $('bApply').style.background=isReset?'rgba(255,107,107,.12)':'rgba(78,207,255,.1)';
+  $('bApply').style.borderColor=isReset?'rgba(255,107,107,.4)':'rgba(78,207,255,.35)';
+  $('bApply').style.color=isReset?'#ffcccc':'#b0e8ff';
+  $('explainBox').innerHTML=STEP_EXPLAINS[step]||'';
+  updateTutStatus();
+}
+function updateTutStatus(){
+  if(mode!=='tutorial') return;
+  var s=STEPS[step];
+  var f=Math.abs(+els.focus.value), as=Math.abs(+els.astigX.value)+Math.abs(+els.astigY.value);
+  var v=+els.vibration.value, d=+els.drift.value, c=+els.charging.value;
+  var wb=cl((+els.wd.value-8.5)*0.12,0,2.5);
+  var sh=cl(100-(f+wb)*2.8-as*1.5-v*0.8-d*0.6,0,100);
+  var st=cl(100-v*3.2-d*2.4,0,100);
+  var res=s.validate({sharp:sh,stab:st,astig:as,charge:c});
+  var el2=$('sstat');
+  el2.style.background=res.ok?'rgba(79,212,148,.07)':'rgba(255,184,77,.06)';
+  el2.style.borderColor=res.ok?'rgba(79,212,148,.3)':'rgba(255,184,77,.22)';
+  el2.style.color=res.ok?'#b0f0d0':'#ffe4b5';
+  el2.textContent=res.ok?'✓ 완료! 다음 단계로 넘어가도 됩니다.':'아직 완료가 아닙니다.';
+  $('srlist').innerHTML=(res.r||[]).map(function(x){return '<li>'+x+'</li>';}).join('');
+}
+function setMode(m){
+  mode=m;
+  $('bTut').classList.toggle('on',m==='tutorial');
+  $('bFree').classList.toggle('on',m==='free');
+  $('tutMod').style.display=m==='tutorial'?'':'none';
+  $('freeMod').style.display=m==='free'?'':'none';
+  if(m==='tutorial') renderStep();
+}
+
+var P={
+  normal:   {s:'etch_v',    det:'SE',mag:55,kv:5, wd:8.0,f:0, ax:0,  ay:0,  v:0, d:0,c:0, n:2,br:50,co:56,t:0},
+  focusbad: {s:'etch_v',    det:'SE',mag:55,kv:5, wd:9,  f:24,ax:0,  ay:0,  v:0, d:0,c:0, n:3,br:50,co:55,t:0},
+  astigbad: {s:'surf_grain',det:'SE',mag:50,kv:5, wd:8.5,f:2, ax:22, ay:-15,v:0, d:0,c:0, n:3,br:50,co:55,t:10},
+  shake:    {s:'surf_grain',det:'SE',mag:48,kv:5,wd:8.5,f:1, ax:0,  ay:0,  v:22,d:15,c:0,n:5,br:50,co:55,t:0},
+  chargebad:{s:'surf_grain',det:'SE',mag:44,kv:15,wd:8.5,f:2, ax:0,  ay:0,  v:2, d:1, c:22,n:6,br:50,co:55,t:10},
+  hvhigh:   {s:'etch_v',    det:'SE',mag:55,kv:25,wd:8.5,f:0, ax:0,  ay:0,  v:0, d:0,c:0, n:2,br:50,co:55,t:0},
+  etch_ok:  {s:'etch_v',    det:'SE',mag:55,kv:5, wd:8.0,f:0, ax:0,  ay:0,  v:0, d:0,c:0, n:1,br:50,co:58,t:0},
+  film_ok:  {s:'film_single',det:'SE',mag:55,kv:5, wd:8.0,f:0, ax:0,  ay:0,  v:0, d:0,c:0, n:1,br:52,co:58,t:0}
+};
+function applyP(n){
+  var p=P[n]; if(!p) return;
+  els.sample.value=p.s; els.detector.value=p.det; els.mag.value=p.mag; els.kv.value=p.kv;
+  els.wd.value=p.wd; els.focus.value=p.f; els.astigX.value=p.ax; els.astigY.value=p.ay;
+  els.vibration.value=p.v; els.drift.value=p.d; els.charging.value=p.c;
+  els.noise.value=p.n; els.brightness.value=p.br; els.contrast.value=p.co;
+  stage.tilt=p.t; draw();
+}
+
+Object.values(els).forEach(function(e){ e.addEventListener('input',draw); });
+document.querySelectorAll('[data-m]').forEach(function(b){
+  b.addEventListener('click',function(){
+    var m=b.dataset.m;
+    var mag=magV(+els.mag.value);
+    var s=els.sample.value;
+    /* moveStep is tuned so each click shifts the view by ~75 px regardless
+       of magnification or rendering mode. Each mode applies a different
+       effective multiplier to stage.x/y, so we branch here. */
+    var moveStep;
+    if(mag<=2000){
+      /* drawOverview: effective px = stage*mag*1.339 */
+      moveStep=cl(56/mag, 0.00011, 0.5);
+    } else if(s==='etch_v'||s==='etch_taper'||s.indexOf('film')===0){
+      /* drawEtch / drawFilm cross-section: effective px = stage*mag*0.469 */
+      moveStep=cl(160/mag, 0.00032, 0.08);
+    } else {
+      /* drawSurf: effective px = stage*mag*0.134 */
+      moveStep=cl(560/mag, 0.0011, 0.28);
+    }
+    if(m==='up')    stage.y-=moveStep;
+    if(m==='down')  stage.y+=moveStep;
+    if(m==='left')  stage.x-=moveStep;
+    if(m==='right') stage.x+=moveStep;
+    if(m==='tilt+') stage.tilt=cl(stage.tilt+2,-30,30);
+    if(m==='tilt-') stage.tilt=cl(stage.tilt-2,-30,30);
+    if(m==='zoom+') els.mag.value=Math.min(100,+els.mag.value+4);
+    if(m==='zoom-') els.mag.value=Math.max(0,+els.mag.value-4);
+    if(m==='scan')  scan=!scan;
+    draw();
+  });
+});
+document.querySelectorAll('[data-t]').forEach(function(b){ b.addEventListener('click',function(){ stage.tilt=+b.dataset.t; draw(); }); });
+$('bHome').onclick=function(){ stage.x=0; stage.y=0; draw(); };
+$('bAF').onclick=function(){ els.focus.value=0; draw(); };
+$('bAS').onclick=function(){ els.astigX.value=0; els.astigY.value=0; draw(); };
+$('bStab').onclick=function(){ els.vibration.value=0; els.drift.value=0; draw(); };
+$('bReset').onclick=function(){ seen.fill(false); step=0; mpts=[]; $('mLayer').innerHTML=''; $('mout').textContent='이미지를 클릭하고 드래그하여 거리를 측정합니다.'; initAllProblems(); setMode('tutorial'); draw(); };
+document.querySelectorAll('[data-p]').forEach(function(b){ b.addEventListener('click',function(){ applyP(b.dataset.p); }); });
+$('bTutReset').onclick=function(){ seen.fill(false); step=0; mpts=[]; $('mLayer').innerHTML=''; $('mout').textContent='이미지를 클릭하고 드래그하여 거리를 측정합니다.'; initAllProblems(); renderStep(); draw(); };
+$('bFree').onclick=function(){ setMode('free'); };
+$('bPrev').onclick=function(){ step=Math.max(0,step-1); renderStep(); draw(); };
+$('bNext').onclick=function(){ step=Math.min(STEPS.length-1,step+1); renderStep(); draw(); };
+$('bApply').onclick=function(){ STEPS[step].apply(); draw(); updateTutStatus(); };
+$('explainToggle').onclick=function(){
+  explainOpen=!explainOpen;
+  $('explainBox').classList.toggle('open',explainOpen);
+  $('explainArrow').classList.toggle('open',explainOpen);
+};
+
+initAllProblems();
+setMode('tutorial');
+draw();
+</script>
+</body>
+</html>
