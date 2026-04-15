@@ -46,6 +46,9 @@ const OxidationSimulator = ({ initialTab }) => {
   
   const [animatedThickness, setAnimatedThickness] = useState(10);
   const [temperatureBlink, setTemperatureBlink] = useState(true);
+
+  // Thermal tab: which SVG element is being hovered (for native tooltip highlight)
+  const [hoveredPart, setHoveredPart] = useState(null);
   
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState('');
@@ -1417,106 +1420,423 @@ const OxidationSimulator = ({ initialTab }) => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h4 className="text-lg font-semibold mb-4">수평형 열산화 장비 (Dry와 Wet 공용)</h4>
               
-              <div className="flex justify-center mb-6">
-                <svg width="800" height="400" viewBox="0 0 800 400">
-                  <g>
-                    <rect x="20" y="50" width="25" height="80" fill="#fbbf24" stroke="#92400e" strokeWidth="2" />
-                    <text x="32" y="45" textAnchor="middle" className="text-xs font-bold">HCl</text>
-                    <text x="32" y="145" textAnchor="middle" className="text-xs">{gasFlows.HCl}</text>
-                    
-                    <rect x="60" y="50" width="25" height="80" fill="#6b7280" stroke="#374151" strokeWidth="2" />
-                    <text x="72" y="45" textAnchor="middle" className="text-xs font-bold">N₂</text>
-                    <text x="72" y="145" textAnchor="middle" className="text-xs">{gasFlows.N2}</text>
-                    
-                    <rect x="100" y="50" width="25" height="80" fill="#3b82f6" stroke="#1e40af" strokeWidth="2" />
-                    <text x="112" y="45" textAnchor="middle" className="text-xs font-bold">O₂</text>
-                    <text x="112" y="145" textAnchor="middle" className="text-xs">{gasFlows.O2}</text>
-                    
-                    <rect x="140" y="50" width="25" height="80" fill="#06b6d4" stroke="#0891b2" strokeWidth="2" />
-                    <text x="152" y="45" textAnchor="middle" className="text-xs font-bold">H₂O</text>
-                    <text x="152" y="145" textAnchor="middle" className="text-xs">{gasFlows.H2O}</text>
-                    
-                    <rect x="180" y="50" width="25" height="80" fill="#10b981" stroke="#047857" strokeWidth="2" />
-                    <text x="192" y="45" textAnchor="middle" className="text-xs font-bold">H₂</text>
-                    <text x="192" y="145" textAnchor="middle" className="text-xs">{gasFlows.H2}</text>
+              <div className="mb-6 rounded-xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-3 border-2 border-slate-700 shadow-2xl">
+                <svg viewBox="0 0 900 440" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
+                  <defs>
+                    {/* Metallic furnace body gradient */}
+                    <linearGradient id="oxFurnaceBody" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stopColor="#64748b"/>
+                      <stop offset="0.5" stopColor="#334155"/>
+                      <stop offset="1" stopColor="#0f172a"/>
+                    </linearGradient>
+                    {/* Quartz tube glass effect */}
+                    <linearGradient id="oxQuartzTube" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0" stopColor="#e0f2fe" stopOpacity="0.1"/>
+                      <stop offset="0.5" stopColor="#ffffff" stopOpacity="0.28"/>
+                      <stop offset="1" stopColor="#e0f2fe" stopOpacity="0.1"/>
+                    </linearGradient>
+                    {/* Heater incandescent glow */}
+                    <radialGradient id="oxHeaterGlow" cx="50%" cy="50%">
+                      <stop offset="0" stopColor="#fde047" stopOpacity="1"/>
+                      <stop offset="0.4" stopColor="#f97316" stopOpacity="0.8"/>
+                      <stop offset="1" stopColor="#dc2626" stopOpacity="0"/>
+                    </radialGradient>
+                    {/* Silicon wafer gradient */}
+                    <linearGradient id="oxWafer" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0" stopColor="#475569"/>
+                      <stop offset="0.5" stopColor="#cbd5e1"/>
+                      <stop offset="1" stopColor="#475569"/>
+                    </linearGradient>
+                    {/* Oxide layer gradient */}
+                    <linearGradient id="oxOxide" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0" stopColor="#1d4ed8"/>
+                      <stop offset="0.5" stopColor="#93c5fd"/>
+                      <stop offset="1" stopColor="#1d4ed8"/>
+                    </linearGradient>
+                    {/* Glow filter */}
+                    <filter id="oxGlow" x="-50%" y="-50%" width="200%" height="200%">
+                      <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                      <feMerge>
+                        <feMergeNode in="blur"/>
+                        <feMergeNode in="SourceGraphic"/>
+                      </feMerge>
+                    </filter>
+                    {/* Gas flow path for particle animation (left → right through tube) */}
+                    <path id="oxGasFlowPath" d="M 120 250 L 260 250 L 280 230 L 700 230 L 720 250 L 800 250"/>
+                  </defs>
+
+                  {/* Dark background with subtle grid */}
+                  <rect x="0" y="0" width="900" height="440" fill="#0b1220"/>
+                  <g opacity="0.08" stroke="#94a3b8" strokeWidth="0.5">
+                    {[...Array(18)].map((_, i) => (
+                      <line key={`gv${i}`} x1={i*50} y1="0" x2={i*50} y2="440"/>
+                    ))}
+                    {[...Array(9)].map((_, i) => (
+                      <line key={`gh${i}`} x1="0" y1={i*50} x2="900" y2={i*50}/>
+                    ))}
                   </g>
 
-                  <g stroke="#4b5563" strokeWidth="3" fill="none">
-                    <path d="M 32 130 L 32 170 L 250 170" />
-                    <path d="M 72 130 L 72 170" />
-                    <path d="M 112 130 L 112 170" />
-                    <path d="M 152 130 L 152 170" />
-                    <path d="M 192 130 L 192 170" />
-                  </g>
-
-                  <g>
-                    <rect x="250" y="115" width="133" height="30" fill={heaterOn ? "#dc2626" : "#9ca3af"} />
-                    <text x="316" y="133" textAnchor="middle" fill="white" className="text-xs font-semibold">Heat Zone1</text>
-                    
-                    <rect x="383" y="115" width="134" height="30" fill={heaterOn ? "#dc2626" : "#9ca3af"} />
-                    <text x="450" y="133" textAnchor="middle" fill="white" className="text-xs font-semibold">Heat Zone2</text>
-                    
-                    <rect x="517" y="115" width="133" height="30" fill={heaterOn ? "#dc2626" : "#9ca3af"} />
-                    <text x="583" y="133" textAnchor="middle" fill="white" className="text-xs font-semibold">Heat Zone3</text>
-                    
-                    <rect x="250" y="260" width="133" height="30" fill={heaterOn ? "#dc2626" : "#9ca3af"} />
-                    <text x="316" y="278" textAnchor="middle" fill="white" className="text-xs font-semibold">Heat Zone4</text>
-                    
-                    <rect x="383" y="260" width="134" height="30" fill={heaterOn ? "#dc2626" : "#9ca3af"} />
-                    <text x="450" y="278" textAnchor="middle" fill="white" className="text-xs font-semibold">Heat Zone5</text>
-                    
-                    <rect x="517" y="260" width="133" height="30" fill={heaterOn ? "#dc2626" : "#9ca3af"} />
-                    <text x="583" y="278" textAnchor="middle" fill="white" className="text-xs font-semibold">Heat Zone6</text>
-                  </g>
-
-                  <rect x="250" y="160" width="400" height="80" fill="#f3f4f6" stroke="#6b7280" strokeWidth="2" fillOpacity="0.3" />
-                  <text x="450" y="175" textAnchor="middle" className="text-sm font-semibold">Quartz Tube</text>
-
-                  {furnaceLoaded && (
-                    <g>
-                      <rect x="350" y="210" width="200" height="10" fill="#8b5cf6" />
-                      <text x="450" y="205" textAnchor="middle" className="text-xs">Quartz Boat</text>
-                      
-                      {[...Array(8)].map((_, i) => (
-                        <g key={i}>
-                          <rect x={370 + i * 20} y="195" width="3" height="15" fill="#4a5568" />
-                          <rect x={370 + i * 20} y="195" width="3" height={oxideThickness/10} fill="#60a5fa" />
-                        </g>
-                      ))}
-                    </g>
-                  )}
-
-                  {(gasFlows.O2 > 0 || gasFlows.H2O > 0 || gasFlows.H2 > 0) && (
-                    <g>
-                      {[...Array(5)].map((_, i) => (
-                        <circle 
-                          key={i} 
-                          cx={280 + i * 40} 
-                          cy={200} 
-                          r="2" 
-                          fill={
-                            processMode === 'wet' ? '#06b6d4' :
-                            processMode === 'dry' ? '#3b82f6' :
-                            processMode === 'pyrogenic' ? '#8b5cf6' : '#6b7280'
-                          }
-                          fillOpacity="0.8" 
-                        />
-                      ))}
-                    </g>
-                  )}
-
-                  <rect x="670" y="180" width="60" height="40" fill="#d1d5db" stroke="#6b7280" strokeWidth="2" />
-                  <text x="700" y="175" textAnchor="middle" className="text-xs">Exhaust</text>
-                  <path d="M 650 200 L 670 200" stroke="#4b5563" strokeWidth="3" />
-
-                  <text 
-                    x="450" 
-                    y="290" 
-                    textAnchor="middle" 
-                    className={`text-lg font-bold ${heaterOn ? 'fill-red-600' : 'fill-gray-400'}`}
-                  >
-                    {heaterOn ? `${temperature}°C` : 'Heater OFF'}
+                  {/* Title */}
+                  <text x="450" y="24" textAnchor="middle" fill="#cbd5e1" fontSize="13" fontWeight="bold" letterSpacing="1.5">
+                    HORIZONTAL THERMAL OXIDATION FURNACE
                   </text>
+                  <text x="450" y="40" textAnchor="middle" fill="#64748b" fontSize="9">
+                    Dry / Wet / Pyrogenic · Click parts for info
+                  </text>
+
+                  {/* ── Gas Cylinders (left side) ── */}
+                  {[
+                    { k: 'HCl', label: 'HCl', fill: '#fbbf24', x: 25, desc: 'HCl 가스: 금속 불순물을 휘발성 염화물로 제거' },
+                    { k: 'N2',  label: 'N₂',  fill: '#94a3b8', x: 60, desc: 'N₂: 불활성 퍼지 및 냉각' },
+                    { k: 'O2',  label: 'O₂',  fill: '#3b82f6', x: 95, desc: 'O₂: Dry 산화 반응 가스 (Si + O₂ → SiO₂)' },
+                    { k: 'H2O', label: 'H₂O', fill: '#06b6d4', x: 130, desc: 'H₂O: Wet 산화 반응 가스 (Si + 2H₂O → SiO₂ + 2H₂)' },
+                    { k: 'H2',  label: 'H₂',  fill: '#10b981', x: 165, desc: 'H₂: Pyrogenic 산화용 (H₂ + ½O₂ → H₂O 현장 생성)' },
+                  ].map(g => {
+                    const active = gasFlows[g.k] > 0;
+                    const isHover = hoveredPart === `cyl_${g.k}`;
+                    return (
+                      <g
+                        key={g.k}
+                        transform={`translate(${g.x}, 70)`}
+                        onMouseEnter={() => setHoveredPart(`cyl_${g.k}`)}
+                        onMouseLeave={() => setHoveredPart(null)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {/* valve handle on top */}
+                        <rect x="8" y="0" width="14" height="6" fill="#475569"/>
+                        <circle cx="15" cy="0" r="2.5" fill="#64748b"/>
+                        {/* cylinder body */}
+                        <rect
+                          x="2" y="6" width="26" height="85" rx="4"
+                          fill={g.fill}
+                          stroke={isHover ? '#fbbf24' : '#0f172a'}
+                          strokeWidth={isHover ? 2.5 : 1.5}
+                        />
+                        {/* reflection highlight */}
+                        <rect x="5" y="10" width="3.5" height="77" fill="#ffffff" opacity="0.3" rx="2"/>
+                        {/* label */}
+                        <text x="15" y="55" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold" pointerEvents="none">
+                          {g.label}
+                        </text>
+                        {/* digital flow readout */}
+                        <rect x="0" y="95" width="30" height="14" rx="2" fill="#020617" stroke="#334155" strokeWidth="0.8"/>
+                        <text
+                          x="15" y="105" textAnchor="middle"
+                          fill={active ? '#22c55e' : '#475569'}
+                          fontSize="9" fontFamily="monospace" fontWeight="bold"
+                          pointerEvents="none"
+                        >
+                          {gasFlows[g.k]}
+                        </text>
+                        {/* active indicator LED */}
+                        {active && (
+                          <circle cx="28" cy="10" r="2" fill="#22c55e">
+                            <animate attributeName="opacity" values="0.4;1;0.4" dur="1.2s" repeatCount="indefinite"/>
+                          </circle>
+                        )}
+                        <title>{g.desc} — 현재 {gasFlows[g.k]} sccm</title>
+                      </g>
+                    );
+                  })}
+
+                  {/* Gas manifold lines going down to MFCs */}
+                  <g stroke="#64748b" strokeWidth="2" fill="none">
+                    <path d="M 40 185 L 40 215 L 260 215"/>
+                    <path d="M 75 185 L 75 215"/>
+                    <path d="M 110 185 L 110 215"/>
+                    <path d="M 145 185 L 145 215"/>
+                    <path d="M 180 185 L 180 215"/>
+                  </g>
+
+                  {/* MFC (Mass Flow Controller) boxes with status LEDs */}
+                  {[
+                    { x: 40, k: 'HCl' },
+                    { x: 75, k: 'N2' },
+                    { x: 110, k: 'O2' },
+                    { x: 145, k: 'H2O' },
+                    { x: 180, k: 'H2' },
+                  ].map((m, i) => {
+                    const active = gasFlows[m.k] > 0;
+                    return (
+                      <g key={i} transform={`translate(${m.x - 7}, 193)`}>
+                        <rect x="0" y="0" width="14" height="11" rx="1.5" fill="#1e293b" stroke="#475569" strokeWidth="0.8"/>
+                        <circle cx="7" cy="5.5" r="2.2" fill={active ? '#22c55e' : '#475569'}>
+                          {active && <animate attributeName="opacity" values="0.5;1;0.5" dur="1s" repeatCount="indefinite"/>}
+                        </circle>
+                        <title>{m.k} MFC — {active ? 'ACTIVE' : 'IDLE'}</title>
+                      </g>
+                    );
+                  })}
+                  <text x="110" y="238" textAnchor="middle" fill="#94a3b8" fontSize="9">MFC Bank</text>
+
+                  {/* ── Furnace Housing ── */}
+                  <g transform="translate(260, 140)">
+                    {/* outer metal shell */}
+                    <rect x="0" y="20" width="460" height="180" rx="12" fill="url(#oxFurnaceBody)" stroke="#0f172a" strokeWidth="2.5"/>
+                    {/* insulation bands */}
+                    <rect x="10" y="28" width="440" height="16" fill="#64748b" opacity="0.35" rx="2"/>
+                    <rect x="10" y="176" width="440" height="16" fill="#64748b" opacity="0.35" rx="2"/>
+                    <text x="230" y="40" textAnchor="middle" fill="#94a3b8" fontSize="7" opacity="0.7" letterSpacing="2">CERAMIC INSULATION</text>
+
+                    {/* Heater zones (clickable) */}
+                    {[0, 1, 2, 3, 4, 5].map(i => {
+                      const zx = 16 + i * 72;
+                      const isHover = hoveredPart === `zone_${i}`;
+                      return (
+                        <g
+                          key={i}
+                          onMouseEnter={() => setHoveredPart(`zone_${i}`)}
+                          onMouseLeave={() => setHoveredPart(null)}
+                          style={{ cursor: 'pointer' }}
+                        >
+                          {/* glow behind zone when heater on */}
+                          {heaterOn && (
+                            <ellipse
+                              cx={zx + 33}
+                              cy="110"
+                              rx="42"
+                              ry="60"
+                              fill="url(#oxHeaterGlow)"
+                              opacity="0.55"
+                            >
+                              <animate attributeName="opacity" values="0.4;0.7;0.4" dur={`${1.5 + i * 0.1}s`} repeatCount="indefinite"/>
+                            </ellipse>
+                          )}
+                          {/* heater block */}
+                          <rect
+                            x={zx} y="52" width="66" height="116" rx="3"
+                            fill={heaterOn ? '#7f1d1d' : '#1e293b'}
+                            stroke={isHover ? '#fbbf24' : (heaterOn ? '#fbbf24' : '#475569')}
+                            strokeWidth={isHover ? 2.5 : 1.5}
+                            filter={heaterOn ? 'url(#oxGlow)' : undefined}
+                          />
+                          {/* heater coils (animated wavy pattern) */}
+                          {heaterOn && (
+                            <g pointerEvents="none">
+                              {[0, 1, 2, 3].map(r => (
+                                <path
+                                  key={r}
+                                  d={`M ${zx + 4} ${72 + r * 24} Q ${zx + 20} ${60 + r * 24}, ${zx + 36} ${72 + r * 24} T ${zx + 68} ${72 + r * 24}`}
+                                  stroke="#fde047"
+                                  strokeWidth="1.5"
+                                  fill="none"
+                                  opacity="0.9"
+                                >
+                                  <animate attributeName="opacity" values="0.5;1;0.5" dur={`${1.2 + r * 0.15}s`} repeatCount="indefinite"/>
+                                </path>
+                              ))}
+                            </g>
+                          )}
+                          {/* zone label */}
+                          <text
+                            x={zx + 33} y="114"
+                            textAnchor="middle"
+                            fill={heaterOn ? '#fef3c7' : '#64748b'}
+                            fontSize="10" fontWeight="bold"
+                            pointerEvents="none"
+                          >
+                            Zone {i + 1}
+                          </text>
+                          <title>Heater Zone {i + 1} — {heaterOn ? `${temperature}°C 가열 중` : 'OFF'}</title>
+                        </g>
+                      );
+                    })}
+
+                    {/* Quartz tube (glass cylinder overlay) */}
+                    <ellipse
+                      cx="230" cy="112" rx="226" ry="34"
+                      fill="none" stroke="#7dd3fc" strokeWidth="1.2"
+                      strokeDasharray="3,3" opacity="0.6"
+                    />
+                    <rect
+                      x="4" y="84" width="452" height="56" rx="28"
+                      fill="url(#oxQuartzTube)" stroke="#7dd3fc" strokeWidth="1.5" strokeOpacity="0.7"
+                    />
+                    <text x="230" y="157" textAnchor="middle" fill="#7dd3fc" fontSize="9" opacity="0.8">Quartz Tube</text>
+
+                    {/* Temperature digital readout mounted on furnace */}
+                    <g transform="translate(340, 6)">
+                      <rect x="0" y="0" width="120" height="20" rx="3" fill="#020617" stroke="#475569" strokeWidth="1"/>
+                      <text x="6" y="14" fill="#94a3b8" fontSize="8">FURNACE T</text>
+                      <text
+                        x="114" y="15" textAnchor="end"
+                        fill={heaterOn ? '#ef4444' : '#475569'}
+                        fontSize="12" fontFamily="monospace" fontWeight="bold"
+                      >
+                        {heaterOn ? `${temperature} °C` : '--- °C'}
+                      </text>
+                      {heaterOn && (
+                        <circle cx="110" cy="15" r="0.5" fill="#ef4444">
+                          <animate attributeName="opacity" values="0;1;0" dur="1s" repeatCount="indefinite"/>
+                        </circle>
+                      )}
+                    </g>
+                  </g>
+
+                  {/* ── Load port door (left of tube) ── */}
+                  <g transform="translate(252, 222)">
+                    <rect x="0" y="0" width="10" height="44" fill="#475569" stroke="#1e293b" strokeWidth="1" rx="1"/>
+                    <circle cx="5" cy="22" r="2" fill="#fbbf24"/>
+                    <title>Load port door</title>
+                  </g>
+
+                  {/* ── Wafer Boat with wafers inside tube ── */}
+                  <g
+                    transform="translate(330, 242)"
+                    onMouseEnter={() => setHoveredPart('boat')}
+                    onMouseLeave={() => setHoveredPart(null)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {furnaceLoaded ? (
+                      <g>
+                        {/* Boat rails */}
+                        <rect x="0" y="28" width="300" height="6" rx="1.5" fill="#a78bfa"/>
+                        <rect x="-5" y="20" width="9" height="22" fill="#7c3aed" rx="1"/>
+                        <rect x="296" y="20" width="9" height="22" fill="#7c3aed" rx="1"/>
+                        {/* Wafers with oxide layer */}
+                        {[...Array(12)].map((_, i) => {
+                          const wx = 14 + i * 24;
+                          const oxidePx = Math.min((oxideThickness / 200), 3);
+                          return (
+                            <g key={i}>
+                              {/* oxide skin (grows outward as thickness increases) */}
+                              {oxideThickness > 0 && (
+                                <rect
+                                  x={wx - oxidePx} y={-2 - oxidePx}
+                                  width={7 + 2 * oxidePx} height={34 + 2 * oxidePx}
+                                  fill="url(#oxOxide)" opacity="0.9" rx="1"
+                                />
+                              )}
+                              {/* silicon wafer */}
+                              <rect x={wx} y="-2" width="7" height="34" fill="url(#oxWafer)" rx="1"/>
+                            </g>
+                          );
+                        })}
+                        <text x="150" y="56" textAnchor="middle" fill="#c4b5fd" fontSize="8">
+                          Quartz Boat · 12 wafers{oxideThickness > 0 ? ` · SiO₂ ${oxideThickness.toFixed(1)} nm` : ''}
+                        </text>
+                        <title>Wafer Boat (loaded) — 12 wafers</title>
+                      </g>
+                    ) : (
+                      <g>
+                        {/* empty slot with animated dashed hint */}
+                        <rect
+                          x="0" y="-5" width="300" height="50" rx="4"
+                          fill="none" stroke="#f59e0b" strokeWidth="2" strokeDasharray="6,4"
+                          opacity="0.9"
+                        >
+                          <animate attributeName="stroke-dashoffset" values="0;-10" dur="1s" repeatCount="indefinite"/>
+                        </rect>
+                        <text x="150" y="26" textAnchor="middle" fill="#fbbf24" fontSize="12" fontWeight="bold">
+                          ← Load wafer boat here
+                        </text>
+                        <title>Empty tube — 웨이퍼를 로드하세요</title>
+                      </g>
+                    )}
+                  </g>
+
+                  {/* ── Animated gas flow particles through tube ── */}
+                  {heaterOn && (gasFlows.O2 > 0 || gasFlows.H2O > 0 || gasFlows.H2 > 0) && (
+                    <g pointerEvents="none">
+                      {[0, 1, 2, 3, 4, 5, 6].map(i => {
+                        const color =
+                          processMode === 'wet' ? '#22d3ee' :
+                          processMode === 'pyrogenic' ? '#c084fc' :
+                          processMode === 'dry' ? '#60a5fa' : '#94a3b8';
+                        return (
+                          <circle key={i} r="3" fill={color} opacity="0">
+                            <animateMotion dur={`${3.5 + i * 0.3}s`} repeatCount="indefinite" begin={`${i * 0.5}s`}>
+                              <mpath href="#oxGasFlowPath"/>
+                            </animateMotion>
+                            <animate
+                              attributeName="opacity"
+                              values="0;0.9;0.9;0"
+                              dur={`${3.5 + i * 0.3}s`}
+                              repeatCount="indefinite"
+                              begin={`${i * 0.5}s`}
+                            />
+                          </circle>
+                        );
+                      })}
+                    </g>
+                  )}
+
+                  {/* ── Exhaust / Scrubber ── */}
+                  <g
+                    transform="translate(735, 225)"
+                    onMouseEnter={() => setHoveredPart('exhaust')}
+                    onMouseLeave={() => setHoveredPart(null)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {/* pipe connector */}
+                    <rect x="-15" y="22" width="20" height="8" fill="#475569" stroke="#1e293b" strokeWidth="1"/>
+                    {/* scrubber box */}
+                    <rect
+                      x="5" y="0" width="80" height="62" rx="4"
+                      fill="#334155"
+                      stroke={hoveredPart === 'exhaust' ? '#fbbf24' : '#0f172a'}
+                      strokeWidth={hoveredPart === 'exhaust' ? 2.5 : 2}
+                    />
+                    <text x="45" y="18" textAnchor="middle" fill="#cbd5e1" fontSize="9" fontWeight="bold">SCRUBBER</text>
+                    <text x="45" y="32" textAnchor="middle" fill="#94a3b8" fontSize="7">VAC PUMP</text>
+                    {/* pressure gauge */}
+                    <circle cx="45" cy="48" r="6" fill="#020617" stroke="#475569" strokeWidth="0.8"/>
+                    <line
+                      x1="45" y1="48"
+                      x2={45 + 4 * Math.cos((heaterOn ? -0.5 : -1.5))}
+                      y2={48 + 4 * Math.sin((heaterOn ? -0.5 : -1.5))}
+                      stroke="#22c55e" strokeWidth="1"
+                    />
+                    {/* exhaust stack with rising smoke */}
+                    <rect x="40" y="-18" width="10" height="18" fill="#475569"/>
+                    {heaterOn && (gasFlows.O2 > 0 || gasFlows.H2O > 0 || gasFlows.H2 > 0) && (
+                      <g pointerEvents="none">
+                        {[0, 1, 2].map(i => (
+                          <circle key={i} cx="45" cy="-18" r="3" fill="#94a3b8" opacity="0">
+                            <animate attributeName="cy" values="-18;-55" dur="2s" begin={`${i * 0.6}s`} repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0;0.6;0" dur="2s" begin={`${i * 0.6}s`} repeatCount="indefinite"/>
+                            <animate attributeName="r" values="2;5" dur="2s" begin={`${i * 0.6}s`} repeatCount="indefinite"/>
+                          </circle>
+                        ))}
+                      </g>
+                    )}
+                    <title>Exhaust Scrubber + Vacuum Pump</title>
+                  </g>
+
+                  {/* ── Hovered part tooltip (bottom bar) ── */}
+                  {hoveredPart && (
+                    <g>
+                      <rect x="20" y="400" width="860" height="28" rx="4" fill="#0f172a" stroke="#475569" strokeWidth="1" opacity="0.95"/>
+                      <text x="30" y="418" fill="#fbbf24" fontSize="11" fontWeight="bold">
+                        {(() => {
+                          if (hoveredPart.startsWith('cyl_')) {
+                            const k = hoveredPart.slice(4);
+                            const map = {
+                              HCl: 'HCl Cylinder · 금속 불순물을 휘발성 염화물로 제거 → 게이트 산화막 품질 향상',
+                              N2:  'N₂ Cylinder · 불활성 퍼지 가스 · 승온/냉각 중 산화 방지, idle 튜브 유지',
+                              O2:  'O₂ Cylinder · Dry 산화 반응 가스 · Si + O₂ → SiO₂ (느림, 고품질)',
+                              H2O: 'H₂O Cylinder · Wet 산화 수증기 · Si + 2H₂O → SiO₂ + 2H₂ (빠름, 두꺼움)',
+                              H2:  'H₂ Cylinder · Pyrogenic 산화 · H₂ + ½O₂ → H₂O in-situ 생성 (초고순도)',
+                            };
+                            return `▸ ${map[k] || k}  ·  현재 유량: ${gasFlows[k]} sccm`;
+                          }
+                          if (hoveredPart.startsWith('zone_')) {
+                            const n = parseInt(hoveredPart.slice(5)) + 1;
+                            return `▸ Heater Zone ${n} · 6-zone 독립 PID 제어로 튜브 축방향 온도 균일도 ±0.5°C 유지  ·  ${heaterOn ? `${temperature}°C` : 'OFF'}`;
+                          }
+                          if (hoveredPart === 'boat') {
+                            return furnaceLoaded
+                              ? `▸ Quartz Boat · 12 wafers loaded · 현재 SiO₂ 두께: ${oxideThickness.toFixed(1)} nm`
+                              : '▸ 빈 튜브 · 웨이퍼 보트를 로드해야 공정을 시작할 수 있습니다';
+                          }
+                          if (hoveredPart === 'exhaust') {
+                            return '▸ Exhaust Scrubber + Vacuum Pump · 반응 부산물과 잔여 가스를 중화/배기';
+                          }
+                          return '';
+                        })()}
+                      </text>
+                    </g>
+                  )}
                 </svg>
               </div>
 
