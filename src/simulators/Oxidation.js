@@ -1616,36 +1616,19 @@ const OxidationSimulator = ({ initialTab }) => {
                           <rect
                             x={zx} y="52" width="66" height="116" rx="3"
                             fill={heaterOn ? '#7f1d1d' : '#1e293b'}
-                            stroke={isHover ? '#fbbf24' : (heaterOn ? '#fbbf24' : '#475569')}
+                            stroke={isHover ? '#fbbf24' : (heaterOn ? '#f97316' : '#475569')}
                             strokeWidth={isHover ? 2.5 : 1.5}
                             filter={heaterOn ? 'url(#oxGlow)' : undefined}
                           />
-                          {/* heater coils (animated wavy pattern) */}
-                          {heaterOn && (
-                            <g pointerEvents="none">
-                              {[0, 1, 2, 3].map(r => (
-                                <path
-                                  key={r}
-                                  d={`M ${zx + 4} ${72 + r * 24} Q ${zx + 20} ${60 + r * 24}, ${zx + 36} ${72 + r * 24} T ${zx + 68} ${72 + r * 24}`}
-                                  stroke="#fde047"
-                                  strokeWidth="1.5"
-                                  fill="none"
-                                  opacity="0.9"
-                                >
-                                  <animate attributeName="opacity" values="0.5;1;0.5" dur={`${1.2 + r * 0.15}s`} repeatCount="indefinite"/>
-                                </path>
-                              ))}
-                            </g>
-                          )}
-                          {/* zone label */}
+                          {/* zone label — placed above the quartz tube so it never overlaps wafers/boat */}
                           <text
-                            x={zx + 33} y="114"
+                            x={zx + 33} y="72"
                             textAnchor="middle"
-                            fill={heaterOn ? '#fef3c7' : '#64748b'}
+                            fill={heaterOn ? '#fde047' : '#64748b'}
                             fontSize="10" fontWeight="bold"
                             pointerEvents="none"
                           >
-                            Zone {i + 1}
+                            Z{i + 1}
                           </text>
                           <title>Heater Zone {i + 1} — {heaterOn ? `${temperature}°C 가열 중` : 'OFF'}</title>
                         </g>
@@ -1662,7 +1645,6 @@ const OxidationSimulator = ({ initialTab }) => {
                       x="4" y="84" width="452" height="56" rx="28"
                       fill="url(#oxQuartzTube)" stroke="#7dd3fc" strokeWidth="1.5" strokeOpacity="0.7"
                     />
-                    <text x="230" y="157" textAnchor="middle" fill="#7dd3fc" fontSize="9" opacity="0.8">Quartz Tube</text>
 
                     {/* Temperature digital readout mounted on furnace */}
                     <g transform="translate(340, 6)">
@@ -1722,10 +1704,7 @@ const OxidationSimulator = ({ initialTab }) => {
                             </g>
                           );
                         })}
-                        <text x="150" y="56" textAnchor="middle" fill="#c4b5fd" fontSize="8">
-                          Quartz Boat · 12 wafers{oxideThickness > 0 ? ` · SiO₂ ${oxideThickness.toFixed(1)} nm` : ''}
-                        </text>
-                        <title>Wafer Boat (loaded) — 12 wafers</title>
+                        <title>Wafer Boat (loaded) — 12 wafers{oxideThickness > 0 ? ` · SiO₂ ${oxideThickness.toFixed(1)} nm` : ''}</title>
                       </g>
                     ) : (
                       <g>
@@ -1790,20 +1769,23 @@ const OxidationSimulator = ({ initialTab }) => {
                     <text x="33" y="14" textAnchor="middle" fill="#cbd5e1" fontSize="8" fontWeight="bold">VAC PUMP</text>
                     {/* rotor housing */}
                     <circle cx="33" cy="38" r="15" fill="#020617" stroke="#475569" strokeWidth="1"/>
-                    {/* rotor blades (rotate when pumping) */}
+                    {/* rotor blades — outer g translates to rotor center, inner g handles rotation
+                        so animateTransform does not overwrite the translate */}
                     <g transform="translate(33, 38)">
-                      {(gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && heaterOn && (
-                        <animateTransform attributeName="transform" type="rotate"
-                          from="0" to="360" dur="0.5s" repeatCount="indefinite"/>
-                      )}
-                      {[0, 60, 120, 180, 240, 300].map(ang => (
-                        <line key={ang} x1="0" y1="0" x2="0" y2="-11"
-                          stroke={(gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && heaterOn ? '#22c55e' : '#475569'}
-                          strokeWidth="1.8"
-                          strokeLinecap="round"
-                          transform={`rotate(${ang})`}
-                        />
-                      ))}
+                      <g>
+                        {[0, 60, 120, 180, 240, 300].map(ang => (
+                          <line key={ang} x1="0" y1="0" x2="0" y2="-11"
+                            stroke={(gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && heaterOn ? '#22c55e' : '#475569'}
+                            strokeWidth="1.8"
+                            strokeLinecap="round"
+                            transform={`rotate(${ang})`}
+                          />
+                        ))}
+                        {(gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && heaterOn && (
+                          <animateTransform attributeName="transform" type="rotate"
+                            from="0" to="360" dur="0.5s" repeatCount="indefinite"/>
+                        )}
+                      </g>
                     </g>
                     <circle cx="33" cy="38" r="2.2" fill="#fbbf24"/>
                     <title>Vacuum Pump · 챔버 후단에서 반응 부산물과 잔여 가스를 강제 배기</title>
