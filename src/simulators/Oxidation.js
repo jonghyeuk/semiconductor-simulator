@@ -1461,8 +1461,8 @@ const OxidationSimulator = ({ initialTab }) => {
                         <feMergeNode in="SourceGraphic"/>
                       </feMerge>
                     </filter>
-                    {/* Gas flow path for particle animation (left → right through tube) */}
-                    <path id="oxGasFlowPath" d="M 120 250 L 260 250 L 280 230 L 700 230 L 720 250 L 800 250"/>
+                    {/* Gas flow path: starts at MFC manifold bus → through gas feed pipe → into tube → out to vacuum pump */}
+                    <path id="oxGasFlowPath" d="M 40 215 L 290 215 L 290 250 L 720 250 L 760 250"/>
                   </defs>
 
                   {/* Dark background with subtle grid */}
@@ -1547,6 +1547,16 @@ const OxidationSimulator = ({ initialTab }) => {
                     <path d="M 145 185 L 145 215"/>
                     <path d="M 180 185 L 180 215"/>
                   </g>
+
+                  {/* Visible gas feed pipe: bends from MFC bus down to the quartz tube top inlet */}
+                  <g stroke="#334155" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M 260 215 L 290 215 L 290 226"/>
+                  </g>
+                  <g stroke="#94a3b8" strokeWidth="3" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M 260 215 L 290 215 L 290 226"/>
+                  </g>
+                  {/* gas inlet flange sitting on top of quartz tube */}
+                  <rect x="284" y="222" width="12" height="7" rx="1" fill="#64748b" stroke="#1e293b" strokeWidth="0.8"/>
 
                   {/* MFC (Mass Flow Controller) boxes with status LEDs */}
                   {[
@@ -1761,46 +1771,103 @@ const OxidationSimulator = ({ initialTab }) => {
                     </g>
                   )}
 
-                  {/* ── Exhaust / Scrubber ── */}
+                  {/* ── Vacuum Pump (directly after chamber) ── */}
                   <g
-                    transform="translate(735, 225)"
-                    onMouseEnter={() => setHoveredPart('exhaust')}
+                    transform="translate(728, 222)"
+                    onMouseEnter={() => setHoveredPart('vacpump')}
                     onMouseLeave={() => setHoveredPart(null)}
                     style={{ cursor: 'pointer' }}
                   >
-                    {/* pipe connector */}
-                    <rect x="-15" y="22" width="20" height="8" fill="#475569" stroke="#1e293b" strokeWidth="1"/>
-                    {/* scrubber box */}
+                    {/* pipe from chamber → pump inlet */}
+                    <rect x="-12" y="25" width="14" height="8" fill="#475569" stroke="#1e293b" strokeWidth="1"/>
+                    {/* pump housing */}
                     <rect
-                      x="5" y="0" width="80" height="62" rx="4"
-                      fill="#334155"
-                      stroke={hoveredPart === 'exhaust' ? '#fbbf24' : '#0f172a'}
-                      strokeWidth={hoveredPart === 'exhaust' ? 2.5 : 2}
+                      x="2" y="0" width="62" height="62" rx="4"
+                      fill="#1f2937"
+                      stroke={hoveredPart === 'vacpump' ? '#fbbf24' : '#0f172a'}
+                      strokeWidth={hoveredPart === 'vacpump' ? 2.5 : 2}
                     />
-                    <text x="45" y="18" textAnchor="middle" fill="#cbd5e1" fontSize="9" fontWeight="bold">SCRUBBER</text>
-                    <text x="45" y="32" textAnchor="middle" fill="#94a3b8" fontSize="7">VAC PUMP</text>
+                    <text x="33" y="14" textAnchor="middle" fill="#cbd5e1" fontSize="8" fontWeight="bold">VAC PUMP</text>
+                    {/* rotor housing */}
+                    <circle cx="33" cy="38" r="15" fill="#020617" stroke="#475569" strokeWidth="1"/>
+                    {/* rotor blades (rotate when pumping) */}
+                    <g transform="translate(33, 38)">
+                      {(gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && heaterOn && (
+                        <animateTransform attributeName="transform" type="rotate"
+                          from="0" to="360" dur="0.5s" repeatCount="indefinite"/>
+                      )}
+                      {[0, 60, 120, 180, 240, 300].map(ang => (
+                        <line key={ang} x1="0" y1="0" x2="0" y2="-11"
+                          stroke={(gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && heaterOn ? '#22c55e' : '#475569'}
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          transform={`rotate(${ang})`}
+                        />
+                      ))}
+                    </g>
+                    <circle cx="33" cy="38" r="2.2" fill="#fbbf24"/>
+                    <title>Vacuum Pump · 챔버 후단에서 반응 부산물과 잔여 가스를 강제 배기</title>
+                  </g>
+
+                  {/* pipe between vacuum pump and scrubber */}
+                  <g stroke="#475569" strokeWidth="4" fill="none" strokeLinecap="round">
+                    <path d="M 792 250 L 810 250"/>
+                  </g>
+                  <g stroke="#94a3b8" strokeWidth="1.5" fill="none" strokeLinecap="round">
+                    <path d="M 792 250 L 810 250"/>
+                  </g>
+
+                  {/* ── Scrubber (after vacuum pump) ── */}
+                  <g
+                    transform="translate(810, 222)"
+                    onMouseEnter={() => setHoveredPart('scrubber')}
+                    onMouseLeave={() => setHoveredPart(null)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {/* scrubber housing */}
+                    <rect
+                      x="0" y="0" width="66" height="62" rx="4"
+                      fill="#334155"
+                      stroke={hoveredPart === 'scrubber' ? '#fbbf24' : '#0f172a'}
+                      strokeWidth={hoveredPart === 'scrubber' ? 2.5 : 2}
+                    />
+                    <text x="33" y="14" textAnchor="middle" fill="#cbd5e1" fontSize="8" fontWeight="bold">SCRUBBER</text>
+                    {/* neutralizing liquid bath */}
+                    <rect x="6" y="24" width="54" height="32" rx="2" fill="#1e40af" opacity="0.38"/>
+                    <line x1="6" y1="30" x2="60" y2="30" stroke="#60a5fa" strokeWidth="0.8" opacity="0.6"/>
+                    {/* bubbles when gas flows through */}
+                    {(gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && heaterOn && (
+                      <g pointerEvents="none">
+                        {[0, 1, 2, 3].map(i => (
+                          <circle key={i} cx={14 + i * 13} cy="52" r="1.8" fill="#93c5fd">
+                            <animate attributeName="cy" values="54;28" dur="1.8s" begin={`${i * 0.45}s`} repeatCount="indefinite"/>
+                            <animate attributeName="opacity" values="0;0.9;0" dur="1.8s" begin={`${i * 0.45}s`} repeatCount="indefinite"/>
+                          </circle>
+                        ))}
+                      </g>
+                    )}
                     {/* pressure gauge */}
-                    <circle cx="45" cy="48" r="6" fill="#020617" stroke="#475569" strokeWidth="0.8"/>
+                    <circle cx="52" cy="14" r="5" fill="#020617" stroke="#475569" strokeWidth="0.8"/>
                     <line
-                      x1="45" y1="48"
-                      x2={45 + 4 * Math.cos((heaterOn ? -0.5 : -1.5))}
-                      y2={48 + 4 * Math.sin((heaterOn ? -0.5 : -1.5))}
+                      x1="52" y1="14"
+                      x2={52 + 3.5 * Math.cos(heaterOn ? -0.5 : -1.5)}
+                      y2={14 + 3.5 * Math.sin(heaterOn ? -0.5 : -1.5)}
                       stroke="#22c55e" strokeWidth="1"
                     />
-                    {/* exhaust stack with rising smoke */}
-                    <rect x="40" y="-18" width="10" height="18" fill="#475569"/>
-                    {heaterOn && (gasFlows.O2 > 0 || gasFlows.H2O > 0 || gasFlows.H2 > 0) && (
+                    {/* exhaust stack rising from scrubber */}
+                    <rect x="28" y="-20" width="10" height="20" fill="#475569" stroke="#1e293b" strokeWidth="0.8"/>
+                    {heaterOn && (gasFlows.O2 + gasFlows.H2O + gasFlows.H2) > 0 && (
                       <g pointerEvents="none">
                         {[0, 1, 2].map(i => (
-                          <circle key={i} cx="45" cy="-18" r="3" fill="#94a3b8" opacity="0">
-                            <animate attributeName="cy" values="-18;-55" dur="2s" begin={`${i * 0.6}s`} repeatCount="indefinite"/>
+                          <circle key={i} cx="33" cy="-20" r="3" fill="#94a3b8" opacity="0">
+                            <animate attributeName="cy" values="-20;-55" dur="2s" begin={`${i * 0.6}s`} repeatCount="indefinite"/>
                             <animate attributeName="opacity" values="0;0.6;0" dur="2s" begin={`${i * 0.6}s`} repeatCount="indefinite"/>
                             <animate attributeName="r" values="2;5" dur="2s" begin={`${i * 0.6}s`} repeatCount="indefinite"/>
                           </circle>
                         ))}
                       </g>
                     )}
-                    <title>Exhaust Scrubber + Vacuum Pump</title>
+                    <title>Scrubber · 배기 가스를 중화/정화하여 대기로 방출</title>
                   </g>
 
                   {/* ── Hovered part tooltip (bottom bar) ── */}
@@ -1829,8 +1896,11 @@ const OxidationSimulator = ({ initialTab }) => {
                               ? `▸ Quartz Boat · 12 wafers loaded · 현재 SiO₂ 두께: ${oxideThickness.toFixed(1)} nm`
                               : '▸ 빈 튜브 · 웨이퍼 보트를 로드해야 공정을 시작할 수 있습니다';
                           }
-                          if (hoveredPart === 'exhaust') {
-                            return '▸ Exhaust Scrubber + Vacuum Pump · 반응 부산물과 잔여 가스를 중화/배기';
+                          if (hoveredPart === 'vacpump') {
+                            return '▸ Vacuum Pump · 챔버 후단에서 반응 부산물과 잔여 가스를 강제 배기 (챔버 직후 배치)';
+                          }
+                          if (hoveredPart === 'scrubber') {
+                            return '▸ Scrubber · 펌프를 거친 배기 가스를 중화/정화한 뒤 대기로 방출';
                           }
                           return '';
                         })()}
