@@ -2089,74 +2089,35 @@ const OxidationSimulator = ({ initialTab }) => {
                   </div>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-semibold mb-3">장비 제어</h5>
-                  
-                  <div className="space-y-4">
-                    <div className="p-4 bg-white rounded-lg border-2 border-red-200 shadow-sm">
-                      <label className="block text-sm font-medium mb-2 text-red-800">온도: {temperature}°C</label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="800"
-                          max="1200"
-                          step="25"
-                          value={temperature}
-                          onChange={(e) => setTemperature(Number(e.target.value))}
-                          className="w-full h-4 bg-red-100 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(temperature-800)/400*100}%, #fecaca ${(temperature-800)/400*100}%, #fecaca 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>800°C</span>
-                          <span>1200°C</span>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-center">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                          temperature >= 1100 ? 'bg-red-100 text-red-800' :
-                          temperature >= 1000 ? 'bg-orange-100 text-orange-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {temperature >= 1100 ? '고온' : temperature >= 1000 ? '중온' : '저온'}
-                        </span>
-                      </div>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h5 className="font-semibold mb-2 text-sm">장비 제어</h5>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 bg-white rounded px-2 py-1 border border-gray-200">
+                      <span className="w-8 text-xs font-bold text-red-600">온도</span>
+                      <span className="w-14 text-xs font-mono text-right font-semibold text-gray-700">{temperature}°C</span>
+                      <input
+                        type="range" min="800" max="1200" step="25"
+                        value={temperature}
+                        onChange={(e) => setTemperature(Number(e.target.value))}
+                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                        style={{ background: `linear-gradient(to right, #dc2626 0%, #dc2626 ${(temperature-800)/400*100}%, #fecaca ${(temperature-800)/400*100}%, #fecaca 100%)` }}
+                      />
+                      <span className="w-8 text-[10px] text-gray-400 text-right">1200</span>
                     </div>
-
-                    <div className="p-4 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
-                      <label className="block text-sm font-medium mb-2 text-blue-800">시간: {time}분</label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="10"
-                          max="180"
-                          step="10"
-                          value={time}
-                          onChange={(e) => setTime(Number(e.target.value))}
-                          className="w-full h-4 bg-blue-100 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #2563eb 0%, #2563eb ${(time-10)/170*100}%, #dbeafe ${(time-10)/170*100}%, #dbeafe 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>10분</span>
-                          <span>180분</span>
-                        </div>
-                      </div>
-                      <div className="mt-2 text-center">
-                        <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                          time >= 120 ? 'bg-blue-100 text-blue-800' :
-                          time >= 60 ? 'bg-green-100 text-green-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
-                          {time >= 120 ? '장시간' : time >= 60 ? '중간' : '단시간'}
-                        </span>
-                      </div>
+                    <div className="flex items-center gap-2 bg-white rounded px-2 py-1 border border-gray-200">
+                      <span className="w-8 text-xs font-bold text-blue-600">시간</span>
+                      <span className="w-14 text-xs font-mono text-right font-semibold text-gray-700">{time}분</span>
+                      <input
+                        type="range" min="10" max="180" step="10"
+                        value={time}
+                        onChange={(e) => setTime(Number(e.target.value))}
+                        className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                        style={{ background: `linear-gradient(to right, #2563eb 0%, #2563eb ${(time-10)/170*100}%, #dbeafe ${(time-10)/170*100}%, #dbeafe 100%)` }}
+                      />
+                      <span className="w-8 text-[10px] text-gray-400 text-right">180</span>
                     </div>
-
-                    <p className="text-xs text-gray-500 text-center mt-1">* 웨이퍼 로드·히터 ON/OFF 는 개략도 하단 원형 버튼으로 조작</p>
                   </div>
+                  <p className="text-[10px] text-gray-400 text-center mt-1.5">* 웨이퍼 로드·히터 ON/OFF 는 개략도 하단 원형 버튼</p>
                 </div>
               </div>
             </div>
