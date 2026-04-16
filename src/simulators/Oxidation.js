@@ -1852,46 +1852,40 @@ const OxidationSimulator = ({ initialTab }) => {
                     <title>Scrubber · 배기 가스를 중화/정화하여 대기로 방출</title>
                   </g>
 
-                  {/* ── Equipment action buttons (SVG, bottom-center gap) ── */}
-                  <g transform="translate(580, 355)">
+                  {/* ── Equipment action buttons (SVG, stacked vertically in the gap) ── */}
+                  <g transform="translate(568, 356)">
                     {/* Wafer Load button */}
-                    <g
-                      onClick={() => setFurnaceLoaded(!furnaceLoaded)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <rect x="0" y="0" width="64" height="64" rx="32"
+                    <g onClick={() => setFurnaceLoaded(!furnaceLoaded)} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="0" width="38" height="38" rx="19"
                         fill={furnaceLoaded ? '#166534' : '#1e293b'}
                         stroke={furnaceLoaded ? '#22c55e' : '#475569'}
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                       />
-                      <text x="32" y="28" textAnchor="middle" fill={furnaceLoaded ? '#bbf7d0' : '#94a3b8'} fontSize="8" fontWeight="bold">WAFER</text>
-                      <text x="32" y="42" textAnchor="middle" fill={furnaceLoaded ? '#4ade80' : '#64748b'} fontSize="10" fontWeight="bold">
+                      <text x="19" y="16" textAnchor="middle" fill={furnaceLoaded ? '#bbf7d0' : '#94a3b8'} fontSize="6" fontWeight="bold">WAFER</text>
+                      <text x="19" y="27" textAnchor="middle" fill={furnaceLoaded ? '#4ade80' : '#64748b'} fontSize="8" fontWeight="bold">
                         {furnaceLoaded ? 'LOADED' : 'LOAD'}
                       </text>
-                      <title>{furnaceLoaded ? '클릭하면 웨이퍼 언로드' : '클릭하면 웨이퍼 로드'}</title>
+                      <title>{furnaceLoaded ? '클릭 → 웨이퍼 언로드' : '클릭 → 웨이퍼 로드'}</title>
                     </g>
 
                     {/* Heater ON/OFF button */}
-                    <g
-                      onClick={() => setHeaterOn(!heaterOn)}
-                      style={{ cursor: 'pointer' }}
-                    >
-                      <rect x="78" y="0" width="64" height="64" rx="32"
+                    <g onClick={() => setHeaterOn(!heaterOn)} style={{ cursor: 'pointer' }}>
+                      <rect x="0" y="42" width="38" height="38" rx="19"
                         fill={heaterOn ? '#7f1d1d' : '#1e293b'}
                         stroke={heaterOn ? '#ef4444' : '#475569'}
-                        strokeWidth="2.5"
+                        strokeWidth="2"
                       />
                       {heaterOn && (
-                        <rect x="78" y="0" width="64" height="64" rx="32"
+                        <rect x="0" y="42" width="38" height="38" rx="19"
                           fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6">
                           <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite"/>
                         </rect>
                       )}
-                      <text x="110" y="28" textAnchor="middle" fill={heaterOn ? '#fecaca' : '#94a3b8'} fontSize="8" fontWeight="bold">HEATER</text>
-                      <text x="110" y="42" textAnchor="middle" fill={heaterOn ? '#fca5a5' : '#64748b'} fontSize="11" fontWeight="bold">
+                      <text x="19" y="58" textAnchor="middle" fill={heaterOn ? '#fecaca' : '#94a3b8'} fontSize="6" fontWeight="bold">HEATER</text>
+                      <text x="19" y="69" textAnchor="middle" fill={heaterOn ? '#fca5a5' : '#64748b'} fontSize="8" fontWeight="bold">
                         {heaterOn ? 'ON' : 'OFF'}
                       </text>
-                      <title>{heaterOn ? '클릭하면 히터 OFF' : '클릭하면 히터 ON'}</title>
+                      <title>{heaterOn ? '클릭 → 히터 OFF' : '클릭 → 히터 ON'}</title>
                     </g>
                   </g>
 
@@ -1981,7 +1975,7 @@ const OxidationSimulator = ({ initialTab }) => {
                 </svg>
 
                 {/* ── HTML overlay: Process status + Start button (bottom-right) ── */}
-                <div className="absolute right-[2%] bottom-[3%] w-[34%] max-w-[310px] rounded-lg bg-slate-900/85 backdrop-blur-sm border-2 border-slate-600 shadow-2xl p-3">
+                <div className="absolute right-[2%] bottom-[3%] w-[30%] max-w-[280px] rounded-lg bg-slate-900/85 backdrop-blur-sm border-2 border-slate-600 shadow-2xl p-3">
                   {/* Header row */}
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] font-bold text-slate-400 tracking-widest">PROCESS STATUS</span>
