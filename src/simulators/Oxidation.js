@@ -1636,11 +1636,6 @@ const OxidationSimulator = ({ initialTab }) => {
                     })}
 
                     {/* Quartz tube (glass cylinder overlay) */}
-                    <ellipse
-                      cx="230" cy="112" rx="226" ry="34"
-                      fill="none" stroke="#7dd3fc" strokeWidth="1.2"
-                      strokeDasharray="3,3" opacity="0.6"
-                    />
                     <rect
                       x="4" y="84" width="452" height="56" rx="28"
                       fill="url(#oxQuartzTube)" stroke="#7dd3fc" strokeWidth="1.5" strokeOpacity="0.7"
