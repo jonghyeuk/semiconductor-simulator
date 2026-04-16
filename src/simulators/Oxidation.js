@@ -43,6 +43,7 @@ const OxidationSimulator = ({ initialTab }) => {
   const [growthRate, setGrowthRate] = useState(0);
   const [stress, setStress] = useState(0);
   const [refractiveIndex, setRefractiveIndex] = useState(1.46);
+  const [oxideQuality, setOxideQuality] = useState(null); // { grade:'A'|'B'|'C'|'D', score:0-100, issues:[] }
   
   const [animatedThickness, setAnimatedThickness] = useState(10);
   const [temperatureBlink, setTemperatureBlink] = useState(true);
@@ -178,12 +179,72 @@ const OxidationSimulator = ({ initialTab }) => {
     return orientationEffect * dopingEffect * initialOxideEffect * tempPressureEffect;
   };
 
+  // Evaluate oxide film quality based on process conditions
+  const evaluateOxideQuality = (mode, temp, gasFlowState) => {
+    let score = 100;
+    const issues = [];
+
+    // --- Gas ratio issues ---
+    if (mode === 'wet' && gasFlowState.H2O > 200) {
+      const penalty = Math.min((gasFlowState.H2O - 200) / 100 * 25, 30);
+      score -= penalty;
+      issues.push('H₂O 과다: 산화막 밀도 저하, 누설전류 증가 우려');
+    }
+    if (mode === 'pyrogenic') {
+      const ratio = gasFlowState.O2 > 0 ? gasFlowState.H2 / gasFlowState.O2 : 0;
+      if (ratio > 0.6) {
+        score -= 20;
+        issues.push('H₂/O₂ 비율 과다: 불완전 연소 → 잔류 H₂ → 막질 불량');
+      } else if (ratio < 0.3 && gasFlowState.H2 > 0) {
+        score -= 10;
+        issues.push('H₂/O₂ 비율 부족: 수증기 생성량 저하');
+      }
+    }
+    if (gasFlowState.HCl > 0 && gasFlowState.HCl <= 5) {
+      score += 5; // small bonus for proper HCl gettering
+      issues.push('HCl 게터링 적용: 금속 불순물 제거 → 품질 향상');
+    } else if (gasFlowState.HCl > 5) {
+      const penalty = Math.min((gasFlowState.HCl - 5) / 10 * 20, 25);
+      score -= penalty;
+      issues.push('HCl 과다 (>' + gasFlowState.HCl + ' sccm): 산화막 식각 및 장비 부식 위험');
+    }
+    if (gasFlowState.N2 < 80) {
+      score -= 10;
+      issues.push('N₂ 퍼지 부족: 대기 오염 유입, 불순물 혼입 우려');
+    }
+
+    // --- Temperature appropriateness ---
+    if (mode === 'dry' && temp > 1100) {
+      score -= 10;
+      issues.push('Dry 고온 (>1100°C): 급속 성장 → 계면 거칠기 증가, 응력 상승');
+    }
+    if (mode === 'dry' && temp >= 900 && temp <= 1000) {
+      score += 5; // optimal range for gate oxide
+    }
+    if ((mode === 'wet' || mode === 'pyrogenic') && temp < 900) {
+      score -= 10;
+      issues.push('Wet 저온 (<900°C): 성장 속도 매우 느리고 막질 불균일');
+    }
+
+    // --- Dry + low flow ---
+    if (mode === 'dry' && gasFlowState.O2 > 0 && gasFlowState.O2 < 50) {
+      score -= 10;
+      issues.push('O₂ 유량 부족: 불균일 산화 우려');
+    }
+
+    score = Math.max(0, Math.min(100, score));
+    const grade = score >= 85 ? 'A' : score >= 70 ? 'B' : score >= 50 ? 'C' : 'D';
+    if (issues.length === 0) issues.push('양호한 공정 조건');
+    return { grade, score, issues };
+  };
+
   const runSimulation = () => {
     setIsSimulating(true);
     setSimulationProgress(0);
-    
+    setOxideQuality(null);
+
     const oxidationType = (processMode === 'wet' || processMode === 'pyrogenic') ? 'wet' : 'dry';
-    
+
     let effectiveGasFlow = 0;
     if (oxidationType === 'wet') {
       effectiveGasFlow = gasFlows.H2O;
@@ -193,29 +254,31 @@ const OxidationSimulator = ({ initialTab }) => {
     } else {
       effectiveGasFlow = gasFlows.O2;
     }
-    
+
     if (effectiveGasFlow === 0) {
       alert('경고: 산화 가스 플로우가 0입니다. 가스를 공급해주세요.');
       setIsSimulating(false);
       return;
     }
-    
+
     const interval = setInterval(() => {
       setSimulationProgress(prev => {
         if (prev >= 100) {
           clearInterval(interval);
           setIsSimulating(false);
-          
+
           const thickness = calculateOxideGrowth(temperature, time, oxidationType, effectiveGasFlow);
           setOxideThickness(thickness);
           setGrowthRate(thickness / time);
-          
+
           const thermalMismatch = (temperature - 25) * 2.3e-6;
           setStress(-300 * thermalMismatch * thickness);
-          
+
           const densityFactor = Math.min(thickness / 100, 1);
           setRefractiveIndex(1.46 + 0.02 * densityFactor);
-          
+
+          setOxideQuality(evaluateOxideQuality(processMode, temperature, gasFlows));
+
           return 100;
         }
         return prev + 2;
@@ -1987,14 +2050,38 @@ const OxidationSimulator = ({ initialTab }) => {
                   {/* Result — only visible AFTER running the process */}
                   {oxideThickness > 0 && !isSimulating ? (
                     <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
-                      <div className="text-[9px] text-green-400 font-semibold tracking-wider">RESULT · SiO₂</div>
-                      <div className="flex items-baseline gap-1 font-mono leading-none">
+                      <div className="flex items-center justify-between">
+                        <div className="text-[9px] text-green-400 font-semibold tracking-wider">RESULT · SiO₂</div>
+                        {oxideQuality && (
+                          <span className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
+                            oxideQuality.grade === 'A' ? 'bg-green-500/20 text-green-300 border border-green-500/50' :
+                            oxideQuality.grade === 'B' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/50' :
+                            oxideQuality.grade === 'C' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/50' :
+                            'bg-red-500/20 text-red-300 border border-red-500/50'
+                          }`}>
+                            Grade {oxideQuality.grade}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-baseline gap-1 font-mono leading-none mt-1">
                         <span className="text-2xl font-bold text-orange-400 tabular-nums">
                           {oxideThickness.toFixed(1)}
                         </span>
                         <span className="text-[10px] text-slate-500">nm</span>
                         <span className="text-[9px] text-slate-600 ml-auto">{growthRate.toFixed(2)} nm/min</span>
                       </div>
+                      {oxideQuality && oxideQuality.issues.length > 0 && (
+                        <div className="mt-1.5 pt-1.5 border-t border-slate-800 space-y-0.5">
+                          {oxideQuality.issues.map((issue, idx) => (
+                            <div key={idx} className={`text-[8px] leading-tight ${
+                              issue.startsWith('HCl 게터링') || issue.startsWith('양호')
+                                ? 'text-green-400' : 'text-amber-400'
+                            }`}>
+                              {issue.startsWith('HCl 게터링') || issue.startsWith('양호') ? '✓ ' : '⚠ '}{issue}
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
@@ -2061,23 +2148,40 @@ const OxidationSimulator = ({ initialTab }) => {
                       { key: 'HCl', label: 'HCl', fg: '#f59e0b', bg: '#fef3c7', min: 0, max: 50, step: 1 },
                     ].map(g => {
                       const pct = ((gasFlows[g.key] - g.min) / (g.max - g.min)) * 100;
+                      // Real-time warnings
+                      let warn = null;
+                      if (g.key === 'H2O' && gasFlows.H2O > 200 && (processMode === 'wet' || processMode === 'pyrogenic'))
+                        warn = '⚠ H₂O > 200: 막질 밀도 저하, 누설전류 증가 우려';
+                      if (g.key === 'H2' && processMode === 'pyrogenic' && gasFlows.O2 > 0 && gasFlows.H2 / gasFlows.O2 > 0.6)
+                        warn = '⚠ H₂/O₂ 비율 과다: 불완전 연소 위험';
+                      if (g.key === 'HCl' && gasFlows.HCl > 5)
+                        warn = '⚠ HCl > 5%: 산화막 식각·장비 부식 위험';
+                      if (g.key === 'N2' && gasFlows.N2 < 80)
+                        warn = '⚠ N₂ 부족: 대기 오염 유입, 불순물 혼입 우려';
+                      if (g.key === 'O2' && processMode === 'dry' && gasFlows.O2 > 0 && gasFlows.O2 < 50)
+                        warn = '⚠ O₂ 부족: 불균일 산화 우려';
                       return (
-                        <div key={g.key} className="flex items-center gap-2 bg-white rounded px-2 py-1 border border-gray-200">
-                          <span className="w-8 text-xs font-bold" style={{ color: g.fg }}>{g.label}</span>
-                          <span className="w-8 text-xs font-mono text-right font-semibold text-gray-700">{gasFlows[g.key]}</span>
-                          <input
-                            type="range"
-                            min={g.min}
-                            max={g.max}
-                            step={g.step}
-                            value={gasFlows[g.key]}
-                            onChange={(e) => setGasFlows({...gasFlows, [g.key]: Number(e.target.value)})}
-                            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
-                            style={{
-                              background: `linear-gradient(to right, ${g.fg} 0%, ${g.fg} ${pct}%, ${g.bg} ${pct}%, ${g.bg} 100%)`
-                            }}
-                          />
-                          <span className="w-7 text-[10px] text-gray-400 text-right">{g.max}</span>
+                        <div key={g.key}>
+                          <div className={`flex items-center gap-2 bg-white rounded px-2 py-1 border ${warn ? 'border-amber-400' : 'border-gray-200'}`}>
+                            <span className="w-8 text-xs font-bold" style={{ color: g.fg }}>{g.label}</span>
+                            <span className="w-8 text-xs font-mono text-right font-semibold text-gray-700">{gasFlows[g.key]}</span>
+                            <input
+                              type="range"
+                              min={g.min}
+                              max={g.max}
+                              step={g.step}
+                              value={gasFlows[g.key]}
+                              onChange={(e) => setGasFlows({...gasFlows, [g.key]: Number(e.target.value)})}
+                              className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                              style={{
+                                background: `linear-gradient(to right, ${g.fg} 0%, ${g.fg} ${pct}%, ${g.bg} ${pct}%, ${g.bg} 100%)`
+                              }}
+                            />
+                            <span className="w-7 text-[10px] text-gray-400 text-right">{g.max}</span>
+                          </div>
+                          {warn && (
+                            <div className="text-[10px] text-amber-600 bg-amber-50 border border-amber-200 rounded px-2 py-0.5 mt-0.5">{warn}</div>
+                          )}
                         </div>
                       );
                     })}
