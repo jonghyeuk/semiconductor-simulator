@@ -1420,7 +1420,7 @@ const OxidationSimulator = ({ initialTab }) => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h4 className="text-lg font-semibold mb-4">수평형 열산화 장비 (Dry와 Wet 공용)</h4>
               
-              <div className="mb-6 rounded-xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-3 border-2 border-slate-700 shadow-2xl">
+              <div className="relative mb-6 rounded-xl bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 p-3 border-2 border-slate-700 shadow-2xl">
                 <svg viewBox="0 0 900 440" className="w-full h-auto" preserveAspectRatio="xMidYMid meet">
                   <defs>
                     {/* Metallic furnace body gradient */}
@@ -1852,41 +1852,41 @@ const OxidationSimulator = ({ initialTab }) => {
                     <title>Scrubber · 배기 가스를 중화/정화하여 대기로 방출</title>
                   </g>
 
-                  {/* ── Digital LED panel at bottom (current process parameters) ── */}
+                  {/* ── Digital LED panel at bottom-left (compact gas + furnace readout) ── */}
                   <g transform="translate(30, 348)">
                     {/* outer bezel */}
-                    <rect x="0" y="0" width="840" height="82" rx="8" fill="#020617" stroke="#1e293b" strokeWidth="2"/>
+                    <rect x="0" y="0" width="530" height="82" rx="8" fill="#020617" stroke="#1e293b" strokeWidth="2"/>
                     {/* screen */}
-                    <rect x="4" y="4" width="832" height="74" rx="6" fill="#000000" stroke="#334155" strokeWidth="0.8"/>
+                    <rect x="4" y="4" width="522" height="74" rx="6" fill="#000000" stroke="#334155" strokeWidth="0.8"/>
 
                     {/* header strip */}
-                    <rect x="4" y="4" width="832" height="15" fill="#0f172a"/>
+                    <rect x="4" y="4" width="522" height="15" fill="#0f172a"/>
                     <text x="12" y="15" fill="#64748b" fontSize="8" fontWeight="bold" letterSpacing="2">
-                      ▸ PROCESS CONTROL PANEL
+                      ▸ PROCESS PANEL
                     </text>
-                    <circle cx="802" cy="11" r="3" fill={heaterOn ? '#22c55e' : '#475569'}>
+                    <circle cx="494" cy="11" r="3" fill={heaterOn ? '#22c55e' : '#475569'}>
                       {heaterOn && (
                         <animate attributeName="opacity" values="0.3;1;0.3" dur="1.5s" repeatCount="indefinite"/>
                       )}
                     </circle>
-                    <text x="820" y="15" textAnchor="end" fill="#64748b" fontSize="7" fontFamily="monospace">
+                    <text x="512" y="15" textAnchor="end" fill="#64748b" fontSize="7" fontFamily="monospace">
                       {heaterOn ? 'ACTIVE' : ' IDLE '}
                     </text>
 
-                    {/* ── Row 1: GAS FLOWS ── */}
-                    <g transform="translate(16, 32)">
-                      <text x="0" y="9" fill="#475569" fontSize="8" fontWeight="bold" letterSpacing="1">GAS FLOW [sccm]</text>
+                    {/* ── Row 1: GAS FLOWS (5 compact boxes) ── */}
+                    <g transform="translate(14, 32)">
+                      <text x="0" y="9" fill="#475569" fontSize="8" fontWeight="bold" letterSpacing="1">GAS</text>
                       {[
-                        { k: 'O2',  label: 'O2',  x: 118, color: '#60a5fa' },
-                        { k: 'H2O', label: 'H2O', x: 238, color: '#22d3ee' },
-                        { k: 'H2',  label: 'H2',  x: 358, color: '#34d399' },
-                        { k: 'N2',  label: 'N2',  x: 478, color: '#cbd5e1' },
-                        { k: 'HCl', label: 'HCl', x: 598, color: '#fbbf24' },
+                        { k: 'O2',  label: 'O2',  x: 34,  color: '#60a5fa' },
+                        { k: 'H2O', label: 'H2O', x: 132, color: '#22d3ee' },
+                        { k: 'H2',  label: 'H2',  x: 230, color: '#34d399' },
+                        { k: 'N2',  label: 'N2',  x: 328, color: '#cbd5e1' },
+                        { k: 'HCl', label: 'HCl', x: 408, color: '#fbbf24' },
                       ].map(g => (
                         <g key={g.k}>
-                          <rect x={g.x - 4} y="-4" width="108" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                          <text x={g.x + 2} y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">{g.label}</text>
-                          <text x={g.x + 98} y="11" textAnchor="end"
+                          <rect x={g.x - 2} y="-4" width="92" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
+                          <text x={g.x + 3} y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">{g.label}</text>
+                          <text x={g.x + 86} y="11" textAnchor="end"
                             fill={gasFlows[g.k] > 0 ? g.color : '#1e293b'}
                             fontSize="14" fontFamily="monospace" fontWeight="bold">
                             {String(gasFlows[g.k]).padStart(3, '0')}
@@ -1895,34 +1895,34 @@ const OxidationSimulator = ({ initialTab }) => {
                       ))}
                     </g>
 
-                    {/* ── Row 2: FURNACE + MODE + STATUS ── */}
-                    <g transform="translate(16, 58)">
-                      <text x="0" y="9" fill="#475569" fontSize="8" fontWeight="bold" letterSpacing="1">FURNACE SETTING</text>
+                    {/* ── Row 2: FURNACE T / t / MODE ── */}
+                    <g transform="translate(14, 58)">
+                      <text x="0" y="9" fill="#475569" fontSize="8" fontWeight="bold" letterSpacing="1">FURN</text>
 
                       {/* Temperature */}
-                      <rect x="114" y="-4" width="108" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="120" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">T</text>
-                      <text x="198" y="11" textAnchor="end"
+                      <rect x="34" y="-4" width="150" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
+                      <text x="40" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">T</text>
+                      <text x="156" y="11" textAnchor="end"
                         fill={heaterOn ? '#ef4444' : '#1e293b'}
                         fontSize="14" fontFamily="monospace" fontWeight="bold">
                         {String(temperature).padStart(4, '0')}
                       </text>
-                      <text x="216" y="10" fill="#64748b" fontSize="8" fontFamily="monospace">°C</text>
+                      <text x="174" y="10" fill="#64748b" fontSize="8" fontFamily="monospace">°C</text>
 
                       {/* Time */}
-                      <rect x="234" y="-4" width="108" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="240" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">t</text>
-                      <text x="320" y="11" textAnchor="end"
+                      <rect x="194" y="-4" width="150" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
+                      <text x="200" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">t</text>
+                      <text x="316" y="11" textAnchor="end"
                         fill="#fbbf24"
                         fontSize="14" fontFamily="monospace" fontWeight="bold">
                         {String(time).padStart(3, '0')}
                       </text>
-                      <text x="332" y="10" fill="#64748b" fontSize="7" fontFamily="monospace">min</text>
+                      <text x="328" y="10" fill="#64748b" fontSize="7" fontFamily="monospace">min</text>
 
                       {/* Mode */}
-                      <rect x="354" y="-4" width="108" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
+                      <rect x="354" y="-4" width="144" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
                       <text x="360" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">MODE</text>
-                      <text x="456" y="11" textAnchor="end"
+                      <text x="492" y="11" textAnchor="end"
                         fill={
                           processMode === 'dry' ? '#60a5fa' :
                           processMode === 'wet' ? '#22d3ee' :
@@ -1933,31 +1933,30 @@ const OxidationSimulator = ({ initialTab }) => {
                          processMode === 'wet' ? 'WET' :
                          processMode === 'pyrogenic' ? 'PYRO' : '---'}
                       </text>
+                    </g>
+                  </g>
+                </svg>
 
-                      {/* Heater status */}
-                      <rect x="474" y="-4" width="86" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="480" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">HTR</text>
-                      <text x="554" y="11" textAnchor="end"
-                        fill={heaterOn ? '#22c55e' : '#475569'}
-                        fontSize="12" fontFamily="monospace" fontWeight="bold">
-                        {heaterOn ? 'ON' : 'OFF'}
-                      </text>
+                {/* ── HTML overlay: Process status + Start button (bottom-right) ── */}
+                <div className="absolute right-[2%] bottom-[3%] w-[34%] max-w-[310px] rounded-lg bg-slate-900/85 backdrop-blur-sm border-2 border-slate-600 shadow-2xl p-3">
+                  {/* Header row */}
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-bold text-slate-400 tracking-widest">PROCESS STATUS</span>
+                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                      processMode === 'wet' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/60' :
+                      processMode === 'dry' ? 'bg-blue-500/20 text-blue-300 border-blue-500/60' :
+                      processMode === 'pyrogenic' ? 'bg-purple-500/20 text-purple-300 border-purple-500/60' :
+                      'bg-slate-700/40 text-slate-400 border-slate-600/60'
+                    }`}>
+                      {processMode === 'wet' ? 'WET' : processMode === 'dry' ? 'DRY' : processMode === 'pyrogenic' ? 'PYRO' : 'STANDBY'}
+                    </span>
+                  </div>
 
-                      {/* Wafer boat status */}
-                      <rect x="572" y="-4" width="104" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="578" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">BOAT</text>
-                      <text x="670" y="11" textAnchor="end"
-                        fill={furnaceLoaded ? '#22c55e' : '#475569'}
-                        fontSize="11" fontFamily="monospace" fontWeight="bold">
-                        {furnaceLoaded ? 'LOADED' : 'EMPTY'}
-                      </text>
-
-                      {/* Predicted oxide thickness */}
-                      <rect x="688" y="-4" width="120" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="694" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">PRED</text>
-                      <text x="790" y="11" textAnchor="end"
-                        fill={processMode === 'standby' ? '#1e293b' : '#f97316'}
-                        fontSize="13" fontFamily="monospace" fontWeight="bold">
+                  {/* Predicted thickness */}
+                  <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
+                    <div className="text-[9px] text-slate-500 font-semibold tracking-wider">PREDICTED SiO₂</div>
+                    <div className="flex items-baseline gap-1 font-mono leading-none">
+                      <span className="text-2xl font-bold text-orange-400 tabular-nums">
                         {(() => {
                           if (processMode === 'standby') return '---.-';
                           const oxType = (processMode === 'wet' || processMode === 'pyrogenic') ? 'wet' : 'dry';
@@ -1970,14 +1969,67 @@ const OxidationSimulator = ({ initialTab }) => {
                           }
                           return calculateOxideGrowth(temperature, time, oxType, flow).toFixed(1);
                         })()}
-                      </text>
-                      <text x="802" y="10" fill="#64748b" fontSize="7" fontFamily="monospace">nm</text>
-                    </g>
-                  </g>
-                </svg>
+                      </span>
+                      <span className="text-[10px] text-slate-500">nm</span>
+                    </div>
+                  </div>
+
+                  {/* Boat / Heater mini indicators */}
+                  <div className="flex gap-1.5 mb-2 text-[9px]">
+                    <div className={`flex-1 rounded px-1.5 py-1 border ${
+                      furnaceLoaded
+                        ? 'bg-green-900/40 text-green-300 border-green-700/60'
+                        : 'bg-slate-800/60 text-slate-500 border-slate-700/60'
+                    }`}>
+                      <div className="opacity-70 tracking-wider">BOAT</div>
+                      <div className="font-bold font-mono">{furnaceLoaded ? 'LOADED' : 'EMPTY'}</div>
+                    </div>
+                    <div className={`flex-1 rounded px-1.5 py-1 border ${
+                      heaterOn
+                        ? 'bg-red-900/40 text-red-300 border-red-700/60'
+                        : 'bg-slate-800/60 text-slate-500 border-slate-700/60'
+                    }`}>
+                      <div className="opacity-70 tracking-wider">HEATER</div>
+                      <div className="font-bold font-mono">{heaterOn ? 'ON' : 'OFF'}</div>
+                    </div>
+                  </div>
+
+                  {/* Start button */}
+                  <button
+                    onClick={runSimulation}
+                    disabled={isSimulating || !furnaceLoaded || !heaterOn || processMode === 'standby'}
+                    className="w-full py-2 rounded-md text-xs font-bold bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:from-orange-400 hover:to-red-500 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed transition-all"
+                  >
+                    {isSimulating ? '⏳ 공정 진행중...' : '▶ 산화 공정 시작'}
+                  </button>
+
+                  {/* Progress bar */}
+                  {isSimulating && (
+                    <div className="mt-2 w-full bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-700">
+                      <div
+                        className="bg-gradient-to-r from-orange-400 to-red-500 h-full transition-all duration-100"
+                        style={{ width: `${simulationProgress}%` }}
+                      />
+                    </div>
+                  )}
+
+                  {/* Recent result (compact) */}
+                  {oxideThickness > 0 && !isSimulating && (
+                    <div className="mt-2 pt-2 border-t border-slate-700 grid grid-cols-2 gap-1.5 text-[9px]">
+                      <div className="bg-slate-950/60 rounded px-1.5 py-1 border border-slate-800">
+                        <div className="text-slate-500 tracking-wider">두께</div>
+                        <div className="font-mono font-bold text-blue-300">{oxideThickness.toFixed(1)} nm</div>
+                      </div>
+                      <div className="bg-slate-950/60 rounded px-1.5 py-1 border border-slate-800">
+                        <div className="text-slate-500 tracking-wider">성장률</div>
+                        <div className="font-mono font-bold text-green-300">{growthRate.toFixed(2)}</div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h5 className="font-semibold mb-3">가스 플로우 제어 (sccm)</h5>
                   
@@ -2183,108 +2235,6 @@ const OxidationSimulator = ({ initialTab }) => {
                         {heaterOn ? 'Heater ON' : 'Heater OFF'}
                       </button>
                     </div>
-                  </div>
-                </div>
-
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-semibold mb-3">공정 상태</h5>
-                  
-                  <div className="space-y-3">
-                    <div className="text-sm">
-                      <strong>공정 모드:</strong>
-                      <span className={`ml-2 px-2 py-1 rounded text-xs font-semibold ${
-                        processMode === 'wet' 
-                          ? 'bg-blue-100 text-blue-800' 
-                          : processMode === 'dry'
-                            ? 'bg-green-100 text-green-800'
-                            : processMode === 'pyrogenic'
-                              ? 'bg-purple-100 text-purple-800'
-                              : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {processMode === 'wet' 
-                          ? 'Wet Oxidation (H₂O)' 
-                          : processMode === 'dry'
-                            ? 'Dry Oxidation (O₂)'
-                            : processMode === 'pyrogenic'
-                              ? 'Pyrogenic Wet (H₂+O₂)'
-                              : 'Standby'}
-                      </span>
-                    </div>
-                    
-                    <div className="text-sm">
-                      <strong>예상 두께:</strong> {(() => {
-                        const oxidationType = processMode === 'wet' || processMode === 'pyrogenic' ? 'wet' : 'dry';
-                        let effectiveGasFlow = 100;
-                        if (oxidationType === 'wet') {
-                          effectiveGasFlow = gasFlows.H2O > 0 ? gasFlows.H2O : 100;
-                          if (processMode === 'pyrogenic') {
-                            effectiveGasFlow = Math.min(gasFlows.H2 * 2, gasFlows.O2);
-                          }
-                        } else {
-                          effectiveGasFlow = gasFlows.O2 > 0 ? gasFlows.O2 : 100;
-                        }
-                        return calculateOxideGrowth(temperature, time, oxidationType, effectiveGasFlow).toFixed(1);
-                      })()} nm
-                    </div>
-                    
-                    <div className="text-sm">
-                      <strong>활성 가스:</strong> 
-                      {gasFlows.O2 > 0 && <span className="ml-1 text-blue-600">O₂</span>}
-                      {gasFlows.H2O > 0 && <span className="ml-1 text-cyan-600">H₂O</span>}
-                      {gasFlows.H2 > 0 && <span className="ml-1 text-green-600">H₂</span>}
-                      {gasFlows.HCl > 0 && <span className="ml-1 text-yellow-600">HCl</span>}
-                    </div>
-                    
-                    <div className="text-sm">
-                      <strong>HCl 효과:</strong> {gasFlows.HCl > 0 ? '불순물 제거 활성' : '비활성'}
-                    </div>
-
-                    <button
-                      onClick={runSimulation}
-                      disabled={isSimulating || !furnaceLoaded || !heaterOn || processMode === 'standby'}
-                      className="w-full bg-orange-600 text-white py-2 px-4 rounded hover:bg-orange-700 disabled:opacity-50"
-                    >
-                      {isSimulating ? '공정 진행중...' : '산화 공정 시작'}
-                    </button>
-
-                    {isSimulating && (
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div 
-                          className="bg-orange-600 h-2 rounded-full transition-all duration-100"
-                          style={{ width: `${simulationProgress}%` }}
-                        />
-                      </div>
-                    )}
-
-                    {oxideThickness > 0 && (
-                      <div className="mt-4 pt-4 border-t border-gray-300">
-                        <h6 className="font-semibold mb-3 text-sm">실험 결과</h6>
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>산화막 두께:</span>
-                            <span className="font-semibold text-blue-600">{oxideThickness.toFixed(1)} nm</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>성장률:</span>
-                            <span className="font-semibold text-green-600">{growthRate.toFixed(2)} nm/min</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>공정 조건:</span>
-                            <span className="font-semibold text-purple-600">
-                              {temperature}°C, {time}분
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span>산화 방식:</span>
-                            <span className="font-semibold text-orange-600">
-                              {processMode === 'wet' ? 'Wet (H₂O)' :
-                               processMode === 'dry' ? 'Dry (O₂)' :
-                               processMode === 'pyrogenic' ? 'Pyrogenic' : 'Unknown'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
