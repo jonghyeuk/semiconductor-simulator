@@ -2036,8 +2036,8 @@ const OxidationSimulator = ({ initialTab }) => {
                 <div className="absolute right-[2%] bottom-[3%] w-[30%] max-w-[280px] rounded-lg bg-slate-900/85 backdrop-blur-sm border-2 border-slate-600 shadow-2xl p-3">
                   {/* Header row */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-[10px] font-bold text-slate-400 tracking-widest">PROCESS STATUS</span>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                    <span className="text-xs font-bold text-slate-400 tracking-widest">PROCESS STATUS</span>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-bold border ${
                       processMode === 'wet' ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/60' :
                       processMode === 'dry' ? 'bg-blue-500/20 text-blue-300 border-blue-500/60' :
                       processMode === 'pyrogenic' ? 'bg-purple-500/20 text-purple-300 border-purple-500/60' :
@@ -2049,11 +2049,11 @@ const OxidationSimulator = ({ initialTab }) => {
 
                   {/* Result — only visible AFTER running the process */}
                   {oxideThickness > 0 && !isSimulating ? (
-                    <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
+                    <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-2 mb-2">
                       <div className="flex items-center justify-between">
-                        <div className="text-[9px] text-green-400 font-semibold tracking-wider">RESULT · SiO₂</div>
+                        <div className="text-xs text-green-400 font-semibold tracking-wider">RESULT · SiO₂</div>
                         {oxideQuality && (
-                          <span className={`text-[10px] font-bold font-mono px-1.5 py-0.5 rounded ${
+                          <span className={`text-xs font-bold font-mono px-1.5 py-0.5 rounded ${
                             oxideQuality.grade === 'A' ? 'bg-green-500/20 text-green-300 border border-green-500/50' :
                             oxideQuality.grade === 'B' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/50' :
                             oxideQuality.grade === 'C' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/50' :
@@ -2063,17 +2063,17 @@ const OxidationSimulator = ({ initialTab }) => {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-baseline gap-1 font-mono leading-none mt-1">
-                        <span className="text-2xl font-bold text-orange-400 tabular-nums">
+                      <div className="flex items-baseline gap-1.5 font-mono leading-none mt-1">
+                        <span className="text-3xl font-bold text-orange-400 tabular-nums">
                           {oxideThickness.toFixed(1)}
                         </span>
-                        <span className="text-[10px] text-slate-500">nm</span>
-                        <span className="text-[9px] text-slate-600 ml-auto">{growthRate.toFixed(2)} nm/min</span>
+                        <span className="text-sm text-slate-500">nm</span>
+                        <span className="text-[11px] text-slate-600 ml-auto">{growthRate.toFixed(2)} nm/min</span>
                       </div>
                       {oxideQuality && oxideQuality.issues.length > 0 && (
                         <div className="mt-1.5 pt-1.5 border-t border-slate-800 space-y-0.5">
                           {oxideQuality.issues.map((issue, idx) => (
-                            <div key={idx} className={`text-[8px] leading-tight ${
+                            <div key={idx} className={`text-[11px] leading-snug ${
                               issue.startsWith('HCl 게터링') || issue.startsWith('양호')
                                 ? 'text-green-400' : 'text-amber-400'
                             }`}>
@@ -2084,18 +2084,18 @@ const OxidationSimulator = ({ initialTab }) => {
                       )}
                     </div>
                   ) : (
-                    <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
-                      <div className="text-[9px] text-slate-500 font-semibold tracking-wider">SiO₂ THICKNESS</div>
-                      <div className="flex items-baseline gap-1 font-mono leading-none">
-                        <span className="text-2xl font-bold text-slate-700 tabular-nums">---.-</span>
-                        <span className="text-[10px] text-slate-700">nm</span>
+                    <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-2 mb-2">
+                      <div className="text-xs text-slate-500 font-semibold tracking-wider">SiO₂ THICKNESS</div>
+                      <div className="flex items-baseline gap-1 font-mono leading-none mt-1">
+                        <span className="text-3xl font-bold text-slate-700 tabular-nums">---.-</span>
+                        <span className="text-sm text-slate-700">nm</span>
                       </div>
-                      <div className="text-[8px] text-slate-600 mt-0.5">공정 실행 후 결과가 표시됩니다</div>
+                      <div className="text-[11px] text-slate-600 mt-1">공정 실행 후 결과가 표시됩니다</div>
                     </div>
                   )}
 
                   {/* Boat / Heater mini indicators */}
-                  <div className="flex gap-1.5 mb-2 text-[9px]">
+                  <div className="flex gap-1.5 mb-2 text-xs">
                     <div className={`flex-1 rounded px-1.5 py-1 border ${
                       furnaceLoaded
                         ? 'bg-green-900/40 text-green-300 border-green-700/60'
@@ -2118,7 +2118,7 @@ const OxidationSimulator = ({ initialTab }) => {
                   <button
                     onClick={runSimulation}
                     disabled={isSimulating || !furnaceLoaded || !heaterOn || processMode === 'standby'}
-                    className="w-full py-2 rounded-md text-xs font-bold bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:from-orange-400 hover:to-red-500 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed transition-all"
+                    className="w-full py-2.5 rounded-md text-sm font-bold bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:from-orange-400 hover:to-red-500 disabled:from-slate-700 disabled:to-slate-700 disabled:text-slate-500 disabled:cursor-not-allowed transition-all"
                   >
                     {isSimulating ? '⏳ 공정 진행중...' : '▶ 산화 공정 시작'}
                   </button>
