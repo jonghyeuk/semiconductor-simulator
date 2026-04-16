@@ -1852,6 +1852,49 @@ const OxidationSimulator = ({ initialTab }) => {
                     <title>Scrubber · 배기 가스를 중화/정화하여 대기로 방출</title>
                   </g>
 
+                  {/* ── Equipment action buttons (SVG, bottom-center gap) ── */}
+                  <g transform="translate(580, 355)">
+                    {/* Wafer Load button */}
+                    <g
+                      onClick={() => setFurnaceLoaded(!furnaceLoaded)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <rect x="0" y="0" width="64" height="64" rx="32"
+                        fill={furnaceLoaded ? '#166534' : '#1e293b'}
+                        stroke={furnaceLoaded ? '#22c55e' : '#475569'}
+                        strokeWidth="2.5"
+                      />
+                      <text x="32" y="28" textAnchor="middle" fill={furnaceLoaded ? '#bbf7d0' : '#94a3b8'} fontSize="8" fontWeight="bold">WAFER</text>
+                      <text x="32" y="42" textAnchor="middle" fill={furnaceLoaded ? '#4ade80' : '#64748b'} fontSize="10" fontWeight="bold">
+                        {furnaceLoaded ? 'LOADED' : 'LOAD'}
+                      </text>
+                      <title>{furnaceLoaded ? '클릭하면 웨이퍼 언로드' : '클릭하면 웨이퍼 로드'}</title>
+                    </g>
+
+                    {/* Heater ON/OFF button */}
+                    <g
+                      onClick={() => setHeaterOn(!heaterOn)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <rect x="78" y="0" width="64" height="64" rx="32"
+                        fill={heaterOn ? '#7f1d1d' : '#1e293b'}
+                        stroke={heaterOn ? '#ef4444' : '#475569'}
+                        strokeWidth="2.5"
+                      />
+                      {heaterOn && (
+                        <rect x="78" y="0" width="64" height="64" rx="32"
+                          fill="none" stroke="#fbbf24" strokeWidth="1.5" opacity="0.6">
+                          <animate attributeName="opacity" values="0.3;0.8;0.3" dur="1.5s" repeatCount="indefinite"/>
+                        </rect>
+                      )}
+                      <text x="110" y="28" textAnchor="middle" fill={heaterOn ? '#fecaca' : '#94a3b8'} fontSize="8" fontWeight="bold">HEATER</text>
+                      <text x="110" y="42" textAnchor="middle" fill={heaterOn ? '#fca5a5' : '#64748b'} fontSize="11" fontWeight="bold">
+                        {heaterOn ? 'ON' : 'OFF'}
+                      </text>
+                      <title>{heaterOn ? '클릭하면 히터 OFF' : '클릭하면 히터 ON'}</title>
+                    </g>
+                  </g>
+
                   {/* ── Digital LED panel at bottom-left (compact gas + furnace readout) ── */}
                   <g transform="translate(30, 348)">
                     {/* outer bezel */}
@@ -1861,7 +1904,7 @@ const OxidationSimulator = ({ initialTab }) => {
 
                     {/* header strip */}
                     <rect x="4" y="4" width="522" height="15" fill="#0f172a"/>
-                    <text x="12" y="15" fill="#64748b" fontSize="8" fontWeight="bold" letterSpacing="2">
+                    <text x="12" y="15" fill="#ffffff" fontSize="8" fontWeight="bold" letterSpacing="2">
                       ▸ PROCESS PANEL
                     </text>
                     <circle cx="494" cy="11" r="3" fill={heaterOn ? '#22c55e' : '#475569'}>
@@ -1875,7 +1918,7 @@ const OxidationSimulator = ({ initialTab }) => {
 
                     {/* ── Row 1: GAS FLOWS (5 compact boxes) ── */}
                     <g transform="translate(14, 32)">
-                      <text x="0" y="9" fill="#475569" fontSize="8" fontWeight="bold" letterSpacing="1">GAS</text>
+                      <text x="0" y="9" fill="#e2e8f0" fontSize="8" fontWeight="bold" letterSpacing="1">GAS</text>
                       {[
                         { k: 'O2',  label: 'O2',  x: 34,  color: '#60a5fa' },
                         { k: 'H2O', label: 'H2O', x: 132, color: '#22d3ee' },
@@ -1885,7 +1928,7 @@ const OxidationSimulator = ({ initialTab }) => {
                       ].map(g => (
                         <g key={g.k}>
                           <rect x={g.x - 2} y="-4" width="92" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                          <text x={g.x + 3} y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">{g.label}</text>
+                          <text x={g.x + 3} y="10" fill="#94a3b8" fontSize="9" fontFamily="monospace" fontWeight="bold">{g.label}</text>
                           <text x={g.x + 86} y="11" textAnchor="end"
                             fill={gasFlows[g.k] > 0 ? g.color : '#1e293b'}
                             fontSize="14" fontFamily="monospace" fontWeight="bold">
@@ -1897,11 +1940,11 @@ const OxidationSimulator = ({ initialTab }) => {
 
                     {/* ── Row 2: FURNACE T / t / MODE ── */}
                     <g transform="translate(14, 58)">
-                      <text x="0" y="9" fill="#475569" fontSize="8" fontWeight="bold" letterSpacing="1">FURN</text>
+                      <text x="0" y="9" fill="#e2e8f0" fontSize="8" fontWeight="bold" letterSpacing="1">FURN</text>
 
                       {/* Temperature */}
                       <rect x="34" y="-4" width="150" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="40" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">T</text>
+                      <text x="40" y="10" fill="#94a3b8" fontSize="9" fontFamily="monospace" fontWeight="bold">T</text>
                       <text x="156" y="11" textAnchor="end"
                         fill={heaterOn ? '#ef4444' : '#1e293b'}
                         fontSize="14" fontFamily="monospace" fontWeight="bold">
@@ -1911,7 +1954,7 @@ const OxidationSimulator = ({ initialTab }) => {
 
                       {/* Time */}
                       <rect x="194" y="-4" width="150" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="200" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">t</text>
+                      <text x="200" y="10" fill="#94a3b8" fontSize="9" fontFamily="monospace" fontWeight="bold">t</text>
                       <text x="316" y="11" textAnchor="end"
                         fill="#fbbf24"
                         fontSize="14" fontFamily="monospace" fontWeight="bold">
@@ -1921,7 +1964,7 @@ const OxidationSimulator = ({ initialTab }) => {
 
                       {/* Mode */}
                       <rect x="354" y="-4" width="144" height="18" rx="2" fill="#0a0f1c" stroke="#1e293b" strokeWidth="0.6"/>
-                      <text x="360" y="10" fill="#475569" fontSize="9" fontFamily="monospace" fontWeight="bold">MODE</text>
+                      <text x="360" y="10" fill="#94a3b8" fontSize="9" fontFamily="monospace" fontWeight="bold">MODE</text>
                       <text x="492" y="11" textAnchor="end"
                         fill={
                           processMode === 'dry' ? '#60a5fa' :
@@ -2030,119 +2073,37 @@ const OxidationSimulator = ({ initialTab }) => {
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-4 rounded-lg">
-                  <h5 className="font-semibold mb-3">가스 플로우 제어 (sccm)</h5>
-                  
-                  <div className="space-y-4">
-                    <div className="p-3 bg-white rounded-lg border-2 border-blue-200 shadow-sm">
-                      <label className="block text-sm font-medium mb-2 text-blue-800">O₂: {gasFlows.O2} sccm</label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="0"
-                          max="200"
-                          step="10"
-                          value={gasFlows.O2}
-                          onChange={(e) => setGasFlows({...gasFlows, O2: Number(e.target.value)})}
-                          className="w-full h-3 bg-blue-100 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${gasFlows.O2/200*100}%, #dbeafe ${gasFlows.O2/200*100}%, #dbeafe 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>0</span>
-                          <span>200</span>
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <h5 className="font-semibold mb-2 text-sm">가스 플로우 (sccm)</h5>
+                  <div className="space-y-1.5">
+                    {[
+                      { key: 'O2',  label: 'O₂',  fg: '#3b82f6', bg: '#dbeafe', min: 0, max: 200, step: 10 },
+                      { key: 'H2O', label: 'H₂O', fg: '#06b6d4', bg: '#cffafe', min: 0, max: 300, step: 10 },
+                      { key: 'H2',  label: 'H₂',  fg: '#10b981', bg: '#dcfce7', min: 0, max: 100, step: 5 },
+                      { key: 'N2',  label: 'N₂',  fg: '#6b7280', bg: '#f3f4f6', min: 50, max: 500, step: 10 },
+                      { key: 'HCl', label: 'HCl', fg: '#f59e0b', bg: '#fef3c7', min: 0, max: 50, step: 1 },
+                    ].map(g => {
+                      const pct = ((gasFlows[g.key] - g.min) / (g.max - g.min)) * 100;
+                      return (
+                        <div key={g.key} className="flex items-center gap-2 bg-white rounded px-2 py-1 border border-gray-200">
+                          <span className="w-8 text-xs font-bold" style={{ color: g.fg }}>{g.label}</span>
+                          <span className="w-8 text-xs font-mono text-right font-semibold text-gray-700">{gasFlows[g.key]}</span>
+                          <input
+                            type="range"
+                            min={g.min}
+                            max={g.max}
+                            step={g.step}
+                            value={gasFlows[g.key]}
+                            onChange={(e) => setGasFlows({...gasFlows, [g.key]: Number(e.target.value)})}
+                            className="flex-1 h-1.5 rounded-full appearance-none cursor-pointer"
+                            style={{
+                              background: `linear-gradient(to right, ${g.fg} 0%, ${g.fg} ${pct}%, ${g.bg} ${pct}%, ${g.bg} 100%)`
+                            }}
+                          />
+                          <span className="w-7 text-[10px] text-gray-400 text-right">{g.max}</span>
                         </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 bg-white rounded-lg border-2 border-cyan-200 shadow-sm">
-                      <label className="block text-sm font-medium mb-2 text-cyan-800">H₂O: {gasFlows.H2O} sccm</label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="0"
-                          max="300"
-                          step="10"
-                          value={gasFlows.H2O}
-                          onChange={(e) => setGasFlows({...gasFlows, H2O: Number(e.target.value)})}
-                          className="w-full h-3 bg-cyan-100 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #06b6d4 0%, #06b6d4 ${gasFlows.H2O/300*100}%, #cffafe ${gasFlows.H2O/300*100}%, #cffafe 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>0</span>
-                          <span>300</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 bg-white rounded-lg border-2 border-green-200 shadow-sm">
-                      <label className="block text-sm font-medium mb-2 text-green-800">H₂: {gasFlows.H2} sccm</label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          step="5"
-                          value={gasFlows.H2}
-                          onChange={(e) => setGasFlows({...gasFlows, H2: Number(e.target.value)})}
-                          className="w-full h-3 bg-green-100 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #10b981 0%, #10b981 ${gasFlows.H2/100*100}%, #dcfce7 ${gasFlows.H2/100*100}%, #dcfce7 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>0</span>
-                          <span>100</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 bg-white rounded-lg border-2 border-gray-200 shadow-sm">
-                      <label className="block text-sm font-medium mb-2 text-gray-800">N₂: {gasFlows.N2} sccm</label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="50"
-                          max="500"
-                          step="10"
-                          value={gasFlows.N2}
-                          onChange={(e) => setGasFlows({...gasFlows, N2: Number(e.target.value)})}
-                          className="w-full h-3 bg-gray-100 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #6b7280 0%, #6b7280 ${(gasFlows.N2-50)/450*100}%, #f3f4f6 ${(gasFlows.N2-50)/450*100}%, #f3f4f6 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>50</span>
-                          <span>500</span>
-                        </div>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 bg-white rounded-lg border-2 border-yellow-200 shadow-sm">
-                      <label className="block text-sm font-medium mb-2 text-yellow-800">HCl: {gasFlows.HCl} sccm</label>
-                      <div className="relative">
-                        <input
-                          type="range"
-                          min="0"
-                          max="50"
-                          step="1"
-                          value={gasFlows.HCl}
-                          onChange={(e) => setGasFlows({...gasFlows, HCl: Number(e.target.value)})}
-                          className="w-full h-3 bg-yellow-100 rounded-lg appearance-none cursor-pointer slider"
-                          style={{
-                            background: `linear-gradient(to right, #f59e0b 0%, #f59e0b ${gasFlows.HCl/50*100}%, #fef3c7 ${gasFlows.HCl/50*100}%, #fef3c7 100%)`
-                          }}
-                        />
-                        <div className="flex justify-between text-xs text-gray-500 mt-1">
-                          <span>0</span>
-                          <span>50</span>
-                        </div>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -2212,29 +2173,7 @@ const OxidationSimulator = ({ initialTab }) => {
                       </div>
                     </div>
 
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={() => setFurnaceLoaded(!furnaceLoaded)}
-                        className={`flex-1 py-2 px-3 rounded text-sm ${
-                          furnaceLoaded 
-                            ? 'bg-green-600 text-white' 
-                            : 'bg-gray-300 text-gray-700'
-                        }`}
-                      >
-                        {furnaceLoaded ? '웨이퍼 로딩됨' : '웨이퍼 로딩'}
-                      </button>
-                      
-                      <button
-                        onClick={() => setHeaterOn(!heaterOn)}
-                        className={`flex-1 py-2 px-3 rounded text-sm ${
-                          heaterOn 
-                            ? 'bg-red-600 text-white' 
-                            : 'bg-gray-300 text-gray-700'
-                        }`}
-                      >
-                        {heaterOn ? 'Heater ON' : 'Heater OFF'}
-                      </button>
-                    </div>
+                    <p className="text-xs text-gray-500 text-center mt-1">* 웨이퍼 로드·히터 ON/OFF 는 개략도 하단 원형 버튼으로 조작</p>
                   </div>
                 </div>
               </div>
