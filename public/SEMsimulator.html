@@ -137,10 +137,10 @@ canvas{width:100%;height:100%;display:block}
     <div class="mh"><h4>Specimen</h4><span>sample · det</span></div>
     <select id="sample">
       <option value="etch_v">식각 단면 — 수직 profile (cleave)</option>
-      <option value="etch_taper">식각 단면 — step 구조</option>
-      <option value="film_single">증착 단면 — 단층막</option>
-      <option value="surf_grain">표면 — grain/island (top-down)</option>
-      <option value="surf_particle">표면 — 파티클 오염 (top-down)</option>
+      <option value="etch_taper" disabled style="color:#3a4a5c">식각 단면 — step 구조 (데모 제한)</option>
+      <option value="film_single" disabled style="color:#3a4a5c">증착 단면 — 단층막 (데모 제한)</option>
+      <option value="surf_grain" disabled style="color:#3a4a5c">표면 — grain/island (데모 제한)</option>
+      <option value="surf_particle" disabled style="color:#3a4a5c">표면 — 파티클 오염 (데모 제한)</option>
     </select>
     <select id="detector">
       <option value="SE">SE — Secondary Electron</option>
@@ -277,9 +277,9 @@ canvas{width:100%;height:100%;display:block}
   <div class="mod">
     <div class="mh"><h4>Stage</h4><span>xy · tilt · zoom</span></div>
     <div class="sgrid">
-      <button data-m="tilt+">T+</button><button data-m="up">↑</button><button data-m="zoom+">Z+</button>
+      <button data-m="tilt+" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">T+</button><button data-m="up">↑</button><button data-m="zoom+">Z+</button>
       <button data-m="left">←</button><button data-m="scan">SCAN</button><button data-m="right">→</button>
-      <button data-m="tilt-">T−</button><button data-m="down">↓</button><button data-m="zoom-">Z−</button>
+      <button data-m="tilt-" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">T−</button><button data-m="down">↓</button><button data-m="zoom-">Z−</button>
     </div>
     <div class="sreads">
       <div class="sread"><b>X</b><span id="sX">0</span></div>
@@ -287,8 +287,8 @@ canvas{width:100%;height:100%;display:block}
       <div class="sread"><b>TILT</b><span id="sTilt">0°</span></div>
     </div>
     <div class="g2" style="margin-top:5px">
-      <button data-t="0">Tilt 0°</button><button data-t="10">Tilt 10°</button>
-      <button data-t="20">Tilt 20°</button><button id="bHome">Home</button>
+      <button data-t="0" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">Tilt 0°</button><button data-t="10" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">Tilt 10°</button>
+      <button data-t="20" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">Tilt 20°</button><button id="bHome">Home</button>
     </div>
   </div>
   <div class="mod">
@@ -1118,14 +1118,16 @@ var P={
 };
 function applyP(n){
   var p=P[n]; if(!p) return;
-  els.sample.value=p.s; els.detector.value=p.det; els.mag.value=p.mag; els.kv.value=p.kv;
+  els.sample.value='etch_v'; /* demo: lock to 수직 profile */ els.detector.value=p.det; els.mag.value=p.mag; els.kv.value=p.kv;
   els.wd.value=p.wd; els.focus.value=p.f; els.astigX.value=p.ax; els.astigY.value=p.ay;
   els.vibration.value=p.v; els.drift.value=p.d; els.charging.value=p.c;
   els.noise.value=p.n; els.brightness.value=p.br; els.contrast.value=p.co;
-  stage.tilt=p.t; draw();
+  stage.tilt=0; /* tilt locked to 0 for demo */ draw();
 }
 
 Object.values(els).forEach(function(e){ e.addEventListener('input',draw); });
+/* demo: lock sample to etch_v only */
+els.sample.addEventListener('change',function(){ els.sample.value='etch_v'; draw(); });
 document.querySelectorAll('[data-m]').forEach(function(b){
   b.addEventListener('click',function(){
     var m=b.dataset.m;
@@ -1149,15 +1151,14 @@ document.querySelectorAll('[data-m]').forEach(function(b){
     if(m==='down')  stage.y+=moveStep;
     if(m==='left')  stage.x-=moveStep;
     if(m==='right') stage.x+=moveStep;
-    if(m==='tilt+') stage.tilt=cl(stage.tilt+2,-30,30);
-    if(m==='tilt-') stage.tilt=cl(stage.tilt-2,-30,30);
+    /* tilt disabled for demo */
     if(m==='zoom+') els.mag.value=Math.min(100,+els.mag.value+4);
     if(m==='zoom-') els.mag.value=Math.max(0,+els.mag.value-4);
     if(m==='scan')  scan=!scan;
     draw();
   });
 });
-document.querySelectorAll('[data-t]').forEach(function(b){ b.addEventListener('click',function(){ stage.tilt=+b.dataset.t; draw(); }); });
+/* tilt preset buttons disabled for demo */
 $('bHome').onclick=function(){ stage.x=0; stage.y=0; draw(); };
 $('bAF').onclick=function(){ els.focus.value=0; draw(); };
 $('bAS').onclick=function(){ els.astigX.value=0; els.astigY.value=0; draw(); };
