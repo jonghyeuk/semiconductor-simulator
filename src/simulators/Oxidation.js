@@ -1989,27 +1989,28 @@ const OxidationSimulator = ({ initialTab }) => {
                     </span>
                   </div>
 
-                  {/* Predicted thickness */}
-                  <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
-                    <div className="text-[9px] text-slate-500 font-semibold tracking-wider">PREDICTED SiO₂</div>
-                    <div className="flex items-baseline gap-1 font-mono leading-none">
-                      <span className="text-2xl font-bold text-orange-400 tabular-nums">
-                        {(() => {
-                          if (processMode === 'standby') return '---.-';
-                          const oxType = (processMode === 'wet' || processMode === 'pyrogenic') ? 'wet' : 'dry';
-                          let flow = 100;
-                          if (oxType === 'wet') {
-                            flow = gasFlows.H2O > 0 ? gasFlows.H2O : 100;
-                            if (processMode === 'pyrogenic') flow = Math.min(gasFlows.H2 * 2, gasFlows.O2);
-                          } else {
-                            flow = gasFlows.O2 > 0 ? gasFlows.O2 : 100;
-                          }
-                          return calculateOxideGrowth(temperature, time, oxType, flow).toFixed(1);
-                        })()}
-                      </span>
-                      <span className="text-[10px] text-slate-500">nm</span>
+                  {/* Result — only visible AFTER running the process */}
+                  {oxideThickness > 0 && !isSimulating ? (
+                    <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
+                      <div className="text-[9px] text-green-400 font-semibold tracking-wider">RESULT · SiO₂</div>
+                      <div className="flex items-baseline gap-1 font-mono leading-none">
+                        <span className="text-2xl font-bold text-orange-400 tabular-nums">
+                          {oxideThickness.toFixed(1)}
+                        </span>
+                        <span className="text-[10px] text-slate-500">nm</span>
+                        <span className="text-[9px] text-slate-600 ml-auto">{growthRate.toFixed(2)} nm/min</span>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="bg-slate-950/80 rounded border border-slate-700/80 px-2.5 py-1.5 mb-2">
+                      <div className="text-[9px] text-slate-500 font-semibold tracking-wider">SiO₂ THICKNESS</div>
+                      <div className="flex items-baseline gap-1 font-mono leading-none">
+                        <span className="text-2xl font-bold text-slate-700 tabular-nums">---.-</span>
+                        <span className="text-[10px] text-slate-700">nm</span>
+                      </div>
+                      <div className="text-[8px] text-slate-600 mt-0.5">공정 실행 후 결과가 표시됩니다</div>
+                    </div>
+                  )}
 
                   {/* Boat / Heater mini indicators */}
                   <div className="flex gap-1.5 mb-2 text-[9px]">
@@ -2050,19 +2051,6 @@ const OxidationSimulator = ({ initialTab }) => {
                     </div>
                   )}
 
-                  {/* Recent result (compact) */}
-                  {oxideThickness > 0 && !isSimulating && (
-                    <div className="mt-2 pt-2 border-t border-slate-700 grid grid-cols-2 gap-1.5 text-[9px]">
-                      <div className="bg-slate-950/60 rounded px-1.5 py-1 border border-slate-800">
-                        <div className="text-slate-500 tracking-wider">두께</div>
-                        <div className="font-mono font-bold text-blue-300">{oxideThickness.toFixed(1)} nm</div>
-                      </div>
-                      <div className="bg-slate-950/60 rounded px-1.5 py-1 border border-slate-800">
-                        <div className="text-slate-500 tracking-wider">성장률</div>
-                        <div className="font-mono font-bold text-green-300">{growthRate.toFixed(2)}</div>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
 
