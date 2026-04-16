@@ -294,7 +294,10 @@ const MatrixDashboard = ({ onNavigate }) => {
                 </a>
 
                 {/* SEM 분석 카드 */}
-                <div
+                <a
+                  href="/SEMsimulator.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="group relative flex flex-col p-5 rounded-2xl border-2 border-indigo-400 bg-gradient-to-br from-indigo-50 via-violet-50 to-blue-50 shadow-lg shadow-indigo-200 ring-2 ring-indigo-300/60 cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-indigo-300 text-left min-h-[160px]"
                 >
                   <div className="absolute -top-3 -left-2 flex items-center gap-1">
@@ -332,7 +335,7 @@ const MatrixDashboard = ({ onNavigate }) => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </div>
-                </div>
+                </a>
 
                 {bestCards.map((card, idx) => (
                   <button
