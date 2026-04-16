@@ -293,6 +293,47 @@ const MatrixDashboard = ({ onNavigate }) => {
                   </div>
                 </a>
 
+                {/* SEM 분석 카드 */}
+                <div
+                  className="group relative flex flex-col p-5 rounded-2xl border-2 border-indigo-400 bg-gradient-to-br from-indigo-50 via-violet-50 to-blue-50 shadow-lg shadow-indigo-200 ring-2 ring-indigo-300/60 cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-indigo-300 text-left min-h-[160px]"
+                >
+                  <div className="absolute -top-3 -left-2 flex items-center gap-1">
+                    <span className="px-2.5 py-1 text-xs font-extrabold rounded-lg bg-gradient-to-r from-indigo-500 to-violet-500 text-white shadow-md">
+                      🏆 BEST
+                    </span>
+                    <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-indigo-100 text-indigo-700">
+                      분석 입문
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-end mb-3 mt-1">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-indigo-500 text-white">
+                      분석
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3 flex-1">
+                    <span className="text-4xl flex-shrink-0">🔬</span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold leading-tight text-indigo-600">
+                        시편분석 및 장비분석
+                      </div>
+                      <div className="text-lg font-extrabold text-gray-900 leading-tight mt-0.5">
+                        SEM 분석
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-indigo-200">
+                    <p className="text-sm text-indigo-800 font-medium leading-snug">
+                      👉 전자현미경으로 시편 표면을 관찰하고 분석합니다
+                    </p>
+                  </div>
+                  <div className="absolute bottom-4 right-4 flex items-center gap-1 text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-xs font-bold">체험하기</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </div>
+
                 {bestCards.map((card, idx) => (
                   <button
                     key={`${card.processId}-${card.id}`}
@@ -535,12 +576,12 @@ const MatrixDashboard = ({ onNavigate }) => {
                   이 데모는 Education Center의 핵심 실습을 먼저 체험하는 버전입니다
                 </p>
                 <p className="text-xs text-slate-400">
-                  전체 플랫폼은 3개의 학습 센터로 구성됩니다
+                  전체 플랫폼은 4개의 학습 센터로 구성됩니다
                 </p>
               </div>
 
               {/* 3센터 카드 */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {/* Education Center - 활성 */}
                 <div className="relative rounded-xl border-2 border-teal-400 bg-gradient-to-br from-teal-50 to-cyan-50 p-5 shadow-md ring-2 ring-teal-200/50">
                   <span className="absolute -top-2.5 left-4 px-2 py-0.5 text-[10px] font-bold bg-teal-500 text-white rounded-full shadow-sm">
@@ -614,6 +655,30 @@ const MatrixDashboard = ({ onNavigate }) => {
                     <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">IEDF</span>
                     <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">ICP/CCP</span>
                     <span className="px-1.5 py-0.5 text-[9px] bg-gray-100 text-gray-400 rounded font-medium">Matching</span>
+                  </div>
+                </div>
+
+                {/* Analysis Center - 활성 */}
+                <div className="relative rounded-xl border-2 border-indigo-400 bg-gradient-to-br from-indigo-50 to-violet-50 p-5 shadow-md ring-2 ring-indigo-200/50">
+                  <span className="absolute -top-2.5 left-4 px-2 py-0.5 text-[10px] font-bold bg-indigo-500 text-white rounded-full shadow-sm">
+                    지금 체험 중
+                  </span>
+                  <div className="flex items-center gap-3 mb-3 mt-1">
+                    <div className="w-10 h-10 rounded-lg bg-indigo-500 flex items-center justify-center text-white text-xl shadow-sm">
+                      🔬
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-indigo-900">Analysis Center</h4>
+                      <p className="text-[11px] text-indigo-600">시편분석 및 장비분석</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-indigo-700 leading-relaxed">
+                    SEM, OES, RGA 등 분석 장비의 원리와 데이터 해석을 학습합니다
+                  </p>
+                  <div className="mt-3 flex flex-wrap gap-1">
+                    <span className="px-1.5 py-0.5 text-[9px] bg-indigo-100 text-indigo-700 rounded font-medium">SEM</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-indigo-50 text-indigo-300 rounded font-medium">OES</span>
+                    <span className="px-1.5 py-0.5 text-[9px] bg-indigo-50 text-indigo-300 rounded font-medium">RGA</span>
                   </div>
                 </div>
               </div>
