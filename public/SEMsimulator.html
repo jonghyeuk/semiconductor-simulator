@@ -19,8 +19,8 @@ body{background:var(--bg);color:var(--text);font-family:"Noto Sans KR","Malgun G
 .mbtns{display:flex;gap:5px}
 .mbtn{padding:6px 13px;border-radius:7px;border:1px solid var(--line);background:var(--chip);color:#a0c0dc;font-size:12px;font-weight:700;cursor:pointer}
 .mbtn.on{background:rgba(78,207,255,.14);border-color:var(--acc);color:#ddf5ff}
-.layout{display:grid;grid-template-columns:265px 1fr 305px;flex:1;min-height:0;min-width:960px}
-.lp,.rp{background:var(--panel);overflow-y:auto;padding:9px}
+.layout{display:grid;grid-template-columns:265px 1fr 305px;grid-template-rows:minmax(0,1fr);flex:1;min-height:0;min-width:960px}
+.lp,.rp{background:var(--panel);overflow-y:auto;padding:9px;min-height:0}
 .lp{border-right:1px solid var(--line)}.rp{border-left:1px solid var(--line)}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:#1b2e44;border-radius:3px}::-webkit-scrollbar-thumb:hover{background:#2a4a66}
 .mod{background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.06);border-radius:11px;padding:9px;margin-bottom:7px}
@@ -35,15 +35,14 @@ select{width:100%;background:var(--chip);border:1px solid var(--line);color:var(
 button{background:var(--chip);border:1px solid var(--line);color:var(--text);border-radius:7px;padding:6px 7px;cursor:pointer;font-size:11px;transition:.12s}
 button:hover{border-color:var(--acc);color:var(--acc)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:5px}
-.center{background:#060e18;display:flex;flex-direction:column}
-.vh{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;background:rgba(0,0,0,.35);border-bottom:1px solid var(--line)}
+.center{background:#060e18;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.vh{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;background:rgba(0,0,0,.35);border-bottom:1px solid var(--line);flex-shrink:0}
 .vt{font-size:11px;font-weight:800;letter-spacing:.1em;color:#7ab8d8}
 .vtools{display:flex;gap:4px}
 .vtb{padding:4px 8px;border-radius:5px;border:1px solid var(--line);background:var(--chip);color:#88aec4;font-size:10px;cursor:pointer}
-.cout{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;background:radial-gradient(circle at center,#09131e,#040b12);min-height:0;overflow:hidden}
-.cshell{position:relative;width:min(100%,680px);aspect-ratio:1/1;max-height:100%;border-radius:10px;overflow:hidden;border:1px solid #192e44;box-shadow:0 0 32px rgba(0,0,0,.8)}
+.cout{flex:1;display:flex;align-items:center;justify-content:center;padding:10px;background:radial-gradient(circle at center,#09131e,#040b12);min-height:0;min-width:0;overflow:hidden}
+.cshell{position:relative;max-width:680px;max-height:680px;border-radius:10px;overflow:hidden;border:1px solid #192e44;box-shadow:0 0 32px rgba(0,0,0,.8);cursor:crosshair}
 canvas{width:100%;height:100%;display:block}
-.cshell{cursor:crosshair}
 .ov-tl{position:absolute;top:9px;left:9px;display:flex;flex-direction:column;gap:4px;pointer-events:none}
 .ov-tr{position:absolute;top:9px;right:9px;display:flex;flex-direction:column;gap:4px;align-items:flex-end;pointer-events:none}
 .ov-bl{position:absolute;bottom:9px;left:9px;pointer-events:none}
@@ -57,7 +56,7 @@ canvas{width:100%;height:100%;display:block}
 .cross::after{left:0;top:10px;width:22px;height:2px}
 .sbar{width:80px;height:3px;background:#fff;border-radius:2px;transition:width .2s ease}
 .slbl{font-size:10px;font-family:monospace;color:#cce8ff}
-.vbot{padding:9px 11px;background:rgba(0,0,0,.2);border-top:1px solid var(--line)}
+.vbot{padding:9px 11px;background:rgba(0,0,0,.2);border-top:1px solid var(--line);flex-shrink:0}
 .hint{padding:8px 11px;border-radius:8px;background:rgba(255,184,77,.06);border:1px solid rgba(255,184,77,.18);font-size:11px;line-height:1.7;color:#ffe0a8;margin-bottom:7px}
 .hint b{color:#ffcc60}
 .arow{display:flex;gap:5px;flex-wrap:wrap}
@@ -80,6 +79,8 @@ canvas{width:100%;height:100%;display:block}
 .abtn{width:100%;margin-top:5px;background:rgba(78,207,255,.1);border-color:rgba(78,207,255,.35);color:#b0e8ff;font-weight:800;padding:7px}
 .sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 .sgrid button{height:40px;font-size:14px;font-weight:800}
+button:disabled,button[disabled]{opacity:.3;cursor:not-allowed;color:var(--soft);filter:grayscale(1);pointer-events:none}
+button:disabled:hover,button[disabled]:hover{border-color:var(--line);color:var(--soft)}
 .sreads{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:5px}
 .sread{padding:7px;border-radius:7px;background:#07111e;border:1px solid var(--line);text-align:center}
 .sread b{display:block;font-size:10px;color:var(--soft);margin-bottom:2px}
@@ -117,7 +118,7 @@ canvas{width:100%;height:100%;display:block}
 <header class="topbar">
   <div style="display:flex;align-items:center;gap:10px">
     <div class="lamp"></div>
-    <div><div class="bname">SEM TRAINING CONSOLE</div><div class="bsub">식각단면 · 증착두께 · 표면 morphology · 파티클</div></div>
+    <div><div class="bname">SEM TRAINING CONSOLE</div></div>
   </div>
   <div class="hud-row">
     <div class="hud"><b>MAG</b><span id="hMag">-</span></div>
@@ -137,10 +138,10 @@ canvas{width:100%;height:100%;display:block}
     <div class="mh"><h4>Specimen</h4><span>sample · det</span></div>
     <select id="sample">
       <option value="etch_v">식각 단면 — 수직 profile (cleave)</option>
-      <option value="etch_taper" disabled style="color:#3a4a5c">식각 단면 — step 구조 (데모 제한)</option>
-      <option value="film_single" disabled style="color:#3a4a5c">증착 단면 — 단층막 (데모 제한)</option>
-      <option value="surf_grain" disabled style="color:#3a4a5c">표면 — grain/island (데모 제한)</option>
-      <option value="surf_particle" disabled style="color:#3a4a5c">표면 — 파티클 오염 (데모 제한)</option>
+      <option value="etch_taper">식각 단면 — step 구조</option>
+      <option value="film_single">증착 단면 — 단층막</option>
+      <option value="surf_grain">표면 — grain/island (top-down)</option>
+      <option value="surf_particle">표면 — 파티클 오염 (top-down)</option>
     </select>
     <select id="detector">
       <option value="SE">SE — Secondary Electron</option>
@@ -277,9 +278,9 @@ canvas{width:100%;height:100%;display:block}
   <div class="mod">
     <div class="mh"><h4>Stage</h4><span>xy · tilt · zoom</span></div>
     <div class="sgrid">
-      <button data-m="tilt+" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">T+</button><button data-m="up">↑</button><button data-m="zoom+">Z+</button>
+      <button data-m="tilt+" disabled>T+</button><button data-m="up">↑</button><button data-m="zoom+">Z+</button>
       <button data-m="left">←</button><button data-m="scan">SCAN</button><button data-m="right">→</button>
-      <button data-m="tilt-" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">T−</button><button data-m="down">↓</button><button data-m="zoom-">Z−</button>
+      <button data-m="tilt-" disabled>T−</button><button data-m="down">↓</button><button data-m="zoom-">Z−</button>
     </div>
     <div class="sreads">
       <div class="sread"><b>X</b><span id="sX">0</span></div>
@@ -287,8 +288,8 @@ canvas{width:100%;height:100%;display:block}
       <div class="sread"><b>TILT</b><span id="sTilt">0°</span></div>
     </div>
     <div class="g2" style="margin-top:5px">
-      <button data-t="0" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">Tilt 0°</button><button data-t="10" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">Tilt 10°</button>
-      <button data-t="20" disabled style="opacity:0.3;cursor:not-allowed;color:#3a4a5c">Tilt 20°</button><button id="bHome">Home</button>
+      <button data-t="0" disabled>Tilt 0°</button><button data-t="10" disabled>Tilt 10°</button>
+      <button data-t="20" disabled>Tilt 20°</button><button id="bHome">Home</button>
     </div>
   </div>
   <div class="mod">
@@ -529,82 +530,102 @@ function drawEtch(taper){
     return;
   }
 
-  /* ── PERIODIC TRENCH 구조: etch_v mode ── */
+  /* ── PERIODIC TRENCH 구조: etch_v mode (true 3D box rendering) ── */
+  /* Each pillar is modelled as a real 3D box with width pillarW, vertical
+     height `depth`, and depth D into the screen. A simple X-axis tilt
+     projection maps every 3D point (x,y,z) to the 2D canvas via
+       y_2d = yAxis + (y - yAxis) * cos(tilt) - z * sin(tilt)
+     The top face and front face fall out as axis-aligned rectangles with
+     mathematically consistent edges, so there is no parallelogram hack
+     and no seam between the two faces — they share the same y coordinate
+     (frontTopY) by construction.                                          */
   var period=500/nmPerPx, trenchW=200/nmPerPx, pillarW=period-trenchW, depth=1500/nmPerPx;
+  var D=cl(pillarW*3.5,20,400); // visible pillar depth into the screen
   var oyPx=(stage.y*50*1000)/nmPerPx;
+  var tiltRad=tiltDeg*Math.PI/180;
+  var cosT=Math.cos(tiltRad), sinT=Math.sin(tiltRad);
+  var yAxis=H/2;
+  var pillarTopYSrc=yAxis-depth/2-oyPx*0.35;
+  var pillarBotYSrc=pillarTopYSrc+depth;
+  // Projected Y coordinates after tilt (orthographic, rotation around yAxis)
+  var frontTopY=yAxis+(pillarTopYSrc-yAxis)*cosT;        // front edge of pillar top (z=0)
+  var frontBotY=yAxis+(pillarBotYSrc-yAxis)*cosT;        // front edge of pillar bottom / trench floor (z=0)
+  var topBackY=frontTopY-D*sinT;                         // back edge of pillar top (z=D)
+  // For code that still expects `pillarTop`/`floorY` below (grain, etc.)
+  var pillarTop=frontTopY, floorY=frontBotY;
+  // Background (void above the sample)
   CTX.fillStyle='#04080f'; CTX.fillRect(0,0,W,H);
-  var pillarTop=H/2-depth/2-oyPx*0.35, floorY=pillarTop+depth;
+  // Material tones — Si everywhere; top face slightly brighter to signal
+  // the new surface coming into view at non-zero tilt.
   var subV=det==='BSE'?88:68, subHV=det==='BSE'?(kv-5)*1.2:-(kv-5)*0.8;
   var sv=cl(subV+subHV,20,200);
-  var sva=tone(sv+10), svb=tone(sv), svc=tone(sv-22);
-  var sG=CTX.createLinearGradient(0,pillarTop,0,H);
-  sG.addColorStop(0,   rgb(sva,sva,sva));
-  sG.addColorStop(0.35,rgb(svb,svb,svb));
-  sG.addColorStop(1,   rgb(svc,svc,svc));
-  CTX.fillStyle=sG; CTX.fillRect(0,pillarTop,W,H-pillarTop);
+  var svb=tone(sv);
+  var svTop=tone(cl(sv+22,20,200));
+  // Floor (substrate below the trenches) — fill whole width below frontBotY
+  CTX.fillStyle=rgb(svb,svb,svb);
+  CTX.fillRect(0,frontBotY,W,H-frontBotY);
+  // Edge brightening parameters (HV-dependent, same physics as before)
+  var eSharp=cl((Math.log10(mag)-2.7)*1.4,0,1);
+  var hvEdgeBoost=cl((kv-5)*0.09,0,2.2);
+  // Pillar loop — top face + front face for every visible pillar
   var stageOffsetX=(stage.x*50*1000/nmPerPx)%period;
   var centerX=W/2-stageOffsetX;
   var startX=centerX-Math.ceil(W/period+2)*period;
   for(var x0=startX; x0<W+period*2; x0+=period){
-    var tL=x0+pillarW/2, tR=tL+trenchW;
-    var sc=mag>=50000?2.2:mag>=20000?0.8:0;
-    CTX.fillStyle='#030508';
-    {
-      CTX.beginPath(); CTX.moveTo(tL,pillarTop);
-      for(var i=0;i<=20;i++){ var sy=pillarTop+(depth/20)*i; CTX.lineTo(tL-Math.sin(i*Math.PI*0.95)*sc,sy); }
-      CTX.lineTo(tL,floorY); CTX.lineTo(tR,floorY);
-      for(var j=20;j>=0;j--){ var sy2=pillarTop+(depth/20)*j; CTX.lineTo(tR+Math.sin(j*Math.PI*0.95)*sc,sy2); }
-      CTX.closePath(); CTX.fill();
+    var pLx=x0-pillarW/2, pRx=x0+pillarW/2;
+    // 1) Top face (rectangle: frontTopY -> topBackY). Invisible at tilt=0
+    //    because topBackY == frontTopY.
+    if(tiltDeg>1){
+      CTX.fillStyle=rgb(svTop,svTop,svTop);
+      CTX.fillRect(pLx,topBackY,pillarW,frontTopY-topBackY);
+      // Back edge highlight where the top face meets the dark void
+      CTX.strokeStyle='rgba(255,255,255,'+cl(sinT*0.55,0,0.5)+')';
+      CTX.lineWidth=1.2;
+      CTX.beginPath();
+      CTX.moveTo(pLx,topBackY);
+      CTX.lineTo(pRx,topBackY);
+      CTX.stroke();
     }
-    var eSharp=cl((Math.log10(mag)-2.7)*1.4,0,1);
+    // 2) Front face (rectangle: frontTopY -> frontBotY), cos-foreshortened
+    CTX.fillStyle=rgb(svb,svb,svb);
+    CTX.fillRect(pLx,frontTopY,pillarW,frontBotY-frontTopY);
+    // 3) Edge brightening on the left/right of the front face (HV artifact)
     if(det!=='EDS' && eSharp>0.05){
-      var ew=cl(trenchW*0.24,4,18), tb=tiltDeg*0.022;
-      var hvEdgeBoost=cl(1+(kv-5)*0.038,0.55,2.2);
-      var lB=cl((0.88-tb)*eSharp,0,1), rB=cl((0.88+tb)*eSharp,0,1);
-      var gL=CTX.createLinearGradient(tL,0,tL+ew*1.8,0);
-      gL.addColorStop(0,'rgba(255,255,255,'+cl(lB*hvEdgeBoost*0.62,0,0.95)+')');
+      var ew=cl(trenchW*0.24,4,18);
+      var gL=CTX.createLinearGradient(pLx,0,pLx+ew*1.8,0);
+      gL.addColorStop(0,'rgba(255,255,255,'+cl(0.88*hvEdgeBoost*eSharp*0.62,0,0.95)+')');
       gL.addColorStop(0.45,'rgba(210,220,235,'+cl(0.28*hvEdgeBoost*eSharp,0,0.5)+')');
       gL.addColorStop(1,'rgba(0,0,0,0)');
-      CTX.fillStyle=gL; CTX.fillRect(tL,pillarTop,ew*1.8,depth);
-      var gR=CTX.createLinearGradient(tR,0,tR-ew*1.8,0);
-      gR.addColorStop(0,'rgba(255,255,255,'+cl(rB*hvEdgeBoost*0.62,0,0.95)+')');
+      CTX.fillStyle=gL;
+      CTX.fillRect(pLx,frontTopY,ew*1.8,frontBotY-frontTopY);
+      var gR=CTX.createLinearGradient(pRx,0,pRx-ew*1.8,0);
+      gR.addColorStop(0,'rgba(255,255,255,'+cl(0.88*hvEdgeBoost*eSharp*0.62,0,0.95)+')');
       gR.addColorStop(0.45,'rgba(210,220,235,'+cl(0.28*hvEdgeBoost*eSharp,0,0.5)+')');
       gR.addColorStop(1,'rgba(0,0,0,0)');
-      CTX.fillStyle=gR; CTX.fillRect(tR-ew*1.8,pillarTop,ew*1.8,depth);
-      if(eSharp>0.3){
-        var cg=cl(eSharp*hvEdgeBoost*0.5,0,0.85);
-        var cgL=CTX.createRadialGradient(tL,pillarTop,0,tL,pillarTop,ew*2.2);
-        cgL.addColorStop(0,'rgba(255,255,255,'+cg+')'); cgL.addColorStop(1,'rgba(255,255,255,0)');
-        CTX.fillStyle=cgL; CTX.fillRect(tL-ew,pillarTop-ew*0.5,ew*2.5,ew*2.5);
-        var cgR=CTX.createRadialGradient(tR,pillarTop,0,tR,pillarTop,ew*2.2);
-        cgR.addColorStop(0,'rgba(255,255,255,'+cg+')'); cgR.addColorStop(1,'rgba(255,255,255,0)');
-        CTX.fillStyle=cgR; CTX.fillRect(tR-ew,pillarTop-ew*0.5,ew*2.5,ew*2.5);
-      }
+      CTX.fillStyle=gR;
+      CTX.fillRect(pRx-ew*1.8,frontTopY,ew*1.8,frontBotY-frontTopY);
     }
-    if(tiltDeg>2){
-      var shW=cl(tiltDeg*2.2,0,trenchW*0.65);
-      var shG=CTX.createLinearGradient(tL,0,tL+shW,0);
-      shG.addColorStop(0,'rgba(0,0,0,'+cl(tiltDeg*0.022,0,0.55)+')'); shG.addColorStop(1,'rgba(0,0,0,0)');
-      CTX.fillStyle=shG; CTX.fillRect(tL,pillarTop,shW,depth);
-    } else if(tiltDeg<-2){
-      var shW2=cl(-tiltDeg*2.2,0,trenchW*0.65);
-      var shG2=CTX.createLinearGradient(tR,0,tR-shW2,0);
-      shG2.addColorStop(0,'rgba(0,0,0,'+cl(-tiltDeg*0.022,0,0.55)+')'); shG2.addColorStop(1,'rgba(0,0,0,0)');
-      CTX.fillStyle=shG2; CTX.fillRect(tR-shW2,pillarTop,shW2,depth);
+    // 4) Front seam — thin dark line where the top face meets the front
+    //    face (sharper visual separation between the two faces)
+    if(tiltDeg>1){
+      CTX.strokeStyle='rgba(0,0,0,'+cl(sinT*0.4,0,0.4)+')';
+      CTX.lineWidth=1;
+      CTX.beginPath();
+      CTX.moveTo(pLx,frontTopY);
+      CTX.lineTo(pRx,frontTopY);
+      CTX.stroke();
     }
-    var fda=cl(svb-18,0,255);
-    var fG=CTX.createLinearGradient(0,floorY-16,0,floorY+4);
-    fG.addColorStop(0,'rgba(0,0,0,0)');
-    fG.addColorStop(0.6, rgba(fda,fda,fda,0.55));
-    fG.addColorStop(1,rgba(fda,fda,fda,0.3));
-    CTX.fillStyle = det==='EDS' ? 'rgba(160,120,30,.18)' : fG;
-    CTX.fillRect(tL+1,floorY-16,trenchW-2,22);
   }
-  CTX.fillStyle='#04080f'; CTX.fillRect(0,0,W,Math.max(0,pillarTop));
-  if(floorY<H){ CTX.fillStyle=rgb(svb,svb,svb); CTX.fillRect(0,floorY,W,H-floorY); }
-  if(det==='EDS'){ CTX.globalAlpha=0.4; CTX.fillStyle='rgba(30,90,210,.5)'; CTX.fillRect(0,pillarTop,W,H-pillarTop); CTX.globalAlpha=1; }
+  // EDS overlay (if selected)
+  if(det==='EDS'){
+    CTX.globalAlpha=0.4;
+    CTX.fillStyle='rgba(30,90,210,.5)';
+    CTX.fillRect(0,topBackY,W,H-topBackY);
+    CTX.globalAlpha=1;
+  }
+  // Grain noise (seeded so it doesn't flicker)
   for(var ig=0;ig<500;ig++){
-    var gx=rn(ig*3.1)*W, gy=pillarTop+rn(ig*7.3)*(H-pillarTop), gv=22+rn(ig*4.5)*30;
+    var gx=rn(ig*3.1)*W, gy=topBackY+rn(ig*7.3)*(H-topBackY), gv=22+rn(ig*4.5)*30;
     CTX.fillStyle=rgba(gv,gv,gv,0.033); CTX.fillRect(gx,gy,1.3,1.3);
   }
 }
@@ -880,6 +901,7 @@ function fxScanHold(){
 
 /* ── MAIN DRAW ── */
 function draw(){
+  stage.tilt=0; /* tilt 기능 비활성: 항상 0으로 강제 고정 */
   updateLabels();
   var s=els.sample.value, mag=magV(+els.mag.value);
   CTX.clearRect(0,0,W,H);
@@ -888,7 +910,11 @@ function draw(){
   else if(s==='etch_taper') drawEtch(true);
   else if(s.indexOf('film')===0) drawFilm(s==='film_multi');
   else drawSurf(s);
-  fxTilt(); fxBlur(); fxVib(); fxCharge(); fxNoise(); fxScanHold();
+  // etch_v handles tilt natively with proper 3D projection, so we skip
+  // the keystone-slice fxTilt pass for that sample (the other samples
+  // still use it for their 2D tilt approximation).
+  if(s!=='etch_v') fxTilt();
+  fxBlur(); fxVib(); fxCharge(); fxNoise(); fxScanHold();
   computeStatus(); updateHint(); updateMeasure();
   $('edsLegend').classList.toggle('show', els.detector.value==='EDS');
   if(mode==='tutorial') updateTutStatus();
@@ -1118,16 +1144,14 @@ var P={
 };
 function applyP(n){
   var p=P[n]; if(!p) return;
-  els.sample.value='etch_v'; /* demo: lock to 수직 profile */ els.detector.value=p.det; els.mag.value=p.mag; els.kv.value=p.kv;
+  els.sample.value=p.s; els.detector.value=p.det; els.mag.value=p.mag; els.kv.value=p.kv;
   els.wd.value=p.wd; els.focus.value=p.f; els.astigX.value=p.ax; els.astigY.value=p.ay;
   els.vibration.value=p.v; els.drift.value=p.d; els.charging.value=p.c;
   els.noise.value=p.n; els.brightness.value=p.br; els.contrast.value=p.co;
-  stage.tilt=0; /* tilt locked to 0 for demo */ draw();
+  stage.tilt=0; /* tilt 기능 비활성: preset의 p.t 무시 */ draw();
 }
 
 Object.values(els).forEach(function(e){ e.addEventListener('input',draw); });
-/* demo: lock sample to etch_v only */
-els.sample.addEventListener('change',function(){ els.sample.value='etch_v'; draw(); });
 document.querySelectorAll('[data-m]').forEach(function(b){
   b.addEventListener('click',function(){
     var m=b.dataset.m;
@@ -1151,14 +1175,15 @@ document.querySelectorAll('[data-m]').forEach(function(b){
     if(m==='down')  stage.y+=moveStep;
     if(m==='left')  stage.x-=moveStep;
     if(m==='right') stage.x+=moveStep;
-    /* tilt disabled for demo */
+    /* tilt 기능 비활성: tilt+/tilt- 클릭 완전 무시 */
+    if(m==='tilt+'||m==='tilt-'){ stage.tilt=0; return; }
     if(m==='zoom+') els.mag.value=Math.min(100,+els.mag.value+4);
     if(m==='zoom-') els.mag.value=Math.max(0,+els.mag.value-4);
     if(m==='scan')  scan=!scan;
     draw();
   });
 });
-/* tilt preset buttons disabled for demo */
+/* tilt 기능 비활성: data-t 프리셋 버튼 핸들러 제거 — stage.tilt는 항상 0 */
 $('bHome').onclick=function(){ stage.x=0; stage.y=0; draw(); };
 $('bAF').onclick=function(){ els.focus.value=0; draw(); };
 $('bAS').onclick=function(){ els.astigX.value=0; els.astigY.value=0; draw(); };
@@ -1179,6 +1204,25 @@ $('explainToggle').onclick=function(){
 initAllProblems();
 setMode('tutorial');
 draw();
+
+// Size .cshell as the largest square that fits in .cout (so overlays
+// like the scale bar at bottom-right stay within the visible area).
+function sizeShell(){
+  var cout=document.querySelector('.cout');
+  var shell=document.getElementById('cshell');
+  if(!cout||!shell) return;
+  var pad=20; // matches .cout padding:10px on both sides
+  var cw=cout.clientWidth-pad, ch=cout.clientHeight-pad;
+  var size=Math.max(0,Math.min(cw,ch,680));
+  shell.style.width=size+'px';
+  shell.style.height=size+'px';
+  draw();
+}
+window.addEventListener('resize',sizeShell);
+if(window.ResizeObserver){
+  new ResizeObserver(sizeShell).observe(document.querySelector('.cout'));
+}
+sizeShell();
 </script>
 </body>
 </html>
