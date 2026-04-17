@@ -1815,7 +1815,87 @@ const PhotolithographySimulator = ({ initialTab }) => {
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <h4 className="text-lg font-semibold mb-4">PR 코팅 결과 시각화</h4>
                 
-                {processResults.prThickness === 0 ? (
+                {isProcessing ? (() => {
+                  const totalSec = processParams.step1_time + processParams.step2_time + processParams.step3_time;
+                  const b1 = (processParams.step1_time / totalSec) * 100;
+                  const b2 = ((processParams.step1_time + processParams.step2_time) / totalSec) * 100;
+                  let phaseName, phaseColor, rpm, prRadius, edgeBead;
+                  if (processProgress < b1) {
+                    const local = b1 > 0 ? processProgress / b1 : 1;
+                    phaseName = '1단계: Spread'; phaseColor = 'text-blue-600';
+                    rpm = processParams.step1_rpm;
+                    prRadius = 18 + local * 104;
+                    edgeBead = 0;
+                  } else if (processProgress < b2) {
+                    const local = (b2 - b1) > 0 ? (processProgress - b1) / (b2 - b1) : 1;
+                    phaseName = '2단계: Spin'; phaseColor = 'text-green-600';
+                    rpm = processParams.step2_rpm;
+                    prRadius = 132;
+                    edgeBead = local;
+                  } else {
+                    const local = (100 - b2) > 0 ? (processProgress - b2) / (100 - b2) : 1;
+                    phaseName = '3단계: Stop'; phaseColor = 'text-gray-600';
+                    rpm = processParams.step2_rpm * (1 - local);
+                    prRadius = 132;
+                    edgeBead = 1;
+                  }
+                  const spinDur = rpm > 50 ? Math.max(0.15, 1500 / rpm) : null;
+                  return (
+                    <div className="flex flex-col items-center justify-center h-96 space-y-4">
+                      <div className="flex items-center gap-10 text-center">
+                        <div>
+                          <div className="text-xs text-gray-500 font-medium">현재 단계</div>
+                          <div className={`text-xl font-bold ${phaseColor}`}>{phaseName}</div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 font-medium">회전 속도</div>
+                          <div className="text-xl font-bold text-indigo-600">{Math.round(rpm)} RPM</div>
+                        </div>
+                      </div>
+                      <div className="relative" style={{ width: 240, height: 240 }}>
+                        <svg className="absolute inset-0" viewBox="0 0 300 300" width="100%" height="100%">
+                          <circle cx="150" cy="150" r="148" fill="#1e293b" />
+                          <circle cx="150" cy="150" r="142" fill="#334155" />
+                        </svg>
+                        <div
+                          className={spinDur ? 'absolute inset-0 animate-spin' : 'absolute inset-0'}
+                          style={spinDur ? { animationDuration: `${spinDur}s` } : undefined}
+                        >
+                          <svg viewBox="0 0 300 300" width="100%" height="100%">
+                            <defs>
+                              <radialGradient id="prLiquidAnim" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="#93c5fd" stopOpacity="0.95" />
+                                <stop offset="60%" stopColor="#3b82f6" stopOpacity="0.88" />
+                                <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.75" />
+                              </radialGradient>
+                              <radialGradient id="waferGradAnim" cx="50%" cy="50%" r="50%">
+                                <stop offset="0%" stopColor="#e2e8f0" />
+                                <stop offset="85%" stopColor="#cbd5e1" />
+                                <stop offset="100%" stopColor="#94a3b8" />
+                              </radialGradient>
+                            </defs>
+                            <circle cx="150" cy="150" r="135" fill="url(#waferGradAnim)" />
+                            <path d="M 143 15 L 157 15 L 155 25 L 145 25 Z" fill="#64748b" />
+                            <circle cx="150" cy="150" r={prRadius} fill="url(#prLiquidAnim)" />
+                            {edgeBead > 0 && (
+                              <circle cx="150" cy="150" r="132" fill="none" stroke="#1e40af" strokeWidth="4" opacity={edgeBead} />
+                            )}
+                          </svg>
+                        </div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-gray-800 shadow-lg ring-2 ring-gray-500"></div>
+                      </div>
+                      <div className="w-full max-w-sm">
+                        <div className="flex justify-between text-xs text-gray-600 mb-1">
+                          <span>진행률</span>
+                          <span>{Math.round(processProgress)}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-blue-600 h-2 rounded-full transition-all" style={{ width: `${processProgress}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })() : processResults.prThickness === 0 ? (
                   <div className="flex justify-center items-center h-96 text-gray-500">
                     <div className="text-center">
                       <svg className="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1826,103 +1906,73 @@ const PhotolithographySimulator = ({ initialTab }) => {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex justify-center">
-                    <svg width="600" height="400" viewBox="0 0 600 400">
-                      <rect x="50" y="280" width="500" height="80" fill="#4a5568" />
-                      <text x="300" y="325" textAnchor="middle" fill="white" className="text-lg font-bold">Silicon Wafer</text>
-                      
-                      <g>
-                        <rect x="50" y="260" width="500" height="20" fill="#3b82f6" />
-                        
-                        <ellipse cx="50" cy="270" rx="15" ry="15" fill="#3b82f6" />
-                        <ellipse cx="550" cy="270" rx="15" ry="15" fill="#3b82f6" />
-                        
-                        {processParams.step2_rpm < 2000 && (
-                          <>
-                            <rect x="100" y="255" width="50" height="25" fill="#3b82f6" />
-                            <rect x="200" y="258" width="50" height="22" fill="#3b82f6" />
-                            <rect x="350" y="256" width="50" height="24" fill="#3b82f6" />
-                            <rect x="450" y="257" width="50" height="23" fill="#3b82f6" />
-                            <text x="300" y="240" textAnchor="middle" className="text-sm font-bold fill-red-600">
-                              불균일한 두께 (저속 회전)
-                            </text>
-                          </>
-                        )}
-                        
-                        {processParams.step2_rpm >= 2000 && processParams.step2_rpm <= 4000 && (
-                          <>
-                            <text x="300" y="240" textAnchor="middle" className="text-sm font-bold fill-green-600">
-                              균일한 두께 (최적 RPM)
-                            </text>
-                          </>
-                        )}
-                        
-                        {processParams.step2_rpm > 4000 && (
-                          <>
-                            <rect x="50" y="265" width="500" height="15" fill="#3b82f6" />
-                            <text x="300" y="240" textAnchor="middle" className="text-sm font-bold fill-orange-600">
-                              과도한 얇음 (고속 회전)
-                            </text>
-                          </>
-                        )}
-                        
-                        <text x="50" y="200" className="text-xs fill-blue-800">Edge Bead</text>
-                        <line x1="50" y1="210" x2="50" y2="255" stroke="#2563eb" strokeWidth="2" />
-                        
-                        <text x="350" y="200" className="text-xs fill-blue-800">Edge Bead</text>
-                        <line x1="550" y1="210" x2="550" y2="255" stroke="#2563eb" strokeWidth="2" />
-                      </g>
-                      
-                      <g>
-                        <rect x="20" y="20" width="560" height="150" fill="#f8fafc" stroke="#e2e8f0" strokeWidth="1" rx="8" />
-                        <text x="30" y="40" className="text-sm font-bold fill-gray-800">실행된 Recipe 정보</text>
-                        
-                        <text x="30" y="65" className="text-xs fill-gray-700">
-                          1단계 Spread: {processParams.step1_rpm} RPM × {processParams.step1_time}초
-                        </text>
-                        <text x="30" y="85" className="text-xs fill-gray-700">
-                          2단계 Spin: {processParams.step2_rpm} RPM × {processParams.step2_time}초
-                        </text>
-                        <text x="30" y="105" className="text-xs fill-gray-700">
-                          3단계 Stop: {processParams.step3_rpm} RPM × {processParams.step3_time}초
-                        </text>
-                        
-                        <text x="320" y="65" className="text-xs fill-gray-700">
-                          • PR 분산 효과: {processParams.step1_rpm >= 400 && processParams.step1_rpm <= 600 && processParams.step1_time >= 4 ? '우수' : '불량'}
-                        </text>
-                        <text x="320" y="85" className="text-xs fill-gray-700">
-                          • 코팅 균일도: {processResults.uniformity.toFixed(1)}%
-                        </text>
-                        <text x="320" y="105" className="text-xs fill-gray-700">
-                          • 결함 밀도: {processResults.defectDensity.toFixed(1)}/cm²
-                        </text>
-                        
-                        <rect x="30" y="120" width="520" height="40" fill="#e0f2fe" stroke="#0284c7" strokeWidth="1" rx="4" />
-                        <text x="40" y="140" className="text-sm font-bold fill-blue-800">PR 두께 측정 결과</text>
-                        <text x="40" y="155" className="text-xs fill-blue-700">
-                          측정 두께: {processResults.prThickness.toFixed(0)} nm (목표: 1000nm)
-                        </text>
-                        <text x="300" y="155" className="text-xs fill-blue-700">
-                          두께 편차: {Math.abs(processResults.prThickness - 1000).toFixed(0)} nm
-                        </text>
-                      </g>
-                      
-                      <g>
-                        <text x="300" y="380" textAnchor="middle" className="text-lg font-bold fill-purple-600">
-                          균일도: {processResults.uniformity.toFixed(1)}%
-                        </text>
-                        
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                      <div>
+                        <h5 className="text-sm font-bold text-gray-700 mb-2">실행된 Recipe</h5>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <p>1단계 Spread: {processParams.step1_rpm} RPM × {processParams.step1_time}초</p>
+                          <p>2단계 Spin: {processParams.step2_rpm} RPM × {processParams.step2_time}초</p>
+                          <p>3단계 Stop: {processParams.step3_rpm} RPM × {processParams.step3_time}초</p>
+                        </div>
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-bold text-gray-700 mb-2">측정 결과</h5>
+                        <div className="text-xs text-gray-600 space-y-1">
+                          <p>PR 두께: <span className="font-bold text-blue-700">{processResults.prThickness.toFixed(0)} nm</span> (목표 1000nm)</p>
+                          <p>코팅 균일도: <span className="font-bold text-blue-700">{processResults.uniformity.toFixed(1)}%</span></p>
+                          <p>결함 밀도: <span className="font-bold text-blue-700">{processResults.defectDensity.toFixed(1)}/cm²</span></p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex justify-center items-center gap-6 py-2">
+                      <div className="relative" style={{ width: 220, height: 220 }}>
+                        <svg viewBox="0 0 300 300" width="100%" height="100%">
+                          <defs>
+                            <radialGradient id="prFinalGrad" cx="50%" cy="50%" r="50%">
+                              <stop offset="0%" stopColor="#93c5fd" stopOpacity={processParams.step2_rpm > 4000 ? 0.55 : 0.92} />
+                              <stop offset="80%" stopColor="#3b82f6" stopOpacity={processParams.step2_rpm > 4000 ? 0.55 : 0.9} />
+                              <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0.95" />
+                            </radialGradient>
+                          </defs>
+                          <circle cx="150" cy="150" r="148" fill="#1e293b" />
+                          <circle cx="150" cy="150" r="142" fill="#334155" />
+                          <circle cx="150" cy="150" r="135" fill="#cbd5e1" />
+                          <path d="M 143 15 L 157 15 L 155 25 L 145 25 Z" fill="#64748b" />
+                          <circle cx="150" cy="150" r="135" fill="url(#prFinalGrad)" />
+                          {processParams.step2_rpm < 2000 && (
+                            <>
+                              <circle cx="85" cy="120" r="24" fill="#1e3a8a" opacity="0.55" />
+                              <circle cx="205" cy="195" r="30" fill="#1e3a8a" opacity="0.55" />
+                              <circle cx="210" cy="90" r="18" fill="#1e3a8a" opacity="0.45" />
+                              <circle cx="110" cy="215" r="22" fill="#1e3a8a" opacity="0.5" />
+                            </>
+                          )}
+                          <circle cx="150" cy="150" r="132" fill="none" stroke="#1e40af" strokeWidth="4" opacity="0.85" />
+                          <circle cx="150" cy="150" r="5" fill="#475569" />
+                        </svg>
+                      </div>
+                      <div className="space-y-2">
+                        <div>
+                          <div className="text-xs text-gray-500">균일도</div>
+                          <div className="text-3xl font-bold text-purple-600">{processResults.uniformity.toFixed(1)}%</div>
+                        </div>
                         {processResults.uniformity >= 85 && (
-                          <text x="300" y="395" textAnchor="middle" className="text-sm fill-green-600">✓ 우수한 코팅 품질</text>
+                          <div className="text-sm text-green-700 font-medium">✓ 우수한 코팅 품질</div>
                         )}
                         {processResults.uniformity >= 70 && processResults.uniformity < 85 && (
-                          <text x="300" y="395" textAnchor="middle" className="text-sm fill-yellow-600">△ 보통 코팅 품질</text>
+                          <div className="text-sm text-yellow-700 font-medium">△ 보통 코팅 품질</div>
                         )}
                         {processResults.uniformity < 70 && (
-                          <text x="300" y="395" textAnchor="middle" className="text-sm fill-red-600">✗ 불량한 코팅 품질</text>
+                          <div className="text-sm text-red-700 font-medium">✗ 불량한 코팅 품질</div>
                         )}
-                      </g>
-                    </svg>
+                        <div className="text-xs text-gray-600 pt-2 border-t border-gray-200 max-w-[160px]">
+                          {processParams.step2_rpm < 2000 && '저속 회전 → 불균일한 두께'}
+                          {processParams.step2_rpm >= 2000 && processParams.step2_rpm <= 4000 && '최적 RPM 구간'}
+                          {processParams.step2_rpm > 4000 && '고속 회전 → 과도하게 얇음'}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 )}
 
