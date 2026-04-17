@@ -146,8 +146,8 @@ select option:disabled{color:#3a4f66}
     </select>
     <select id="detector">
       <option value="SE">SE — Secondary Electron</option>
-      <option value="BSE">BSE — Backscatter Z-contrast</option>
-      <option value="EDS">EDS Map</option>
+      <option value="BSE" disabled>BSE — Backscatter Z-contrast (정식 버전)</option>
+      <option value="EDS" disabled>EDS Map (정식 버전)</option>
     </select>
   </div>
   <div class="mod">
@@ -327,6 +327,14 @@ var els = {
   vibration:$('vibration'), drift:$('drift'), charging:$('charging'),
   noise:$('noise'), brightness:$('brightness'), contrast:$('contrast')
 };
+/* BSE / EDS Map 비활성(정식 버전 기능) — 어떤 경로로도 선택되지 않도록 잠금.
+   option[disabled]로 UI 차단 + 값이 SE가 아니면 강제로 SE로 되돌린다. */
+function lockDetectorToSE(){
+  if(els.detector.value!=='SE') els.detector.value='SE';
+}
+els.detector.addEventListener('change', lockDetectorToSE);
+els.detector.addEventListener('input', lockDetectorToSE);
+lockDetectorToSE();
 var stage = {x:0, y:0, tilt:0};
 var scan = true, mode = 'tutorial', step = 0;
 var seen = new Array(10).fill(false);
@@ -904,6 +912,7 @@ function fxScanHold(){
 function draw(){
   stage.tilt=0; /* tilt 기능 비활성: 항상 0으로 강제 고정 */
   els.sample.value='etch_v'; /* 데모: 수직 profile만 허용 */
+  if(els.detector.value!=='SE') els.detector.value='SE'; /* BSE/EDS 비활성: SE만 허용 */
   updateLabels();
   var s=els.sample.value, mag=magV(+els.mag.value);
   CTX.clearRect(0,0,W,H);
