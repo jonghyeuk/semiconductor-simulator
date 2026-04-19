@@ -49,6 +49,16 @@ const PhotolithographySimulator = ({ initialTab }) => {
     step3_time: 2
   });
 
+  // 환경 파라미터 (-10 ~ +10, 0 = 표준 조건). 단면 프로파일에 반영.
+  const [envParams, setEnvParams] = useState({
+    coolingTemp: 0,      // ↑ → ⌒ 가운데 오목
+    prTemp: 0,           // ↑ → ∩ 가운데 볼록
+    exhaustFlow: 0,      // ↑ → 가장자리 상승
+    chamberHumidity: 0,  // ↑ → ▬ 전체 얇음
+    chamberTemp: 0,      // ↑ → █ 전체 두꺼움
+    motorTemp: 0         // ↑ → ⌒⌒ 양쪽 끝 강하게 상승
+  });
+
   // 결과 데이터
   const [processResults, setProcessResults] = useState({
     prThickness: 0,
@@ -1973,6 +1983,87 @@ const PhotolithographySimulator = ({ initialTab }) => {
                         </div>
                       </div>
                     </div>
+                    {(() => {
+                      const dispThk = processParams.step2_rpm > 4000 ? 10
+                        : processParams.step2_rpm < 2000 ? 26 : 22;
+                      const baseY = 130;
+                      const topY = baseY - dispThk;
+                      const peakY = topY - 14;
+                      const lowUniform = processParams.step2_rpm < 2000;
+                      // 환경 파라미터에 따른 PR 상부 프로파일 변형 (xc: -1 가장자리 ~ 0 중앙 ~ +1 가장자리)
+                      const e = envParams;
+                      const profileY = (xc) => {
+                        const r2 = xc * xc;
+                        let dy = 0;
+                        dy += e.coolingTemp     * 0.55 * (1 - r2);                // ⌒ 가운데 오목
+                        dy -= e.prTemp          * 0.55 * (1 - r2);                // ∩ 가운데 볼록
+                        dy -= e.exhaustFlow     * 0.45 * r2;                      // 가장자리 상승
+                        dy += e.chamberHumidity * 0.35;                           // ▬ 전체 얇음
+                        dy -= e.chamberTemp     * 0.35;                           // █ 전체 두꺼움
+                        dy -= e.motorTemp       * 1.10 * Math.pow(r2, 4);         // ⌒⌒ 양쪽 끝 강한 상승
+                        let y = topY + dy;
+                        if (lowUniform) y += Math.sin(xc * 9) * 3.5;              // RPM 낮을 때 잔물결
+                        return y;
+                      };
+                      const N = 13;
+                      const xs = Array.from({ length: N }, (_, i) => 75 + (i * 450) / (N - 1));
+                      const ys = xs.map(x => profileY((x - 300) / 225));
+                      // 양 끝 Edge Bead까지 곡선 path 생성 (연속 quadratic 보간)
+                      let prPath = `M 40 ${baseY} L 40 ${topY + 6} Q 40 ${peakY} ${xs[0]} ${ys[0]}`;
+                      for (let i = 1; i < N; i++) {
+                        const cx = (xs[i - 1] + xs[i]) / 2;
+                        const cy = (ys[i - 1] + ys[i]) / 2;
+                        prPath += ` Q ${xs[i - 1]} ${ys[i - 1]} ${cx} ${cy}`;
+                      }
+                      prPath += ` L ${xs[N - 1]} ${ys[N - 1]} Q 560 ${peakY} 560 ${topY + 6} L 560 ${baseY} Z`;
+                      // 지배적인 환경 효과 라벨
+                      const envEffects = [
+                        { v: e.coolingTemp,     pos: '⌒ 가운데 오목 (냉각 온도 ↑)' },
+                        { v: -e.prTemp,         pos: '∩ 가운데 볼록 (PR 온도 ↑)' },
+                        { v: -e.exhaustFlow,    pos: '⌒ 가장자리 상승 (배기량 ↑)' },
+                        { v: e.chamberHumidity, pos: '▬ 전체 얇음 (챔버 습도 ↑)' },
+                        { v: -e.chamberTemp,    pos: '█ 전체 두꺼움 (챔버 온도 ↑)' },
+                        { v: -e.motorTemp,      pos: '⌒⌒ 양쪽 끝 강한 상승 (모터 온도 ↑)' }
+                      ];
+                      const dominant = envEffects.reduce((m, x) => Math.abs(x.v) > Math.abs(m.v) ? x : m, { v: 0, pos: '' });
+                      return (
+                        <div className="px-2 pt-2 border-t border-gray-200">
+                          <div className="text-sm font-bold text-gray-700 mb-2">코팅 단면도 (Cross-section)</div>
+                          <svg viewBox="0 0 600 180" className="w-full" style={{ maxHeight: 200 }}>
+                            <defs>
+                              <linearGradient id="csSiGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#64748b" />
+                                <stop offset="100%" stopColor="#1e293b" />
+                              </linearGradient>
+                              <linearGradient id="csPrGrad" x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="0%" stopColor="#60a5fa" />
+                                <stop offset="100%" stopColor="#1e3a8a" />
+                              </linearGradient>
+                            </defs>
+                            <text x="55" y="35" textAnchor="middle" fontSize="11" fill="#1e40af" fontWeight="bold">Edge Bead</text>
+                            <line x1="55" y1="42" x2="55" y2={peakY - 4} stroke="#1e40af" strokeWidth="1.2" strokeDasharray="3,2" />
+                            <text x="545" y="35" textAnchor="middle" fontSize="11" fill="#1e40af" fontWeight="bold">Edge Bead</text>
+                            <line x1="545" y1="42" x2="545" y2={peakY - 4} stroke="#1e40af" strokeWidth="1.2" strokeDasharray="3,2" />
+                            <path d={prPath} fill="url(#csPrGrad)" />
+                            <text x="300" y={Math.min(...ys) - 4} textAnchor="middle" fontSize="10" fill="#1e40af" fontWeight="bold">
+                              PR {processResults.prThickness.toFixed(0)} nm
+                            </text>
+                            <rect x="40" y={baseY} width="520" height="35" fill="url(#csSiGrad)" />
+                            <text x="300" y={baseY + 23} textAnchor="middle" fill="white" fontSize="13" fontWeight="bold">Silicon Wafer</text>
+                          </svg>
+                          <div className="text-xs text-gray-500 mt-1 text-center space-y-0.5">
+                            <div>
+                              {lowUniform && '⚠ 저속 회전으로 표면 두께가 불균일하게 형성됨'}
+                              {!lowUniform && processParams.step2_rpm <= 4000 && '✓ 균일한 평탄 프로파일 (Edge Bead만 가장자리에 형성)'}
+                              {processParams.step2_rpm > 4000 && '⚠ 고속 회전으로 PR이 과도하게 얇아짐'}
+                            </div>
+                            {Math.abs(dominant.v) >= 2 && (
+                              <div className="text-blue-600 font-medium">환경 영향: {dominant.pos}</div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
@@ -1990,8 +2081,51 @@ const PhotolithographySimulator = ({ initialTab }) => {
                   <h4 className="text-lg font-semibold mb-4">환경 파라미터가 PR 코팅에 미치는 영향</h4>
                   <div className="text-sm text-gray-600 mb-4">
                     실제 제조 현장에서는 다양한 환경 조건이 PR 코팅 균일도에 영향을 미칩니다.
+                    아래 슬라이더를 조절하면 위 <strong>코팅 단면도</strong>의 두께 프로파일이 실시간으로 변화합니다.
                   </div>
-                  
+
+                  <div className="mb-5 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex justify-between items-center mb-3">
+                      <h5 className="font-medium text-blue-900 text-sm">환경 조건 조절 (단면도 실시간 반영)</h5>
+                      <button
+                        onClick={() => setEnvParams({ coolingTemp: 0, prTemp: 0, exhaustFlow: 0, chamberHumidity: 0, chamberTemp: 0, motorTemp: 0 })}
+                        className="text-xs px-2 py-1 bg-white border border-blue-300 text-blue-700 rounded hover:bg-blue-100"
+                      >
+                        초기화
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-3">
+                      {[
+                        { key: 'coolingTemp',     label: '냉각 온도',  shape: '⌒' },
+                        { key: 'prTemp',          label: 'PR 온도',    shape: '∩' },
+                        { key: 'exhaustFlow',     label: '배기량',     shape: '⌒(가장자리)' },
+                        { key: 'chamberHumidity', label: '챔버 습도',  shape: '▬ 얇음' },
+                        { key: 'chamberTemp',     label: '챔버 온도',  shape: '█ 두꺼움' },
+                        { key: 'motorTemp',       label: '모터 온도',  shape: '⌒⌒' }
+                      ].map(p => (
+                        <div key={p.key}>
+                          <div className="flex justify-between items-baseline">
+                            <label className="text-xs font-medium text-gray-700">{p.label}</label>
+                            <span className="text-xs font-mono text-blue-700">
+                              {envParams[p.key] > 0 ? '+' : ''}{envParams[p.key]} <span className="text-gray-400">{p.shape}</span>
+                            </span>
+                          </div>
+                          <input
+                            type="range"
+                            min="-10"
+                            max="10"
+                            value={envParams[p.key]}
+                            onChange={(ev) => setEnvParams({ ...envParams, [p.key]: parseInt(ev.target.value, 10) })}
+                            className="w-full"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-xs text-gray-500 mt-2">
+                      💡 Recipe를 실행한 뒤 슬라이더를 움직이면 단면도가 즉시 반응합니다.
+                    </p>
+                  </div>
+
                   <div className="overflow-x-auto">
                     <table className="w-full border-collapse border border-gray-300">
                       <thead>
