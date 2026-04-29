@@ -1677,40 +1677,107 @@ const EtchSimulator = ({ initialTab }) => {
   ];
 
   // 식각 계산 함수들
+  // 실제 식각 공정처럼 극단적인 파라미터에서 trade-off가 나타나도록 모델링
   const calculateEtchRate = (material, gasFlow, power, pressure) => {
-    let baseRate = 100; // nm/min
+    let baseRate = 0;
 
     switch(material) {
-      case 'Si':
-        baseRate = (gasFlow.Cl2 / 30) * (power / 300) * (pressure / 100) * 100;
+      case 'Si': {
+        // Cl2가 식각률을 올리지만, 과도한 HBr은 측벽 passivation으로 식각률 저하
+        const cl2Effect = gasFlow.Cl2 * 3.0;
+        const hbrPassivation = Math.max(0, (gasFlow.HBr - 30) * 1.8);
+        baseRate = (cl2Effect - hbrPassivation) * (power / 300);
         break;
-      case 'SiO2':
-        baseRate = (gasFlow.CF4 / 30) * (power / 600) * (pressure / 30) * 50;
+      }
+      case 'SiO2': {
+        // CF4/CHF3가 식각률에 기여하지만, 과도한 CHF3는 폴리머 누적으로 etch stop
+        const cf4Effect = gasFlow.CF4 * 2.5;
+        const chf3Effect = gasFlow.CHF3 * 1.5;
+        const polymerStop = Math.max(0, (gasFlow.CHF3 - 45) * 2.5);
+        baseRate = (cf4Effect + chf3Effect - polymerStop) * (power / 400);
         break;
-      case 'Si3N4':
-        baseRate = (gasFlow.CHF3 / 25) * (power / 600) * (pressure / 30) * 40;
+      }
+      case 'Si3N4': {
+        const chf3Effect = gasFlow.CHF3 * 2.2;
+        const polymerStop = Math.max(0, (gasFlow.CHF3 - 50) * 2.0);
+        baseRate = (chf3Effect - polymerStop) * (power / 400);
         break;
+      }
+      case 'PR': {
+        baseRate = gasFlow.O2 * 4.0 * (power / 400);
+        break;
+      }
       default:
         baseRate = 50;
     }
 
-    return Math.max(0, baseRate * (0.8 + Math.random() * 0.4));
+    // 압력이 너무 높으면 가스상 재결합으로 식각률 감소 (~80mTorr에서 정점)
+    const pressureFactor = pressure < 80
+      ? 0.5 + (pressure / 80) * 0.5
+      : Math.max(0.4, 1 - (pressure - 80) / 250);
+
+    // 파워 600W 초과 시 마스크/하부층 손상이 누적되며 유효 식각률 saturation
+    const powerSaturation = power > 600 ? Math.max(0.7, 1 - (power - 600) / 800) : 1;
+
+    baseRate = baseRate * pressureFactor * powerSaturation;
+    return Math.max(5, baseRate * (0.9 + Math.random() * 0.2));
   };
 
-  const calculateSelectivity = (target, gasFlow) => {
-    if (target === 'Si' && gasFlow.HBr > 0) {
-      return 10 + (gasFlow.HBr / 15) * 20; // HBr improves selectivity
+  const calculateSelectivity = (target, gasFlow, power, pressure) => {
+    let sel = 5;
+
+    switch(target) {
+      case 'Si': {
+        // HBr이 선택비를 올리지만 Cl2/Ar 과다 시 PR/oxide 손상으로 선택비 저하
+        sel = 8 + (gasFlow.HBr / 10) * 8;
+        const cl2Penalty = Math.max(0, (gasFlow.Cl2 - 50) * 0.35);
+        const arPenalty = Math.max(0, (gasFlow.Ar - 80) * 0.25);
+        sel -= cl2Penalty + arPenalty;
+        break;
+      }
+      case 'SiO2': {
+        // CHF3 폴리머가 Si 표면 보호 → 선택비↑, CF4 과다는 F 라디칼 증가로 선택비↓
+        sel = 5 + (gasFlow.CHF3 / 10) * 4;
+        const cf4Penalty = Math.max(0, (gasFlow.CF4 - 30) * 0.3);
+        const arPenalty = Math.max(0, (gasFlow.Ar - 70) * 0.25);
+        sel -= cf4Penalty + arPenalty;
+        break;
+      }
+      case 'Si3N4': {
+        sel = 5 + (gasFlow.CHF3 / 10) * 3;
+        const o2Penalty = Math.max(0, (gasFlow.O2 - 15) * 0.5);
+        sel -= o2Penalty;
+        break;
+      }
+      case 'PR': {
+        sel = 30 + Math.random() * 5;
+        break;
+      }
+      default:
+        sel = 5 + Math.random() * 5;
     }
-    if (target === 'SiO2' && gasFlow.CF4 > 0) {
-      return 15 + (gasFlow.CF4 / 30) * 10;
-    }
-    return 5 + Math.random() * 10;
+
+    // 고전력에서는 물리 충격이 우세해져 선택비 저하
+    const powerPenalty = power > 500 ? (power - 500) / 150 : 0;
+    // 저압은 이방성 좋지만 sputter 비중 증가 → 선택비 약간 저하
+    const lowPressurePenalty = pressure < 40 ? (40 - pressure) / 20 : 0;
+    sel = sel - powerPenalty - lowPressurePenalty;
+
+    return Math.max(1, sel);
   };
 
-  const calculateUniformity = (pressure, power) => {
-    const pressureEffect = Math.max(0, 100 - Math.abs(pressure - 100) / 2);
+  const calculateUniformity = (pressure, power, gasFlow) => {
+    const pressureEffect = Math.max(0, 100 - Math.abs(pressure - 100) / 1.5);
     const powerEffect = Math.max(0, 100 - Math.abs(power - 300) / 5);
-    return (pressureEffect + powerEffect) / 2;
+    let uniformity = (pressureEffect + powerEffect) / 2;
+
+    // 총 가스 유량이 과도하면 흐름 분포가 어긋나 균일성 저하
+    if (gasFlow) {
+      const totalGas = Object.values(gasFlow).reduce((a, b) => a + b, 0);
+      if (totalGas > 350) uniformity -= (totalGas - 350) / 6;
+    }
+
+    return Math.max(40, Math.min(100, uniformity));
   };
 
   const calculatePressureEffect = (pressure) => {
@@ -1742,8 +1809,8 @@ const EtchSimulator = ({ initialTab }) => {
 
           // 최종 결과 계산
           const finalEtchRate = calculateEtchRate(etchTarget, gasFlows, power, pressure);
-          const finalSelectivity = calculateSelectivity(etchTarget, gasFlows);
-          const finalUniformity = calculateUniformity(pressure, power);
+          const finalSelectivity = calculateSelectivity(etchTarget, gasFlows, power, pressure);
+          const finalUniformity = calculateUniformity(pressure, power, gasFlows);
 
           setEtchRate(finalEtchRate);
           setSelectivity(finalSelectivity);
@@ -1779,7 +1846,7 @@ const EtchSimulator = ({ initialTab }) => {
       data.push({
         pressure: i,
         etchRate: calculateEtchRate(etchTarget, gasFlows, power, i),
-        uniformity: calculateUniformity(i, power)
+        uniformity: calculateUniformity(i, power, gasFlows)
       });
     }
     return data;
@@ -4020,18 +4087,26 @@ const EtchSimulator = ({ initialTab }) => {
                             <>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Cl₂ {gasFlows.Cl2} sccm: {gasFlows.Cl2 >= 25 ? '높은 식각률 제공 ✓' : gasFlows.Cl2 >= 15 ? '적정 식각률' : '식각률 낮음 ⚠'}</span>
+                                <span>Cl₂ {gasFlows.Cl2} sccm: {gasFlows.Cl2 > 50 ? '과다 → 등방성 식각/언더컷, 선택비 저하 ⚠' : gasFlows.Cl2 >= 25 ? '높은 식각률 제공 ✓' : gasFlows.Cl2 >= 15 ? '적정 식각률' : '식각률 낮음 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>HBr {gasFlows.HBr} sccm: {gasFlows.HBr >= 12 ? '우수한 선택비 기여 ✓' : gasFlows.HBr >= 5 ? '선택비 보통' : '선택비 낮음 ⚠'}</span>
+                                <span>HBr {gasFlows.HBr} sccm: {gasFlows.HBr > 30 ? '과다 passivation → 식각률 저하 ⚠' : gasFlows.HBr >= 12 ? '우수한 선택비 기여 ✓' : gasFlows.HBr >= 5 ? '선택비 보통' : '선택비 낮음 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar >= 70 ? '수직 프로파일 향상 ✓' : gasFlows.Ar >= 40 ? '이방성 보통' : '등방성 경향 ⚠'}</span>
+                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 85 ? '과도한 스퍼터링 → 마스크 손상 ⚠' : gasFlows.Ar >= 70 ? '수직 프로파일 향상 ✓' : gasFlows.Ar >= 40 ? '이방성 보통' : '등방성 경향 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>RF {power} W: {power > 600 ? '과전력 → 플라즈마 데미지/선택비 저하 ⚠' : power >= 250 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>압력 {pressure} mTorr: {pressure > 150 ? '고압 → 가스 재결합/이방성 저하 ⚠' : pressure < 50 ? '저압 → sputter 우세, 선택비 저하 ⚠' : '적정 압력 ✓'}</span>
                               </div>
                               <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-                                → {gasFlows.Cl2 >= 25 && gasFlows.HBr >= 12 && gasFlows.Ar >= 70 ? '이상적인 Si 식각 조건입니다' : '일부 파라미터 조정이 필요합니다'}
+                                → {(gasFlows.Cl2 >= 25 && gasFlows.Cl2 <= 50) && (gasFlows.HBr >= 12 && gasFlows.HBr <= 30) && (gasFlows.Ar >= 70 && gasFlows.Ar <= 85) && (power >= 250 && power <= 600) && (pressure >= 50 && pressure <= 150) ? '이상적인 Si 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
                               </div>
                             </>
                           )}
@@ -4039,18 +4114,26 @@ const EtchSimulator = ({ initialTab }) => {
                             <>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>CF₄ {gasFlows.CF4} sccm: {gasFlows.CF4 >= 20 ? 'SiO₂ 식각 활성화 ✓' : gasFlows.CF4 >= 10 ? '식각률 보통' : '식각률 부족 ⚠'}</span>
+                                <span>CF₄ {gasFlows.CF4} sccm: {gasFlows.CF4 > 45 ? '과다 → F 라디칼 과잉, Si 선택비 저하 ⚠' : gasFlows.CF4 >= 20 ? 'SiO₂ 식각 활성화 ✓' : gasFlows.CF4 >= 10 ? '식각률 보통' : '식각률 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>CHF₃ {gasFlows.CHF3} sccm: {gasFlows.CHF3 >= 15 ? '높은 선택비 유지 ✓' : gasFlows.CHF3 >= 8 ? '선택비 보통' : '선택비 낮음 ⚠'}</span>
+                                <span>CHF₃ {gasFlows.CHF3} sccm: {gasFlows.CHF3 > 45 ? '폴리머 과다 → etch stop 위험 ⚠' : gasFlows.CHF3 >= 15 ? '높은 선택비 유지 ✓' : gasFlows.CHF3 >= 8 ? '선택비 보통' : '선택비 낮음 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar >= 50 ? '물리적 충격 증가 ✓' : gasFlows.Ar >= 30 ? '적정 수준' : '스퍼터링 부족 ⚠'}</span>
+                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 75 ? '과도한 스퍼터링 → PR 마스크 손상 ⚠' : gasFlows.Ar >= 50 ? '물리적 충격 증가 ✓' : gasFlows.Ar >= 30 ? '적정 수준' : '스퍼터링 부족 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>RF {power} W: {power > 600 ? '과전력 → 하부층 손상 ⚠' : power >= 300 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>압력 {pressure} mTorr: {pressure > 150 ? '고압 → 폴리머 누적/etch stop ⚠' : pressure < 40 ? '저압 → 식각률 저하 ⚠' : '적정 압력 ✓'}</span>
                               </div>
                               <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-                                → {gasFlows.CF4 >= 20 && gasFlows.CHF3 >= 15 && gasFlows.Ar >= 50 ? '이상적인 SiO₂ 식각 조건입니다' : '일부 파라미터 조정이 필요합니다'}
+                                → {(gasFlows.CF4 >= 20 && gasFlows.CF4 <= 45) && (gasFlows.CHF3 >= 15 && gasFlows.CHF3 <= 45) && (gasFlows.Ar >= 50 && gasFlows.Ar <= 75) && (power >= 300 && power <= 600) && (pressure >= 40 && pressure <= 150) ? '이상적인 SiO₂ 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
                               </div>
                             </>
                           )}
@@ -4058,18 +4141,26 @@ const EtchSimulator = ({ initialTab }) => {
                             <>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>CHF₃ {gasFlows.CHF3} sccm: {gasFlows.CHF3 >= 25 ? 'Si₃N₄ 식각 최적 ✓' : gasFlows.CHF3 >= 15 ? '식각률 보통' : '식각률 낮음 ⚠'}</span>
+                                <span>CHF₃ {gasFlows.CHF3} sccm: {gasFlows.CHF3 > 50 ? '폴리머 누적 → 식각률 급감/etch stop ⚠' : gasFlows.CHF3 >= 25 ? 'Si₃N₄ 식각 최적 ✓' : gasFlows.CHF3 >= 15 ? '식각률 보통' : '식각률 낮음 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>O₂ {gasFlows.O2} sccm: {gasFlows.O2 >= 8 && gasFlows.O2 <= 15 ? '폴리머 제거 최적 ✓' : gasFlows.O2 > 15 ? '과도한 등방성 ⚠' : 'O₂ 부족 ⚠'}</span>
+                                <span>O₂ {gasFlows.O2} sccm: {gasFlows.O2 > 15 ? '과도한 등방성 → 측벽 손상 ⚠' : gasFlows.O2 >= 8 ? '폴리머 제거 최적 ✓' : 'O₂ 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar >= 60 ? '수직성 확보 ✓' : gasFlows.Ar >= 40 ? '적정 수준' : '이방성 부족 ⚠'}</span>
+                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 85 ? '과도한 스퍼터링 → 마스크 손상 ⚠' : gasFlows.Ar >= 60 ? '수직성 확보 ✓' : gasFlows.Ar >= 40 ? '적정 수준' : '이방성 부족 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>RF {power} W: {power > 600 ? '과전력 → 플라즈마 데미지 ⚠' : power >= 300 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>압력 {pressure} mTorr: {pressure > 150 ? '고압 → 등방성 증가 ⚠' : pressure < 40 ? '저압 → 식각률 저하 ⚠' : '적정 압력 ✓'}</span>
                               </div>
                               <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-                                → {gasFlows.CHF3 >= 25 && gasFlows.O2 >= 8 && gasFlows.O2 <= 15 && gasFlows.Ar >= 60 ? '이상적인 Si₃N₄ 식각 조건입니다' : '일부 파라미터 조정이 필요합니다'}
+                                → {(gasFlows.CHF3 >= 25 && gasFlows.CHF3 <= 50) && (gasFlows.O2 >= 8 && gasFlows.O2 <= 15) && (gasFlows.Ar >= 60 && gasFlows.Ar <= 85) && (power >= 300 && power <= 600) && (pressure >= 40 && pressure <= 150) ? '이상적인 Si₃N₄ 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
                               </div>
                             </>
                           )}
@@ -4077,14 +4168,22 @@ const EtchSimulator = ({ initialTab }) => {
                             <>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>O₂ {gasFlows.O2} sccm: {gasFlows.O2 >= 80 ? 'PR 제거 최적 ✓' : gasFlows.O2 >= 50 ? '제거율 보통' : '제거율 낮음 ⚠'}</span>
+                                <span>O₂ {gasFlows.O2} sccm: {gasFlows.O2 > 95 ? 'O₂ 과다 → 하부층 산화/손상 ⚠' : gasFlows.O2 >= 80 ? 'PR 제거 최적 ✓' : gasFlows.O2 >= 50 ? '제거율 보통' : '제거율 낮음 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar >= 15 && gasFlows.Ar <= 25 ? '스퍼터링 보조 ✓' : gasFlows.Ar > 25 ? 'Ar 과다 ⚠' : 'Ar 부족 ⚠'}</span>
+                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 25 ? 'Ar 과다 → 하부 substrate 손상 ⚠' : gasFlows.Ar >= 15 ? '스퍼터링 보조 ✓' : 'Ar 부족 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>RF {power} W: {power > 500 ? '과전력 → 하부 device 손상 ⚠' : power >= 200 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
+                              </div>
+                              <div className="flex items-start gap-1">
+                                <span>•</span>
+                                <span>압력 {pressure} mTorr: {pressure > 180 ? '고압 → 균일성 저하 ⚠' : pressure < 50 ? '저압 → 제거율 저하 ⚠' : '적정 압력 ✓'}</span>
                               </div>
                               <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-                                → {gasFlows.O2 >= 80 && gasFlows.Ar >= 15 && gasFlows.Ar <= 25 ? '이상적인 PR 제거 조건입니다' : '일부 파라미터 조정이 필요합니다'}
+                                → {(gasFlows.O2 >= 80 && gasFlows.O2 <= 95) && (gasFlows.Ar >= 15 && gasFlows.Ar <= 25) && (power >= 200 && power <= 500) && (pressure >= 50 && pressure <= 180) ? '이상적인 PR 제거 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
                               </div>
                             </>
                           )}
