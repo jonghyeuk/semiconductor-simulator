@@ -1860,21 +1860,21 @@ const EtchSimulator = ({ initialTab }) => {
     const radicalEtchers = (gasFlows.Cl2 || 0) + (gasFlows.CF4 || 0) + (etchTarget === 'PR' ? gasFlows.O2 : 0);
     const ionBombardment = (gasFlows.Ar || 0) + power / 25;
 
-    // 이방성 (0=등방, 1=완전 수직)
-    let anisotropy = 0.35
-      + Math.min(0.35, ionBombardment / 200)
-      + Math.min(0.20, polymerFormers / 200)
-      - Math.max(0, (pressure - 50) / 250);
-    anisotropy = Math.max(0.1, Math.min(1, anisotropy));
-
-    // 언더컷 양 (px 단위 시각화용)
-    const undercut = Math.max(0,
-      (1 - anisotropy) * 18
-      + Math.max(0, radicalEtchers - polymerFormers * 1.5) * 0.15
-    );
+    // 이방성 (0=등방, 1=완전 수직) — 슬라이더 전 구간이 반영되도록 선형 조합
+    let anisotropy = 0.25
+      + 0.0050 * ionBombardment            // Ar/RF↑ → 수직 ↑
+      + 0.0030 * polymerFormers            // CHF₃/HBr passivation → 수직 ↑
+      - 0.0050 * Math.max(0, pressure - 30); // 고압 → 등방 ↑
+    anisotropy = Math.max(0.05, Math.min(1, anisotropy));
 
     // 측벽 폴리머 두께 (px)
-    const polymerThickness = Math.min(6, polymerFormers / 10);
+    const polymerThickness = Math.min(8, polymerFormers / 12);
+
+    // 언더컷 양 — 폴리머가 강하게 억제
+    const undercut = Math.max(0,
+      (1 - anisotropy) * 22
+      + Math.max(0, radicalEtchers * 0.25 - polymerFormers * 0.30)
+    );
 
     // Etch stop / 마스크 손상
     const etchStop = (etchTarget !== 'PR' && polymerFormers > 60 && radicalEtchers < 20) || er < 15;
@@ -1884,12 +1884,15 @@ const EtchSimulator = ({ initialTab }) => {
     // 깊이 (식각 진행에 따른 시각화 비율)
     const depthRatio = Math.min(1, (er * (time || 60) / 60) / 250);
 
-    // 프로파일 분류
-    let profileType = 'tapered';
+    // 프로파일 분류 — 시각 측벽 변위(undercut - polymer*1.6)와 일관
+    const visualOffset = undercut - polymerThickness * 1.0;
+    let profileType;
     if (etchStop) profileType = 'etch-stop';
-    else if (anisotropy > 0.85 && undercut < 4) profileType = 'vertical';
-    else if (undercut > 10) profileType = 'undercut';
-    else if (anisotropy < 0.5) profileType = 'isotropic';
+    else if (visualOffset > 6) profileType = 'undercut';
+    else if (anisotropy < 0.40 && visualOffset > 2) profileType = 'isotropic';
+    else if (visualOffset < -4) profileType = 'tapered';
+    else if (anisotropy > 0.75) profileType = 'vertical';
+    else profileType = 'tapered';
 
     return { er, sel, uni, anisotropy, undercut, polymerThickness, etchStop, maskDamage, isotropicWarn, depthRatio, profileType };
   }, [etchTarget, gasFlows, power, pressure, time]);
@@ -4172,18 +4175,17 @@ const EtchSimulator = ({ initialTab }) => {
                             ? Math.min(12, maxDepth * 0.08)
                             : maxDepth * Math.max(0.08, liveResults.depthRatio);
 
-                          // 측벽 형상 — 언더컷 / 수직 / 테이퍼 결정
-                          const undercutPx = Math.min(40, liveResults.undercut);
-                          const taperPx = liveResults.profileType === 'tapered' && undercutPx < 1
-                            ? Math.min(15, (1 - liveResults.anisotropy) * 20)
-                            : 0;
+                          // 측벽 횡 변위 = 언더컷 - 폴리머 테이퍼
+                          // 양수면 언더컷(아래가 더 넓음), 음수면 테이퍼(아래가 더 좁음)
+                          const lateralOffset = Math.min(40, liveResults.undercut)
+                            - liveResults.polymerThickness * 1.0;
 
-                          const bottomLeft = holeLeft - undercutPx + taperPx;
-                          const bottomRight = holeRight + undercutPx - taperPx;
+                          const bottomLeft = holeLeft - lateralOffset;
+                          const bottomRight = holeRight + lateralOffset;
 
-                          // 언더컷일 때 둥근 곡선, 그 외엔 직선
+                          // 언더컷일 때 곡선, 테이퍼/수직일 때 직선
                           let cavityPath;
-                          if (undercutPx > 1) {
+                          if (lateralOffset > 1) {
                             const midY = targetTop + depth * 0.5;
                             cavityPath = `M ${holeLeft},${targetTop} L ${holeRight},${targetTop} `
                               + `Q ${bottomRight + 6},${midY} ${bottomRight},${targetTop + depth} `
