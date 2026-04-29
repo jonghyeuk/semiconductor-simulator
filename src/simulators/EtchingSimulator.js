@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, BarChart, Bar } from 'recharts';
 import * as THREE from 'three';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
@@ -1794,6 +1794,105 @@ const EtchSimulator = ({ initialTab }) => {
     // 가스 비율에 따른 선택비 변화
     return Math.min(2.0, 0.8 + (ratio / 50));
   };
+
+  // 슬라이더 변화에 따라 즉시 갱신되는 예상 결과 + 단면 프로파일 메트릭
+  const liveResults = useMemo(() => {
+    // 결정적 식각률 (random 제외)
+    let baseRate = 0;
+    switch (etchTarget) {
+      case 'Si': {
+        const cl2 = gasFlows.Cl2 * 3.0;
+        const hbrPass = Math.max(0, (gasFlows.HBr - 30) * 1.8);
+        baseRate = (cl2 - hbrPass) * (power / 300);
+        break;
+      }
+      case 'SiO2': {
+        const polymerStop = Math.max(0, (gasFlows.CHF3 - 45) * 2.5);
+        baseRate = (gasFlows.CF4 * 2.5 + gasFlows.CHF3 * 1.5 - polymerStop) * (power / 400);
+        break;
+      }
+      case 'Si3N4': {
+        const polymerStop = Math.max(0, (gasFlows.CHF3 - 50) * 2.0);
+        baseRate = (gasFlows.CHF3 * 2.2 - polymerStop) * (power / 400);
+        break;
+      }
+      case 'PR': {
+        baseRate = gasFlows.O2 * 4.0 * (power / 400);
+        break;
+      }
+      default: baseRate = 50;
+    }
+    const pressureFactor = pressure < 80 ? 0.5 + (pressure / 80) * 0.5 : Math.max(0.4, 1 - (pressure - 80) / 250);
+    const powerSat = power > 600 ? Math.max(0.7, 1 - (power - 600) / 800) : 1;
+    const er = Math.max(5, baseRate * pressureFactor * powerSat);
+
+    // 결정적 선택비
+    let sel = 5;
+    switch (etchTarget) {
+      case 'Si':
+        sel = 8 + (gasFlows.HBr / 10) * 8 - Math.max(0, (gasFlows.Cl2 - 50) * 0.35) - Math.max(0, (gasFlows.Ar - 80) * 0.25);
+        break;
+      case 'SiO2':
+        sel = 5 + (gasFlows.CHF3 / 10) * 4 - Math.max(0, (gasFlows.CF4 - 30) * 0.3) - Math.max(0, (gasFlows.Ar - 70) * 0.25);
+        break;
+      case 'Si3N4':
+        sel = 5 + (gasFlows.CHF3 / 10) * 3 - Math.max(0, (gasFlows.O2 - 15) * 0.5);
+        break;
+      case 'PR':
+        sel = 32;
+        break;
+      default: sel = 5;
+    }
+    sel -= power > 500 ? (power - 500) / 150 : 0;
+    sel -= pressure < 40 ? (40 - pressure) / 20 : 0;
+    sel = Math.max(1, sel);
+
+    // 결정적 균일성
+    const pressureEffect = Math.max(0, 100 - Math.abs(pressure - 100) / 1.5);
+    const powerEffect = Math.max(0, 100 - Math.abs(power - 300) / 5);
+    const totalGas = Object.values(gasFlows).reduce((a, b) => a + b, 0);
+    let uni = (pressureEffect + powerEffect) / 2;
+    if (totalGas > 350) uni -= (totalGas - 350) / 6;
+    uni = Math.max(40, Math.min(100, uni));
+
+    // 단면 프로파일 메트릭
+    const polymerFormers = (gasFlows.CHF3 || 0) + (gasFlows.HBr || 0) * 0.5;
+    const radicalEtchers = (gasFlows.Cl2 || 0) + (gasFlows.CF4 || 0) + (etchTarget === 'PR' ? gasFlows.O2 : 0);
+    const ionBombardment = (gasFlows.Ar || 0) + power / 25;
+
+    // 이방성 (0=등방, 1=완전 수직)
+    let anisotropy = 0.35
+      + Math.min(0.35, ionBombardment / 200)
+      + Math.min(0.20, polymerFormers / 200)
+      - Math.max(0, (pressure - 50) / 250);
+    anisotropy = Math.max(0.1, Math.min(1, anisotropy));
+
+    // 언더컷 양 (px 단위 시각화용)
+    const undercut = Math.max(0,
+      (1 - anisotropy) * 18
+      + Math.max(0, radicalEtchers - polymerFormers * 1.5) * 0.15
+    );
+
+    // 측벽 폴리머 두께 (px)
+    const polymerThickness = Math.min(6, polymerFormers / 10);
+
+    // Etch stop / 마스크 손상
+    const etchStop = (etchTarget !== 'PR' && polymerFormers > 60 && radicalEtchers < 20) || er < 15;
+    const maskDamage = (gasFlows.Ar || 0) > 85 || power > 650;
+    const isotropicWarn = pressure > 150 && (gasFlows.Ar || 0) < 40;
+
+    // 깊이 (식각 진행에 따른 시각화 비율)
+    const depthRatio = Math.min(1, (er * (time || 60) / 60) / 250);
+
+    // 프로파일 분류
+    let profileType = 'tapered';
+    if (etchStop) profileType = 'etch-stop';
+    else if (anisotropy > 0.85 && undercut < 4) profileType = 'vertical';
+    else if (undercut > 10) profileType = 'undercut';
+    else if (anisotropy < 0.5) profileType = 'isotropic';
+
+    return { er, sel, uni, anisotropy, undercut, polymerThickness, etchStop, maskDamage, isotropicWarn, depthRatio, profileType };
+  }, [etchTarget, gasFlows, power, pressure, time]);
 
   const runEtchSimulation = () => {
     setIsSimulating(true);
@@ -4038,42 +4137,159 @@ const EtchSimulator = ({ initialTab }) => {
 
                 <div className="bg-gray-50 p-4 rounded-lg">
                   <h5 className="font-semibold mb-3">📊 실험 결과</h5>
-                  {etchRate > 0 ? (
+                  {(() => {
+                    const simulated = etchRate > 0;
+                    const displayRate = simulated ? etchRate : liveResults.er;
+                    const displaySel = simulated ? selectivity : liveResults.sel;
+                    const displayUni = simulated ? uniformity : liveResults.uni;
+                    const displayDepth = simulated ? etchDepth * 2 : liveResults.er * (time / 60);
+                    return (
                     <div className="space-y-4">
-                      {/* 실험 결과 */}
+                      {/* 실시간/완료 배지 */}
+                      <div className={`text-xs font-semibold px-2 py-1 rounded inline-block ${simulated ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
+                        {simulated ? '✅ 식각 완료' : '🔮 실시간 예상 (슬라이더 조절 시 즉시 반영)'}
+                      </div>
+
+                      {/* 단면 프로파일 SVG */}
+                      <div className="bg-gray-900 rounded-lg p-2">
+                        <div className="text-xs text-gray-300 mb-1 px-1">📐 식각 단면 프로파일</div>
+                        {(() => {
+                          const W = 280, H = 160;
+                          const maskTop = 18, maskBottom = 38;
+                          const targetTop = maskBottom;
+                          const targetBottom = 130;
+                          const targetHeight = targetBottom - targetTop;
+                          const holeLeft = W * 0.32;
+                          const holeRight = W * 0.68;
+
+                          const targetColor = etchTarget === 'Si' ? '#f59e0b'
+                            : etchTarget === 'SiO2' ? '#10b981'
+                            : etchTarget === 'Si3N4' ? '#8b5cf6'
+                            : '#ef4444';
+
+                          const maxDepth = targetHeight - 4;
+                          const depth = liveResults.etchStop
+                            ? Math.min(12, maxDepth * 0.08)
+                            : maxDepth * Math.max(0.08, liveResults.depthRatio);
+
+                          // 측벽 형상 — 언더컷 / 수직 / 테이퍼 결정
+                          const undercutPx = Math.min(40, liveResults.undercut);
+                          const taperPx = liveResults.profileType === 'tapered' && undercutPx < 1
+                            ? Math.min(15, (1 - liveResults.anisotropy) * 20)
+                            : 0;
+
+                          const bottomLeft = holeLeft - undercutPx + taperPx;
+                          const bottomRight = holeRight + undercutPx - taperPx;
+
+                          // 언더컷일 때 둥근 곡선, 그 외엔 직선
+                          let cavityPath;
+                          if (undercutPx > 1) {
+                            const midY = targetTop + depth * 0.5;
+                            cavityPath = `M ${holeLeft},${targetTop} L ${holeRight},${targetTop} `
+                              + `Q ${bottomRight + 6},${midY} ${bottomRight},${targetTop + depth} `
+                              + `L ${bottomLeft},${targetTop + depth} `
+                              + `Q ${bottomLeft - 6},${midY} ${holeLeft},${targetTop} Z`;
+                          } else {
+                            cavityPath = `M ${holeLeft},${targetTop} L ${holeRight},${targetTop} `
+                              + `L ${bottomRight},${targetTop + depth} L ${bottomLeft},${targetTop + depth} Z`;
+                          }
+
+                          // 폴리머 측벽 라인
+                          const polyT = liveResults.polymerThickness;
+
+                          return (
+                            <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ minHeight: '140px' }}>
+                              {/* 기판 */}
+                              <rect x="0" y={targetBottom} width={W} height={H - targetBottom} fill="#0c4a6e" />
+                              <text x={W - 4} y={H - 4} fontSize="9" fill="#7dd3fc" textAnchor="end">Substrate</text>
+
+                              {/* 타겟 물질 */}
+                              <rect x="0" y={targetTop} width={W} height={targetHeight} fill={targetColor} opacity="0.85" />
+                              <text x="6" y={targetTop + 13} fontSize="10" fill="#1f2937" fontWeight="bold">
+                                {etchTarget === 'Si' ? 'Si' : etchTarget === 'SiO2' ? 'SiO₂' : etchTarget === 'Si3N4' ? 'Si₃N₄' : 'PR'}
+                              </text>
+
+                              {/* 마스크 (PR) */}
+                              <rect x="0" y={maskTop} width={holeLeft} height={maskBottom - maskTop} fill="#cbd5e1" stroke="#64748b" strokeWidth="0.5" />
+                              <rect x={holeRight} y={maskTop} width={W - holeRight} height={maskBottom - maskTop} fill="#cbd5e1" stroke="#64748b" strokeWidth="0.5" />
+                              <text x="6" y={maskTop + 13} fontSize="9" fill="#334155">Mask</text>
+
+                              {/* 식각 캐비티 */}
+                              <path d={cavityPath} fill="#020617" stroke="#1e293b" strokeWidth="0.5" />
+
+                              {/* 측벽 폴리머 (CHF₃/HBr) */}
+                              {polyT > 0.5 && !liveResults.etchStop && (
+                                <g opacity="0.75">
+                                  <line x1={holeLeft + polyT / 2} y1={targetTop + 2} x2={bottomLeft + polyT / 2} y2={targetTop + depth - 1} stroke="#fbbf24" strokeWidth={polyT} strokeLinecap="round" />
+                                  <line x1={holeRight - polyT / 2} y1={targetTop + 2} x2={bottomRight - polyT / 2} y2={targetTop + depth - 1} stroke="#fbbf24" strokeWidth={polyT} strokeLinecap="round" />
+                                </g>
+                              )}
+
+                              {/* 마스크 손상 표시 */}
+                              {liveResults.maskDamage && (
+                                <g stroke="#ef4444" strokeWidth="1" fill="none">
+                                  <path d={`M ${holeLeft - 14},${maskTop} l 4,4 l -4,4 l 4,4 l -4,4`} />
+                                  <path d={`M ${holeRight + 14},${maskTop} l -4,4 l 4,4 l -4,4 l 4,4`} />
+                                  <text x={W / 2} y={maskTop - 4} fontSize="8" fill="#fca5a5" textAnchor="middle">마스크 스퍼터링 손상</text>
+                                </g>
+                              )}
+
+                              {/* Etch stop 경고 */}
+                              {liveResults.etchStop && (
+                                <text x={W / 2} y={targetTop + depth + 14} fontSize="11" fill="#ef4444" fontWeight="bold" textAnchor="middle">⚠ Etch Stop (폴리머 누적)</text>
+                              )}
+
+                              {/* 프로파일 라벨 */}
+                              <text x={W - 6} y={maskTop + 13} fontSize="9" fill="#fef3c7" textAnchor="end" fontWeight="bold">
+                                {liveResults.profileType === 'vertical' ? '🟢 수직 (이방성)'
+                                  : liveResults.profileType === 'undercut' ? '🟠 언더컷'
+                                  : liveResults.profileType === 'isotropic' ? '🟠 등방성'
+                                  : liveResults.profileType === 'etch-stop' ? '🔴 Etch Stop'
+                                  : '🟡 테이퍼'}
+                              </text>
+
+                              {/* 깊이 가이드 */}
+                              <line x1={W - 22} y1={targetTop} x2={W - 22} y2={targetTop + depth} stroke="#94a3b8" strokeWidth="0.5" strokeDasharray="2,2" />
+                              <text x={W - 18} y={targetTop + depth / 2 + 3} fontSize="8" fill="#cbd5e1">{Math.round(displayDepth)}nm</text>
+                            </svg>
+                          );
+                        })()}
+                      </div>
+
+                      {/* 결과 수치 */}
                       <div className="space-y-3">
                         <div className="bg-white p-3 rounded border">
                           <div className="flex justify-between text-sm">
-                            <span>✓ 식각속도:</span>
+                            <span>{simulated ? '✓' : '◇'} 식각속도:</span>
                             <span className="font-semibold text-blue-600">
-                              {etchRate.toFixed(1)} nm/min
+                              {displayRate.toFixed(1)} nm/min
                             </span>
                           </div>
                         </div>
 
                         <div className="bg-white p-3 rounded border">
                           <div className="flex justify-between text-sm">
-                            <span>✓ 선택비:</span>
+                            <span>{simulated ? '✓' : '◇'} 선택비:</span>
                             <span className="font-semibold text-green-600">
-                              {selectivity.toFixed(1)} : 1
+                              {displaySel.toFixed(1)} : 1
                             </span>
                           </div>
                         </div>
 
                         <div className="bg-white p-3 rounded border">
                           <div className="flex justify-between text-sm">
-                            <span>✓ 균일성:</span>
+                            <span>{simulated ? '✓' : '◇'} 균일성:</span>
                             <span className="font-semibold text-purple-600">
-                              {uniformity.toFixed(1)}%
+                              {displayUni.toFixed(1)}%
                             </span>
                           </div>
                         </div>
 
                         <div className="bg-white p-3 rounded border">
                           <div className="flex justify-between text-sm">
-                            <span>✓ 식각 깊이:</span>
+                            <span>{simulated ? '✓ 식각 깊이:' : '◇ 예상 깊이 (' + time + '초):'}</span>
                             <span className="font-semibold text-red-600">
-                              {(etchDepth * 2).toFixed(0)} nm
+                              {displayDepth.toFixed(0)} nm
                             </span>
                           </div>
                         </div>
@@ -4190,81 +4406,8 @@ const EtchSimulator = ({ initialTab }) => {
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {/* 시뮬레이션 시작 전 가이드 */}
-                      <div className="text-center py-4 text-gray-500 text-sm border-2 border-dashed border-gray-300 rounded">
-                        시뮬레이션을 시작하세요
-                      </div>
-
-                      {/* 가스별 영향 가이드 */}
-                      <div className="border-t pt-3">
-                        <h6 className="font-semibold text-sm mb-2">💡 가스별 영향 가이드</h6>
-                        <div className="space-y-1.5 text-xs text-gray-700">
-                          {etchTarget === 'Si' && (
-                            <>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>Cl₂ 증가</strong> → 식각률↑, 선택비↓, 이방성 유지</span>
-                              </div>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>HBr 증가</strong> → 선택비↑, 측벽 보호↑, 이방성↑</span>
-                              </div>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>Ar 증가</strong> → 물리적 스퍼터링↑, 이방성↑</span>
-                              </div>
-                            </>
-                          )}
-                          {etchTarget === 'SiO2' && (
-                            <>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>CF₄ 증가</strong> → SiO₂ 식각률↑, F 라디칼↑</span>
-                              </div>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>CHF₃ 증가</strong> → 높은 선택비, 폴리머 형성↑</span>
-                              </div>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>Ar 증가</strong> → 물리적 충격↑, 폴리머 제거</span>
-                              </div>
-                            </>
-                          )}
-                          {etchTarget === 'Si3N4' && (
-                            <>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>CHF₃ 증가</strong> → Si₃N₄ 식각률↑, 선택비↑</span>
-                              </div>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>O₂ 증가</strong> → 폴리머 제거↑, 등방성↑</span>
-                              </div>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>Ar 증가</strong> → 수직성 향상↑, 이방성↑</span>
-                              </div>
-                            </>
-                          )}
-                          {etchTarget === 'PR' && (
-                            <>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>O₂ 증가</strong> → PR 제거율↑, 완전 연소</span>
-                              </div>
-                              <div className="flex items-start gap-1">
-                                <span className="text-blue-600">🔹</span>
-                                <span><strong>Ar 증가</strong> → 스퍼터링 보조, 속도↑</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               </div>
             </div>
