@@ -1684,37 +1684,37 @@ const EtchSimulator = ({ initialTab }) => {
     switch(material) {
       case 'Si': {
         // Cl2가 식각률을 올리지만, 과도한 HBr은 측벽 passivation으로 식각률 저하
-        const cl2Effect = gasFlow.Cl2 * 3.0;
+        const cl2Effect = gasFlow.Cl2 * 4.5;
         const hbrPassivation = Math.max(0, (gasFlow.HBr - 30) * 1.8);
         baseRate = (cl2Effect - hbrPassivation) * (power / 300);
         break;
       }
       case 'SiO2': {
         // CF4/CHF3가 식각률에 기여하지만, 과도한 CHF3는 폴리머 누적으로 etch stop
-        const cf4Effect = gasFlow.CF4 * 2.5;
-        const chf3Effect = gasFlow.CHF3 * 1.5;
-        const polymerStop = Math.max(0, (gasFlow.CHF3 - 45) * 2.5);
+        const cf4Effect = gasFlow.CF4 * 5.0;
+        const chf3Effect = gasFlow.CHF3 * 2.5;
+        const polymerStop = Math.max(0, (gasFlow.CHF3 - 45) * 3.0);
         baseRate = (cf4Effect + chf3Effect - polymerStop) * (power / 400);
         break;
       }
       case 'Si3N4': {
-        const chf3Effect = gasFlow.CHF3 * 2.2;
-        const polymerStop = Math.max(0, (gasFlow.CHF3 - 50) * 2.0);
+        const chf3Effect = gasFlow.CHF3 * 4.0;
+        const polymerStop = Math.max(0, (gasFlow.CHF3 - 50) * 2.5);
         baseRate = (chf3Effect - polymerStop) * (power / 400);
         break;
       }
       case 'PR': {
-        baseRate = gasFlow.O2 * 4.0 * (power / 400);
+        baseRate = gasFlow.O2 * 5.0 * (power / 400);
         break;
       }
       default:
         baseRate = 50;
     }
 
-    // 압력이 너무 높으면 가스상 재결합으로 식각률 감소 (~80mTorr에서 정점)
+    // 압력 sweet spot ~80mTorr — ICP 저압 운전(<30)에서도 rate 유지, 고압은 가스상 재결합으로 감소
     const pressureFactor = pressure < 80
-      ? 0.5 + (pressure / 80) * 0.5
-      : Math.max(0.4, 1 - (pressure - 80) / 250);
+      ? 0.75 + Math.max(0, pressure - 30) / 50 * 0.25
+      : Math.max(0.5, 1 - (pressure - 80) / 240);
 
     // 파워 600W 초과 시 마스크/하부층 손상이 누적되며 유효 식각률 saturation
     const powerSaturation = power > 600 ? Math.max(0.7, 1 - (power - 600) / 800) : 1;
@@ -1801,28 +1801,30 @@ const EtchSimulator = ({ initialTab }) => {
     let baseRate = 0;
     switch (etchTarget) {
       case 'Si': {
-        const cl2 = gasFlows.Cl2 * 3.0;
+        const cl2 = gasFlows.Cl2 * 4.5;
         const hbrPass = Math.max(0, (gasFlows.HBr - 30) * 1.8);
         baseRate = (cl2 - hbrPass) * (power / 300);
         break;
       }
       case 'SiO2': {
-        const polymerStop = Math.max(0, (gasFlows.CHF3 - 45) * 2.5);
-        baseRate = (gasFlows.CF4 * 2.5 + gasFlows.CHF3 * 1.5 - polymerStop) * (power / 400);
+        const polymerStop = Math.max(0, (gasFlows.CHF3 - 45) * 3.0);
+        baseRate = (gasFlows.CF4 * 5.0 + gasFlows.CHF3 * 2.5 - polymerStop) * (power / 400);
         break;
       }
       case 'Si3N4': {
-        const polymerStop = Math.max(0, (gasFlows.CHF3 - 50) * 2.0);
-        baseRate = (gasFlows.CHF3 * 2.2 - polymerStop) * (power / 400);
+        const polymerStop = Math.max(0, (gasFlows.CHF3 - 50) * 2.5);
+        baseRate = (gasFlows.CHF3 * 4.0 - polymerStop) * (power / 400);
         break;
       }
       case 'PR': {
-        baseRate = gasFlows.O2 * 4.0 * (power / 400);
+        baseRate = gasFlows.O2 * 5.0 * (power / 400);
         break;
       }
       default: baseRate = 50;
     }
-    const pressureFactor = pressure < 80 ? 0.5 + (pressure / 80) * 0.5 : Math.max(0.4, 1 - (pressure - 80) / 250);
+    const pressureFactor = pressure < 80
+      ? 0.75 + Math.max(0, pressure - 30) / 50 * 0.25
+      : Math.max(0.5, 1 - (pressure - 80) / 240);
     const powerSat = power > 600 ? Math.max(0.7, 1 - (power - 600) / 800) : 1;
     const er = Math.max(5, baseRate * pressureFactor * powerSat);
 
@@ -3814,6 +3816,16 @@ const EtchSimulator = ({ initialTab }) => {
                 실제 식각 장비를 조작하여 다양한 물질의 식각 원리를 체험해보세요.
                 가스 조성, 압력, 파워 등을 조절하며 화학 반응과 물리적 메커니즘을 이해해보세요.
               </p>
+            </div>
+
+            <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-r-lg">
+              <p className="text-sm text-amber-900 font-semibold mb-1">📚 교육용 모델 — 정성적 트렌드 학습용</p>
+              <ul className="text-xs text-amber-800 space-y-0.5 list-disc list-inside">
+                <li>식각률·선택비 등 절대 수치는 실제 fab 데이터 대비 ±2배 정도 오차가 있을 수 있습니다 (트렌드 방향은 정확).</li>
+                <li>실제 ICP 장비의 <strong>Source power(플라즈마 밀도)</strong>와 <strong>Bias power(이온 에너지)</strong>는 본 시뮬에서 단일 RF 파워로 단순화되어 있습니다.</li>
+                <li>균일성 sweet spot은 ~100 mTorr·~300 W 기준(CCP 영역)으로 모델링되었습니다. 실제 ICP는 5-50 mTorr·500-1500W에서 운전됩니다.</li>
+                <li>SiO₂ 식각의 F/C 비율(Coburn-Winters) 모델은 단순화되어, CHF₃ 과다 시 폴리머 누적/Etch stop만 표현합니다.</li>
+              </ul>
             </div>
 
             <div className="bg-white p-6 rounded-lg shadow-md">
