@@ -251,7 +251,7 @@ const MatrixDashboard = ({ onNavigate }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                 {/* ====== SemiFab AI 미니팹 특별 카드 ====== */}
                 <a
-                  href="https://krsimul.semifabai.com/?demo"
+                  href="https://kredu.semifabai.com/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative flex flex-col p-5 rounded-2xl border-2 border-fuchsia-400 bg-gradient-to-br from-fuchsia-50 via-purple-50 to-pink-50 shadow-lg shadow-fuchsia-200 ring-2 ring-fuchsia-300/60 cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-fuchsia-300 text-left min-h-[160px]"
