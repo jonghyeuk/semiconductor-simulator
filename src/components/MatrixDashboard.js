@@ -249,6 +249,50 @@ const MatrixDashboard = ({ onNavigate }) => {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                {/* ====== SemiFab AI 미니팹 특별 카드 ====== */}
+                <a
+                  href="https://krsimul.semifabai.com/?demo"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group relative flex flex-col p-5 rounded-2xl border-2 border-fuchsia-400 bg-gradient-to-br from-fuchsia-50 via-purple-50 to-pink-50 shadow-lg shadow-fuchsia-200 ring-2 ring-fuchsia-300/60 cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-fuchsia-300 text-left min-h-[160px]"
+                >
+                  <div className="absolute -top-3 -left-2 flex items-center gap-1">
+                    <span className="px-2.5 py-1 text-xs font-extrabold rounded-lg bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white shadow-md animate-pulse">
+                      🏭 SemiFab AI 미니팹
+                    </span>
+                    <span className="px-2 py-1 text-[10px] font-bold rounded-lg bg-fuchsia-100 text-fuchsia-700">
+                      DEMO
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-end mb-3 mt-1">
+                    <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-fuchsia-500 text-white">
+                      가상 팹
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-3 flex-1">
+                    <span className="text-4xl flex-shrink-0">🏭</span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-semibold leading-tight text-fuchsia-600">
+                        가상 공정 실습
+                      </div>
+                      <div className="text-lg font-extrabold text-gray-900 leading-tight mt-0.5">
+                        미니팹 시뮬레이터
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-fuchsia-200">
+                    <p className="text-sm text-fuchsia-800 font-medium leading-snug">
+                      👉 실제 팹 공정을 가상으로 직접 돌려보세요
+                    </p>
+                  </div>
+                  <div className="absolute bottom-4 right-4 flex items-center gap-1 text-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="text-xs font-bold">체험하기</span>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                    </svg>
+                  </div>
+                </a>
+
                 {/* ====== 1일차 체험하기 특별 카드 ====== */}
                 <a
                   href="https://kredu.semifabai.com/?trial=true"
