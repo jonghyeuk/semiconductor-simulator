@@ -284,6 +284,9 @@ const MatrixDashboard = ({ onNavigate }) => {
                     <p className="text-sm text-fuchsia-800 font-medium leading-snug">
                       👉 실제 팹 공정을 가상으로 직접 돌려보세요
                     </p>
+                    <p className="mt-1.5 text-xs font-semibold text-fuchsia-700">
+                      접속 후 <span className="px-1.5 py-0.5 rounded bg-fuchsia-100 text-fuchsia-700">🏭 미니팹 체험</span> 버튼을 눌러주세요
+                    </p>
                   </div>
                   <div className="absolute bottom-4 right-4 flex items-center gap-1 text-fuchsia-400 opacity-0 group-hover:opacity-100 transition-opacity">
                     <span className="text-xs font-bold">체험하기</span>
@@ -295,7 +298,7 @@ const MatrixDashboard = ({ onNavigate }) => {
 
                 {/* ====== 1일차 체험하기 특별 카드 ====== */}
                 <a
-                  href="https://kredu.semifabai.com/?trial=true"
+                  href="https://kredu.semifabai.com/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group relative flex flex-col p-5 rounded-2xl border-2 border-emerald-400 bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 shadow-lg shadow-emerald-200 ring-2 ring-emerald-300/60 cursor-pointer transition-all duration-200 hover:scale-[1.03] hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-emerald-300 text-left min-h-[160px]"
@@ -327,6 +330,9 @@ const MatrixDashboard = ({ onNavigate }) => {
                   <div className="mt-3 pt-3 border-t border-emerald-200">
                     <p className="text-sm text-emerald-800 font-medium leading-snug">
                       👉 무료로 진공 교육 1일차를 체험해보세요
+                    </p>
+                    <p className="mt-1.5 text-xs font-semibold text-emerald-700">
+                      접속 후 <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">▶ Day 1 체험</span> 버튼을 눌러주세요
                     </p>
                   </div>
                   <div className="absolute bottom-4 right-4 flex items-center gap-1 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity">
