@@ -274,7 +274,6 @@ const RTAAnimation = () => {
 
 const EmailGate = ({ onComplete }) => {
   const [email, setEmail] = useState('');
-  const [marketingConsent, setMarketingConsent] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -299,7 +298,6 @@ const EmailGate = ({ onComplete }) => {
     try {
       await addDoc(collection(db, 'visitors'), {
         email: email.trim(),
-        marketingConsent,
         visitedAt: serverTimestamp(),
         userAgent: navigator.userAgent,
       });
@@ -347,18 +345,6 @@ const EmailGate = ({ onComplete }) => {
             {error && (
               <p className="text-red-500 text-xs mt-2">{error}</p>
             )}
-
-            <label className="flex items-start mt-4 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={marketingConsent}
-                onChange={(e) => setMarketingConsent(e.target.checked)}
-                className="mt-0.5 mr-2 rounded"
-              />
-              <span className="text-xs text-gray-500">
-                교육 관련 소식을 보내드릴 수 있습니다.
-              </span>
-            </label>
 
             <button
               type="submit"
