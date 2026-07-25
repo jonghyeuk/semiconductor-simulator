@@ -8,12 +8,8 @@ import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './utils/firebase';
 
 // 잠금 탭 정의 (시뮬레이터:탭)
-const LOCKED_TABS = new Set([
-  'deposition:pvd-sputtering',
-  'deposition:cvd-thermal',
-  'deposition:cvd-pecvd',
-  'deposition:ald',
-]);
+// Deposition 4종(PVD 스퍼터링/CVD Thermal/PECVD/ALD) 공개 — 잠금 없음
+const LOCKED_TABS = new Set([]);
 
 // 시뮬레이터별 탭 오버레이 위치 (top: 타이틀 아래부터, height: 탭 바 높이)
 // height: 0 → 오버레이 안 씌움 (탭 전환 허용)
