@@ -878,6 +878,43 @@ const W1_SENT = [
   { prompt: '“The process has been stopped by the interlock.”', opts: ['공정이 정상 완료됐다', '인터록 때문에 공정이 멈췄다', '레시피를 바꿨다'], ans: 1 },
   { prompt: '“Pump down to base pressure before starting the process.”', opts: ['공정 시작 전 기준 압력까지 배기하라', '공정 후에 벤트하라', '가스를 먼저 넣어라'], ans: 0 },
 ];
+// 현장 둘러보기 — 이 책에서 배울 5개 영역 맛보기 (첫날 오리엔테이션용)
+const W1_TOUR = [
+  { ic: '🖥️', area: 'Equipment · 장비', en: '“Load the wafer and pump down.”', ko: '영어 지시로 장비를 운전' },
+  { ic: '🚨', area: 'Alarm · 알람', en: '“Stopped by the interlock.”', ko: '영문 알람을 해석' },
+  { ic: '📐', area: 'DRC · 디자인 규칙', en: '“METAL1.SPACING violation.”', ko: '디자인 오류를 읽기' },
+  { ic: '🔗', area: 'LVS · 검증', en: '“Missing device in the layout.”', ko: '레이아웃 vs 회로도' },
+  { ic: '📝', area: 'Report · 보고', en: '“Problem / Cause / Action…”', ko: '영문 현장 보고서' },
+];
+// 선배–신입 대화
+const W1_DIALOGUE = [
+  { who: 'Senior', en: 'Load the wafer and pump down the chamber.', ko: '웨이퍼 싣고 챔버 배기해.' },
+  { who: 'You', en: 'The chamber is pumping down now.', ko: '지금 챔버 배기 중입니다.' },
+  { who: 'Senior', en: 'Check the pressure. Is it stable?', ko: '압력 확인해. 안정적이야?' },
+  { who: 'You', en: 'Yes, base pressure is reached.', ko: '네, 기준 압력에 도달했습니다.' },
+  { who: 'Senior', en: 'Good. Start the gas and ignite the plasma.', ko: '좋아. 가스 시작하고 플라즈마 점화해.' },
+];
+const W1_DIALOGUE_Q = [
+  { prompt: '선배가 처음 지시한 것은?', opts: ['웨이퍼 싣고 배기', '챔버 벤트', '펌프 교체'], ans: 0 },
+  { prompt: '“Is it stable?” 는 무엇을 묻나?', opts: ['압력이 안정적인지', '가스가 남았는지', '문이 열렸는지'], ans: 0 },
+];
+
+// 대화문 렌더
+function Dialogue({ lines }) {
+  return (
+    <div className="fes-dlg">
+      {lines.map((l, i) => (
+        <div key={i} className={`fes-dlg-row ${l.who === 'You' ? 'me' : ''}`}>
+          <div className="fes-dlg-who">{l.who}</div>
+          <div className="fes-dlg-bubble">
+            <div className="fes-dlg-en">{l.en}</div>
+            <div className="fes-dlg-ko">{l.ko}</div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 const W2_PARTS = [
   { id: 'chamber', en: 'Chamber', ko: '챔버', desc: 'The vacuum space where the process happens.', x: 130, y: 60, w: 200, h: 150 },
@@ -968,6 +1005,7 @@ function GlossaryGrid({ intro, items }) {
             <div className="fes-wk-gloss-en">{g.en}</div>
             <div className="fes-wk-gloss-ko">{g.ko}</div>
             <div className="fes-wk-gloss-d">{g.d}</div>
+            {g.ex && <div className="fes-wk-gloss-ex">“{g.ex}”</div>}
           </div>
         ))}
       </div>
@@ -1006,7 +1044,7 @@ const C6_TERMS = [
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
 const CHAPTERS = [
   {
-    id: 'c1', title: '현장 첫걸음 · 기본 용어',
+    id: 'c1', title: 'Day 1 · 오리엔테이션 (두루두루)', kind: '오리엔테이션',
     slides: [
       {
         title: '현장 스토리 — 팹(fab) 첫 출근날',
@@ -1017,7 +1055,23 @@ const CHAPTERS = [
               <div>당신은 반도체 <b>팹(fab)</b>에 첫 출근했습니다. 장비 화면·매뉴얼·경고창이 <b>전부 영어</b>입니다.
               <br/>“<i>Chamber pressure is above the allowable limit…</i>” — 이게 무슨 뜻일까요?</div>
             </div>
-            <p className="fes-wk-p">이 책의 목표는 그 영어를 <b>읽고 → 판단하고 → 보고</b>하는 힘을 기르는 것입니다. 첫 챕터에서 이 훈련이 어떻게 흘러가는지와 기본 용어부터 익혀봅시다.</p>
+            <p className="fes-wk-p">첫날은 <b>넓게 둘러봅니다.</b> 이 책이 뭘 하는지, 현장에서 어떤 영어를 만나는지, 그리고 앞으로 매 챕터가 어떻게 흘러가는지 감을 잡습니다.</p>
+          </div>
+        ),
+      },
+      {
+        title: '이 책의 방식 — 매 챕터가 반복하는 4단계',
+        body: (
+          <div>
+            <div className="fes-cm-loop" style={{ margin: '4px 0 0' }}>
+              {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (
+                <React.Fragment key={s}>
+                  <div className="fes-cm-loop-chip"><span>{i + 1}</span>{s}</div>
+                  {i < 3 && <span className="fes-cm-loop-ar">→</span>}
+                </React.Fragment>
+              ))}
+            </div>
+            <p className="fes-wk-hint">Chapter 2부터는 매번 <b>자료 읽기 → 시뮬 조작 → 로그·오류 해석 → 영문 보고</b>를 반복합니다. 오늘(Day 1)은 그 준비 단계예요. 모르는 단어는 <b>점선 밑줄에 마우스를 올리면</b> 뜻이 떠요.</p>
           </div>
         ),
       },
@@ -1036,33 +1090,27 @@ const CHAPTERS = [
         ),
       },
       {
-        title: '이 책의 학습 순서 — 4단계 루프',
-        body: (
-          <div>
-            <div className="fes-cm-loop" style={{ margin: '4px 0 0' }}>
-              {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (
-                <React.Fragment key={s}>
-                  <div className="fes-cm-loop-chip"><span>{i + 1}</span>{s}</div>
-                  {i < 3 && <span className="fes-cm-loop-ar">→</span>}
-                </React.Fragment>
-              ))}
-            </div>
-            <p className="fes-wk-hint">자료를 읽고 → 시뮬레이터를 조작하고 → 로그·오류를 해석하고 → 영어로 정리합니다. 모르는 단어는 <b>점선 밑줄에 마우스를 올리면</b> 뜻이 떠요.</p>
-          </div>
-        ),
+        title: '오늘의 생존 용어 (자료)',
+        body: <GlossaryGrid intro="첫날은 이 정도만. 가장 자주 보는 기본 용어를 예문과 함께 익혀두세요." items={W1_GLOSSARY} />,
       },
       {
-        title: '기본 용어 — 먼저 읽어봅시다 (자료)',
+        title: '용어 확인 (퀴즈)',
+        body: <QuizBlock intro="영어 용어를 보고 뜻을 고르세요." questions={W1_TERMS} />,
+      },
+      {
+        title: '현장 둘러보기 — 이 책에서 배우는 것',
         body: (
           <div>
-            <p className="fes-wk-quiz-intro">현장에서 매일 쓰는 기본 용어입니다. 예문까지 소리내어 읽어보세요.</p>
-            <div className="fes-wk-gloss">
-              {W1_GLOSSARY.map((g) => (
-                <div key={g.en} className="fes-wk-gloss-item">
-                  <div className="fes-wk-gloss-en">{g.en}</div>
-                  <div className="fes-wk-gloss-ko">{g.ko}</div>
-                  <div className="fes-wk-gloss-d">{g.d}</div>
-                  <div className="fes-wk-gloss-ex">“{g.ex}”</div>
+            <p className="fes-wk-quiz-intro">Chapter 2부터 이 5가지를 하나씩 깊게 다룹니다. 오늘은 맛만 봅니다.</p>
+            <div className="fes-tour">
+              {W1_TOUR.map((t) => (
+                <div key={t.area} className="fes-tour-item">
+                  <span className="fes-tour-ic">{t.ic}</span>
+                  <div className="fes-tour-body">
+                    <div className="fes-tour-area">{t.area}</div>
+                    <div className="fes-tour-en">{t.en}</div>
+                    <div className="fes-tour-ko">{t.ko}</div>
+                  </div>
                 </div>
               ))}
             </div>
@@ -1070,37 +1118,35 @@ const CHAPTERS = [
         ),
       },
       {
-        title: '용어 확인 (퀴즈)',
-        body: <QuizBlock intro="영어 용어를 보고 뜻을 고르세요." questions={W1_TERMS} />,
+        title: '현장의 말투 — 선배·신입 대화 (읽기)',
+        body: (
+          <div>
+            <p className="fes-wk-quiz-intro">실제 현장은 이렇게 짧은 영어 지시로 오갑니다. 소리내어 읽어보세요.</p>
+            <Dialogue lines={W1_DIALOGUE} />
+          </div>
+        ),
       },
       {
-        title: '문장 해석 (난이도 ↑)',
-        body: <QuizBlock intro="실제 현장에서 나오는 문장입니다. 무슨 뜻인지 고르세요." questions={W1_SENT} />,
+        title: '대화 이해 (퀴즈)',
+        body: <QuizBlock intro="위 대화를 떠올리며 답하세요." questions={W1_DIALOGUE_Q} />,
       },
       {
-        title: '쓰기 ① 뜻 이해 — 우리말로 옮기기',
+        title: '첫 쓰기 — 아주 짧게',
         body: <WriteBlock
-          prompt={<span>아래 영어 문장을 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“The chamber must reach base pressure before the process starts.”</span></span>}
-          hint="예: ~하기 전에 ~해야 한다"
-          model="공정을 시작하기 전에 챔버가 기준 압력(base pressure)에 도달해야 한다." />,
+          prompt={<span>대화에 나온 상황을 <b>영어 한 문장</b>으로:<br/><span className="fes-wr-ko">“압력을 확인하세요.”</span></span>}
+          hint="동사로 시작하는 명령문"
+          model="Check the pressure." />,
       },
       {
-        title: '쓰기 ② 영작 — 한 문장으로',
-        body: <WriteBlock
-          prompt={<span>아래 상황을 <b>영어 한 문장</b>으로 써보세요:<br/><span className="fes-wr-ko">“가스가 흐르지 않는다.”</span></span>}
-          hint="주어 + be동사 + not + -ing"
-          model="The gas is not flowing." />,
-      },
-      {
-        title: '정리 — 이 챕터 핵심',
+        title: '정리 — 오늘 한 것 & 앞으로',
         body: (
           <div>
             <ul className="fes-cb-summary">
-              <li>현장 영어 = <b>읽고 → 판단하고 → 보고</b>하는 것.</li>
-              <li>기본 용어 6개 + 실제 문장 해석을 익혔다.</li>
-              <li>해석(우리말)과 영작(영어) 쓰기를 각각 연습했다.</li>
+              <li>이 책이 뭘 하는지, <b>4단계 반복 방식</b>을 이해했다.</li>
+              <li>현장 직무 · 생존 용어 · 실제 말투(대화)를 훑었다.</li>
+              <li>Chapter 2부터는 <b>한 주제씩 깊게</b> — 장비 → 운전 → 알람 → DRC → LVS → 종합 보고.</li>
             </ul>
-            <div className="fes-cb-complete">여기까지 오면 <b>Chapter 1 완료 ✓</b> — 진도에 표시됩니다. 다음 챕터에서 장비 구성요소를 영어로 배웁니다.</div>
+            <div className="fes-cb-complete"><b>Day 1 완료 ✓</b> — 준비 끝. 이제 본격적으로 시작합니다.</div>
           </div>
         ),
       },
@@ -1768,6 +1814,24 @@ function FesStyles() {
 .fes-wr-prompt b{color:${C.cyan}}
 .fes-wr-en{display:inline-block;margin-top:6px;font-family:${C.mono};font-size:14px;color:#bfe9f5;background:#0b1424;border:1px solid ${C.line2};border-radius:6px;padding:6px 10px}
 .fes-wr-ko{display:inline-block;margin-top:6px;font-size:15px;color:#e8eefc;background:#0b1424;border:1px solid ${C.line2};border-radius:6px;padding:6px 10px}
+
+/* 현장 둘러보기 (tour) */
+.fes-tour{display:flex;flex-direction:column;gap:8px}
+.fes-tour-item{display:flex;align-items:center;gap:12px;background:${C.panel};border:1px solid ${C.line2};border-radius:10px;padding:11px 14px}
+.fes-tour-ic{font-size:24px;flex:none}
+.fes-tour-area{font-size:13px;font-weight:700;color:#e8eefc}
+.fes-tour-en{font-family:${C.mono};font-size:12.5px;color:#bfe9f5;margin:2px 0}
+.fes-tour-ko{font-size:11.5px;color:${C.dim}}
+
+/* 대화문 (dialogue) */
+.fes-dlg{display:flex;flex-direction:column;gap:10px}
+.fes-dlg-row{display:flex;flex-direction:column;max-width:80%}
+.fes-dlg-row.me{align-self:flex-end;align-items:flex-end}
+.fes-dlg-who{font-family:${C.mono};font-size:10.5px;color:${C.dim};margin-bottom:3px;padding:0 4px}
+.fes-dlg-bubble{background:${C.panel2};border:1px solid ${C.line2};border-radius:12px 12px 12px 4px;padding:10px 13px}
+.fes-dlg-row.me .fes-dlg-bubble{background:${C.cyan}14;border-color:${C.cyan}44;border-radius:12px 12px 4px 12px}
+.fes-dlg-en{font-size:14px;color:#e8f6ff}
+.fes-dlg-ko{font-size:11.5px;color:${C.dim};margin-top:3px}
 `}</style>
   );
 }
