@@ -23,13 +23,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
  * ====================================================================== */
 
 const THEMES = [
-  { id: 'overview', en: 'Course Map', ko: '강의 개요', icon: '🗺️', loop: 'Overview' },
+  { id: 'overview', en: 'Course Map', ko: '책 개요', icon: '🗺️', loop: 'Overview' },
   { id: 'chapters', en: 'Chapters', ko: '교재 (챕터)', icon: '📖', loop: 'Study' },
-  { id: 'equipment', en: 'Equipment HMI', ko: '가상 장비 조작', icon: '🖥️', loop: 'Operate' },
-  { id: 'alarm', en: 'Alarm & Log', ko: '알람·로그 해석', icon: '🚨', loop: 'Interpret' },
-  { id: 'drc', en: 'Design Rule Check', ko: 'DRC 오류 해석', icon: '📐', loop: 'Judge' },
-  { id: 'lvs', en: 'LVS Compare', ko: 'LVS 비교', icon: '🔗', loop: 'Judge' },
-  { id: 'report', en: 'Field Report', ko: '영문 보고', icon: '📝', loop: 'Report' },
 ];
 const THEME_IDS = THEMES.map((t) => t.id);
 
@@ -962,6 +957,52 @@ function LessonDeck({ steps, chapterId, onReachEnd }) {
   );
 }
 
+// 재사용 용어 그리드 (자료 슬라이드)
+function GlossaryGrid({ intro, items }) {
+  return (
+    <div>
+      {intro && <p className="fes-wk-quiz-intro">{intro}</p>}
+      <div className="fes-wk-gloss">
+        {items.map((g) => (
+          <div key={g.en} className="fes-wk-gloss-item">
+            <div className="fes-wk-gloss-en">{g.en}</div>
+            <div className="fes-wk-gloss-ko">{g.ko}</div>
+            <div className="fes-wk-gloss-d">{g.d}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+const C3_TERMS = [
+  { en: 'Load', ko: '싣다', d: '웨이퍼를 장비에 넣다.' },
+  { en: 'Pump down', ko: '배기', d: '챔버를 진공으로 배기하다.' },
+  { en: 'Purge', ko: '퍼지', d: '불활성 가스로 잔류 가스를 밀어내다.' },
+  { en: 'Vent', ko: '벤트', d: '챔버를 대기압으로 되돌리다.' },
+  { en: 'Ignite', ko: '점화', d: '플라즈마를 발생시키다.' },
+  { en: 'Stop', ko: '정지', d: '운전을 멈추다.' },
+];
+const C4_TERMS = [
+  { en: 'Alarm', ko: '알람', d: '즉시 조치가 필요한 경고.' },
+  { en: 'Warning', ko: '경고', d: '주의가 필요한 알림.' },
+  { en: 'Interlock', ko: '인터록', d: '안전조건 미충족 시 강제 정지.' },
+  { en: 'Timeout', ko: '타임아웃', d: '정해진 시간 내 목표 미달.' },
+  { en: 'Failure', ko: '고장/실패', d: '정상 동작에 실패한 상태.' },
+];
+const C5_TERMS = [
+  { en: 'Width', ko: '선폭', d: '패턴의 폭.' },
+  { en: 'Spacing', ko: '간격', d: '같은 레이어 두 패턴 사이 거리.' },
+  { en: 'Enclosure', ko: '감쌈', d: '한 레이어가 다른 레이어를 감싸는 최소량.' },
+  { en: 'Violation', ko: '위반', d: '규칙을 만족하지 못함.' },
+  { en: 'Minimum', ko: '최소', d: '허용되는 최소값.' },
+];
+const C6_TERMS = [
+  { en: 'Mismatch', ko: '불일치', d: '레이아웃과 회로도가 다름.' },
+  { en: 'Missing device', ko: '누락 소자', d: '레이아웃에 소자가 빠짐.' },
+  { en: 'Incorrect connection', ko: '잘못된 연결', d: '배선이 회로도와 다름.' },
+  { en: 'Net', ko: '넷', d: '전기적으로 연결된 노드(선).' },
+];
+
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
 const CHAPTERS = [
   {
@@ -1122,15 +1163,6 @@ const CHAPTERS = [
           model="터보 펌프가 게이트 밸브로 (챔버와) 분리된 채, 챔버를 배기한다." />,
       },
       {
-        title: '실습 — 직접 장비를 운전해보기',
-        body: (
-          <div>
-            <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>아래 장비를 직접 운전하며 로그에 뜨는 <b>영어</b>를 읽어보세요. 순서: <b>Load Wafer → Pump Down → Start Gas → Ignite Plasma</b>.</p>
-            <EquipmentHMI />
-          </div>
-        ),
-      },
-      {
         title: '쓰기 ② 영작 — 한 문장으로',
         body: <WriteBlock
           prompt={<span>아래 상황을 <b>영어 한 문장</b>으로 써보세요:<br/><span className="fes-wr-ko">“챔버 압력이 너무 높다.”</span></span>}
@@ -1152,11 +1184,117 @@ const CHAPTERS = [
       },
     ],
   },
-  { id: 'c3', title: '운전과 로그 읽기', locked: true },
-  { id: 'c4', title: '알람과 트러블슈팅', locked: true },
-  { id: 'c5', title: '디자인 규칙 · DRC', locked: true },
-  { id: 'c6', title: 'LVS 검증', locked: true },
-  { id: 'c7', title: '종합 현장 보고', locked: true },
+  {
+    id: 'c3', title: '운전과 로그 읽기',
+    slides: [
+      { title: '현장 스토리 — 운전 지시를 받다', body: (
+        <div>
+          <div className="fes-wk-story"><div className="fes-wk-story-ic">🏭</div>
+            <div>“<i>Load the wafer, pump down, then start the gas.</i>” — 운전 지시는 <b>영어 동사</b>로 옵니다. 순서대로 못 하면 인터록이 걸립니다.</div></div>
+          <p className="fes-wk-p">운전 용어를 익히고, 직접 장비를 순서대로 운전하며 <b>로그에 뜨는 영어</b>를 읽어봅니다.</p>
+        </div>) },
+      { title: '운전 용어 (자료)', body: <GlossaryGrid intro="운전 절차에서 쓰는 동사입니다." items={C3_TERMS} /> },
+      { title: '실습 — 직접 장비를 운전해보기', body: (
+        <div>
+          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>순서: <b>Load Wafer → Pump Down → Start Gas → Ignite Plasma → Start Process</b>. <b>Log</b> 메뉴에서 영어 로그를 읽으세요.</p>
+          <EquipmentHMI />
+        </div>) },
+      { title: '쓰기 — 로그 해석', body: <WriteBlock
+        prompt={<span>로그 문장을 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“Base pressure reached. Chamber is ready.”</span></span>}
+        model="기준 압력에 도달했다. 챔버가 준비됐다." /> },
+      { title: '정리 — 이 챕터 핵심', body: (
+        <div><ul className="fes-cb-summary"><li>운전 동사(load·pump down·vent·ignite)를 익혔다.</li><li>직접 장비를 순서대로 운전하고 영어 로그를 읽었다.</li></ul>
+        <div className="fes-cb-complete"><b>Chapter 3 완료 ✓</b> — 다음은 알람 해석.</div></div>) },
+    ],
+  },
+  {
+    id: 'c4', title: '알람과 트러블슈팅',
+    slides: [
+      { title: '현장 스토리 — 알람이 울렸다', body: (
+        <div>
+          <div className="fes-wk-story"><div className="fes-wk-story-ic">🚨</div>
+            <div>운전 중 빨간 알람: “<i>Process operation has been stopped by the interlock.</i>” — 뭐가 문제고, 뭘 해야 할까요?</div></div>
+          <p className="fes-wk-p">알람 용어를 익히고, 영문 알람·로그를 읽어 <b>이상 장치·원인·조치</b>를 판단합니다.</p>
+        </div>) },
+      { title: '알람 용어 (자료)', body: <GlossaryGrid intro="알람 메시지에서 자주 보는 단어입니다." items={C4_TERMS} /> },
+      { title: '실습 — 알람 해석 (채점)', body: (
+        <div>
+          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>영문 알람과 로그를 읽고 <b>이상 장치 · 원인 · 조치</b>를 고르세요. 3케이스 모두 3/3 목표.</p>
+          <AlarmLab />
+        </div>) },
+      { title: '쓰기 — 조치 영작', body: <WriteBlock
+        prompt={<span>아래 조치를 <b>영어 한 문장</b>으로:<br/><span className="fes-wr-ko">“진공 밸브와 펌프를 점검하라.”</span></span>}
+        hint="Check the ..." model="Check the vacuum valve and the pump." /> },
+      { title: '정리 — 이 챕터 핵심', body: (
+        <div><ul className="fes-cb-summary"><li>알람·인터록·타임아웃 용어를 익혔다.</li><li>알람을 읽고 원인·조치를 판단했다.</li></ul>
+        <div className="fes-cb-complete"><b>Chapter 4 완료 ✓</b></div></div>) },
+    ],
+  },
+  {
+    id: 'c5', title: '디자인 규칙 · DRC',
+    slides: [
+      { title: '현장 스토리 — 패턴이 규칙을 어겼다', body: (
+        <div>
+          <div className="fes-wk-story"><div className="fes-wk-story-ic">📐</div>
+            <div>DRC 로그: “<i>METAL1.SPACING violation. Required 0.30, measured 0.18.</i>” — 무슨 뜻이고 어떻게 고칠까요?</div></div>
+          <p className="fes-wk-p">디자인 규칙 용어를 익히고, 직접 패턴을 고쳐 <b>영문 DRC 오류</b>를 해석합니다.</p>
+        </div>) },
+      { title: 'DRC 용어 (자료)', body: <GlossaryGrid intro="디자인 규칙에서 쓰는 용어입니다." items={C5_TERMS} /> },
+      { title: '실습 — DRC 오류 해석·수정', body: (
+        <div>
+          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Width/Spacing 슬라이더를 조절하고 <b>Run DRC</b> → 영문 violation 로그를 읽고 규칙을 만족시키세요.</p>
+          <DrcLab />
+        </div>) },
+      { title: '쓰기 — violation 해석', body: <WriteBlock
+        prompt={<span>DRC 로그를 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“METAL1.SPACING violation. Required 0.30, measured 0.18 µm.”</span></span>}
+        model="Metal 1 간격 위반. 요구 0.30µm인데 실측 0.18µm이다 (간격이 좁다)." /> },
+      { title: '정리 — 이 챕터 핵심', body: (
+        <div><ul className="fes-cb-summary"><li>width·spacing·enclosure·violation 용어를 익혔다.</li><li>DRC 오류를 읽고 직접 수정했다.</li></ul>
+        <div className="fes-cb-complete"><b>Chapter 5 완료 ✓</b></div></div>) },
+    ],
+  },
+  {
+    id: 'c6', title: 'LVS 검증',
+    slides: [
+      { title: '현장 스토리 — 레이아웃 ≠ 회로도', body: (
+        <div>
+          <div className="fes-wk-story"><div className="fes-wk-story-ic">🔗</div>
+            <div>LVS 리포트: “<i>ERROR: Missing device — NMOS not found in layout.</i>” — 레이아웃이 회로도와 다릅니다.</div></div>
+          <p className="fes-wk-p">LVS 용어를 익히고, 영문 <b>mismatch</b> 메시지로 무엇이 다른지 판단합니다.</p>
+        </div>) },
+      { title: 'LVS 용어 (자료)', body: <GlossaryGrid intro="LVS 비교에서 쓰는 용어입니다." items={C6_TERMS} /> },
+      { title: '실습 — LVS 비교', body: (
+        <div>
+          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Schematic(정답) vs Layout(추출)을 보고, 영문 리포트로 <b>missing device / incorrect connection</b>을 판단하세요.</p>
+          <LvsLab />
+        </div>) },
+      { title: '쓰기 — mismatch 해석', body: <WriteBlock
+        prompt={<span>LVS 오류를 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“The NMOS transistor is missing in the layout.”</span></span>}
+        model="레이아웃에 NMOS 트랜지스터가 빠져 있다." /> },
+      { title: '정리 — 이 챕터 핵심', body: (
+        <div><ul className="fes-cb-summary"><li>mismatch·missing device·incorrect connection을 익혔다.</li><li>LVS 리포트를 읽고 차이를 판단했다.</li></ul>
+        <div className="fes-cb-complete"><b>Chapter 6 완료 ✓</b></div></div>) },
+    ],
+  },
+  {
+    id: 'c7', title: '종합 현장 보고',
+    slides: [
+      { title: '현장 스토리 — 모든 것을 종합하다', body: (
+        <div>
+          <div className="fes-wk-story"><div className="fes-wk-story-ic">🧩</div>
+            <div>장비 이상(압력·RF) → 식각 결과 비정상 → DRC width 오류. 지금까지 배운 걸 모아 <b>영문 보고서</b>로 정리합니다.</div></div>
+          <p className="fes-wk-p">이 챕터가 이 책의 종착점입니다. 상황을 읽고, 원인·조치를 규명해 5칸 보고서를 영어로 작성하세요.</p>
+        </div>) },
+      { title: '실습 — 영문 현장 보고서', body: (
+        <div>
+          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Problem / Observed log / Possible cause / Corrective action / Result 5칸을 <b>영어로</b> 작성하고 모범답안과 비교하세요.</p>
+          <ReportLab />
+        </div>) },
+      { title: '수료 — 이 책을 마치며', body: (
+        <div><ul className="fes-cb-summary"><li>용어 → 장비 → 운전·로그 → 알람 → DRC → LVS → 종합 보고까지 마쳤다.</li><li>이제 현장 영어를 <b>읽고 → 판단하고 → 보고</b>할 수 있다.</li></ul>
+        <div className="fes-cb-complete">🎉 <b>모든 챕터 완료!</b> 진도 100%.</div></div>) },
+    ],
+  },
 ];
 
 // 챕터 책 리더 — 목차(진도·성취 표시) + 슬라이드 뷰어
@@ -1222,7 +1360,7 @@ const LANE_B = [
 
 function NodeCard({ n, onOpen }) {
   return (
-    <button className="fes-cm-node" onClick={() => onOpen(n.theme)}>
+    <button className="fes-cm-node" onClick={() => onOpen('chapters')}>
       <div className="fes-cm-node-top">
         <span className="fes-cm-ic">{n.icon}</span>
         <div className="fes-cm-node-name"><b>{n.en}</b><span>{n.ko}</span></div>
@@ -1230,7 +1368,7 @@ function NodeCard({ n, onOpen }) {
       </div>
       <div className="fes-cm-terms">{n.terms.map((t) => <span key={t} className="fes-cm-term">{t}</span>)}</div>
       <div className="fes-cm-tip">👤 {n.tip}</div>
-      <div className="fes-cm-open">실습 열기 →</div>
+      <div className="fes-cm-open">교재에서 학습 →</div>
     </button>
   );
 }
@@ -1274,9 +1412,9 @@ function CourseMap({ onOpen }) {
           <div className="fes-cm-integr-d">장비 이상(압력·RF) → 식각 결과 비정상 → DRC width 오류 → 원인·조치 규명</div>
         </div>
         <span className="fes-cm-loop-ar big">→</span>
-        <button className="fes-cm-node fes-cm-report" onClick={() => onOpen('report')}>
+        <button className="fes-cm-node fes-cm-report" onClick={() => onOpen('chapters')}>
           <div className="fes-cm-node-top"><span className="fes-cm-ic">📝</span><div className="fes-cm-node-name"><b>Field Report</b><span>Problem·Observed·Cause·Action·Result</span></div></div>
-          <div className="fes-cm-open">보고서 열기 →</div>
+          <div className="fes-cm-open">교재에서 학습 →</div>
         </button>
       </div>
 
@@ -1313,7 +1451,6 @@ export default function FieldEnglishSimulator({
   const Body = {
     overview: <CourseMap onOpen={pick} />,
     chapters: <ChapterBook />,
-    equipment: <EquipmentHMI />, alarm: <AlarmLab />, drc: <DrcLab />, lvs: <LvsLab />, report: <ReportLab />,
   }[theme];
 
   return (

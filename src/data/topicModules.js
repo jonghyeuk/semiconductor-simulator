@@ -30,13 +30,8 @@ export const TOPIC_CHAPTERS = [
 
     // ② 시뮬 링크 — 한 컴포넌트(field-english)의 5개 개념을 mount 로 쪼개 목차 개별 항목으로 노출
     sims: [
-      { id: 'field-english', label: '⓪ 강의 개요 (Course Map)', teachTip: '강의자용 한눈에 보기: 4단계 루프·장비/디자인 축·평가', mount: { initialTheme: 'overview', hideOtherTabs: true } },
-      { id: 'field-english', label: '📖 교재 (Chapters)', teachTip: '챕터형 교재: 스토리→자료→실습→쓰기, 진도 표시', mount: { initialTheme: 'chapters', hideOtherTabs: true } },
-      { id: 'field-english', label: '① 가상 장비 조작 (Equipment HMI)', teachTip: '메뉴를 클릭해 영문 상태를 읽고 순서대로 운전', mount: { initialTheme: 'equipment', hideOtherTabs: true } },
-      { id: 'field-english', label: '② 알람·로그 해석 (Alarm & Log)', teachTip: '영문 알람을 읽고 이상 장치·원인·조치 선택', mount: { initialTheme: 'alarm', hideOtherTabs: true } },
-      { id: 'field-english', label: '③ DRC 오류 해석 (Design Rule Check)', teachTip: 'Width/Spacing을 조절하고 영문 violation 로그 해석', mount: { initialTheme: 'drc', hideOtherTabs: true } },
-      { id: 'field-english', label: '④ LVS 비교 (Layout vs Schematic)', teachTip: 'mismatch 영문 메시지로 missing/incorrect 판단', mount: { initialTheme: 'lvs', hideOtherTabs: true } },
-      { id: 'field-english', label: '⑤ 영문 현장 보고 (Field Report)', teachTip: 'Problem/Observed/Cause/Action/Result 영어로 작성', mount: { initialTheme: 'report', hideOtherTabs: true } },
+      { id: 'field-english', label: '📖 교재 (Chapters)', teachTip: '챕터형 교재 — 각 챕터 안에 스토리→자료→시뮬 실습→쓰기, 진도 표시', mount: { initialTheme: 'chapters', hideOtherTabs: true } },
+      { id: 'field-english', label: '🗺️ 책 개요 (Course Map)', teachTip: '강의자용 한눈에 보기: 4단계 루프·구조·평가', mount: { initialTheme: 'overview', hideOtherTabs: true } },
     ],
 
     // 교과서 데크 — 3수준 자동 탐색(.intro/.standard/.pro)
