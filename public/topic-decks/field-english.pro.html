@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Field English · PRO — 심화 트러블슈팅</title>
+<link rel="stylesheet" href="deck-base.css?v=9"/>
+<style>
+:root{ --ac:#34e3d4; }
+.fe-h1{font-size:54px;font-weight:800;line-height:1.1;margin:0 0 14px}
+.fe-sub{font-size:25px;color:#9fb3c8;font-weight:400}
+.fe-en{color:#e8f6ff;font-weight:700}
+.fe-note{color:#7f93a8;font-size:20px;margin-top:18px}
+.fe-kicker{font-family:monospace;letter-spacing:3px;color:var(--ac);font-size:20px;margin-bottom:12px}
+table.fe-tbl{width:100%;border-collapse:collapse;font-size:20px;margin-top:14px}
+table.fe-tbl th,table.fe-tbl td{border:1px solid #1c3a4a;padding:11px 15px;text-align:left;vertical-align:top}
+table.fe-tbl th{background:#0f2333;color:var(--ac);font-family:monospace;font-size:16px;letter-spacing:1px}
+.fe-log{background:#060c17;border:1px solid #1c3a4a;border-radius:10px;padding:18px 22px;font-family:monospace;font-size:20px;color:#cbd5e1;margin-top:16px;line-height:1.7}
+.fe-log .err{color:#f87171}.fe-log .ok{color:#34d399}.fe-log .warn{color:#fbbf24}
+.fe-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:18px}
+.fe-box{background:#0f2333;border:1px solid #1c3a4a;border-radius:12px;padding:16px 20px;font-size:20px;color:#e8f6ff}
+.fe-ar{color:var(--ac);font-size:30px}
+.fe-report{background:#0f2333;border:1px solid #1c3a4a;border-left:5px solid var(--ac);border-radius:12px;padding:20px 24px;margin-top:16px;font-size:21px;line-height:1.9}
+.fe-report b{color:var(--ac);font-family:monospace}
+body{background:#0a1520}
+</style>
+</head>
+<body>
+<div class="deck-viewport"><div class="deck-stage" id="stage">
+
+<section class="slide" id="s1" data-level="pro">
+  <div class="fe-kicker">FIELD ENGLISH · PRO</div>
+  <h1 class="h-title fe-h1">심화 트러블슈팅</h1>
+  <div class="fe-sub">플라즈마 식각 이상, DRC/LVS 심화 오류, 종합 시나리오 보고</div>
+  <div class="fe-note">현장 로그의 영문 알람을 읽고 → 원인을 해석하고 → 매뉴얼에서 조치를 찾아 → 영문 보고서로 정리하는 실무 흐름을 다룹니다.</div>
+</section>
+
+<section class="slide" id="s2" data-level="pro">
+  <h2 class="h-title fe-h1">플라즈마 &amp; 매칭</h2>
+  <div class="fe-sub"><span class="fe-en">Forward power</span> is delivered to the chamber; <span class="fe-en">reflected power</span> bounces back when the load is not matched. The <span class="fe-en">matching network</span> tunes impedance so the plasma ignites and stays stable.</div>
+  <div class="fe-log">
+09:15:19&nbsp;&nbsp;Chamber ready — attempting <span class="fe-en">plasma ignition</span><br/>
+09:15:20&nbsp;&nbsp;RF on: Fwd 600 W / <span class="err">Refl 420 W</span><br/>
+09:15:21&nbsp;&nbsp;<span class="err">RF-204 High reflected power — matching failed</span>
+  </div>
+  <div class="fe-note">반사파(reflected power)가 크면 전력이 플라즈마에 전달되지 못한다 → 압력·가스·매칭(pressure, gas, matching)을 점검한다.</div>
+</section>
+
+<section class="slide" id="s3" data-level="pro">
+  <h2 class="h-title fe-h1">트러블슈팅 매트릭스</h2>
+  <div class="fe-sub">현장 영문 증상(symptom) → 유력 원인(likely cause) → 조치(corrective action)로 이어지는 대응표.</div>
+  <table class="fe-tbl">
+    <thead>
+      <tr><th>SYMPTOM (ENGLISH)</th><th>LIKELY CAUSE</th><th>CORRECTIVE ACTION</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Pressure will not reach base</td>
+        <td>Vacuum leak, or a valve is closed</td>
+        <td>Check seals and O-rings; verify the isolation valve is open</td>
+      </tr>
+      <tr>
+        <td>High reflected power</td>
+        <td>Pressure out of range, or matching network detuned</td>
+        <td>Bring pressure into spec, then re-tune the matching network</td>
+      </tr>
+      <tr>
+        <td>Flow below set point</td>
+        <td>Empty gas cylinder, or a blocked MFC</td>
+        <td>Check the gas supply; clean or re-calibrate the MFC</td>
+      </tr>
+      <tr>
+        <td>Etch rate too high</td>
+        <td>Pressure or RF power drift during the run</td>
+        <td>Re-stabilize the recipe; confirm pressure and RF are steady</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="slide" id="s4" data-level="pro">
+  <h2 class="h-title fe-h1">DRC 심화</h2>
+  <div class="fe-sub">DRC checks geometric rules: <span class="fe-en">width</span>, <span class="fe-en">spacing</span>, <span class="fe-en">enclosure</span>, <span class="fe-en">overlap</span>, and minimum / maximum limits. A violation means the drawn layout breaks the foundry design rule.</div>
+  <div class="fe-log">
+<span class="err">METAL1.WIDTH violation</span>&nbsp;&nbsp;Required 0.30 um&nbsp;&nbsp;Measured 0.22 um<br/>
+<span class="err">CONTACT.ENCLOSURE violation</span>&nbsp;&nbsp;Metal must enclose contact by 0.05 um
+  </div>
+  <div class="fe-note">METAL1 선폭이 규정 0.30 um보다 좁은 0.22 um이다 → 배선을 규정 폭 이상으로 넓힌다.</div>
+  <div class="fe-note">금속이 콘택을 0.05 um만큼 감싸야 하는데 부족하다(enclosure 위반) → 금속 여유(overlap)를 확보한다.</div>
+</section>
+
+<section class="slide" id="s5" data-level="pro">
+  <h2 class="h-title fe-h1">LVS 심화</h2>
+  <div class="fe-sub">LVS compares layout vs schematic. Mismatch types: <span class="fe-en">missing device</span>, <span class="fe-en">incorrect connection</span>, <span class="fe-en">short</span> (nets wrongly joined), and <span class="fe-en">open</span> (a net not connected).</div>
+  <div class="fe-log">
+<span class="err">ERROR: Incorrect connection — MN.drain tied to VSS instead of OUT</span><br/>
+<span class="warn">WARN: Net OUT has fewer connections than schematic</span>
+  </div>
+  <div class="fe-note">MN 트랜지스터의 드레인이 OUT이 아니라 VSS에 연결됨(잘못된 연결) → 드레인을 OUT 노드로 다시 배선한다.</div>
+  <div class="fe-note">OUT 노드의 연결 수가 회로도보다 적다(open 경고) → 빠진 연결을 찾아 이어준다.</div>
+</section>
+
+<section class="slide" id="s6" data-level="pro">
+  <h2 class="h-title fe-h1">종합 시나리오</h2>
+  <div class="fe-sub">14주차 통합 사례: 공정 이상이 설계 오류로 이어지는 인과 사슬을 하나의 흐름으로 추적한다.</div>
+  <div class="fe-flow">
+    <div class="fe-box">Pressure &amp; RF out of range</div>
+    <span class="fe-ar">→</span>
+    <div class="fe-box">Etched line too narrow</div>
+    <span class="fe-ar">→</span>
+    <div class="fe-box">DRC WIDTH violation</div>
+    <span class="fe-ar">→</span>
+    <div class="fe-box">Field report</div>
+  </div>
+  <div class="fe-note">학생은 로그에서 비정상 수치(abnormal value)를 찾고, 영문 알람을 해석하고, 매뉴얼에서 조치를 찾은 뒤, 공정 조건(pressure &amp; RF)이 어떻게 설계 오류(DRC width)를 유발했는지 인과관계로 설명한다.</div>
+</section>
+
+<section class="slide" id="s7" data-level="pro">
+  <h2 class="h-title fe-h1">영문 보고서 예시</h2>
+  <div class="fe-sub">현장 표준 템플릿(Problem / Observed log / Possible cause / Corrective action / Result)으로 작성한 완성 보고서.</div>
+  <div class="fe-report">
+    <b>Problem:</b> The etched line width was smaller than target, causing a DRC width violation.<br/>
+    <b>Observed log:</b> RF reflected power high; pressure above set point; METAL1.WIDTH violation (req 0.30 / meas 0.22 um).<br/>
+    <b>Possible cause:</b> Unstable pressure and poor RF matching changed the etch rate.<br/>
+    <b>Corrective action:</b> Re-stabilized pressure, re-tuned matching, re-ran the recipe.<br/>
+    <b>Result:</b> Line width returned to target; DRC clean (0 violations).
+  </div>
+</section>
+
+</div></div>
+<script src="deck-base.js?v=8"></script>
+</body>
+</html>

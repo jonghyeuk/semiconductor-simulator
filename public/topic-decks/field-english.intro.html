@@ -1,0 +1,108 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>장비 기초 영어 · INTRO</title>
+<link rel="stylesheet" href="deck-base.css?v=9"/>
+<style>
+:root{ --ac:#34e3d4; }
+
+.fe-h1{font-size:60px;font-weight:800;line-height:1.1;margin:0 0 14px}
+.fe-sub{font-size:26px;color:#9fb3c8;font-weight:400}
+.fe-en{color:#e8f6ff;font-weight:700}
+.fe-note{color:#7f93a8;font-size:20px;margin-top:18px}
+.fe-kicker{font-family:monospace;letter-spacing:3px;color:var(--ac);font-size:20px;margin-bottom:12px}
+.fe-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+.fe-card{background:#0f2333;border:1px solid #1c3a4a;border-radius:14px;padding:22px}
+.fe-card .ic{font-size:40px}.fe-card .t{font-size:26px;font-weight:700;margin:8px 0 4px;color:#e8f6ff}
+.fe-card .d{font-size:19px;color:#9fb3c8}
+table.fe-tbl{width:100%;border-collapse:collapse;font-size:22px;margin-top:14px}
+table.fe-tbl th,table.fe-tbl td{border:1px solid #1c3a4a;padding:12px 16px;text-align:left}
+table.fe-tbl th{background:#0f2333;color:var(--ac);font-family:monospace;font-size:18px;letter-spacing:1px}
+.fe-msg{background:#0e1a10;border:1px solid #2b5a2b;border-left:5px solid #34e3d4;border-radius:10px;padding:18px 22px;font-family:monospace;font-size:24px;color:#d7ffe9;margin-top:16px}
+.fe-say{font-size:22px;color:#9fb3c8;margin-top:10px}
+body{background:#0a1520}
+
+/* local layout helpers (non-conflicting) */
+.slide{padding:70px 90px;box-sizing:border-box;color:#e8f6ff}
+.h-title{font-size:52px;font-weight:800;margin:0 0 6px;line-height:1.1}
+.fe-bul{font-size:24px;color:#c7d6e5;line-height:1.7;margin-top:16px;padding-left:24px}
+.fe-bul li{margin-bottom:10px}
+.fe-bul b{color:var(--ac)}
+.fe-lead{font-size:24px;color:#9fb3c8;line-height:1.6;margin-top:14px}
+.fe-lead b{color:#e8f6ff}
+.fe-alarm{background:#1f0e0e;border:1px solid #5a2b2b;border-left:5px solid #ff6b6b;border-radius:10px;padding:18px 22px;font-family:monospace;font-size:26px;color:#ffdede;margin-top:16px}
+</style>
+</head>
+<body>
+<div class="deck-viewport"><div class="deck-stage" id="stage">
+
+<section class="slide" id="s1" data-level="intro">
+  <div class="fe-kicker">FIELD ENGLISH · INTRO</div>
+  <h1 class="h-title fe-h1">장비 기초 영어</h1>
+  <div class="fe-sub">쉬운 영어로 장비 이름과 기본 동작을 익힌다.</div>
+  <div class="fe-note">Level: INTRO · Simple English + 한국어 도움말</div>
+</section>
+
+<section class="slide" id="s2" data-level="intro">
+  <h2 class="h-title">장비 구성요소</h2>
+  <div class="fe-lead">장비를 이루는 <b>기본 부품</b>의 영어 이름을 익혀요.</div>
+  <div class="fe-grid">
+    <div class="fe-card"><div class="ic">🛢️</div><div class="t">Chamber</div><div class="d">챔버 · 반응 공간</div></div>
+    <div class="fe-card"><div class="ic">🌀</div><div class="t">Pump</div><div class="d">펌프 · 배기</div></div>
+    <div class="fe-card"><div class="ic">🔘</div><div class="t">Valve</div><div class="d">밸브 · 여닫음</div></div>
+    <div class="fe-card"><div class="ic">🧪</div><div class="t">Gas line</div><div class="d">가스 라인 · 가스 통로</div></div>
+    <div class="fe-card"><div class="ic">⚡</div><div class="t">RF generator</div><div class="d">RF 전원</div></div>
+    <div class="fe-card"><div class="ic">💿</div><div class="t">Wafer</div><div class="d">웨이퍼 · 기판</div></div>
+  </div>
+</section>
+
+<section class="slide" id="s3" data-level="intro">
+  <h2 class="h-title">기본 동작 동사</h2>
+  <div class="fe-lead">현장에서 자주 쓰는 <b>동작 동사</b>와 예문이에요.</div>
+  <table class="fe-tbl">
+    <thead><tr><th>ENGLISH</th><th>뜻</th><th>예문</th></tr></thead>
+    <tbody>
+      <tr><td><span class="fe-en">Load</span></td><td>싣다</td><td>"Load the wafer."</td></tr>
+      <tr><td><span class="fe-en">Pump down</span></td><td>배기하다</td><td>"Pump down the chamber."</td></tr>
+      <tr><td><span class="fe-en">Purge</span></td><td>퍼지하다</td><td>"Purge with N2."</td></tr>
+      <tr><td><span class="fe-en">Vent</span></td><td>대기압 복귀</td><td>"Vent the chamber."</td></tr>
+      <tr><td><span class="fe-en">Unload</span></td><td>꺼내다</td><td>"Unload the wafer."</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="slide" id="s4" data-level="intro">
+  <h2 class="h-title">값 읽기: set point vs actual</h2>
+  <div class="fe-lead">
+    <b>Set point</b> = 목표값 (내가 정한 값)<br/>
+    <b>Actual value</b> = 실측값 (지금 실제 값)
+  </div>
+  <div class="fe-msg">Pressure set point 5.0e-6 Torr / actual 5.0e-6 Torr — OK.</div>
+  <div class="fe-say">설정값과 실측값이 같으면 정상.</div>
+</section>
+
+<section class="slide" id="s5" data-level="intro">
+  <h2 class="h-title">알람 읽기 (쉬움)</h2>
+  <div class="fe-lead">짧은 영어 <b>알람 메시지</b>를 읽고 뜻을 파악해요.</div>
+  <div class="fe-alarm">Chamber pressure is too high. Check the pump.</div>
+  <ul class="fe-bul">
+    <li><b>무엇이 문제인가?</b> → 챔버 압력이 너무 높다 (too high).</li>
+    <li><b>어느 장치?</b> → 펌프 (the pump).</li>
+    <li><b>무엇을 하라고?</b> → 펌프를 점검하라 (Check the pump).</li>
+  </ul>
+</section>
+
+<section class="slide" id="s6" data-level="intro">
+  <h2 class="h-title">실습으로 가기</h2>
+  <div class="fe-lead">
+    <b>① Equipment HMI</b> 시뮬레이터를 열어요.<br/>
+    메뉴 <b>Main · Chamber · Log</b> 를 눌러보고 영어를 읽어요.<br/>
+    순서대로 <b>Load Wafer → Pump Down</b> 버튼을 누르세요.
+  </div>
+  <div class="fe-msg">Step 1: Load Wafer &nbsp;→&nbsp; Step 2: Pump Down</div>
+  <div class="fe-note">4단계 루프 기억하기: Read → Operate → Interpret → Report (읽기 → 조작 → 해석 → 보고)</div>
+</section>
+
+</div></div>
+<script src="deck-base.js?v=8"></script>
+</body></html>
