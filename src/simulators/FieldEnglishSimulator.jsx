@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { CONTENT_CHAPTERS } from '../data/fieldEnglishChapters.data';
 
 /**
  * FieldEnglishSimulator — 반도체 현장 실무영어 시뮬레이터 (서고 drop-in)
@@ -1330,302 +1331,7 @@ function SlideRenderer({ slide }) {
 }
 
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
-const CHAPTERS = [
-  {
-    id: 'c1', title: 'Day 1 · 오리엔테이션 (두루두루)', kind: '오리엔테이션',
-    slides: [
-      {
-        title: '현장 스토리 — 팹(fab) 첫 출근날',
-        body: (
-          <div>
-            <div className="fes-wk-story">
-              <div className="fes-wk-story-ic">🏭</div>
-              <div>당신은 반도체 <b>팹(fab)</b>에 첫 출근했습니다. 장비 화면·매뉴얼·경고창이 <b>전부 영어</b>입니다.
-              <br/>“<i>Chamber pressure is above the allowable limit…</i>” — 이게 무슨 뜻일까요?</div>
-            </div>
-            <p className="fes-wk-p">첫날은 <b>넓게 둘러봅니다.</b> 이 책이 뭘 하는지, 현장에서 어떤 영어를 만나는지, 그리고 앞으로 매 챕터가 어떻게 흘러가는지 감을 잡습니다.</p>
-          </div>
-        ),
-      },
-      {
-        title: '이 책의 방식 — 매 챕터가 반복하는 4단계',
-        body: (
-          <div>
-            <div className="fes-cm-loop" style={{ margin: '4px 0 0' }}>
-              {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (
-                <React.Fragment key={s}>
-                  <div className="fes-cm-loop-chip"><span>{i + 1}</span>{s}</div>
-                  {i < 3 && <span className="fes-cm-loop-ar">→</span>}
-                </React.Fragment>
-              ))}
-            </div>
-            <p className="fes-wk-hint">Chapter 2부터는 매번 <b>자료 읽기 → 시뮬 조작 → 로그·오류 해석 → 영문 보고</b>를 반복합니다. 오늘(Day 1)은 그 준비 단계예요. 모르는 단어는 <b>점선 밑줄에 마우스를 올리면</b> 뜻이 떠요.</p>
-          </div>
-        ),
-      },
-      {
-        title: '누가 · 어디서 영어를 쓰나',
-        body: (
-          <div className="fes-wk-roles">
-            {W1_ROLES.map((r) => (
-              <div key={r.role} className="fes-wk-role">
-                <div className="fes-wk-role-h"><span>{r.icon}</span><b>{r.role}</b></div>
-                <div className="fes-wk-role-en">{r.duty}</div>
-                <div className="fes-wk-role-ko">{r.ko}</div>
-              </div>
-            ))}
-          </div>
-        ),
-      },
-      {
-        title: '식각 장비 한눈에 (그림)',
-        body: <ChamberIllustration />,
-      },
-      {
-        title: '오늘의 생존 용어 (자료)',
-        body: <GlossaryGrid intro="첫날은 이 정도만. 가장 자주 보는 기본 용어를 예문과 함께 익혀두세요." items={W1_GLOSSARY} />,
-      },
-      {
-        title: '용어 확인 (퀴즈)',
-        body: <QuizBlock intro="영어 용어를 보고 뜻을 고르세요." questions={W1_TERMS} />,
-      },
-      {
-        title: '현장 둘러보기 — 이 책에서 배우는 것',
-        body: (
-          <div>
-            <p className="fes-wk-quiz-intro">Chapter 2부터 이 5가지를 하나씩 깊게 다룹니다. 오늘은 맛만 봅니다.</p>
-            <div className="fes-tour">
-              {W1_TOUR.map((t) => (
-                <div key={t.area} className="fes-tour-item">
-                  <span className="fes-tour-ic">{t.ic}</span>
-                  <div className="fes-tour-body">
-                    <div className="fes-tour-area">{t.area}</div>
-                    <div className="fes-tour-en">{t.en}</div>
-                    <div className="fes-tour-ko">{t.ko}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-      },
-      {
-        title: '영어는 어디에 있나 — 매뉴얼 · 지시문 · HMI 화면',
-        body: (
-          <div>
-            <p className="fes-wk-quiz-intro">이 책에서 다루는 현장 영어는 딱 이 3곳에서 나옵니다.</p>
-            <div className="fes-src">
-              {W1_SOURCES.map((s) => (
-                <div key={s.k} className="fes-src-item">
-                  <div className="fes-src-top"><span className="fes-src-ic">{s.ic}</span><span className="fes-src-k">{s.k}</span></div>
-                  <div className="fes-src-en">“{s.en}”</div>
-                  <div className="fes-src-ko">{s.ko}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ),
-      },
-      {
-        title: '읽기 확인 (퀴즈)',
-        body: <QuizBlock intro="위 세 문장을 보고 답하세요." questions={W1_SRC_Q} />,
-      },
-      {
-        title: '의사소통 코너 — 첫 인사',
-        body: <CommCorner items={COMM_C1} />,
-      },
-      {
-        title: '정리 — 오늘 한 것 & 앞으로',
-        body: (
-          <div>
-            <ul className="fes-cb-summary">
-              <li>이 책이 뭘 하는지, <b>4단계 반복 방식</b>을 이해했다.</li>
-              <li>현장 직무 · 생존 용어 · 영어가 나오는 3곳(매뉴얼·지시문·HMI)을 훑었다.</li>
-              <li>Chapter 2부터는 <b>한 주제씩 깊게</b> — 장비 → 운전 → 알람 → DRC → LVS → 종합 보고.</li>
-            </ul>
-            <div className="fes-cb-complete"><b>Day 1 완료 ✓</b> — 준비 끝. 이제 본격적으로 시작합니다.</div>
-          </div>
-        ),
-      },
-    ],
-  },
-  {
-    id: 'c2', title: '장비 구성요소',
-    slides: [
-      {
-        title: '현장 스토리 — 장비 앞에 서다',
-        body: (
-          <div>
-            <div className="fes-wk-story">
-              <div className="fes-wk-story-ic">🏭</div>
-              <div>식각 장비(Plasma Etcher) 앞. 선배가 말합니다:
-              <br/>“<i>Check the chamber pressure and the MFC before you start.</i>”
-              <br/><b>chamber? MFC?</b> — 부품 이름을 영어로 알아야 지시를 알아듣습니다.</div>
-            </div>
-            <p className="fes-wk-p">이 챕터에서는 장비의 <b>주요 구성요소를 영어로</b> 익히고, 실제로 장비를 운전해 로그의 영어까지 읽어봅니다.</p>
-          </div>
-        ),
-      },
-      {
-        title: '가상 장비 구성도 — 부품을 눌러보세요',
-        body: <PartDiagram parts={W2_PARTS} />,
-      },
-      {
-        title: '구성요소 정리 (자료)',
-        body: (
-          <div>
-            <p className="fes-wk-quiz-intro">6개 핵심 부품의 영어 이름·뜻·기능입니다.</p>
-            <table className="fes-wk-table">
-              <thead><tr><th>English</th><th>한글</th><th>기능 (function)</th></tr></thead>
-              <tbody>
-                {W2_PARTS.map((p) => (
-                  <tr key={p.id}><td className="fes-wk-td-en">{p.en}</td><td>{p.ko}</td><td>{p.desc}</td></tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ),
-      },
-      {
-        title: '영문 매뉴얼 발췌 — Main Components',
-        body: (
-          <div className="fes-wk-manual">
-            <div className="fes-wk-manual-h">MANUAL · 2. Main Components</div>
-            <p>The <b>chamber (CH)</b> is the vacuum space where etching takes place. Process gas is supplied through the <b>gas line</b> and regulated by the <b>MFC</b>. The <b>RF generator</b> applies power to the <b>wafer chuck</b> to ignite the plasma. The <b>turbo pump</b>, isolated by the <b>gate valve</b>, evacuates the chamber to base pressure (BP). If reflected power exceeds the limit, the <b>interlock</b> stops the process.</p>
-          </div>
-        ),
-      },
-      {
-        title: '구성요소 명명 퀴즈',
-        body: <QuizBlock intro="영어 설명을 읽고 어느 부품인지 고르세요." questions={W2_QUIZ} />,
-      },
-      {
-        title: '의사소통 코너 — 부품 이름 묻고 답하기',
-        body: <CommCorner items={COMM_C2} />,
-      },
-      {
-        title: '정리 — 이 챕터 핵심',
-        body: (
-          <div>
-            <ul className="fes-cb-summary">
-              <li>장비 6개 부품의 영어 이름·기능을 익혔다.</li>
-              <li>구성도를 눌러 부품별 역할을 확인하고, 영문 매뉴얼을 읽었다.</li>
-              <li>외국인 엔지니어와 부품 이름을 영어로 주고받았다.</li>
-            </ul>
-            <div className="fes-cb-complete"><b>Chapter 2 완료 ✓</b> — 다음 챕터(운전·로그 읽기)에서 이어집니다.</div>
-          </div>
-        ),
-      },
-    ],
-  },
-  {
-    id: 'c3', title: '운전과 로그 읽기',
-    slides: [
-      { title: '현장 스토리 — 운전 지시를 받다', body: (
-        <div>
-          <div className="fes-wk-story"><div className="fes-wk-story-ic">🏭</div>
-            <div>“<i>Load the wafer, pump down, then start the gas.</i>” — 운전 지시는 <b>영어 동사</b>로 옵니다. 순서대로 못 하면 인터록이 걸립니다.</div></div>
-          <p className="fes-wk-p">운전 용어를 익히고, 직접 장비를 순서대로 운전하며 <b>로그에 뜨는 영어</b>를 읽어봅니다.</p>
-        </div>) },
-      { title: '운전 용어 (자료)', body: <GlossaryGrid intro="운전 절차에서 쓰는 동사입니다." items={C3_TERMS} /> },
-      { title: '장치 디스플레이 읽기 — LED · 진동 모니터', body: <DevicePanel /> },
-      { title: '실습 — 직접 장비를 운전해보기', body: (
-        <div>
-          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>순서: <b>Load Wafer → Pump Down → Start Gas → Ignite Plasma → Start Process</b>. <b>Log</b> 메뉴에서 영어 로그를 읽으세요.</p>
-          <EquipmentHMI />
-        </div>) },
-      { title: '의사소통 코너 — 외국인 엔지니어와', body: <CommCorner items={COMM_C3} /> },
-      { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>운전 동사(load·pump down·vent·ignite)를 익혔다.</li><li>장치 디스플레이(LED·진동)와 로그의 영어를 읽었다.</li><li>외국인 엔지니어와 운전 상황을 영어로 주고받았다.</li></ul>
-        <div className="fes-cb-complete"><b>Chapter 3 완료 ✓</b> — 다음은 알람 해석.</div></div>) },
-    ],
-  },
-  {
-    id: 'c4', title: '알람과 트러블슈팅',
-    slides: [
-      { title: '현장 스토리 — 알람이 울렸다', body: (
-        <div>
-          <div className="fes-wk-story"><div className="fes-wk-story-ic">🚨</div>
-            <div>운전 중 빨간 알람: “<i>Process operation has been stopped by the interlock.</i>” — 뭐가 문제고, 뭘 해야 할까요?</div></div>
-          <p className="fes-wk-p">알람 용어를 익히고, 영문 알람·로그를 읽어 <b>이상 장치·원인·조치</b>를 판단합니다.</p>
-        </div>) },
-      { title: '알람 용어 (자료)', body: <GlossaryGrid intro="알람 메시지에서 자주 보는 단어입니다." items={C4_TERMS} /> },
-      { title: '실습 — 알람 해석 (채점)', body: (
-        <div>
-          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>영문 알람과 로그를 읽고 <b>이상 장치 · 원인 · 조치</b>를 고르세요. 3케이스 모두 3/3 목표.</p>
-          <AlarmLab />
-        </div>) },
-      { title: '의사소통 코너 — 알람 상황 보고', body: <CommCorner items={COMM_C4} /> },
-      { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>알람·인터록·타임아웃 용어를 익혔다.</li><li>알람을 읽고 원인·조치를 판단했다.</li><li>외국인 엔지니어에게 알람 상황을 영어로 보고했다.</li></ul>
-        <div className="fes-cb-complete"><b>Chapter 4 완료 ✓</b></div></div>) },
-    ],
-  },
-  {
-    id: 'c5', title: '디자인 규칙 · DRC (Design Rule Check)',
-    slides: [
-      { title: '현장 스토리 — 패턴이 규칙을 어겼다', body: (
-        <div>
-          <div className="fes-wk-acr"><b>DRC = Design Rule Check</b> — 레이아웃이 디자인 규칙(선폭·간격 등)을 지켰는지 자동으로 검사하는 것.</div>
-          <div className="fes-wk-story"><div className="fes-wk-story-ic">📐</div>
-            <div>DRC 로그: “<i>METAL1.SPACING violation. Required 0.30, measured 0.18.</i>” — 무슨 뜻이고 어떻게 고칠까요?</div></div>
-          <p className="fes-wk-p">디자인 규칙 용어를 익히고, 직접 패턴을 고쳐 <b>영문 DRC 오류</b>를 해석합니다.</p>
-        </div>) },
-      { title: 'DRC 용어 (자료)', body: <GlossaryGrid intro="디자인 규칙에서 쓰는 용어입니다." items={C5_TERMS} /> },
-      { title: '실습 — DRC 오류 해석·수정', body: (
-        <div>
-          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Width/Spacing 슬라이더를 조절하고 <b>Run DRC</b> → 영문 violation 로그를 읽고 규칙을 만족시키세요.</p>
-          <DrcLab />
-        </div>) },
-      { title: '의사소통 코너 — DRC 결과 공유', body: <CommCorner items={COMM_C5} /> },
-      { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>width·spacing·enclosure·violation 용어를 익혔다.</li><li>DRC 오류를 읽고 직접 수정했다.</li><li>외국인 엔지니어와 DRC 결과를 영어로 공유했다.</li></ul>
-        <div className="fes-cb-complete"><b>Chapter 5 완료 ✓</b></div></div>) },
-    ],
-  },
-  {
-    id: 'c6', title: 'LVS (Layout Versus Schematic) 검증',
-    slides: [
-      { title: '현장 스토리 — 레이아웃 ≠ 회로도', body: (
-        <div>
-          <div className="fes-wk-acr"><b>LVS = Layout Versus Schematic</b> — 그린 레이아웃이 원래 회로도(설계)와 같은지 비교·검증하는 것.</div>
-          <div className="fes-wk-story"><div className="fes-wk-story-ic">🔗</div>
-            <div>LVS 리포트: “<i>ERROR: Missing device — NMOS not found in layout.</i>” — 레이아웃이 회로도와 다릅니다.</div></div>
-          <p className="fes-wk-p">LVS 용어를 익히고, 영문 <b>mismatch</b> 메시지로 무엇이 다른지 판단합니다.</p>
-        </div>) },
-      { title: 'LVS 용어 (자료)', body: <GlossaryGrid intro="LVS 비교에서 쓰는 용어입니다." items={C6_TERMS} /> },
-      { title: '실습 — LVS 비교', body: (
-        <div>
-          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Schematic(정답) vs Layout(추출)을 보고, 영문 리포트로 <b>missing device / incorrect connection</b>을 판단하세요.</p>
-          <LvsLab />
-        </div>) },
-      { title: '의사소통 코너 — LVS 결과 공유', body: <CommCorner items={COMM_C6} /> },
-      { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>mismatch·missing device·incorrect connection을 익혔다.</li><li>LVS 리포트를 읽고 차이를 판단했다.</li><li>외국인 엔지니어와 LVS 결과를 영어로 공유했다.</li></ul>
-        <div className="fes-cb-complete"><b>Chapter 6 완료 ✓</b></div></div>) },
-    ],
-  },
-  {
-    id: 'c7', title: '종합 현장 보고',
-    slides: [
-      { title: '현장 스토리 — 모든 것을 종합하다', body: (
-        <div>
-          <div className="fes-wk-story"><div className="fes-wk-story-ic">🧩</div>
-            <div>장비 이상(압력·RF) → 식각 결과 비정상 → DRC width 오류. 지금까지 배운 걸 모아 <b>영문 보고서</b>로 정리합니다.</div></div>
-          <p className="fes-wk-p">이 챕터가 이 책의 종착점입니다. 상황을 읽고, 원인·조치를 규명해 5칸 보고서를 영어로 작성하세요.</p>
-        </div>) },
-      { title: '실습 — 영문 현장 보고서', body: (
-        <div>
-          <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Problem / Observed log / Possible cause / Corrective action / Result 5칸을 <b>영어로</b> 작성하고 모범답안과 비교하세요.</p>
-          <ReportLab />
-        </div>) },
-      { title: '의사소통 코너 — 종합 결과 보고', body: <CommCorner items={COMM_C7} /> },
-      { title: '수료 — 이 책을 마치며', body: (
-        <div><ul className="fes-cb-summary"><li>용어 → 장비 → 운전·로그 → 알람 → DRC → LVS → 종합 보고까지 마쳤다.</li><li>이제 현장 영어를 <b>읽고 → 판단하고 → 보고</b>할 수 있다.</li></ul>
-        <div className="fes-cb-complete">🎉 <b>모든 챕터 완료!</b> 진도 100%.</div></div>) },
-    ],
-  },
-];
+const CHAPTERS = CONTENT_CHAPTERS;
 
 // 챕터 책 리더 — 목차(진도·성취 표시) + 슬라이드 뷰어
 function ChapterBook() {
@@ -1681,13 +1387,19 @@ function ChapterBook() {
 
 // Course Map = 정적 '책 안내'. 클릭 네비 없음 — 학습은 Chapters 탭에서.
 const CM_PART_EQUIP = [
-  { ch: 'CH 2', t: '장비 구성요소', d: '영문 매뉴얼로 부품 이름·기능 익히기' },
-  { ch: 'CH 3', t: '운전과 로그 읽기', d: '영어 지시문대로 운전 + HMI 로그 해석' },
-  { ch: 'CH 4', t: '알람과 트러블슈팅', d: 'HMI 영문 알람 → 원인·조치 판단' },
+  { ch: '2주', t: '장비 구성요소', d: 'chamber·pump·valve·MFC·RF (영문 매뉴얼)' },
+  { ch: '3주', t: '운전 절차', d: 'load·evacuate·purge·vent (작업 지시문)' },
+  { ch: '4주', t: '진공·가스 로그', d: 'set point vs actual value, sccm' },
+  { ch: '5주', t: '플라즈마 장비', d: 'RF power·matching·reflected power' },
+  { ch: '6주', t: '알람과 조치', d: 'alarm·interlock·timeout·failure' },
+  { ch: '7주', t: '유지보수(PM)', d: 'inspect·clean·replace·calibrate' },
 ];
 const CM_PART_DESIGN = [
-  { ch: 'CH 5', t: '디자인 규칙 · DRC', d: 'DRC (Design Rule Check) — 영문 오류 메시지 해석·수정' },
-  { ch: 'CH 6', t: 'LVS 검증', d: 'LVS (Layout Versus Schematic) — 영문 mismatch 판단' },
+  { ch: '9주', t: 'Layer 용어', d: 'well·active·poly·contact·metal' },
+  { ch: '10주', t: 'Design Rule', d: 'width·spacing·overlap·enclosure' },
+  { ch: '11주', t: '패턴 배치', d: 'layer 배치 · 선폭 · 간격' },
+  { ch: '12주', t: 'DRC 오류', d: 'DRC (Design Rule Check) 오류 해석' },
+  { ch: '13주', t: 'LVS 검증', d: 'LVS (Layout Versus Schematic) 비교' },
 ];
 
 function CourseMap() {
@@ -1711,7 +1423,7 @@ function CourseMap() {
       </div>
 
       {/* 구성: Day1 + 장비 파트 / 디자인 파트 / 종합 */}
-      <div className="fes-cm-day1">CH 1 · Day 1 — 오리엔테이션 (두루두루 훑기)</div>
+      <div className="fes-cm-day1">1주 · Day 1 — 오리엔테이션 (두루두루 훑기)</div>
       <div className="fes-cm-parts">
         <div className="fes-cm-part">
           <div className="fes-cm-part-h fes-a">장비 파트 · Equipment</div>
@@ -1727,8 +1439,9 @@ function CourseMap() {
         </div>
       </div>
       <div className="fes-cm-part fes-cm-part-full">
-        <div className="fes-cm-part-h fes-c">종합 · Integrated</div>
-        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">CH 7</span><div><b>종합 현장 보고</b><span>장비 이상 → 식각 비정상 → DRC 오류 → 영문 보고서까지 한 흐름</span></div></div>
+        <div className="fes-cm-part-h fes-c">종합 · 평가</div>
+        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">14주</span><div><b>종합 현장 보고</b><span>장비 이상 → 식각 비정상 → DRC 오류 → 영문 보고서까지 한 흐름</span></div></div>
+        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">8·15주</span><div><b>중간고사 · 기말고사</b><span>8주: 장비·운전·로그·알람 / 15주: + Layer·DRC·LVS 종합</span></div></div>
       </div>
     </div>
   );
