@@ -824,11 +824,6 @@ function NodeCard({ n, onOpen }) {
 function CourseMap({ onOpen }) {
   return (
     <div className="fes-cm">
-      <div className="fes-cm-phil">
-        <b>디자인 툴 사용법이 아니라, 영문을 읽고 판단하는 훈련.</b>
-        장비 운전·로그·매뉴얼이 <span className="fes-cm-hl">중심축</span>, 디자인(DRC/LVS)은 결과를 확인하는 <span className="fes-cm-hl">수단</span>.
-      </div>
-
       {/* 4단계 루프 */}
       <div className="fes-cm-loop">
         {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (

@@ -42,7 +42,7 @@ export const TOPIC_CHAPTERS = [
     deck: '/topic-decks/field-english.html',
     tiered: true,
     body: [],
-    fieldTip: '디자인 툴 사용법이 아니라 "영문을 읽고 판단하는" 훈련. 매주 4단계 루프를 반복한다.',
+    fieldTip: '매주 4단계 루프(매뉴얼 읽기 → 조작 → 로그·오류 해석 → 영문 보고)를 반복한다.',
     prerequisites: [],
     sourceRefs: { day: [14], script: 'field-english-course' },
   },
