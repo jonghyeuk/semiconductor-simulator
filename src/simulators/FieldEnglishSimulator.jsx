@@ -1118,31 +1118,34 @@ function ChamberIllustration() {
         <rect width="480" height="300" fill="#0a0f1a" />
         {/* chamber */}
         <rect x="120" y="55" width="240" height="180" rx="12" fill="#0e1a2e" stroke={C.cyan} strokeWidth="2" />
-        <text x="130" y="76" fill={C.cyan} fontSize="12" fontFamily={C.mono}>Chamber · 챔버</text>
+        <text x="130" y="76" fill={C.cyan} fontSize="13" fontFamily={C.mono}>Chamber</text>
         {/* gas inlet */}
         <line x1="240" y1="22" x2="240" y2="55" stroke={C.cyan} strokeWidth="3" markerEnd="url(#fesArr)" />
-        <text x="252" y="30" fill="#bfe9f5" fontSize="12" fontFamily={C.mono}>Process gas · 가스 주입</text>
+        <text x="252" y="30" fill="#bfe9f5" fontSize="13" fontFamily={C.mono}>Process gas</text>
         <defs><marker id="fesArr" markerWidth="9" markerHeight="9" refX="4" refY="7" orient="auto"><path d="M1 1L4 7L7 1" stroke={C.cyan} fill="none" strokeWidth="1.5" /></marker></defs>
         {/* RF */}
-        <rect x="26" y="130" width="76" height="40" rx="6" fill="#132139" stroke={C.violet} strokeWidth="1.5" />
-        <text x="64" y="147" fill={C.violet} fontSize="12" fontFamily={C.mono} textAnchor="middle">RF power</text>
-        <text x="64" y="162" fill={C.dim} fontSize="10" fontFamily={C.mono} textAnchor="middle">고주파</text>
+        <rect x="26" y="132" width="76" height="34" rx="6" fill="#132139" stroke={C.violet} strokeWidth="1.5" />
+        <text x="64" y="153" fill={C.violet} fontSize="13" fontFamily={C.mono} textAnchor="middle">RF power</text>
         <line x1="102" y1="150" x2="185" y2="196" stroke={C.violet} strokeWidth="2" />
         {/* plasma */}
         <ellipse cx="240" cy="150" rx="92" ry="52" fill="url(#fesPlasma)" />
         {[210, 230, 250, 270, 224, 256, 240].map((x, i) => (
           <circle key={i} cx={x} cy={130 + (i % 3) * 18} r="3" fill="#c4b5fd" opacity="0.9" />
         ))}
-        <text x="240" y="120" fill="#d9ccff" fontSize="12" fontFamily={C.mono} textAnchor="middle">Plasma · 플라즈마</text>
+        <text x="240" y="118" fill="#d9ccff" fontSize="13" fontFamily={C.mono} textAnchor="middle">Plasma</text>
         {/* chuck + wafer */}
         <rect x="180" y="205" width="120" height="16" rx="3" fill="#1a2a44" stroke="#2a3d5f" />
         <ellipse cx="240" cy="205" rx="66" ry="8" fill="#4f9dde" />
-        <text x="240" y="240" fill="#bfe9f5" fontSize="12" fontFamily={C.mono} textAnchor="middle">Wafer on chuck · 웨이퍼/척</text>
+        <text x="240" y="240" fill="#bfe9f5" fontSize="13" fontFamily={C.mono} textAnchor="middle">Wafer on chuck</text>
         {/* pump */}
         <line x1="240" y1="235" x2="240" y2="272" stroke={C.emerald} strokeWidth="3" markerEnd="url(#fesArrG)" />
         <defs><marker id="fesArrG" markerWidth="9" markerHeight="9" refX="4" refY="7" orient="auto"><path d="M1 1L4 7L7 1" stroke={C.emerald} fill="none" strokeWidth="1.5" /></marker></defs>
-        <text x="252" y="268" fill={C.emerald} fontSize="12" fontFamily={C.mono}>To pump · 배기</text>
+        <text x="252" y="268" fill={C.emerald} fontSize="13" fontFamily={C.mono}>To pump</text>
       </svg>
+      <div className="fes-illus-legend">
+        <span><b>Chamber</b> 챔버</span><span><b>Process gas</b> 가스 주입</span><span><b>RF power</b> 고주파 전력</span>
+        <span><b>Plasma</b> 플라즈마</span><span><b>Wafer on chuck</b> 웨이퍼/척</span><span><b>To pump</b> 배기</span>
+      </div>
     </div>
   );
 }
@@ -1251,12 +1254,14 @@ function LayerCrossSection() {
             <g key={L.en}>
               <rect x="40" y={yy} width="260" height={L.h} fill={L.c} opacity="0.85" stroke="#0a0f1a" />
               <line x1="300" y1={yy + L.h / 2} x2="320" y2={yy + L.h / 2} stroke={C.dim} />
-              <text x="326" y={yy + L.h / 2 + 4} fill="#e8f6ff" fontSize="13" fontFamily={C.mono}>{L.en}</text>
-              <text x="326" y={yy + L.h / 2 + 19} fill={C.dim} fontSize="10">{L.ko}</text>
+              <text x="326" y={yy + L.h / 2 + 5} fill="#e8f6ff" fontSize="14" fontFamily={C.mono}>{L.en}</text>
             </g>
           );
         })}
       </svg>
+      <div className="fes-illus-legend">
+        {LAYER_STACK.map((L) => <span key={L.en}><b>{L.en}</b> {L.ko}</span>)}
+      </div>
     </div>
   );
 }
@@ -1872,6 +1877,8 @@ function FesStyles() {
 .fes-wk-acr{background:${C.violet}12;border:1px solid ${C.violet}44;border-radius:8px;padding:9px 12px;font-size:12.5px;color:#d9ccff;line-height:1.6;margin-bottom:12px}
 .fes-wk-acr b{color:${C.violet};font-family:${C.mono}}
 .fes-illus-svg{width:100%;border:1px solid ${C.line};border-radius:10px;display:block;background:#0a0f1a;margin-top:4px}
+.fes-illus-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:11.5px;color:${C.dim}}
+.fes-illus-legend b{color:#bfe9f5;font-family:${C.mono}}
 .fes-wk-partinfo-role{font-size:12.5px;color:${C.emerald};margin-top:8px}
 .fes-pm{display:flex;flex-direction:column;gap:8px}
 .fes-pm-item{display:flex;align-items:center;gap:11px;background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:11px 13px;cursor:pointer}
