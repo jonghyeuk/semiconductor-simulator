@@ -975,7 +975,7 @@ function LessonDeck({ steps, chapterId, onReachEnd }) {
       </div>
       <div className="fes-ld-slide">
         <div className="fes-ld-title"><span className="fes-ld-step">STEP {i + 1} / {steps.length}</span>{step.title}</div>
-        <div className="fes-ld-body">{step.body}</div>
+        <div className="fes-ld-body">{step.body || <SlideRenderer slide={step} />}</div>
       </div>
       <div className="fes-ld-nav">
         <button className="fes-btn ghost" disabled={i === 0} onClick={() => setI(i - 1)}>◀ 이전</button>
@@ -1227,6 +1227,107 @@ const COMM_C7 = [
     q: { en: 'And the result after the fix?', ko: '조치 후 결과는요?' },
     a: { en: 'The width returned to target, and DRC is clean now.', ko: '선폭이 목표로 돌아왔고, 이제 DRC는 깨끗합니다.' } },
 ];
+
+// ===== Layer 단면도 (9주) =====
+const LAYER_STACK = [
+  { en: 'Metal', ko: '금속 배선', c: '#9ca3af', h: 26 },
+  { en: 'Contact', ko: '콘택 (연결 구멍)', c: '#f2c14e', h: 22 },
+  { en: 'Poly (gate)', ko: '폴리 게이트', c: '#e0554f', h: 24 },
+  { en: 'Active', ko: '액티브 영역', c: '#4fd39a', h: 26 },
+  { en: 'Well', ko: '웰 (도핑 영역)', c: '#6b7fd7', h: 30 },
+  { en: 'Substrate (Si)', ko: '실리콘 기판', c: '#334155', h: 60 },
+];
+function LayerCrossSection() {
+  let y = 40;
+  return (
+    <div>
+      <p className="fes-wk-quiz-intro">웨이퍼 <b>단면(cross-section)</b>입니다. 아래(기판)→위(배선)로 쌓이는 각 <b>Layer</b>의 영어 이름을 익히세요.</p>
+      <svg viewBox="0 0 480 240" className="fes-illus-svg">
+        <rect width="480" height="240" fill="#0a0f1a" />
+        {LAYER_STACK.map((L) => {
+          const yy = y; y += L.h + 2;
+          return (
+            <g key={L.en}>
+              <rect x="40" y={yy} width="260" height={L.h} fill={L.c} opacity="0.85" stroke="#0a0f1a" />
+              <line x1="300" y1={yy + L.h / 2} x2="320" y2={yy + L.h / 2} stroke={C.dim} />
+              <text x="326" y={yy + L.h / 2 + 4} fill="#e8f6ff" fontSize="13" fontFamily={C.mono}>{L.en}</text>
+              <text x="326" y={yy + L.h / 2 + 19} fill={C.dim} fontSize="10">{L.ko}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+// ===== PM 점검표 (7주) =====
+const PM_TASKS = [
+  { en: 'Inspect the O-ring seal', ko: 'O-링 씰 점검' },
+  { en: 'Clean the chamber wall', ko: '챔버 벽 세정' },
+  { en: 'Replace the pump oil', ko: '펌프 오일 교체' },
+  { en: 'Calibrate the MFC and gauge', ko: 'MFC·게이지 교정' },
+  { en: 'Tighten the loose bolts', ko: '풀린 볼트 조임' },
+];
+function PMChecklist() {
+  const [done, setDone] = useState({});
+  const n = Object.values(done).filter(Boolean).length;
+  return (
+    <div>
+      <p className="fes-wk-quiz-intro">유지보수 <b>점검표(checklist)</b>입니다. 항목을 읽고 완료하면 체크하세요.</p>
+      <div className="fes-pm">
+        {PM_TASKS.map((t, i) => (
+          <label key={i} className={`fes-pm-item ${done[i] ? 'on' : ''}`}>
+            <input type="checkbox" checked={!!done[i]} onChange={(e) => setDone((d) => ({ ...d, [i]: e.target.checked }))} />
+            <div><div className="fes-pm-en">{t.en}</div><div className="fes-pm-ko">{t.ko}</div></div>
+          </label>
+        ))}
+      </div>
+      <div className="fes-check-row"><span className={`fes-score ${n === PM_TASKS.length ? 'ok' : 'mid'}`}>{n}/{PM_TASKS.length} 완료</span></div>
+    </div>
+  );
+}
+
+// ===== 데이터 주도 슬라이드 렌더러 (에이전트가 낸 typed slide 를 그대로 렌더) =====
+function rich(text) {
+  if (text == null) return null;
+  return String(text).split(/\*\*/).map((s, i) => (i % 2 ? <b key={i}>{s}</b> : <React.Fragment key={i}>{s}</React.Fragment>));
+}
+const SIM_REGISTRY = {
+  equipment: () => <EquipmentHMI />,
+  alarm: () => <AlarmLab />,
+  drc: () => <DrcLab />,
+  lvs: () => <LvsLab />,
+  report: () => <ReportLab />,
+  partDiagram: () => <PartDiagram parts={W2_PARTS} />,
+  devicePanel: () => <DevicePanel />,
+  chamber: () => <ChamberIllustration />,
+  layer: () => <LayerCrossSection />,
+  pm: () => <PMChecklist />,
+};
+function SlideRenderer({ slide }) {
+  switch (slide.type) {
+    case 'story':
+      return <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>;
+    case 'read':
+      return <div>{slide.intro && <p className="fes-wk-quiz-intro">{slide.intro}</p>}{(slide.paras || []).map((p, i) => <p key={i} className="fes-wk-p">{rich(p)}</p>)}</div>;
+    case 'acr':
+      return <div>{slide.intro && <p className="fes-wk-quiz-intro">{slide.intro}</p>}{(slide.items || []).map((a, i) => <div key={i} className="fes-wk-acr"><b>{a.ab} = {a.full}</b> — {a.ko}</div>)}</div>;
+    case 'glossary':
+      return <GlossaryGrid intro={slide.intro} items={slide.items || []} />;
+    case 'quiz':
+      return <QuizBlock intro={slide.intro} questions={slide.questions || []} />;
+    case 'manual':
+      return <div className="fes-wk-manual"><div className="fes-wk-manual-h">{slide.mtitle || 'MANUAL'}</div>{(slide.paras || []).map((p, i) => <p key={i}>{rich(p)}</p>)}</div>;
+    case 'comm':
+      return <CommCorner items={slide.items || []} />;
+    case 'sim':
+      return <div>{slide.intro && <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>{rich(slide.intro)}</p>}{(SIM_REGISTRY[slide.which] || (() => <div className="fes-dim">[{slide.which}]</div>))()}</div>;
+    case 'wrap':
+      return <div><ul className="fes-cb-summary">{(slide.points || []).map((p, i) => <li key={i}>{rich(p)}</li>)}</ul>{slide.done && <div className="fes-cb-complete">{rich(slide.done)}</div>}</div>;
+    default:
+      return slide.body || null;
+  }
+}
 
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
 const CHAPTERS = [
@@ -2059,6 +2160,12 @@ function FesStyles() {
 .fes-wk-acr b{color:${C.violet};font-family:${C.mono}}
 .fes-illus-svg{width:100%;border:1px solid ${C.line};border-radius:10px;display:block;background:#0a0f1a;margin-top:4px}
 .fes-wk-partinfo-role{font-size:12.5px;color:${C.emerald};margin-top:8px}
+.fes-pm{display:flex;flex-direction:column;gap:8px}
+.fes-pm-item{display:flex;align-items:center;gap:11px;background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:11px 13px;cursor:pointer}
+.fes-pm-item.on{border-color:${C.emerald};background:${C.emerald}12}
+.fes-pm-item input{accent-color:${C.emerald};width:17px;height:17px;flex:none}
+.fes-pm-en{font-size:14px;color:#e8f6ff}
+.fes-pm-ko{font-size:11.5px;color:${C.dim};margin-top:2px}
 `}</style>
   );
 }
