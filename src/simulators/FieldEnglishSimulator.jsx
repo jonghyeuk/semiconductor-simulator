@@ -886,35 +886,17 @@ const W1_TOUR = [
   { ic: '🔗', area: 'LVS · 검증', en: '“Missing device in the layout.”', ko: '레이아웃 vs 회로도' },
   { ic: '📝', area: 'Report · 보고', en: '“Problem / Cause / Action…”', ko: '영문 현장 보고서' },
 ];
-// 선배–신입 대화
-const W1_DIALOGUE = [
-  { who: 'Senior', en: 'Load the wafer and pump down the chamber.', ko: '웨이퍼 싣고 챔버 배기해.' },
-  { who: 'You', en: 'The chamber is pumping down now.', ko: '지금 챔버 배기 중입니다.' },
-  { who: 'Senior', en: 'Check the pressure. Is it stable?', ko: '압력 확인해. 안정적이야?' },
-  { who: 'You', en: 'Yes, base pressure is reached.', ko: '네, 기준 압력에 도달했습니다.' },
-  { who: 'Senior', en: 'Good. Start the gas and ignite the plasma.', ko: '좋아. 가스 시작하고 플라즈마 점화해.' },
+// 현장 영어가 나오는 3곳 — 매뉴얼 · 지시문 · HMI 화면
+const W1_SOURCES = [
+  { ic: '📄', k: 'Manual · 매뉴얼', en: 'The turbo pump evacuates the chamber to base pressure.', ko: '장비 설명서의 설명 문장' },
+  { ic: '📋', k: 'Instruction · 작업 지시문', en: 'Load the wafer, pump down, then start the gas.', ko: '작업 절차·지시 문장' },
+  { ic: '🖥️', k: 'HMI screen · 장비 화면(GUI)', en: 'Chamber pressure is above the allowable limit.', ko: '장비 화면에 뜨는 영어 메시지' },
 ];
-const W1_DIALOGUE_Q = [
-  { prompt: '선배가 처음 지시한 것은?', opts: ['웨이퍼 싣고 배기', '챔버 벤트', '펌프 교체'], ans: 0 },
-  { prompt: '“Is it stable?” 는 무엇을 묻나?', opts: ['압력이 안정적인지', '가스가 남았는지', '문이 열렸는지'], ans: 0 },
+const W1_SRC_Q = [
+  { prompt: '“evacuates the chamber” 의 뜻은?', opts: ['챔버를 배기한다', '챔버를 채운다', '챔버를 연다'], ans: 0 },
+  { prompt: '지시문 “pump down, then start the gas” 순서는?', opts: ['배기 → 가스', '가스 → 배기', '벤트 → 배기'], ans: 0 },
+  { prompt: 'HMI 메시지 “above the allowable limit” 은?', opts: ['허용치보다 높다', '허용치 안이다', '측정 불가'], ans: 0 },
 ];
-
-// 대화문 렌더
-function Dialogue({ lines }) {
-  return (
-    <div className="fes-dlg">
-      {lines.map((l, i) => (
-        <div key={i} className={`fes-dlg-row ${l.who === 'You' ? 'me' : ''}`}>
-          <div className="fes-dlg-who">{l.who}</div>
-          <div className="fes-dlg-bubble">
-            <div className="fes-dlg-en">{l.en}</div>
-            <div className="fes-dlg-ko">{l.ko}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 const W2_PARTS = [
   { id: 'chamber', en: 'Chamber', ko: '챔버', desc: 'The vacuum space where the process happens.', x: 130, y: 60, w: 200, h: 150 },
@@ -1118,22 +1100,30 @@ const CHAPTERS = [
         ),
       },
       {
-        title: '현장의 말투 — 선배·신입 대화 (읽기)',
+        title: '영어는 어디에 있나 — 매뉴얼 · 지시문 · HMI 화면',
         body: (
           <div>
-            <p className="fes-wk-quiz-intro">실제 현장은 이렇게 짧은 영어 지시로 오갑니다. 소리내어 읽어보세요.</p>
-            <Dialogue lines={W1_DIALOGUE} />
+            <p className="fes-wk-quiz-intro">이 책에서 다루는 현장 영어는 딱 이 3곳에서 나옵니다.</p>
+            <div className="fes-src">
+              {W1_SOURCES.map((s) => (
+                <div key={s.k} className="fes-src-item">
+                  <div className="fes-src-top"><span className="fes-src-ic">{s.ic}</span><span className="fes-src-k">{s.k}</span></div>
+                  <div className="fes-src-en">“{s.en}”</div>
+                  <div className="fes-src-ko">{s.ko}</div>
+                </div>
+              ))}
+            </div>
           </div>
         ),
       },
       {
-        title: '대화 이해 (퀴즈)',
-        body: <QuizBlock intro="위 대화를 떠올리며 답하세요." questions={W1_DIALOGUE_Q} />,
+        title: '읽기 확인 (퀴즈)',
+        body: <QuizBlock intro="위 세 문장을 보고 답하세요." questions={W1_SRC_Q} />,
       },
       {
         title: '첫 쓰기 — 아주 짧게',
         body: <WriteBlock
-          prompt={<span>대화에 나온 상황을 <b>영어 한 문장</b>으로:<br/><span className="fes-wr-ko">“압력을 확인하세요.”</span></span>}
+          prompt={<span>HMI 화면에 띄울 <b>영어 지시문</b>을 한 문장으로:<br/><span className="fes-wr-ko">“압력을 확인하세요.”</span></span>}
           hint="동사로 시작하는 명령문"
           model="Check the pressure." />,
       },
@@ -1395,34 +1385,27 @@ function ChapterBook() {
  * 개념 ⓪  Course Map — 강의자용 한눈에 보기 콘솔 (주차 대신 구조 중심)
  * ====================================================================== */
 
-const LANE_A = [
-  { theme: 'equipment', icon: '🖥️', en: 'Equipment HMI', ko: '가상 장비 조작 · 영문 매뉴얼', wk: 'W2–5', terms: ['chamber', 'evacuate', 'interlock', 'set point'], tip: '메뉴별 영문 상태를 읽고 순서대로 운전' },
-  { theme: 'alarm', icon: '🚨', en: 'Alarm & Log', ko: '영문 알람·로그 → 원인·조치', wk: 'W6–7', terms: ['alarm', 'timeout', 'reflected power'], tip: '이상 장치·원인·조치 3/3 목표' },
+// Course Map = 정적 '책 안내'. 클릭 네비 없음 — 학습은 Chapters 탭에서.
+const CM_PART_EQUIP = [
+  { ch: 'CH 2', t: '장비 구성요소', d: '영문 매뉴얼로 부품 이름·기능 익히기' },
+  { ch: 'CH 3', t: '운전과 로그 읽기', d: '영어 지시문대로 운전 + HMI 로그 해석' },
+  { ch: 'CH 4', t: '알람과 트러블슈팅', d: 'HMI 영문 알람 → 원인·조치 판단' },
 ];
-const LANE_B = [
-  { theme: 'drc', icon: '📐', en: 'Design Rule Check', ko: 'Layer 배치 → DRC 오류 해석', wk: 'W9–12', terms: ['width', 'spacing', 'enclosure', 'violation'], tip: 'violation 문장 → 한 문장 요약 후 수정' },
-  { theme: 'lvs', icon: '🔗', en: 'LVS Compare', ko: '레이아웃 vs 회로도 비교', wk: 'W13', terms: ['mismatch', 'missing device', 'net'], tip: 'missing vs incorrect connection 구분' },
+const CM_PART_DESIGN = [
+  { ch: 'CH 5', t: '디자인 규칙 · DRC', d: '영문 DRC 오류 메시지 해석·수정' },
+  { ch: 'CH 6', t: 'LVS 검증', d: '영문 mismatch 메시지로 차이 판단' },
 ];
 
-function NodeCard({ n, onOpen }) {
-  return (
-    <button className="fes-cm-node" onClick={() => onOpen('chapters')}>
-      <div className="fes-cm-node-top">
-        <span className="fes-cm-ic">{n.icon}</span>
-        <div className="fes-cm-node-name"><b>{n.en}</b><span>{n.ko}</span></div>
-        <span className="fes-cm-wk">{n.wk}</span>
-      </div>
-      <div className="fes-cm-terms">{n.terms.map((t) => <span key={t} className="fes-cm-term">{t}</span>)}</div>
-      <div className="fes-cm-tip">👤 {n.tip}</div>
-      <div className="fes-cm-open">교재에서 학습 →</div>
-    </button>
-  );
-}
-
-function CourseMap({ onOpen }) {
+function CourseMap() {
   return (
     <div className="fes-cm">
-      {/* 4단계 루프 */}
+      <div className="fes-cm-guide-note">📖 이 화면은 <b>책 구성 안내</b>입니다. 실제 학습은 위 <b>Chapters</b> 탭에서 하세요.</div>
+
+      <div className="fes-cm-what">
+        <b>무엇을 배우나</b> — 실제 현장의 <span className="fes-cm-hl">영어 매뉴얼</span>, <span className="fes-cm-hl">영어 작업 지시문</span>, 그리고 <span className="fes-cm-hl">HMI 화면의 영어 GUI·메시지</span>를 읽고 판단하는 힘.
+      </div>
+
+      {/* 4단계 방식 */}
       <div className="fes-cm-loop">
         {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (
           <React.Fragment key={s}>
@@ -1430,45 +1413,28 @@ function CourseMap({ onOpen }) {
             {i < 3 && <span className="fes-cm-loop-ar">→</span>}
           </React.Fragment>
         ))}
-        <span className="fes-cm-loop-tag">매주 반복</span>
+        <span className="fes-cm-loop-tag">매 챕터 반복</span>
       </div>
 
-      {/* 비중 막대 */}
-      <div className="fes-cm-emph">
-        <div className="fes-cm-emph-a">장비·공정 영어 (중심축) · 운전/로그/알람/PM</div>
-        <div className="fes-cm-emph-b">디자인 영어 (결과 확인) · DRC/LVS</div>
-      </div>
-
-      {/* 두 축 */}
-      <div className="fes-cm-lanes">
-        <div className="fes-cm-lane">
-          <div className="fes-cm-lane-h fes-a">① 장비·공정 축 — Operate &amp; Interpret</div>
-          {LANE_A.map((n) => <NodeCard key={n.theme} n={n} onOpen={onOpen} />)}
+      {/* 구성: Day1 + 장비 파트 / 디자인 파트 / 종합 */}
+      <div className="fes-cm-day1">CH 1 · Day 1 — 오리엔테이션 (두루두루 훑기)</div>
+      <div className="fes-cm-parts">
+        <div className="fes-cm-part">
+          <div className="fes-cm-part-h fes-a">장비 파트 · Equipment</div>
+          {CM_PART_EQUIP.map((c) => (
+            <div key={c.ch} className="fes-cm-part-row"><span className="fes-cm-part-ch">{c.ch}</span><div><b>{c.t}</b><span>{c.d}</span></div></div>
+          ))}
         </div>
-        <div className="fes-cm-lane">
-          <div className="fes-cm-lane-h fes-b">② 디자인 축 — Read &amp; Judge</div>
-          {LANE_B.map((n) => <NodeCard key={n.theme} n={n} onOpen={onOpen} />)}
+        <div className="fes-cm-part">
+          <div className="fes-cm-part-h fes-b">디자인 파트 · Design</div>
+          {CM_PART_DESIGN.map((c) => (
+            <div key={c.ch} className="fes-cm-part-row"><span className="fes-cm-part-ch">{c.ch}</span><div><b>{c.t}</b><span>{c.d}</span></div></div>
+          ))}
         </div>
       </div>
-
-      {/* 종합 → 보고 */}
-      <div className="fes-cm-integr">
-        <div className="fes-cm-integr-l">
-          <div className="fes-cm-integr-t">③ 종합 시나리오 <span className="fes-cm-wk">W14</span></div>
-          <div className="fes-cm-integr-d">장비 이상(압력·RF) → 식각 결과 비정상 → DRC width 오류 → 원인·조치 규명</div>
-        </div>
-        <span className="fes-cm-loop-ar big">→</span>
-        <button className="fes-cm-node fes-cm-report" onClick={() => onOpen('chapters')}>
-          <div className="fes-cm-node-top"><span className="fes-cm-ic">📝</span><div className="fes-cm-node-name"><b>Field Report</b><span>Problem·Observed·Cause·Action·Result</span></div></div>
-          <div className="fes-cm-open">교재에서 학습 →</div>
-        </button>
-      </div>
-
-      {/* 평가 */}
-      <div className="fes-cm-assess">
-        <span className="fes-cm-assess-chip">중간고사 · W8 — 장비 구성/운전/로그/알람</span>
-        <span className="fes-cm-assess-chip">기말고사 · W15 — 로그·매뉴얼·DRC/LVS 종합 해석</span>
-        <span className="fes-cm-assess-note">※ 주차는 참고용 태그일 뿐, 수업은 위 4단계 루프로 진행</span>
+      <div className="fes-cm-part fes-cm-part-full">
+        <div className="fes-cm-part-h fes-c">종합 · Integrated</div>
+        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">CH 7</span><div><b>종합 현장 보고</b><span>장비 이상 → 식각 비정상 → DRC 오류 → 영문 보고서까지 한 흐름</span></div></div>
       </div>
     </div>
   );
@@ -1495,7 +1461,7 @@ export default function FieldEnglishSimulator({
   const cur = THEMES.find((t) => t.id === theme) || THEMES[0];
 
   const Body = {
-    overview: <CourseMap onOpen={pick} />,
+    overview: <CourseMap />,
     chapters: <ChapterBook />,
   }[theme];
 
@@ -1832,6 +1798,35 @@ function FesStyles() {
 .fes-dlg-row.me .fes-dlg-bubble{background:${C.cyan}14;border-color:${C.cyan}44;border-radius:12px 12px 4px 12px}
 .fes-dlg-en{font-size:14px;color:#e8f6ff}
 .fes-dlg-ko{font-size:11.5px;color:${C.dim};margin-top:3px}
+
+/* 영어 소스 3곳 (매뉴얼/지시문/HMI) */
+.fes-src{display:flex;flex-direction:column;gap:10px}
+.fes-src-item{background:#08101f;border:1px solid ${C.line2};border-left:3px solid ${C.cyan};border-radius:10px;padding:12px 15px}
+.fes-src-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.fes-src-ic{font-size:18px}
+.fes-src-k{font-family:${C.mono};font-size:12px;color:${C.cyan};font-weight:700;letter-spacing:.4px}
+.fes-src-en{font-size:15px;color:#e8f6ff;line-height:1.5}
+.fes-src-ko{font-size:11.5px;color:${C.dim};margin-top:4px}
+
+/* Course Map 정적 안내 */
+.fes-cm-guide-note{background:${C.cyan}12;border:1px solid ${C.cyan}33;border-radius:9px;padding:10px 13px;font-size:12.5px;color:#bfe9f5;margin-bottom:12px}
+.fes-cm-guide-note b{color:#fff}
+.fes-cm-what{font-size:13.5px;line-height:1.7;color:${C.text};margin-bottom:14px}
+.fes-cm-day1{background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:10px 14px;font-size:13.5px;font-weight:700;color:#e8eefc;margin:14px 0}
+.fes-cm-parts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:600px){.fes-cm-parts{grid-template-columns:1fr}}
+.fes-cm-part{background:${C.panel};border:1px solid ${C.line2};border-radius:12px;padding:14px}
+.fes-cm-part-full{margin-top:14px}
+.fes-cm-part-h{font-family:${C.mono};font-size:12px;font-weight:700;letter-spacing:.4px;padding:7px 11px;border-radius:8px;margin-bottom:10px}
+.fes-cm-part-h.fes-a{background:${C.cyan}14;color:${C.cyan};border:1px solid ${C.cyan}40}
+.fes-cm-part-h.fes-b{background:${C.violet}14;color:${C.violet};border:1px solid ${C.violet}40}
+.fes-cm-part-h.fes-c{background:${C.emerald}14;color:${C.emerald};border:1px solid ${C.emerald}40}
+.fes-cm-part-row{display:flex;gap:11px;align-items:flex-start;padding:8px 4px;border-top:1px solid ${C.line}}
+.fes-cm-part-row:first-of-type{border-top:none}
+.fes-cm-part-ch{font-family:${C.mono};font-size:11px;color:${C.amber};border:1px solid ${C.amber}44;border-radius:6px;padding:2px 7px;flex:none;margin-top:1px}
+.fes-cm-part-row div{display:flex;flex-direction:column}
+.fes-cm-part-row b{font-size:13.5px;color:#e8eefc}
+.fes-cm-part-row span{font-size:11.5px;color:${C.dim};margin-top:1px}
 `}</style>
   );
 }
