@@ -1023,6 +1023,112 @@ const C6_TERMS = [
   { en: 'Net', ko: '넷', d: '전기적으로 연결된 노드(선).' },
 ];
 
+// ===== 장치 계기판 디스플레이 (LED 리드아웃 · 상태 LED · 진동 모니터) — 용어 학습용 =====
+const DEV_NORMAL = [
+  { label: 'PRESSURE', val: '5.0e-6', unit: 'Torr', ko: '압력' },
+  { label: 'RF FORWARD', val: '600', unit: 'W', ko: '전진파(공급)' },
+  { label: 'RF REFLECTED', val: '15', unit: 'W', ko: '반사파' },
+  { label: 'CHUCK TEMP', val: '65', unit: '°C', ko: '척 온도' },
+  { label: 'GAS FLOW', val: '50', unit: 'sccm', ko: '가스 유량' },
+];
+const DEV_ABNORMAL = [
+  { label: 'PRESSURE', val: '2.1e-2', unit: 'Torr', ko: '압력', bad: true },
+  { label: 'RF FORWARD', val: '600', unit: 'W', ko: '전진파(공급)' },
+  { label: 'RF REFLECTED', val: '420', unit: 'W', ko: '반사파', bad: true },
+  { label: 'CHUCK TEMP', val: '88', unit: '°C', ko: '척 온도', bad: true },
+  { label: 'GAS FLOW', val: '6', unit: 'sccm', ko: '가스 유량', bad: true },
+];
+
+function VibWave({ bad }) {
+  const amp = bad ? 17 : 5, n = 60, pts = [];
+  for (let i = 0; i < n; i++) {
+    const x = i / (n - 1) * 240;
+    const y = 30 + Math.sin(i * 0.85) * amp * (bad ? (0.6 + 0.4 * Math.sin(i * 0.4)) : 1);
+    pts.push(`${x.toFixed(1)},${y.toFixed(1)}`);
+  }
+  return (
+    <svg viewBox="0 0 240 60" className="fes-vib-svg" preserveAspectRatio="none">
+      <line x1="0" y1="30" x2="240" y2="30" stroke="#16233b" strokeWidth="1" />
+      <polyline points={pts.join(' ')} fill="none" stroke={bad ? C.red : C.emerald} strokeWidth="2" />
+    </svg>
+  );
+}
+
+function DevicePanel() {
+  const [ab, setAb] = useState(false);
+  const ro = ab ? DEV_ABNORMAL : DEV_NORMAL;
+  const vib = ab ? { v: '9.8', s: 'HIGH', bad: true } : { v: '2.1', s: 'NORMAL' };
+  const stat = ab
+    ? [{ k: 'POWER', c: 'grn' }, { k: 'PLASMA', c: 'off' }, { k: 'READY', c: 'off' }, { k: 'INTERLOCK · TRIPPED', c: 'red' }]
+    : [{ k: 'POWER', c: 'grn' }, { k: 'PLASMA', c: 'grn' }, { k: 'READY', c: 'grn' }, { k: 'INTERLOCK', c: 'off' }];
+  return (
+    <div>
+      <p className="fes-wk-quiz-intro">실제 장비 계기판입니다. 각 <b>영어 라벨</b>이 무슨 값인지 익히세요. 아래 체크로 <b>비정상 상태</b>도 봅니다.</p>
+      <div className="fes-dev-grid">
+        {ro.map((r) => (
+          <div key={r.label} className="fes-dev-led">
+            <div className="fes-dev-led-label">{r.label}</div>
+            <div className={`fes-dev-led-val ${r.bad ? 'bad' : ''}`}>{r.val}<span className="fes-dev-led-unit">{r.unit}</span></div>
+            <div className="fes-dev-led-ko">{r.ko}</div>
+          </div>
+        ))}
+      </div>
+      <div className="fes-dev-row">
+        <div className="fes-dev-status">
+          <div className="fes-dev-sub">STATUS LED</div>
+          {stat.map((s) => (<div key={s.k} className="fes-dev-stat"><span className={`fes-dev-dot ${s.c}`} />{s.k}</div>))}
+        </div>
+        <div className="fes-dev-vib">
+          <div className="fes-dev-sub">VIBRATION MONITOR <span className="fes-dev-vibko">진동 모니터</span></div>
+          <VibWave bad={vib.bad} />
+          <div className={`fes-dev-vib-val ${vib.bad ? 'bad' : ''}`}>{vib.v} mm/s · {vib.s}</div>
+        </div>
+      </div>
+      <label className="fes-inject" style={{ marginTop: 10 }}>
+        <input type="checkbox" checked={ab} onChange={(e) => setAb(e.target.checked)} /> Simulate abnormal (비정상 상태 보기)
+      </label>
+    </div>
+  );
+}
+
+// ===== 의사소통 코너 — 외국인 엔지니어 (상황 → 예상 답변) =====
+function CommTurn({ it, n }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="fes-comm-turn">
+      <div className="fes-comm-sit"><b>상황 {n}.</b> {it.sit}</div>
+      <div className="fes-comm-them">
+        <span className="fes-comm-who">🧑‍🔧 Foreign Engineer</span>
+        <div className="fes-comm-en">{it.q.en}</div>
+        <div className="fes-comm-ko">{it.q.ko}</div>
+      </div>
+      <button className="fes-btn ghost" onClick={() => setShow((s) => !s)}>{show ? '예상 답변 숨기기' : '👉 이렇게 답하세요'}</button>
+      {show && (
+        <div className="fes-comm-you">
+          <span className="fes-comm-who">🙋 You</span>
+          <div className="fes-comm-en">{it.a.en}</div>
+          <div className="fes-comm-ko">{it.a.ko}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+function CommCorner({ items }) {
+  return <div className="fes-comm">{items.map((it, i) => <CommTurn key={i} it={it} n={i + 1} />)}</div>;
+}
+const COMM_C3 = [
+  {
+    sit: '운전을 시작하려는데 외국인 엔지니어가 상태를 묻습니다.',
+    q: { en: 'Is the chamber ready? Did you reach base pressure?', ko: '챔버 준비됐어요? 기준 압력에 도달했나요?' },
+    a: { en: 'Yes, base pressure is reached. The chamber is ready.', ko: '네, 기준 압력에 도달했습니다. 챔버 준비됐습니다.' },
+  },
+  {
+    sit: '다음 단계를 확인합니다.',
+    q: { en: 'Good. Please start the gas and check the flow.', ko: '좋아요. 가스를 시작하고 유량을 확인해 주세요.' },
+    a: { en: 'Okay. The gas flow is 50 sccm and stable.', ko: '알겠습니다. 가스 유량 50 sccm, 안정적입니다.' },
+  },
+];
+
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
 const CHAPTERS = [
   {
@@ -1230,6 +1336,7 @@ const CHAPTERS = [
           <p className="fes-wk-p">운전 용어를 익히고, 직접 장비를 순서대로 운전하며 <b>로그에 뜨는 영어</b>를 읽어봅니다.</p>
         </div>) },
       { title: '운전 용어 (자료)', body: <GlossaryGrid intro="운전 절차에서 쓰는 동사입니다." items={C3_TERMS} /> },
+      { title: '장치 디스플레이 읽기 — LED · 진동 모니터', body: <DevicePanel /> },
       { title: '실습 — 직접 장비를 운전해보기', body: (
         <div>
           <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>순서: <b>Load Wafer → Pump Down → Start Gas → Ignite Plasma → Start Process</b>. <b>Log</b> 메뉴에서 영어 로그를 읽으세요.</p>
@@ -1238,8 +1345,9 @@ const CHAPTERS = [
       { title: '쓰기 — 로그 해석', body: <WriteBlock
         prompt={<span>로그 문장을 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“Base pressure reached. Chamber is ready.”</span></span>}
         model="기준 압력에 도달했다. 챔버가 준비됐다." /> },
+      { title: '의사소통 코너 — 외국인 엔지니어와', body: <CommCorner items={COMM_C3} /> },
       { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>운전 동사(load·pump down·vent·ignite)를 익혔다.</li><li>직접 장비를 순서대로 운전하고 영어 로그를 읽었다.</li></ul>
+        <div><ul className="fes-cb-summary"><li>운전 동사(load·pump down·vent·ignite)를 익혔다.</li><li>장치 디스플레이(LED·진동)와 로그의 영어를 읽었다.</li><li>외국인 엔지니어와 운전 상황을 영어로 주고받았다.</li></ul>
         <div className="fes-cb-complete"><b>Chapter 3 완료 ✓</b> — 다음은 알람 해석.</div></div>) },
     ],
   },
@@ -1827,6 +1935,39 @@ function FesStyles() {
 .fes-cm-part-row div{display:flex;flex-direction:column}
 .fes-cm-part-row b{font-size:13.5px;color:#e8eefc}
 .fes-cm-part-row span{font-size:11.5px;color:${C.dim};margin-top:1px}
+
+/* 장치 계기판 디스플레이 */
+.fes-dev-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.fes-dev-led{background:#04070d;border:1px solid ${C.line2};border-radius:9px;padding:10px 12px}
+.fes-dev-led-label{font-family:${C.mono};font-size:10px;letter-spacing:1px;color:${C.dim}}
+.fes-dev-led-val{font-family:${C.mono};font-size:24px;font-weight:700;color:${C.emerald};text-shadow:0 0 8px ${C.emerald}66;margin-top:3px;line-height:1}
+.fes-dev-led-val.bad{color:${C.red};text-shadow:0 0 8px ${C.red}66;animation:fesBlink 1s infinite}
+.fes-dev-led-unit{font-size:11px;color:${C.dim};margin-left:4px;text-shadow:none;font-weight:400}
+.fes-dev-led-ko{font-size:10.5px;color:${C.dim};margin-top:4px}
+.fes-dev-row{display:grid;grid-template-columns:1fr 1.3fr;gap:10px;margin-top:10px}
+@media(max-width:560px){.fes-dev-row{grid-template-columns:1fr}}
+.fes-dev-status,.fes-dev-vib{background:#04070d;border:1px solid ${C.line2};border-radius:9px;padding:11px 13px}
+.fes-dev-sub{font-family:${C.mono};font-size:10px;letter-spacing:1px;color:${C.cyan};margin-bottom:8px}
+.fes-dev-vibko{color:${C.dim};letter-spacing:0}
+.fes-dev-stat{display:flex;align-items:center;gap:8px;font-family:${C.mono};font-size:12px;color:${C.text};padding:3px 0}
+.fes-dev-dot{width:10px;height:10px;border-radius:50%;flex:none}
+.fes-dev-dot.grn{background:${C.emerald};box-shadow:0 0 6px ${C.emerald}}
+.fes-dev-dot.red{background:${C.red};box-shadow:0 0 6px ${C.red};animation:fesBlink 1s infinite}
+.fes-dev-dot.off{background:#28344a}
+.fes-vib-svg{width:100%;height:56px;display:block;background:#060c17;border-radius:6px}
+.fes-dev-vib-val{font-family:${C.mono};font-size:13px;color:${C.emerald};margin-top:6px}
+.fes-dev-vib-val.bad{color:${C.red}}
+
+/* 의사소통 코너 */
+.fes-comm{display:flex;flex-direction:column;gap:14px}
+.fes-comm-turn{background:${C.panel};border:1px solid ${C.line2};border-radius:12px;padding:14px}
+.fes-comm-sit{font-size:12.5px;color:${C.amber};margin-bottom:10px}
+.fes-comm-sit b{color:${C.amber}}
+.fes-comm-who{font-family:${C.mono};font-size:10.5px;color:${C.dim};display:block;margin-bottom:4px}
+.fes-comm-them{background:${C.panel2};border:1px solid ${C.line2};border-radius:10px 10px 10px 3px;padding:10px 13px;margin-bottom:10px}
+.fes-comm-you{background:${C.cyan}12;border:1px solid ${C.cyan}44;border-radius:10px 10px 3px 10px;padding:10px 13px;margin-top:10px}
+.fes-comm-en{font-size:14.5px;color:#e8f6ff;line-height:1.5}
+.fes-comm-ko{font-size:11.5px;color:${C.dim};margin-top:3px}
 `}</style>
   );
 }
