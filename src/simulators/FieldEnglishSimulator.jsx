@@ -42,9 +42,11 @@ const C = {
   amber: '#fbbf24',
   red: '#f87171',
   violet: '#a78bfa',
-  blue: '#60a5fa',
-  mono: "'SF Mono','Roboto Mono','DejaVu Sans Mono',ui-monospace,monospace",
-  sans: "'Inter',system-ui,-apple-system,'Segoe UI',sans-serif",
+  blue: '#3b82f6',      // Tech Innovation · Electric Blue
+  elec: '#2f6bff',      // electric blue (primary accent)
+  neon: '#22d3ee',      // neon cyan (highlight)
+  mono: "'DejaVu Sans Mono','SF Mono','Roboto Mono',ui-monospace,monospace",
+  sans: "'DejaVu Sans','Segoe UI',system-ui,-apple-system,sans-serif",
 };
 
 // 현장 영어 용어 사전 (hover 스캐폴딩)
@@ -975,7 +977,10 @@ function LessonDeck({ steps, chapterId, onReachEnd }) {
         ))}
       </div>
       <div className="fes-ld-slide">
-        <div className="fes-ld-title"><span className="fes-ld-step">STEP {i + 1} / {steps.length}</span>{step.title}</div>
+        <div className="fes-ld-head">
+          <span className="fes-ld-step">STEP {i + 1} / {steps.length}{step.type ? ' · ' + String(step.type).toUpperCase() : ''}</span>
+          <div className="fes-ld-title">{step.title}</div>
+        </div>
         <div className="fes-ld-body">{step.body || <SlideRenderer slide={step} />}</div>
       </div>
       <div className="fes-ld-nav">
@@ -1315,7 +1320,14 @@ function SlideRenderer({ slide }) {
     case 'story':
       return <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>;
     case 'read':
-      return <div>{slide.intro && <p className="fes-wk-quiz-intro">{slide.intro}</p>}{(slide.paras || []).map((p, i) => <p key={i} className="fes-wk-p">{rich(p)}</p>)}</div>;
+      return (
+        <div className="fes-th">
+          {slide.intro && <div className="fes-th-lead">{rich(slide.intro)}</div>}
+          <ul className="fes-th-list">
+            {(slide.paras || []).map((p, i) => <li key={i} className="fes-th-point"><span className="fes-th-mk" />{rich(p)}</li>)}
+          </ul>
+        </div>
+      );
     case 'acr':
       return <div>{slide.intro && <p className="fes-wk-quiz-intro">{slide.intro}</p>}{(slide.items || []).map((a, i) => <div key={i} className="fes-wk-acr"><b>{a.ab} = {a.full}</b> — {a.ko}</div>)}</div>;
     case 'glossary':
@@ -1721,10 +1733,20 @@ function FesStyles() {
 .fes-ld-dot{width:34px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
 .fes-ld-dot.done{background:${C.cyan}66}
 .fes-ld-dot.on{background:${C.cyan};box-shadow:0 0 0 3px ${C.cyan}22}
-.fes-ld-slide{background:#08101f;border:1px solid ${C.line};border-radius:12px;padding:20px 22px;min-height:280px}
-.fes-ld-title{font-size:18px;font-weight:800;color:#e8eefc;margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
-.fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1px;color:${C.cyan};font-weight:700}
-.fes-ld-body{font-size:14px;line-height:1.7}
+.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;min-height:360px;display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
+.fes-ld-head{position:relative;background:linear-gradient(90deg,${C.elec}22,${C.elec}08 60%,transparent);border-bottom:1px solid ${C.line};border-left:4px solid ${C.elec};padding:15px 24px}
+.fes-ld-head:after{content:'';position:absolute;right:20px;top:16px;width:34px;height:34px;border-radius:9px;background:radial-gradient(circle at 30% 30%,${C.neon}55,${C.elec}22);opacity:.5}
+.fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1.5px;color:${C.neon};font-weight:700}
+.fes-ld-title{font-size:23px;font-weight:800;color:#fff;margin-top:5px;letter-spacing:-.2px;text-wrap:balance;max-width:90%}
+.fes-ld-body{font-size:14px;line-height:1.7;padding:20px 24px 22px;flex:1}
+
+/* 이론(PPT) 슬라이드 */
+.fes-th-lead{font-size:16px;line-height:1.7;color:#eaf1ff;border-left:3px solid ${C.neon};background:${C.neon}0e;padding:11px 15px;border-radius:0 9px 9px 0;margin-bottom:15px}
+.fes-th-lead b{color:${C.neon}}
+.fes-th-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.fes-th-point{position:relative;background:${C.panel};border:1px solid ${C.line2};border-radius:11px;padding:13px 15px 13px 42px;font-size:14.5px;line-height:1.65;color:${C.text}}
+.fes-th-point b{color:${C.neon};font-weight:700}
+.fes-th-mk{position:absolute;left:16px;top:17px;width:10px;height:10px;background:${C.elec};transform:rotate(45deg);border-radius:2px;box-shadow:0 0 8px ${C.elec}88}
 .fes-ld-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
 .fes-ld-count{font-family:${C.mono};font-size:12px;color:${C.dim}}
 .fes-wk-p{font-size:15px;line-height:1.8;color:${C.text}}.fes-wk-p b{color:${C.cyan}}
