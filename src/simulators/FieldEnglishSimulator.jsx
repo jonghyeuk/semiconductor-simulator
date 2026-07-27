@@ -24,6 +24,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 const THEMES = [
   { id: 'overview', en: 'Course Map', ko: '강의 개요', icon: '🗺️', loop: 'Overview' },
+  { id: 'weekly', en: 'Weekly Lessons', ko: '주차 수업', icon: '📅', loop: 'Lesson' },
   { id: 'equipment', en: 'Equipment HMI', ko: '가상 장비 조작', icon: '🖥️', loop: 'Operate' },
   { id: 'alarm', en: 'Alarm & Log', ko: '알람·로그 해석', icon: '🚨', loop: 'Interpret' },
   { id: 'drc', en: 'Design Rule Check', ko: 'DRC 오류 해석', icon: '📐', loop: 'Judge' },
@@ -794,6 +795,326 @@ function TaskCard({ title, children }) {
 }
 
 /* =========================================================================
+ * 주차 수업 (Weekly Lessons) — 주차별 전용 인터랙티브 수업
+ * ====================================================================== */
+
+const WEEKS = [
+  { n: 1, t: '개요 · 기본 용어', on: true },
+  { n: 2, t: '장비 구성요소', on: true },
+  { n: 3, t: '운전 절차', on: false },
+  { n: 4, t: '진공 · 가스 로그', on: false },
+  { n: 5, t: '플라즈마', on: false },
+  { n: 6, t: '알람 · 조치', on: false },
+  { n: 7, t: '유지보수(PM)', on: false },
+  { n: 8, t: '중간고사', on: false },
+  { n: 9, t: 'Layer 용어', on: false },
+  { n: 10, t: 'Design Rule', on: false },
+  { n: 11, t: '패턴 배치', on: false },
+  { n: 12, t: 'DRC 오류', on: false },
+  { n: 13, t: 'LVS', on: false },
+  { n: 14, t: '종합 프로젝트', on: false },
+  { n: 15, t: '기말고사', on: false },
+];
+
+// 재사용 객관식 퀴즈 블록
+function QuizBlock({ intro, questions }) {
+  const [sel, setSel] = useState({});
+  const [checked, setChecked] = useState(false);
+  const score = questions.filter((q, i) => sel[i] === q.ans).length;
+  return (
+    <div>
+      {intro && <p className="fes-wk-quiz-intro">{intro}</p>}
+      <div className="fes-qs">
+        {questions.map((q, i) => (
+          <div key={i} className="fes-q">
+            <div className="fes-q-prompt"><span className="fes-wk-qn">Q{i + 1}</span> {q.prompt}</div>
+            <div className="fes-q-opts">
+              {q.opts.map((o, j) => {
+                const chosen = sel[i] === j, right = checked && j === q.ans, wrong = checked && chosen && j !== q.ans;
+                return (
+                  <button key={j} disabled={checked} onClick={() => setSel((s) => ({ ...s, [i]: j }))}
+                    className={`fes-opt ${chosen ? 'sel' : ''} ${right ? 'right' : ''} ${wrong ? 'wrong' : ''}`}>
+                    {o}{right ? '  ✓' : wrong ? '  ✕' : ''}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="fes-check-row">
+        {!checked
+          ? <button className="fes-btn" disabled={Object.keys(sel).length < questions.length} onClick={() => setChecked(true)}>Check answers</button>
+          : <>
+            <span className={`fes-score ${score === questions.length ? 'ok' : score >= 1 ? 'mid' : 'bad'}`}>Score {score}/{questions.length}</span>
+            <button className="fes-btn ghost" onClick={() => { setSel({}); setChecked(false); }}>Retry</button>
+          </>}
+      </div>
+    </div>
+  );
+}
+
+/* ---- 1주차: 개요 · 직무 · 사용법 · 기본 용어 ---- */
+const W1_ROLES = [
+  { icon: '🛠️', role: 'Equipment Engineer', duty: 'Operates and maintains process equipment; reads English alarms and manuals.', ko: '장비 엔지니어 — 장비 운전·정비, 영문 알람·매뉴얼 해석' },
+  { icon: '🧪', role: 'Process Engineer', duty: 'Sets recipes and analyzes process logs and English data sheets.', ko: '공정 엔지니어 — 레시피 설정, 영문 로그·데이터 분석' },
+  { icon: '📐', role: 'Design Engineer', duty: 'Draws layouts and fixes DRC / LVS errors written in English.', ko: '설계 엔지니어 — 레이아웃 작성, 영문 DRC/LVS 오류 수정' },
+];
+const W1_GLOSSARY = [
+  { en: 'Wafer', ko: '웨이퍼', d: '반도체를 만드는 얇은 원판(기판).' },
+  { en: 'Chamber', ko: '챔버', d: '공정이 일어나는 진공 공간.' },
+  { en: 'Vacuum', ko: '진공', d: '공기를 빼내 압력을 낮춘 상태.' },
+  { en: 'Recipe', ko: '레시피', d: '가스·압력·시간 등 공정 조건표.' },
+  { en: 'Etch', ko: '식각', d: '표면을 깎아내는 공정.' },
+  { en: 'Deposition', ko: '증착', d: '표면에 얇은 막을 쌓는 공정.' },
+];
+const W1_TERMS = [
+  { prompt: '“Wafer” 의 뜻은?', opts: ['웨이퍼 (반도체 기판)', '진공', '식각'], ans: 0 },
+  { prompt: '“Chamber” 의 뜻은?', opts: ['레시피', '챔버 (공정이 일어나는 공간)', '밸브'], ans: 1 },
+  { prompt: '“Vacuum” 의 뜻은?', opts: ['진공', '증착', '층(layer)'], ans: 0 },
+  { prompt: '“Recipe” 의 뜻은?', opts: ['식각', '공정 조건표 (레시피)', '펌프'], ans: 1 },
+  { prompt: '“Etch” 의 뜻은?', opts: ['쌓다 (증착)', '깎아내다 (식각)', '읽다'], ans: 1 },
+  { prompt: '“Deposition” 의 뜻은?', opts: ['증착 (막을 쌓기)', '진공', '알람'], ans: 0 },
+];
+
+function Week1Lesson() {
+  const steps = [
+    {
+      title: '현장 스토리 — 팹(fab) 첫 출근날',
+      body: (
+        <div>
+          <div className="fes-wk-story">
+            <div className="fes-wk-story-ic">🏭</div>
+            <div>당신은 반도체 <b>팹(fab)</b>에 첫 출근했습니다. 장비 화면, 매뉴얼, 경고창이 <b>전부 영어</b>입니다.
+            <br/>“<i>Chamber pressure is above the allowable limit…</i>” — 이게 무슨 뜻일까요?</div>
+          </div>
+          <p className="fes-wk-p">이 수업의 목표는 그 영어를 <b>읽고 → 판단하고 → 보고</b>하는 힘을 기르는 것입니다. 오늘은 첫날이니, 이 수업이 어떻게 흘러가는지와 가장 기본이 되는 용어부터 익혀봅시다.</p>
+        </div>
+      ),
+    },
+    {
+      title: '이 수업이 뭘 하는 곳인가',
+      body: <p className="fes-wk-p">반도체 현장에서 마주치는 <b>영어 화면·문서·오류</b>를 읽고 <b>판단</b>하는 연습을 합니다. 문법 시험이 아니라, 실제 장비 화면을 다루듯 영어를 씁니다.</p>,
+    },
+    {
+      title: '현장 직무 이해 — 누가 영어를 쓰나',
+      body: (
+        <div className="fes-wk-roles">
+          {W1_ROLES.map((r) => (
+            <div key={r.role} className="fes-wk-role">
+              <div className="fes-wk-role-h"><span>{r.icon}</span><b>{r.role}</b></div>
+              <div className="fes-wk-role-en">{r.duty}</div>
+              <div className="fes-wk-role-ko">{r.ko}</div>
+            </div>
+          ))}
+        </div>
+      ),
+    },
+    {
+      title: '시뮬레이터 사용법 — 매주 이 순서',
+      body: (
+        <div>
+          <div className="fes-cm-loop" style={{ margin: '4px 0 0' }}>
+            {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (
+              <React.Fragment key={s}>
+                <div className="fes-cm-loop-chip"><span>{i + 1}</span>{s}</div>
+                {i < 3 && <span className="fes-cm-loop-ar">→</span>}
+              </React.Fragment>
+            ))}
+          </div>
+          <p className="fes-wk-hint">상단 탭에서 도구를 열고, 화면의 영어를 읽고, 판단해서 답하면 됩니다. 모르는 단어는 <b>점선 밑줄에 마우스를 올리면</b> 뜻이 떠요.</p>
+        </div>
+      ),
+    },
+    {
+      title: '기본 용어 — 먼저 읽어봅시다 (자료)',
+      body: (
+        <div>
+          <p className="fes-wk-quiz-intro">현장에서 매일 쓰는 6개 기본 용어입니다. 소리내어 읽고 뜻을 익힌 뒤 다음 슬라이드에서 확인해요.</p>
+          <div className="fes-wk-gloss">
+            {W1_GLOSSARY.map((g) => (
+              <div key={g.en} className="fes-wk-gloss-item">
+                <div className="fes-wk-gloss-en">{g.en}</div>
+                <div className="fes-wk-gloss-ko">{g.ko}</div>
+                <div className="fes-wk-gloss-d">{g.d}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: '기본 용어 워밍업 (퀴즈)',
+      body: <QuizBlock intro="영어 용어를 보고 뜻을 고르세요. 6문제 모두 맞히면 통과." questions={W1_TERMS} />,
+    },
+  ];
+  return <LessonDeck steps={steps} />;
+}
+
+/* ---- 2주차: 장비 구성요소 (클릭 구성도 + 매뉴얼 + 명명 퀴즈) ---- */
+const W2_PARTS = [
+  { id: 'chamber', en: 'Chamber', ko: '챔버', desc: 'The vacuum space where the process happens.', x: 130, y: 60, w: 200, h: 150 },
+  { id: 'chuck', en: 'Wafer chuck', ko: '척 (웨이퍼 받침)', desc: 'Holds the wafer during the process.', x: 190, y: 170, w: 80, h: 18 },
+  { id: 'gas', en: 'Gas line (MFC)', ko: '가스 라인 / 질량유량제어기', desc: 'Delivers and controls the process gas flow.', x: 198, y: 12, w: 64, h: 26 },
+  { id: 'rf', en: 'RF generator', ko: 'RF 전원', desc: 'Supplies RF power to generate plasma.', x: 16, y: 150, w: 88, h: 34 },
+  { id: 'valve', en: 'Gate valve', ko: '게이트 밸브', desc: 'Opens or closes the path to the pump.', x: 204, y: 214, w: 52, h: 16 },
+  { id: 'pump', en: 'Turbo pump', ko: '터보 펌프', desc: 'Evacuates the chamber down to vacuum.', x: 190, y: 234, w: 80, h: 26 },
+];
+const W2_QUIZ = [
+  { prompt: '“The vacuum space where the process happens.”', opts: ['Chamber', 'Pump', 'Recipe'], ans: 0 },
+  { prompt: '“Delivers and controls the process gas flow.”', opts: ['RF generator', 'Gas line (MFC)', 'Wafer chuck'], ans: 1 },
+  { prompt: '“Supplies RF power to generate plasma.”', opts: ['RF generator', 'Gate valve', 'Turbo pump'], ans: 0 },
+  { prompt: '“Evacuates the chamber down to vacuum.”', opts: ['Wafer chuck', 'Turbo pump', 'Gas line'], ans: 1 },
+  { prompt: '“Holds the wafer during the process.”', opts: ['Wafer chuck', 'Gate valve', 'Chamber'], ans: 0 },
+];
+
+function PartDiagram() {
+  const [sel, setSel] = useState('chamber');
+  const cur = W2_PARTS.find((p) => p.id === sel);
+  return (
+    <div className="fes-wk-diag">
+      <svg viewBox="0 0 460 272" className="fes-wk-svg">
+        <rect width="460" height="272" fill="#0a0f1a" />
+        <line x1="230" y1="38" x2="230" y2="60" stroke="#3a4d6a" strokeWidth="4" />
+        <line x1="104" y1="167" x2="190" y2="179" stroke="#3a4d6a" strokeWidth="4" />
+        <line x1="230" y1="210" x2="230" y2="214" stroke="#3a4d6a" strokeWidth="6" />
+        <line x1="230" y1="230" x2="230" y2="234" stroke="#3a4d6a" strokeWidth="6" />
+        <ellipse cx="230" cy="140" rx="70" ry="46" fill="#a78bfa" opacity="0.18" />
+        {W2_PARTS.map((p) => {
+          const on = sel === p.id;
+          return (
+            <g key={p.id} onClick={() => setSel(p.id)} style={{ cursor: 'pointer' }}>
+              <rect x={p.x} y={p.y} width={p.w} height={p.h} rx="6"
+                fill={p.id === 'chamber' ? 'none' : on ? `${C.cyan}22` : '#0f1d33'}
+                stroke={on ? C.cyan : '#2a3d5f'} strokeWidth={on ? 3 : 1.5} />
+              <text x={p.x + p.w / 2} y={p.y + p.h / 2 + 4} textAnchor="middle" fontSize="12"
+                fontFamily={C.mono} fill={on ? C.cyan : C.dim}>{p.en}</text>
+            </g>
+          );
+        })}
+      </svg>
+      <div className="fes-wk-partinfo">
+        <div className="fes-wk-partinfo-en">{cur.en} <span className="fes-wk-partinfo-ko">{cur.ko}</span></div>
+        <div className="fes-wk-partinfo-desc">{cur.desc}</div>
+        <div className="fes-wk-partinfo-hint">👆 도형을 클릭하면 부품별 영어 이름·설명이 바뀝니다.</div>
+      </div>
+    </div>
+  );
+}
+
+function Week2Lesson() {
+  const steps = [
+    {
+      title: '현장 스토리 — 장비 앞에 서다',
+      body: (
+        <div>
+          <div className="fes-wk-story">
+            <div className="fes-wk-story-ic">🏭</div>
+            <div>식각 장비(Plasma Etcher) 앞. 선배가 말합니다:
+            <br/>“<i>Check the chamber pressure and the MFC before you start.</i>”
+            <br/><b>chamber? MFC?</b> — 부품 이름을 영어로 알아야 지시를 알아듣고 움직일 수 있습니다.</div>
+          </div>
+          <p className="fes-wk-p">오늘은 장비의 <b>주요 구성요소를 영어로</b> 익힙니다. 구성도를 직접 눌러보고, 매뉴얼을 읽고, 마지막에 이름을 맞혀봅시다.</p>
+        </div>
+      ),
+    },
+    {
+      title: '가상 장비 구성도 — 부품을 눌러보세요',
+      body: <PartDiagram />,
+    },
+    {
+      title: '구성요소 정리 (자료)',
+      body: (
+        <div>
+          <p className="fes-wk-quiz-intro">6개 핵심 부품의 영어 이름·뜻·기능입니다.</p>
+          <table className="fes-wk-table">
+            <thead><tr><th>English</th><th>한글</th><th>기능 (function)</th></tr></thead>
+            <tbody>
+              {W2_PARTS.map((p) => (
+                <tr key={p.id}><td className="fes-wk-td-en">{p.en}</td><td>{p.ko}</td><td>{p.desc}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ),
+    },
+    {
+      title: '영문 매뉴얼 발췌 — Main Components',
+      body: (
+        <div className="fes-wk-manual">
+          <div className="fes-wk-manual-h">MANUAL · 2. Main Components</div>
+          <p>The <b>chamber</b> is the vacuum space where etching takes place. Process gas is supplied through the <b>gas line</b> and controlled by the <b>MFC</b>. The <b>RF generator</b> supplies power to the <b>wafer chuck</b> to ignite the plasma. The <b>turbo pump</b>, isolated by the <b>gate valve</b>, evacuates the chamber to base pressure.</p>
+        </div>
+      ),
+    },
+    {
+      title: '구성요소 명명 퀴즈',
+      body: <QuizBlock intro="영어 설명을 읽고 어느 부품인지 고르세요." questions={W2_QUIZ} />,
+    },
+  ];
+  return <LessonDeck steps={steps} />;
+}
+
+// PPT처럼 한 화면씩 넘기는 슬라이드 뷰어 — 강의자는 '다음'만 누르면 순서대로 진행
+function LessonDeck({ steps }) {
+  const [i, setI] = useState(0);
+  const step = steps[i];
+  const last = i === steps.length - 1;
+  return (
+    <div className="fes-ld">
+      <div className="fes-ld-dots">
+        {steps.map((s, j) => (
+          <button key={j} onClick={() => setI(j)}
+            className={`fes-ld-dot ${j === i ? 'on' : ''} ${j < i ? 'done' : ''}`} title={s.title} />
+        ))}
+      </div>
+      <div className="fes-ld-slide">
+        <div className="fes-ld-title"><span className="fes-ld-step">STEP {i + 1} / {steps.length}</span>{step.title}</div>
+        <div className="fes-ld-body">{step.body}</div>
+      </div>
+      <div className="fes-ld-nav">
+        <button className="fes-btn ghost" disabled={i === 0} onClick={() => setI(i - 1)}>◀ 이전</button>
+        <span className="fes-ld-count">{i + 1} / {steps.length}</span>
+        <button className="fes-btn" disabled={last} onClick={() => setI(i + 1)}>{last ? '이 주차 끝 ✓' : '다음 ▶'}</button>
+      </div>
+    </div>
+  );
+}
+
+function WeeklyLessons({ onOpen }) {
+  const [wk, setWk] = useState(1);
+  const meta = WEEKS.find((w) => w.n === wk);
+  return (
+    <div>
+      <div className="fes-wk-rail">
+        {WEEKS.map((w) => (
+          <button key={w.n} disabled={!w.on} onClick={() => w.on && setWk(w.n)}
+            className={`fes-wk-chip ${wk === w.n ? 'on' : ''} ${!w.on ? 'off' : ''}`} title={w.t}>
+            W{w.n}{!w.on ? ' 🔒' : ''}
+          </button>
+        ))}
+      </div>
+      <div className="fes-wk-head">
+        <div className="fes-wk-head-t"><b>{wk}주차</b> · {meta.t}</div>
+        {!meta.on && <span className="fes-wk-soon">준비 중</span>}
+      </div>
+
+      {wk === 1 && <Week1Lesson />}
+      {wk === 2 && <Week2Lesson />}
+      {!meta.on && (
+        <div className="fes-wk-placeholder">
+          이 주차는 아직 준비 중입니다. 현재 <b>1주차(개요·기본 용어)</b>와 <b>2주차(장비 구성요소)</b>가 완성되어 있어요.
+          <div className="fes-wk-ph-btns">
+            <button className="fes-btn ghost" onClick={() => setWk(1)}>1주차 열기</button>
+            <button className="fes-btn ghost" onClick={() => setWk(2)}>2주차 열기</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================================
  * 개념 ⓪  Course Map — 강의자용 한눈에 보기 콘솔 (주차 대신 구조 중심)
  * ====================================================================== */
 
@@ -898,6 +1219,7 @@ export default function FieldEnglishSimulator({
 
   const Body = {
     overview: <CourseMap onOpen={pick} />,
+    weekly: <WeeklyLessons onOpen={pick} />,
     equipment: <EquipmentHMI />, alarm: <AlarmLab />, drc: <DrcLab />, lvs: <LvsLab />, report: <ReportLab />,
   }[theme];
 
@@ -1126,6 +1448,67 @@ function FesStyles() {
 .fes-cm-assess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid ${C.line}}
 .fes-cm-assess-chip{font-size:11.5px;color:#e8eefc;background:${C.panel};border:1px solid ${C.line2};border-radius:7px;padding:7px 12px}
 .fes-cm-assess-note{font-size:10.5px;color:${C.dim};margin-left:auto}
+
+/* Weekly lessons */
+.fes-wk-rail{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}
+.fes-wk-chip{background:${C.panel};border:1px solid ${C.line2};color:${C.dim};border-radius:8px;padding:6px 10px;font-family:${C.mono};font-size:11.5px;font-weight:700;cursor:pointer;transition:.12s}
+.fes-wk-chip:hover:not(:disabled){border-color:${C.cyan};color:${C.text}}
+.fes-wk-chip.on{background:${C.cyan}18;border-color:${C.cyan};color:${C.cyan}}
+.fes-wk-chip.off{opacity:.4;cursor:not-allowed}
+.fes-wk-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.fes-wk-head-t{font-size:16px;color:#e8eefc}.fes-wk-head-t b{color:${C.cyan}}
+.fes-wk-soon{font-size:10.5px;color:${C.amber};border:1px solid ${C.amber}55;border-radius:20px;padding:3px 10px}
+.fes-wk-placeholder{background:${C.panel};border:1px dashed ${C.line2};border-radius:12px;padding:26px;text-align:center;color:${C.dim};font-size:13px}
+.fes-wk-placeholder b{color:${C.text}}
+.fes-wk-ph-btns{display:flex;gap:8px;justify-content:center;margin-top:14px}
+
+/* Lesson deck (PPT-style) */
+.fes-ld-dots{display:flex;gap:7px;justify-content:center;margin-bottom:12px}
+.fes-ld-dot{width:34px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
+.fes-ld-dot.done{background:${C.cyan}66}
+.fes-ld-dot.on{background:${C.cyan};box-shadow:0 0 0 3px ${C.cyan}22}
+.fes-ld-slide{background:#08101f;border:1px solid ${C.line};border-radius:12px;padding:20px 22px;min-height:280px}
+.fes-ld-title{font-size:18px;font-weight:800;color:#e8eefc;margin-bottom:16px;display:flex;flex-direction:column;gap:6px}
+.fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1px;color:${C.cyan};font-weight:700}
+.fes-ld-body{font-size:14px;line-height:1.7}
+.fes-ld-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
+.fes-ld-count{font-family:${C.mono};font-size:12px;color:${C.dim}}
+.fes-wk-p{font-size:15px;line-height:1.8;color:${C.text}}.fes-wk-p b{color:${C.cyan}}
+.fes-wk-hint{font-size:12.5px;color:${C.dim};margin:14px 0 0}.fes-wk-hint b{color:${C.text}}
+.fes-wk-roles{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:600px){.fes-wk-roles{grid-template-columns:1fr}}
+.fes-wk-role{background:${C.panel};border:1px solid ${C.line2};border-radius:11px;padding:14px}
+.fes-wk-role-h{display:flex;align-items:center;gap:8px;font-size:15px;color:#e8eefc;margin-bottom:8px}
+.fes-wk-role-h span{font-size:22px}
+.fes-wk-role-en{font-size:12.5px;color:${C.text};line-height:1.6;margin-bottom:8px}
+.fes-wk-role-ko{font-size:11.5px;color:${C.dim};border-top:1px solid ${C.line};padding-top:8px}
+.fes-wk-diag{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;align-items:center}
+@media(max-width:600px){.fes-wk-diag{grid-template-columns:1fr}}
+.fes-wk-svg{width:100%;border:1px solid ${C.line};border-radius:10px;display:block}
+.fes-wk-partinfo{background:${C.panel};border:1px solid ${C.line2};border-left:3px solid ${C.cyan};border-radius:10px;padding:14px}
+.fes-wk-partinfo-en{font-size:17px;font-weight:800;color:${C.cyan}}
+.fes-wk-partinfo-ko{font-size:12px;color:${C.dim};font-weight:400;margin-left:6px}
+.fes-wk-partinfo-desc{font-size:13.5px;color:${C.text};line-height:1.6;margin-top:8px}
+.fes-wk-partinfo-hint{font-size:11px;color:${C.dim};margin-top:12px}
+.fes-wk-manual{background:#060c17;border:1px solid ${C.line};border-radius:10px;padding:16px 18px}
+.fes-wk-manual-h{font-family:${C.mono};font-size:11px;letter-spacing:1px;color:${C.cyan};margin-bottom:10px}
+.fes-wk-manual p{font-size:14.5px;line-height:1.9;color:${C.text};margin:0}
+.fes-wk-manual b{color:#bfe9f5;font-weight:700}
+.fes-wk-quiz-intro{font-size:12.5px;color:${C.dim};margin:0 0 12px}
+.fes-wk-qn{font-family:${C.mono};color:${C.cyan};font-size:12px;margin-right:4px}
+.fes-wk-story{display:flex;gap:14px;align-items:flex-start;background:linear-gradient(135deg,#132338,#0e1a2e);border:1px solid ${C.line2};border-left:3px solid ${C.amber};border-radius:12px;padding:16px 18px;font-size:14px;line-height:1.8;color:${C.text}}
+.fes-wk-story-ic{font-size:30px;flex:none}
+.fes-wk-story b{color:${C.amber}}.fes-wk-story i{color:#bfe9f5;font-style:italic}
+.fes-wk-gloss{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+@media(max-width:600px){.fes-wk-gloss{grid-template-columns:1fr 1fr}}
+.fes-wk-gloss-item{background:${C.panel};border:1px solid ${C.line2};border-radius:10px;padding:12px}
+.fes-wk-gloss-en{font-size:16px;font-weight:800;color:${C.cyan}}
+.fes-wk-gloss-ko{font-size:12px;color:#e8eefc;margin:2px 0 6px}
+.fes-wk-gloss-d{font-size:11.5px;color:${C.dim};line-height:1.5}
+.fes-wk-table{width:100%;border-collapse:collapse;font-size:13px}
+.fes-wk-table th{background:${C.panel};color:${C.cyan};font-family:${C.mono};font-size:11px;letter-spacing:.5px;text-align:left;padding:9px 12px;border:1px solid ${C.line2}}
+.fes-wk-table td{border:1px solid ${C.line};padding:9px 12px;color:${C.text};vertical-align:top}
+.fes-wk-td-en{color:#bfe9f5;font-family:${C.mono};font-weight:700}
 `}</style>
   );
 }
