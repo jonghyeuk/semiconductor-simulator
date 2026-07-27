@@ -2,7 +2,7 @@
 export const CONTENT_CHAPTERS = [
  {
   "id": "w1",
-  "title": "1주 · 오리엔테이션 · 기본 용어",
+  "title": "오리엔테이션 · 기본 용어",
   "slides": [
    {
     "type": "story",
@@ -409,7 +409,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w2",
-  "title": "2주 · 장비 구성요소",
+  "title": "장비 구성요소",
   "slides": [
    {
     "type": "story",
@@ -777,7 +777,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w3",
-  "title": "3주 · 운전 절차",
+  "title": "운전 절차",
   "slides": [
    {
     "type": "story",
@@ -1194,7 +1194,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w4",
-  "title": "4주 · 진공·가스 로그",
+  "title": "진공·가스 로그",
   "slides": [
    {
     "type": "story",
@@ -1603,7 +1603,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w5",
-  "title": "5주 · 플라즈마 장비",
+  "title": "플라즈마 장비",
   "slides": [
    {
     "type": "story",
@@ -1996,7 +1996,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w6",
-  "title": "6주 · 알람과 조치",
+  "title": "알람과 조치",
   "slides": [
    {
     "type": "story",
@@ -2416,7 +2416,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w7",
-  "title": "7주 · 유지보수(PM)",
+  "title": "유지보수(PM)",
   "slides": [
    {
     "type": "story",
@@ -2858,13 +2858,13 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w8",
-  "title": "8주 · 중간고사",
+  "title": "중간 점검",
   "kind": "평가",
   "slides": [
    {
     "type": "story",
     "icon": "📝",
-    "title": "중간고사 안내",
+    "title": "중간 점검 안내",
     "text": "1~7주에 배운 **장비 구성 · 운전 절차 · 로그 값 · 알람 해석**을 확인합니다. 영어 문장과 용어를 읽고 답하세요."
    },
    {
@@ -3005,18 +3005,18 @@ export const CONTENT_CHAPTERS = [
    },
    {
     "type": "wrap",
-    "title": "중간고사 정리",
+    "title": "중간 점검 정리",
     "points": [
      "장비 구성 · 운전 · 로그 · 알람 영어를 점검했다.",
      "9주부터는 디자인(Layer·DRC·LVS)으로 넘어간다."
     ],
-    "done": "**중간고사 완료 ✓**"
+    "done": "**중간 점검 완료 ✓**"
    }
   ]
  },
  {
   "id": "w9",
-  "title": "9주 · Layer 용어",
+  "title": "Layer 용어",
   "slides": [
    {
     "type": "story",
@@ -3427,7 +3427,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w10",
-  "title": "10주 · Design Rule",
+  "title": "Design Rule",
   "slides": [
    {
     "type": "story",
@@ -3850,7 +3850,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w11",
-  "title": "11주 · 패턴 배치",
+  "title": "패턴 배치",
   "slides": [
    {
     "type": "story",
@@ -4244,7 +4244,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w12",
-  "title": "12주 · DRC 오류",
+  "title": "DRC 오류",
   "slides": [
    {
     "type": "story",
@@ -4685,7 +4685,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w13",
-  "title": "13주 · LVS 검증",
+  "title": "LVS 검증",
   "slides": [
    {
     "type": "story",
@@ -5124,7 +5124,7 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w14",
-  "title": "14주 · 종합 현장 보고",
+  "title": "종합 현장 보고",
   "slides": [
    {
     "type": "story",
@@ -5559,13 +5559,13 @@ export const CONTENT_CHAPTERS = [
  },
  {
   "id": "w15",
-  "title": "15주 · 기말고사",
+  "title": "종합 점검",
   "kind": "평가",
   "slides": [
    {
     "type": "story",
     "icon": "🎓",
-    "title": "기말고사 안내",
+    "title": "종합 점검 안내",
     "text": "장비·공정·디자인 전체를 종합합니다. **로그 · 매뉴얼 · Design Rule · DRC/LVS 오류**를 읽고 답하세요."
    },
    {
@@ -5711,7 +5711,7 @@ export const CONTENT_CHAPTERS = [
      "장비 운전·로그·알람 → 디자인 규칙·DRC·LVS → 종합 보고까지 마쳤다.",
      "이제 현장 영어를 읽고 → 판단하고 → 보고할 수 있다."
     ],
-    "done": "🎓 **기말고사 완료 · 전 과정 수료!**"
+    "done": "🎓 **종합 점검 완료 · 전 과정 수료!**"
    }
   ]
  }

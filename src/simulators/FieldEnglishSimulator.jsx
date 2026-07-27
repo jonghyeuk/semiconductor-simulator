@@ -1404,19 +1404,19 @@ function ChapterBook() {
 
 // Course Map = 정적 '책 안내'. 클릭 네비 없음 — 학습은 Chapters 탭에서.
 const CM_PART_EQUIP = [
-  { ch: '2주', t: '장비 구성요소', d: 'chamber·pump·valve·MFC·RF (영문 매뉴얼)' },
-  { ch: '3주', t: '운전 절차', d: 'load·evacuate·purge·vent (작업 지시문)' },
-  { ch: '4주', t: '진공·가스 로그', d: 'set point vs actual value, sccm' },
-  { ch: '5주', t: '플라즈마 장비', d: 'RF power·matching·reflected power' },
-  { ch: '6주', t: '알람과 조치', d: 'alarm·interlock·timeout·failure' },
-  { ch: '7주', t: '유지보수(PM)', d: 'inspect·clean·replace·calibrate' },
+  { ch: 'CH 2', t: '장비 구성요소', d: 'chamber·pump·valve·MFC·RF (영문 매뉴얼)' },
+  { ch: 'CH 3', t: '운전 절차', d: 'load·evacuate·purge·vent (작업 지시문)' },
+  { ch: 'CH 4', t: '진공·가스 로그', d: 'set point vs actual value, sccm' },
+  { ch: 'CH 5', t: '플라즈마 장비', d: 'RF power·matching·reflected power' },
+  { ch: 'CH 6', t: '알람과 조치', d: 'alarm·interlock·timeout·failure' },
+  { ch: 'CH 7', t: '유지보수(PM)', d: 'inspect·clean·replace·calibrate' },
 ];
 const CM_PART_DESIGN = [
-  { ch: '9주', t: 'Layer 용어', d: 'well·active·poly·contact·metal' },
-  { ch: '10주', t: 'Design Rule', d: 'width·spacing·overlap·enclosure' },
-  { ch: '11주', t: '패턴 배치', d: 'layer 배치 · 선폭 · 간격' },
-  { ch: '12주', t: 'DRC 오류', d: 'DRC (Design Rule Check) 오류 해석' },
-  { ch: '13주', t: 'LVS 검증', d: 'LVS (Layout Versus Schematic) 비교' },
+  { ch: 'CH 9', t: 'Layer 용어', d: 'well·active·poly·contact·metal' },
+  { ch: 'CH 10', t: 'Design Rule', d: 'width·spacing·overlap·enclosure' },
+  { ch: 'CH 11', t: '패턴 배치', d: 'layer 배치 · 선폭 · 간격' },
+  { ch: 'CH 12', t: 'DRC 오류', d: 'DRC (Design Rule Check) 오류 해석' },
+  { ch: 'CH 13', t: 'LVS 검증', d: 'LVS (Layout Versus Schematic) 비교' },
 ];
 
 function CourseMap() {
@@ -1440,7 +1440,7 @@ function CourseMap() {
       </div>
 
       {/* 구성: Day1 + 장비 파트 / 디자인 파트 / 종합 */}
-      <div className="fes-cm-day1">1주 · Day 1 — 오리엔테이션 (두루두루 훑기)</div>
+      <div className="fes-cm-day1">CH 1 · Day 1 — 오리엔테이션 (두루두루 훑기)</div>
       <div className="fes-cm-parts">
         <div className="fes-cm-part">
           <div className="fes-cm-part-h fes-a">장비 파트 · Equipment</div>
@@ -1457,8 +1457,8 @@ function CourseMap() {
       </div>
       <div className="fes-cm-part fes-cm-part-full">
         <div className="fes-cm-part-h fes-c">종합 · 평가</div>
-        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">14주</span><div><b>종합 현장 보고</b><span>장비 이상 → 식각 비정상 → DRC 오류 → 영문 보고서까지 한 흐름</span></div></div>
-        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">8·15주</span><div><b>중간고사 · 기말고사</b><span>8주: 장비·운전·로그·알람 / 15주: + Layer·DRC·LVS 종합</span></div></div>
+        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">CH 14</span><div><b>종합 현장 보고</b><span>장비 이상 → 식각 비정상 → DRC 오류 → 영문 보고서까지 한 흐름</span></div></div>
+        <div className="fes-cm-part-row"><span className="fes-cm-part-ch">CH 8·15</span><div><b>중간 점검 · 종합 점검</b><span>CH 8: 장비·운전·로그·알람 / CH 15: + Layer·DRC·LVS 종합</span></div></div>
       </div>
     </div>
   );
@@ -1733,12 +1733,12 @@ function FesStyles() {
 .fes-ld-dot{width:34px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
 .fes-ld-dot.done{background:${C.cyan}66}
 .fes-ld-dot.on{background:${C.cyan};box-shadow:0 0 0 3px ${C.cyan}22}
-.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;min-height:360px;display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
+.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;min-height:min(58vh,500px);display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
 .fes-ld-head{position:relative;background:linear-gradient(90deg,${C.elec}22,${C.elec}08 60%,transparent);border-bottom:1px solid ${C.line};border-left:4px solid ${C.elec};padding:15px 24px}
 .fes-ld-head:after{content:'';position:absolute;right:20px;top:16px;width:34px;height:34px;border-radius:9px;background:radial-gradient(circle at 30% 30%,${C.neon}55,${C.elec}22);opacity:.5}
 .fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1.5px;color:${C.neon};font-weight:700}
 .fes-ld-title{font-size:23px;font-weight:800;color:#fff;margin-top:5px;letter-spacing:-.2px;text-wrap:balance;max-width:90%}
-.fes-ld-body{font-size:14px;line-height:1.7;padding:20px 24px 22px;flex:1}
+.fes-ld-body{font-size:15px;line-height:1.75;padding:22px 26px 24px;flex:1;display:flex;flex-direction:column;justify-content:center}
 
 /* 이론(PPT) 슬라이드 */
 .fes-th-lead{font-size:16px;line-height:1.7;color:#eaf1ff;border-left:3px solid ${C.neon};background:${C.neon}0e;padding:11px 15px;border-radius:0 9px 9px 0;margin-bottom:15px}
