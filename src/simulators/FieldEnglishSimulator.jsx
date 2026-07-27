@@ -23,6 +23,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
  * ====================================================================== */
 
 const THEMES = [
+  { id: 'overview', en: 'Course Map', ko: '강의 개요', icon: '🗺️', loop: 'Overview' },
   { id: 'equipment', en: 'Equipment HMI', ko: '가상 장비 조작', icon: '🖥️', loop: 'Operate' },
   { id: 'alarm', en: 'Alarm & Log', ko: '알람·로그 해석', icon: '🚨', loop: 'Interpret' },
   { id: 'drc', en: 'Design Rule Check', ko: 'DRC 오류 해석', icon: '📐', loop: 'Judge' },
@@ -793,6 +794,94 @@ function TaskCard({ title, children }) {
 }
 
 /* =========================================================================
+ * 개념 ⓪  Course Map — 강의자용 한눈에 보기 콘솔 (주차 대신 구조 중심)
+ * ====================================================================== */
+
+const LANE_A = [
+  { theme: 'equipment', icon: '🖥️', en: 'Equipment HMI', ko: '가상 장비 조작 · 영문 매뉴얼', wk: 'W2–5', terms: ['chamber', 'evacuate', 'interlock', 'set point'], tip: '메뉴별 영문 상태를 읽고 순서대로 운전' },
+  { theme: 'alarm', icon: '🚨', en: 'Alarm & Log', ko: '영문 알람·로그 → 원인·조치', wk: 'W6–7', terms: ['alarm', 'timeout', 'reflected power'], tip: '이상 장치·원인·조치 3/3 목표' },
+];
+const LANE_B = [
+  { theme: 'drc', icon: '📐', en: 'Design Rule Check', ko: 'Layer 배치 → DRC 오류 해석', wk: 'W9–12', terms: ['width', 'spacing', 'enclosure', 'violation'], tip: 'violation 문장 → 한 문장 요약 후 수정' },
+  { theme: 'lvs', icon: '🔗', en: 'LVS Compare', ko: '레이아웃 vs 회로도 비교', wk: 'W13', terms: ['mismatch', 'missing device', 'net'], tip: 'missing vs incorrect connection 구분' },
+];
+
+function NodeCard({ n, onOpen }) {
+  return (
+    <button className="fes-cm-node" onClick={() => onOpen(n.theme)}>
+      <div className="fes-cm-node-top">
+        <span className="fes-cm-ic">{n.icon}</span>
+        <div className="fes-cm-node-name"><b>{n.en}</b><span>{n.ko}</span></div>
+        <span className="fes-cm-wk">{n.wk}</span>
+      </div>
+      <div className="fes-cm-terms">{n.terms.map((t) => <span key={t} className="fes-cm-term">{t}</span>)}</div>
+      <div className="fes-cm-tip">👤 {n.tip}</div>
+      <div className="fes-cm-open">실습 열기 →</div>
+    </button>
+  );
+}
+
+function CourseMap({ onOpen }) {
+  return (
+    <div className="fes-cm">
+      <div className="fes-cm-phil">
+        <b>디자인 툴 사용법이 아니라, 영문을 읽고 판단하는 훈련.</b>
+        장비 운전·로그·매뉴얼이 <span className="fes-cm-hl">중심축</span>, 디자인(DRC/LVS)은 결과를 확인하는 <span className="fes-cm-hl">수단</span>.
+      </div>
+
+      {/* 4단계 루프 */}
+      <div className="fes-cm-loop">
+        {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (
+          <React.Fragment key={s}>
+            <div className="fes-cm-loop-chip"><span>{i + 1}</span>{s}</div>
+            {i < 3 && <span className="fes-cm-loop-ar">→</span>}
+          </React.Fragment>
+        ))}
+        <span className="fes-cm-loop-tag">매주 반복</span>
+      </div>
+
+      {/* 비중 막대 */}
+      <div className="fes-cm-emph">
+        <div className="fes-cm-emph-a">장비·공정 영어 (중심축) · 운전/로그/알람/PM</div>
+        <div className="fes-cm-emph-b">디자인 영어 (결과 확인) · DRC/LVS</div>
+      </div>
+
+      {/* 두 축 */}
+      <div className="fes-cm-lanes">
+        <div className="fes-cm-lane">
+          <div className="fes-cm-lane-h fes-a">① 장비·공정 축 — Operate &amp; Interpret</div>
+          {LANE_A.map((n) => <NodeCard key={n.theme} n={n} onOpen={onOpen} />)}
+        </div>
+        <div className="fes-cm-lane">
+          <div className="fes-cm-lane-h fes-b">② 디자인 축 — Read &amp; Judge</div>
+          {LANE_B.map((n) => <NodeCard key={n.theme} n={n} onOpen={onOpen} />)}
+        </div>
+      </div>
+
+      {/* 종합 → 보고 */}
+      <div className="fes-cm-integr">
+        <div className="fes-cm-integr-l">
+          <div className="fes-cm-integr-t">③ 종합 시나리오 <span className="fes-cm-wk">W14</span></div>
+          <div className="fes-cm-integr-d">장비 이상(압력·RF) → 식각 결과 비정상 → DRC width 오류 → 원인·조치 규명</div>
+        </div>
+        <span className="fes-cm-loop-ar big">→</span>
+        <button className="fes-cm-node fes-cm-report" onClick={() => onOpen('report')}>
+          <div className="fes-cm-node-top"><span className="fes-cm-ic">📝</span><div className="fes-cm-node-name"><b>Field Report</b><span>Problem·Observed·Cause·Action·Result</span></div></div>
+          <div className="fes-cm-open">보고서 열기 →</div>
+        </button>
+      </div>
+
+      {/* 평가 */}
+      <div className="fes-cm-assess">
+        <span className="fes-cm-assess-chip">중간고사 · W8 — 장비 구성/운전/로그/알람</span>
+        <span className="fes-cm-assess-chip">기말고사 · W15 — 로그·매뉴얼·DRC/LVS 종합 해석</span>
+        <span className="fes-cm-assess-note">※ 주차는 참고용 태그일 뿐, 수업은 위 4단계 루프로 진행</span>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================================
  * 메인 컴포넌트
  * ====================================================================== */
 
@@ -805,7 +894,7 @@ export default function FieldEnglishSimulator({
   hideOtherTabs = false,    // 규격: 그 개념만 노출
 }) {
   const first = THEME_IDS.includes(initialTheme) ? initialTheme
-    : THEME_IDS.includes(initialTab) ? initialTab : 'equipment';
+    : THEME_IDS.includes(initialTab) ? initialTab : 'overview';
   const [theme, setTheme] = useState(first);
   useEffect(() => { if (THEME_IDS.includes(initialTheme)) setTheme(initialTheme); }, [initialTheme]);
 
@@ -813,6 +902,7 @@ export default function FieldEnglishSimulator({
   const cur = THEMES.find((t) => t.id === theme) || THEMES[0];
 
   const Body = {
+    overview: <CourseMap onOpen={pick} />,
     equipment: <EquipmentHMI />, alarm: <AlarmLab />, drc: <DrcLab />, lvs: <LvsLab />, report: <ReportLab />,
   }[theme];
 
@@ -1001,6 +1091,46 @@ function FesStyles() {
 .fes-rubric{display:flex;align-items:center;gap:9px;font-size:12px;color:${C.dim}}
 .fes-rubric-bar{width:120px;height:7px;background:#0a1526;border-radius:20px;overflow:hidden}.fes-rubric-bar>div{height:100%;background:${C.emerald};transition:width .3s}
 .fes-mono{font-family:${C.mono};font-size:11px}
+
+/* Course Map (instructor console) */
+.fes-cm-phil{background:linear-gradient(180deg,#0d1a30,#0b1526);border:1px solid ${C.line2};border-left:3px solid ${C.cyan};border-radius:10px;padding:12px 15px;font-size:13px;line-height:1.7;color:${C.text}}
+.fes-cm-phil b{color:#e8eefc;display:block;margin-bottom:2px}
+.fes-cm-hl{color:${C.cyan};font-weight:700}
+.fes-cm-loop{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:14px 0}
+.fes-cm-loop-chip{display:flex;align-items:center;gap:7px;background:${C.panel};border:1px solid ${C.line2};border-radius:22px;padding:7px 14px;font-size:12.5px;font-weight:600;color:#e8eefc}
+.fes-cm-loop-chip span{display:inline-flex;width:19px;height:19px;border-radius:50%;background:${C.cyan};color:#04121a;font-family:${C.mono};font-size:11px;font-weight:700;align-items:center;justify-content:center}
+.fes-cm-loop-ar{color:${C.cyan};font-size:17px}.fes-cm-loop-ar.big{font-size:26px}
+.fes-cm-loop-tag{margin-left:auto;font-size:10px;letter-spacing:.6px;text-transform:uppercase;color:${C.dim};border:1px solid ${C.line2};border-radius:20px;padding:4px 10px}
+.fes-cm-emph{display:flex;gap:4px;margin-bottom:16px;font-size:11px;font-weight:600}
+.fes-cm-emph-a{flex:6;background:linear-gradient(90deg,${C.cyan}22,${C.cyan}11);border:1px solid ${C.cyan}44;color:#bfe9f5;border-radius:8px 3px 3px 8px;padding:9px 12px;text-align:center}
+.fes-cm-emph-b{flex:4;background:linear-gradient(90deg,${C.violet}18,${C.violet}0d);border:1px solid ${C.violet}44;color:#d9ccff;border-radius:3px 8px 8px 3px;padding:9px 12px;text-align:center}
+.fes-cm-lanes{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.fes-cm-lanes{grid-template-columns:1fr}}
+.fes-cm-lane{display:flex;flex-direction:column;gap:10px}
+.fes-cm-lane-h{font-family:${C.mono};font-size:12px;font-weight:700;letter-spacing:.4px;padding:8px 12px;border-radius:8px}
+.fes-cm-lane-h.fes-a{background:${C.cyan}14;color:${C.cyan};border:1px solid ${C.cyan}40}
+.fes-cm-lane-h.fes-b{background:${C.violet}14;color:${C.violet};border:1px solid ${C.violet}40}
+.fes-cm-node{display:block;width:100%;text-align:left;background:${C.panel};border:1px solid ${C.line2};border-radius:11px;padding:13px 15px;cursor:pointer;transition:.14s}
+.fes-cm-node:hover{border-color:${C.cyan};background:${C.panel2};transform:translateY(-1px);box-shadow:0 6px 18px #0007}
+.fes-cm-node-top{display:flex;align-items:center;gap:11px}
+.fes-cm-ic{font-size:26px}
+.fes-cm-node-name{display:flex;flex-direction:column;flex:1}
+.fes-cm-node-name b{color:#e8eefc;font-size:15px}
+.fes-cm-node-name span{color:${C.dim};font-size:11.5px}
+.fes-cm-wk{font-family:${C.mono};font-size:10.5px;color:${C.amber};border:1px solid ${C.amber}44;border-radius:20px;padding:2px 9px;flex:none}
+.fes-cm-terms{display:flex;flex-wrap:wrap;gap:5px;margin:9px 0}
+.fes-cm-term{font-family:${C.mono};font-size:10.5px;color:${C.text};background:#0b1424;border:1px solid ${C.line2};border-radius:5px;padding:2px 7px}
+.fes-cm-tip{font-size:11px;color:${C.dim};margin-bottom:7px}
+.fes-cm-open{font-size:11.5px;font-weight:700;color:${C.cyan}}
+.fes-cm-integr{display:flex;align-items:stretch;gap:12px;margin-top:14px;flex-wrap:wrap}
+.fes-cm-integr-l{flex:1;min-width:260px;background:linear-gradient(135deg,#12233b,#0e1a2e);border:1px solid ${C.emerald}44;border-radius:11px;padding:14px 16px}
+.fes-cm-integr-t{font-size:15px;font-weight:800;color:#e8eefc;display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.fes-cm-integr-d{font-size:12px;color:${C.text};line-height:1.6}
+.fes-cm-report{width:auto;min-width:230px;align-self:center;border-color:${C.emerald}55}
+.fes-cm-report:hover{border-color:${C.emerald}}
+.fes-cm-assess{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:14px;padding-top:12px;border-top:1px solid ${C.line}}
+.fes-cm-assess-chip{font-size:11.5px;color:#e8eefc;background:${C.panel};border:1px solid ${C.line2};border-radius:7px;padding:7px 12px}
+.fes-cm-assess-note{font-size:10.5px;color:${C.dim};margin-left:auto}
 `}</style>
   );
 }
