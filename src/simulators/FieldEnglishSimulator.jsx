@@ -68,6 +68,15 @@ const GLOSSARY = {
   violation: '위반 — 디자인 규칙(DRC)을 만족하지 못한 상태',
   mismatch: '불일치 — 레이아웃과 회로도(schematic)가 다른 상태',
   netlist: '넷리스트 — 소자와 연결 관계를 나열한 회로 정보',
+  // 약어(acronym) — 단독으로 쓰일 때 풀어서 설명
+  drc: 'DRC (Design Rule Check) — 레이아웃이 디자인 규칙을 지켰는지 자동 검사',
+  lvs: 'LVS (Layout Versus Schematic) — 레이아웃이 회로도(설계)와 같은지 비교',
+  mfc: 'MFC (Mass Flow Controller) — 가스 유량을 조절·제어하는 장치',
+  rf: 'RF (Radio Frequency) — 플라즈마를 만드는 고주파 전력',
+  hmi: 'HMI (Human-Machine Interface) — 장비를 조작·감시하는 화면',
+  pm: 'PM (Preventive Maintenance) — 고장을 예방하는 정기 점검·정비',
+  eds: 'EDS (Electrical Die Sorting) — 웨이퍼 상태에서 칩의 전기적 양·불량 선별',
+  sccm: 'sccm (standard cubic centimeter per minute) — 표준 상태 기준 분당 유량 단위',
 };
 
 function Term({ children, k }) {
@@ -882,8 +891,8 @@ const W1_SENT = [
 const W1_TOUR = [
   { ic: '🖥️', area: 'Equipment · 장비', en: '“Load the wafer and pump down.”', ko: '영어 지시로 장비를 운전' },
   { ic: '🚨', area: 'Alarm · 알람', en: '“Stopped by the interlock.”', ko: '영문 알람을 해석' },
-  { ic: '📐', area: 'DRC · 디자인 규칙', en: '“METAL1.SPACING violation.”', ko: '디자인 오류를 읽기' },
-  { ic: '🔗', area: 'LVS · 검증', en: '“Missing device in the layout.”', ko: '레이아웃 vs 회로도' },
+  { ic: '📐', area: 'DRC · 디자인 규칙 검사', en: '“METAL1.SPACING violation.”', ko: 'DRC = Design Rule Check · 디자인 오류 읽기' },
+  { ic: '🔗', area: 'LVS · 레이아웃 검증', en: '“Missing device in the layout.”', ko: 'LVS = Layout Versus Schematic · 레이아웃 vs 회로도' },
   { ic: '📝', area: 'Report · 보고', en: '“Problem / Cause / Action…”', ko: '영문 현장 보고서' },
 ];
 // 현장 영어가 나오는 3곳 — 매뉴얼 · 지시문 · HMI 화면
@@ -899,12 +908,12 @@ const W1_SRC_Q = [
 ];
 
 const W2_PARTS = [
-  { id: 'chamber', en: 'Chamber', ko: '챔버', desc: 'The vacuum space where the process happens.', x: 130, y: 60, w: 200, h: 150 },
-  { id: 'chuck', en: 'Wafer chuck', ko: '척 (웨이퍼 받침)', desc: 'Holds the wafer during the process.', x: 190, y: 170, w: 80, h: 18 },
-  { id: 'gas', en: 'Gas line (MFC)', ko: '가스 라인 / 질량유량제어기', desc: 'Delivers and controls the process gas flow.', x: 198, y: 12, w: 64, h: 26 },
-  { id: 'rf', en: 'RF generator', ko: 'RF 전원', desc: 'Supplies RF power to generate plasma.', x: 16, y: 150, w: 88, h: 34 },
-  { id: 'valve', en: 'Gate valve', ko: '게이트 밸브', desc: 'Opens or closes the path to the pump.', x: 204, y: 214, w: 52, h: 16 },
-  { id: 'pump', en: 'Turbo pump', ko: '터보 펌프', desc: 'Evacuates the chamber down to vacuum.', x: 190, y: 234, w: 80, h: 26 },
+  { id: 'chamber', en: 'Chamber', ko: '챔버', desc: 'The sealed vacuum space where the process (etching) takes place.', role: '공정이 일어나는 밀폐 진공 공간', x: 130, y: 60, w: 200, h: 150 },
+  { id: 'chuck', en: 'Wafer chuck', ko: '척 (웨이퍼 받침)', desc: 'Holds the wafer flat and often controls its temperature.', role: '웨이퍼를 고정하고 온도를 관리', x: 190, y: 170, w: 80, h: 18 },
+  { id: 'gas', en: 'Gas line (MFC)', ko: '가스 라인 / 질량유량제어기', desc: 'Delivers the process gas; the MFC sets the exact flow (sccm).', role: '공정 가스를 공급, MFC가 유량을 정밀 제어', x: 198, y: 12, w: 64, h: 26 },
+  { id: 'rf', en: 'RF generator', ko: 'RF 전원', desc: 'Supplies RF (Radio Frequency) power to ignite and sustain the plasma.', role: '플라즈마를 만들고 유지하는 고주파 전력', x: 16, y: 150, w: 88, h: 34 },
+  { id: 'valve', en: 'Gate valve', ko: '게이트 밸브', desc: 'Opens or closes the path between the chamber and the pump.', role: '챔버와 펌프 사이 통로를 여닫음', x: 204, y: 214, w: 52, h: 16 },
+  { id: 'pump', en: 'Turbo pump', ko: '터보 펌프', desc: 'Evacuates the chamber down to base pressure (high vacuum).', role: '챔버를 기준 압력(고진공)까지 배기', x: 190, y: 234, w: 80, h: 26 },
 ];
 const W2_QUIZ = [
   { prompt: '“The vacuum space where the process happens.”', opts: ['Chamber', 'Pump', 'Recipe'], ans: 0 },
@@ -942,6 +951,7 @@ function PartDiagram({ parts }) {
       <div className="fes-wk-partinfo">
         <div className="fes-wk-partinfo-en">{cur.en} <span className="fes-wk-partinfo-ko">{cur.ko}</span></div>
         <div className="fes-wk-partinfo-desc">{cur.desc}</div>
+        <div className="fes-wk-partinfo-role">🔧 {cur.role}</div>
         <div className="fes-wk-partinfo-hint">👆 도형을 클릭하면 부품별 영어 이름·설명이 바뀝니다.</div>
       </div>
     </div>
@@ -1064,6 +1074,7 @@ function DevicePanel() {
   return (
     <div>
       <p className="fes-wk-quiz-intro">실제 장비 계기판입니다. 각 <b>영어 라벨</b>이 무슨 값인지 익히세요. 아래 체크로 <b>비정상 상태</b>도 봅니다.</p>
+      <div className="fes-wk-acr" style={{ marginBottom: 12 }}><b>RF</b> = Radio Frequency(고주파 전력) · <b>FWD</b> Forward(전진파) · <b>REFL</b> Reflected(반사파)</div>
       <div className="fes-dev-grid">
         {ro.map((r) => (
           <div key={r.label} className="fes-dev-led">
@@ -1087,6 +1098,50 @@ function DevicePanel() {
       <label className="fes-inject" style={{ marginTop: 10 }}>
         <input type="checkbox" checked={ab} onChange={(e) => setAb(e.target.checked)} /> Simulate abnormal (비정상 상태 보기)
       </label>
+    </div>
+  );
+}
+
+// ===== 식각 장비 일러스트 (라벨 그림) =====
+function ChamberIllustration() {
+  return (
+    <div>
+      <p className="fes-wk-quiz-intro">식각 장비를 그림으로 봅니다. 각 <b>영어 라벨</b>이 어디를 가리키는지 눈에 익혀두세요.</p>
+      <svg viewBox="0 0 480 300" className="fes-illus-svg">
+        <defs>
+          <radialGradient id="fesPlasma" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stopColor="#a78bfa" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+        <rect width="480" height="300" fill="#0a0f1a" />
+        {/* chamber */}
+        <rect x="120" y="55" width="240" height="180" rx="12" fill="#0e1a2e" stroke={C.cyan} strokeWidth="2" />
+        <text x="130" y="76" fill={C.cyan} fontSize="12" fontFamily={C.mono}>Chamber · 챔버</text>
+        {/* gas inlet */}
+        <line x1="240" y1="22" x2="240" y2="55" stroke={C.cyan} strokeWidth="3" markerEnd="url(#fesArr)" />
+        <text x="252" y="30" fill="#bfe9f5" fontSize="12" fontFamily={C.mono}>Process gas · 가스 주입</text>
+        <defs><marker id="fesArr" markerWidth="9" markerHeight="9" refX="4" refY="7" orient="auto"><path d="M1 1L4 7L7 1" stroke={C.cyan} fill="none" strokeWidth="1.5" /></marker></defs>
+        {/* RF */}
+        <rect x="26" y="130" width="76" height="40" rx="6" fill="#132139" stroke={C.violet} strokeWidth="1.5" />
+        <text x="64" y="147" fill={C.violet} fontSize="12" fontFamily={C.mono} textAnchor="middle">RF power</text>
+        <text x="64" y="162" fill={C.dim} fontSize="10" fontFamily={C.mono} textAnchor="middle">고주파</text>
+        <line x1="102" y1="150" x2="185" y2="196" stroke={C.violet} strokeWidth="2" />
+        {/* plasma */}
+        <ellipse cx="240" cy="150" rx="92" ry="52" fill="url(#fesPlasma)" />
+        {[210, 230, 250, 270, 224, 256, 240].map((x, i) => (
+          <circle key={i} cx={x} cy={130 + (i % 3) * 18} r="3" fill="#c4b5fd" opacity="0.9" />
+        ))}
+        <text x="240" y="120" fill="#d9ccff" fontSize="12" fontFamily={C.mono} textAnchor="middle">Plasma · 플라즈마</text>
+        {/* chuck + wafer */}
+        <rect x="180" y="205" width="120" height="16" rx="3" fill="#1a2a44" stroke="#2a3d5f" />
+        <ellipse cx="240" cy="205" rx="66" ry="8" fill="#4f9dde" />
+        <text x="240" y="240" fill="#bfe9f5" fontSize="12" fontFamily={C.mono} textAnchor="middle">Wafer on chuck · 웨이퍼/척</text>
+        {/* pump */}
+        <line x1="240" y1="235" x2="240" y2="272" stroke={C.emerald} strokeWidth="3" markerEnd="url(#fesArrG)" />
+        <defs><marker id="fesArrG" markerWidth="9" markerHeight="9" refX="4" refY="7" orient="auto"><path d="M1 1L4 7L7 1" stroke={C.emerald} fill="none" strokeWidth="1.5" /></marker></defs>
+        <text x="252" y="268" fill={C.emerald} fontSize="12" fontFamily={C.mono}>To pump · 배기</text>
+      </svg>
     </div>
   );
 }
@@ -1116,17 +1171,61 @@ function CommTurn({ it, n }) {
 function CommCorner({ items }) {
   return <div className="fes-comm">{items.map((it, i) => <CommTurn key={i} it={it} n={i + 1} />)}</div>;
 }
+const COMM_C1 = [
+  { sit: '첫 출근, 외국인 엔지니어가 인사하며 담당 업무를 묻습니다.',
+    q: { en: 'Welcome! What will you be working on?', ko: '환영해요! 무슨 일을 맡게 되나요?' },
+    a: { en: "I'll operate the etch equipment and read the alarms.", ko: '식각 장비를 운전하고 알람을 확인합니다.' } },
+  { sit: '영어가 걱정된다고 하자 조언해 줍니다.',
+    q: { en: "Don't worry. Just read the screen, and ask if you're not sure.", ko: '걱정 마요. 화면을 읽고, 모르면 물어봐요.' },
+    a: { en: 'Okay, I will read the manual and the HMI carefully.', ko: '네, 매뉴얼과 HMI 화면을 잘 읽겠습니다.' } },
+];
+const COMM_C2 = [
+  { sit: '부품 이름을 확인합니다.',
+    q: { en: 'Which part controls the gas flow?', ko: '어느 부품이 가스 유량을 조절하죠?' },
+    a: { en: 'The MFC (Mass Flow Controller) controls the gas flow.', ko: 'MFC가 가스 유량을 조절합니다.' } },
+  { sit: '배기 장치를 묻습니다.',
+    q: { en: 'And what evacuates the chamber?', ko: '그럼 챔버를 배기하는 건 뭐죠?' },
+    a: { en: 'The turbo pump evacuates the chamber to base pressure.', ko: '터보 펌프가 챔버를 기준 압력까지 배기합니다.' } },
+];
 const COMM_C3 = [
-  {
-    sit: '운전을 시작하려는데 외국인 엔지니어가 상태를 묻습니다.',
+  { sit: '운전을 시작하려는데 외국인 엔지니어가 상태를 묻습니다.',
     q: { en: 'Is the chamber ready? Did you reach base pressure?', ko: '챔버 준비됐어요? 기준 압력에 도달했나요?' },
-    a: { en: 'Yes, base pressure is reached. The chamber is ready.', ko: '네, 기준 압력에 도달했습니다. 챔버 준비됐습니다.' },
-  },
-  {
-    sit: '다음 단계를 확인합니다.',
+    a: { en: 'Yes, base pressure is reached. The chamber is ready.', ko: '네, 기준 압력에 도달했습니다. 챔버 준비됐습니다.' } },
+  { sit: '다음 단계를 확인합니다.',
     q: { en: 'Good. Please start the gas and check the flow.', ko: '좋아요. 가스를 시작하고 유량을 확인해 주세요.' },
-    a: { en: 'Okay. The gas flow is 50 sccm and stable.', ko: '알겠습니다. 가스 유량 50 sccm, 안정적입니다.' },
-  },
+    a: { en: 'Okay. The gas flow is 50 sccm and stable.', ko: '알겠습니다. 가스 유량 50 sccm, 안정적입니다.' } },
+];
+const COMM_C4 = [
+  { sit: '알람이 떠서 상황을 공유합니다.',
+    q: { en: 'What alarm is on the screen?', ko: '화면에 무슨 알람이 떴어요?' },
+    a: { en: 'RF-204, high reflected power. The plasma failed to ignite.', ko: 'RF-204, 반사파 높음. 플라즈마 점화 실패입니다.' } },
+  { sit: '조치를 묻습니다.',
+    q: { en: 'What will you do first?', ko: '먼저 뭘 할 거예요?' },
+    a: { en: "I'll check the pressure and re-tune the matching network.", ko: '압력을 확인하고 매칭을 다시 맞추겠습니다.' } },
+];
+const COMM_C5 = [
+  { sit: 'DRC 결과를 공유합니다.',
+    q: { en: 'Did the layout pass DRC?', ko: '레이아웃이 DRC를 통과했어요?' },
+    a: { en: 'No, there is a spacing violation on METAL1.', ko: '아뇨, METAL1에 간격 위반이 있습니다.' } },
+  { sit: '수정 방법을 묻습니다.',
+    q: { en: 'How will you fix it?', ko: '어떻게 고칠 건가요?' },
+    a: { en: "I'll increase the spacing to meet the minimum.", ko: '최소 간격을 만족하도록 간격을 넓히겠습니다.' } },
+];
+const COMM_C6 = [
+  { sit: 'LVS 결과를 공유합니다.',
+    q: { en: 'Does the layout match the schematic?', ko: '레이아웃이 회로도와 일치해요?' },
+    a: { en: 'No, the NMOS device is missing in the layout.', ko: '아뇨, 레이아웃에 NMOS 소자가 빠졌습니다.' } },
+  { sit: '조치를 요청합니다.',
+    q: { en: 'Please add it and re-run LVS.', ko: '추가하고 LVS를 다시 돌려요.' },
+    a: { en: 'Okay, I will place the device and re-run LVS.', ko: '네, 소자를 배치하고 LVS를 다시 돌리겠습니다.' } },
+];
+const COMM_C7 = [
+  { sit: '종합 결과를 보고합니다.',
+    q: { en: 'Can you summarize the problem?', ko: '문제를 요약해 줄래요?' },
+    a: { en: 'The line width was too narrow due to unstable pressure and RF.', ko: '압력·RF 불안정으로 선폭이 너무 좁았습니다.' } },
+  { sit: '조치 후 결과를 묻습니다.',
+    q: { en: 'And the result after the fix?', ko: '조치 후 결과는요?' },
+    a: { en: 'The width returned to target, and DRC is clean now.', ko: '선폭이 목표로 돌아왔고, 이제 DRC는 깨끗합니다.' } },
 ];
 
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
@@ -1178,6 +1277,10 @@ const CHAPTERS = [
         ),
       },
       {
+        title: '식각 장비 한눈에 (그림)',
+        body: <ChamberIllustration />,
+      },
+      {
         title: '오늘의 생존 용어 (자료)',
         body: <GlossaryGrid intro="첫날은 이 정도만. 가장 자주 보는 기본 용어를 예문과 함께 익혀두세요." items={W1_GLOSSARY} />,
       },
@@ -1227,11 +1330,8 @@ const CHAPTERS = [
         body: <QuizBlock intro="위 세 문장을 보고 답하세요." questions={W1_SRC_Q} />,
       },
       {
-        title: '첫 쓰기 — 아주 짧게',
-        body: <WriteBlock
-          prompt={<span>HMI 화면에 띄울 <b>영어 지시문</b>을 한 문장으로:<br/><span className="fes-wr-ko">“압력을 확인하세요.”</span></span>}
-          hint="동사로 시작하는 명령문"
-          model="Check the pressure." />,
+        title: '의사소통 코너 — 첫 인사',
+        body: <CommCorner items={COMM_C1} />,
       },
       {
         title: '정리 — 오늘 한 것 & 앞으로',
@@ -1239,7 +1339,7 @@ const CHAPTERS = [
           <div>
             <ul className="fes-cb-summary">
               <li>이 책이 뭘 하는지, <b>4단계 반복 방식</b>을 이해했다.</li>
-              <li>현장 직무 · 생존 용어 · 실제 말투(대화)를 훑었다.</li>
+              <li>현장 직무 · 생존 용어 · 영어가 나오는 3곳(매뉴얼·지시문·HMI)을 훑었다.</li>
               <li>Chapter 2부터는 <b>한 주제씩 깊게</b> — 장비 → 운전 → 알람 → DRC → LVS → 종합 보고.</li>
             </ul>
             <div className="fes-cb-complete"><b>Day 1 완료 ✓</b> — 준비 끝. 이제 본격적으로 시작합니다.</div>
@@ -1299,17 +1399,8 @@ const CHAPTERS = [
         body: <QuizBlock intro="영어 설명을 읽고 어느 부품인지 고르세요." questions={W2_QUIZ} />,
       },
       {
-        title: '쓰기 ① 뜻 이해 — 우리말로 옮기기',
-        body: <WriteBlock
-          prompt={<span>매뉴얼 문장을 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“The turbo pump, isolated by the gate valve, evacuates the chamber.”</span></span>}
-          model="터보 펌프가 게이트 밸브로 (챔버와) 분리된 채, 챔버를 배기한다." />,
-      },
-      {
-        title: '쓰기 ② 영작 — 한 문장으로',
-        body: <WriteBlock
-          prompt={<span>아래 상황을 <b>영어 한 문장</b>으로 써보세요:<br/><span className="fes-wr-ko">“챔버 압력이 너무 높다.”</span></span>}
-          hint="주어 + be동사 + too + 형용사"
-          model="The chamber pressure is too high." />,
+        title: '의사소통 코너 — 부품 이름 묻고 답하기',
+        body: <CommCorner items={COMM_C2} />,
       },
       {
         title: '정리 — 이 챕터 핵심',
@@ -1317,8 +1408,8 @@ const CHAPTERS = [
           <div>
             <ul className="fes-cb-summary">
               <li>장비 6개 부품의 영어 이름·기능을 익혔다.</li>
-              <li>영문 매뉴얼을 읽고, 직접 장비를 운전했다.</li>
-              <li>매뉴얼 해석과 상태 영작을 연습했다.</li>
+              <li>구성도를 눌러 부품별 역할을 확인하고, 영문 매뉴얼을 읽었다.</li>
+              <li>외국인 엔지니어와 부품 이름을 영어로 주고받았다.</li>
             </ul>
             <div className="fes-cb-complete"><b>Chapter 2 완료 ✓</b> — 다음 챕터(운전·로그 읽기)에서 이어집니다.</div>
           </div>
@@ -1342,9 +1433,6 @@ const CHAPTERS = [
           <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>순서: <b>Load Wafer → Pump Down → Start Gas → Ignite Plasma → Start Process</b>. <b>Log</b> 메뉴에서 영어 로그를 읽으세요.</p>
           <EquipmentHMI />
         </div>) },
-      { title: '쓰기 — 로그 해석', body: <WriteBlock
-        prompt={<span>로그 문장을 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“Base pressure reached. Chamber is ready.”</span></span>}
-        model="기준 압력에 도달했다. 챔버가 준비됐다." /> },
       { title: '의사소통 코너 — 외국인 엔지니어와', body: <CommCorner items={COMM_C3} /> },
       { title: '정리 — 이 챕터 핵심', body: (
         <div><ul className="fes-cb-summary"><li>운전 동사(load·pump down·vent·ignite)를 익혔다.</li><li>장치 디스플레이(LED·진동)와 로그의 영어를 읽었다.</li><li>외국인 엔지니어와 운전 상황을 영어로 주고받았다.</li></ul>
@@ -1366,19 +1454,18 @@ const CHAPTERS = [
           <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>영문 알람과 로그를 읽고 <b>이상 장치 · 원인 · 조치</b>를 고르세요. 3케이스 모두 3/3 목표.</p>
           <AlarmLab />
         </div>) },
-      { title: '쓰기 — 조치 영작', body: <WriteBlock
-        prompt={<span>아래 조치를 <b>영어 한 문장</b>으로:<br/><span className="fes-wr-ko">“진공 밸브와 펌프를 점검하라.”</span></span>}
-        hint="Check the ..." model="Check the vacuum valve and the pump." /> },
+      { title: '의사소통 코너 — 알람 상황 보고', body: <CommCorner items={COMM_C4} /> },
       { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>알람·인터록·타임아웃 용어를 익혔다.</li><li>알람을 읽고 원인·조치를 판단했다.</li></ul>
+        <div><ul className="fes-cb-summary"><li>알람·인터록·타임아웃 용어를 익혔다.</li><li>알람을 읽고 원인·조치를 판단했다.</li><li>외국인 엔지니어에게 알람 상황을 영어로 보고했다.</li></ul>
         <div className="fes-cb-complete"><b>Chapter 4 완료 ✓</b></div></div>) },
     ],
   },
   {
-    id: 'c5', title: '디자인 규칙 · DRC',
+    id: 'c5', title: '디자인 규칙 · DRC (Design Rule Check)',
     slides: [
       { title: '현장 스토리 — 패턴이 규칙을 어겼다', body: (
         <div>
+          <div className="fes-wk-acr"><b>DRC = Design Rule Check</b> — 레이아웃이 디자인 규칙(선폭·간격 등)을 지켰는지 자동으로 검사하는 것.</div>
           <div className="fes-wk-story"><div className="fes-wk-story-ic">📐</div>
             <div>DRC 로그: “<i>METAL1.SPACING violation. Required 0.30, measured 0.18.</i>” — 무슨 뜻이고 어떻게 고칠까요?</div></div>
           <p className="fes-wk-p">디자인 규칙 용어를 익히고, 직접 패턴을 고쳐 <b>영문 DRC 오류</b>를 해석합니다.</p>
@@ -1389,19 +1476,18 @@ const CHAPTERS = [
           <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Width/Spacing 슬라이더를 조절하고 <b>Run DRC</b> → 영문 violation 로그를 읽고 규칙을 만족시키세요.</p>
           <DrcLab />
         </div>) },
-      { title: '쓰기 — violation 해석', body: <WriteBlock
-        prompt={<span>DRC 로그를 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“METAL1.SPACING violation. Required 0.30, measured 0.18 µm.”</span></span>}
-        model="Metal 1 간격 위반. 요구 0.30µm인데 실측 0.18µm이다 (간격이 좁다)." /> },
+      { title: '의사소통 코너 — DRC 결과 공유', body: <CommCorner items={COMM_C5} /> },
       { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>width·spacing·enclosure·violation 용어를 익혔다.</li><li>DRC 오류를 읽고 직접 수정했다.</li></ul>
+        <div><ul className="fes-cb-summary"><li>width·spacing·enclosure·violation 용어를 익혔다.</li><li>DRC 오류를 읽고 직접 수정했다.</li><li>외국인 엔지니어와 DRC 결과를 영어로 공유했다.</li></ul>
         <div className="fes-cb-complete"><b>Chapter 5 완료 ✓</b></div></div>) },
     ],
   },
   {
-    id: 'c6', title: 'LVS 검증',
+    id: 'c6', title: 'LVS (Layout Versus Schematic) 검증',
     slides: [
       { title: '현장 스토리 — 레이아웃 ≠ 회로도', body: (
         <div>
+          <div className="fes-wk-acr"><b>LVS = Layout Versus Schematic</b> — 그린 레이아웃이 원래 회로도(설계)와 같은지 비교·검증하는 것.</div>
           <div className="fes-wk-story"><div className="fes-wk-story-ic">🔗</div>
             <div>LVS 리포트: “<i>ERROR: Missing device — NMOS not found in layout.</i>” — 레이아웃이 회로도와 다릅니다.</div></div>
           <p className="fes-wk-p">LVS 용어를 익히고, 영문 <b>mismatch</b> 메시지로 무엇이 다른지 판단합니다.</p>
@@ -1412,11 +1498,9 @@ const CHAPTERS = [
           <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Schematic(정답) vs Layout(추출)을 보고, 영문 리포트로 <b>missing device / incorrect connection</b>을 판단하세요.</p>
           <LvsLab />
         </div>) },
-      { title: '쓰기 — mismatch 해석', body: <WriteBlock
-        prompt={<span>LVS 오류를 <b>우리말로</b> 옮겨 써보세요:<br/><span className="fes-wr-en">“The NMOS transistor is missing in the layout.”</span></span>}
-        model="레이아웃에 NMOS 트랜지스터가 빠져 있다." /> },
+      { title: '의사소통 코너 — LVS 결과 공유', body: <CommCorner items={COMM_C6} /> },
       { title: '정리 — 이 챕터 핵심', body: (
-        <div><ul className="fes-cb-summary"><li>mismatch·missing device·incorrect connection을 익혔다.</li><li>LVS 리포트를 읽고 차이를 판단했다.</li></ul>
+        <div><ul className="fes-cb-summary"><li>mismatch·missing device·incorrect connection을 익혔다.</li><li>LVS 리포트를 읽고 차이를 판단했다.</li><li>외국인 엔지니어와 LVS 결과를 영어로 공유했다.</li></ul>
         <div className="fes-cb-complete"><b>Chapter 6 완료 ✓</b></div></div>) },
     ],
   },
@@ -1434,6 +1518,7 @@ const CHAPTERS = [
           <p className="fes-wk-hint" style={{ margin: '0 0 12px' }}>Problem / Observed log / Possible cause / Corrective action / Result 5칸을 <b>영어로</b> 작성하고 모범답안과 비교하세요.</p>
           <ReportLab />
         </div>) },
+      { title: '의사소통 코너 — 종합 결과 보고', body: <CommCorner items={COMM_C7} /> },
       { title: '수료 — 이 책을 마치며', body: (
         <div><ul className="fes-cb-summary"><li>용어 → 장비 → 운전·로그 → 알람 → DRC → LVS → 종합 보고까지 마쳤다.</li><li>이제 현장 영어를 <b>읽고 → 판단하고 → 보고</b>할 수 있다.</li></ul>
         <div className="fes-cb-complete">🎉 <b>모든 챕터 완료!</b> 진도 100%.</div></div>) },
@@ -1500,8 +1585,8 @@ const CM_PART_EQUIP = [
   { ch: 'CH 4', t: '알람과 트러블슈팅', d: 'HMI 영문 알람 → 원인·조치 판단' },
 ];
 const CM_PART_DESIGN = [
-  { ch: 'CH 5', t: '디자인 규칙 · DRC', d: '영문 DRC 오류 메시지 해석·수정' },
-  { ch: 'CH 6', t: 'LVS 검증', d: '영문 mismatch 메시지로 차이 판단' },
+  { ch: 'CH 5', t: '디자인 규칙 · DRC', d: 'DRC (Design Rule Check) — 영문 오류 메시지 해석·수정' },
+  { ch: 'CH 6', t: 'LVS 검증', d: 'LVS (Layout Versus Schematic) — 영문 mismatch 판단' },
 ];
 
 function CourseMap() {
@@ -1968,6 +2053,12 @@ function FesStyles() {
 .fes-comm-you{background:${C.cyan}12;border:1px solid ${C.cyan}44;border-radius:10px 10px 3px 10px;padding:10px 13px;margin-top:10px}
 .fes-comm-en{font-size:14.5px;color:#e8f6ff;line-height:1.5}
 .fes-comm-ko{font-size:11.5px;color:${C.dim};margin-top:3px}
+
+/* 약어 설명 박스 */
+.fes-wk-acr{background:${C.violet}12;border:1px solid ${C.violet}44;border-radius:8px;padding:9px 12px;font-size:12.5px;color:#d9ccff;line-height:1.6;margin-bottom:12px}
+.fes-wk-acr b{color:${C.violet};font-family:${C.mono}}
+.fes-illus-svg{width:100%;border:1px solid ${C.line};border-radius:10px;display:block;background:#0a0f1a;margin-top:4px}
+.fes-wk-partinfo-role{font-size:12.5px;color:${C.emerald};margin-top:8px}
 `}</style>
   );
 }
