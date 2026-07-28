@@ -926,36 +926,110 @@ const W2_QUIZ = [
   { prompt: '“Holds the wafer during the process.”', opts: ['Wafer chuck', 'Gate valve', 'Chamber'], ans: 0 },
 ];
 
-function PartDiagram({ parts }) {
-  const [sel, setSel] = useState(parts[0].id);
-  const cur = parts.find((p) => p.id === sel);
+const PART_SPEC = [
+  { id: 'gas', n: 1, at: [230, 94], en: 'Gas inlet (showerhead)', ko: '가스 주입구·샤워헤드', desc: 'Delivers process gas uniformly through the showerhead. The MFC sets the exact flow.' },
+  { id: 'chamber', n: 2, at: [120, 84], en: 'Chamber', ko: '챔버', desc: 'The sealed vacuum space where etching takes place.' },
+  { id: 'plasma', n: 3, at: [230, 158], en: 'Plasma', ko: '플라즈마', desc: 'Ionized gas that etches the wafer surface, driven by RF power.' },
+  { id: 'chuck', n: 4, at: [230, 238], en: 'Wafer chuck (ESC)', ko: '정전 척·웨이퍼', desc: 'Holds the wafer flat and controls its temperature during the process.' },
+  { id: 'rf', n: 5, at: [54, 202], en: 'RF power / match', ko: 'RF 전원·매칭', desc: 'Supplies RF power (through the matching network) to ignite and sustain the plasma.' },
+  { id: 'pump', n: 6, at: [288, 296], en: 'Turbo pump / gate valve', ko: '터보 펌프·게이트 밸브', desc: 'Evacuates the chamber to base pressure; the gate valve isolates the pump.' },
+];
+
+function PartDiagram() {
+  const [sel, setSel] = useState('chamber');
+  const cur = PART_SPEC.find((p) => p.id === sel);
+  const hl = (id) => (sel === id ? C.neon : '#3a4d6a');
+  const hw = (id) => (sel === id ? 2.6 : 1.4);
   return (
     <div className="fes-wk-diag">
-      <svg viewBox="0 0 460 272" className="fes-wk-svg">
-        <rect width="460" height="272" fill="#0a0f1a" />
-        <line x1="230" y1="38" x2="230" y2="60" stroke="#3a4d6a" strokeWidth="4" />
-        <line x1="104" y1="167" x2="190" y2="179" stroke="#3a4d6a" strokeWidth="4" />
-        <line x1="230" y1="210" x2="230" y2="214" stroke="#3a4d6a" strokeWidth="6" />
-        <line x1="230" y1="230" x2="230" y2="234" stroke="#3a4d6a" strokeWidth="6" />
-        <ellipse cx="230" cy="140" rx="70" ry="46" fill="#a78bfa" opacity="0.18" />
-        {parts.map((p) => {
-          const on = sel === p.id;
-          return (
+      <div className="fes-pd-wrap">
+        <svg viewBox="0 0 480 340" className="fes-illus-svg">
+          <defs>
+            <linearGradient id="pdSteel" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#1c2740" /><stop offset="1" stopColor="#0e1626" />
+            </linearGradient>
+            <linearGradient id="pdChuck" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#2a3856" /><stop offset="1" stopColor="#16203a" />
+            </linearGradient>
+            <radialGradient id="pdPlasma" cx="50%" cy="45%" r="55%">
+              <stop offset="0" stopColor="#c4b5fd" stopOpacity="0.9" />
+              <stop offset="45%" stopColor="#a78bfa" stopOpacity="0.35" />
+              <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
+            </radialGradient>
+            <linearGradient id="pdWafer" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stopColor="#2f6bff" /><stop offset="1" stopColor="#22d3ee" />
+            </linearGradient>
+            <marker id="pdArr" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M1 1L5 8L9 1" fill="none" stroke={C.neon} strokeWidth="1.6" /></marker>
+            <marker id="pdArrG" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M1 1L5 8L9 1" fill="none" stroke={C.emerald} strokeWidth="1.6" /></marker>
+          </defs>
+          <rect width="480" height="340" rx="10" fill="#080c15" />
+          <text x="20" y="26" fill={C.dim} fontSize="11" fontFamily={C.mono} letterSpacing="1.5">PLASMA ETCH CHAMBER — CROSS SECTION</text>
+
+          {/* gas line + plenum */}
+          <line x1="230" y1="46" x2="230" y2="78" stroke={hl('gas')} strokeWidth={hw('gas') + 1} markerEnd="url(#pdArr)" />
+          <rect x="204" y="36" width="52" height="12" rx="2" fill="#16203a" stroke={hl('gas')} strokeWidth={hw('gas')} onClick={() => setSel('gas')} style={{ cursor: 'pointer' }} />
+
+          {/* chamber body */}
+          <rect x="86" y="66" width="250" height="210" rx="16" fill="url(#pdSteel)" stroke={hl('chamber')} strokeWidth={hw('chamber') + 0.6} onClick={() => setSel('chamber')} style={{ cursor: 'pointer' }} />
+          <rect x="96" y="76" width="230" height="190" rx="10" fill="none" stroke="#2a3a58" strokeWidth="1" />
+
+          {/* showerhead */}
+          <g onClick={() => setSel('gas')} style={{ cursor: 'pointer' }}>
+            <rect x="120" y="86" width="180" height="14" rx="3" fill="#1b2740" stroke={hl('gas')} strokeWidth={hw('gas')} />
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => <circle key={k} cx={132 + k * 17} cy={104} r="2.1" fill={C.neon} opacity="0.75" />)}
+          </g>
+
+          {/* plasma */}
+          <ellipse cx="230" cy="158" rx="94" ry="56" fill="url(#pdPlasma)" onClick={() => setSel('plasma')} style={{ cursor: 'pointer' }} />
+          {[[205, 140], [230, 132], [255, 142], [218, 165], [245, 168], [230, 152]].map(([x, yy], i) => <circle key={i} cx={x} cy={yy} r="2.4" fill="#ddd6fe" opacity="0.9" />)}
+          {sel === 'plasma' && <ellipse cx="230" cy="158" rx="98" ry="60" fill="none" stroke={C.neon} strokeWidth="1.4" strokeDasharray="5 4" />}
+
+          {/* chuck + wafer */}
+          <g onClick={() => setSel('chuck')} style={{ cursor: 'pointer' }}>
+            <path d="M168 258 L176 224 L284 224 L292 258 Z" fill="url(#pdChuck)" stroke={hl('chuck')} strokeWidth={hw('chuck')} />
+            <ellipse cx="230" cy="224" rx="58" ry="8" fill="url(#pdWafer)" />
+            <ellipse cx="230" cy="224" rx="58" ry="8" fill="none" stroke="#bfe9f5" strokeWidth="0.8" opacity="0.6" />
+          </g>
+
+          {/* RF box + cable */}
+          <g onClick={() => setSel('rf')} style={{ cursor: 'pointer' }}>
+            <rect x="22" y="216" width="64" height="40" rx="7" fill="#101a30" stroke={hl('rf')} strokeWidth={hw('rf')} />
+            <text x="54" y="234" textAnchor="middle" fill={sel === 'rf' ? C.neon : C.violet} fontSize="12" fontFamily={C.mono} fontWeight="700">RF</text>
+            <text x="54" y="248" textAnchor="middle" fill={C.dim} fontSize="9" fontFamily={C.mono}>MATCH</text>
+            <path d="M86 232 C 120 232 140 240 168 244" fill="none" stroke={hl('rf')} strokeWidth={hw('rf')} />
+          </g>
+
+          {/* gate valve + turbo pump */}
+          <g onClick={() => setSel('pump')} style={{ cursor: 'pointer' }}>
+            <line x1="230" y1="276" x2="230" y2="292" stroke={hl('pump')} strokeWidth={hw('pump') + 2} />
+            <rect x="206" y="286" width="48" height="12" rx="2" fill="#16203a" stroke={hl('pump')} strokeWidth={hw('pump')} />
+            <rect x="196" y="300" width="68" height="30" rx="7" fill="#101a30" stroke={hl('pump')} strokeWidth={hw('pump')} />
+            <text x="230" y="319" textAnchor="middle" fill={sel === 'pump' ? C.neon : C.emerald} fontSize="11" fontFamily={C.mono} fontWeight="700">TURBO PUMP</text>
+            <line x1="290" y1="315" x2="330" y2="315" stroke={C.emerald} strokeWidth="2" markerEnd="url(#pdArrG)" transform="rotate(90 290 315)" />
+          </g>
+
+          {/* number badges */}
+          {PART_SPEC.map((p) => (
             <g key={p.id} onClick={() => setSel(p.id)} style={{ cursor: 'pointer' }}>
-              <rect x={p.x} y={p.y} width={p.w} height={p.h} rx="6"
-                fill={p.id === 'chamber' ? 'none' : on ? `${C.cyan}22` : '#0f1d33'}
-                stroke={on ? C.cyan : '#2a3d5f'} strokeWidth={on ? 3 : 1.5} />
-              <text x={p.x + p.w / 2} y={p.y + p.h / 2 + 4} textAnchor="middle" fontSize="12"
-                fontFamily={C.mono} fill={on ? C.cyan : C.dim}>{p.en}</text>
+              <circle cx={p.at[0]} cy={p.at[1]} r="11" fill={sel === p.id ? C.elec : '#0b1220'} stroke={sel === p.id ? C.neon : '#4a5a75'} strokeWidth="1.5" />
+              <text x={p.at[0]} y={p.at[1] + 4} textAnchor="middle" fill={sel === p.id ? '#fff' : '#9fb3c8'} fontSize="11" fontFamily={C.mono} fontWeight="700">{p.n}</text>
             </g>
-          );
-        })}
-      </svg>
+          ))}
+        </svg>
+        {/* legend */}
+        <div className="fes-pd-legend">
+          {PART_SPEC.map((p) => (
+            <button key={p.id} onClick={() => setSel(p.id)} className={`fes-pd-leg ${sel === p.id ? 'on' : ''}`}>
+              <span className="fes-pd-num">{p.n}</span>
+              <span><b>{p.en}</b><span className="fes-pd-ko">{p.ko}</span></span>
+            </button>
+          ))}
+        </div>
+      </div>
       <div className="fes-wk-partinfo">
         <div className="fes-wk-partinfo-en">{cur.en} <span className="fes-wk-partinfo-ko">{cur.ko}</span></div>
         <div className="fes-wk-partinfo-desc">{cur.desc}</div>
-        <div className="fes-wk-partinfo-role">🔧 {cur.role}</div>
-        <div className="fes-wk-partinfo-hint">👆 도형을 클릭하면 부품별 영어 이름·설명이 바뀝니다.</div>
+        <div className="fes-wk-partinfo-hint">👆 그림의 번호나 아래 목록을 클릭하면 부품이 강조됩니다.</div>
       </div>
     </div>
   );
@@ -1758,8 +1832,16 @@ function FesStyles() {
 .fes-wk-role-h span{font-size:22px}
 .fes-wk-role-en{font-size:12.5px;color:${C.text};line-height:1.6;margin-bottom:8px}
 .fes-wk-role-ko{font-size:11.5px;color:${C.dim};border-top:1px solid ${C.line};padding-top:8px}
-.fes-wk-diag{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;align-items:center}
-@media(max-width:600px){.fes-wk-diag{grid-template-columns:1fr}}
+.fes-wk-diag{display:flex;flex-direction:column;gap:12px}
+.fes-pd-wrap{display:grid;grid-template-columns:1.55fr 1fr;gap:14px;align-items:start}
+@media(max-width:640px){.fes-pd-wrap{grid-template-columns:1fr}}
+.fes-pd-legend{display:flex;flex-direction:column;gap:7px}
+.fes-pd-leg{display:flex;align-items:center;gap:11px;text-align:left;background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:8px 11px;cursor:pointer;transition:.12s}
+.fes-pd-leg:hover{border-color:${C.neon}88}
+.fes-pd-leg.on{border-color:${C.neon};background:${C.neon}14}
+.fes-pd-num{width:22px;height:22px;border-radius:50%;background:${C.elec};color:#fff;font-family:${C.mono};font-size:12px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.fes-pd-leg b{color:#e8f6ff;font-size:13px}
+.fes-pd-ko{display:block;color:${C.dim};font-size:11px;margin-top:1px}
 .fes-wk-svg{width:100%;border:1px solid ${C.line};border-radius:10px;display:block}
 .fes-wk-partinfo{background:${C.panel};border:1px solid ${C.line2};border-left:3px solid ${C.cyan};border-radius:10px;padding:14px}
 .fes-wk-partinfo-en{font-size:17px;font-weight:800;color:${C.cyan}}

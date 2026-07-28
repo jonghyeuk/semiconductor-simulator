@@ -8,7 +8,7 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🏭",
     "title": "첫 출근 — 반도체 라인에 서다",
-    "text": "여러분은 오늘 반도체 공장(Fab)에 첫 출근했다. 방진복을 입고 클린룸에 들어서자 커다란 은색 장비들이 줄지어 있다. 선임이 다가와 영어로 말한다. **\"This is the etch chamber. Check the vacuum before you load the wafer.\"** 무슨 뜻인지 몰라 당황했다. 이 과목은 바로 이런 순간, 현장에서 실제로 쓰는 **직무 영어**를 익히기 위한 것이다. 장비(Equipment), 알람(Alarm), 설계 검증(DRC/LVS), 보고서(Report)까지 12주 동안 하나씩 배운다."
+    "text": "여러분은 오늘 반도체 공장(Fab)에 첫 출근했다. 방진복을 입고 클린룸에 들어서자 커다란 은색 장비들이 줄지어 있다. 선임이 다가와 영어로 말한다. **\"This is the etch chamber. Check the vacuum before you load the wafer.\"** 무슨 뜻인지 몰라 당황했다. 이 과목은 바로 이런 순간, 현장에서 실제로 쓰는 **직무 영어**를 익히기 위한 것이다. 장비(Equipment), 알람(Alarm), 설계 검증(DRC/LVS), 보고서(Report)까지 여러 챕터에 걸쳐 하나씩 배운다."
    },
    {
     "type": "read",
@@ -17,7 +17,7 @@ export const CONTENT_CHAPTERS = [
     "paras": [
      "이 과목은 반도체 현장에서 실제로 쓰이는 영어를 다룬다. 문법 시험용 영어가 아니라, 장비 화면(HMI)에 뜨는 문장, 매뉴얼 지시문, 외국인 엔지니어와의 짧은 대화처럼 '바로 써먹는' 영어다.",
      "반도체 직무는 크게 세 갈래로 나뉜다. 첫째 장비·공정(Equipment/Process) 직무는 장비를 운전하고 공정을 관리한다. 둘째 설계(Design) 직무는 회로와 레이아웃을 그리고 검증한다. 셋째 품질·분석 직무는 불량을 찾고 보고서를 쓴다. 어느 직무든 영어 용어와 문장을 피할 수 없다.",
-     "매주 우리는 짧은 이론(read)으로 개념을 잡고, 용어(glossary)를 외우고, 실제 매뉴얼 문장(manual)을 해석하고, 시뮬레이터(sim)로 장비를 조작해 본다. 오늘 1주차는 첫날인 만큼 각 분야를 넓게 맛본다."
+     "매주 우리는 짧은 이론(read)으로 개념을 잡고, 용어(glossary)를 외우고, 실제 매뉴얼 문장(manual)을 해석하고, 시뮬레이터(sim)로 장비를 조작해 본다. 오늘 CH 1는 첫날인 만큼 각 분야를 넓게 맛본다."
     ]
    },
    {
@@ -403,7 +403,7 @@ export const CONTENT_CHAPTERS = [
      "핵심 용어: wafer, chamber, vacuum, recipe, process, etch, deposition, layer, load/unload.",
      "앞으로 배울 분야: 장비(HMI), 알람, DRC/LVS(설계 검증), 보고서. 알람 문장은 '문제 + 조치' 구조로 읽는다."
     ],
-    "done": "**1주 완료 ✓** — 첫날 기본 용어와 각 분야 맛보기를 마쳤다."
+    "done": "**Chapter 1 완료 ✓** — 첫날 기본 용어와 각 분야 맛보기를 마쳤다."
    }
   ]
  },
@@ -771,7 +771,7 @@ export const CONTENT_CHAPTERS = [
      "부품 이름을 알면 영어 로그·알람에서 문제 위치를 바로 찾을 수 있다.",
      "MFC=가스 유량 제어(sccm), RF=플라즈마용 고주파 전력."
     ],
-    "done": "**2주 완료 ✓** — 장비 구성요소의 영어 이름과 역할을 익혔다."
+    "done": "**Chapter 2 완료 ✓** — 장비 구성요소의 영어 이름과 역할을 익혔다."
    }
   ]
  },
@@ -1188,7 +1188,7 @@ export const CONTENT_CHAPTERS = [
      "시동 순서 Load → Pump Down → Start Gas → Ignite → Process 를 장비 HMI로 직접 조작했다.",
      "SOP(작업절차서)와 Log 메뉴의 영어 문장, 오류(Error)·경고(Warning) 줄을 읽는 법을 배웠다."
     ],
-    "done": "**3주 완료 ✓** — 이제 영어 SOP 순서대로 장비를 운전할 수 있다."
+    "done": "**Chapter 3 완료 ✓** — 이제 영어 SOP 순서대로 장비를 운전할 수 있다."
    }
   ]
  },
@@ -1597,7 +1597,7 @@ export const CONTENT_CHAPTERS = [
      "devicePanel 로 계기판(LED·숫자)을 읽고, equipment HMI 로그로 값 변화를 확인한다.",
      "오류 메시지: Base pressure not reached / Gas flow out of range / Leak detected 를 해석할 수 있다."
     ],
-    "done": "**4주 완료 ✓** — 이제 진공·가스 로그를 영어로 읽고 set point 와 actual 을 비교할 수 있다."
+    "done": "**Chapter 4 완료 ✓** — 이제 진공·가스 로그를 영어로 읽고 set point 와 actual 을 비교할 수 있다."
    }
   ]
  },
@@ -1990,7 +1990,7 @@ export const CONTENT_CHAPTERS = [
      "Forward power 는 높고 Reflected power 는 낮아야 정상 — matching 이 정합을 맞춘다.",
      "Reflected power 가 높으면 RF-204 같은 반사파 알람이 뜬다. 로그를 읽고 \"Reflected is high, matching failed\" 처럼 영어로 보고할 수 있다."
     ],
-    "done": "**5주 완료 ✓** — 플라즈마 운전 변수와 반사파 알람을 영어로 다룰 수 있다."
+    "done": "**Chapter 5 완료 ✓** — 플라즈마 운전 변수와 반사파 알람을 영어로 다룰 수 있다."
    }
   ]
  },
@@ -2410,7 +2410,7 @@ export const CONTENT_CHAPTERS = [
      "등급을 구분한다: warning(노랑, 지켜봄) < alarm(빨강, 즉시 조치) / interlock(강제 정지, 혼자 우회 금지).",
      "핵심 케이스: VAC-101 진공 실패→도어·펌프 확인, RF-204 반사 전력 높음→매칭·압력 확인, GAS-330 유량 타임아웃→가스 라인·MFC 확인. 원인을 먼저 파악하고 조치한다."
     ],
-    "done": "**6주 완료 ✓** — 영문 알람을 읽고 원인과 조치를 스스로 고를 수 있다."
+    "done": "**Chapter 6 완료 ✓** — 영문 알람을 읽고 원인과 조치를 스스로 고를 수 있다."
    }
   ]
  },
@@ -2852,7 +2852,7 @@ export const CONTENT_CHAPTERS = [
      "핵심 동사 5개: inspect(점검) · clean(청소) · replace(교체) · calibrate(교정) · tighten(조이기).",
      "영문 점검표는 각 항목을 확인·기록하고 마지막에 서명(sign)한다. OK는 정상, NG/out of range는 이상."
     ],
-    "done": "**7주 완료 ✓** — 이제 영문 PM 매뉴얼과 점검표를 읽고 작업 순서를 따라갈 수 있다."
+    "done": "**Chapter 7 완료 ✓** — 이제 영문 PM 매뉴얼과 점검표를 읽고 작업 순서를 따라갈 수 있다."
    }
   ]
  },
@@ -2865,7 +2865,7 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "📝",
     "title": "중간 점검 안내",
-    "text": "1~7주에 배운 **장비 구성 · 운전 절차 · 로그 값 · 알람 해석**을 확인합니다. 영어 문장과 용어를 읽고 답하세요."
+    "text": "앞 챕터(CH 1~7)에서 배운 **장비 구성 · 운전 절차 · 로그 값 · 알람 해석**을 확인합니다. 영어 문장과 용어를 읽고 답하세요."
    },
    {
     "type": "quiz",
@@ -3008,7 +3008,7 @@ export const CONTENT_CHAPTERS = [
     "title": "중간 점검 정리",
     "points": [
      "장비 구성 · 운전 · 로그 · 알람 영어를 점검했다.",
-     "9주부터는 디자인(Layer·DRC·LVS)으로 넘어간다."
+     "다음 챕터(CH 9)부터는 디자인(Layer·DRC·LVS)으로 넘어간다."
     ],
     "done": "**중간 점검 완료 ✓**"
    }
@@ -3421,7 +3421,7 @@ export const CONTENT_CHAPTERS = [
      "각 Layer 는 공정 한 단계의 결과이고, 레이아웃(Layout)은 그 층들을 색 도형으로 그린 설계도다.",
      "DRC(디자인 규칙 검사)와 LVS(레이아웃-회로도 비교)로 레이아웃 오류를 미리 잡는다. 영문 오류는 Layer 이름 + 규칙 단어(spacing, width, overlap)로 읽는다."
     ],
-    "done": "**9주 완료 ✓** — 단면도로 Well·Active·Poly·Implant·Contact·Metal 영어 이름을 익혔다."
+    "done": "**Chapter 9 완료 ✓** — 단면도로 Well·Active·Poly·Implant·Contact·Metal 영어 이름을 익혔다."
    }
   ]
  },
@@ -3844,7 +3844,7 @@ export const CONTENT_CHAPTERS = [
      "핵심 규칙 단어 6개: width(폭), spacing(간격), overlap(겹침), enclosure(감쌈), minimum(최소), maximum(최대).",
      "규칙 문장 패턴 \"must be at least/at most … um\" 과 에러 로그 \"below minimum / exceeds maximum\" 만 읽으면 어디를 고칠지 알 수 있다."
     ],
-    "done": "**10주 완료 ✓** — Design Rule 영어 문장과 DRC 에러를 읽고 고칠 수 있다."
+    "done": "**Chapter 10 완료 ✓** — Design Rule 영어 문장과 DRC 에러를 읽고 고칠 수 있다."
    }
   ]
  },
@@ -4238,7 +4238,7 @@ export const CONTENT_CHAPTERS = [
      "선폭(width)과 간격(spacing)이 최소값 이상이어야 규칙을 통과(pass)한다.",
      "DRC(Design Rule Check)는 위반(violation)을 빨간색으로 알려주고, 슬라이더로 값을 조절해 clean 상태로 만든다."
     ],
-    "done": "**11주 완료 ✓** — 규칙을 지키면 초록, 어기면 빨강. 슬라이더로 정상/위반을 직접 비교했다."
+    "done": "**Chapter 11 완료 ✓** — 규칙을 지키면 초록, 어기면 빨강. 슬라이더로 정상/위반을 직접 비교했다."
    }
   ]
  },
@@ -4679,7 +4679,7 @@ export const CONTENT_CHAPTERS = [
      "대표 오류 3종: minimum width(선폭 부족), insufficient spacing(간격 부족), enclosure error(덮임 부족).",
      "영문 로그에서 오류 종류·위치(coordinate)·규칙 값을 읽으면 수정 방향이 나온다. 다 고치면 'DRC clean'."
     ],
-    "done": "**12주 완료 ✓** — 영문 DRC violation 로그를 읽고 오류를 찾아 수정할 수 있다."
+    "done": "**Chapter 12 완료 ✓** — 영문 DRC violation 로그를 읽고 오류를 찾아 수정할 수 있다."
    }
   ]
  },
@@ -5118,7 +5118,7 @@ export const CONTENT_CHAPTERS = [
      "대표 오류는 mismatch, missing device, incorrect connection이며 net 단위로 원인을 찾는다.",
      "로그 문장을 읽고 오류 유형을 판단해 MATCH(불일치 0)가 될 때까지 수정·재검사한다."
     ],
-    "done": "**13주 완료 ✓** — 이제 LVS 로그를 읽고 missing device와 incorrect connection을 구분할 수 있다."
+    "done": "**Chapter 13 완료 ✓** — 이제 LVS 로그를 읽고 missing device와 incorrect connection을 구분할 수 있다."
    }
   ]
  },
@@ -5553,7 +5553,7 @@ export const CONTENT_CHAPTERS = [
      "equipment로 장비 값을 확인하고, drc로 오류를 세고, report로 다섯 칸을 채워 영어로 보고한다.",
      "핵심 표현: out of spec(규격 이탈), root cause(근본 원인), on hold(정지), DRC passed(검사 통과)."
     ],
-    "done": "**14주 완료 ✓** — 장비·공정·디자인을 하나로 묶어 영문 현장 보고서를 완성했다."
+    "done": "**Chapter 14 완료 ✓** — 장비·공정·디자인을 하나로 묶어 영문 현장 보고서를 완성했다."
    }
   ]
  },
