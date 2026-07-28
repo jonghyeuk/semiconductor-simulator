@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>현장 실무영어 · 표준 실무</title>
+<link rel="stylesheet" href="deck-base.css?v=9"/>
+<style>
+:root{ --ac:#34e3d4; }
+.fe-h1{font-size:56px;font-weight:800;line-height:1.1;margin:0 0 14px}
+.fe-sub{font-size:26px;color:#9fb3c8;font-weight:400}
+.fe-en{color:#e8f6ff;font-weight:700}
+.fe-note{color:#7f93a8;font-size:20px;margin-top:18px}
+.fe-kicker{font-family:monospace;letter-spacing:3px;color:var(--ac);font-size:20px;margin-bottom:12px}
+.fe-cols{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:18px}
+.fe-card{background:#0f2333;border:1px solid #1c3a4a;border-radius:14px;padding:22px}
+.fe-card .t{font-size:24px;font-weight:700;margin:0 0 6px;color:#e8f6ff}
+.fe-card .d{font-size:19px;color:#9fb3c8}
+table.fe-tbl{width:100%;border-collapse:collapse;font-size:21px;margin-top:14px}
+table.fe-tbl th,table.fe-tbl td{border:1px solid #1c3a4a;padding:11px 15px;text-align:left}
+table.fe-tbl th{background:#0f2333;color:var(--ac);font-family:monospace;font-size:17px;letter-spacing:1px}
+.fe-log{background:#060c17;border:1px solid #1c3a4a;border-radius:10px;padding:18px 22px;font-family:monospace;font-size:21px;color:#cbd5e1;margin-top:16px;line-height:1.7}
+.fe-log .err{color:#f87171}.fe-log .ok{color:#34d399}
+.fe-steps{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.fe-chip{background:#0f2333;border:1px solid #1c3a4a;border-radius:24px;padding:10px 18px;font-size:20px;color:#e8f6ff}
+.fe-chip b{color:var(--ac)}
+body{background:#0a1520}
+.fe-ol{font-size:24px;line-height:1.9;margin-top:18px;padding-left:34px}
+.fe-ol li{margin-bottom:6px}
+.fe-ol .ko{color:#9fb3c8;font-size:20px}
+.fe-list{font-size:22px;line-height:1.8;color:#cbd5e1;margin:8px 0 0;padding-left:26px}
+.fe-list li{margin-bottom:5px}
+.fe-list .ko{color:#9fb3c8;font-size:19px}
+</style>
+</head>
+<body>
+<div class="deck-viewport">
+<div class="deck-stage" id="stage">
+
+<section class="slide" id="s1" data-level="standard">
+  <div class="fe-kicker">FIELD ENGLISH · STANDARD</div>
+  <h1 class="h-title fe-h1">현장 실무영어</h1>
+  <div class="fe-sub">장비 운전·로그·알람과 디자인 오류를 영어로 읽고 판단한다</div>
+  <div class="fe-note">English-first · 한국어 gloss로 확인하는 표준 실무 과정</div>
+</section>
+
+<section class="slide" id="s2" data-level="standard">
+  <h2 class="h-title fe-h1">4단계 루프</h2>
+  <div class="fe-sub">현장 실무영어의 기본 순환 구조</div>
+  <div class="fe-steps">
+    <div class="fe-chip"><b>1</b> Read manual</div>
+    <div class="fe-chip"><b>2</b> Operate</div>
+    <div class="fe-chip"><b>3</b> Interpret log/error</div>
+    <div class="fe-chip"><b>4</b> Report</div>
+  </div>
+  <div class="fe-note">장비 운전·로그가 중심축, 디자인은 결과 확인 수단.</div>
+</section>
+
+<section class="slide" id="s3" data-level="standard">
+  <h2 class="h-title fe-h1">장비 구성 &amp; 매뉴얼</h2>
+  <div class="fe-cols">
+    <div class="fe-card">
+      <div class="t">Main components</div>
+      <ul class="fe-list">
+        <li><span class="fe-en">Chamber</span> <span class="ko">(공정 챔버)</span></li>
+        <li><span class="fe-en">Turbo pump</span> <span class="ko">(터보 펌프 · 고진공)</span></li>
+        <li><span class="fe-en">Gate valve</span> <span class="ko">(게이트 밸브)</span></li>
+        <li><span class="fe-en">MFC (gas)</span> <span class="ko">(질량유량 제어기)</span></li>
+        <li><span class="fe-en">RF generator</span> <span class="ko">(RF 전원)</span></li>
+        <li><span class="fe-en">Matching network</span> <span class="ko">(정합 회로)</span></li>
+      </ul>
+    </div>
+    <div class="fe-card">
+      <div class="t">Manual sections</div>
+      <ul class="fe-list">
+        <li><span class="fe-en">Equipment overview</span> <span class="ko">(장비 개요)</span></li>
+        <li><span class="fe-en">Operating procedure</span> <span class="ko">(운전 절차)</span></li>
+        <li><span class="fe-en">Alarm messages</span> <span class="ko">(알람 메시지)</span></li>
+        <li><span class="fe-en">Troubleshooting</span> <span class="ko">(문제 해결)</span></li>
+        <li><span class="fe-en">Preventive maintenance</span> <span class="ko">(예방 정비)</span></li>
+        <li><span class="fe-en">Safety precautions</span> <span class="ko">(안전 주의사항)</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="slide" id="s4" data-level="standard">
+  <h2 class="h-title fe-h1">운전 절차</h2>
+  <div class="fe-sub">Standard operating procedure — English + 한국어</div>
+  <ol class="fe-ol">
+    <li><span class="fe-en">Load the wafer into the chamber.</span> <span class="ko">(웨이퍼를 챔버에 로드한다)</span></li>
+    <li><span class="fe-en">Evacuate — pump down to base pressure.</span> <span class="ko">(기준 압력까지 배기한다)</span></li>
+    <li><span class="fe-en">Start gas and stabilize the flow.</span> <span class="ko">(가스를 투입해 유량을 안정화한다)</span></li>
+    <li><span class="fe-en">Ignite plasma — check reflected power is low.</span> <span class="ko">(플라즈마를 점화하고 반사파가 낮은지 확인한다)</span></li>
+    <li><span class="fe-en">Run the process.</span> <span class="ko">(공정을 진행한다)</span></li>
+    <li><span class="fe-en">Stop the process.</span> <span class="ko">(공정을 정지한다)</span></li>
+    <li><span class="fe-en">Vent the chamber.</span> <span class="ko">(챔버를 대기압으로 벤트한다)</span></li>
+  </ol>
+</section>
+
+<section class="slide" id="s5" data-level="standard">
+  <h2 class="h-title fe-h1">진공·가스 로그</h2>
+  <div class="fe-cols">
+    <div class="fe-card">
+      <div class="t">Set point vs Actual value</div>
+      <div class="d">설정값(set point)과 실측값(actual value)을 비교한다.</div>
+    </div>
+    <div class="fe-card">
+      <div class="t">Flow &amp; Leakage</div>
+      <div class="d">Flow rate 는 sccm 단위 · leakage(누설) 확인.</div>
+    </div>
+  </div>
+  <div class="fe-log">
+12:04:11  Pump down started<br/>
+12:06:40  Pressure 2.1e-2 Torr  <span class="err">(timeout)</span><br/>
+12:06:41  <span class="err">VAC-101 interlock — pressure above limit</span>
+  </div>
+  <div class="fe-note">실측값이 설정값에 도달하지 못하면 interlock 이 걸린다.</div>
+</section>
+
+<section class="slide" id="s6" data-level="standard">
+  <h2 class="h-title fe-h1">알람 &amp; 조치</h2>
+  <table class="fe-tbl">
+    <thead>
+      <tr><th>ALARM</th><th>MEANING</th><th>CORRECTIVE ACTION</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>VAC-101</td>
+        <td>Pressure above limit</td>
+        <td>Check vacuum valve &amp; leaks</td>
+      </tr>
+      <tr>
+        <td>RF-204</td>
+        <td>High reflected power, ignition failed</td>
+        <td>Check pressure &amp; re-tune matching</td>
+      </tr>
+      <tr>
+        <td>GAS-330</td>
+        <td>Flow below set point</td>
+        <td>Check gas supply &amp; MFC</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section class="slide" id="s7" data-level="standard">
+  <h2 class="h-title fe-h1">디자인 Layer &amp; DRC</h2>
+  <div class="fe-cols">
+    <div class="fe-card">
+      <div class="t">Layer terms</div>
+      <div class="d">Well · Active · Poly · Implant · Contact · Metal</div>
+    </div>
+    <div class="fe-card">
+      <div class="t">DRC rule terms</div>
+      <div class="d">width · spacing · enclosure · minimum</div>
+    </div>
+  </div>
+  <div class="fe-log">
+<span class="err">METAL1.SPACING violation</span><br/>
+Required spacing: 0.30 um<br/>
+Measured spacing: 0.18 um
+  </div>
+  <div class="fe-note">실제 간격이 최소 요구 간격보다 작다 → 간격을 넓혀야 한다.</div>
+</section>
+
+<section class="slide" id="s8" data-level="standard">
+  <h2 class="h-title fe-h1">LVS 비교</h2>
+  <div class="fe-sub">Layout Versus Schematic — 레이아웃과 회로도 대조</div>
+  <div class="fe-cols">
+    <div class="fe-card">
+      <div class="t">What LVS checks</div>
+      <div class="d">layout vs schematic · mismatch(불일치)</div>
+    </div>
+    <div class="fe-card">
+      <div class="t">Typical errors</div>
+      <div class="d">missing device(누락 소자) · incorrect connection(잘못된 연결)</div>
+    </div>
+  </div>
+  <div class="fe-log">
+LVS: comparing layout vs schematic...<br/>
+Device count  schematic=2  layout=1<br/>
+<span class="err">ERROR: Missing device — NMOS (MN) not found in layout</span>
+  </div>
+</section>
+
+<section class="slide" id="s9" data-level="standard">
+  <h2 class="h-title fe-h1">영문 보고서 형식</h2>
+  <div class="fe-cols">
+    <div class="fe-card">
+      <div class="t">Problem</div>
+      <div class="d">Pump down failed to reach base pressure.</div>
+    </div>
+    <div class="fe-card">
+      <div class="t">Observed log</div>
+      <div class="d">VAC-101 interlock — pressure above limit.</div>
+    </div>
+    <div class="fe-card">
+      <div class="t">Possible cause</div>
+      <div class="d">Vacuum valve not fully open, or a leak.</div>
+    </div>
+    <div class="fe-card">
+      <div class="t">Corrective action</div>
+      <div class="d">Checked the valve and re-sealed the flange.</div>
+    </div>
+    <div class="fe-card">
+      <div class="t">Result</div>
+      <div class="d">Base pressure reached; process resumed normally.</div>
+    </div>
+  </div>
+  <div class="fe-note">5개 항목을 영어로 채우면 현장 보고가 완성된다.</div>
+</section>
+
+</div>
+</div>
+<script src="deck-base.js?v=8"></script>
+</body>
+</html>

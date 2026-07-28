@@ -11,6 +11,7 @@ import DopingProcessSimulator from '../simulators/Dopingprocesssimulator';
 import DepositionSimulator from '../simulators/DepositionSimulator';
 import MetallizationEDSPackagingSimulator from '../simulators/MetallizationEDSPackagingSimulator';
 import ComprehensiveAssessmentSimulator from '../simulators/ComprehensiveAssessmentSimulator';
+import FieldEnglishSimulator from '../simulators/FieldEnglishSimulator';
 
 class SimulatorRegistry {
   constructor() {
@@ -295,6 +296,31 @@ class SimulatorRegistry {
           '전체 시뮬레이터 통합 문제',
           '점수 및 등급 평가',
           '오답 해설 제공'
+        ]
+      }
+    });
+
+    // 반도체 현장 실무영어 시뮬레이터 (완성됨) — 서고 drop-in / 14주 종합
+    this.register({
+      id: 'field-english',
+      name: 'Field English',
+      icon: '🗣️',
+      description: '현장 실무영어: 장비·로그·DRC/LVS 영문 해석 및 보고',
+      component: FieldEnglishSimulator,
+      available: true,
+      category: 'assessment',
+      order: 12,
+      metadata: {
+        version: '1.0.0',
+        lastUpdated: '2026-07-27',
+        author: 'Semiconductor Simulator Team',
+        features: [
+          '가상 Plasma Etcher HMI 조작 (Main/Recipe/Chamber/Vacuum/Gas/RF/Alarm/Log/Maintenance/Manual)',
+          '영문 Alarm/Log 해석 → 이상 장치·원인·조치 선택 채점',
+          'DRC: Width/Spacing 조절 → 영문 violation 로그 해석·수정',
+          'LVS: Schematic vs Layout 비교 → mismatch 영문 해석',
+          '영문 현장 보고서 작성 (Problem/Observed/Cause/Action/Result)',
+          '현장 영어 용어 hover 사전 + 4단계 학습 루프'
         ]
       }
     });

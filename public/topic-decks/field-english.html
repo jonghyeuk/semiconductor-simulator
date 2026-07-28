@@ -1,0 +1,80 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>반도체 현장 실무영어</title>
+<link rel="stylesheet" href="deck-base.css?v=9"/>
+<style>
+:root{ --ac:#34e3d4; }
+.fe-hero{display:flex;flex-direction:column;justify-content:center;height:100%}
+.fe-kicker{font-family:monospace;letter-spacing:3px;color:var(--ac);font-size:22px;margin-bottom:14px}
+.fe-h1{font-size:72px;font-weight:800;line-height:1.1;margin:0 0 8px}
+.fe-sub{font-size:30px;color:#9fb3c8;font-weight:400}
+.fe-loop{display:flex;gap:0;align-items:stretch;margin-top:24px;flex-wrap:wrap}
+.fe-loop-step{flex:1;min-width:220px;background:#0f2333;border:1px solid #1c3a4a;border-radius:14px;padding:22px;margin:8px}
+.fe-loop-n{font-family:monospace;color:var(--ac);font-size:20px}
+.fe-loop-t{font-size:26px;font-weight:700;margin:6px 0}
+.fe-loop-d{font-size:18px;color:#9fb3c8}
+.fe-arrow{align-self:center;color:var(--ac);font-size:40px;padding:0 4px}
+.fe-map{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-top:20px}
+.fe-card{background:#0f2333;border:1px solid #1c3a4a;border-radius:14px;padding:20px;text-align:center}
+.fe-card .ic{font-size:40px}.fe-card .t{font-size:22px;font-weight:700;margin:8px 0 4px}
+.fe-card .d{font-size:16px;color:#9fb3c8}
+.fe-badge{display:inline-block;font-family:monospace;font-size:16px;color:#04121a;background:var(--ac);border-radius:20px;padding:3px 12px;margin-top:8px}
+table.fe-tbl{width:100%;border-collapse:collapse;font-size:22px;margin-top:14px}
+table.fe-tbl th,table.fe-tbl td{border:1px solid #1c3a4a;padding:12px 16px;text-align:left}
+table.fe-tbl th{background:#0f2333;color:var(--ac);font-family:monospace;font-size:18px;letter-spacing:1px}
+.fe-en{color:#e8f6ff}.fe-note{color:#7f93a8;font-size:20px;margin-top:18px}
+</style>
+</head><body>
+<div class="deck-viewport"><div class="deck-stage" id="stage">
+
+  <section class="slide" id="s1" data-level="intro standard pro">
+    <div class="fe-hero">
+      <div class="fe-kicker">SEMICONDUCTOR FIELD ENGLISH</div>
+      <h1 class="h-title fe-h1">반도체 현장 실무영어</h1>
+      <div class="fe-sub">디자인 툴 사용법이 아니라, 가상 장비·디자인 시뮬레이션으로<br/><b style="color:var(--ac)">영문을 읽고 판단하는</b> 훈련</div>
+      <div class="fe-badge">가상 매뉴얼 · 로그 · 알람 · DRC/LVS</div>
+    </div>
+  </section>
+
+  <section class="slide" id="s2" data-level="intro standard pro">
+    <h2 class="h-title fe-h1" style="font-size:48px">매주 반복하는 4단계 루프</h2>
+    <div class="fe-loop">
+      <div class="fe-loop-step"><div class="fe-loop-n">STEP 1</div><div class="fe-loop-t">Read manual</div><div class="fe-loop-d">가상 영문 매뉴얼 읽기</div></div>
+      <div class="fe-arrow">→</div>
+      <div class="fe-loop-step"><div class="fe-loop-n">STEP 2</div><div class="fe-loop-t">Operate</div><div class="fe-loop-d">시뮬레이션 조작</div></div>
+      <div class="fe-arrow">→</div>
+      <div class="fe-loop-step"><div class="fe-loop-n">STEP 3</div><div class="fe-loop-t">Interpret</div><div class="fe-loop-d">로그·오류 해석</div></div>
+      <div class="fe-arrow">→</div>
+      <div class="fe-loop-step"><div class="fe-loop-n">STEP 4</div><div class="fe-loop-t">Report</div><div class="fe-loop-d">간단한 영문 보고</div></div>
+    </div>
+    <p class="fe-note">※ 장비 운전·로그·매뉴얼이 중심축, 디자인(DRC/LVS)은 결과를 확인하는 수단으로만 다룬다.</p>
+  </section>
+
+  <section class="slide" id="s3" data-level="intro standard pro">
+    <h2 class="h-title fe-h1" style="font-size:48px">이 책의 시뮬레이터 지도</h2>
+    <div class="fe-map">
+      <div class="fe-card"><div class="ic">🖥️</div><div class="t">Equipment</div><div class="d">가상 장비 조작 (HMI)</div></div>
+      <div class="fe-card"><div class="ic">🚨</div><div class="t">Alarm &amp; Log</div><div class="d">영문 알람 해석</div></div>
+      <div class="fe-card"><div class="ic">📐</div><div class="t">DRC</div><div class="d">디자인 규칙 오류</div></div>
+      <div class="fe-card"><div class="ic">🔗</div><div class="t">LVS</div><div class="d">레이아웃·회로 비교</div></div>
+      <div class="fe-card"><div class="ic">📝</div><div class="t">Report</div><div class="d">영문 현장 보고</div></div>
+    </div>
+    <p class="fe-note">각 카드는 목차에서 개별 실습으로 열린다. 슬라이드를 넘겨 수준(입문·표준·실무)을 선택하세요.</p>
+  </section>
+
+  <section class="slide" id="s4" data-level="intro standard pro">
+    <h2 class="h-title fe-h1" style="font-size:48px">수준(렌즈) 안내</h2>
+    <table class="fe-tbl">
+      <thead><tr><th>Level</th><th>대상</th><th>초점</th></tr></thead>
+      <tbody>
+        <tr><td class="fe-en">Intro</td><td>입문 / 기초</td><td>기본 장비 용어와 쉬운 영어 문장 읽기</td></tr>
+        <tr><td class="fe-en">Standard</td><td>표준 실무</td><td>운전 절차·로그·알람·DRC/LVS 기본 해석</td></tr>
+        <tr><td class="fe-en">Pro</td><td>심화</td><td>플라즈마 트러블슈팅·종합 시나리오·보고</td></tr>
+      </tbody>
+    </table>
+    <p class="fe-note">같은 주제라도 고른 수준의 슬라이드만 이어집니다.</p>
+  </section>
+
+</div></div>
+<script src="deck-base.js?v=8"></script>
+</body></html>
