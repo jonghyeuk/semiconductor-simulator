@@ -1504,10 +1504,6 @@ function CourseMap() {
         <b>무엇을 배우나</b> — 현장의 <span className="fes-cm-hl">HMI 화면·알람</span>, <span className="fes-cm-hl">영어 매뉴얼·작업 지시문</span>, <span className="fes-cm-hl">스펙·안전 문구</span>를 <b>기능적으로 읽는 힘</b>. 목표는 유창한 회화가 아니라, <b>필요한 순간에 정확히 읽어내는 것</b>이다.
       </div>
 
-      <div className="fes-cm-what fes-cm-why">
-        <b>솔직히 — 영어는 언제 무기가 되나</b> &nbsp;입문 오퍼레이터 채용에 영어 점수(TOEIC·OPIc)가 <b>필수는 아니다</b>. 현장 영어는 <b>정비·설비 엔지니어</b>로, 나아가 <span className="fes-cm-hl">외국계 장비사(ASM·AMAT·TEL·Lam)</span>의 필드서비스 엔지니어로 올라갈수록 <b>실제로 돈이 되는 커리어 무기</b>가 된다. 이 책은 그 사다리의 <b>첫 칸(읽기)</b>을 탄탄히 다지는 것이 목적이다.
-      </div>
-
       {/* 4단계 방식 */}
       <div className="fes-cm-loop">
         {['Read manual', 'Operate', 'Interpret log/error', 'Report'].map((s, i) => (
@@ -1934,8 +1930,6 @@ function FesStyles() {
 .fes-cm-guide-note{background:${C.cyan}12;border:1px solid ${C.cyan}33;border-radius:9px;padding:10px 13px;font-size:12.5px;color:#bfe9f5;margin-bottom:12px}
 .fes-cm-guide-note b{color:#fff}
 .fes-cm-what{font-size:13.5px;line-height:1.7;color:${C.text};margin-bottom:14px}
-.fes-cm-why{background:${C.panel};border:1px solid ${C.line};border-left:3px solid ${C.amber};border-radius:10px;padding:12px 15px;color:${C.dim}}
-.fes-cm-why b{color:${C.text}}
 .fes-cm-day1{background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:10px 14px;font-size:13.5px;font-weight:700;color:#e8eefc;margin:14px 0}
 .fes-cm-parts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:600px){.fes-cm-parts{grid-template-columns:1fr}}
