@@ -1232,6 +1232,29 @@ function ChamberIllustration() {
   );
 }
 
+// ===== 듣기(TTS) — 브라우저 내장 Web Speech API. 무료·오프라인·외부연결 없음 =====
+function speakEN(text) {
+  try {
+    const synth = window.speechSynthesis;
+    if (!synth || !text) return;
+    synth.cancel(); // 이전 재생 중단
+    const u = new SpeechSynthesisUtterance(String(text));
+    u.lang = 'en-US';
+    u.rate = 0.94; // 학습용으로 약간 천천히
+    const v = (synth.getVoices() || []).find((vc) => /en[-_]/i.test(vc.lang));
+    if (v) u.voice = v;
+    synth.speak(u);
+  } catch (e) { /* 미지원 브라우저는 무시 */ }
+}
+function SpeakBtn({ text, title }) {
+  const ok = typeof window !== 'undefined' && 'speechSynthesis' in window;
+  if (!ok) return null;
+  return (
+    <button type="button" className="fes-speak" title={title || '듣기 (Play)'} aria-label={title || '듣기'}
+      onClick={(e) => { e.stopPropagation(); speakEN(text); }}>🔊</button>
+  );
+}
+
 // ===== 의사소통 코너 — 외국인 엔지니어 (상황 → 예상 답변) =====
 function CommTurn({ it, n }) {
   const [show, setShow] = useState(false);
@@ -1240,14 +1263,14 @@ function CommTurn({ it, n }) {
       <div className="fes-comm-sit"><b>상황 {n}.</b> {it.sit}</div>
       <div className="fes-comm-them">
         <span className="fes-comm-who">🧑‍🔧 Foreign Engineer</span>
-        <div className="fes-comm-en">{it.q.en}</div>
+        <div className="fes-comm-en">{it.q.en} <SpeakBtn text={it.q.en} title="외국인 엔지니어 문장 듣기" /></div>
         <div className="fes-comm-ko">{it.q.ko}</div>
       </div>
       <button className="fes-btn ghost" onClick={() => setShow((s) => !s)}>{show ? '예상 답변 숨기기' : '👉 이렇게 답하세요'}</button>
       {show && (
         <div className="fes-comm-you">
           <span className="fes-comm-who">🙋 You</span>
-          <div className="fes-comm-en">{it.a.en}</div>
+          <div className="fes-comm-en">{it.a.en} <SpeakBtn text={it.a.en} title="내 답변 듣기" /></div>
           <div className="fes-comm-ko">{it.a.ko}</div>
         </div>
       )}
@@ -1478,7 +1501,11 @@ function CourseMap() {
       <div className="fes-cm-guide-note">📖 이 화면은 <b>책 구성 안내</b>입니다. 실제 학습은 위 <b>Chapters</b> 탭에서 하세요.</div>
 
       <div className="fes-cm-what">
-        <b>무엇을 배우나</b> — 실제 현장의 <span className="fes-cm-hl">영어 매뉴얼</span>, <span className="fes-cm-hl">영어 작업 지시문</span>, 그리고 <span className="fes-cm-hl">HMI 화면의 영어 GUI·메시지</span>를 읽고 판단하는 힘.
+        <b>무엇을 배우나</b> — 현장의 <span className="fes-cm-hl">HMI 화면·알람</span>, <span className="fes-cm-hl">영어 매뉴얼·작업 지시문</span>, <span className="fes-cm-hl">스펙·안전 문구</span>를 <b>기능적으로 읽는 힘</b>. 목표는 유창한 회화가 아니라, <b>필요한 순간에 정확히 읽어내는 것</b>이다.
+      </div>
+
+      <div className="fes-cm-what fes-cm-why">
+        <b>솔직히 — 영어는 언제 무기가 되나</b> &nbsp;입문 오퍼레이터 채용에 영어 점수(TOEIC·OPIc)가 <b>필수는 아니다</b>. 현장 영어는 <b>정비·설비 엔지니어</b>로, 나아가 <span className="fes-cm-hl">외국계 장비사(ASM·AMAT·TEL·Lam)</span>의 필드서비스 엔지니어로 올라갈수록 <b>실제로 돈이 되는 커리어 무기</b>가 된다. 이 책은 그 사다리의 <b>첫 칸(읽기)</b>을 탄탄히 다지는 것이 목적이다.
       </div>
 
       {/* 4단계 방식 */}
@@ -1550,7 +1577,7 @@ export default function FieldEnglishSimulator({
         <div className="fes-header">
           <div className="fes-title">
             <span className="fes-title-en">Semiconductor Field English</span>
-            <span className="fes-title-ko">반도체 현장 실무영어 · 읽고 판단하는 시뮬레이션</span>
+            <span className="fes-title-ko">반도체 현장 실무영어 · 화면·알람·매뉴얼을 읽는 힘</span>
           </div>
           <div className="fes-tabs">
             {THEMES.map((t) => (
@@ -1907,6 +1934,8 @@ function FesStyles() {
 .fes-cm-guide-note{background:${C.cyan}12;border:1px solid ${C.cyan}33;border-radius:9px;padding:10px 13px;font-size:12.5px;color:#bfe9f5;margin-bottom:12px}
 .fes-cm-guide-note b{color:#fff}
 .fes-cm-what{font-size:13.5px;line-height:1.7;color:${C.text};margin-bottom:14px}
+.fes-cm-why{background:${C.panel};border:1px solid ${C.line};border-left:3px solid ${C.amber};border-radius:10px;padding:12px 15px;color:${C.dim}}
+.fes-cm-why b{color:${C.text}}
 .fes-cm-day1{background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:10px 14px;font-size:13.5px;font-weight:700;color:#e8eefc;margin:14px 0}
 .fes-cm-parts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:600px){.fes-cm-parts{grid-template-columns:1fr}}
@@ -1955,6 +1984,10 @@ function FesStyles() {
 .fes-comm-you{background:${C.cyan}12;border:1px solid ${C.cyan}44;border-radius:10px 10px 3px 10px;padding:10px 13px;margin-top:10px}
 .fes-comm-en{font-size:14.5px;color:#e8f6ff;line-height:1.5}
 .fes-comm-ko{font-size:11.5px;color:${C.dim};margin-top:3px}
+.fes-speak{display:inline-flex;align-items:center;justify-content:center;vertical-align:middle;margin-left:7px;width:24px;height:24px;padding:0;border:1px solid ${C.line2};background:${C.panel};border-radius:7px;font-size:12px;cursor:pointer;line-height:1;opacity:.8;transition:.15s}
+.fes-speak:hover{opacity:1;border-color:${C.cyan};background:${C.panel2}}
+.fes-speak:active{transform:scale(.9)}
+.fes-speak:focus-visible{outline:2px solid ${C.cyan};outline-offset:1px}
 
 /* 약어 설명 박스 */
 .fes-wk-acr{background:${C.violet}12;border:1px solid ${C.violet}44;border-radius:8px;padding:9px 12px;font-size:12.5px;color:#d9ccff;line-height:1.6;margin-bottom:12px}

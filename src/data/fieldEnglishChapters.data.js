@@ -1,4 +1,4 @@
-/* AUTO-GENERATED — 반도체 현장 실무영어 chapter content (deepened). Do not hand-edit. */
+/* AUTO-GENERATED — 반도체 현장 실무영어 chapter content (deepened + fab-register enrich). Do not hand-edit. */
 export const CONTENT_CHAPTERS = [
  {
   "id": "w1",
@@ -8,7 +8,7 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🏭",
     "title": "첫 출근 · 화면 앞에 서다",
-    "text": "입사 첫날, 선배가 당신을 장비 앞으로 데려간다. 눈앞의 큰 화면(**HMI, Human-Machine Interface**)에는 온통 영어다. **CHAMBER A — IDLE**, **PRESS START TO BEGIN CYCLE**, 그리고 빨간 글씨로 **INTERLOCK ACTIVE**. 선배가 묻는다. \"지금 이 장비, 돌려도 되는 상태야?\" 당신은 한국어로 설명을 듣고 싶지만, 화면도 옆에 놓인 두꺼운 **operating manual**도 전부 영어다. 반도체 현장에서 영어는 '작문'이 아니라 '판단'이다. 화면 한 줄, 매뉴얼 한 문장을 **읽고(read)** 지금 무엇을 해야 하는지 **판단하는(judge)** 힘. 이번 학기 우리가 기를 것은 바로 그 힘이다. 오늘은 그 첫걸음으로, 장비와 화면 전반에 두루 쓰이는 기초 용어와 '화면 읽는 법'을 넓게 살펴본다."
+    "text": "입사 첫날, 선배가 당신을 장비 앞으로 데려간다. 눈앞의 큰 화면(**HMI, Human-Machine Interface**)에는 온통 영어다. **CHAMBER A — IDLE**, **PRESS START TO BEGIN CYCLE**, 그리고 빨간 글씨로 **INTERLOCK ACTIVE**. 선배가 묻는다. \"지금 이 장비, 돌려도 되는 상태야?\" 신입에게 필요한 영어는 '작문'도, 유창한 회화도 아니다. 화면 한 줄, 매뉴얼 한 문장을 **정확히 읽어내는(read)** 힘이다. 사실 입사에 영어 점수가 필수인 건 아니다. 하지만 이 '읽는 힘'은 나중에 **정비·설비 엔지니어**로, 나아가 외국계 장비사로 올라갈수록 커리어의 무기가 된다. 오늘은 그 첫걸음으로, 장비와 화면 전반에 두루 쓰이는 기초 용어와 '화면 읽는 법'을 넓게 살펴본다."
    },
    {
     "type": "read",
@@ -54,6 +54,18 @@ export const CONTENT_CHAPTERS = [
      "상태 라벨은 대개 대문자 한 단어다. **IDLE(대기)**, **RUN/PROCESSING(진행중)**, **DONE/COMPLETE(완료)**, **ABORT(중단)**, **FAULT/ERROR(고장)**. 이 단어만으로 '지금 개입해도 되는가'를 판단한다.",
      "타이밍 표현도 자주 나온다. **elapsed time(경과 시간)**, **remaining(남은 시간)**, **cycle time(1회 처리 시간)**. 예: **REMAINING 00:45** = 45초 남음.",
      "숫자 색·깜빡임도 정보다. 값이 **out of range(범위 이탈)**면 빨간색으로 바뀌거나 깜빡인다. 숫자+단위+색을 한 세트로 읽는 것이 프로의 습관이다."
+    ]
+   },
+   {
+    "type": "read",
+    "title": "현장 영어의 진짜 문체 — 완전문장이 아니다",
+    "intro": "교과서 영어와 현장 영어는 '문체(register)'가 다르다. 현장은 짧고 딱딱하다. 이 문체에 익숙해지는 것이 핵심이다.",
+    "paras": [
+     "화면 버튼·명령은 **한 단어 동사**다. 완전한 문장이 아니라 **Pump / Vent / Purge / Abort / Accept / Reset** 처럼 딱 떨어진다. '가스를 배출하시겠습니까?'가 아니라 그냥 **Purge**.",
+     "알람은 문장이 아니라 **상태 조각(status fragment)**으로 뜬다. \"The pressure is not correct\"가 아니라 **Pressure out of spec**, \"There is a problem with the interlock\"가 아니라 **Interlock not satisfied**.",
+     "숫자는 항상 **단위와 붙어서** 나온다. **0.1 Torr**, **50 sccm**, **13.56 MHz**, **1500 W**. 값만 읽지 말고 단위까지 한 세트로 읽어야 판단이 된다.",
+     "기록(로그)은 **주어를 생략한 과거형**이다. \"I found a leak and I replaced the o-ring\"가 아니라 **Found leak, replaced O-ring, tool back up**. 짧게 끊어 읽는 연습이 필요하다.",
+     "정리: 현장 영어 = **짧은 명령형 + 상태 조각 + 숫자·단위 + 끊어진 과거형 로그**. 예쁜 완전문장을 기대하지 말 것. 이 딱딱함 자체가 현장의 표준이다."
     ]
    },
    {
@@ -252,6 +264,77 @@ export const CONTENT_CHAPTERS = [
        "장비가 고장 났다",
        "장비가 대기 상태라 시작할 수 있다",
        "장비가 이미 돌고 있다"
+      ],
+      "ans": 1
+     }
+    ]
+   },
+   {
+    "type": "glossary",
+    "title": "장비 상태어 — 현장 표준(SEMI E10)",
+    "intro": "장비의 '지금 상태'는 대시보드·인계 로그에 표준 단어로 뜬다. IDLE/RUN 만으로는 부족하다.",
+    "items": [
+     {
+      "en": "Productive",
+      "ko": "생산 중",
+      "d": "실제로 웨이퍼를 처리하며 돈을 버는 상태.",
+      "ex": "The tool is productive and running lots."
+     },
+     {
+      "en": "Standby",
+      "ko": "대기",
+      "d": "켜져 있고 정상이지만 지금은 일을 안 하는 상태.",
+      "ex": "The tool is in standby, ready for the next lot."
+     },
+     {
+      "en": "Engineering",
+      "ko": "엔지니어링(시험) 모드",
+      "d": "정상 생산이 아니라 시험·평가 목적으로 쓰는 상태.",
+      "ex": "Chamber B is in engineering mode for a test run."
+     },
+     {
+      "en": "Scheduled Down",
+      "ko": "계획 정지",
+      "d": "예방 정비(PM)처럼 미리 잡아둔 정지.",
+      "ex": "The tool is scheduled down for PM this morning."
+     },
+     {
+      "en": "Unscheduled Down",
+      "ko": "비계획 정지",
+      "d": "고장·이상으로 갑자기 멈춘 정지.",
+      "ex": "Etcher 3 is unscheduled down after an RF fault."
+     }
+    ]
+   },
+   {
+    "type": "quiz",
+    "title": "확인 퀴즈 — 장비 상태어",
+    "intro": "대시보드/인계 로그의 상태 단어를 읽고 판단하시오.",
+    "questions": [
+     {
+      "prompt": "인계 로그에 'Tool scheduled down for PM.' 무슨 뜻인가?",
+      "opts": [
+       "예방 정비를 위해 미리 잡아둔 정지 상태",
+       "고장으로 갑자기 멈춤",
+       "정상 생산 중"
+      ],
+      "ans": 0
+     },
+     {
+      "prompt": "'Unscheduled down' 과 'Scheduled down' 의 차이는?",
+      "opts": [
+       "둘 다 같은 뜻",
+       "Unscheduled=고장 등 갑작스런 정지, Scheduled=미리 계획된 정지",
+       "Unscheduled가 더 안전한 상태"
+      ],
+      "ans": 1
+     },
+     {
+      "prompt": "'The tool is in standby.' 가 뜻하는 것은?",
+      "opts": [
+       "장비가 고장났다",
+       "켜져 있고 정상이지만 지금은 일하지 않는 대기 상태",
+       "웨이퍼를 처리하는 중"
       ],
       "ans": 1
      }
@@ -2351,6 +2434,18 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "read",
+    "title": "알람은 '문장'이 아니라 '상태 조각'이다",
+    "intro": "실제 알람 배너는 예의 바른 문장이 아니라, 원인·상태를 압축한 짧은 조각이다. 이 형태에 익숙해져야 빨리 판단한다.",
+    "paras": [
+     "실제 배너 예시: **Interlock not satisfied**(인터록 조건 미충족), **Chamber pressure out of spec**(챔버 압력 규격 이탈), **Reflected power high — Process abort**(반사파 높음 → 공정 중단), **Water flow low — Warning**(냉각수 유량 낮음, 경고).",
+     "알람에는 **심각도 등급**이 붙는다(SECS/GEM 표준). **personal safety**(인명 안전) > **equipment safety**(장비 안전) > **parameter control**(공정 파라미터) > **others**. 등급 단어를 먼저 보고 긴장도를 정한다.",
+     "색으로도 등급을 준다. 보통 **Blue = Warning**(주의), **Red = Process abort / Fault**(중단·고장). 색과 텍스트를 함께 읽는다.",
+     "알람을 지우는 동작도 딱딱한 동사다: **Accept / Acknowledge**(확인해 로그에 남김), **Silence**(경보음만 끔), **Reset**(원인 해소 후 해제). 'Acknowledge'는 문제 해결이 아니라 그냥 '봤음'이다.",
+     "핵심: 알람을 완전문장으로 기대하지 말고 **[대상] + [상태/문제] + [조치]** 조각으로 끊어 읽어라. 예: **APC valve / stuck / abort**."
+    ]
+   },
+   {
     "type": "acr",
     "title": "약어",
     "intro": "알람 화면과 매뉴얼에서 반복적으로 만나는 핵심 약어들이다.",
@@ -2602,6 +2697,43 @@ export const CONTENT_CHAPTERS = [
        "전력 센서를 교체해야 한다"
       ],
       "ans": 0
+     }
+    ]
+   },
+   {
+    "type": "glossary",
+    "title": "핵심 어휘 (4) — 실제 알람 배너 표현(청크)",
+    "intro": "낱단어가 아니라, 배너에 그대로 뜨는 '덩어리 표현(청크)'으로 익히자.",
+    "items": [
+     {
+      "en": "out of spec (OOS)",
+      "ko": "규격 이탈",
+      "d": "값이 허용 범위를 벗어남.",
+      "ex": "Chamber pressure is out of spec."
+     },
+     {
+      "en": "interlock not satisfied",
+      "ko": "인터록 미충족",
+      "d": "안전 조건이 안 맞아 동작이 막힘.",
+      "ex": "The tool won't start: interlock not satisfied."
+     },
+     {
+      "en": "reflected power high",
+      "ko": "반사파 높음",
+      "d": "매칭 불량으로 RF가 되돌아옴 → 흔히 abort.",
+      "ex": "Reflected power high — check the matching network."
+     },
+     {
+      "en": "process abort",
+      "ko": "공정 중단",
+      "d": "심각 알람으로 공정을 즉시 멈춤.",
+      "ex": "Reflected power high triggered a process abort."
+     },
+     {
+      "en": "water flow low",
+      "ko": "냉각수 유량 낮음",
+      "d": "냉각 부족 경고. 보통 Warning 등급.",
+      "ex": "Water flow low — do not ignite the plasma."
      }
     ]
    },
@@ -5803,6 +5935,18 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "read",
+    "title": "교대 인수인계 로그 — 짧게 끊어 쓴 과거형",
+    "intro": "보고의 실제 형태는 매끈한 문장이 아니라 '인수인계 로그(passdown)'다. 주어를 빼고 과거형으로 짧게 끊는다.",
+    "paras": [
+     "실제 passdown 예: **Found leak on Chamber B, replaced O-ring, tool back up.** (B챔버 누설 발견 → O-링 교체 → 장비 재가동). 'I found... and then I replaced...'로 풀어 쓰지 않는다.",
+     "아직 안 끝난 일은 이렇게: **Etcher 3 still down, waiting on the part, escalated to the vendor.** (3호기 여전히 정지, 부품 대기 중, 벤더에 에스컬레이션).",
+     "자주 쓰는 **덩어리 표현(청크)**: **tool is down / back up**(장비 정지/재가동), **waiting on the part**(부품 대기), **out of spec**(규격 이탈), **no trouble found (NTF)**(이상 없음), **placed down pending PM**(PM까지 정지 처리).",
+     "읽을 때는 **[무엇을 발견 → 무엇을 조치 → 지금 상태]** 세 조각으로 끊는다. 이 순서가 곧 problem–action–status 다.",
+     "핵심: passdown은 '잘 쓴 영어'가 목표가 아니라 **다음 근무자가 3초 안에 상태를 파악**하게 하는 것. 그래서 짧고 딱딱하다. 그 형태를 읽어내는 게 이 챕터의 실전 능력이다."
+    ]
+   },
+   {
     "type": "acr",
     "title": "약어",
     "intro": "현장 보고문과 화면에서 반복적으로 마주치는 핵심 약어. 뜻을 모르면 문장 전체를 오해한다.",
@@ -5846,6 +5990,21 @@ export const CONTENT_CHAPTERS = [
       "ab": "ETA",
       "full": "Estimated Time of Arrival",
       "ko": "예상 완료/도착 시각. 복구 ETA 등."
+     },
+     {
+      "ab": "WO",
+      "full": "Work Order",
+      "ko": "작업 지시(서) — 정비·수리 요청 건"
+     },
+     {
+      "ab": "NTF",
+      "full": "No Trouble Found",
+      "ko": "이상 없음 — 점검했으나 문제 재현 안 됨"
+     },
+     {
+      "ab": "N/G",
+      "full": "No Good",
+      "ko": "불량 — 판정 실패"
      }
     ]
    },
@@ -6183,6 +6342,63 @@ export const CONTENT_CHAPTERS = [
      "보고문에 'temporary workaround applied'라고 있으면 장비가 여전히 위험 상태라고 보고 다음 작업자에게 알린다.",
      "WARNING: Do NOT release any quarantined lot back to production without written engineering approval.",
      "경고: 보류(quarantine) 처리된 로트는 서면 엔지니어링 승인 없이 절대 생산으로 되돌리지 않는다."
+    ]
+   },
+   {
+    "type": "manual",
+    "mtitle": "NIGHT SHIFT PASSDOWN LOG (raw)",
+    "paras": [
+     "EQP-204 (Etcher 3): Unscheduled down at 02:10. RF fault, reflected power high. NTF after re-tune. Tool back up 03:05. Watch reflected power.",
+     "EQP-204(3호기): 02:10 비계획 정지. RF 고장, 반사파 높음. 재매칭 후 이상 없음(NTF). 03:05 재가동. 반사파 계속 주시할 것.",
+     "EQP-118 (CVD B): Chamber pressure out of spec during lot 7. Aborted lot, switched to Chamber A. Placed down pending PM.",
+     "EQP-118(CVD B): 로트 7 중 챔버 압력 규격 이탈(OOS). 로트 중단, A챔버로 우회. PM까지 정지 처리.",
+     "Open items: Etcher 5 waiting on the part (turbo pump), ETA tomorrow AM. WO #4471 still open. Escalated to vendor.",
+     "미결 항목: 5호기 부품(터보펌프) 대기, 예상 도착(ETA) 내일 오전. 작업지시(WO) #4471 미결. 벤더 에스컬레이션.",
+     "NOTE: Read every line as [what was found] -> [what was done] -> [current status]. Confirm any tool marked 'down' before you start it.",
+     "참고: 각 줄을 [발견]->[조치]->[현재 상태]로 끊어 읽을 것. 'down'으로 표시된 장비는 가동 전 반드시 상태를 확인하라."
+    ]
+   },
+   {
+    "type": "quiz",
+    "title": "인수인계 로그 읽기 — 판단",
+    "intro": "위 passdown 로그 표현을 읽고 뜻을 고르시오.",
+    "questions": [
+     {
+      "prompt": "'Etcher 3 still down, waiting on the part.' 무슨 상태인가?",
+      "opts": [
+       "3호기 정상 가동 중",
+       "3호기 여전히 정지, 부품 기다리는 중",
+       "3호기 부품 교체 완료"
+      ],
+      "ans": 1
+     },
+     {
+      "prompt": "'NTF after re-tune' 의 뜻은?",
+      "opts": [
+       "재매칭 후에도 고장",
+       "재매칭 후 이상 없음(문제 재현 안 됨)",
+       "새 부품으로 교체함"
+      ],
+      "ans": 1
+     },
+     {
+      "prompt": "'Placed down pending PM' 이 뜻하는 것은?",
+      "opts": [
+       "PM(예방정비)까지 정지 상태로 둠",
+       "PM을 취소함",
+       "즉시 재가동함"
+      ],
+      "ans": 0
+     },
+     {
+      "prompt": "passdown 로그를 읽는 올바른 3조각 순서는?",
+      "opts": [
+       "[발견] -> [조치] -> [현재 상태]",
+       "[결론] -> [원인] -> [인사]",
+       "[가격] -> [수량] -> [날짜]"
+      ],
+      "ans": 0
+     }
     ]
    },
    {
