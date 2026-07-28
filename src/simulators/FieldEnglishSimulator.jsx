@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CONTENT_CHAPTERS } from '../data/fieldEnglishChapters.data';
+import { ART } from '../data/fieldEnglishArt.data';
 
 /**
  * FieldEnglishSimulator — 반도체 현장 실무영어 시뮬레이터 (서고 drop-in)
@@ -1379,15 +1380,25 @@ function rich(text) {
   if (text == null) return null;
   return String(text).split(/\*\*/).map((s, i) => (i % 2 ? <b key={i}>{s}</b> : <React.Fragment key={i}>{s}</React.Fragment>));
 }
+function ArtImage({ which, cap }) {
+  if (!ART[which]) return null;
+  return (
+    <figure className="fes-art">
+      <img src={ART[which]} alt={cap || which} className="fes-art-img" />
+      {cap && <figcaption className="fes-art-cap">{cap}</figcaption>}
+    </figure>
+  );
+}
 const SIM_REGISTRY = {
   equipment: () => <EquipmentHMI />,
+  chamberArt: () => <ArtImage which="chamber" cap="Plasma etch chamber — cross-section (도해). 각 부품의 영어 이름은 번호 라벨 참고." />,
   alarm: () => <AlarmLab />,
   drc: () => <DrcLab />,
   lvs: () => <LvsLab />,
   report: () => <ReportLab />,
   partDiagram: () => <PartDiagram parts={W2_PARTS} />,
   devicePanel: () => <DevicePanel />,
-  chamber: () => <PartDiagram />,
+  chamber: () => <ArtImage which="chamber" cap="Plasma etch chamber — cross-section (도해). 각 부품의 영어 이름은 번호 라벨 참고." />,
   layer: () => <LayerCrossSection />,
   pm: () => <PMChecklist />,
 };
@@ -1983,6 +1994,9 @@ function FesStyles() {
 .fes-wk-acr{background:${C.violet}12;border:1px solid ${C.violet}44;border-radius:8px;padding:9px 12px;font-size:12.5px;color:#d9ccff;line-height:1.6;margin-bottom:12px}
 .fes-wk-acr b{color:${C.violet};font-family:${C.mono}}
 .fes-illus-svg{width:100%;border:1px solid ${C.line};border-radius:10px;display:block;background:#0a0f1a;margin-top:4px}
+.fes-art{margin:0}
+.fes-art-img{width:100%;display:block;border-radius:12px;border:1px solid ${C.line};box-shadow:0 6px 24px #0007}
+.fes-art-cap{font-size:12px;color:${C.dim};margin-top:9px;text-align:center}
 .fes-illus-legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:10px;font-size:11.5px;color:${C.dim}}
 .fes-illus-legend b{color:#bfe9f5;font-family:${C.mono}}
 .fes-wk-partinfo-role{font-size:12.5px;color:${C.emerald};margin-top:8px}
