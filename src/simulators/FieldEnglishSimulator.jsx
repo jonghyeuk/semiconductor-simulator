@@ -927,92 +927,94 @@ const W2_QUIZ = [
 ];
 
 const PART_SPEC = [
-  { id: 'gas', n: 1, at: [230, 94], en: 'Gas inlet (showerhead)', ko: '가스 주입구·샤워헤드', desc: 'Delivers process gas uniformly through the showerhead. The MFC sets the exact flow.' },
-  { id: 'chamber', n: 2, at: [120, 84], en: 'Chamber', ko: '챔버', desc: 'The sealed vacuum space where etching takes place.' },
-  { id: 'plasma', n: 3, at: [230, 158], en: 'Plasma', ko: '플라즈마', desc: 'Ionized gas that etches the wafer surface, driven by RF power.' },
-  { id: 'chuck', n: 4, at: [230, 238], en: 'Wafer chuck (ESC)', ko: '정전 척·웨이퍼', desc: 'Holds the wafer flat and controls its temperature during the process.' },
-  { id: 'rf', n: 5, at: [54, 202], en: 'RF power / match', ko: 'RF 전원·매칭', desc: 'Supplies RF power (through the matching network) to ignite and sustain the plasma.' },
-  { id: 'pump', n: 6, at: [288, 296], en: 'Turbo pump / gate valve', ko: '터보 펌프·게이트 밸브', desc: 'Evacuates the chamber to base pressure; the gate valve isolates the pump.' },
+  { id: 'gas', n: 1, at: [211, 96], en: 'Gas inlet (showerhead)', ko: '가스 주입구·샤워헤드', desc: 'Delivers process gas uniformly through the showerhead. The MFC sets the exact flow.' },
+  { id: 'chamber', n: 2, at: [118, 82], en: 'Chamber', ko: '챔버', desc: 'The sealed vacuum space where etching takes place.' },
+  { id: 'plasma', n: 3, at: [211, 152], en: 'Plasma', ko: '플라즈마', desc: 'Ionized gas that etches the wafer surface, driven by RF power.' },
+  { id: 'chuck', n: 4, at: [211, 236], en: 'Wafer chuck (ESC)', ko: '정전 척·웨이퍼', desc: 'Holds the wafer flat and controls its temperature during the process.' },
+  { id: 'rf', n: 5, at: [54, 200], en: 'RF power / match', ko: 'RF 전원·매칭', desc: 'Supplies RF power (through the matching network) to the chuck electrode to ignite and sustain the plasma.' },
+  { id: 'pump', n: 6, at: [258, 290], en: 'Turbo pump / gate valve', ko: '터보 펌프·게이트 밸브', desc: 'Evacuates the chamber to base pressure; the gate valve isolates the pump.' },
 ];
 
 function PartDiagram() {
   const [sel, setSel] = useState('chamber');
   const cur = PART_SPEC.find((p) => p.id === sel);
-  const hl = (id) => (sel === id ? C.neon : '#3a4d6a');
-  const hw = (id) => (sel === id ? 2.6 : 1.4);
+  const hl = (id) => (sel === id ? C.neon : '#42557a');
+  const hw = (id) => (sel === id ? 2.4 : 1.3);
   return (
     <div className="fes-wk-diag">
       <div className="fes-pd-wrap">
         <svg viewBox="0 0 480 340" className="fes-illus-svg">
           <defs>
-            <linearGradient id="pdSteel" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#1c2740" /><stop offset="1" stopColor="#0e1626" />
-            </linearGradient>
-            <linearGradient id="pdChuck" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stopColor="#2a3856" /><stop offset="1" stopColor="#16203a" />
-            </linearGradient>
-            <radialGradient id="pdPlasma" cx="50%" cy="45%" r="55%">
-              <stop offset="0" stopColor="#c4b5fd" stopOpacity="0.9" />
-              <stop offset="45%" stopColor="#a78bfa" stopOpacity="0.35" />
-              <stop offset="100%" stopColor="#a78bfa" stopOpacity="0" />
-            </radialGradient>
-            <linearGradient id="pdWafer" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stopColor="#2f6bff" /><stop offset="1" stopColor="#22d3ee" />
-            </linearGradient>
-            <marker id="pdArr" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M1 1L5 8L9 1" fill="none" stroke={C.neon} strokeWidth="1.6" /></marker>
-            <marker id="pdArrG" markerWidth="10" markerHeight="10" refX="5" refY="8" orient="auto"><path d="M1 1L5 8L9 1" fill="none" stroke={C.emerald} strokeWidth="1.6" /></marker>
+            <linearGradient id="pdSteel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#1e2a44" /><stop offset="1" stopColor="#0d1524" /></linearGradient>
+            <linearGradient id="pdChuck" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#33456a" /><stop offset="1" stopColor="#161f36" /></linearGradient>
+            <radialGradient id="pdPlasma" cx="50%" cy="50%" r="55%"><stop offset="0" stopColor="#d4c9ff" stopOpacity="0.95" /><stop offset="42%" stopColor="#a78bfa" stopOpacity="0.4" /><stop offset="100%" stopColor="#7c6bd6" stopOpacity="0" /></radialGradient>
+            <linearGradient id="pdWafer" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stopColor="#2f6bff" /><stop offset="1" stopColor="#22d3ee" /></linearGradient>
+            <marker id="pdArrG" markerWidth="11" markerHeight="11" refX="5.5" refY="9" orient="auto"><path d="M1 1L5.5 9L10 1" fill="none" stroke={C.emerald} strokeWidth="1.6" /></marker>
+            <marker id="pdArrC" markerWidth="11" markerHeight="11" refX="5.5" refY="9" orient="auto"><path d="M1 1L5.5 9L10 1" fill="none" stroke={C.neon} strokeWidth="1.6" /></marker>
           </defs>
           <rect width="480" height="340" rx="10" fill="#080c15" />
           <text x="20" y="26" fill={C.dim} fontSize="11" fontFamily={C.mono} letterSpacing="1.5">PLASMA ETCH CHAMBER — CROSS SECTION</text>
 
-          {/* gas line + plenum */}
-          <line x1="230" y1="46" x2="230" y2="78" stroke={hl('gas')} strokeWidth={hw('gas') + 1} markerEnd="url(#pdArr)" />
-          <rect x="204" y="36" width="52" height="12" rx="2" fill="#16203a" stroke={hl('gas')} strokeWidth={hw('gas')} onClick={() => setSel('gas')} style={{ cursor: 'pointer' }} />
-
-          {/* chamber body */}
-          <rect x="86" y="66" width="250" height="210" rx="16" fill="url(#pdSteel)" stroke={hl('chamber')} strokeWidth={hw('chamber') + 0.6} onClick={() => setSel('chamber')} style={{ cursor: 'pointer' }} />
-          <rect x="96" y="76" width="230" height="190" rx="10" fill="none" stroke="#2a3a58" strokeWidth="1" />
-
-          {/* showerhead */}
+          {/* gas inlet: valve + pipe */}
           <g onClick={() => setSel('gas')} style={{ cursor: 'pointer' }}>
-            <rect x="120" y="86" width="180" height="14" rx="3" fill="#1b2740" stroke={hl('gas')} strokeWidth={hw('gas')} />
-            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((k) => <circle key={k} cx={132 + k * 17} cy={104} r="2.1" fill={C.neon} opacity="0.75" />)}
+            <circle cx="211" cy="34" r="7" fill="#101a30" stroke={hl('gas')} strokeWidth={hw('gas')} />
+            <line x1="207" y1="34" x2="215" y2="34" stroke={hl('gas')} strokeWidth={hw('gas')} /><line x1="211" y1="30" x2="211" y2="38" stroke={hl('gas')} strokeWidth={hw('gas')} />
+            <line x1="211" y1="41" x2="211" y2="80" stroke={hl('gas')} strokeWidth={hw('gas') + 0.8} markerEnd="url(#pdArrC)" />
           </g>
 
-          {/* plasma */}
-          <ellipse cx="230" cy="158" rx="94" ry="56" fill="url(#pdPlasma)" onClick={() => setSel('plasma')} style={{ cursor: 'pointer' }} />
-          {[[205, 140], [230, 132], [255, 142], [218, 165], [245, 168], [230, 152]].map(([x, yy], i) => <circle key={i} cx={x} cy={yy} r="2.4" fill="#ddd6fe" opacity="0.9" />)}
-          {sel === 'plasma' && <ellipse cx="230" cy="158" rx="98" ry="60" fill="none" stroke={C.neon} strokeWidth="1.4" strokeDasharray="5 4" />}
+          {/* chamber body (double wall) */}
+          <rect x="96" y="64" width="230" height="214" rx="14" fill="url(#pdSteel)" stroke={hl('chamber')} strokeWidth={hw('chamber') + 0.7} onClick={() => setSel('chamber')} style={{ cursor: 'pointer' }} />
+          <rect x="106" y="74" width="210" height="194" rx="8" fill="none" stroke="#26344f" strokeWidth="1" />
 
-          {/* chuck + wafer */}
+          {/* gas plenum + showerhead plate */}
+          <g onClick={() => setSel('gas')} style={{ cursor: 'pointer' }}>
+            <rect x="156" y="80" width="110" height="10" rx="2" fill="#22314e" stroke={hl('gas')} strokeWidth={hw('gas')} />
+            <rect x="156" y="90" width="110" height="7" fill="#16233b" stroke={hl('gas')} strokeWidth={hw('gas') * 0.8} />
+            {[0, 1, 2, 3, 4, 5, 6, 7].map((k) => <circle key={k} cx={168 + k * 14} cy={97.5} r="1.9" fill={C.neon} opacity="0.8" />)}
+          </g>
+
+          {/* plasma region + sheath edges */}
+          <g onClick={() => setSel('plasma')} style={{ cursor: 'pointer' }}>
+            <ellipse cx="211" cy="152" rx="74" ry="48" fill="url(#pdPlasma)" />
+            <line x1="150" y1="106" x2="272" y2="106" stroke="#a78bfa" strokeWidth="1" strokeDasharray="3 4" opacity="0.5" />
+            <line x1="152" y1="208" x2="270" y2="208" stroke="#a78bfa" strokeWidth="1" strokeDasharray="3 4" opacity="0.5" />
+            {[[196, 138], [222, 132], [238, 150], [204, 162], [230, 168], [212, 148]].map(([x, yy], i) => <circle key={i} cx={x} cy={yy} r="2.2" fill="#e9e3ff" opacity="0.92" />)}
+            {sel === 'plasma' && <ellipse cx="211" cy="152" rx="80" ry="54" fill="none" stroke={C.neon} strokeWidth="1.3" strokeDasharray="5 4" />}
+          </g>
+
+          {/* chuck electrode + wafer */}
           <g onClick={() => setSel('chuck')} style={{ cursor: 'pointer' }}>
-            <path d="M168 258 L176 224 L284 224 L292 258 Z" fill="url(#pdChuck)" stroke={hl('chuck')} strokeWidth={hw('chuck')} />
-            <ellipse cx="230" cy="224" rx="58" ry="8" fill="url(#pdWafer)" />
-            <ellipse cx="230" cy="224" rx="58" ry="8" fill="none" stroke="#bfe9f5" strokeWidth="0.8" opacity="0.6" />
+            <path d="M180 252 L188 220 L234 220 L242 252 Z" fill="url(#pdChuck)" stroke={hl('chuck')} strokeWidth={hw('chuck')} />
+            <rect x="182" y="216" width="58" height="6" rx="1" fill="#3a4d72" stroke={hl('chuck')} strokeWidth={hw('chuck') * 0.7} />
+            <ellipse cx="211" cy="215" rx="45" ry="4.5" fill="url(#pdWafer)" />
+            <path d="M254 215 l-6 -2.4 v4.8 z" fill="#0d1524" />
           </g>
 
-          {/* RF box + cable */}
+          {/* RF box + cable to electrode */}
           <g onClick={() => setSel('rf')} style={{ cursor: 'pointer' }}>
-            <rect x="22" y="216" width="64" height="40" rx="7" fill="#101a30" stroke={hl('rf')} strokeWidth={hw('rf')} />
-            <text x="54" y="234" textAnchor="middle" fill={sel === 'rf' ? C.neon : C.violet} fontSize="12" fontFamily={C.mono} fontWeight="700">RF</text>
-            <text x="54" y="248" textAnchor="middle" fill={C.dim} fontSize="9" fontFamily={C.mono}>MATCH</text>
-            <path d="M86 232 C 120 232 140 240 168 244" fill="none" stroke={hl('rf')} strokeWidth={hw('rf')} />
+            <rect x="18" y="214" width="66" height="40" rx="7" fill="#101a30" stroke={hl('rf')} strokeWidth={hw('rf')} />
+            <text x="51" y="231" textAnchor="middle" fill={sel === 'rf' ? C.neon : C.violet} fontSize="12" fontFamily={C.mono} fontWeight="700">RF</text>
+            <text x="51" y="245" textAnchor="middle" fill={C.dim} fontSize="8.5" fontFamily={C.mono} letterSpacing="1">MATCH</text>
+            <path d="M84 236 C 130 236 150 244 188 246" fill="none" stroke={hl('rf')} strokeWidth={hw('rf') + 0.3} />
+            <circle cx="188" cy="246" r="2.4" fill={hl('rf')} />
           </g>
 
-          {/* gate valve + turbo pump */}
+          {/* foreline: gate valve + turbo pump + exhaust */}
           <g onClick={() => setSel('pump')} style={{ cursor: 'pointer' }}>
-            <line x1="230" y1="276" x2="230" y2="292" stroke={hl('pump')} strokeWidth={hw('pump') + 2} />
-            <rect x="206" y="286" width="48" height="12" rx="2" fill="#16203a" stroke={hl('pump')} strokeWidth={hw('pump')} />
-            <rect x="196" y="300" width="68" height="30" rx="7" fill="#101a30" stroke={hl('pump')} strokeWidth={hw('pump')} />
-            <text x="230" y="319" textAnchor="middle" fill={sel === 'pump' ? C.neon : C.emerald} fontSize="11" fontFamily={C.mono} fontWeight="700">TURBO PUMP</text>
-            <line x1="290" y1="315" x2="330" y2="315" stroke={C.emerald} strokeWidth="2" markerEnd="url(#pdArrG)" transform="rotate(90 290 315)" />
+            <line x1="211" y1="278" x2="211" y2="284" stroke={hl('pump')} strokeWidth={hw('pump') + 3} />
+            <rect x="191" y="284" width="40" height="12" rx="2" fill="#22314e" stroke={hl('pump')} strokeWidth={hw('pump')} />
+            <line x1="197" y1="290" x2="225" y2="290" stroke={hl('pump')} strokeWidth={hw('pump') * 0.8} />
+            <rect x="183" y="300" width="56" height="30" rx="7" fill="#101a30" stroke={hl('pump')} strokeWidth={hw('pump')} />
+            <text x="211" y="319" textAnchor="middle" fill={sel === 'pump' ? C.neon : C.emerald} fontSize="10.5" fontFamily={C.mono} fontWeight="700">TURBO PUMP</text>
+            <line x1="239" y1="315" x2="268" y2="315" stroke={C.emerald} strokeWidth="2" markerEnd="url(#pdArrG)" />
+            <text x="274" y="312" fill={C.emerald} fontSize="9" fontFamily={C.mono}>exhaust</text>
           </g>
 
           {/* number badges */}
           {PART_SPEC.map((p) => (
             <g key={p.id} onClick={() => setSel(p.id)} style={{ cursor: 'pointer' }}>
-              <circle cx={p.at[0]} cy={p.at[1]} r="11" fill={sel === p.id ? C.elec : '#0b1220'} stroke={sel === p.id ? C.neon : '#4a5a75'} strokeWidth="1.5" />
-              <text x={p.at[0]} y={p.at[1] + 4} textAnchor="middle" fill={sel === p.id ? '#fff' : '#9fb3c8'} fontSize="11" fontFamily={C.mono} fontWeight="700">{p.n}</text>
+              <circle cx={p.at[0]} cy={p.at[1]} r="10.5" fill={sel === p.id ? C.elec : '#0b1220'} stroke={sel === p.id ? C.neon : '#54668a'} strokeWidth="1.5" />
+              <text x={p.at[0]} y={p.at[1] + 4} textAnchor="middle" fill={sel === p.id ? '#fff' : '#a9bcd6'} fontSize="11" fontFamily={C.mono} fontWeight="700">{p.n}</text>
             </g>
           ))}
         </svg>
@@ -1385,7 +1387,7 @@ const SIM_REGISTRY = {
   report: () => <ReportLab />,
   partDiagram: () => <PartDiagram parts={W2_PARTS} />,
   devicePanel: () => <DevicePanel />,
-  chamber: () => <ChamberIllustration />,
+  chamber: () => <PartDiagram />,
   layer: () => <LayerCrossSection />,
   pm: () => <PMChecklist />,
 };
