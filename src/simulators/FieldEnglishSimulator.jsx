@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CONTENT_CHAPTERS } from '../data/fieldEnglishChapters.data';
 import { ART } from '../data/fieldEnglishArt.data';
+import { MANGA } from '../data/fieldEnglishManga.data';
 
 /**
  * FieldEnglishSimulator — 반도체 현장 실무영어 시뮬레이터 (서고 drop-in)
@@ -1394,7 +1395,16 @@ const SIM_REGISTRY = {
 function SlideRenderer({ slide }) {
   switch (slide.type) {
     case 'story':
-      return <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>;
+      return (
+        <div>
+          {slide.art && MANGA[slide.art] && (
+            <figure className="fes-manga">
+              <div className="fes-manga-svg" dangerouslySetInnerHTML={{ __html: MANGA[slide.art] }} />
+            </figure>
+          )}
+          <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>
+        </div>
+      );
     case 'read':
       return (
         <div className="fes-th">
@@ -1856,6 +1866,9 @@ function FesStyles() {
 .fes-wk-manual b{color:#bfe9f5;font-weight:700}
 .fes-wk-quiz-intro{font-size:12.5px;color:${C.dim};margin:0 0 12px}
 .fes-wk-qn{font-family:${C.mono};color:${C.cyan};font-size:12px;margin-right:4px}
+.fes-manga{margin:0 0 14px}
+.fes-manga-svg{background:linear-gradient(135deg,#132338,#0e1a2e);border:1px solid ${C.line2};border-radius:14px;padding:12px;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.fes-manga-svg svg{width:100%;height:auto;display:block;border-radius:6px}
 .fes-wk-story{display:flex;gap:14px;align-items:flex-start;background:linear-gradient(135deg,#132338,#0e1a2e);border:1px solid ${C.line2};border-left:3px solid ${C.amber};border-radius:12px;padding:16px 18px;font-size:14px;line-height:1.8;color:${C.text}}
 .fes-wk-story-ic{font-size:30px;flex:none}
 .fes-wk-story b{color:${C.amber}}.fes-wk-story i{color:#bfe9f5;font-style:italic}

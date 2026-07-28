@@ -8,7 +8,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🏭",
     "title": "첫 출근 · 화면 앞에 서다",
-    "text": "입사 첫날, 선배가 당신을 장비 앞으로 데려간다. 눈앞의 큰 화면(**HMI, Human-Machine Interface**)에는 온통 영어다. **CHAMBER A — IDLE**, **PRESS START TO BEGIN CYCLE**, 그리고 빨간 글씨로 **INTERLOCK ACTIVE**. 선배가 묻는다. \"지금 이 장비, 돌려도 되는 상태야?\" 신입에게 필요한 영어는 작문도, 유창한 회화도 아니다. 화면 한 줄, 매뉴얼 한 문장을 **정확히 읽어내는(read)** 힘이다. 이 읽는 힘은 현장에서 바로 쓰일 뿐 아니라, 나중에 **정비·설비 엔지니어**로 성장할수록 더 큰 무기가 된다. 오늘은 그 첫걸음으로, 장비와 화면 전반에 두루 쓰이는 기초 용어와 화면 읽는 법을 넓게 살펴본다."
+    "text": "입사 첫날, 선배가 당신을 장비 앞으로 데려간다. 눈앞의 큰 화면(**HMI, Human-Machine Interface**)에는 온통 영어다. **CHAMBER A — IDLE**, **PRESS START TO BEGIN CYCLE**, 그리고 빨간 글씨로 **INTERLOCK ACTIVE**. 선배가 묻는다. \"지금 이 장비, 돌려도 되는 상태야?\" 신입에게 필요한 영어는 작문도, 유창한 회화도 아니다. 화면 한 줄, 매뉴얼 한 문장을 **정확히 읽어내는(read)** 힘이다. 이 읽는 힘은 현장에서 바로 쓰일 뿐 아니라, 나중에 **정비·설비 엔지니어**로 성장할수록 더 큰 무기가 된다. 오늘은 그 첫걸음으로, 장비와 화면 전반에 두루 쓰이는 기초 용어와 화면 읽는 법을 넓게 살펴본다.",
+    "art": "hmi"
    },
    {
     "type": "read",
@@ -1902,7 +1903,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "⚡",
     "title": "플라즈마가 켜지지 않는 새벽",
-    "text": "새벽 3시, 식각(etch) 라인의 플라즈마 장비 앞에 선 지원이. 레시피를 시작했지만 웨이퍼 처리가 멈춰 있다. HMI 화면에는 **RF Power: 800 W** 라고 떠 있지만 그 아래 **Reflected: 210 W** 가 빨갛게 깜빡인다. 선배가 다가와 한마디 한다. \"**The plasma didn't ignite** — look at the **reflected power**, the **match** isn't tuned.\" 지원이는 이 문장을 읽고 무엇을 봐야 하는지 알아야 한다. 오늘 우리는 **RF power**, **forward/reflected power**, **matching network**, **impedance** 같은 화면 속 영어가 실제로 무엇을 뜻하는지, 그리고 반사파(reflected power) 값이 왜 중요한지를 읽고 판단하는 법을 배운다."
+    "text": "새벽 3시, 식각(etch) 라인의 플라즈마 장비 앞에 선 지원이. 레시피를 시작했지만 웨이퍼 처리가 멈춰 있다. HMI 화면에는 **RF Power: 800 W** 라고 떠 있지만 그 아래 **Reflected: 210 W** 가 빨갛게 깜빡인다. 선배가 다가와 한마디 한다. \"**The plasma didn't ignite** — look at the **reflected power**, the **match** isn't tuned.\" 지원이는 이 문장을 읽고 무엇을 봐야 하는지 알아야 한다. 오늘 우리는 **RF power**, **forward/reflected power**, **matching network**, **impedance** 같은 화면 속 영어가 실제로 무엇을 뜻하는지, 그리고 반사파(reflected power) 값이 왜 중요한지를 읽고 판단하는 법을 배운다.",
+    "art": "fse"
    },
    {
     "type": "read",
@@ -2370,7 +2372,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🚨",
     "title": "빨간 램프가 켜졌다",
-    "text": "새벽 3시, 식각(etch) 장비의 타워 램프가 초록에서 빨강으로 바뀌고 로봇이 멈춘다. HMI 화면에는 붉은 글씨로 **ALARM: RF POWER FAILURE — Reflected power exceeded limit**이 떠 있다. 신입 기술자 지훈은 반사적으로 **RESET** 버튼에 손을 뻗었지만, 사수가 말린다. \"먼저 읽어. **alarm**인지 **warning**인지, **interlock**이 걸린 건지부터 봐야 해.\" 화면 아래에는 작은 글씨로 **INTERLOCK ACTIVE — Chamber door open**도 함께 떠 있었다. 만약 지훈이 그냥 리셋을 눌렀다면, 도어가 열린 채로 공정이 재개되어 위험한 상황이 벌어졌을 것이다. 이 장에서 우리는 화면과 매뉴얼에 뜨는 영어 알람 문장을 **읽고**, 무엇을 **먼저** 할지 **판단**하는 법을 배운다. 현장에서 영어는 쓰는 것이 아니라 정확히 읽고 조치를 결정하는 도구다."
+    "text": "새벽 3시, 식각(etch) 장비의 타워 램프가 초록에서 빨강으로 바뀌고 로봇이 멈춘다. HMI 화면에는 붉은 글씨로 **ALARM: RF POWER FAILURE — Reflected power exceeded limit**이 떠 있다. 신입 기술자 지훈은 반사적으로 **RESET** 버튼에 손을 뻗었지만, 사수가 말린다. \"먼저 읽어. **alarm**인지 **warning**인지, **interlock**이 걸린 건지부터 봐야 해.\" 화면 아래에는 작은 글씨로 **INTERLOCK ACTIVE — Chamber door open**도 함께 떠 있었다. 만약 지훈이 그냥 리셋을 눌렀다면, 도어가 열린 채로 공정이 재개되어 위험한 상황이 벌어졌을 것이다. 이 장에서 우리는 화면과 매뉴얼에 뜨는 영어 알람 문장을 **읽고**, 무엇을 **먼저** 할지 **판단**하는 법을 배운다. 현장에서 영어는 쓰는 것이 아니라 정확히 읽고 조치를 결정하는 도구다.",
+    "art": "alarm"
    },
    {
     "type": "read",
@@ -5895,7 +5898,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "📋",
     "title": "야간 근무 인계, 영어 리포트 한 장",
-    "text": "새벽 6시, 야간조가 끝나고 인계 시간이다. 선임이 태블릿에 뜬 영어 **shift report** 한 장을 건네며 말한다. \"이거 3분 안에 읽고, 라인 상태 요약해서 주간조 반장한테 구두로 보고해줘.\" 화면에는 이런 문장이 있다. **Problem:** Chamber A pressure spiked to 12 mTorr during etch step 3. **Cause:** APC throttle valve stuck at 40%. **Action:** Aborted lot, switched to Chamber B, notified equipment engineer. **Result:** Lot recovered, chamber A placed **DOWN** pending PM. 당신이 할 일은 영작이 아니다. 이 **problem–cause–action–result** 4단 구조를 정확히 읽어내고, '지금 A 챔버는 정지 상태, B로 우회, 로트는 살렸다'를 한 문장으로 요약·판단하는 것이다. 오늘은 장비부터 디자인 검증까지 현장 전체를 아우르는 영어 보고문을 읽고, 무슨 일이 일어났고 지금 무엇을 해야 하는지 판단하는 훈련을 한다."
+    "text": "새벽 6시, 야간조가 끝나고 인계 시간이다. 선임이 태블릿에 뜬 영어 **shift report** 한 장을 건네며 말한다. \"이거 3분 안에 읽고, 라인 상태 요약해서 주간조 반장한테 구두로 보고해줘.\" 화면에는 이런 문장이 있다. **Problem:** Chamber A pressure spiked to 12 mTorr during etch step 3. **Cause:** APC throttle valve stuck at 40%. **Action:** Aborted lot, switched to Chamber B, notified equipment engineer. **Result:** Lot recovered, chamber A placed **DOWN** pending PM. 당신이 할 일은 영작이 아니다. 이 **problem–cause–action–result** 4단 구조를 정확히 읽어내고, '지금 A 챔버는 정지 상태, B로 우회, 로트는 살렸다'를 한 문장으로 요약·판단하는 것이다. 오늘은 장비부터 디자인 검증까지 현장 전체를 아우르는 영어 보고문을 읽고, 무슨 일이 일어났고 지금 무엇을 해야 하는지 판단하는 훈련을 한다.",
+    "art": "passdown"
    },
    {
     "type": "read",
