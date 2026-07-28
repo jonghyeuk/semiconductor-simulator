@@ -1314,40 +1314,6 @@ const COMM_C7 = [
     a: { en: 'The width returned to target, and DRC is clean now.', ko: '선폭이 목표로 돌아왔고, 이제 DRC는 깨끗합니다.' } },
 ];
 
-// ===== Layer 단면도 (9주) =====
-const LAYER_STACK = [
-  { en: 'Metal', ko: '금속 배선', c: '#9ca3af', h: 26 },
-  { en: 'Contact', ko: '콘택 (연결 구멍)', c: '#f2c14e', h: 22 },
-  { en: 'Poly (gate)', ko: '폴리 게이트', c: '#e0554f', h: 24 },
-  { en: 'Active', ko: '액티브 영역', c: '#4fd39a', h: 26 },
-  { en: 'Well', ko: '웰 (도핑 영역)', c: '#6b7fd7', h: 30 },
-  { en: 'Substrate (Si)', ko: '실리콘 기판', c: '#334155', h: 60 },
-];
-function LayerCrossSection() {
-  let y = 40;
-  return (
-    <div>
-      <p className="fes-wk-quiz-intro">웨이퍼 <b>단면(cross-section)</b>입니다. 아래(기판)→위(배선)로 쌓이는 각 <b>Layer</b>의 영어 이름을 익히세요.</p>
-      <svg viewBox="0 0 480 240" className="fes-illus-svg">
-        <rect width="480" height="240" fill="#0a0f1a" />
-        {LAYER_STACK.map((L) => {
-          const yy = y; y += L.h + 2;
-          return (
-            <g key={L.en}>
-              <rect x="40" y={yy} width="260" height={L.h} fill={L.c} opacity="0.85" stroke="#0a0f1a" />
-              <line x1="300" y1={yy + L.h / 2} x2="320" y2={yy + L.h / 2} stroke={C.dim} />
-              <text x="326" y={yy + L.h / 2 + 5} fill="#e8f6ff" fontSize="14" fontFamily={C.mono}>{L.en}</text>
-            </g>
-          );
-        })}
-      </svg>
-      <div className="fes-illus-legend">
-        {LAYER_STACK.map((L) => <span key={L.en}><b>{L.en}</b> {L.ko}</span>)}
-      </div>
-    </div>
-  );
-}
-
 // ===== PM 점검표 (7주) =====
 const PM_TASKS = [
   { en: 'Inspect the O-ring seal', ko: 'O-링 씰 점검' },
@@ -1393,13 +1359,13 @@ const SIM_REGISTRY = {
   equipment: () => <EquipmentHMI />,
   chamberArt: () => <ArtImage which="chamber" cap="Plasma etch chamber — cross-section (도해). 각 부품의 영어 이름은 번호 라벨 참고." />,
   alarm: () => <AlarmLab />,
-  drc: () => <DrcLab />,
-  lvs: () => <LvsLab />,
+  drc: () => <><ArtImage which="drc" cap="Design Rule Check — 레이아웃 상면도(top view). 통과(PASS)와 위반(VIOLATION) 예시. 아래에서 직접 판정 연습." /><DrcLab /></>,
+  lvs: () => <><ArtImage which="lvs" cap="Layout Versus Schematic — 회로도(reference)와 레이아웃(extracted) 넷리스트 비교. 아래에서 직접 판정 연습." /><LvsLab /></>,
   report: () => <ReportLab />,
   partDiagram: () => <PartDiagram parts={W2_PARTS} />,
   devicePanel: () => <DevicePanel />,
   chamber: () => <ArtImage which="chamber" cap="Plasma etch chamber — cross-section (도해). 각 부품의 영어 이름은 번호 라벨 참고." />,
-  layer: () => <LayerCrossSection />,
+  layer: () => <ArtImage which="layer" cap="MOSFET device cross-section — 공정 레이어(도해). 각 레이어의 영어 이름은 번호 라벨 참고." />,
   pm: () => <PMChecklist />,
 };
 function SlideRenderer({ slide }) {
