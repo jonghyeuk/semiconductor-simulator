@@ -232,6 +232,53 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 화면(HMI) 읽기",
+    "doc": {
+     "name": "EQP-204 Operating Manual",
+     "no": "OM-204",
+     "sec": "2.1",
+     "rev": "B",
+     "page": "2-3"
+    },
+    "heading": "2.1  Reading the Main Screen (HMI)",
+    "steps": [
+     "Check the top bar for the Tool ID and current STATUS.",
+     "Confirm the status reads [IDLE] before any operation.",
+     {
+      "t": "Read the alarm banner at the bottom of the screen.",
+      "note": {
+       "kind": "note",
+       "en": "A red banner means the tool cannot start."
+      }
+     },
+     "Compare each value: SP (setpoint) vs PV (process value)."
+    ],
+    "callout": {
+     "kind": "warning",
+     "en": "Do NOT press START while INTERLOCK ACTIVE is displayed."
+    },
+    "fig": "See Fig. 2-1: Main screen layout.",
+    "gloss": [
+     [
+      "setpoint (SP)",
+      "목표값"
+     ],
+     [
+      "process value (PV)",
+      "현재값"
+     ],
+     [
+      "interlock",
+      "안전 연동(잠금)"
+     ],
+     [
+      "idle",
+      "대기 상태"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "확인 퀴즈 (1)",
     "intro": "아래 영어 표시/문장의 '뜻'을 고르시오. (읽고 판단하기)",
@@ -882,6 +929,165 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 터보펌프 조립",
+    "doc": {
+     "name": "ETCH-2000 Assembly Manual",
+     "no": "AM-2000",
+     "sec": "3.1",
+     "rev": "C",
+     "page": "3-4"
+    },
+    "heading": "3.1  Installing the Turbo Pump",
+    "steps": [
+     "Verify the part number matches the BOM: [TMP-803].",
+     {
+      "t": "Mount the pump to the foreline flange.",
+      "note": {
+       "kind": "caution",
+       "en": "Use a new copper gasket; do not reuse the old one."
+      }
+     },
+     "Tighten the flange bolts to 15 N·m in a cross pattern.",
+     {
+      "t": "Connect the controller cable and the cooling water line.",
+      "note": {
+       "kind": "note",
+       "en": "Match the connector labels: PUMP / CTRL."
+      }
+     },
+     "Run the leak test before powering on (see 3.2)."
+    ],
+    "callout": {
+     "kind": "warning",
+     "en": "Do NOT power the pump before the leak test passes."
+    },
+    "fig": "See Fig. 3-1: Foreline flange assembly.",
+    "gloss": [
+     [
+      "BOM",
+      "부품표(Bill of Materials)"
+     ],
+     [
+      "flange",
+      "플랜지(연결부)"
+     ],
+     [
+      "gasket",
+      "개스킷(밀봉재)"
+     ],
+     [
+      "leak test",
+      "누설 검사"
+     ]
+    ]
+   },
+   {
+    "type": "mansample",
+    "variant": "parts",
+    "title": "매뉴얼 표본 — 부품 리스트(BOM)",
+    "doc": {
+     "name": "ETCH-2000 · Spare Parts List",
+     "no": "SP-2000",
+     "rev": "C"
+    },
+    "heading": "Section 3 — Vacuum Assembly · Spare Parts",
+    "cols": [
+     "Item",
+     "Part No.",
+     "Description",
+     "Qty",
+     "Lead time"
+    ],
+    "rows": [
+     [
+      "1",
+      "TMP-803",
+      "Turbo pump, 800 L/s",
+      "1",
+      "6 wks"
+     ],
+     [
+      "2",
+      "GSK-40CU",
+      "Copper gasket, CF40",
+      "10",
+      "in stock"
+     ],
+     [
+      "3",
+      "VLV-GT63",
+      "Gate valve, DN63",
+      "1",
+      "8 wks"
+     ],
+     [
+      "4",
+      "MFC-100AR",
+      "Mass flow controller, Ar 100 sccm",
+      "2",
+      "4 wks"
+     ]
+    ],
+    "callout": {
+     "kind": "note",
+     "en": "\"Lead time\" = time from order to delivery. \"in stock\" ships now."
+    },
+    "gloss": [
+     [
+      "part no.",
+      "부품 번호"
+     ],
+     [
+      "qty",
+      "수량 (quantity)"
+     ],
+     [
+      "lead time",
+      "납기"
+     ],
+     [
+      "in stock",
+      "재고 있음"
+     ]
+    ]
+   },
+   {
+    "type": "mansample",
+    "variant": "email",
+    "title": "매뉴얼 표본 — 공급사에 견적 메일",
+    "from": "j.kim@fab.example.com",
+    "to": "sales@vac-supply.example.com",
+    "subject": "RFQ — Turbo pump TMP-803 and CF40 gaskets",
+    "sign": "Best regards,\nJ. Kim\nEquipment Assembly, Fab 2",
+    "gloss": [
+     [
+      "RFQ",
+      "견적 요청(Request for Quotation)"
+     ],
+     [
+      "quotation",
+      "견적"
+     ],
+     [
+      "unit price",
+      "단가"
+     ],
+     [
+      "datasheet",
+      "규격서"
+     ]
+    ],
+    "lines": [
+     "Dear Sales Team,",
+     "We are assembling an ETCH-2000 tool and need a [quotation] for the following parts:",
+     "· TMP-803 turbo pump — qty 1",
+     "· GSK-40CU copper gasket (CF40) — qty 10",
+     "Could you please confirm the [unit price], [lead time], and whether the pump is [in stock]?",
+     "We would also appreciate the [datasheet] for the TMP-803."
+    ]
+   },
+   {
     "type": "quiz",
     "title": "확인 퀴즈 (1)",
     "intro": "다음 영어 표현의 의미를 고르세요.",
@@ -1429,6 +1635,55 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 로드 & 운전",
+    "doc": {
+     "name": "EQP-311 Operating Manual",
+     "no": "OM-311",
+     "sec": "4.2",
+     "rev": "A",
+     "page": "4-5"
+    },
+    "heading": "4.2  Loading a Wafer and Starting a Cycle",
+    "steps": [
+     "Confirm the tool STATUS is [IDLE] and the green light is ON.",
+     "Place the wafer on the load port and press [LOAD].",
+     {
+      "t": "Press EVACUATE and wait until the chamber is under vacuum.",
+      "note": {
+       "kind": "note",
+       "en": "The READY lamp turns on when base pressure is reached."
+      }
+     },
+     "Select the recipe, then press [START] to begin the cycle.",
+     {
+      "t": "Do not open the door until the cycle is COMPLETE.",
+      "note": {
+       "kind": "warning",
+       "en": "Opening the door during RUN aborts the process and may scrap the wafer."
+      }
+     }
+    ],
+    "gloss": [
+     [
+      "load port",
+      "웨이퍼 투입구"
+     ],
+     [
+      "evacuate",
+      "배기(진공화)"
+     ],
+     [
+      "recipe",
+      "공정 레시피"
+     ],
+     [
+      "complete",
+      "완료"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "확인 문제 (1)",
     "intro": "화면·매뉴얼의 영어 명령을 올바르게 해석하세요.",
@@ -1948,6 +2203,52 @@ export const CONTENT_CHAPTERS = [
       "d": "허용 범위를 벗어난 이상 상태.",
       "ex": "Warning: gas flow is out of range."
      }
+    ]
+   },
+   {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 압력 알람 대응",
+    "doc": {
+     "name": "EQP-204 Operating Manual",
+     "no": "OM-204",
+     "sec": "6.5",
+     "rev": "B",
+     "page": "6-9"
+    },
+    "heading": "6.5  Responding to a Pressure Out-of-Range Alarm",
+    "steps": [
+     "Read the current chamber pressure (PV) on the main screen.",
+     "Compare PV against the setpoint (SP) and the alarm limit.",
+     {
+      "t": "If PV [drifts] above the limit, check for a gas leak or valve fault.",
+      "note": {
+       "kind": "caution",
+       "en": "Rising pressure during process indicates a possible leak."
+      }
+     },
+     "Record the event in the vacuum log with the timestamp."
+    ],
+    "callout": {
+     "kind": "note",
+     "en": "\"out of spec\" and \"out of range\" both mean the value left its allowed band."
+    },
+    "gloss": [
+     [
+      "drift",
+      "서서히 벗어남"
+     ],
+     [
+      "leak",
+      "누설"
+     ],
+     [
+      "out of range",
+      "범위 이탈"
+     ],
+     [
+      "timestamp",
+      "기록 시각"
+     ]
     ]
    },
    {
@@ -2495,6 +2796,52 @@ export const CONTENT_CHAPTERS = [
       "d": "실제로 플라즈마에 전달된 전력 (forward − reflected).",
       "ex": "Delivered power dropped because reflected power went up."
      }
+    ]
+   },
+   {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 플라즈마 점화·정합",
+    "doc": {
+     "name": "PLASMA-ETCH Operating Manual",
+     "no": "OM-PE",
+     "sec": "5.3",
+     "rev": "C",
+     "page": "5-8"
+    },
+    "heading": "5.3  Igniting the Plasma and Tuning the Match",
+    "steps": [
+     "Confirm process pressure and gas flow are stable.",
+     "Press RF ON to [strike] the plasma.",
+     {
+      "t": "Watch the reflected power; it must fall below 20 W.",
+      "note": {
+       "kind": "caution",
+       "en": "High reflected power can damage the RF generator."
+      }
+     },
+     "If reflected power stays high, set the match to AUTO TUNE."
+    ],
+    "callout": {
+     "kind": "warning",
+     "en": "PLASMA ON. Do not enter the chamber area."
+    },
+    "gloss": [
+     [
+      "strike",
+      "점화(플라즈마 켜기)"
+     ],
+     [
+      "reflected power",
+      "반사전력"
+     ],
+     [
+      "matching network",
+      "매칭 회로"
+     ],
+     [
+      "auto tune",
+      "자동 정합"
+     ]
     ]
    },
    {
@@ -3103,6 +3450,52 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 인터락 알람 해제",
+    "doc": {
+     "name": "EQP-204 Operating Manual",
+     "no": "OM-204",
+     "sec": "7.1",
+     "rev": "B",
+     "page": "7-2"
+    },
+    "heading": "7.1  Clearing an Interlock Alarm",
+    "steps": [
+     "Read the alarm code and message on the banner.",
+     {
+      "t": "Identify the unsatisfied interlock (e.g., DOOR OPEN, VACUUM LOST).",
+      "note": {
+       "kind": "note",
+       "en": "\"INTERLOCK NOT SATISFIED\" means a safety condition is not met."
+      }
+     },
+     "Correct the condition (close the door, restore vacuum).",
+     "Press [ACK] to acknowledge, then [RESET] to clear the alarm."
+    ],
+    "callout": {
+     "kind": "warning",
+     "en": "Do NOT bypass an interlock. Bypassing may cause injury or tool damage."
+    },
+    "gloss": [
+     [
+      "interlock",
+      "안전 연동"
+     ],
+     [
+      "acknowledge (ACK)",
+      "확인 처리"
+     ],
+     [
+      "reset",
+      "해제"
+     ],
+     [
+      "bypass",
+      "우회(무시)"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "확인 퀴즈 (1)",
     "intro": "다음 영어 표현의 의미를 고르시오.",
@@ -3680,6 +4073,111 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — PM 챔버 세정",
+    "doc": {
+     "name": "ETCH-2000 Maintenance Manual",
+     "no": "MM-2000",
+     "sec": "8.2",
+     "rev": "C",
+     "page": "8-14"
+    },
+    "heading": "8.2  Preventive Maintenance: Chamber Clean",
+    "steps": [
+     "Tag the tool [DOWN] and apply LOTO before opening the chamber.",
+     {
+      "t": "Inspect the chamber wall and electrode for wear.",
+      "note": {
+       "kind": "note",
+       "en": "Record any cracks or heavy deposition in the PM log."
+      }
+     },
+     "Clean the parts with IPA-dampened, lint-free wipes.",
+     "Replace the O-ring and lubricate lightly with vacuum grease.",
+     {
+      "t": "Tighten the bolts to 8 N·m in a star pattern.",
+      "note": {
+       "kind": "caution",
+       "en": "Over-tightening may crack the ceramic parts."
+      }
+     }
+    ],
+    "callout": {
+     "kind": "warning",
+     "en": "DO NOT ENERGIZE. Equipment must remain locked out during PM."
+    },
+    "gloss": [
+     [
+      "LOTO",
+      "잠금·표찰"
+     ],
+     [
+      "deposition",
+      "침착물"
+     ],
+     [
+      "lint-free",
+      "보풀 없는"
+     ],
+     [
+      "torque (N·m)",
+      "조임 토크"
+     ]
+    ]
+   },
+   {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 조립 후 성능 시험",
+    "doc": {
+     "name": "ETCH-2000 Test Procedure",
+     "no": "TP-2000",
+     "sec": "5.1",
+     "rev": "B",
+     "page": "5-2"
+    },
+    "heading": "5.1  Vacuum Leak-Rate Acceptance Test",
+    "steps": [
+     "Pump the chamber down to base pressure (< 1E-6 Torr).",
+     "Close the gate valve to [isolate] the chamber.",
+     {
+      "t": "Record the pressure rise over 10 minutes.",
+      "note": {
+       "kind": "note",
+       "en": "Rate of rise = (P_end − P_start) / time."
+      }
+     },
+     {
+      "t": "The leak rate must be below the spec limit to PASS.",
+      "note": {
+       "kind": "caution",
+       "en": "If the tool fails, check flanges and gaskets, then retest."
+      }
+     }
+    ],
+    "callout": {
+     "kind": "note",
+     "en": "PASS = within spec.  FAIL / N-G = out of spec, needs rework."
+    },
+    "gloss": [
+     [
+      "acceptance test",
+      "합격 판정 시험"
+     ],
+     [
+      "rate of rise",
+      "압력 상승률"
+     ],
+     [
+      "spec limit",
+      "규격 한계"
+     ],
+     [
+      "pass / fail",
+      "합격/불합격"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "확인 퀴즈 (1) — 동작 동사 해석",
     "intro": "영어 체크리스트 줄을 읽고 그 의미를 고르세요.",
@@ -4063,6 +4561,42 @@ export const CONTENT_CHAPTERS = [
     "goal": "흩어진 조각을 하나로 모아 스스로 판단해 보기."
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 상태·알람 빠른 참조",
+    "doc": {
+     "name": "EQP-204 Operating Manual",
+     "no": "OM-204",
+     "sec": "App.",
+     "rev": "B",
+     "page": "A-1"
+    },
+    "heading": "Appendix A  Quick Reference: Status & Alarms",
+    "steps": [
+     "[IDLE] — the tool is ready but not running.",
+     "[RUN] / PROCESSING — a cycle is in progress.",
+     "[FAULT] — a fault stopped the tool; check the alarm.",
+     "[INTERLOCK ACTIVE] — a safety condition blocks START."
+    ],
+    "gloss": [
+     [
+      "ready",
+      "준비됨"
+     ],
+     [
+      "in progress",
+      "진행 중"
+     ],
+     [
+      "fault",
+      "고장"
+     ],
+     [
+      "blocks",
+      "막다"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "① 장비 구성요소",
     "intro": "부품의 영어 이름·기능을 확인합니다.",
@@ -4442,6 +4976,47 @@ export const CONTENT_CHAPTERS = [
       "d": "트랜지스터가 실제로 동작하는 영역 (OD/AA).",
       "ex": "Define the active area inside the well before the gate step."
      }
+    ]
+   },
+   {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 레이어 스택 가이드",
+    "doc": {
+     "name": "Device Layer Guide",
+     "no": "DLG-14",
+     "sec": "2.2",
+     "rev": "A",
+     "page": "2-4"
+    },
+    "heading": "2.2  Layer Stack (Bottom to Top)",
+    "steps": [
+     "[SUBSTRATE] — the base silicon wafer.",
+     "[WELL] / ACTIVE — doped regions where devices are formed (FEOL).",
+     "[POLY] — the gate layer.",
+     "CONTACT / VIA — vertical connections between layers.",
+     "[METAL] — the interconnect wiring (BEOL)."
+    ],
+    "callout": {
+     "kind": "note",
+     "en": "Read the stack from substrate up to metal."
+    },
+    "gloss": [
+     [
+      "substrate",
+      "기판"
+     ],
+     [
+      "doped",
+      "불순물 주입된"
+     ],
+     [
+      "interconnect",
+      "배선"
+     ],
+     [
+      "FEOL / BEOL",
+      "전공정 / 후공정"
+     ]
     ]
    },
    {
@@ -4996,6 +5571,45 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 디자인 룰 문서",
+    "doc": {
+     "name": "Design Rule Manual (N28)",
+     "no": "DRM-N28",
+     "sec": "3.1",
+     "rev": "D",
+     "page": "3-2"
+    },
+    "heading": "3.1  Minimum Spacing and Width Rules",
+    "steps": [
+     "M1.W.1 — Minimum metal [width]: 0.10 µm.",
+     "M1.S.1 — Minimum metal [spacing]: 0.14 µm.",
+     "CO.E.1 — Minimum contact [enclosure]: 0.05 µm."
+    ],
+    "callout": {
+     "kind": "caution",
+     "en": "Any spacing below 0.14 µm is a violation and must be reworked."
+    },
+    "gloss": [
+     [
+      "minimum width",
+      "최소 선폭"
+     ],
+     [
+      "spacing",
+      "간격"
+     ],
+     [
+      "enclosure",
+      "겹침(감쌈)"
+     ],
+     [
+      "violation",
+      "위반"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "확인 퀴즈 (1)",
     "intro": "영어 규칙 항목의 뜻을 고르세요.",
@@ -5509,6 +6123,48 @@ export const CONTENT_CHAPTERS = [
       "d": "여러 층을 위에서 본 평면 배치도.",
       "ex": "Open the layout and check the top metal layer."
      }
+    ]
+   },
+   {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 셀 배치 가이드",
+    "doc": {
+     "name": "Layout Guide",
+     "no": "LG-11",
+     "sec": "4.4",
+     "rev": "B",
+     "page": "4-6"
+    },
+    "heading": "4.4  Placing Standard Cells",
+    "steps": [
+     "Load the placement drawing (Rev C) as the [reference].",
+     "Snap all cells to the placement grid.",
+     {
+      "t": "Verify no cell is [off-grid].",
+      "note": {
+       "kind": "note",
+       "en": "Off-grid cells cause routing and DRC errors."
+      }
+     },
+     "Confirm placement matches the drawing before routing."
+    ],
+    "gloss": [
+     [
+      "drawing",
+      "도면"
+     ],
+     [
+      "snap to grid",
+      "격자에 맞춤"
+     ],
+     [
+      "off-grid",
+      "격자를 벗어난"
+     ],
+     [
+      "routing",
+      "배선 연결"
+     ]
     ]
    },
    {
@@ -6064,6 +6720,52 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — DRC 결과 읽기",
+    "doc": {
+     "name": "Verification Manual",
+     "no": "VM-12",
+     "sec": "5.2",
+     "rev": "C",
+     "page": "5-3"
+    },
+    "heading": "5.2  Reading the DRC Results",
+    "steps": [
+     "Load the rule deck and run DRC on the layout.",
+     {
+      "t": "Read each line: <check name> : <count> errors.",
+      "note": {
+       "kind": "note",
+       "en": "\"error\" must be fixed; \"warning\" must be checked."
+      }
+     },
+     "Zoom to each [violation] marker on the layout.",
+     "Fix the geometry, then re-run until the result is [CLEAN]."
+    ],
+    "callout": {
+     "kind": "caution",
+     "en": "Do not tape out while DRC is NOT CLEAN."
+    },
+    "gloss": [
+     [
+      "rule deck",
+      "규칙 세트"
+     ],
+     [
+      "violation",
+      "위반"
+     ],
+     [
+      "marker",
+      "표시"
+     ],
+     [
+      "clean",
+      "통과(무오류)"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "확인 퀴즈 (1)",
     "intro": "화면 문구의 의미를 고르시오.",
@@ -6533,6 +7235,48 @@ export const CONTENT_CHAPTERS = [
       "d": "소자들이 어떤 선으로 이어져 있는가",
       "ex": "LVS checks connectivity, not the shape of the wires."
      }
+    ]
+   },
+   {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — LVS 리포트 읽기",
+    "doc": {
+     "name": "Verification Manual",
+     "no": "VM-13",
+     "sec": "6.1",
+     "rev": "C",
+     "page": "6-2"
+    },
+    "heading": "6.1  Reading the LVS Report",
+    "steps": [
+     "Run LVS to compare the layout [netlist] with the schematic.",
+     "Check the summary: nets matched, devices matched.",
+     {
+      "t": "Locate any [MISMATCH] in the report.",
+      "note": {
+       "kind": "note",
+       "en": "A mismatch means layout ≠ schematic."
+      }
+     },
+     "Fix the layout or schematic, then re-run until MATCHED."
+    ],
+    "gloss": [
+     [
+      "netlist",
+      "넷리스트(연결표)"
+     ],
+     [
+      "matched",
+      "일치"
+     ],
+     [
+      "mismatch",
+      "불일치"
+     ],
+     [
+      "schematic",
+      "회로도"
+     ]
     ]
    },
    {
@@ -7063,6 +7807,48 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 인수인계 로그 작성",
+    "doc": {
+     "name": "Shift Handover Procedure",
+     "no": "SHP-14",
+     "sec": "2.1",
+     "rev": "B",
+     "page": "2-1"
+    },
+    "heading": "2.1  Writing the Passdown Log",
+    "steps": [
+     "State the tool status (UP / DOWN) and any open [work orders (WO)].",
+     {
+      "t": "List parts on order with an [ETA].",
+      "note": {
+       "kind": "note",
+       "en": "WO = work order, ETA = estimated time of arrival."
+      }
+     },
+     "Note any chamber that is [OOS] (out of service).",
+     "Sign off and hand over to the next shift."
+    ],
+    "gloss": [
+     [
+      "passdown",
+      "인수인계"
+     ],
+     [
+      "work order (WO)",
+      "작업 지시"
+     ],
+     [
+      "ETA",
+      "도착 예정"
+     ],
+     [
+      "OOS",
+      "사용 불가"
+     ]
+    ]
+   },
+   {
     "type": "quiz",
     "title": "읽고 판단하기 (1)",
     "intro": "보고 문장의 뜻을 정확히 해석하세요. 영작이 아니라 '무슨 뜻인가'를 고릅니다.",
@@ -7539,6 +8325,46 @@ export const CONTENT_CHAPTERS = [
      "DRC / LVS CLEAN"
     ],
     "goal": "배운 모든 현장 영어를 실제 흐름에서 통합 적용하기."
+   },
+   {
+    "type": "mansample",
+    "title": "매뉴얼 표본 — 영어 현장 보고서",
+    "doc": {
+     "name": "Field Report Template",
+     "no": "FRT-15",
+     "sec": "1.0",
+     "rev": "A",
+     "page": "1-1"
+    },
+    "heading": "1.0  Writing an English Field Report",
+    "steps": [
+     "Describe the equipment [issue] (what the HMI/alarm showed).",
+     "State the process result (e.g., etch abnormal, out of spec).",
+     "Report the design check (DRC / LVS clean or not).",
+     "Give the [action taken] and the current status."
+    ],
+    "callout": {
+     "kind": "note",
+     "en": "Read → judge → report: the whole loop in English."
+    },
+    "gloss": [
+     [
+      "issue",
+      "문제"
+     ],
+     [
+      "abnormal",
+      "비정상"
+     ],
+     [
+      "action taken",
+      "조치 사항"
+     ],
+     [
+      "status",
+      "상태"
+     ]
+    ]
    },
    {
     "type": "quiz",

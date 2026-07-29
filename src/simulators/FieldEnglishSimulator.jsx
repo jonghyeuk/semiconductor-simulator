@@ -1056,7 +1056,7 @@ function LessonDeck({ steps, chapterId, onReachEnd }) {
       </div>
       <div className="fes-ld-slide">
         <div className="fes-ld-head">
-          <span className="fes-ld-step">STEP {i + 1} / {steps.length}{step.type ? ' · ' + String(step.type).toUpperCase() : ''}</span>
+          <span className="fes-ld-step">STEP {i + 1} / {steps.length}{step.type ? ' · ' + (({ scene: 'SET THE SCENE', mansample: 'MANUAL', story: 'STORY' })[step.type] || String(step.type).toUpperCase()) : ''}</span>
           <div className="fes-ld-title">{step.title}</div>
         </div>
         <div className="fes-ld-body">{step.body || <SlideRenderer slide={step} />}</div>
@@ -1501,10 +1501,69 @@ function SceneCard({ s }) {
     </div>
   );
 }
+// ===== 매뉴얼 표본 (실제 영어 문서를 그대로 읽어보는 맛보기) — 운전·조립·테스트·부품·메일 =====
+function DocNote({ n }) {
+  const w = { warning: 'WARNING', caution: 'CAUTION', note: 'NOTE', danger: 'DANGER' }[n.kind] || 'NOTE';
+  return <div className={`fes-doc-note fes-doc-${n.kind}`}><b>{n.kind === 'note' ? '📝' : '⚠'} {w}</b> {n.en}</div>;
+}
+function ManualSpecimen({ s }) {
+  const v = s.variant || 'manual';
+  let paper;
+  if (v === 'email') {
+    paper = (
+      <div className="fes-doc fes-doc-email">
+        <div className="fes-mail-hd">
+          <div><span>From</span> {s.from}</div>
+          <div><span>To</span> {s.to}</div>
+          <div><span>Subject</span> <b>{s.subject}</b></div>
+        </div>
+        <div className="fes-mail-body">{(s.lines || []).map((p, i) => <p key={i}>{faRich(p)}</p>)}</div>
+        {s.sign && <div className="fes-mail-sign">{s.sign}</div>}
+      </div>
+    );
+  } else if (v === 'parts') {
+    paper = (
+      <div className="fes-doc">
+        <div className="fes-doc-hd"><div className="fes-doc-name">{s.doc?.name || 'PARTS LIST'}</div><div className="fes-doc-meta">{s.doc ? `DOC ${s.doc.no} · REV ${s.doc.rev}` : ''}</div></div>
+        <div className="fes-doc-h">{s.heading}</div>
+        <table className="fes-parts"><thead><tr>{(s.cols || []).map((c, i) => <th key={i}>{c}</th>)}</tr></thead>
+          <tbody>{(s.rows || []).map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody></table>
+        {s.callout && <DocNote n={s.callout} />}
+      </div>
+    );
+  } else {
+    paper = (
+      <div className="fes-doc">
+        <div className="fes-doc-hd"><div className="fes-doc-name">{s.doc?.name || 'OPERATING MANUAL'}</div><div className="fes-doc-meta">DOC {s.doc?.no} · SEC {s.doc?.sec} · REV {s.doc?.rev} · PG {s.doc?.page}</div></div>
+        <div className="fes-doc-h">{s.heading}</div>
+        {s.intro && <p className="fes-doc-intro">{s.intro}</p>}
+        <ol className="fes-doc-steps">
+          {(s.steps || []).map((st, i) => { const t = typeof st === 'string' ? st : st.t; return <li key={i}><span>{faRich(t)}</span>{st.note && <DocNote n={st.note} />}</li>; })}
+        </ol>
+        {s.callout && <DocNote n={s.callout} />}
+        {s.fig && <div className="fes-doc-fig">▣ {s.fig}</div>}
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className="fes-doc-tag">{v === 'email' ? '✉ 실제 이메일 표본' : v === 'parts' ? '🔩 부품 리스트 표본' : '📄 실제 매뉴얼 표본'} — 영어 원문 그대로 읽어보세요</div>
+      {paper}
+      {s.gloss && s.gloss.length > 0 && (
+        <div className="fes-doc-help">
+          <div className="fes-doc-help-h">🔑 읽기 도움말</div>
+          <div className="fes-doc-gloss">{s.gloss.map((g, i) => <span key={i}><b>{g[0]}</b> — {g[1]}</span>)}</div>
+        </div>
+      )}
+    </div>
+  );
+}
 function slideInner(slide) {
   switch (slide.type) {
     case 'scene':
       return <SceneCard s={slide} />;
+    case 'mansample':
+      return <ManualSpecimen s={slide} />;
     case 'story':
       return (
         <div>
@@ -1982,6 +2041,37 @@ function FesStyles() {
 .fes-wk-manual b{color:#bfe9f5;font-weight:700}
 .fes-wk-quiz-intro{font-size:12.5px;color:${C.dim};margin:0 0 12px}
 .fes-wk-qn{font-family:${C.mono};color:${C.cyan};font-size:12px;margin-right:4px}
+/* ===== 매뉴얼 표본 (printed English document look) ===== */
+.fes-doc-tag{font-size:11.5px;color:${C.dim};margin:0 0 8px;font-weight:600}
+.fes-doc{background:#f4efe2;color:#1c1913;border:1px solid #cabf9f;border-radius:8px;padding:18px 20px;box-shadow:0 6px 20px rgba(0,0,0,.3);font-family:'Georgia','Times New Roman',serif}
+.fes-doc-hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid #1c1913;padding-bottom:7px;margin-bottom:12px;flex-wrap:wrap}
+.fes-doc-name{font-weight:800;font-size:13px;letter-spacing:.3px;text-transform:uppercase}
+.fes-doc-meta{font-family:${C.mono};font-size:10.5px;color:#6b6350}
+.fes-doc-h{font-size:16px;font-weight:800;margin:0 0 10px}
+.fes-doc-intro{font-size:13.5px;line-height:1.6;margin:0 0 10px;color:#3a352a}
+.fes-doc-steps{margin:0;padding:0 0 0 4px;list-style:none;counter-reset:dc}
+.fes-doc-steps>li{counter-increment:dc;position:relative;padding:5px 0 5px 30px;font-size:14px;line-height:1.55;border-bottom:1px dotted #cabf9f}
+.fes-doc-steps>li:last-child{border-bottom:none}
+.fes-doc-steps>li::before{content:counter(dc) ".";position:absolute;left:0;top:5px;font-weight:800;color:#8a5a1a}
+.fes-doc em{font-style:normal;font-weight:800;background:#e4d29a;border-radius:3px;padding:0 3px}
+.fes-doc-note{margin:8px 0 4px;padding:7px 11px;border-radius:5px;font-family:${C.sans};font-size:12.5px;line-height:1.5;border-left:4px solid}
+.fes-doc-note b{font-family:${C.mono};font-size:11px;letter-spacing:.5px;margin-right:6px}
+.fes-doc-warning,.fes-doc-danger{background:#f6dcd6;border-color:#c4402f;color:#5c1810}
+.fes-doc-caution{background:#f6e6c8;border-color:#d38a25;color:#5a3c08}
+.fes-doc-note.fes-doc-note{background:#e6ecd6;border-color:#7a8a4a;color:#33401a}
+.fes-doc-fig{margin-top:11px;font-style:italic;font-size:12.5px;color:#6b6350}
+.fes-doc-email .fes-mail-hd{border-bottom:1px solid #cabf9f;padding-bottom:9px;margin-bottom:11px;font-family:${C.mono};font-size:12.5px;line-height:1.9}
+.fes-mail-hd span{display:inline-block;width:62px;color:#6b6350;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
+.fes-mail-body p{font-size:13.5px;line-height:1.65;margin:0 0 9px}
+.fes-mail-sign{font-size:13px;color:#3a352a;border-top:1px dotted #cabf9f;padding-top:9px;white-space:pre-line}
+.fes-parts{width:100%;border-collapse:collapse;font-family:${C.mono};font-size:12px}
+.fes-parts th{text-align:left;background:#e6dcc0;border:1px solid #cabf9f;padding:6px 9px;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase}
+.fes-parts td{border:1px solid #cabf9f;padding:6px 9px}
+.fes-doc-help{margin-top:10px;background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:11px 14px}
+.fes-doc-help-h{font-size:11px;font-weight:700;letter-spacing:1px;color:${C.cyan};margin-bottom:7px}
+.fes-doc-gloss{display:flex;flex-wrap:wrap;gap:7px 18px}
+.fes-doc-gloss span{font-size:12.5px;color:${C.text}}
+.fes-doc-gloss b{color:#e8f6ff}
 /* ===== 오늘의 현장 · 상황 설정 브리핑 ===== */
 .fes-scene{background:linear-gradient(135deg,#111d33,#0b1626);border:1px solid ${C.line2};border-left:4px solid ${C.amber};border-radius:14px;padding:18px 20px;box-shadow:0 8px 26px rgba(0,0,0,.3)}
 .fes-scene-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px dashed ${C.line2}}
