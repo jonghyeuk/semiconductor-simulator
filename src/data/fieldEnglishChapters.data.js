@@ -23,31 +23,11 @@ export const CONTENT_CHAPTERS = [
     ],
     "figs": [
      {
-      "kind": "hmi",
-      "tool": "TOOL EQP-204",
-      "status": "IDLE",
-      "state": "idle",
-      "rows": [
-       [
-        "CHAMBER A",
-        "READY"
-       ],
-       [
-        "Temp",
-        "SP 250 / PV 248°C",
-        "ok"
-       ],
-       [
-        "Pressure",
-        "5.0 Torr"
-       ]
-      ],
-      "banner": {
-       "level": "danger",
-       "en": "INTERLOCK ACTIVE",
-       "ko": "인터락 작동 — 지금은 시작 불가"
-      },
-      "cap": "HMI 화면: 상단=장비ID·상태, 가운데=값, 아래=경보 띠."
+      "kind": "sticker",
+      "level": "danger",
+      "en": "DO NOT OPEN — HIGH VACUUM",
+      "ko": "열지 마시오 — 고진공 상태",
+      "cap": "현장 경고문은 대부분 이런 명령문(imperative)."
      }
     ]
    },
@@ -60,6 +40,32 @@ export const CONTENT_CHAPTERS = [
      "둘째, **operating manual / SOP(Standard Operating Procedure)**. 장비를 어떻게 켜고, 어떻게 웨이퍼를 넣고, 문제가 나면 어떻게 하는지 단계별로 적힌 문서다. 대부분 번호가 붙은 **step-by-step imperative** 문장이다.",
      "셋째, **work instruction(작업 지시문)**. 반장·엔지니어가 붙여 놓은 그날그날의 지시다. 예: **Run PM on Tool 3 before shift end.** 짧지만 '누가·무엇을·언제'가 압축되어 있어 정확한 해석이 중요하다.",
      "세 통로 모두 공통 어휘를 공유한다. 그래서 오늘 배우는 기초 용어 하나가 화면·매뉴얼·지시문 세 곳에서 동시에 통한다. 기초 용어를 넓게 깔아두는 것이 오늘의 목적이다."
+    ],
+    "figs": [
+     {
+      "kind": "buttons",
+      "items": [
+       [
+        "RUN",
+        "go"
+       ],
+       [
+        "IDLE",
+        "n"
+       ],
+       [
+        "ABORT",
+        "stop"
+       ]
+      ],
+      "cap": "화면 하단 버튼 — 색과 단어를 함께 읽는다."
+     },
+     {
+      "kind": "note",
+      "title": "WORK INSTRUCTION",
+      "en": "Confirm [IDLE] before loading the wafer.",
+      "ko": "웨이퍼 넣기 전 IDLE 확인."
+     }
     ]
    },
    {
@@ -72,6 +78,23 @@ export const CONTENT_CHAPTERS = [
      "숫자에는 두 가지가 있다. **setpoint(목표값)**과 **actual/PV(현재값, Process Value)**. 예: **Temp SP 250°C / PV 248°C**. 둘의 차이를 읽으면 장비가 목표에 도달했는지 판단할 수 있다.",
      "하단(bottom/footer)에는 조작 버튼과 **alarm banner(경보 띠)**가 있다. 색이 중요하다. 보통 **green=normal**, **yellow=warning**, **red=alarm/fault**. 색과 영어 라벨을 함께 읽는 습관이 필요하다.",
      "정리하면 '상단=무엇/무슨 상태, 가운데=어디가 어떤 값, 하단=무엇을 눌러 무엇을 막는가'. 이 세 질문으로 어떤 화면이든 스캔하라."
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "COLOR CODE",
+      "en": "Green = normal · Yellow = warning · Red = alarm.",
+      "ko": "초록=정상, 노랑=주의, 빨강=경보."
+     },
+     {
+      "kind": "meter",
+      "name": "Chamber Pressure",
+      "sp": "5.0",
+      "pv": "5.0",
+      "unit": "Torr",
+      "state": "ok",
+      "note": "SP(목표)와 PV(현재)가 같으면 안정."
+     }
     ]
    },
    {
@@ -84,15 +107,6 @@ export const CONTENT_CHAPTERS = [
      "상태 라벨은 대개 대문자 한 단어다. **IDLE(대기)**, **RUN/PROCESSING(진행중)**, **DONE/COMPLETE(완료)**, **ABORT(중단)**, **FAULT/ERROR(고장)**. 이 단어만으로 '지금 개입해도 되는가'를 판단한다.",
      "타이밍 표현도 자주 나온다. **elapsed time(경과 시간)**, **remaining(남은 시간)**, **cycle time(1회 처리 시간)**. 예: **REMAINING 00:45** = 45초 남음.",
      "숫자 색·깜빡임도 정보다. 값이 **out of range(범위 이탈)**면 빨간색으로 바뀌거나 깜빡인다. 숫자+단위+색을 한 세트로 읽는 것이 프로의 습관이다."
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "danger",
-      "en": "DO NOT OPEN — HIGH VACUUM",
-      "ko": "열지 마시오 — 고진공 상태",
-      "cap": "현장 경고문은 대부분 이런 명령문(imperative)."
-     }
     ]
    },
    {
@@ -163,26 +177,6 @@ export const CONTENT_CHAPTERS = [
       "ab": "PV",
       "full": "Process Value",
       "ko": "현재 측정값(실제값). 목표값(setpoint)과 짝을 이룬다."
-     }
-    ],
-    "figs": [
-     {
-      "kind": "buttons",
-      "items": [
-       [
-        "RUN",
-        "go"
-       ],
-       [
-        "IDLE",
-        "n"
-       ],
-       [
-        "ABORT",
-        "stop"
-       ]
-      ],
-      "cap": "화면 하단 버튼 — 색과 단어를 함께 읽는다."
      }
     ]
    },
@@ -326,17 +320,6 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 1
      }
-    ],
-    "figs": [
-     {
-      "kind": "meter",
-      "name": "Chamber Pressure",
-      "sp": "5.0",
-      "pv": "5.0",
-      "unit": "Torr",
-      "state": "ok",
-      "note": "SP(목표)와 PV(현재)가 같으면 안정."
-     }
     ]
    },
    {
@@ -448,10 +431,12 @@ export const CONTENT_CHAPTERS = [
     ],
     "figs": [
      {
-      "kind": "sticker",
-      "level": "caution",
-      "en": "AUTHORIZED PERSONNEL ONLY",
-      "ko": "허가된 작업자만"
+      "kind": "meter",
+      "name": "Chamber Temp",
+      "sp": "250",
+      "pv": "248",
+      "unit": "°C",
+      "state": "ok"
      }
     ]
    },
@@ -517,14 +502,6 @@ export const CONTENT_CHAPTERS = [
      "위험: 비상시 EMO 버튼을 눌러 모든 전원을 즉시 차단하라. — DANGER는 최고 등급, 즉각 조치.",
      "NOTE: If the chamber is under high vacuum, vent to ATM before opening.",
      "참고: 챔버가 고진공 상태면 열기 전에 대기압(ATM)으로 벤트하라. — 순서를 지키지 않으면 장비 손상."
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "WORK INSTRUCTION",
-      "en": "Confirm [IDLE] before loading the wafer.",
-      "ko": "웨이퍼 넣기 전 IDLE 확인."
-     }
     ]
    },
    {
@@ -539,6 +516,35 @@ export const CONTENT_CHAPTERS = [
      "경보가 뜨면 경보 문구를 읽고 ACK를 눌러 확인 처리하라. — 원인 파악이 먼저, 그다음 ACK.",
      "If PV differs greatly from the setpoint, notify the process engineer.",
      "현재값(PV)이 설정값(setpoint)과 크게 다르면 공정 엔지니어에게 알려라. — 임의 조작 금지, 보고가 원칙."
+    ],
+    "figs": [
+     {
+      "kind": "hmi",
+      "tool": "TOOL EQP-204",
+      "status": "IDLE",
+      "state": "idle",
+      "rows": [
+       [
+        "CHAMBER A",
+        "READY"
+       ],
+       [
+        "Temp",
+        "SP 250 / PV 248°C",
+        "ok"
+       ],
+       [
+        "Pressure",
+        "5.0 Torr"
+       ]
+      ],
+      "banner": {
+       "level": "danger",
+       "en": "INTERLOCK ACTIVE",
+       "ko": "인터락 작동 — 지금은 시작 불가"
+      },
+      "cap": "HMI 화면: 상단=장비ID·상태, 가운데=값, 아래=경보 띠."
+     }
     ]
    },
    {
@@ -629,10 +635,9 @@ export const CONTENT_CHAPTERS = [
     "figs": [
      {
       "kind": "sticker",
-      "level": "info",
-      "en": "TURBO PUMP · TMP-803",
-      "ko": "터보펌프 — 명판(nameplate)",
-      "cap": "장비 곳곳의 명판·라벨도 영어다."
+      "level": "caution",
+      "en": "VACUUM — KEEP DOOR CLOSED",
+      "ko": "진공 — 도어 닫힘 유지"
      }
     ]
    },
@@ -646,6 +651,15 @@ export const CONTENT_CHAPTERS = [
      "순서가 생명입니다. 터보 펌프는 반드시 러핑 펌프로 **foreline(배기 배관)** 쪽 압력을 충분히 낮춘 뒤에만 가속(**spin up**)해야 합니다. 대기압에서 터보를 돌리면 날개가 손상됩니다. 매뉴얼의 경고문 **Do NOT start the turbo pump against atmosphere**가 이 뜻입니다.",
      "펌프 상태 영어 표기: **Spinning Up(가속 중)**, **At Speed / Normal(정상 속도)**, **Spinning Down(감속 중)**, **Fault(고장)**. **Pump Fault** 알람이 뜨면 즉시 공정을 멈추고(**abort**) 보고해야 합니다.",
      "펌프에서 나온 배기 가스는 유해할 수 있어 **abatement / scrubber(배기가스 처리장치)**를 거쳐 처리됩니다. 매뉴얼에서 **exhaust** 관련 항목과 함께 자주 언급됩니다."
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "info",
+      "en": "TURBO PUMP · TMP-803",
+      "ko": "터보펌프 — 명판(nameplate)",
+      "cap": "장비 곳곳의 명판·라벨도 영어다."
+     }
     ]
    },
    {
@@ -658,6 +672,14 @@ export const CONTENT_CHAPTERS = [
      "**Throttle valve(스로틀 밸브)**는 게이트 밸브와 유사하지만 '얼마나' 여는지를 조절해 챔버 압력을 원하는 값으로 제어하는 밸브입니다. 화면에서 **Throttle Position 45%**처럼 백분율로 표시되며 **pressure control** 항목과 함께 나옵니다.",
      "**Foreline(포어라인)**은 터보 펌프 출구와 러핑 펌프를 잇는 배관입니다. 매뉴얼의 **Foreline Pressure** 값이 높으면 러핑 펌프 성능 저하나 배관 막힘을 의심합니다.",
      "핵심 안전 규칙: 챔버가 **Vented(대기압)** 상태일 때 게이트 밸브를 열면 대기가 터보 펌프로 밀려들어 파손됩니다. 그래서 대부분의 장비는 **interlock(인터록, 안전 연동)** 으로 이를 물리적·소프트웨어적으로 차단합니다."
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "CAUTION",
+      "en": "Do not close the [gate valve] while pumping.",
+      "ko": "배기 중 게이트밸브를 닫지 마시오."
+     }
     ]
    },
    {
@@ -674,10 +696,12 @@ export const CONTENT_CHAPTERS = [
     ],
     "figs": [
      {
-      "kind": "sticker",
-      "level": "warn",
-      "en": "HOT SURFACE — DO NOT TOUCH",
-      "ko": "고온 표면 — 접촉 금지"
+      "kind": "meter",
+      "name": "Mass Flow (Ar)",
+      "sp": "20",
+      "pv": "20",
+      "unit": "sccm",
+      "state": "ok"
      }
     ]
    },
@@ -692,6 +716,22 @@ export const CONTENT_CHAPTERS = [
      "**Wafer chuck(웨이퍼 척, 웨이퍼 받침)**은 공정 중 웨이퍼를 고정하는 판입니다. 정전기 힘으로 붙잡는 것을 **ESC(Electrostatic Chuck, 정전 척)**라 하며, 화면에서 **Chuck Clamp On/Off**로 표시됩니다.",
      "웨이퍼는 플라즈마 때문에 뜨거워지므로 척 뒷면으로 헬륨을 흘려 온도를 식힙니다. 이를 **backside gas** 또는 **He backside cooling**이라 하며 **Backside Pressure / He Flow** 값으로 관리합니다.",
      "안전: 플라즈마 공정 중에는 고전압·고주파가 흐르므로 매뉴얼에 **RF ON**, **High Voltage** 경고와 함께 챔버 문을 열지 말라는 지시가 반드시 붙습니다."
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "danger",
+      "en": "RF ON — HIGH VOLTAGE",
+      "ko": "RF 작동 — 고전압"
+     },
+     {
+      "kind": "meter",
+      "name": "RF Power",
+      "sp": "1500",
+      "pv": "1490",
+      "unit": "W",
+      "state": "ok"
+     }
     ]
    },
    {
@@ -882,14 +922,6 @@ export const CONTENT_CHAPTERS = [
       "d": "가스를 웨이퍼 위로 고르게 분사하는 다공성 전극판",
       "ex": "Inspect the showerhead for clogged holes during preventive maintenance."
      }
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "CAUTION",
-      "en": "Do not close the [gate valve] while pumping.",
-      "ko": "배기 중 게이트밸브를 닫지 마시오."
-     }
     ]
    },
    {
@@ -961,14 +993,6 @@ export const CONTENT_CHAPTERS = [
       "d": "안전 조건이 안 맞으면 동작을 막는 보호 기능",
       "ex": "The gate valve is interlocked because the chamber is still vented."
      }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "danger",
-      "en": "RF ON — HIGH VOLTAGE",
-      "ko": "RF 작동 — 고전압"
-     }
     ]
    },
    {
@@ -1035,16 +1059,6 @@ export const CONTENT_CHAPTERS = [
      "MFC가 설정값을 따라가지 못하면 라인 막힘이나 가스 실린더 소진을 점검한다.",
      "After the process, purge the gas lines with the inert gas for the specified time.",
      "공정 종료 후 지정된 시간 동안 불활성 가스로 가스 라인을 퍼지한다."
-    ],
-    "figs": [
-     {
-      "kind": "meter",
-      "name": "Mass Flow (Ar)",
-      "sp": "20",
-      "pv": "20",
-      "unit": "sccm",
-      "state": "ok"
-     }
     ]
    },
    {
@@ -1202,6 +1216,14 @@ export const CONTENT_CHAPTERS = [
      "화면에는 **Venting to atmosphere...** 또는 **N2 purge in progress**가 표시되며, 완료되면 **Vent complete** 또는 **Door unlocked** 같은 메시지가 뜹니다. 이 완료 표시를 확인한 뒤에만 문을 엽니다.",
      "펌프가 아직 돌고 있을 때 **vent**하면 펌프 손상이나 오일 역류가 생길 수 있으므로, 매뉴얼의 **Never vent while the pump is running** 같은 경고문을 반드시 읽고 지켜야 합니다.",
      "**vent** 후에는 압력계(**gauge**)가 대기압(약 **760 Torr**)을 가리키는지 눈으로 확인하는 것이 마지막 판단 기준입니다. 숫자와 화면 메시지가 일치해야 안전합니다."
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "WORK INSTRUCTION",
+      "en": "Do not open the door until the cycle is [complete].",
+      "ko": "사이클 완료 전 도어를 열지 마시오."
+     }
     ]
    },
    {
@@ -1249,6 +1271,41 @@ export const CONTENT_CHAPTERS = [
      "확인을 요구하는 팝업(**prompt**)이 뜹니다: **Confirm to continue?** 또는 **Are you sure you want to vent?** — 여기서 **OK/Yes**는 진행, **Cancel/No**는 취소입니다. 내용을 읽지 않고 누르면 안 됩니다.",
      "수치 표시는 보통 **현재값(actual)**과 **목표값(setpoint)**이 나란히 나옵니다. 예: **Pressure: 8.0E-5 / SP 5.0E-6 Torr**. 왼쪽이 지금, 오른쪽이 도달해야 할 값입니다.",
      "이상 메시지는 짧은 영어 코드/문장으로 뜹니다: **INTERLOCK ACTIVE**, **BASE PRESSURE NOT REACHED**, **DOOR OPEN**, **GAS FLOW LOW**. 이 문장을 그대로 읽고 원인을 판단하는 것이 현장 영어의 핵심 능력입니다."
+    ],
+    "figs": [
+     {
+      "kind": "buttons",
+      "items": [
+       [
+        "PRESS START",
+        "go"
+       ],
+       [
+        "PROCESSING…",
+        "n"
+       ],
+       [
+        "DONE",
+        "n"
+       ]
+      ]
+     },
+     {
+      "kind": "hmi",
+      "tool": "EQP-311",
+      "status": "IDLE",
+      "state": "idle",
+      "rows": [
+       [
+        "State",
+        "IDLE → READY"
+       ],
+       [
+        "Wafer",
+        "LOADED"
+       ]
+      ]
+     }
     ]
    },
    {
@@ -1326,25 +1383,6 @@ export const CONTENT_CHAPTERS = [
       "ko": "펌프로 진공을 내리다",
       "d": "펌프를 돌려 챔버 압력을 낮추는 배기 동작(evacuate와 동의)",
       "ex": "Pump down the load lock until it reaches base pressure."
-     }
-    ],
-    "figs": [
-     {
-      "kind": "buttons",
-      "items": [
-       [
-        "PRESS START",
-        "go"
-       ],
-       [
-        "PROCESSING…",
-        "n"
-       ],
-       [
-        "DONE",
-        "n"
-       ]
-      ]
      }
     ]
    },
@@ -1445,14 +1483,6 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 1
      }
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "WORK INSTRUCTION",
-      "en": "Do not open the door until the cycle is [complete].",
-      "ko": "사이클 완료 전 도어를 열지 마시오."
-     }
     ]
    },
    {
@@ -1549,6 +1579,14 @@ export const CONTENT_CHAPTERS = [
       "d": "팝업에서 동작을 계속할지 승인하는 것",
       "ex": "The screen asks: Confirm to continue? Press OK to proceed."
      }
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "warn",
+      "en": "ABORT STOPS THE CYCLE",
+      "ko": "ABORT는 사이클을 중단시킨다"
+     }
     ]
    },
    {
@@ -1565,28 +1603,6 @@ export const CONTENT_CHAPTERS = [
      "다음 단계로 넘어가기 전에 READY 표시등이 초록으로 바뀔 때까지 기다려라. (READY = 시작 가능 상태)",
      "5. Do NOT open the transfer valve until base pressure is achieved.",
      "base pressure에 도달하기 전에는 트랜스퍼 밸브를 열지 마라. (Do NOT = 금지, 인터록으로 막힐 수 있음)"
-    ],
-    "figs": [
-     {
-      "kind": "hmi",
-      "tool": "EQP-311",
-      "status": "RUN",
-      "state": "run",
-      "rows": [
-       [
-        "Step",
-        "2 / 5"
-       ],
-       [
-        "Remaining",
-        "00:45"
-       ],
-       [
-        "Recipe",
-        "ETCH_A"
-       ]
-      ]
-     }
     ]
    },
    {
@@ -1688,17 +1704,6 @@ export const CONTENT_CHAPTERS = [
      "장비는 목표값인 **set point (SP)**와 실제 측정값인 **actual value (PV, process value)**를 나란히 보여줍니다. 두 값의 차이(**deviation**)가 정상 판단의 핵심 단서입니다.",
      "로그는 단순한 숫자 나열이 아니라 시간에 따른 **trend**입니다. 값이 **stable**하게 유지되는지, 아니면 **drift**하거나 **spike**가 있는지를 봐야 합니다.",
      "HMI/GUI 화면과 영문 매뉴얼은 이 상태를 영어 단어로 표시합니다: **STABLE / UNSTABLE / OUT OF RANGE / IN RANGE / OK / ALARM**. 이 단어를 못 읽으면 값을 봐도 판단할 수 없습니다."
-    ],
-    "figs": [
-     {
-      "kind": "meter",
-      "name": "Chamber Pressure",
-      "sp": "5.0",
-      "pv": "5.8",
-      "unit": "Torr",
-      "state": "high",
-      "note": "PV가 SP보다 높음 → out of range."
-     }
     ]
    },
    {
@@ -1711,6 +1716,25 @@ export const CONTENT_CHAPTERS = [
      "유량 단위 **sccm (standard cubic centimeters per minute)**: 표준 조건에서 1분당 흘러가는 가스 부피입니다. 예: **Ar 50 sccm**은 아르곤이 분당 50 표준 cc로 흐른다는 뜻입니다.",
      "큰 유량은 **slm (standard liters per minute)**로도 표기됩니다. 1 slm = 1000 sccm. 로그에서 단위가 sccm인지 slm인지 먼저 확인하세요.",
      "로그에서 값과 단위, 그리고 SP/PV 위치를 함께 읽는 습관이 중요합니다. 예: **Pressure PV 9.8 mTorr / SP 10.0 mTorr** → 목표 10에 거의 도달, 정상 범위."
+    ],
+    "figs": [
+     {
+      "kind": "meter",
+      "name": "Chamber Pressure",
+      "sp": "5.0",
+      "pv": "5.8",
+      "unit": "Torr",
+      "state": "high",
+      "note": "PV가 SP보다 높음 → out of range."
+     },
+     {
+      "kind": "meter",
+      "name": "Base Pressure",
+      "sp": "1E-6",
+      "pv": "1E-6",
+      "unit": "Torr",
+      "state": "ok"
+     }
     ]
    },
    {
@@ -1723,6 +1747,37 @@ export const CONTENT_CHAPTERS = [
      "**STABLE vs UNSTABLE**: 값이 시간에 따라 일정하면 stable, 위아래로 요동치면 unstable입니다. UNSTABLE은 누설(**leak**), MFC 이상, 밸브 문제의 초기 징후일 수 있습니다.",
      "**Warning vs Alarm**: 색으로도 구분됩니다. 보통 노랑=**warning**(주의), 빨강=**alarm/interlock**(즉시 조치·정지). 색과 단어를 함께 읽어야 대응 수준을 압니다.",
      "판단 순서: (1) 단위 확인 → (2) SP와 PV 비교 → (3) 상태어(STABLE/OUT OF RANGE 등) 확인 → (4) 색/알람 등급 확인. 이 순서를 지키면 새벽 3시에도 흔들리지 않습니다."
+    ],
+    "figs": [
+     {
+      "kind": "hmi",
+      "tool": "EQP-204",
+      "status": "FAULT",
+      "state": "fault",
+      "rows": [
+       [
+        "Pressure",
+        "5.8 Torr",
+        "high"
+       ],
+       [
+        "Setpoint",
+        "5.0 Torr"
+       ]
+      ],
+      "banner": {
+       "level": "warn",
+       "en": "PRESSURE OUT OF RANGE",
+       "ko": "압력 범위 이탈"
+      }
+     },
+     {
+      "kind": "alarm",
+      "level": "warn",
+      "code": "W-0455",
+      "en": "PRESSURE DRIFT — CHECK LEAK",
+      "ko": "압력 드리프트 — 누설 확인"
+     }
     ]
    },
    {
@@ -1783,6 +1838,16 @@ export const CONTENT_CHAPTERS = [
       "ab": "OOR",
       "full": "Out Of Range",
       "ko": "허용 범위 벗어남 (이상)"
+     }
+    ],
+    "figs": [
+     {
+      "kind": "meter",
+      "name": "Gas Flow (Ar)",
+      "sp": "20",
+      "pv": "14",
+      "unit": "sccm",
+      "state": "warn"
      }
     ]
    },
@@ -1860,14 +1925,6 @@ export const CONTENT_CHAPTERS = [
        "장비가 꺼져 있음"
       ],
       "ans": 0
-     }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "warn",
-      "en": "N2 PURGE IN PROGRESS",
-      "ko": "질소(N2) 퍼지 진행 중"
      }
     ]
    },
@@ -1989,16 +2046,6 @@ export const CONTENT_CHAPTERS = [
       "d": "공정 전 챔버가 도달해야 하는 낮은 초기 압력.",
       "ex": "Confirm the chamber has reached base pressure."
      }
-    ],
-    "figs": [
-     {
-      "kind": "meter",
-      "name": "Gas Flow (Ar)",
-      "sp": "20",
-      "pv": "14",
-      "unit": "sccm",
-      "state": "warn"
-     }
     ]
    },
    {
@@ -2065,30 +2112,6 @@ export const CONTENT_CHAPTERS = [
      "실제값이 허용 오차 안으로 돌아오기 전에는 경보를 리셋하지 마세요.",
      "If the value does not recover, place the tool on hold and escalate to the shift leader.",
      "값이 회복되지 않으면 장비를 홀드(hold) 상태로 두고 교대 책임자에게 보고하세요."
-    ],
-    "figs": [
-     {
-      "kind": "hmi",
-      "tool": "EQP-204",
-      "status": "FAULT",
-      "state": "fault",
-      "rows": [
-       [
-        "Pressure",
-        "5.8 Torr",
-        "high"
-       ],
-       [
-        "Setpoint",
-        "5.0 Torr"
-       ]
-      ],
-      "banner": {
-       "level": "warn",
-       "en": "PRESSURE OUT OF RANGE",
-       "ko": "압력 범위 이탈"
-      }
-     }
     ]
    },
    {
@@ -2252,6 +2275,36 @@ export const CONTENT_CHAPTERS = [
      "장비가 이 커패시터를 자동으로 움직여 반사파를 최소로 만드는 동작을 **auto tune** 또는 **impedance matching** 이라 한다. 화면의 **Tuning...** 표시는 지금 매칭을 맞추는 중이라는 뜻이다.",
      "**Match Position: Load 45% / Tune 62%** 같은 값이 매번 크게 튀거나 한쪽 끝(0% 또는 100%)에 붙어 있으면 매칭이 제대로 잡히지 못한 상태(**match at limit**)로, 반사파가 높게 남는다.",
      "즉 **matching network** 의 역할은 한 줄로: '챔버 임피던스를 50 Ω 으로 맞춰 **reflected power** 를 0에 가깝게 만든다'이다."
+    ],
+    "figs": [
+     {
+      "kind": "hmi",
+      "tool": "PLASMA ETCH",
+      "status": "RUN",
+      "state": "run",
+      "rows": [
+       [
+        "RF",
+        "1480 W"
+       ],
+       [
+        "Reflected",
+        "85 W",
+        "high"
+       ],
+       [
+        "Match",
+        "TUNING"
+       ]
+      ]
+     },
+     {
+      "kind": "alarm",
+      "level": "warn",
+      "code": "E-1180",
+      "en": "REFLECTED POWER HIGH",
+      "ko": "반사전력 높음 — 매칭 확인"
+     }
     ]
    },
    {
@@ -2267,6 +2320,12 @@ export const CONTENT_CHAPTERS = [
      "현장에서 '**tune 이 안 잡힌다**'는 말은 곧 '반사파가 안 떨어진다', 즉 매칭 문제라는 뜻으로 통용된다."
     ],
     "figs": [
+     {
+      "kind": "note",
+      "title": "TERM",
+      "en": "[Strike] the plasma, then [tune] the match.",
+      "ko": "플라즈마 점화(strike) 후 매칭 튜닝."
+     },
      {
       "kind": "meter",
       "name": "Reflected Power",
@@ -2400,14 +2459,6 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 1
      }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "danger",
-      "en": "PLASMA ON — DO NOT ENTER",
-      "ko": "플라즈마 작동 — 출입 금지"
-     }
     ]
    },
    {
@@ -2507,11 +2558,10 @@ export const CONTENT_CHAPTERS = [
     ],
     "figs": [
      {
-      "kind": "alarm",
-      "level": "warn",
-      "code": "E-1180",
-      "en": "REFLECTED POWER HIGH",
-      "ko": "반사전력 높음 — 매칭 확인"
+      "kind": "sticker",
+      "level": "danger",
+      "en": "PLASMA ON — DO NOT ENTER",
+      "ko": "플라즈마 작동 — 출입 금지"
      }
     ]
    },
@@ -2619,29 +2669,6 @@ export const CONTENT_CHAPTERS = [
      "4. 반사파가 거의 0 W까지 떨어지고 값들이 안정화되는지 확인한다.",
      "5. If the plasma fails to ignite, do NOT increase the RF power repeatedly; check gas flow, pressure, and the match position first.",
      "5. 플라즈마가 점화되지 않으면 RF 전력을 반복해서 올리지 말고, 먼저 가스 유량·압력·매칭 위치를 점검한다."
-    ],
-    "figs": [
-     {
-      "kind": "hmi",
-      "tool": "PLASMA ETCH",
-      "status": "RUN",
-      "state": "run",
-      "rows": [
-       [
-        "RF",
-        "1480 W"
-       ],
-       [
-        "Reflected",
-        "85 W",
-        "high"
-       ],
-       [
-        "Match",
-        "TUNING"
-       ]
-      ]
-     }
     ]
    },
    {
@@ -2721,7 +2748,26 @@ export const CONTENT_CHAPTERS = [
      "점화 흐름: **RF ON → Ignite → Tune → Reflected ≈ 0 → Stable**. **Failed to ignite / High reflected** 알람은 가스·압력·매칭부터 점검한다.",
      "화면은 항상 짝으로 읽는다: **SP vs PV**, **Forward vs Reflected**, 그리고 단위(**W, Ω, MHz, %**)를 확인한다."
     ],
-    "done": "이제 플라즈마 장비 화면에서 **반사파(reflected power)** 의 의미를 읽고 정상/경고를 스스로 판단할 수 있습니다. **잘 하셨습니다!**"
+    "done": "이제 플라즈마 장비 화면에서 **반사파(reflected power)** 의 의미를 읽고 정상/경고를 스스로 판단할 수 있습니다. **잘 하셨습니다!**",
+    "figs": [
+     {
+      "kind": "buttons",
+      "items": [
+       [
+        "RF ON",
+        "go"
+       ],
+       [
+        "TUNE",
+        "warn"
+       ],
+       [
+        "RF OFF",
+        "stop"
+       ]
+      ]
+     }
+    ]
    }
   ]
  },
@@ -2779,31 +2825,6 @@ export const CONTENT_CHAPTERS = [
      "**Abort(중단)**는 진행 중이던 공정이나 동작이 도중에 강제로 취소된 것이다. 예: **PROCESS ABORTED by interlock**. \"누가/무엇이\" 중단시켰는지(by ~)를 읽는 것이 원인 파악의 핵심이다.",
      "이 단어들은 종종 한 문장에 겹쳐 나온다. 예: **Step aborted due to pump-down timeout** — \"펌프다운 타임아웃 때문에 스텝이 중단됨\". 각 단어를 분해해 읽으면 원인 사슬(cause chain)이 보인다.",
      "판단 요령: **timeout**은 대기·재시도로 회복될 때가 있지만, **failure/fault**는 하드웨어 조치가 필요하고, **abort**는 무엇이 트리거(trigger)했는지를 먼저 찾아야 한다. 문장의 동사와 명사를 정확히 읽는 것이 곧 조치의 방향이다."
-    ]
-   },
-   {
-    "type": "read",
-    "title": "Reset · Recovery — 되돌리기 전에 확인할 것",
-    "intro": "알람을 지우고 장비를 정상으로 되돌리는 절차. 순서를 지키지 않으면 위험하다.",
-    "paras": [
-     "**Acknowledge(ACK, 확인)**는 \"이 알람을 봤다\"고 시스템에 알리는 첫 동작이다. ACK를 눌러도 원인이 사라지는 것은 아니며, 단지 알람음/깜빡임을 멈추고 이력에 확인 시각을 남긴다.",
-     "**Reset(리셋)**은 알람 상태를 해제하고 장비를 **IDLE/READY** 상태로 되돌리는 동작이다. 반드시 **원인을 해소(clear the cause)한 뒤에만** 눌러야 한다. 원인이 남은 채 리셋하면 같은 알람이 즉시 다시 뜨거나, 인터록이라면 위험을 초래한다.",
-     "**Recovery(복구)**는 정지 지점에서 공정을 안전하게 재개하거나 초기 상태로 되돌리는 전체 과정을 말한다. 화면의 **Recovery** 메뉴는 보통 단계별(step-by-step) 안내를 제공한다.",
-     "표준 순서는 대개 이렇다: (1) 메시지 **읽기(read)** → (2) 안전/인터록 조건 **확인(verify)** → (3) 원인 **조치(clear)** → (4) **ACK** → (5) **RESET** → (6) 상태가 **READY**인지 **확인** → (7) 재개(resume) 또는 엔지니어 보고.",
-     "**Override(강제 해제)**는 인터록이나 안전 조건을 사람이 임의로 무시하는 기능으로, 권한이 있는 엔지니어만 사용해야 한다. 매뉴얼에 **Do NOT override**라고 적혀 있으면 절대 눌러서는 안 된다."
-    ]
-   },
-   {
-    "type": "read",
-    "title": "화면(HMI)에서 알람 읽기 — 어디를 보나",
-    "intro": "실제 장비 GUI에서 알람 정보는 정해진 위치와 형식으로 표시된다.",
-    "paras": [
-     "**Status bar(상태 표시줄)**: 화면 상단 또는 하단에 장비 상태가 영어 한 단어로 뜬다 — **RUN / IDLE / READY / HOLD / DOWN / ALARM**. 이 단어만 봐도 지금 장비가 돌 수 있는지 없는지를 알 수 있다.",
-     "**Alarm banner(알람 배너)**: 붉은 띠에 **code + message + timestamp**가 표시된다. 형식은 보통 **[ALM-1203] 03:14:07 Chamber pressure out of range**처럼 코드-시각-문장 순이다.",
-     "**Active vs History(현재 vs 이력)**: **Active alarms**는 아직 해소되지 않아 지금 조치가 필요한 알람이고, **Alarm history**는 지나간 기록이다. 조치할 때는 반드시 **Active** 목록을 먼저 본다.",
-     "**Severity color(심각도 색)**: 대부분 빨강=alarm/critical, 노랑=warning, 파랑/회색=information. 색과 단어를 함께 읽어 우선순위를 정한다.",
-     "**Help / Guidance 링크**: 알람을 누르면 **Probable cause(추정 원인)**와 **Recommended action(권장 조치)** 영어 설명이 나오는 장비가 많다. 이 두 항목을 읽는 습관이 오조작을 막는다.",
-     "정리하면, 기술자는 화면에서 항상 이 순서로 눈을 움직인다: 상태 단어 → 인터록 여부 → 알람 코드/문장 → 추정 원인 → 권장 조치. 읽는 순서가 곧 안전이다."
     ],
     "figs": [
      {
@@ -2817,6 +2838,39 @@ export const CONTENT_CHAPTERS = [
    },
    {
     "type": "read",
+    "title": "Reset · Recovery — 되돌리기 전에 확인할 것",
+    "intro": "알람을 지우고 장비를 정상으로 되돌리는 절차. 순서를 지키지 않으면 위험하다.",
+    "paras": [
+     "**Acknowledge(ACK, 확인)**는 \"이 알람을 봤다\"고 시스템에 알리는 첫 동작이다. ACK를 눌러도 원인이 사라지는 것은 아니며, 단지 알람음/깜빡임을 멈추고 이력에 확인 시각을 남긴다.",
+     "**Reset(리셋)**은 알람 상태를 해제하고 장비를 **IDLE/READY** 상태로 되돌리는 동작이다. 반드시 **원인을 해소(clear the cause)한 뒤에만** 눌러야 한다. 원인이 남은 채 리셋하면 같은 알람이 즉시 다시 뜨거나, 인터록이라면 위험을 초래한다.",
+     "**Recovery(복구)**는 정지 지점에서 공정을 안전하게 재개하거나 초기 상태로 되돌리는 전체 과정을 말한다. 화면의 **Recovery** 메뉴는 보통 단계별(step-by-step) 안내를 제공한다.",
+     "표준 순서는 대개 이렇다: (1) 메시지 **읽기(read)** → (2) 안전/인터록 조건 **확인(verify)** → (3) 원인 **조치(clear)** → (4) **ACK** → (5) **RESET** → (6) 상태가 **READY**인지 **확인** → (7) 재개(resume) 또는 엔지니어 보고.",
+     "**Override(강제 해제)**는 인터록이나 안전 조건을 사람이 임의로 무시하는 기능으로, 권한이 있는 엔지니어만 사용해야 한다. 매뉴얼에 **Do NOT override**라고 적혀 있으면 절대 눌러서는 안 된다."
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "RESPONSE",
+      "en": "[Acknowledge] the alarm, then find the cause.",
+      "ko": "알람 확인(ACK) 후 원인 파악."
+     }
+    ]
+   },
+   {
+    "type": "read",
+    "title": "화면(HMI)에서 알람 읽기 — 어디를 보나",
+    "intro": "실제 장비 GUI에서 알람 정보는 정해진 위치와 형식으로 표시된다.",
+    "paras": [
+     "**Status bar(상태 표시줄)**: 화면 상단 또는 하단에 장비 상태가 영어 한 단어로 뜬다 — **RUN / IDLE / READY / HOLD / DOWN / ALARM**. 이 단어만 봐도 지금 장비가 돌 수 있는지 없는지를 알 수 있다.",
+     "**Alarm banner(알람 배너)**: 붉은 띠에 **code + message + timestamp**가 표시된다. 형식은 보통 **[ALM-1203] 03:14:07 Chamber pressure out of range**처럼 코드-시각-문장 순이다.",
+     "**Active vs History(현재 vs 이력)**: **Active alarms**는 아직 해소되지 않아 지금 조치가 필요한 알람이고, **Alarm history**는 지나간 기록이다. 조치할 때는 반드시 **Active** 목록을 먼저 본다.",
+     "**Severity color(심각도 색)**: 대부분 빨강=alarm/critical, 노랑=warning, 파랑/회색=information. 색과 단어를 함께 읽어 우선순위를 정한다.",
+     "**Help / Guidance 링크**: 알람을 누르면 **Probable cause(추정 원인)**와 **Recommended action(권장 조치)** 영어 설명이 나오는 장비가 많다. 이 두 항목을 읽는 습관이 오조작을 막는다.",
+     "정리하면, 기술자는 화면에서 항상 이 순서로 눈을 움직인다: 상태 단어 → 인터록 여부 → 알람 코드/문장 → 추정 원인 → 권장 조치. 읽는 순서가 곧 안전이다."
+    ]
+   },
+   {
+    "type": "read",
     "title": "알람은 '문장'이 아니라 '상태 조각'이다",
     "intro": "실제 알람 배너는 예의 바른 문장이 아니라, 원인·상태를 압축한 짧은 조각이다. 이 형태에 익숙해져야 빨리 판단한다.",
     "paras": [
@@ -2825,6 +2879,31 @@ export const CONTENT_CHAPTERS = [
      "색으로도 등급을 준다. 보통 **Blue = Warning**(주의), **Red = Process abort / Fault**(중단·고장). 색과 텍스트를 함께 읽는다.",
      "알람을 지우는 동작도 딱딱한 동사다: **Accept / Acknowledge**(확인해 로그에 남김), **Silence**(경보음만 끔), **Reset**(원인 해소 후 해제). 'Acknowledge'는 문제 해결이 아니라 그냥 '봤음'이다.",
      "핵심: 알람을 완전문장으로 기대하지 말고 **[대상] + [상태/문제] + [조치]** 조각으로 끊어 읽어라. 예: **APC valve / stuck / abort**."
+    ],
+    "figs": [
+     {
+      "kind": "buttons",
+      "items": [
+       [
+        "ABORT",
+        "stop"
+       ],
+       [
+        "RESET",
+        "warn"
+       ],
+       [
+        "ACK",
+        "n"
+       ]
+      ]
+     },
+     {
+      "kind": "sticker",
+      "level": "warn",
+      "en": "FAULT — DO NOT RESTART",
+      "ko": "고장 — 임의 재가동 금지"
+     }
     ]
    },
    {
@@ -2866,6 +2945,14 @@ export const CONTENT_CHAPTERS = [
       "ab": "FDC",
       "full": "Fault Detection and Classification",
       "ko": "이상 감지·분류 시스템 — 실패 원인을 자동 분류"
+     }
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "danger",
+      "en": "EMERGENCY OFF",
+      "ko": "비상 정지(E-STOP)"
      }
     ]
    },
@@ -3071,25 +3158,6 @@ export const CONTENT_CHAPTERS = [
       "d": "리셋 전까지 알람 상태가 그대로 유지되도록 붙잡아 두는 것",
       "ex": "The alarm is latched, so it stays active until you reset it manually."
      }
-    ],
-    "figs": [
-     {
-      "kind": "buttons",
-      "items": [
-       [
-        "ABORT",
-        "stop"
-       ],
-       [
-        "RESET",
-        "warn"
-       ],
-       [
-        "ACK",
-        "n"
-       ]
-      ]
-     }
     ]
    },
    {
@@ -3194,14 +3262,6 @@ export const CONTENT_CHAPTERS = [
        "상태 단어는 무시하고 로트를 투입한다"
       ],
       "ans": 0
-     }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "danger",
-      "en": "EMERGENCY OFF",
-      "ko": "비상 정지(E-STOP)"
      }
     ]
    },
@@ -3335,6 +3395,15 @@ export const CONTENT_CHAPTERS = [
       "level": "danger",
       "en": "EQUIPMENT DOWN — PM IN PROGRESS",
       "ko": "장비 다운 — 정비(PM) 중"
+     },
+     {
+      "kind": "log",
+      "title": "MAINTENANCE LOG",
+      "lines": [
+       "TOOL 3 — [DOWN] for PM",
+       "Replaced: O-ring, filter",
+       "Result: [N-G] → rework needed"
+      ]
      }
     ]
    },
@@ -3375,14 +3444,6 @@ export const CONTENT_CHAPTERS = [
      "**Setpoint vs Actual(설정값 대 실제값)** — HMI에서 유량·온도·압력은 목표(setpoint)와 실제(actual)가 나란히 표시됩니다. 예: *MFC1 flow 0 sccm (setpoint 50)* → 설정은 50인데 실제 0이므로 **가스가 흐르지 않는 이상 상태**입니다.",
      "**판정 문구** — 각 항목 결과는 **Pass / Fail**, **OK / NG(No Good)**, 또는 **In Spec / Out of Spec** 로 표시됩니다. **Out of Spec** 은 '규격을 벗어남 — 조치 필요'라는 뜻입니다.",
      "따라서 좋은 기술자는 '값을 읽는 것'을 넘어, 그 값이 **limit(한계)** 안에 있는지 즉시 판단합니다. 예: *Base pressure 12 mTorr (limit 5 mTorr)* → 한계 초과, 불합격."
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "danger",
-      "en": "DO NOT ENERGIZE — LOTO",
-      "ko": "전원 투입 금지 — 잠금·표찰(LOTO)"
-     }
     ]
    },
    {
@@ -3396,6 +3457,30 @@ export const CONTENT_CHAPTERS = [
      "**기록(logging)** — *Record the reading in the CMMS log*(측정값을 정비 시스템에 기록), *Sign off each step*(각 단계에 서명), *Close the work order*(작업 지시 종료). 정비는 '기록으로 끝난다'는 점을 기억하세요.",
      "**경고 단계** — 문서의 **NOTE**(참고) < **CAUTION**(주의, 장비 손상 가능) < **WARNING**(경고, 인명 위험) < **DANGER**(위험, 즉각적 인명 위험) 순으로 위험도가 올라갑니다.",
      "요약: 화면 한 줄을 읽을 때 ①동사(무엇을), ②대상(어디에), ③수치·단위(얼마나), ④판정(합격 여부)의 네 가지를 순서대로 파악하는 습관을 들이면 실수를 크게 줄일 수 있습니다."
+    ],
+    "figs": [
+     {
+      "kind": "hmi",
+      "tool": "EQP-3",
+      "status": "DOWN",
+      "state": "down",
+      "rows": [
+       [
+        "Reason",
+        "PM"
+       ],
+       [
+        "ETA",
+        "+4h"
+       ]
+      ]
+     },
+     {
+      "kind": "note",
+      "title": "NOTICE",
+      "en": "Tag the tool [DOWN] before starting PM.",
+      "ko": "PM 시작 전 장비를 DOWN 태그."
+     }
     ]
    },
    {
@@ -3442,6 +3527,14 @@ export const CONTENT_CHAPTERS = [
       "ab": "IPA",
       "full": "Isopropyl Alcohol",
       "ko": "이소프로필알코올 — 챔버 세정용 용제"
+     }
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "danger",
+      "en": "DO NOT ENERGIZE — LOTO",
+      "ko": "전원 투입 금지 — 잠금·표찰(LOTO)"
      }
     ]
    },
@@ -3519,30 +3612,6 @@ export const CONTENT_CHAPTERS = [
        "O-ring의 무게를 측정한다"
       ],
       "ans": 0
-     }
-    ],
-    "figs": [
-     {
-      "kind": "step",
-      "title": "PM CHECKLIST",
-      "items": [
-       [
-        "[Inspect] the chamber.",
-        "챔버 점검"
-       ],
-       [
-        "[Clean] the parts.",
-        "부품 세정"
-       ],
-       [
-        "[Replace] the o-ring.",
-        "오링 교체"
-       ],
-       [
-        "[Calibrate] the sensor.",
-        "센서 교정"
-       ]
-      ]
      }
     ]
    },
@@ -3652,17 +3721,6 @@ export const CONTENT_CHAPTERS = [
       "d": "예정된 정비 기한이 지난 상태 — 즉시 수행 필요",
       "ex": "The chamber PM is overdue, so the tool stays down until it is completed."
      }
-    ],
-    "figs": [
-     {
-      "kind": "log",
-      "title": "MAINTENANCE LOG",
-      "lines": [
-       "TOOL 3 — [DOWN] for PM",
-       "Replaced: O-ring, filter",
-       "Result: [N-G] → rework needed"
-      ]
-     }
     ]
    },
    {
@@ -3715,6 +3773,14 @@ export const CONTENT_CHAPTERS = [
      "해설: 모든 챔버 볼트를 규정 토크 8 N·m로, 별 모양 순서로 조여 압력을 고르게 분산하라.",
      "6. Mark each step Pass / Fail and record any out-of-spec value in the CMMS log.",
      "해설: 각 단계를 합격/불합격으로 표시하고, 규격 이탈 값은 CMMS 기록에 남겨라."
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "SPEC",
+      "en": "Tighten bolts to [8 N·m], star pattern.",
+      "ko": "볼트 8N·m, 별 모양 순서로."
+     }
     ]
    },
    {
@@ -3745,14 +3811,6 @@ export const CONTENT_CHAPTERS = [
      "해설: 진공 게이지 영점을 확인하고, 도달 진공도가 5 mTorr에 도달하는지 검증하라.",
      "5. Record all readings in the CMMS maintenance log and close the work order.",
      "해설: 모든 측정값을 CMMS 정비 기록에 남기고 작업 지시서를 종료하라."
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "NOTICE",
-      "en": "Tag the tool [DOWN] before starting PM.",
-      "ko": "PM 시작 전 장비를 DOWN 태그."
-     }
     ]
    },
    {
@@ -3853,7 +3911,31 @@ export const CONTENT_CHAPTERS = [
      "안전 최우선: 챔버를 열기 전 **LOTO** 로 위험 에너지를 차단하고, **Do not / WARNING** 문구는 반드시 지킨다.",
      "정비는 기록으로 끝난다 — **Record the readings in the CMMS log** 하고 **close the work order**."
     ],
-    "done": "이제 여러분은 영어 **PM checklist**와 HMI 화면을 읽고, 각 항목의 **동작·대상·수치·판정**을 스스로 해석할 수 있습니다. **Read it, judge it, log it.** 현장에서 이 세 단계를 기억하세요!"
+    "done": "이제 여러분은 영어 **PM checklist**와 HMI 화면을 읽고, 각 항목의 **동작·대상·수치·판정**을 스스로 해석할 수 있습니다. **Read it, judge it, log it.** 현장에서 이 세 단계를 기억하세요!",
+    "figs": [
+     {
+      "kind": "step",
+      "title": "PM CHECKLIST",
+      "items": [
+       [
+        "[Inspect] the chamber.",
+        "챔버 점검"
+       ],
+       [
+        "[Clean] the parts.",
+        "부품 세정"
+       ],
+       [
+        "[Replace] the o-ring.",
+        "오링 교체"
+       ],
+       [
+        "[Calibrate] the sensor.",
+        "센서 교정"
+       ]
+      ]
+     }
+    ]
    }
   ]
  },
@@ -3900,28 +3982,6 @@ export const CONTENT_CHAPTERS = [
        "전력을 공급"
       ],
       "ans": 0
-     }
-    ],
-    "figs": [
-     {
-      "kind": "hmi",
-      "tool": "REVIEW",
-      "status": "IDLE",
-      "state": "idle",
-      "rows": [
-       [
-        "Ch.1",
-        "TERMS"
-       ],
-       [
-        "Ch.2",
-        "PARTS"
-       ],
-       [
-        "Ch.3",
-        "OPERATION"
-       ]
-      ]
      }
     ]
    },
@@ -3991,14 +4051,6 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 0
      }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "info",
-      "en": "CHECKPOINT — READ & JUDGE",
-      "ko": "중간 점검 — 읽고 판단"
-     }
     ]
    },
    {
@@ -4036,25 +4088,30 @@ export const CONTENT_CHAPTERS = [
     ],
     "figs": [
      {
-      "kind": "buttons",
-      "items": [
+      "kind": "hmi",
+      "tool": "REVIEW",
+      "status": "IDLE",
+      "state": "idle",
+      "rows": [
        [
-        "RUN",
-        "go"
+        "Ch.1",
+        "TERMS"
        ],
        [
-        "IDLE",
-        "n"
+        "Ch.2",
+        "PARTS"
        ],
        [
-        "ABORT",
-        "stop"
-       ],
-       [
-        "DONE",
-        "n"
+        "Ch.3",
+        "OPERATION"
        ]
       ]
+     },
+     {
+      "kind": "sticker",
+      "level": "info",
+      "en": "CHECKPOINT — READ & JUDGE",
+      "ko": "중간 점검 — 읽고 판단"
      }
     ]
    },
@@ -4127,6 +4184,12 @@ export const CONTENT_CHAPTERS = [
        ]
       ],
       "cap": "칩은 층(layer)으로 쌓인다 — 아래에서 위로 읽는다."
+     },
+     {
+      "kind": "note",
+      "title": "TERM",
+      "en": "[FEOL] = transistors · [BEOL] = wiring.",
+      "ko": "FEOL=소자 형성, BEOL=배선."
      }
     ]
    },
@@ -4254,14 +4317,6 @@ export const CONTENT_CHAPTERS = [
       "ko": "활성 영역",
       "d": "트랜지스터가 실제로 동작하는 영역 (OD/AA).",
       "ex": "Define the active area inside the well before the gate step."
-     }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "info",
-      "en": "CROSS-SECTION VIEW",
-      "ko": "단면도(cross-section)"
      }
     ]
    },
@@ -4427,14 +4482,6 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 1
      }
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "TERM",
-      "en": "Read the stack from [substrate] up to [metal].",
-      "ko": "기판부터 금속층까지 순서로 읽는다."
-     }
     ]
    },
    {
@@ -4465,6 +4512,14 @@ export const CONTENT_CHAPTERS = [
       "ko": "정렬",
       "d": "위아래 층이 정확히 겹쳐 놓였는지의 상태.",
       "ex": "The contact shows poor alignment to the active area."
+     }
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "info",
+      "en": "CROSS-SECTION VIEW",
+      "ko": "단면도(cross-section)"
      }
     ]
    },
@@ -4518,6 +4573,14 @@ export const CONTENT_CHAPTERS = [
      "5층: 컨택이 소스/드레인과 폴리를 금속1(M1)까지 위로 연결합니다.",
      "Layer 6 and above: Metal layers (M1, M2 …) linked by vias.",
      "6층 이상: 금속층(M1, M2 …)들이 비아(via)로 서로 연결됩니다."
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "TERM",
+      "en": "Read the stack from [substrate] up to [metal].",
+      "ko": "기판부터 금속층까지 순서로 읽는다."
+     }
     ]
    },
    {
@@ -4626,14 +4689,6 @@ export const CONTENT_CHAPTERS = [
      "값의 단위는 대부분 **micron(um)** 또는 **nanometer(nm)**입니다. 화면에 `0.20 um` 또는 `200 nm`처럼 표기되며, 두 값이 같은 크기임을 즉시 환산해 읽을 수 있어야 합니다.",
      "규칙의 목적은 **manufacturability**(제조 가능성)입니다. 너무 가늘거나 너무 가까운 패턴은 노광·식각에서 끊기거나 붙어(short) 불량이 됩니다. 즉 규칙은 '수율(yield)을 지키는 최소 안전선'입니다.",
      "기술자의 핵심 임무는 도형을 '그리는' 것이 아니라, 측정된 값(**measured value**)이 규칙 값(**rule value**)을 **satisfy**(만족)하는지 **pass/fail**을 판단하는 것입니다."
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "DESIGN RULE",
-      "en": "Minimum spacing = [0.14 µm].",
-      "ko": "최소 간격 = 0.14µm"
-     }
     ]
    },
    {
@@ -4647,6 +4702,14 @@ export const CONTENT_CHAPTERS = [
      "**Enclosure**: 한 층이 다른 층을 '감싸는' 최소 여유입니다. `Metal enclosure of via = 0.05 um`은 via 둘레를 metal이 사방 0.05um 이상 덮어야 한다는 뜻입니다. 정렬 오차(misalignment)를 견디게 해줍니다.",
      "**Extension**: 한 도형이 경계를 넘어 뻗어야 하는 최소 길이입니다. gate가 active 영역 밖으로 충분히 뻗어야(poly extension) 누설을 막습니다.",
      "이 다섯 규칙은 각각 **min**(최소) 조건인지 **max**(최대) 조건인지 반드시 확인해야 합니다. min은 '이보다 크면 OK', max는 '이보다 작으면 OK'로 판단 방향이 정반대입니다."
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "DESIGN RULE",
+      "en": "Minimum spacing = [0.14 µm].",
+      "ko": "최소 간격 = 0.14µm"
+     }
     ]
    },
    {
@@ -4673,6 +4736,14 @@ export const CONTENT_CHAPTERS = [
      "**Waived / Waiver**: 일부 violation은 검토 후 '예외 승인'되어 무시됩니다. 리포트에서 `waived`로 표시된 항목은 실제 fail이 아닐 수 있으니 상태(status)를 함께 읽어야 합니다.",
      "**Error vs Warning**: DRC 리포트는 심각도를 나눕니다. `error`는 반드시 수정, `warning`은 검토 후 판단입니다. 색상(빨강/노랑)과 함께 영어 라벨을 확인하세요.",
      "최종 산출물은 언제나 하나의 영어 판정어입니다: **PASS**(clean) 또는 **FAIL**(violation). 이 한 단어를 정확히 도출하는 것이 이 수업의 목표입니다."
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "danger",
+      "en": "0.02 µm SHORT → REWORK",
+      "ko": "0.02µm 부족 → 재작업"
+     }
     ]
    },
    {
@@ -4730,17 +4801,6 @@ export const CONTENT_CHAPTERS = [
       "full": "Layout Versus Schematic",
       "ko": "레이아웃-회로 일치 검증(DRC와 함께 자주 언급)"
      }
-    ],
-    "figs": [
-     {
-      "kind": "log",
-      "title": "RULE DECK",
-      "lines": [
-       "MIN WIDTH    0.10 µm",
-       "MIN SPACING  0.14 µm",
-       "ENCLOSURE    0.05 µm"
-      ]
-     }
     ]
    },
    {
@@ -4777,6 +4837,23 @@ export const CONTENT_CHAPTERS = [
       "ko": "연장",
       "d": "도형이 경계를 넘어 뻗어야 하는 최소 길이",
       "ex": "The poly extension beyond the active area must not be smaller than 0.10 um."
+     }
+    ],
+    "figs": [
+     {
+      "kind": "log",
+      "title": "RULE DECK",
+      "lines": [
+       "MIN WIDTH    0.10 µm",
+       "MIN SPACING  0.14 µm",
+       "ENCLOSURE    0.05 µm"
+      ]
+     },
+     {
+      "kind": "note",
+      "title": "DESIGN RULE",
+      "en": "Minimum width = [0.10 µm].",
+      "ko": "최소 선폭 = 0.10µm"
      }
     ]
    },
@@ -4888,14 +4965,6 @@ export const CONTENT_CHAPTERS = [
        "측정에 실패한 항목"
       ],
       "ans": 0
-     }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "warn",
-      "en": "DRC CLEAN REQUIRED BEFORE TAPEOUT",
-      "ko": "테이프아웃 전 DRC 통과 필수"
      }
     ]
    },
@@ -5015,9 +5084,9 @@ export const CONTENT_CHAPTERS = [
     "figs": [
      {
       "kind": "sticker",
-      "level": "danger",
-      "en": "0.02 µm SHORT → REWORK",
-      "ko": "0.02µm 부족 → 재작업"
+      "level": "warn",
+      "en": "DRC CLEAN REQUIRED BEFORE TAPEOUT",
+      "ko": "테이프아웃 전 DRC 통과 필수"
      }
     ]
    },
@@ -5142,6 +5211,23 @@ export const CONTENT_CHAPTERS = [
     ],
     "figs": [
      {
+      "kind": "hmi",
+      "tool": "LAYOUT EDITOR",
+      "status": "RUN",
+      "state": "run",
+      "rows": [
+       [
+        "Cells placed",
+        "128"
+       ],
+       [
+        "Off-grid",
+        "2",
+        "high"
+       ]
+      ]
+     },
+     {
       "kind": "note",
       "title": "WORK INSTRUCTION",
       "en": "Place the cells [per the drawing], Rev C.",
@@ -5195,6 +5281,14 @@ export const CONTENT_CHAPTERS = [
      "규칙 결과창(**DRC report**): 위반 항목이 'Spacing < 0.3 μm', 'Width violation', 'Off-grid vertex' 처럼 짧은 영어로 나열된다.",
      "경고 팝업: 'WARNING: Two patterns on the same layer overlap.' 같은 완전한 문장으로 뜨기도 한다. 대문자 WARNING/CAUTION은 즉시 확인이 필요한 신호다.",
      "이 모든 영어는 '작성'이 아니라 '해석'의 대상이다. 짧은 명사구와 부등호를 빠르게 읽어 규칙 위반 여부를 판단하는 훈련이 이 수업의 목표다."
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "caution",
+      "en": "CHECK PLACEMENT vs DRAWING",
+      "ko": "도면 대비 배치 확인"
+     }
     ]
    },
    {
@@ -5262,14 +5356,6 @@ export const CONTENT_CHAPTERS = [
       "ko": "레이아웃/배치도",
       "d": "여러 층을 위에서 본 평면 배치도.",
       "ex": "Open the layout and check the top metal layer."
-     }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "caution",
-      "en": "CHECK PLACEMENT vs DRAWING",
-      "ko": "도면 대비 배치 확인"
      }
     ]
    },
@@ -5466,25 +5552,6 @@ export const CONTENT_CHAPTERS = [
       "d": "서로 다른 물체 사이에 확보해야 하는 최소 여유 간격.",
       "ex": "Maintain enough clearance between the via and the edge."
      }
-    ],
-    "figs": [
-     {
-      "kind": "hmi",
-      "tool": "LAYOUT EDITOR",
-      "status": "RUN",
-      "state": "run",
-      "rows": [
-       [
-        "Cells placed",
-        "128"
-       ],
-       [
-        "Off-grid",
-        "2",
-        "high"
-       ]
-      ]
-     }
     ]
    },
    {
@@ -5650,19 +5717,6 @@ export const CONTENT_CHAPTERS = [
      "검사 기준의 묶음을 **rule deck** 또는 **runset**이라 부르며, 화면에는 보통 `Loaded rule deck: N28_M1.drc` 처럼 어떤 규칙 세트를 썼는지 표시된다.",
      "DRC를 통과하지 못한 도형은 실제 웨이퍼에서 **short**(붙어야 안 될 것이 붙음)나 **open**(끊어짐), 패턴 불량으로 이어질 수 있다. 그래서 현장에서는 '규칙 위반'을 '잠재 불량'으로 읽는다.",
      "결과는 사람이 읽는 리포트(텍스트)와, 레이아웃 위에 겹쳐 보이는 그래픽 마커(색깔 도형) 두 형태로 나온다. 기술자는 두 가지를 연결해 판단한다."
-    ],
-    "figs": [
-     {
-      "kind": "log",
-      "title": "DRC RESULTS",
-      "lines": [
-       "SPACING violation: [15 errors]",
-       "WIDTH violation: [3 errors]",
-       "[2 warnings]",
-       "→ insufficient spacing (min 0.14um)"
-      ],
-      "cap": "검사 결과 창 — 붉은 줄을 하나씩 해독한다."
-     }
     ]
    },
    {
@@ -5711,15 +5765,6 @@ export const CONTENT_CHAPTERS = [
      "리포트 요약 줄은 대개 `Errors: 18  Warnings: 2  Info: 5` 형태다. **Info**(정보)는 조치가 아니라 참고용 메시지다.",
      "현장 판단 원칙: **error = must fix**, **warning = review**, **info = note**. 이 세 단계를 혼동하면 멀쩡한 설계를 붙잡거나 위험한 위반을 방치하게 된다.",
      "일부 장비는 심각도를 **severity: high / medium / low** 나 **critical / minor**로도 표기한다. 색과 단어를 함께 보고 우선순위를 정한다."
-    ],
-    "figs": [
-     {
-      "kind": "alarm",
-      "level": "danger",
-      "code": "DRC",
-      "en": "18 ERRORS FOUND",
-      "ko": "DRC 오류 18건"
-     }
     ]
    },
    {
@@ -5733,6 +5778,14 @@ export const CONTENT_CHAPTERS = [
      "화면에서 위반은 보통 색으로 구분된다: 빨강 = **error**, 노랑 = **warning**, 표시된 도형에는 **highlight marker**가 겹쳐 그려진다. 색과 텍스트를 반드시 함께 읽는다.",
      "상단 요약 패널의 총계(Total errors/warnings)와 하단 리스트의 개별 줄은 연결되어 있다. 총계가 0이 되어야 **DRC clean**(무결) 상태다.",
      "리포트를 저장할 때 파일명은 흔히 `top_drc.rpt`, `drc_summary.txt` 형태다. 재검사 후에는 **before/after** 개수를 비교해 조치 효과를 확인한다."
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "danger",
+      "en": "DRC: NOT CLEAN",
+      "ko": "DRC 미통과"
+     }
     ]
    },
    {
@@ -5829,6 +5882,19 @@ export const CONTENT_CHAPTERS = [
       "d": "검사기가 위반으로 지적함.",
       "ex": "The tool flagged three shapes as too narrow."
      }
+    ],
+    "figs": [
+     {
+      "kind": "log",
+      "title": "DRC RESULTS",
+      "lines": [
+       "SPACING violation: [15 errors]",
+       "WIDTH violation: [3 errors]",
+       "[2 warnings]",
+       "→ insufficient spacing (min 0.14um)"
+      ],
+      "cap": "검사 결과 창 — 붉은 줄을 하나씩 해독한다."
+     }
     ]
    },
    {
@@ -5862,14 +5928,6 @@ export const CONTENT_CHAPTERS = [
        "웨이퍼 온도"
       ],
       "ans": 1
-     }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "danger",
-      "en": "DRC: NOT CLEAN",
-      "ko": "DRC 미통과"
      }
     ]
    },
@@ -5994,6 +6052,14 @@ export const CONTENT_CHAPTERS = [
       "d": "레이아웃 위에 위반 위치를 색으로 겹쳐 표시한 것.",
       "ex": "The red highlight marker shows where the lines are too close."
      }
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "MESSAGE",
+      "en": "[error] = must fix.   [warning] = check.",
+      "ko": "error=반드시 수정, warning=확인 필요."
+     }
     ]
    },
    {
@@ -6027,14 +6093,6 @@ export const CONTENT_CHAPTERS = [
        "규칙 파일명과 날짜"
       ],
       "ans": 0
-     }
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "MESSAGE",
-      "en": "[error] = must fix.   [warning] = check.",
-      "ko": "error=반드시 수정, warning=확인 필요."
      }
     ]
    },
@@ -6126,7 +6184,16 @@ export const CONTENT_CHAPTERS = [
      "심각도: **error = 반드시 수정**, **warning = 검토 후 판단(면제 가능)**, **info = 참고**. **clean**은 오류 0인 통과 상태.",
      "리포트 한 줄 = [severity] rule_ID : description @ (x, y) layer. 좌표와 layer로 화면의 **highlight marker** 위치를 찾는다."
     ],
-    "done": "이제 붉은 줄이 뜬 DRC 화면을 보고 **무엇이, 어디서, 얼마나 심각하게** 위반됐는지 영어 그대로 읽어낼 수 있습니다. **error는 반드시 고치고, warning은 검토하라** — 이것이 현장 판단의 기본입니다."
+    "done": "이제 붉은 줄이 뜬 DRC 화면을 보고 **무엇이, 어디서, 얼마나 심각하게** 위반됐는지 영어 그대로 읽어낼 수 있습니다. **error는 반드시 고치고, warning은 검토하라** — 이것이 현장 판단의 기본입니다.",
+    "figs": [
+     {
+      "kind": "alarm",
+      "level": "danger",
+      "code": "DRC",
+      "en": "18 ERRORS FOUND",
+      "ko": "DRC 오류 18건"
+     }
+    ]
    }
   ]
  },
@@ -6162,6 +6229,12 @@ export const CONTENT_CHAPTERS = [
        "[MISMATCH]: 1 net",
        "→ layout ≠ schematic"
       ]
+     },
+     {
+      "kind": "sticker",
+      "level": "danger",
+      "en": "LVS: NOT CLEAN",
+      "ko": "LVS 미일치"
      }
     ]
    },
@@ -6280,14 +6353,6 @@ export const CONTENT_CHAPTERS = [
       "d": "소자들이 어떤 선으로 이어져 있는가",
       "ex": "LVS checks connectivity, not the shape of the wires."
      }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "danger",
-      "en": "LVS: NOT CLEAN",
-      "ko": "LVS 미일치"
-     }
     ]
    },
    {
@@ -6358,6 +6423,14 @@ export const CONTENT_CHAPTERS = [
       "ko": "잉여 소자",
       "d": "레이아웃엔 있으나 회로도엔 없는 소자",
       "ex": "Please delete the extra device that is not in the schematic."
+     }
+    ],
+    "figs": [
+     {
+      "kind": "note",
+      "title": "TERM",
+      "en": "The [layout] must match the [schematic].",
+      "ko": "레이아웃과 회로도가 일치해야 한다."
      }
     ]
    },
@@ -6497,14 +6570,6 @@ export const CONTENT_CHAPTERS = [
       "ko": "최종 제출",
       "d": "설계를 제조 단계로 넘기는 것",
       "ex": "Do not tape out until LVS is clean."
-     }
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "TERM",
-      "en": "The [layout] must match the [schematic].",
-      "ko": "레이아웃과 회로도가 일치해야 한다."
      }
     ]
    },
@@ -6651,18 +6716,6 @@ export const CONTENT_CHAPTERS = [
      "**Action (조치)**: 실제로 무엇을 했는지. 과거형 동사가 줄줄이 온다 — **aborted**, **replaced**, **notified**, **rebooted**, **isolated**. 예: *Replaced gripper and re-qualified the tool.* 조치가 '임시(temporary fix)'인지 '영구(permanent)'인지가 핵심.",
      "**Result (결과)**: 조치 후 상태. **recovered**, **back to normal**, **still down**, **pending PM** 등. 예: *Tool back UP, monitoring for 24h.* 결과 문장이 곧 '지금 현재 상태'이므로, 구두 보고에서 가장 먼저 말해야 할 정보다.",
      "이 4단은 화면 **HMI** 이벤트 로그, 종이 **work instruction**, 이메일 **8D report** 어디서나 반복된다. 순서가 뒤섞여 있어도 각 문장을 P/C/A/R 중 어디에 속하는지 분류하며 읽으면 요약이 쉬워진다."
-    ],
-    "figs": [
-     {
-      "kind": "log",
-      "title": "PASSDOWN LOG",
-      "lines": [
-       "TOOL 3 — [DOWN], WO#4471",
-       "Waiting on parts, [ETA] tomorrow",
-       "CH-A OK · CH-B [OOS]"
-      ],
-      "cap": "교대 인수인계 로그 — 다음 조가 이걸 읽고 일한다."
-     }
     ]
    },
    {
@@ -6700,6 +6753,14 @@ export const CONTENT_CHAPTERS = [
      "자주 쓰는 **덩어리 표현(청크)**: **tool is down / back up**(장비 정지/재가동), **waiting on the part**(부품 대기), **out of spec**(규격 이탈), **no trouble found (NTF)**(이상 없음), **placed down pending PM**(PM까지 정지 처리).",
      "읽을 때는 **[무엇을 발견 → 무엇을 조치 → 지금 상태]** 세 조각으로 끊는다. 이 순서가 곧 problem–action–status 다.",
      "핵심: passdown은 '잘 쓴 영어'가 목표가 아니라 **다음 근무자가 3초 안에 상태를 파악**하게 하는 것. 그래서 짧고 딱딱하다. 그 형태를 읽어내는 게 이 챕터의 실전 능력이다."
+    ],
+    "figs": [
+     {
+      "kind": "sticker",
+      "level": "info",
+      "en": "END OF SHIFT — SIGN OFF",
+      "ko": "교대 종료 — 확인 서명"
+     }
     ]
    },
    {
@@ -6804,14 +6865,6 @@ export const CONTENT_CHAPTERS = [
       "ko": "정지 시간",
       "d": "장비가 생산하지 못한 시간.",
       "ex": "Total downtime for the tool was 2.5 hours."
-     }
-    ],
-    "figs": [
-     {
-      "kind": "note",
-      "title": "SHIFT REPORT",
-      "en": "Please [hand over] Tool 3 to the day shift.",
-      "ko": "3호기를 주간조에 인계 바람."
      }
     ]
    },
@@ -6970,20 +7023,20 @@ export const CONTENT_CHAPTERS = [
     ],
     "figs": [
      {
-      "kind": "hmi",
-      "tool": "EQP-204",
-      "status": "DOWN",
-      "state": "down",
-      "rows": [
-       [
-        "Shift",
-        "NIGHT → DAY"
-       ],
-       [
-        "Open WO",
-        "1"
-       ]
-      ]
+      "kind": "log",
+      "title": "PASSDOWN LOG",
+      "lines": [
+       "TOOL 3 — [DOWN], WO#4471",
+       "Waiting on parts, [ETA] tomorrow",
+       "CH-A OK · CH-B [OOS]"
+      ],
+      "cap": "교대 인수인계 로그 — 다음 조가 이걸 읽고 일한다."
+     },
+     {
+      "kind": "note",
+      "title": "SHIFT REPORT",
+      "en": "Please [hand over] Tool 3 to the day shift.",
+      "ko": "3호기를 주간조에 인계 바람."
      }
     ]
    },
@@ -7124,14 +7177,6 @@ export const CONTENT_CHAPTERS = [
      "보고문에 'temporary workaround applied'라고 있으면 장비가 여전히 위험 상태라고 보고 다음 작업자에게 알린다.",
      "WARNING: Do NOT release any quarantined lot back to production without written engineering approval.",
      "경고: 보류(quarantine) 처리된 로트는 서면 엔지니어링 승인 없이 절대 생산으로 되돌리지 않는다."
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "info",
-      "en": "END OF SHIFT — SIGN OFF",
-      "ko": "교대 종료 — 확인 서명"
-     }
     ]
    },
    {
@@ -7146,6 +7191,24 @@ export const CONTENT_CHAPTERS = [
      "미결 항목: 5호기 부품(터보펌프) 대기, 예상 도착(ETA) 내일 오전. 작업지시(WO) #4471 미결. 벤더 에스컬레이션.",
      "NOTE: Read every line as [what was found] -> [what was done] -> [current status]. Confirm any tool marked 'down' before you start it.",
      "참고: 각 줄을 [발견]->[조치]->[현재 상태]로 끊어 읽을 것. 'down'으로 표시된 장비는 가동 전 반드시 상태를 확인하라."
+    ],
+    "figs": [
+     {
+      "kind": "hmi",
+      "tool": "EQP-204",
+      "status": "DOWN",
+      "state": "down",
+      "rows": [
+       [
+        "Shift",
+        "NIGHT → DAY"
+       ],
+       [
+        "Open WO",
+        "1"
+       ]
+      ]
+     }
     ]
    },
    {
@@ -7302,14 +7365,6 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 0
      }
-    ],
-    "figs": [
-     {
-      "kind": "sticker",
-      "level": "info",
-      "en": "FINAL CHECK — READ · JUDGE · REPORT",
-      "ko": "최종 점검 — 읽고·판단하고·보고"
-     }
     ]
    },
    {
@@ -7343,6 +7398,25 @@ export const CONTENT_CHAPTERS = [
        "누설"
       ],
       "ans": 0
+     }
+    ],
+    "figs": [
+     {
+      "kind": "hmi",
+      "tool": "ALL TOOLS",
+      "status": "RUN",
+      "state": "run",
+      "rows": [
+       [
+        "Equipment",
+        "OK"
+       ],
+       [
+        "Design",
+        "DRC/LVS CLEAN",
+        "ok"
+       ]
+      ]
      }
     ]
    },
@@ -7378,25 +7452,6 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 0
      }
-    ],
-    "figs": [
-     {
-      "kind": "hmi",
-      "tool": "ALL TOOLS",
-      "status": "RUN",
-      "state": "run",
-      "rows": [
-       [
-        "Equipment",
-        "OK"
-       ],
-       [
-        "Design",
-        "DRC/LVS CLEAN",
-        "ok"
-       ]
-      ]
-     }
     ]
    },
    {
@@ -7431,8 +7486,23 @@ export const CONTENT_CHAPTERS = [
       ],
       "ans": 0
      }
+    ]
+   },
+   {
+    "type": "wrap",
+    "title": "수료 — 이 과정을 마치며",
+    "points": [
+     "장비 운전·로그·알람 → 디자인 규칙·DRC·LVS → 종합 보고까지 마쳤다.",
+     "이제 현장 영어를 읽고 → 판단하고 → 보고할 수 있다."
     ],
+    "done": "🎓 **종합 점검 완료 · 전 과정 수료!**",
     "figs": [
+     {
+      "kind": "sticker",
+      "level": "info",
+      "en": "FINAL CHECK — READ · JUDGE · REPORT",
+      "ko": "최종 점검 — 읽고·판단하고·보고"
+     },
      {
       "kind": "log",
       "title": "FINAL CHECKLIST",
@@ -7443,15 +7513,6 @@ export const CONTENT_CHAPTERS = [
       ]
      }
     ]
-   },
-   {
-    "type": "wrap",
-    "title": "수료 — 이 과정을 마치며",
-    "points": [
-     "장비 운전·로그·알람 → 디자인 규칙·DRC·LVS → 종합 보고까지 마쳤다.",
-     "이제 현장 영어를 읽고 → 판단하고 → 보고할 수 있다."
-    ],
-    "done": "🎓 **종합 점검 완료 · 전 과정 수료!**"
    }
   ]
  }
