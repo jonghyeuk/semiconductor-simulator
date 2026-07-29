@@ -1392,7 +1392,95 @@ const SIM_REGISTRY = {
   layer: () => <ArtImage which="layer" cap="MOSFET device cross-section — 공정 레이어(도해). 각 레이어의 영어 이름은 번호 라벨 참고." />,
   pm: () => <PMChecklist />,
 };
-function SlideRenderer({ slide }) {
+// ===== 현장 자료 삽화 (장비에 붙은 스티커·화면·계기·로그를 직접 보여준다) =====
+function faRich(text) {
+  if (text == null) return null;
+  return String(text).split(/\[|\]/).map((s, i) => (i % 2 ? <em key={i}>{s}</em> : <React.Fragment key={i}>{s}</React.Fragment>));
+}
+function FieldArtifact({ f }) {
+  let body = null;
+  switch (f.kind) {
+    case 'sticker': {
+      const lv = f.level || 'info';
+      const word = { danger: 'DANGER', warn: 'WARNING', caution: 'CAUTION', info: 'NOTICE', note: 'NOTE' }[lv] || 'NOTICE';
+      body = (
+        <div className={`fa-sticker fa-${lv}`}>
+          <div className="fa-st-hd">{f.icon || '⚠'} {word}</div>
+          <div className="fa-st-bd"><div className="fa-en">{f.en}</div>{f.ko && <div className="fa-ko">{f.ko}</div>}</div>
+        </div>
+      );
+      break;
+    }
+    case 'hmi':
+      body = (
+        <div className="fa-hmi">
+          <div className="fa-hmi-top"><span>{f.tool || 'TOOL'}</span><span className={`fa-chip fa-s-${f.state || 'idle'}`}>{f.status || 'IDLE'}</span></div>
+          <div className="fa-hmi-body">{(f.rows || []).map((r, i) => <div key={i} className="fa-hmi-row"><span>{r[0]}</span><span className={r[2] ? `fa-v-${r[2]}` : ''}>{r[1]}</span></div>)}</div>
+          {f.banner && <div className={`fa-hmi-bn fa-${f.banner.level || 'danger'}`}>{f.banner.en}{f.banner.ko && <b>{f.banner.ko}</b>}</div>}
+        </div>
+      );
+      break;
+    case 'alarm':
+      body = (
+        <div className={`fa-alarm fa-${f.level || 'danger'}`}>
+          <div className="fa-al-ic">▲</div>
+          <div className="fa-al-tx"><div className="fa-en">{f.code ? <span className="fa-al-code">{f.code}</span> : null}{f.en}</div>{f.ko && <div className="fa-ko">{f.ko}</div>}</div>
+        </div>
+      );
+      break;
+    case 'meter': {
+      const st = f.state || 'ok';
+      body = (
+        <div className="fa-meter">
+          <div className="fa-mt-nm">{f.name}</div>
+          <div className="fa-mt-vals"><span className="fa-mt-sp">SP {f.sp}</span><span className={`fa-mt-pv fa-v-${st}`}>PV {f.pv}</span><span className="fa-mt-u">{f.unit}</span></div>
+          {f.note && <div className="fa-ko">{f.note}</div>}
+        </div>
+      );
+      break;
+    }
+    case 'buttons':
+      body = <div className="fa-btns">{(f.items || []).map((b, i) => <span key={i} className={`fa-btn fa-b-${b[1] || 'n'}`}>{b[0]}</span>)}</div>;
+      break;
+    case 'log':
+      body = (
+        <div className="fa-log">
+          <div className="fa-log-hd">▤ {f.title || 'LOG'}</div>
+          <div className="fa-log-bd">{(f.lines || []).map((l, i) => <div key={i} className="fa-log-ln">{faRich(l)}</div>)}</div>
+        </div>
+      );
+      break;
+    case 'note':
+      body = (
+        <div className="fa-note">
+          <div className="fa-nt-hd">{f.title || 'WORK INSTRUCTION'}</div>
+          <div className="fa-en">{faRich(f.en)}</div>{f.ko && <div className="fa-ko">{f.ko}</div>}
+        </div>
+      );
+      break;
+    case 'step':
+      body = (
+        <div className="fa-step">
+          <div className="fa-sp-hd">{f.title || 'SOP · PROCEDURE'}</div>
+          <ol className="fa-sp-ol">{(f.items || []).map((s, i) => <li key={i}><span className="fa-en">{faRich(Array.isArray(s) ? s[0] : s)}</span>{Array.isArray(s) && s[1] && <span className="fa-ko">{s[1]}</span>}</li>)}</ol>
+        </div>
+      );
+      break;
+    case 'stack':
+      body = (
+        <div className="fa-stack">{(f.layers || []).map((l, i) => <div key={i} className="fa-sk-row" style={{ background: l[2] || 'transparent' }}><span className="fa-en">{l[0]}</span><span className="fa-ko">{l[1]}</span></div>)}</div>
+      );
+      break;
+    default:
+      body = null;
+  }
+  if (!body) return null;
+  return <figure className="fa-fig">{body}{f.cap && <figcaption className="fa-cap">{f.cap}</figcaption>}</figure>;
+}
+function FieldFigs({ figs }) {
+  return <div className="fa-wrap">{figs.map((f, i) => <FieldArtifact key={i} f={f} />)}</div>;
+}
+function slideInner(slide) {
   switch (slide.type) {
     case 'story':
       return (
@@ -1429,6 +1517,13 @@ function SlideRenderer({ slide }) {
     default:
       return slide.body || null;
   }
+}
+function SlideRenderer({ slide }) {
+  const hasFigs = slide.figs && slide.figs.length;
+  const inner = slideInner(slide);
+  // story already leads with its manga panel; field figs go after its narrative.
+  if (slide.type === 'story') return <>{inner}{hasFigs ? <FieldFigs figs={slide.figs} /> : null}</>;
+  return <>{hasFigs ? <FieldFigs figs={slide.figs} /> : null}{inner}</>;
 }
 
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
@@ -1864,6 +1959,72 @@ function FesStyles() {
 .fes-wk-manual b{color:#bfe9f5;font-weight:700}
 .fes-wk-quiz-intro{font-size:12.5px;color:${C.dim};margin:0 0 12px}
 .fes-wk-qn{font-family:${C.mono};color:${C.cyan};font-size:12px;margin-right:4px}
+/* ===== 현장 자료 삽화 (field artifacts) ===== */
+.fa-wrap{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px}
+.fa-fig{margin:0;flex:1 1 240px;min-width:0;display:flex;flex-direction:column}
+.fa-fig>*:first-child{flex:1}
+.fa-cap{font-size:11px;color:${C.dim};margin-top:6px;line-height:1.5}
+.fa-en{font-family:${C.sans};font-weight:800;color:#f3f6fb;letter-spacing:.2px}
+.fa-ko{font-size:11.5px;color:${C.dim};margin-top:3px;line-height:1.5}
+.fa-fig em,.fa-log em,.fa-note em,.fa-step em{font-style:normal;font-weight:800;color:${C.cyan};background:${C.cyan}1a;border-radius:4px;padding:0 3px}
+/* sticker / placard */
+.fa-sticker{border:2px solid;border-radius:10px;overflow:hidden;background:#0e1726}
+.fa-st-hd{font-family:${C.mono};font-size:11px;font-weight:800;letter-spacing:2px;padding:5px 11px;color:#0e1726}
+.fa-st-bd{padding:11px 13px}.fa-st-bd .fa-en{font-size:16px;line-height:1.35}
+.fa-danger{border-color:${C.red}}.fa-danger .fa-st-hd{background:${C.red}}
+.fa-warn{border-color:${C.amber}}.fa-warn .fa-st-hd{background:${C.amber}}
+.fa-caution{border-color:#eab308}.fa-caution .fa-st-hd{background:#eab308}
+.fa-info{border-color:${C.cyan}}.fa-info .fa-st-hd{background:${C.cyan}}
+.fa-note.fa-note{border:none}
+.fa-danger .fa-en{color:#ffd9d3}.fa-warn .fa-en,.fa-caution .fa-en{color:#ffe9c2}
+/* HMI screen */
+.fa-hmi{border:2px solid ${C.line2};border-radius:10px;background:#0a1420;overflow:hidden;box-shadow:inset 0 0 0 4px #060d16}
+.fa-hmi-top{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;background:#0d1a2b;font-family:${C.mono};font-size:11px;color:${C.dim};border-bottom:1px solid ${C.line}}
+.fa-chip{font-weight:800;padding:2px 9px;border-radius:5px;font-size:10.5px;letter-spacing:1px}
+.fa-s-idle{background:#334155;color:#cbd5e1}.fa-s-run{background:${C.emerald};color:#052e1b}.fa-s-fault{background:${C.red};color:#3a0a06}.fa-s-down{background:${C.amber};color:#3a2a05}
+.fa-hmi-body{padding:9px 11px;font-family:${C.mono};font-size:12px}
+.fa-hmi-row{display:flex;justify-content:space-between;padding:3px 0;color:#b7c6de;border-bottom:1px dashed ${C.line}}
+.fa-hmi-row:last-child{border-bottom:none}
+.fa-v-ok{color:${C.emerald};font-weight:700}.fa-v-high,.fa-v-bad{color:${C.red};font-weight:800}.fa-v-warn{color:${C.amber};font-weight:800}
+.fa-hmi-bn{padding:6px 11px;font-family:${C.mono};font-size:12px;font-weight:800;text-align:center;color:#fff}
+.fa-hmi-bn b{display:block;font-weight:500;font-size:10.5px;opacity:.85;margin-top:1px}
+.fa-hmi-bn.fa-danger{background:${C.red}}.fa-hmi-bn.fa-warn{background:${C.amber};color:#3a2a05}
+/* alarm banner */
+.fa-alarm{display:flex;gap:10px;align-items:center;border-radius:9px;padding:10px 13px;border-left:5px solid}
+.fa-alarm.fa-danger{background:${C.red}1e;border-color:${C.red}}.fa-alarm.fa-warn{background:${C.amber}1e;border-color:${C.amber}}
+.fa-al-ic{font-size:18px}.fa-alarm.fa-danger .fa-al-ic{color:${C.red}}.fa-alarm.fa-warn .fa-al-ic{color:${C.amber}}
+.fa-al-tx .fa-en{font-size:14.5px}.fa-al-code{font-family:${C.mono};font-size:11px;background:#0e1726;color:${C.dim};padding:1px 6px;border-radius:4px;margin-right:7px}
+/* meter SP/PV */
+.fa-meter{border:1px solid ${C.line2};border-radius:9px;padding:10px 13px;background:${C.panel}}
+.fa-mt-nm{font-size:11px;color:${C.dim};font-family:${C.mono};margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fa-mt-vals{display:flex;align-items:baseline;gap:12px;font-family:${C.mono}}
+.fa-mt-sp{font-size:13px;color:#8aa0bf}.fa-mt-pv{font-size:19px;font-weight:800}.fa-mt-u{font-size:12px;color:${C.dim}}
+.fa-mt-pv.fa-v-ok{color:${C.emerald}}
+/* buttons */
+.fa-btns{display:flex;flex-wrap:wrap;gap:8px}
+.fa-btn{font-family:${C.mono};font-size:12px;font-weight:800;letter-spacing:1px;padding:8px 15px;border-radius:7px;border:1.5px solid ${C.line2};color:#c8d6ec;background:${C.panel2}}
+.fa-b-go{background:${C.emerald};color:#052e1b;border-color:${C.emerald}}.fa-b-stop{background:${C.red};color:#fff;border-color:${C.red}}.fa-b-warn{background:${C.amber};color:#3a2a05;border-color:${C.amber}}
+/* log printout */
+.fa-log{border:1px solid ${C.line2};border-radius:9px;overflow:hidden;background:#0b1422}
+.fa-log-hd{font-family:${C.mono};font-size:11px;font-weight:800;letter-spacing:1px;color:${C.amber};padding:7px 12px;background:#111e30;border-bottom:1px solid ${C.line}}
+.fa-log-bd{padding:9px 12px;font-family:${C.mono};font-size:11.5px;line-height:1.7;color:#b7c6de}
+.fa-log-ln{white-space:pre-wrap}
+/* work-instruction note */
+.fa-note{border:1px solid ${C.amber}66;border-left:4px solid ${C.amber};border-radius:9px;padding:10px 13px;background:${C.amber}12}
+.fa-nt-hd{font-family:${C.mono};font-size:10.5px;font-weight:800;letter-spacing:1.5px;color:${C.amber};margin-bottom:5px}
+.fa-note .fa-en{font-size:14.5px;line-height:1.4}
+/* SOP steps */
+.fa-step{border:1px solid ${C.line2};border-radius:9px;padding:10px 13px 10px 10px;background:${C.panel}}
+.fa-sp-hd{font-family:${C.mono};font-size:10.5px;font-weight:800;letter-spacing:1.5px;color:${C.cyan};margin:0 0 6px 3px}
+.fa-sp-ol{margin:0;padding:0 0 0 4px;list-style:none;counter-reset:sp}
+.fa-sp-ol li{counter-increment:sp;position:relative;padding:4px 0 4px 30px;border-bottom:1px dashed ${C.line}}
+.fa-sp-ol li:last-child{border-bottom:none}
+.fa-sp-ol li::before{content:counter(sp);position:absolute;left:0;top:4px;width:20px;height:20px;border-radius:50%;background:${C.cyan};color:#052430;font-weight:800;font-size:11px;text-align:center;line-height:20px}
+.fa-sp-ol .fa-en{font-size:13.5px;display:inline}.fa-sp-ol .fa-ko{display:inline;margin-left:8px}
+/* layer stack */
+.fa-stack{border:2px solid ${C.line2};border-radius:8px;overflow:hidden}
+.fa-sk-row{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid #0006}
+.fa-sk-row:last-child{border-bottom:none}.fa-sk-row .fa-en{color:#10202e;font-size:13px}.fa-sk-row .fa-ko{color:#10202e;opacity:.7;margin-top:0}
 .fes-manga{margin:0 0 14px}
 .fes-manga-svg{background:linear-gradient(135deg,#132338,#0e1a2e);border:1px solid ${C.line2};border-radius:14px;padding:12px;box-shadow:0 6px 22px rgba(0,0,0,.28)}
 .fes-manga-svg svg{width:100%;height:auto;display:block;border-radius:6px}
