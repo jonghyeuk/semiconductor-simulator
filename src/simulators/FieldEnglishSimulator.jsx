@@ -1570,10 +1570,6 @@ function ManualSpecimen({ s }) {
 }
 // ===== 모사 EDA 툴 GUI (설계 챕터: 종이 매뉴얼 대신 실제 설계 프로그램 화면을 읽는다) =====
 function edaCanvas(kind) {
-  const G = '#26364a', L = '#0a1420', T = '#1a2635';
-  const grid = `<rect width="440" height="230" fill="${L}"/>` +
-    [...Array(11)].map((_, i) => `<line x1="${i * 44}" y1="0" x2="${i * 44}" y2="230" stroke="${G}" stroke-width="0.8"/>`).join('') +
-    [...Array(6)].map((_, i) => `<line x1="0" y1="${i * 46}" x2="440" y2="${i * 46}" stroke="${G}" stroke-width="0.8"/>`).join('');
   let art = '';
   if (kind === 'layout') {
     art = `<rect x="60" y="60" width="150" height="34" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.5"/><text x="66" y="82" font-family="monospace" font-size="11" fill="#d6ffe9">METAL1</text>
@@ -1600,11 +1596,11 @@ function edaCanvas(kind) {
       <rect x="250" y="60" width="170" height="120" fill="none" stroke="#3b5069" stroke-width="1.2"/><text x="256" y="54" font-family="monospace" font-size="10" fill="#7fe3b0">LAYOUT</text>
       <rect x="280" y="96" width="30" height="20" fill="#2f7d5b" stroke="#e05a4a" stroke-width="1.6"/><rect x="350" y="130" width="30" height="20" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.3"/><line x1="310" y1="106" x2="350" y2="140" stroke="#8fb4dd" stroke-width="1.3"/>`;
   }
-  return `<svg viewBox="0 0 440 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">${grid}${art}</svg>`;
+  return `<svg viewBox="0 0 440 230" preserveAspectRatio="xMinYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">${art}</svg>`;
 }
 function EdaTool({ s }) {
   return (
-    <div>
+    <div className="eda-slide">
       <div className="fes-doc-tag">🖥️ 설계 프로그램 화면 (모사) — 실제 EDA 툴의 <b>영어 UI</b>를 읽어보세요</div>
       <div className="eda">
         <div className="eda-tb">
@@ -2093,23 +2089,27 @@ function FesStyles() {
 .fes-ld-dot{width:26px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
 .fes-ld-dot.done{background:${C.cyan}66}
 .fes-ld-dot.on{background:${C.cyan};box-shadow:0 0 0 3px ${C.cyan}22}
-.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;height:min(76vh,620px);display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
+.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;height:min(72vh,660px);display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
 .fes-ld-head{position:relative;background:linear-gradient(90deg,${C.elec}22,${C.elec}08 60%,transparent);border-bottom:1px solid ${C.line};border-left:4px solid ${C.elec};padding:13px 24px;flex:none}
 .fes-ld-head:after{content:'';position:absolute;right:20px;top:14px;width:30px;height:30px;border-radius:9px;background:radial-gradient(circle at 30% 30%,${C.neon}55,${C.elec}22);opacity:.5}
 .fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1.2px;color:${C.neon};font-weight:700}
 .fes-ld-step-sep{margin:0 8px;color:${C.dim};letter-spacing:0}
 .fes-ld-title{font-size:22px;font-weight:800;color:#fff;margin-top:4px;letter-spacing:-.2px;text-wrap:balance;max-width:92%}
-.fes-ld-body{font-size:15px;line-height:1.72;padding:20px 26px 22px;flex:1;min-height:0;overflow-y:auto}
-.fes-story-split{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:center;height:100%}
+.fes-ld-body{font-size:15px;line-height:1.72;padding:22px 30px 24px;flex:1;min-height:0;overflow-y:auto}
+.fes-story-split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:30px;align-items:center;height:100%}
 .fes-story-split .fes-manga{margin:0}
-.fes-story-split .fes-wk-story{margin:0}
+.fes-story-split .fes-manga-svg{padding:16px}
+.fes-story-split .fes-wk-story{margin:0;font-size:15.5px;line-height:1.78;padding:20px 22px}
+.fes-story-split .fes-wk-story-ic{font-size:34px}
 @media(max-width:760px){.fes-story-split{grid-template-columns:1fr;align-items:start}}
 
 /* 이론(PPT) 슬라이드 */
-.fes-th-lead{font-size:16px;line-height:1.7;color:#eaf1ff;border-left:3px solid ${C.neon};background:${C.neon}0e;padding:11px 15px;border-radius:0 9px 9px 0;margin-bottom:15px}
+.fes-th{height:100%;display:flex;flex-direction:column;justify-content:center}
+.fes-th-lead{font-size:17px;line-height:1.7;color:#eaf1ff;border-left:3px solid ${C.neon};background:${C.neon}0e;padding:13px 17px;border-radius:0 9px 9px 0;margin-bottom:16px}
 .fes-th-lead b{color:${C.neon}}
-.fes-th-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.fes-th-point{position:relative;background:${C.panel};border:1px solid ${C.line2};border-radius:11px;padding:13px 15px 13px 42px;font-size:14.5px;line-height:1.65;color:${C.text}}
+.fes-th-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:900px){.fes-th-list{grid-template-columns:1fr}}
+.fes-th-point{position:relative;background:${C.panel};border:1px solid ${C.line2};border-radius:11px;padding:14px 16px 14px 42px;font-size:15px;line-height:1.66;color:${C.text}}
 .fes-th-point b{color:${C.neon};font-weight:700}
 .fes-th-mk{position:absolute;left:16px;top:17px;width:10px;height:10px;background:${C.elec};transform:rotate(45deg);border-radius:2px;box-shadow:0 0 8px ${C.elec}88}
 .fes-ld-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
@@ -2154,16 +2154,22 @@ function FesStyles() {
 .eda-tools{display:flex;gap:6px;padding:5px 11px;background:#0f1a29;border-bottom:1px solid #1c2c44}
 .eda-tool{font-size:10.5px;color:#a9bcd8;border:1px solid #2a3d5f;border-radius:4px;padding:2px 9px;background:#13202f}
 .eda-tool.on{background:${C.cyan};color:#062230;border-color:${C.cyan};font-weight:700}
-.eda-body{display:flex;min-height:170px}
+.eda-slide{height:100%;display:flex;flex-direction:column;justify-content:center}
+.eda-slide .fes-doc-tag{margin-bottom:6px}
+.eda-slide .fes-doc-help{margin-top:8px;padding:8px 13px}
+.eda-slide .fes-doc-help-h{margin-bottom:4px}
+.eda-slide .fes-doc-gloss{gap:4px 16px}
+.eda-slide .fes-doc-gloss span{font-size:12px}
+.eda-body{display:flex;height:clamp(160px,24vh,250px)}
 .eda-left{width:138px;flex:none;background:#0d1725;border-right:1px solid #1c2c44;padding:7px 8px}
 .eda-ph{font-size:9.5px;letter-spacing:1px;color:#7f96b6;margin-bottom:7px;text-transform:uppercase}
 .eda-row{display:flex;align-items:center;gap:5px;padding:2.5px 0;font-size:11px;color:#c2d2ea}
 .eda-sw{width:11px;height:11px;border-radius:2px;border:1px solid #33465f;flex:none}.eda-sw.off{background:transparent}
 .eda-chk{color:#6f86a6;font-size:11px}.eda-chk.off{color:#3d4d63}
 .eda-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.eda-canvas{flex:1;min-width:0;background:#0a1420;display:flex;align-items:center}
-.eda-canvas svg{display:block;width:100%}
-.eda-console{background:#0a121e;border-top:1px solid #1c2c44;padding:6px 11px;font-size:11px;line-height:1.75;color:#8ea4c4}
+.eda-canvas{flex:1;min-width:0;background:#0a1420;background-image:linear-gradient(#26364a55 1px,transparent 1px),linear-gradient(90deg,#26364a55 1px,transparent 1px);background-size:48px 48px;background-position:-1px -1px;display:flex;align-items:stretch;overflow:hidden}
+.eda-canvas svg{display:block;width:100%;height:100%}
+.eda-console{background:#0a121e;border-top:1px solid #1c2c44;padding:5px 11px;font-size:11px;line-height:1.5;color:#8ea4c4}
 .eda-log.err{color:#f28b7d}.eda-log.ok{color:#6fe0a0}
 .eda-status{background:#0c1521;border-top:1px solid #22334c;padding:4px 11px;font-size:10px;color:#6f86a6}
 /* ===== 매뉴얼 표본 (printed English document look) ===== */
