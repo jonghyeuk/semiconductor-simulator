@@ -4988,43 +4988,59 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
-    "type": "mansample",
-    "title": "매뉴얼 표본 — 레이어 스택 가이드",
-    "doc": {
-     "name": "Device Layer Guide",
-     "no": "DLG-14",
-     "sec": "2.2",
-     "rev": "A",
-     "page": "2-4"
+    "type": "eda",
+    "title": "설계 프로그램 화면 — 레이어 편집",
+    "app": "LayoutPro",
+    "doc": "chip_top.gds",
+    "run": "Select",
+    "canvas": "layout",
+    "left": {
+     "title": "Layers",
+     "items": [
+      {
+       "name": "METAL1",
+       "color": "#2f7d5b"
+      },
+      {
+       "name": "POLY",
+       "color": "#6a4d8f"
+      },
+      {
+       "name": "ACTIVE",
+       "color": "#8f6a3d"
+      },
+      {
+       "name": "CONTACT",
+       "color": "#c9d4e2"
+      },
+      {
+       "name": "WELL",
+       "color": "#3a6a86",
+       "on": false
+      }
+     ]
     },
-    "heading": "2.2  Layer Stack (Bottom to Top)",
-    "steps": [
-     "[SUBSTRATE] — the base silicon wafer.",
-     "[WELL] / ACTIVE — doped regions where devices are formed (FEOL).",
-     "[POLY] — the gate layer.",
-     "CONTACT / VIA — vertical connections between layers.",
-     "[METAL] — the interconnect wiring (BEOL)."
+    "log": [
+     "> open chip_top.gds",
+     "> loaded 5 layers ... done"
     ],
-    "callout": {
-     "kind": "note",
-     "en": "Read the stack from substrate up to metal."
-    },
+    "status": "X: 12.40  Y: 8.10   Layer: METAL1   Zoom: 400%",
     "gloss": [
      [
-      "substrate",
-      "기판"
+      "Layers",
+      "레이어(층) 목록"
      ],
      [
-      "doped",
-      "불순물 주입된"
+      "Palette / swatch",
+      "색상 견본"
      ],
      [
-      "interconnect",
-      "배선"
+      "visible ☑",
+      "표시 켜짐"
      ],
      [
-      "FEOL / BEOL",
-      "전공정 / 후공정"
+      "Zoom",
+      "확대율"
      ]
     ]
    },
@@ -5581,41 +5597,47 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
-    "type": "mansample",
-    "title": "매뉴얼 표본 — 디자인 룰 문서",
-    "doc": {
-     "name": "Design Rule Manual (N28)",
-     "no": "DRM-N28",
-     "sec": "3.1",
-     "rev": "D",
-     "page": "3-2"
+    "type": "eda",
+    "title": "설계 프로그램 화면 — 디자인 룰",
+    "app": "LayoutPro",
+    "doc": "m1_rules.drc",
+    "run": "Ruler",
+    "canvas": "rules",
+    "left": {
+     "title": "Rule Deck",
+     "items": [
+      {
+       "name": "MIN WIDTH 0.10"
+      },
+      {
+       "name": "MIN SPACING 0.14"
+      },
+      {
+       "name": "ENCLOSURE 0.05"
+      }
+     ]
     },
-    "heading": "3.1  Minimum Spacing and Width Rules",
-    "steps": [
-     "M1.W.1 — Minimum metal [width]: 0.10 µm.",
-     "M1.S.1 — Minimum metal [spacing]: 0.14 µm.",
-     "CO.E.1 — Minimum contact [enclosure]: 0.05 µm."
+    "log": [
+     "> load rule deck N28_M1.drc",
+     "> ready"
     ],
-    "callout": {
-     "kind": "caution",
-     "en": "Any spacing below 0.14 µm is a violation and must be reworked."
-    },
+    "status": "Ruler: 0.16µm   Rule: M1.S.1   Zoom: 600%",
     "gloss": [
      [
-      "minimum width",
-      "최소 선폭"
+      "Rule deck",
+      "규칙 세트"
      ],
      [
-      "spacing",
-      "간격"
+      "Ruler",
+      "치수 자"
+     ],
+     [
+      "min spacing",
+      "최소 간격"
      ],
      [
       "enclosure",
       "겹침(감쌈)"
-     ],
-     [
-      "violation",
-      "위반"
      ]
     ]
    },
@@ -6137,44 +6159,54 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
-    "type": "mansample",
-    "title": "매뉴얼 표본 — 셀 배치 가이드",
-    "doc": {
-     "name": "Layout Guide",
-     "no": "LG-11",
-     "sec": "4.4",
-     "rev": "B",
-     "page": "4-6"
-    },
-    "heading": "4.4  Placing Standard Cells",
-    "steps": [
-     "Load the placement drawing (Rev C) as the [reference].",
-     "Snap all cells to the placement grid.",
-     {
-      "t": "Verify no cell is [off-grid].",
-      "note": {
-       "kind": "note",
-       "en": "Off-grid cells cause routing and DRC errors."
+    "type": "eda",
+    "title": "설계 프로그램 화면 — 셀 배치",
+    "app": "FloorPlanner",
+    "doc": "core.def",
+    "run": "Select",
+    "canvas": "place",
+    "left": {
+     "title": "Cells",
+     "items": [
+      {
+       "name": "INV_X1",
+       "color": "#33506e"
+      },
+      {
+       "name": "NAND2",
+       "color": "#33506e"
+      },
+      {
+       "name": "DFF",
+       "color": "#33506e"
+      },
+      {
+       "name": "off-grid: 2",
+       "color": "#e05a4a"
       }
-     },
-     "Confirm placement matches the drawing before routing."
+     ]
+    },
+    "log": [
+     "> place 128 cells",
+     "> WARNING: 2 cells off-grid"
     ],
+    "status": "Placed: 128   Off-grid: 2   Zoom: 200%",
     "gloss": [
      [
-      "drawing",
-      "도면"
+      "Place / placement",
+      "배치"
      ],
      [
-      "snap to grid",
-      "격자에 맞춤"
+      "grid",
+      "격자"
      ],
      [
       "off-grid",
-      "격자를 벗어난"
+      "격자를 벗어남"
      ],
      [
-      "routing",
-      "배선 연결"
+      "cell",
+      "셀(표준 소자)"
      ]
     ]
    },
@@ -6732,48 +6764,55 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
-    "type": "mansample",
-    "title": "매뉴얼 표본 — DRC 결과 읽기",
-    "doc": {
-     "name": "Verification Manual",
-     "no": "VM-12",
-     "sec": "5.2",
-     "rev": "C",
-     "page": "5-3"
-    },
-    "heading": "5.2  Reading the DRC Results",
-    "steps": [
-     "Load the rule deck and run DRC on the layout.",
-     {
-      "t": "Read each line: <check name> : <count> errors.",
-      "note": {
-       "kind": "note",
-       "en": "\"error\" must be fixed; \"warning\" must be checked."
+    "type": "eda",
+    "title": "설계 프로그램 화면 — DRC 검사",
+    "app": "DRC Studio",
+    "doc": "chip_top",
+    "run": "Run",
+    "canvas": "drc",
+    "left": {
+     "title": "Violations",
+     "items": [
+      {
+       "name": "SPACING x15",
+       "color": "#e05a4a"
+      },
+      {
+       "name": "WIDTH x3",
+       "color": "#e05a4a"
+      },
+      {
+       "name": "WARN x2",
+       "color": "#e0a83a"
       }
-     },
-     "Zoom to each [violation] marker on the layout.",
-     "Fix the geometry, then re-run until the result is [CLEAN]."
-    ],
-    "callout": {
-     "kind": "caution",
-     "en": "Do not tape out while DRC is NOT CLEAN."
+     ]
     },
+    "log": [
+     "> run DRC on chip_top",
+     "> DRC finished: 18 errors, 2 warnings",
+     "> result: NOT CLEAN"
+    ],
+    "status": "Errors: 18   Warnings: 2   Marker: M1.S.1",
     "gloss": [
      [
-      "rule deck",
-      "규칙 세트"
+      "Run",
+      "실행"
      ],
      [
-      "violation",
-      "위반"
+      "Violation",
+      "규칙 위반"
      ],
      [
-      "marker",
-      "표시"
+      "Marker",
+      "오류 표시"
      ],
      [
-      "clean",
-      "통과(무오류)"
+      "error / warning",
+      "오류 / 경고"
+     ],
+     [
+      "NOT CLEAN",
+      "미통과"
      ]
     ]
    },
@@ -7251,31 +7290,39 @@ export const CONTENT_CHAPTERS = [
     ]
    },
    {
-    "type": "mansample",
-    "title": "매뉴얼 표본 — LVS 리포트 읽기",
-    "doc": {
-     "name": "Verification Manual",
-     "no": "VM-13",
-     "sec": "6.1",
-     "rev": "C",
-     "page": "6-2"
-    },
-    "heading": "6.1  Reading the LVS Report",
-    "steps": [
-     "Run LVS to compare the layout [netlist] with the schematic.",
-     "Check the summary: nets matched, devices matched.",
-     {
-      "t": "Locate any [MISMATCH] in the report.",
-      "note": {
-       "kind": "note",
-       "en": "A mismatch means layout ≠ schematic."
+    "type": "eda",
+    "title": "설계 프로그램 화면 — LVS 비교",
+    "app": "LVS Studio",
+    "doc": "chip_top",
+    "run": "Run",
+    "canvas": "lvs",
+    "left": {
+     "title": "Nets",
+     "items": [
+      {
+       "name": "matched 1044",
+       "color": "#2f7d5b"
+      },
+      {
+       "name": "MISMATCH 1",
+       "color": "#e05a4a"
       }
-     },
-     "Fix the layout or schematic, then re-run until MATCHED."
+     ]
+    },
+    "log": [
+     "> run LVS: layout vs schematic",
+     "> nets matched: 1044",
+     "> MISMATCH: 1 net",
+     "> result: NOT equivalent"
     ],
+    "status": "Devices: 512   Nets: 1045   Mismatch: 1",
     "gloss": [
      [
-      "netlist",
+      "LVS",
+      "레이아웃-회로도 비교"
+     ],
+     [
+      "Netlist",
       "넷리스트(연결표)"
      ],
      [
@@ -7287,8 +7334,8 @@ export const CONTENT_CHAPTERS = [
       "불일치"
      ],
      [
-      "schematic",
-      "회로도"
+      "equivalent",
+      "동등(일치)"
      ]
     ]
    },

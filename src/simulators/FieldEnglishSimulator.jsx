@@ -1042,29 +1042,37 @@ function PartDiagram() {
 
 // PPT처럼 한 화면씩 넘기는 슬라이드 뷰어 — 강의자는 '다음'만 누르면 순서대로 진행.
 // 마지막 슬라이드 도달 시 onReachEnd(chapterId) 로 챕터 완료를 알린다.
-function LessonDeck({ steps, chapterId, onReachEnd }) {
+function LessonDeck({ steps, chapterId, chapterNo, chapterTitle, onReachEnd }) {
   const [i, setI] = useState(0);
   const step = steps[i];
   const last = i === steps.length - 1;
   useEffect(() => { if (last && onReachEnd) onReachEnd(chapterId); }, [last, chapterId, onReachEnd]);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { if (i < steps.length - 1) setI(i + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { if (i > 0) setI(i - 1); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [i, steps.length]);
+  const stepLabel = step.type ? (({ scene: 'SET THE SCENE', mansample: 'MANUAL', story: 'STORY', eda: 'DESIGN TOOL' })[step.type] || String(step.type).toUpperCase()) : '';
   return (
     <div className="fes-ld">
-      <div className="fes-ld-dots">
-        {steps.map((s, j) => (
-          <button key={j} onClick={() => setI(j)}
-            className={`fes-ld-dot ${j === i ? 'on' : ''} ${j < i ? 'done' : ''}`} title={s.title} />
-        ))}
-      </div>
       <div className="fes-ld-slide">
         <div className="fes-ld-head">
-          <span className="fes-ld-step">STEP {i + 1} / {steps.length}{step.type ? ' · ' + (({ scene: 'SET THE SCENE', mansample: 'MANUAL', story: 'STORY' })[step.type] || String(step.type).toUpperCase()) : ''}</span>
+          <span className="fes-ld-step">CH{chapterNo} · {chapterTitle}<span className="fes-ld-step-sep">/</span>STEP {i + 1} / {steps.length}{stepLabel ? ' · ' + stepLabel : ''}</span>
           <div className="fes-ld-title">{step.title}</div>
         </div>
         <div className="fes-ld-body">{step.body || <SlideRenderer slide={step} />}</div>
       </div>
       <div className="fes-ld-nav">
         <button className="fes-btn ghost" disabled={i === 0} onClick={() => setI(i - 1)}>◀ 이전</button>
-        <span className="fes-ld-count">{i + 1} / {steps.length}</span>
+        <div className="fes-ld-dots">
+          {steps.map((s, j) => (
+            <button key={j} onClick={() => setI(j)}
+              className={`fes-ld-dot ${j === i ? 'on' : ''} ${j < i ? 'done' : ''}`} title={s.title} />
+          ))}
+        </div>
         <button className="fes-btn" disabled={last} onClick={() => setI(i + 1)}>{last ? '이 챕터 끝 ✓' : '다음 ▶'}</button>
       </div>
     </div>
@@ -1560,21 +1568,93 @@ function ManualSpecimen({ s }) {
     </div>
   );
 }
+// ===== 모사 EDA 툴 GUI (설계 챕터: 종이 매뉴얼 대신 실제 설계 프로그램 화면을 읽는다) =====
+function edaCanvas(kind) {
+  const G = '#26364a', L = '#0a1420', T = '#1a2635';
+  const grid = `<rect width="440" height="230" fill="${L}"/>` +
+    [...Array(11)].map((_, i) => `<line x1="${i * 44}" y1="0" x2="${i * 44}" y2="230" stroke="${G}" stroke-width="0.8"/>`).join('') +
+    [...Array(6)].map((_, i) => `<line x1="0" y1="${i * 46}" x2="440" y2="${i * 46}" stroke="${G}" stroke-width="0.8"/>`).join('');
+  let art = '';
+  if (kind === 'layout') {
+    art = `<rect x="60" y="60" width="150" height="34" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.5"/><text x="66" y="82" font-family="monospace" font-size="11" fill="#d6ffe9">METAL1</text>
+      <rect x="90" y="110" width="90" height="70" fill="#6a4d8f" stroke="#c9a9ef" stroke-width="1.5"/><text x="96" y="150" font-family="monospace" font-size="11" fill="#efe3ff">POLY</text>
+      <rect x="230" y="96" width="130" height="90" fill="#8f6a3d" stroke="#e6c79a" stroke-width="1.5"/><text x="236" y="146" font-family="monospace" font-size="11" fill="#ffedd0">ACTIVE</text>
+      <rect x="250" y="66" width="16" height="16" fill="#c9d4e2"/><rect x="290" y="66" width="16" height="16" fill="#c9d4e2"/><text x="250" y="60" font-family="monospace" font-size="9" fill="#9fb2c9">CONTACT</text>`;
+  } else if (kind === 'rules') {
+    art = `<rect x="70" y="90" width="120" height="40" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.5"/><rect x="250" y="90" width="120" height="40" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.5"/>
+      <line x1="190" y1="110" x2="250" y2="110" stroke="#f2b23a" stroke-width="1.5"/><line x1="190" y1="103" x2="190" y2="117" stroke="#f2b23a" stroke-width="1.5"/><line x1="250" y1="103" x2="250" y2="117" stroke="#f2b23a" stroke-width="1.5"/>
+      <text x="196" y="100" font-family="monospace" font-size="11" font-weight="700" fill="#f2b23a">0.16µm ✓</text><text x="120" y="150" font-family="monospace" font-size="10" fill="#9fb2c9">min spacing = 0.14µm</text>`;
+  } else if (kind === 'place') {
+    art = [40, 90, 140, 190, 240, 290, 340].map((x, i) => `<rect x="${x}" y="${60 + (i % 2) * 0}" width="38" height="30" fill="#33506e" stroke="#8fb4dd" stroke-width="1.2"/>`).join('') +
+      [40, 90, 140, 240, 290, 340].map((x) => `<rect x="${x}" y="120" width="38" height="30" fill="#33506e" stroke="#8fb4dd" stroke-width="1.2"/>`).join('') +
+      `<rect x="182" y="128" width="38" height="30" fill="#4a2f2f" stroke="#e05a4a" stroke-width="1.6"/><circle cx="201" cy="143" r="16" fill="none" stroke="#e05a4a" stroke-width="1.8"/><text x="150" y="182" font-family="monospace" font-size="10" fill="#e07a6a">off-grid cell</text>`;
+  } else if (kind === 'drc') {
+    art = `<rect x="80" y="80" width="70" height="44" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.4"/><rect x="176" y="120" width="70" height="44" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.4"/>
+      <line x1="150" y1="100" x2="176" y2="100" stroke="#e05a4a" stroke-width="1.4"/><text x="150" y="94" font-family="monospace" font-size="9" font-weight="700" fill="#e05a4a">0.02µm</text>
+      <circle cx="163" cy="112" r="13" fill="none" stroke="#e05a4a" stroke-width="2"/><path d="M156 105 l14 14 M170 105 l-14 14" stroke="#e05a4a" stroke-width="2"/>
+      <circle cx="300" cy="150" r="13" fill="none" stroke="#e05a4a" stroke-width="2"/><path d="M293 143 l14 14 M307 143 l-14 14" stroke="#e05a4a" stroke-width="2"/><text x="250" y="196" font-family="monospace" font-size="10" fill="#e07a6a">2 markers shown</text>`;
+  } else { // lvs
+    art = `<rect x="30" y="60" width="170" height="120" fill="none" stroke="#3b5069" stroke-width="1.2"/><text x="36" y="54" font-family="monospace" font-size="10" fill="#8fb4dd">SCHEMATIC</text>
+      <circle cx="80" cy="110" r="10" fill="none" stroke="#8fb4dd" stroke-width="1.5"/><circle cx="150" cy="110" r="10" fill="none" stroke="#8fb4dd" stroke-width="1.5"/><line x1="90" y1="110" x2="140" y2="110" stroke="#8fb4dd" stroke-width="1.5"/><line x1="80" y1="120" x2="80" y2="160" stroke="#8fb4dd" stroke-width="1.5"/>
+      <text x="210" y="128" font-family="monospace" font-size="30" font-weight="800" fill="#e05a4a">≠</text>
+      <rect x="250" y="60" width="170" height="120" fill="none" stroke="#3b5069" stroke-width="1.2"/><text x="256" y="54" font-family="monospace" font-size="10" fill="#7fe3b0">LAYOUT</text>
+      <rect x="280" y="96" width="30" height="20" fill="#2f7d5b" stroke="#e05a4a" stroke-width="1.6"/><rect x="350" y="130" width="30" height="20" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.3"/><line x1="310" y1="106" x2="350" y2="140" stroke="#8fb4dd" stroke-width="1.3"/>`;
+  }
+  return `<svg viewBox="0 0 440 230" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">${grid}${art}</svg>`;
+}
+function EdaTool({ s }) {
+  return (
+    <div>
+      <div className="fes-doc-tag">🖥️ 설계 프로그램 화면 (모사) — 실제 EDA 툴의 <b>영어 UI</b>를 읽어보세요</div>
+      <div className="eda">
+        <div className="eda-tb">
+          <span className="eda-dot" style={{ background: '#e05a4a' }} /><span className="eda-dot" style={{ background: '#e0a83a' }} /><span className="eda-dot" style={{ background: '#4ab86a' }} />
+          <span className="eda-app">{s.app || 'LayoutPro'}</span><span className="eda-doc">— {s.doc || 'chip_top'}</span>
+          <span className="eda-menus">{(s.menus || ['File', 'Edit', 'View', 'Tools', 'Verify', 'Window', 'Help']).map((m, i) => <span key={i}>{m}</span>)}</span>
+        </div>
+        <div className="eda-tools">{(s.tools || ['Select', 'Draw', 'Ruler', 'Zoom', 'Run']).map((t, i) => <span key={i} className={`eda-tool${s.run === t ? ' on' : ''}`}>{t}</span>)}</div>
+        <div className="eda-body">
+          <div className="eda-left">
+            <div className="eda-ph">{s.left?.title || 'Layers'}</div>
+            {(s.left?.items || []).map((it, i) => (
+              <div key={i} className="eda-row">
+                {it.color ? <span className="eda-sw" style={{ background: it.color }} /> : <span className="eda-sw off" />}
+                <span className={`eda-chk${it.on === false ? ' off' : ''}`}>{it.on === false ? '☐' : '☑'}</span>
+                <span className="eda-name">{it.name}</span>
+              </div>
+            ))}
+          </div>
+          <div className="eda-canvas" dangerouslySetInnerHTML={{ __html: edaCanvas(s.canvas || 'layout') }} />
+        </div>
+        <div className="eda-console">{(s.log || []).map((l, i) => <div key={i} className={`eda-log${/error|mismatch|not |fail|violation/i.test(l) ? ' err' : /done|clean|match|pass|ok/i.test(l) ? ' ok' : ''}`}>{l}</div>)}</div>
+        <div className="eda-status">{s.status || 'X: 12.40  Y: 8.10   Layer: METAL1   Zoom: 400%'}</div>
+      </div>
+      {s.gloss && s.gloss.length > 0 && (
+        <div className="fes-doc-help"><div className="fes-doc-help-h">🔑 화면 영어 읽기</div>
+          <div className="fes-doc-gloss">{s.gloss.map((g, i) => <span key={i}><b>{g[0]}</b> — {g[1]}</span>)}</div></div>
+      )}
+    </div>
+  );
+}
 function slideInner(slide) {
   switch (slide.type) {
     case 'scene':
       return <SceneCard s={slide} />;
     case 'mansample':
       return <ManualSpecimen s={slide} />;
-    case 'story':
+    case 'eda':
+      return <EdaTool s={slide} />;
+    case 'story': {
+      const hasManga = slide.art && MANGA[slide.art];
       return (
-        <div>
-          {slide.art && MANGA[slide.art] && (
+        <div className={hasManga ? 'fes-story-split' : ''}>
+          {hasManga && (
             <figure className="fes-manga"><div className="fes-manga-svg" dangerouslySetInnerHTML={{ __html: MANGA[slide.art] }} /></figure>
           )}
           <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>
         </div>
       );
+    }
     case 'read':
       return (
         <div className="fes-th">
@@ -1633,30 +1713,30 @@ function ChapterBook() {
   const pct = Math.round(available.filter((c) => done.has(c.id)).length / available.length * 100);
 
   return (
-    <div>
-      <div className="fes-cb-progress">
-        <span>학습 진도</span>
+    <div className="fes-ppt">
+      <aside className="fes-ppt-side">
+        <div className="fes-cb-progress">
+          <span>학습 진도</span>
+          <span className="fes-mono">{pct}%</span>
+        </div>
         <div className="fes-cb-bar"><div style={{ width: `${pct}%` }} /></div>
-        <span className="fes-mono">{pct}%</span>
-      </div>
-      <div className="fes-cb-rail">
-        {CHAPTERS.map((c, idx) => (
-          <button key={c.id} disabled={c.locked} onClick={() => !c.locked && setSel(c.id)}
-            className={`fes-cb-chip ${sel === c.id ? 'on' : ''} ${c.locked ? 'off' : ''} ${done.has(c.id) ? 'done' : ''}`} title={c.title}>
-            <span className="fes-cb-chip-n">CH {idx + 1}</span>
-            <span className="fes-cb-chip-t">{c.title}</span>
-            {done.has(c.id) && <span className="fes-cb-check">✓</span>}
-            {c.locked && <span className="fes-cb-lock">🔒</span>}
-          </button>
-        ))}
-      </div>
-      <div className="fes-cb-head">
-        <div className="fes-cb-head-t">Chapter {curIdx + 1} · {cur.title}</div>
-        {done.has(cur.id) && <span className="fes-cb-done-tag">완료 ✓</span>}
-      </div>
-      {cur.locked
-        ? <div className="fes-wk-placeholder">이 챕터는 아직 <b>준비 중</b>입니다. 현재 <b>Chapter 1~2</b>가 완성되어 있어요.</div>
-        : <LessonDeck key={cur.id} chapterId={cur.id} steps={cur.slides} onReachEnd={markDone} />}
+        <div className="fes-ppt-rail">
+          {CHAPTERS.map((c, idx) => (
+            <button key={c.id} disabled={c.locked} onClick={() => !c.locked && setSel(c.id)}
+              className={`fes-ppt-chip ${sel === c.id ? 'on' : ''} ${c.locked ? 'off' : ''} ${done.has(c.id) ? 'done' : ''}`} title={c.title}>
+              <span className="fes-ppt-chip-n">CH{idx + 1}</span>
+              <span className="fes-ppt-chip-t">{c.title}</span>
+              {done.has(c.id) && <span className="fes-ppt-chip-mk">✓</span>}
+              {c.locked && <span className="fes-ppt-chip-mk">🔒</span>}
+            </button>
+          ))}
+        </div>
+      </aside>
+      <main className="fes-ppt-main">
+        {cur.locked
+          ? <div className="fes-wk-placeholder">이 챕터는 아직 <b>준비 중</b>입니다. 현재 <b>Chapter 1~2</b>가 완성되어 있어요.</div>
+          : <LessonDeck key={cur.id} chapterId={cur.id} chapterNo={curIdx + 1} chapterTitle={cur.title} steps={cur.slides} onReachEnd={markDone} />}
+      </main>
     </div>
   );
 }
@@ -1991,17 +2071,39 @@ function FesStyles() {
 .fes-wk-placeholder b{color:${C.text}}
 .fes-wk-ph-btns{display:flex;gap:8px;justify-content:center;margin-top:14px}
 
-/* Lesson deck (PPT-style) */
-.fes-ld-dots{display:flex;gap:7px;justify-content:center;margin-bottom:12px}
-.fes-ld-dot{width:34px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
+/* Lesson deck (PPT-style, fixed stage) */
+.fes-ppt{display:grid;grid-template-columns:196px minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:820px){.fes-ppt{grid-template-columns:1fr}}
+.fes-ppt-side{position:sticky;top:8px;display:flex;flex-direction:column;gap:8px}
+@media(max-width:820px){.fes-ppt-side{position:static}}
+.fes-ppt-rail{display:flex;flex-direction:column;gap:5px;max-height:min(74vh,620px);overflow-y:auto;padding-right:4px;margin-top:4px}
+@media(max-width:820px){.fes-ppt-rail{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;max-height:none}}
+.fes-ppt-chip{position:relative;display:flex;align-items:baseline;gap:7px;text-align:left;background:${C.panel};border:1px solid ${C.line2};color:${C.text};border-radius:9px;padding:8px 10px;cursor:pointer;transition:.14s;white-space:nowrap}
+.fes-ppt-chip:hover:not(:disabled){border-color:${C.cyan}}
+.fes-ppt-chip.on{background:${C.cyan}1c;border-color:${C.cyan};box-shadow:inset 3px 0 0 ${C.cyan}}
+.fes-ppt-chip.off{opacity:.42;cursor:not-allowed}
+.fes-ppt-chip.done{border-color:${C.emerald}55}
+.fes-ppt-chip-n{font-family:${C.mono};font-size:10px;letter-spacing:.5px;color:${C.cyan};font-weight:700;flex:none}
+.fes-ppt-chip.off .fes-ppt-chip-n{color:${C.dim}}
+.fes-ppt-chip-t{font-size:11.5px;font-weight:600;color:#dfe8fb;overflow:hidden;text-overflow:ellipsis}
+.fes-ppt-chip.off .fes-ppt-chip-t{color:${C.dim}}
+.fes-ppt-chip-mk{margin-left:auto;font-size:10px;color:${C.emerald};flex:none}
+.fes-ppt-main{min-width:0}
+.fes-ld-dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;flex:1}
+.fes-ld-dot{width:26px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
 .fes-ld-dot.done{background:${C.cyan}66}
 .fes-ld-dot.on{background:${C.cyan};box-shadow:0 0 0 3px ${C.cyan}22}
-.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;min-height:min(58vh,500px);display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
-.fes-ld-head{position:relative;background:linear-gradient(90deg,${C.elec}22,${C.elec}08 60%,transparent);border-bottom:1px solid ${C.line};border-left:4px solid ${C.elec};padding:15px 24px}
-.fes-ld-head:after{content:'';position:absolute;right:20px;top:16px;width:34px;height:34px;border-radius:9px;background:radial-gradient(circle at 30% 30%,${C.neon}55,${C.elec}22);opacity:.5}
-.fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1.5px;color:${C.neon};font-weight:700}
-.fes-ld-title{font-size:23px;font-weight:800;color:#fff;margin-top:5px;letter-spacing:-.2px;text-wrap:balance;max-width:90%}
-.fes-ld-body{font-size:15px;line-height:1.75;padding:22px 26px 24px;flex:1;display:flex;flex-direction:column;justify-content:center}
+.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;height:min(76vh,620px);display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
+.fes-ld-head{position:relative;background:linear-gradient(90deg,${C.elec}22,${C.elec}08 60%,transparent);border-bottom:1px solid ${C.line};border-left:4px solid ${C.elec};padding:13px 24px;flex:none}
+.fes-ld-head:after{content:'';position:absolute;right:20px;top:14px;width:30px;height:30px;border-radius:9px;background:radial-gradient(circle at 30% 30%,${C.neon}55,${C.elec}22);opacity:.5}
+.fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1.2px;color:${C.neon};font-weight:700}
+.fes-ld-step-sep{margin:0 8px;color:${C.dim};letter-spacing:0}
+.fes-ld-title{font-size:22px;font-weight:800;color:#fff;margin-top:4px;letter-spacing:-.2px;text-wrap:balance;max-width:92%}
+.fes-ld-body{font-size:15px;line-height:1.72;padding:20px 26px 22px;flex:1;min-height:0;overflow-y:auto}
+.fes-story-split{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:22px;align-items:center;height:100%}
+.fes-story-split .fes-manga{margin:0}
+.fes-story-split .fes-wk-story{margin:0}
+@media(max-width:760px){.fes-story-split{grid-template-columns:1fr;align-items:start}}
 
 /* 이론(PPT) 슬라이드 */
 .fes-th-lead{font-size:16px;line-height:1.7;color:#eaf1ff;border-left:3px solid ${C.neon};background:${C.neon}0e;padding:11px 15px;border-radius:0 9px 9px 0;margin-bottom:15px}
@@ -2043,6 +2145,27 @@ function FesStyles() {
 .fes-wk-manual b{color:#bfe9f5;font-weight:700}
 .fes-wk-quiz-intro{font-size:12.5px;color:${C.dim};margin:0 0 12px}
 .fes-wk-qn{font-family:${C.mono};color:${C.cyan};font-size:12px;margin-right:4px}
+/* ===== 모사 EDA 툴 GUI ===== */
+.eda{border:1px solid ${C.line2};border-radius:9px;overflow:hidden;background:#101a28;font-family:${C.mono};box-shadow:0 6px 20px rgba(0,0,0,.32)}
+.eda-tb{display:flex;align-items:center;gap:7px;background:#0c1521;padding:6px 11px;border-bottom:1px solid #22334c}
+.eda-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.eda-app{font-weight:800;color:#dbe8fb;font-size:12px;margin-left:4px}.eda-doc{color:#6f86a6;font-size:11.5px}
+.eda-menus{margin-left:16px;display:flex;gap:13px;color:#8ea4c4;font-size:11px}
+.eda-tools{display:flex;gap:6px;padding:5px 11px;background:#0f1a29;border-bottom:1px solid #1c2c44}
+.eda-tool{font-size:10.5px;color:#a9bcd8;border:1px solid #2a3d5f;border-radius:4px;padding:2px 9px;background:#13202f}
+.eda-tool.on{background:${C.cyan};color:#062230;border-color:${C.cyan};font-weight:700}
+.eda-body{display:flex;min-height:170px}
+.eda-left{width:138px;flex:none;background:#0d1725;border-right:1px solid #1c2c44;padding:7px 8px}
+.eda-ph{font-size:9.5px;letter-spacing:1px;color:#7f96b6;margin-bottom:7px;text-transform:uppercase}
+.eda-row{display:flex;align-items:center;gap:5px;padding:2.5px 0;font-size:11px;color:#c2d2ea}
+.eda-sw{width:11px;height:11px;border-radius:2px;border:1px solid #33465f;flex:none}.eda-sw.off{background:transparent}
+.eda-chk{color:#6f86a6;font-size:11px}.eda-chk.off{color:#3d4d63}
+.eda-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eda-canvas{flex:1;min-width:0;background:#0a1420;display:flex;align-items:center}
+.eda-canvas svg{display:block;width:100%}
+.eda-console{background:#0a121e;border-top:1px solid #1c2c44;padding:6px 11px;font-size:11px;line-height:1.75;color:#8ea4c4}
+.eda-log.err{color:#f28b7d}.eda-log.ok{color:#6fe0a0}
+.eda-status{background:#0c1521;border-top:1px solid #22334c;padding:4px 11px;font-size:10px;color:#6f86a6}
 /* ===== 매뉴얼 표본 (printed English document look) ===== */
 .fes-doc-tag{font-size:11.5px;color:${C.dim};margin:0 0 8px;font-weight:600}
 .fes-doc{background:#f4efe2;color:#1c1913;border:1px solid #cabf9f;border-radius:8px;padding:18px 20px;box-shadow:0 6px 20px rgba(0,0,0,.3);font-family:'Georgia','Times New Roman',serif}
