@@ -527,7 +527,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🏭",
     "title": "새 장비 앞에 선 첫날",
-    "text": "당신은 오늘 처음으로 식각(**etch**) 장비 앞에 배정되었습니다. 선배 엔지니어가 장비 문을 열자 은색 원통, 굵은 파이프, 반짝이는 밸브들이 눈에 들어옵니다. 선배는 손으로 각 부분을 가리키며 영어로 말합니다. \"This is the **chamber**, and below it is the **turbo pump**. Watch the **gate valve** — never open it under atmosphere.\" 화면(**HMI**)에는 **Chamber Pressure**, **Pump Speed**, **MFC Flow**, **RF Power** 같은 영어 단어가 실시간으로 바뀝니다. 한국어 설명서는 어디에도 없습니다. 모든 부품 이름, 모든 경고문, 모든 버튼이 영어입니다. 부품 이름을 영어로 읽고 그 역할을 이해하는 순간, 당신은 비로소 이 장비를 '다룰' 수 있게 됩니다. 오늘 우리는 식각·증착 장비의 핵심 구성요소 7가지 — **Chamber**, **Pump**, **Gate Valve**, **Gas Line**, **MFC**, **RF Generator**, **Wafer Chuck** — 를 영어 이름과 역할, 그리고 매뉴얼·화면에서의 표기법으로 배웁니다."
+    "text": "당신은 오늘 처음으로 식각(**etch**) 장비 앞에 배정되었습니다. 선배 엔지니어가 장비 문을 열자 은색 원통, 굵은 파이프, 반짝이는 밸브들이 눈에 들어옵니다. 선배는 손으로 각 부분을 가리키며 영어로 말합니다. \"This is the **chamber**, and below it is the **turbo pump**. Watch the **gate valve** — never open it under atmosphere.\" 화면(**HMI**)에는 **Chamber Pressure**, **Pump Speed**, **MFC Flow**, **RF Power** 같은 영어 단어가 실시간으로 바뀝니다. 한국어 설명서는 어디에도 없습니다. 모든 부품 이름, 모든 경고문, 모든 버튼이 영어입니다. 부품 이름을 영어로 읽고 그 역할을 이해하는 순간, 당신은 비로소 이 장비를 '다룰' 수 있게 됩니다. 오늘 우리는 식각·증착 장비의 핵심 구성요소 7가지 — **Chamber**, **Pump**, **Gate Valve**, **Gas Line**, **MFC**, **RF Generator**, **Wafer Chuck** — 를 영어 이름과 역할, 그리고 매뉴얼·화면에서의 표기법으로 배웁니다.",
+    "art": "parts"
    },
    {
     "type": "read",
@@ -986,7 +987,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🕹️",
     "title": "초록불이 켜지기 전에는 손대지 마라",
-    "text": "야간 근무 첫날, 선배가 장비 앞에서 말한다. \"화면에 **READY** 초록불 뜨기 전에는 절대 **START** 누르지 마.\" 신입은 웨이퍼 카세트를 **load port**에 올리고 **START**를 눌렀다. 장비는 곧바로 **pump down**을 시작했고, 압력계 숫자가 빠르게 떨어졌다. 하지만 아직 **base pressure**에 도달하지 못했는데 **transfer valve**를 열려고 하자, 화면에 붉은 글씨로 **INTERLOCK: base pressure not reached** 가 떴다. 선배가 웃으며 말한다. \"장비는 영어로 너한테 계속 말을 걸어. **load, evacuate, pump down, purge, vent, start, stop, unload** — 이 명령어들과 상태 표시만 정확히 읽으면, 절차는 반쯤 끝난 거야.\" 오늘 우리는 장비가 화면과 매뉴얼로 건네는 그 영어를 읽고, 지금 어떤 상태인지 스스로 판단하는 법을 배운다."
+    "text": "야간 근무 첫날, 선배가 장비 앞에서 말한다. \"화면에 **READY** 초록불 뜨기 전에는 절대 **START** 누르지 마.\" 신입은 웨이퍼 카세트를 **load port**에 올리고 **START**를 눌렀다. 장비는 곧바로 **pump down**을 시작했고, 압력계 숫자가 빠르게 떨어졌다. 하지만 아직 **base pressure**에 도달하지 못했는데 **transfer valve**를 열려고 하자, 화면에 붉은 글씨로 **INTERLOCK: base pressure not reached** 가 떴다. 선배가 웃으며 말한다. \"장비는 영어로 너한테 계속 말을 걸어. **load, evacuate, pump down, purge, vent, start, stop, unload** — 이 명령어들과 상태 표시만 정확히 읽으면, 절차는 반쯤 끝난 거야.\" 오늘 우리는 장비가 화면과 매뉴얼로 건네는 그 영어를 읽고, 지금 어떤 상태인지 스스로 판단하는 법을 배운다.",
+    "art": "green"
    },
    {
     "type": "read",
@@ -1441,7 +1443,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🌀",
     "title": "새벽 3시, 챔버 압력이 흔들린다",
-    "text": "야간 근무 중인 신입 기술자 민준. 담당하는 식각(etch) 장비의 HMI 화면에 노란 경고가 뜬다. **Chamber Pressure: 12.4 mTorr (SP 10.0)** 그리고 그 아래 **UNSTABLE**. 옆에는 가스 라인 로그가 흐른다. **Ar Flow: 48 sccm / SP 50 sccm — OUT OF RANGE**. 민준은 순간 얼어붙는다. 이 숫자들이 정상인지, 지금 라인을 멈춰야 하는지 판단해야 한다. 값을 '읽는' 것과 '정상/이상을 판단하는' 것은 다르다. 오늘 우리는 **vacuum & gas log**를 읽고, **set point**와 **actual value**의 차이를 해석하고, **stable/unstable**, **out of range** 같은 상태어를 근거로 정상과 이상을 가려내는 법을 배운다."
+    "text": "야간 근무 중인 신입 기술자 민준. 담당하는 식각(etch) 장비의 HMI 화면에 노란 경고가 뜬다. **Chamber Pressure: 12.4 mTorr (SP 10.0)** 그리고 그 아래 **UNSTABLE**. 옆에는 가스 라인 로그가 흐른다. **Ar Flow: 48 sccm / SP 50 sccm — OUT OF RANGE**. 민준은 순간 얼어붙는다. 이 숫자들이 정상인지, 지금 라인을 멈춰야 하는지 판단해야 한다. 값을 '읽는' 것과 '정상/이상을 판단하는' 것은 다르다. 오늘 우리는 **vacuum & gas log**를 읽고, **set point**와 **actual value**의 차이를 해석하고, **stable/unstable**, **out of range** 같은 상태어를 근거로 정상과 이상을 가려내는 법을 배운다.",
+    "art": "pressure"
    },
    {
     "type": "read",
@@ -2883,7 +2886,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🔧",
     "title": "정비의 아침: 오늘 이 장비는 'DOWN'이다",
-    "text": "야간 근무를 마친 지훈은 교대 전 HMI 화면에서 붉은 글씨를 본다. **PM DUE** — 오늘 이 식각(etch) 장비의 예방 정비(**Preventive Maintenance**) 기한이다. 화면 하단에는 상태가 **TOOL DOWN**으로 바뀌어 있고, 옆에는 **Work Order #4471**이 떠 있다. 선임 기술자가 태블릿을 건네며 말한다. \"Follow the **PM checklist**. **Inspect** the O-ring, **clean** the chamber wall, **replace** the pump oil, and **calibrate** the MFC.\" 지훈이 받은 체크리스트는 전부 영어 명령문이다. **Inspect / Clean / Replace / Calibrate / Tighten / Lubricate** — 이 여섯 개의 동사가 오늘 하루를 지배할 것이다. 그는 먼저 **LOTO**(잠금·표찰)를 걸어 장비의 위험 에너지를 차단한다. 챔버를 열자 **O-ring**에 미세한 균열이 보인다. 체크리스트에는 이렇게 적혀 있다: *Replace the O-ring if any damage is found.* 지훈은 새 O-ring에 **vacuum grease**를 얇게 바르고(lubricate), 볼트를 **star pattern**으로 규정 토크에 맞춰 조인다(tighten). 정비의 핵심은 손재주가 아니라 **영어 지시문을 정확히 읽고 판단하는 능력**이다. 한 줄을 잘못 읽으면 진공 누설(**vacuum leak**)로 이어진다."
+    "text": "야간 근무를 마친 지훈은 교대 전 HMI 화면에서 붉은 글씨를 본다. **PM DUE** — 오늘 이 식각(etch) 장비의 예방 정비(**Preventive Maintenance**) 기한이다. 화면 하단에는 상태가 **TOOL DOWN**으로 바뀌어 있고, 옆에는 **Work Order #4471**이 떠 있다. 선임 기술자가 태블릿을 건네며 말한다. \"Follow the **PM checklist**. **Inspect** the O-ring, **clean** the chamber wall, **replace** the pump oil, and **calibrate** the MFC.\" 지훈이 받은 체크리스트는 전부 영어 명령문이다. **Inspect / Clean / Replace / Calibrate / Tighten / Lubricate** — 이 여섯 개의 동사가 오늘 하루를 지배할 것이다. 그는 먼저 **LOTO**(잠금·표찰)를 걸어 장비의 위험 에너지를 차단한다. 챔버를 열자 **O-ring**에 미세한 균열이 보인다. 체크리스트에는 이렇게 적혀 있다: *Replace the O-ring if any damage is found.* 지훈은 새 O-ring에 **vacuum grease**를 얇게 바르고(lubricate), 볼트를 **star pattern**으로 규정 토크에 맞춰 조인다(tighten). 정비의 핵심은 손재주가 아니라 **영어 지시문을 정확히 읽고 판단하는 능력**이다. 한 줄을 잘못 읽으면 진공 누설(**vacuum leak**)로 이어진다.",
+    "art": "pm"
    },
    {
     "type": "read",
@@ -3375,7 +3379,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "📝",
     "title": "중간 점검 안내",
-    "text": "앞 챕터(CH 1~7)에서 배운 **장비 구성 · 운전 절차 · 로그 값 · 알람 해석**을 확인합니다. 영어 문장과 용어를 읽고 답하세요."
+    "text": "앞 챕터(CH 1~7)에서 배운 **장비 구성 · 운전 절차 · 로그 값 · 알람 해석**을 확인합니다. 영어 문장과 용어를 읽고 답하세요.",
+    "art": "midcheck"
    },
    {
     "type": "quiz",
@@ -3532,7 +3537,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🧱",
     "title": "층으로 읽는 반도체",
-    "text": "신입 기술자 지훈은 첫 출근날, 엔지니어가 모니터에 띄운 소자 **cross-section** 그림 앞에서 멈칫했다. 화면 맨 아래엔 회색 **substrate (Si)**, 그 위로 **well**, **active**, 빨간 **poly (gate)**, 그리고 위쪽 굵은 선들에는 **metal**이라 적혀 있었다. 선배가 물었다. \"This layer here — what is it?\" 지훈은 순간 당황했지만, 곧 깨달았다. 반도체는 결국 **bottom-up** 으로 층층이 쌓인 구조이고, 화면과 매뉴얼의 영어 단어는 각각 그 '층(**layer**)'의 이름일 뿐이라는 것을. 아래에서 위로 **substrate → well → active → poly → contact → metal** 순서만 머릿속에 넣으면, 낯선 영어 화면도 '지도'처럼 읽을 수 있다. 오늘 수업의 목표는 바로 이 층 이름을 영어로 '읽고 판단'하는 것이다."
+    "text": "신입 기술자 지훈은 첫 출근날, 엔지니어가 모니터에 띄운 소자 **cross-section** 그림 앞에서 멈칫했다. 화면 맨 아래엔 회색 **substrate (Si)**, 그 위로 **well**, **active**, 빨간 **poly (gate)**, 그리고 위쪽 굵은 선들에는 **metal**이라 적혀 있었다. 선배가 물었다. \"This layer here — what is it?\" 지훈은 순간 당황했지만, 곧 깨달았다. 반도체는 결국 **bottom-up** 으로 층층이 쌓인 구조이고, 화면과 매뉴얼의 영어 단어는 각각 그 '층(**layer**)'의 이름일 뿐이라는 것을. 아래에서 위로 **substrate → well → active → poly → contact → metal** 순서만 머릿속에 넣으면, 낯선 영어 화면도 '지도'처럼 읽을 수 있다. 오늘 수업의 목표는 바로 이 층 이름을 영어로 '읽고 판단'하는 것이다.",
+    "art": "layers"
    },
    {
     "type": "read",
@@ -4013,7 +4019,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "📐",
     "title": "현장 이야기: 0.02um이 만든 재작업",
-    "text": "신입 공정 기술자 지훈은 마스크 레이아웃 검증 화면 앞에 앉았다. 화면 오른쪽에는 영어로 된 표 하나가 떠 있었다. **Design Rule Table**. 표에는 **Rule**, **Layer**, **Min Width**, **Min Spacing** 같은 영어 항목과 함께 숫자들이 um 단위로 빼곡히 적혀 있었다. 선배가 물었다. \"이 metal 라인 하나, 폭이 **0.18um**인데 룰은 **min width 0.20um**이야. 이거 통과야, 아니야?\" 지훈은 잠깐 멈칫했다. 값은 읽었지만, 영어 항목이 무엇을 요구하는지 정확히 몰랐다. 결국 이 한 줄을 잘못 읽어 **DRC violation**이 그대로 넘어갔고, 마스크는 재작업(rework) 대상이 되었다. 현장에서 영어 **Design Rule**을 '읽고 판단'하는 힘은, 설계 실력이 아니라 안전과 수율의 문제였다."
+    "text": "신입 공정 기술자 지훈은 마스크 레이아웃 검증 화면 앞에 앉았다. 화면 오른쪽에는 영어로 된 표 하나가 떠 있었다. **Design Rule Table**. 표에는 **Rule**, **Layer**, **Min Width**, **Min Spacing** 같은 영어 항목과 함께 숫자들이 um 단위로 빼곡히 적혀 있었다. 선배가 물었다. \"이 metal 라인 하나, 폭이 **0.18um**인데 룰은 **min width 0.20um**이야. 이거 통과야, 아니야?\" 지훈은 잠깐 멈칫했다. 값은 읽었지만, 영어 항목이 무엇을 요구하는지 정확히 몰랐다. 결국 이 한 줄을 잘못 읽어 **DRC violation**이 그대로 넘어갔고, 마스크는 재작업(rework) 대상이 되었다. 현장에서 영어 **Design Rule**을 '읽고 판단'하는 힘은, 설계 실력이 아니라 안전과 수율의 문제였다.",
+    "art": "designrule"
    },
    {
     "type": "read",
@@ -4490,7 +4497,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "📐",
     "title": "도면대로 놓였는가?",
-    "text": "신입 기술자 민수는 포토 공정 앞에서 영어로 된 **layout** 배치 지시서를 받는다. 화면에는 여러 색의 **layer**가 겹쳐 있고, 지시서에는 'Place the metal pattern on **layer** M1, keep **minimum spacing** 0.5 μm'라고 적혀 있다. 민수의 일은 새 패턴을 그리는 것이 아니라, 이미 배치된 패턴이 **line width**와 **spacing** 규칙에 맞는지 **읽고 판단**하는 것이다. 한 곳이라도 **alignment**가 틀어지거나 두 패턴이 **overlap**되면, 웨이퍼 수백 장이 불량이 된다. 오늘 민수가 배워야 할 것은 영어 배치 지시문을 정확히 해석하고, 화면의 **grid** 위 수치가 규칙을 위반하는지 눈으로 잡아내는 능력이다."
+    "text": "신입 기술자 민수는 포토 공정 앞에서 영어로 된 **layout** 배치 지시서를 받는다. 화면에는 여러 색의 **layer**가 겹쳐 있고, 지시서에는 'Place the metal pattern on **layer** M1, keep **minimum spacing** 0.5 μm'라고 적혀 있다. 민수의 일은 새 패턴을 그리는 것이 아니라, 이미 배치된 패턴이 **line width**와 **spacing** 규칙에 맞는지 **읽고 판단**하는 것이다. 한 곳이라도 **alignment**가 틀어지거나 두 패턴이 **overlap**되면, 웨이퍼 수백 장이 불량이 된다. 오늘 민수가 배워야 할 것은 영어 배치 지시문을 정확히 해석하고, 화면의 **grid** 위 수치가 규칙을 위반하는지 눈으로 잡아내는 능력이다.",
+    "art": "placement"
    },
    {
     "type": "read",
@@ -4965,7 +4973,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "📐",
     "title": "빨간 마커가 뜬 화면",
-    "text": "야간 근무 중, 신입 기술자 지훈은 레이아웃 검증 장비의 HMI 화면 앞에 앉아 있다. 방금 돌린 검사 결과 창에 붉은 글씨가 잔뜩 떴다. 화면 상단에는 **DRC RESULTS**, 그 아래로 **SPACING violation: 15 errors**, **WIDTH violation: 3 errors**, 그리고 노란색으로 **2 warnings**라는 줄이 보인다. 각 줄 끝에는 **insufficient spacing (min 0.14um)** 같은 짧은 영어 문장과 좌표가 붙어 있다. 지훈은 이 영어가 '무엇이 잘못되었는지'를 말해준다는 것을 안다. **error**는 반드시 고쳐야 하는 규칙 위반이고, **warning**은 확인이 필요한 경고다. 이 화면을 정확히 읽어내는 것이 오늘 그의 임무다. 선임은 말했다. \"메시지를 못 읽으면 멀쩡한 칩을 버리거나, 불량을 그냥 넘긴다.\" 오늘 우리는 이 붉은 줄들을 하나씩 해독한다."
+    "text": "야간 근무 중, 신입 기술자 지훈은 레이아웃 검증 장비의 HMI 화면 앞에 앉아 있다. 방금 돌린 검사 결과 창에 붉은 글씨가 잔뜩 떴다. 화면 상단에는 **DRC RESULTS**, 그 아래로 **SPACING violation: 15 errors**, **WIDTH violation: 3 errors**, 그리고 노란색으로 **2 warnings**라는 줄이 보인다. 각 줄 끝에는 **insufficient spacing (min 0.14um)** 같은 짧은 영어 문장과 좌표가 붙어 있다. 지훈은 이 영어가 '무엇이 잘못되었는지'를 말해준다는 것을 안다. **error**는 반드시 고쳐야 하는 규칙 위반이고, **warning**은 확인이 필요한 경고다. 이 화면을 정확히 읽어내는 것이 오늘 그의 임무다. 선임은 말했다. \"메시지를 못 읽으면 멀쩡한 칩을 버리거나, 불량을 그냥 넘긴다.\" 오늘 우리는 이 붉은 줄들을 하나씩 해독한다.",
+    "art": "drc"
    },
    {
     "type": "read",
@@ -5427,7 +5436,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🔍",
     "title": "도면과 실제가 다르면?",
-    "text": "야간 근무 중 후배 기술자가 화면을 보다가 당신을 부릅니다. 검증 리포트 맨 위에 빨간 글씨로 **LVS FAILED** 라고 떠 있습니다. 그 아래에는 **1 mismatch, 2 missing devices, 1 short**. 후배가 묻습니다. \"선배님, 이거 레이아웃을 잘못 그린 건가요, 아니면 회로도가 틀린 건가요?\" 당신은 침착하게 설명합니다. **LVS(Layout Versus Schematic)** 는 설계자가 그린 **schematic**(회로도)과 실제로 그려진 **layout**(레이아웃)이 전기적으로 똑같은지를 자동으로 비교하는 검증입니다. 두 개를 각각 **netlist**(넷리스트)로 뽑아서 소자 하나하나, 연결선 하나하나를 대조합니다. **match** 가 뜨면 통과, **mismatch** 가 뜨면 어딘가 다르다는 뜻이죠. 현장에서 우리가 읽어야 할 것은 바로 이 영문 리포트입니다. 어느 소자가 빠졌는지(**missing**), 어디가 붙어버렸는지(**short**), 어디가 끊어졌는지(**open**) — 영어 한 줄을 정확히 읽어내는 것이 오늘의 목표입니다."
+    "text": "야간 근무 중 후배 기술자가 화면을 보다가 당신을 부릅니다. 검증 리포트 맨 위에 빨간 글씨로 **LVS FAILED** 라고 떠 있습니다. 그 아래에는 **1 mismatch, 2 missing devices, 1 short**. 후배가 묻습니다. \"선배님, 이거 레이아웃을 잘못 그린 건가요, 아니면 회로도가 틀린 건가요?\" 당신은 침착하게 설명합니다. **LVS(Layout Versus Schematic)** 는 설계자가 그린 **schematic**(회로도)과 실제로 그려진 **layout**(레이아웃)이 전기적으로 똑같은지를 자동으로 비교하는 검증입니다. 두 개를 각각 **netlist**(넷리스트)로 뽑아서 소자 하나하나, 연결선 하나하나를 대조합니다. **match** 가 뜨면 통과, **mismatch** 가 뜨면 어딘가 다르다는 뜻이죠. 현장에서 우리가 읽어야 할 것은 바로 이 영문 리포트입니다. 어느 소자가 빠졌는지(**missing**), 어디가 붙어버렸는지(**short**), 어디가 끊어졌는지(**open**) — 영어 한 줄을 정확히 읽어내는 것이 오늘의 목표입니다.",
+    "art": "lvs"
    },
    {
     "type": "read",
@@ -6481,7 +6491,8 @@ export const CONTENT_CHAPTERS = [
     "type": "story",
     "icon": "🎓",
     "title": "종합 점검 안내",
-    "text": "장비·공정·디자인 전체를 종합합니다. **로그 · 매뉴얼 · Design Rule · DRC/LVS 오류**를 읽고 답하세요."
+    "text": "장비·공정·디자인 전체를 종합합니다. **로그 · 매뉴얼 · Design Rule · DRC/LVS 오류**를 읽고 답하세요.",
+    "art": "finalcheck"
    },
    {
     "type": "quiz",

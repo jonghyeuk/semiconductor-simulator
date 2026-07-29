@@ -1398,9 +1398,7 @@ function SlideRenderer({ slide }) {
       return (
         <div>
           {slide.art && MANGA[slide.art] && (
-            <figure className="fes-manga">
-              <div className="fes-manga-svg" dangerouslySetInnerHTML={{ __html: MANGA[slide.art] }} />
-            </figure>
+            <figure className="fes-manga"><div className="fes-manga-svg" dangerouslySetInnerHTML={{ __html: MANGA[slide.art] }} /></figure>
           )}
           <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>
         </div>
