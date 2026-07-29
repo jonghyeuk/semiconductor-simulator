@@ -23,7 +23,8 @@ export const CONTENT_CHAPTERS = [
      "SP / PV 값",
      "버튼 RUN·ABORT"
     ],
-    "goal": "화면 한 줄을 \"지금 무엇을 해도 되는가\"로 읽어내기."
+    "goal": "화면 한 줄을 \"지금 무엇을 해도 되는가\"로 읽어내기.",
+    "bg": "w1"
    },
    {
     "type": "read",
@@ -694,7 +695,8 @@ export const CONTENT_CHAPTERS = [
      "경고 HOT SURFACE",
      "MFC · 유량 sccm"
     ],
-    "goal": "장비 구성요소의 영어 이름과 그 역할을 연결하기."
+    "goal": "장비 구성요소의 영어 이름과 그 역할을 연결하기.",
+    "bg": "w2"
    },
    {
     "type": "read",
@@ -1400,7 +1402,8 @@ export const CONTENT_CHAPTERS = [
      "버튼 PRESS START",
      "도어 경고"
     ],
-    "goal": "번호 붙은 절차 문장을 순서대로 정확히 따라 읽기."
+    "goal": "번호 붙은 절차 문장을 순서대로 정확히 따라 읽기.",
+    "bg": "w3"
    },
    {
     "type": "read",
@@ -2003,7 +2006,8 @@ export const CONTENT_CHAPTERS = [
      "N2 퍼지 상태",
      "FAULT 배너"
     ],
-    "goal": "시간순 로그와 숫자를 읽어 \"정상 / 이탈\"을 판단하기."
+    "goal": "시간순 로그와 숫자를 읽어 \"정상 / 이탈\"을 판단하기.",
+    "bg": "w4"
    },
    {
     "type": "read",
@@ -2598,7 +2602,8 @@ export const CONTENT_CHAPTERS = [
      "경고 PLASMA ON",
      "알람 REFLECTED POWER HIGH"
     ],
-    "goal": "RF·매칭 관련 화면과 경고를 읽어 장비 상태를 판단하기."
+    "goal": "RF·매칭 관련 화면과 경고를 읽어 장비 상태를 판단하기.",
+    "bg": "w5"
    },
    {
     "type": "read",
@@ -3211,7 +3216,8 @@ export const CONTENT_CHAPTERS = [
      "버튼 ABORT·RESET",
      "FAULT 화면"
     ],
-    "goal": "알람 문구를 읽어 원인과 조치를 판단하기."
+    "goal": "알람 문구를 읽어 원인과 조치를 판단하기.",
+    "bg": "w6"
    },
    {
     "type": "read",
@@ -3866,7 +3872,8 @@ export const CONTENT_CHAPTERS = [
      "정비 로그 N-G · rework",
      "토크 스펙 N·m"
     ],
-    "goal": "정비 지시문의 동사를 정확히 읽고 행동으로 옮기기."
+    "goal": "정비 지시문의 동사를 정확히 읽고 행동으로 옮기기.",
+    "bg": "w7"
    },
    {
     "type": "read",
@@ -4558,7 +4565,8 @@ export const CONTENT_CHAPTERS = [
      "경고·알람",
      "로그·계기값"
     ],
-    "goal": "흩어진 조각을 하나로 모아 스스로 판단해 보기."
+    "goal": "흩어진 조각을 하나로 모아 스스로 판단해 보기.",
+    "bg": "w8"
    },
    {
     "type": "mansample",
@@ -4793,7 +4801,8 @@ export const CONTENT_CHAPTERS = [
      "cross-section",
      "FEOL / BEOL"
     ],
-    "goal": "칩을 층(layer) 단위로 읽고 화면 용어의 \"위치\"를 알기."
+    "goal": "칩을 층(layer) 단위로 읽고 화면 용어의 \"위치\"를 알기.",
+    "bg": "w9"
    },
    {
     "type": "read",
@@ -5390,7 +5399,8 @@ export const CONTENT_CHAPTERS = [
      "DRC CLEAN 요구",
      "재작업 rework"
     ],
-    "goal": "설계 규칙을 숫자와 영어로 읽어 위반을 판단하기."
+    "goal": "설계 규칙을 숫자와 영어로 읽어 위반을 판단하기.",
+    "bg": "w10"
    },
    {
     "type": "read",
@@ -5962,7 +5972,8 @@ export const CONTENT_CHAPTERS = [
      "off-grid",
      "도면 대조"
     ],
-    "goal": "도면과 실제 배치를 대조해 \"맞다 / 틀리다\"를 판단하기."
+    "goal": "도면과 실제 배치를 대조해 \"맞다 / 틀리다\"를 판단하기.",
+    "bg": "w11"
    },
    {
     "type": "read",
@@ -6527,7 +6538,8 @@ export const CONTENT_CHAPTERS = [
      "레이아웃 마커",
      "NOT CLEAN"
     ],
-    "goal": "붉은 리포트를 한 줄씩 해독해 \"고칠 것 / 확인할 것\"을 나누기."
+    "goal": "붉은 리포트를 한 줄씩 해독해 \"고칠 것 / 확인할 것\"을 나누기.",
+    "bg": "w12"
    },
    {
     "type": "read",
@@ -7088,7 +7100,8 @@ export const CONTENT_CHAPTERS = [
      "layout ≠ schematic",
      "NOT CLEAN"
     ],
-    "goal": "두 넷리스트를 비교해 \"일치 / 불일치\"를 읽기."
+    "goal": "두 넷리스트를 비교해 \"일치 / 불일치\"를 읽기.",
+    "bg": "w13"
    },
    {
     "type": "read",
@@ -7642,7 +7655,8 @@ export const CONTENT_CHAPTERS = [
      "인계 문장 hand over",
      "SIGN OFF"
     ],
-    "goal": "장비 이상→식각→DRC→보고까지 한 흐름을 영어로 정리·인계하기."
+    "goal": "장비 이상→식각→DRC→보고까지 한 흐름을 영어로 정리·인계하기.",
+    "bg": "w14"
    },
    {
     "type": "read",
@@ -8324,7 +8338,8 @@ export const CONTENT_CHAPTERS = [
      "최종 체크리스트",
      "DRC / LVS CLEAN"
     ],
-    "goal": "배운 모든 현장 영어를 실제 흐름에서 통합 적용하기."
+    "goal": "배운 모든 현장 영어를 실제 흐름에서 통합 적용하기.",
+    "bg": "w15"
    },
    {
     "type": "mansample",

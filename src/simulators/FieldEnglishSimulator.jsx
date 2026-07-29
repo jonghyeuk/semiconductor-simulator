@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CONTENT_CHAPTERS } from '../data/fieldEnglishChapters.data';
 import { ART } from '../data/fieldEnglishArt.data';
 import { MANGA } from '../data/fieldEnglishManga.data';
+import { SCENEBG } from '../data/fieldEnglishSceneBg.data';
 
 /**
  * FieldEnglishSimulator — 반도체 현장 실무영어 시뮬레이터 (서고 drop-in)
@@ -1484,6 +1485,7 @@ function FieldFigs({ figs }) {
 function SceneCard({ s }) {
   return (
     <div className="fes-scene">
+      {s.bg && SCENEBG[s.bg] && <div className="fes-scene-bg" dangerouslySetInnerHTML={{ __html: SCENEBG[s.bg] }} />}
       <div className="fes-scene-hd"><span className="fes-scene-k">🎬 오늘의 현장</span><span className="fes-scene-tag">SET THE SCENE</span></div>
       <div className="fes-scene-rows">
         <div className="fes-scene-row"><span className="fes-scene-ic">📍</span><div><div className="fes-scene-lbl">장소 · WHERE</div><div className="fes-scene-val">{s.where}</div></div></div>
@@ -2074,6 +2076,8 @@ function FesStyles() {
 .fes-doc-gloss b{color:#e8f6ff}
 /* ===== 오늘의 현장 · 상황 설정 브리핑 ===== */
 .fes-scene{background:linear-gradient(135deg,#111d33,#0b1626);border:1px solid ${C.line2};border-left:4px solid ${C.amber};border-radius:14px;padding:18px 20px;box-shadow:0 8px 26px rgba(0,0,0,.3)}
+.fes-scene-bg{margin:-4px -6px 15px;border-radius:10px;overflow:hidden;border:1px solid ${C.line2};box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.fes-scene-bg svg{width:100%;height:auto;display:block}
 .fes-scene-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px dashed ${C.line2}}
 .fes-scene-k{font-size:16px;font-weight:800;color:${C.amber}}
 .fes-scene-tag{font-family:${C.mono};font-size:10.5px;font-weight:700;letter-spacing:2px;color:${C.dim};border:1px solid ${C.line2};border-radius:5px;padding:3px 9px}
