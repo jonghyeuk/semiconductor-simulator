@@ -1480,8 +1480,31 @@ function FieldArtifact({ f }) {
 function FieldFigs({ figs }) {
   return <div className="fa-wrap">{figs.map((f, i) => <FieldArtifact key={i} f={f} />)}</div>;
 }
+// ===== 오늘의 현장 · 상황 설정 (학생이 장면을 머릿속에 세팅하고 들어가도록) =====
+function SceneCard({ s }) {
+  return (
+    <div className="fes-scene">
+      <div className="fes-scene-hd"><span className="fes-scene-k">🎬 오늘의 현장</span><span className="fes-scene-tag">SET THE SCENE</span></div>
+      <div className="fes-scene-rows">
+        <div className="fes-scene-row"><span className="fes-scene-ic">📍</span><div><div className="fes-scene-lbl">장소 · WHERE</div><div className="fes-scene-val">{s.where}</div></div></div>
+        <div className="fes-scene-row"><span className="fes-scene-ic">🔧</span><div><div className="fes-scene-lbl">장비 · WHAT</div><div className="fes-scene-val">{s.tool}</div></div></div>
+        <div className="fes-scene-row"><span className="fes-scene-ic">⚡</span><div><div className="fes-scene-lbl">상황 · SITUATION</div><div className="fes-scene-val">{s.situation}</div></div></div>
+      </div>
+      {s.meet && s.meet.length > 0 && (
+        <div className="fes-scene-meet">
+          <div className="fes-scene-lbl">🗣️ 오늘 이 현장에서 만날 영어</div>
+          <div className="fes-scene-chips">{s.meet.map((m, i) => <span key={i} className="fes-scene-chip">{m}</span>)}</div>
+        </div>
+      )}
+      {s.goal && <div className="fes-scene-goal"><b>🎯 오늘의 목표</b> — {s.goal}</div>}
+      <div className="fes-scene-cue">▸ 이 장면을 머릿속에 그려보고 시작하세요.</div>
+    </div>
+  );
+}
 function slideInner(slide) {
   switch (slide.type) {
+    case 'scene':
+      return <SceneCard s={slide} />;
     case 'story':
       return (
         <div>
@@ -1959,6 +1982,22 @@ function FesStyles() {
 .fes-wk-manual b{color:#bfe9f5;font-weight:700}
 .fes-wk-quiz-intro{font-size:12.5px;color:${C.dim};margin:0 0 12px}
 .fes-wk-qn{font-family:${C.mono};color:${C.cyan};font-size:12px;margin-right:4px}
+/* ===== 오늘의 현장 · 상황 설정 브리핑 ===== */
+.fes-scene{background:linear-gradient(135deg,#111d33,#0b1626);border:1px solid ${C.line2};border-left:4px solid ${C.amber};border-radius:14px;padding:18px 20px;box-shadow:0 8px 26px rgba(0,0,0,.3)}
+.fes-scene-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px dashed ${C.line2}}
+.fes-scene-k{font-size:16px;font-weight:800;color:${C.amber}}
+.fes-scene-tag{font-family:${C.mono};font-size:10.5px;font-weight:700;letter-spacing:2px;color:${C.dim};border:1px solid ${C.line2};border-radius:5px;padding:3px 9px}
+.fes-scene-rows{display:flex;flex-direction:column;gap:12px}
+.fes-scene-row{display:flex;gap:12px;align-items:flex-start}
+.fes-scene-ic{font-size:19px;flex:none;width:24px;text-align:center;margin-top:1px}
+.fes-scene-lbl{font-family:${C.mono};font-size:10.5px;font-weight:700;letter-spacing:1.2px;color:${C.dim};margin-bottom:3px}
+.fes-scene-val{font-size:14.5px;line-height:1.65;color:${C.text}}
+.fes-scene-meet{margin-top:15px;padding-top:13px;border-top:1px dashed ${C.line2}}
+.fes-scene-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.fes-scene-chip{font-size:12px;color:#dbe8fb;background:${C.cyan}14;border:1px solid ${C.cyan}44;border-radius:20px;padding:5px 12px}
+.fes-scene-goal{margin-top:15px;background:${C.amber}12;border:1px solid ${C.amber}44;border-radius:10px;padding:11px 14px;font-size:13.5px;line-height:1.6;color:#f4e6cf}
+.fes-scene-goal b{color:${C.amber}}
+.fes-scene-cue{margin-top:13px;font-size:12px;color:${C.dim};font-style:italic;text-align:center}
 /* ===== 현장 자료 삽화 (field artifacts) ===== */
 .fa-wrap{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px}
 .fa-fig{margin:0;flex:1 1 240px;min-width:0;display:flex;flex-direction:column}

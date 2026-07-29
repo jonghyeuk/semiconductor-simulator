@@ -12,6 +12,20 @@ export const CONTENT_CHAPTERS = [
     "art": "hmi"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "입사 첫날, 클린룸 안 — 처음 보는 장비 앞. 방진복을 입고 선배 뒤를 따라간다.",
+    "tool": "장비 조작 화면(HMI)과 큰 모니터. 온통 영어다.",
+    "situation": "선배가 화면을 가리키며 묻는다. \"이 장비, 지금 돌려도 되는 상태야?\"",
+    "meet": [
+     "상태어 IDLE / RUN",
+     "경고문 DO NOT OPEN",
+     "SP / PV 값",
+     "버튼 RUN·ABORT"
+    ],
+    "goal": "화면 한 줄을 \"지금 무엇을 해도 되는가\"로 읽어내기."
+   },
+   {
     "type": "read",
     "title": "왜 '현장 영어'인가 — 쓰기가 아니라 판단",
     "intro": "이 수업의 목표는 영어를 '작성'하는 것이 아니라, 이미 영어로 쓰인 정보를 정확히 '읽고 판단'하는 것이다.",
@@ -622,6 +636,20 @@ export const CONTENT_CHAPTERS = [
     "art": "parts"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "장비 뒤편, 커버를 열어 둔 정비 구역.",
+    "tool": "챔버·펌프·밸브·MFC·RF 제너레이터 — 장비를 이루는 부품들.",
+    "situation": "선배가 부품을 하나씩 가리키며 영어 이름과 명판(nameplate)을 읽어 준다.",
+    "meet": [
+     "부품 명판 TURBO PUMP",
+     "상태 라벨 ON / OPEN",
+     "경고 HOT SURFACE",
+     "MFC · 유량 sccm"
+    ],
+    "goal": "장비 구성요소의 영어 이름과 그 역할을 연결하기."
+   },
+   {
     "type": "read",
     "title": "왜 진공이 필요한가: Chamber의 존재 이유",
     "intro": "식각·증착 공정은 대부분 진공(**vacuum**) 상태의 밀폐 공간 안에서 일어납니다. 그 공간이 바로 **chamber**입니다.",
@@ -1153,6 +1181,20 @@ export const CONTENT_CHAPTERS = [
     "title": "초록불이 켜지기 전에는 손대지 마라",
     "text": "야간 근무 첫날, 선배가 장비 앞에서 말한다. \"화면에 **READY** 초록불 뜨기 전에는 절대 **START** 누르지 마.\" 신입은 웨이퍼 카세트를 **load port**에 올리고 **START**를 눌렀다. 장비는 곧바로 **pump down**을 시작했고, 압력계 숫자가 빠르게 떨어졌다. 하지만 아직 **base pressure**에 도달하지 못했는데 **transfer valve**를 열려고 하자, 화면에 붉은 글씨로 **INTERLOCK: base pressure not reached** 가 떴다. 선배가 웃으며 말한다. \"장비는 영어로 너한테 계속 말을 걸어. **load, evacuate, pump down, purge, vent, start, stop, unload** — 이 명령어들과 상태 표시만 정확히 읽으면, 절차는 반쯤 끝난 거야.\" 오늘 우리는 장비가 화면과 매뉴얼로 건네는 그 영어를 읽고, 지금 어떤 상태인지 스스로 판단하는 법을 배운다.",
     "art": "green"
+   },
+   {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "웨이퍼를 넣는 로드포트(load port) 앞.",
+    "tool": "조작 패널과 작업 절차서(SOP).",
+    "situation": "오늘 첫 로트를 직접 돌려 본다. 순서를 하나라도 틀리면 안 된다.",
+    "meet": [
+     "절차 명령문 Load·Evacuate·Start",
+     "초록불 규칙",
+     "버튼 PRESS START",
+     "도어 경고"
+    ],
+    "goal": "번호 붙은 절차 문장을 순서대로 정확히 따라 읽기."
    },
    {
     "type": "read",
@@ -1695,6 +1737,20 @@ export const CONTENT_CHAPTERS = [
     "art": "pressure"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "새벽 3시, 야간 근무 모니터링 데스크.",
+    "tool": "진공·가스 로그 화면과 압력 게이지.",
+    "situation": "챔버 압력이 5.0에서 5.8 Torr로 흔들린다. 로그를 읽어 원인을 찾아야 한다.",
+    "meet": [
+     "SP / PV 계기",
+     "로그 DRIFT · out of spec",
+     "N2 퍼지 상태",
+     "FAULT 배너"
+    ],
+    "goal": "시간순 로그와 숫자를 읽어 \"정상 / 이탈\"을 판단하기."
+   },
+   {
     "type": "read",
     "title": "왜 진공과 가스를 로그로 감시하는가",
     "intro": "반도체 공정은 대부분 저압(진공) 환경에서 진행되며, 압력과 유량이 결과를 결정합니다.",
@@ -2228,6 +2284,20 @@ export const CONTENT_CHAPTERS = [
     "title": "플라즈마가 켜지지 않는 새벽",
     "text": "새벽 3시, 식각(etch) 라인의 플라즈마 장비 앞에 선 지원이. 레시피를 시작했지만 웨이퍼 처리가 멈춰 있다. HMI 화면에는 **RF Power: 800 W** 라고 떠 있지만 그 아래 **Reflected: 210 W** 가 빨갛게 깜빡인다. 선배가 다가와 한마디 한다. \"**The plasma didn't ignite** — look at the **reflected power**, the **match** isn't tuned.\" 지원이는 이 문장을 읽고 무엇을 봐야 하는지 알아야 한다. 오늘 우리는 **RF power**, **forward/reflected power**, **matching network**, **impedance** 같은 화면 속 영어가 실제로 무엇을 뜻하는지, 그리고 반사파(reflected power) 값이 왜 중요한지를 읽고 판단하는 법을 배운다.",
     "art": "fse"
+   },
+   {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "플라즈마 식각 장비 앞, 아직 어두운 새벽.",
+    "tool": "RF 제너레이터와 매칭 네트워크(matching network).",
+    "situation": "플라즈마가 켜지지 않는다. 반사전력이 높다. 곧 외국 FSE가 도착한다.",
+    "meet": [
+     "RF · 반사전력 계기",
+     "매칭 상태 TUNING",
+     "경고 PLASMA ON",
+     "알람 REFLECTED POWER HIGH"
+    ],
+    "goal": "RF·매칭 관련 화면과 경고를 읽어 장비 상태를 판단하기."
    },
    {
     "type": "read",
@@ -2781,6 +2851,20 @@ export const CONTENT_CHAPTERS = [
     "title": "빨간 램프가 켜졌다",
     "text": "새벽 3시, 식각(etch) 장비의 타워 램프가 초록에서 빨강으로 바뀌고 로봇이 멈춘다. HMI 화면에는 붉은 글씨로 **ALARM: RF POWER FAILURE — Reflected power exceeded limit**이 떠 있다. 신입 기술자 지훈은 반사적으로 **RESET** 버튼에 손을 뻗었지만, 사수가 말린다. \"먼저 읽어. **alarm**인지 **warning**인지, **interlock**이 걸린 건지부터 봐야 해.\" 화면 아래에는 작은 글씨로 **INTERLOCK ACTIVE — Chamber door open**도 함께 떠 있었다. 만약 지훈이 그냥 리셋을 눌렀다면, 도어가 열린 채로 공정이 재개되어 위험한 상황이 벌어졌을 것이다. 이 장에서 우리는 화면과 매뉴얼에 뜨는 영어 알람 문장을 **읽고**, 무엇을 **먼저** 할지 **판단**하는 법을 배운다. 현장에서 영어는 쓰는 것이 아니라 정확히 읽고 조치를 결정하는 도구다.",
     "art": "alarm"
+   },
+   {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "라인 한복판, 빨간 경보등이 돌아가는 장비 앞.",
+    "tool": "HMI 알람 배너와 경보등(beacon).",
+    "situation": "갑자기 알람이 울린다. INTERLOCK이 걸렸다. 무엇을 눌러야 하나?",
+    "meet": [
+     "알람 코드 · 문구",
+     "INTERLOCK · TIMEOUT",
+     "버튼 ABORT·RESET",
+     "FAULT 화면"
+    ],
+    "goal": "알람 문구를 읽어 원인과 조치를 판단하기."
    },
    {
     "type": "read",
@@ -3378,6 +3462,20 @@ export const CONTENT_CHAPTERS = [
     "art": "pm"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "정비의 아침. DOWN 태그가 걸린 장비 앞.",
+    "tool": "PM 체크리스트와 공구, 잠금·표찰(LOTO).",
+    "situation": "오늘 이 장비는 DOWN이다. 점검·세정·교체·교정을 순서대로 한다.",
+    "meet": [
+     "태그 DOWN · LOTO",
+     "PM 체크리스트 동사",
+     "정비 로그 N-G · rework",
+     "토크 스펙 N·m"
+    ],
+    "goal": "정비 지시문의 동사를 정확히 읽고 행동으로 옮기기."
+   },
+   {
     "type": "read",
     "title": "예방 정비(PM)란 무엇이며, 왜 영어로 되어 있는가",
     "intro": "PM은 '고장 난 뒤 고치는' 것이 아니라 '고장 나기 전에 정기적으로 손보는' 정비입니다. 반도체 팹의 장비 대부분은 해외 제조사(Applied Materials, Lam, TEL 등) 제품이므로, PM 문서와 화면 텍스트는 거의 전부 영어입니다.",
@@ -3952,6 +4050,19 @@ export const CONTENT_CHAPTERS = [
     "art": "midcheck"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "1~7장을 마친 중간 지점. 그동안 본 화면·경고·로그를 모아 둔 복습 보드 앞.",
+    "tool": "장비·운전·로그·알람 — 지금까지의 현장 영어 전체.",
+    "situation": "배운 것을 실제 상황에서 다시 \"읽고 판단\"해 본다.",
+    "meet": [
+     "HMI 상태어",
+     "경고·알람",
+     "로그·계기값"
+    ],
+    "goal": "흩어진 조각을 하나로 모아 스스로 판단해 보기."
+   },
+   {
     "type": "quiz",
     "title": "① 장비 구성요소",
     "intro": "부품의 영어 이름·기능을 확인합니다.",
@@ -4136,6 +4247,19 @@ export const CONTENT_CHAPTERS = [
     "title": "층으로 읽는 반도체",
     "text": "신입 기술자 지훈은 첫 출근날, 엔지니어가 모니터에 띄운 소자 **cross-section** 그림 앞에서 멈칫했다. 화면 맨 아래엔 회색 **substrate (Si)**, 그 위로 **well**, **active**, 빨간 **poly (gate)**, 그리고 위쪽 굵은 선들에는 **metal**이라 적혀 있었다. 선배가 물었다. \"This layer here — what is it?\" 지훈은 순간 당황했지만, 곧 깨달았다. 반도체는 결국 **bottom-up** 으로 층층이 쌓인 구조이고, 화면과 매뉴얼의 영어 단어는 각각 그 '층(**layer**)'의 이름일 뿐이라는 것을. 아래에서 위로 **substrate → well → active → poly → contact → metal** 순서만 머릿속에 넣으면, 낯선 영어 화면도 '지도'처럼 읽을 수 있다. 오늘 수업의 목표는 바로 이 층 이름을 영어로 '읽고 판단'하는 것이다.",
     "art": "layers"
+   },
+   {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "이제 장비에서 설계로. 설계·계측 파트의 소자 단면도 앞.",
+    "tool": "칩 단면(cross-section)과 레이어 도면.",
+    "situation": "칩이 어떤 층으로 쌓이는지 아래에서 위로 읽는다.",
+    "meet": [
+     "레이어 metal·poly·substrate",
+     "cross-section",
+     "FEOL / BEOL"
+    ],
+    "goal": "칩을 층(layer) 단위로 읽고 화면 용어의 \"위치\"를 알기."
    },
    {
     "type": "read",
@@ -4680,6 +4804,20 @@ export const CONTENT_CHAPTERS = [
     "art": "designrule"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "레이아웃 검토 데스크.",
+    "tool": "디자인 룰 문서(rule deck)와 레이아웃 화면.",
+    "situation": "0.02µm 차이가 재작업(rework)을 불렀다. 규칙을 숫자로 읽어야 한다.",
+    "meet": [
+     "MIN WIDTH · SPACING 규칙",
+     "0.02µm 위반",
+     "DRC CLEAN 요구",
+     "재작업 rework"
+    ],
+    "goal": "설계 규칙을 숫자와 영어로 읽어 위반을 판단하기."
+   },
+   {
     "type": "read",
     "title": "Design Rule이란 무엇인가",
     "intro": "디자인 규칙은 '만들 수 있는 도형'의 최소 조건을 정한 약속입니다.",
@@ -5199,6 +5337,20 @@ export const CONTENT_CHAPTERS = [
     "art": "placement"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "레이아웃 에디터 화면 앞.",
+    "tool": "셀 배치 도면(Rev C)과 그리드.",
+    "situation": "도면대로 놓였는지 확인한다. off-grid 셀이 보인다.",
+    "meet": [
+     "지시 PER THE DRAWING",
+     "배치 상태 placed",
+     "off-grid",
+     "도면 대조"
+    ],
+    "goal": "도면과 실제 배치를 대조해 \"맞다 / 틀리다\"를 판단하기."
+   },
+   {
     "type": "read",
     "title": "패턴 배치란 무엇인가",
     "intro": "패턴 배치(layout placement)는 각 층의 도형을 정해진 위치·크기·간격 규칙에 맞게 놓는 작업이다.",
@@ -5708,6 +5860,20 @@ export const CONTENT_CHAPTERS = [
     "art": "drc"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "검증 장비 HMI 앞, 야간 근무.",
+    "tool": "DRC(Design Rule Check) 검사 결과 창.",
+    "situation": "방금 돌린 검사에 붉은 글씨가 잔뜩 떴다. error와 warning을 구분해야 한다.",
+    "meet": [
+     "DRC RESULTS 리포트",
+     "violation · error · warning",
+     "레이아웃 마커",
+     "NOT CLEAN"
+    ],
+    "goal": "붉은 리포트를 한 줄씩 해독해 \"고칠 것 / 확인할 것\"을 나누기."
+   },
+   {
     "type": "read",
     "title": "DRC란 무엇인가",
     "intro": "DRC는 설계된 레이아웃이 공정에서 실제로 만들 수 있는지 규칙과 대조해 검사하는 절차다.",
@@ -6209,6 +6375,20 @@ export const CONTENT_CHAPTERS = [
     "art": "lvs"
    },
    {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "검증 데스크. 회로도와 레이아웃을 나란히 띄워 둔 화면 앞.",
+    "tool": "LVS(Layout Versus Schematic) 리포트와 넷리스트 비교.",
+    "situation": "도면과 실제가 다르다는 mismatch가 떴다.",
+    "meet": [
+     "LVS REPORT",
+     "matched · mismatch",
+     "layout ≠ schematic",
+     "NOT CLEAN"
+    ],
+    "goal": "두 넷리스트를 비교해 \"일치 / 불일치\"를 읽기."
+   },
+   {
     "type": "read",
     "title": "LVS란 무엇인가",
     "intro": "LVS는 '내가 그린 그림'과 '내가 의도한 회로'가 같은지 확인하는 검증입니다.",
@@ -6705,6 +6885,20 @@ export const CONTENT_CHAPTERS = [
     "title": "야간 근무 인계, 영어 리포트 한 장",
     "text": "새벽 6시, 야간조가 끝나고 인계 시간이다. 선임이 태블릿에 뜬 영어 **shift report** 한 장을 건네며 말한다. \"이거 3분 안에 읽고, 라인 상태 요약해서 주간조 반장한테 구두로 보고해줘.\" 화면에는 이런 문장이 있다. **Problem:** Chamber A pressure spiked to 12 mTorr during etch step 3. **Cause:** APC throttle valve stuck at 40%. **Action:** Aborted lot, switched to Chamber B, notified equipment engineer. **Result:** Lot recovered, chamber A placed **DOWN** pending PM. 당신이 할 일은 영작이 아니다. 이 **problem–cause–action–result** 4단 구조를 정확히 읽어내고, '지금 A 챔버는 정지 상태, B로 우회, 로트는 살렸다'를 한 문장으로 요약·판단하는 것이다. 오늘은 장비부터 디자인 검증까지 현장 전체를 아우르는 영어 보고문을 읽고, 무슨 일이 일어났고 지금 무엇을 해야 하는지 판단하는 훈련을 한다.",
     "art": "passdown"
+   },
+   {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "야간 근무 종료. 인수인계(passdown) 데스크.",
+    "tool": "인수인계 로그와 영어 리포트 한 장.",
+    "situation": "다음 조에게 오늘 있었던 일을 영어로 넘겨야 한다.",
+    "meet": [
+     "PASSDOWN LOG",
+     "약어 WO · OOS · ETA",
+     "인계 문장 hand over",
+     "SIGN OFF"
+    ],
+    "goal": "장비 이상→식각→DRC→보고까지 한 흐름을 영어로 정리·인계하기."
    },
    {
     "type": "read",
@@ -7332,6 +7526,19 @@ export const CONTENT_CHAPTERS = [
     "title": "종합 점검 안내",
     "text": "장비·공정·디자인 전체를 종합합니다. **로그 · 매뉴얼 · Design Rule · DRC/LVS 오류**를 읽고 답하세요.",
     "art": "finalcheck"
+   },
+   {
+    "type": "scene",
+    "title": "오늘의 현장 · 상황 설정",
+    "where": "전 과정을 마친 종합 점검.",
+    "tool": "장비 + 설계 전 영역의 화면·리포트.",
+    "situation": "마지막으로 읽고·판단하고·영어로 보고한다.",
+    "meet": [
+     "장비 + 설계 종합",
+     "최종 체크리스트",
+     "DRC / LVS CLEAN"
+    ],
+    "goal": "배운 모든 현장 영어를 실제 흐름에서 통합 적용하기."
    },
    {
     "type": "quiz",
