@@ -18,6 +18,7 @@ const TAB_OVERLAY = {
   'plasma-ii':                { top: 80, height: 52 },
   'comprehensive-assessment': { top: 0, height: 0 },
   'field-english':            { top: 0, height: 0 }, // 자체 탭(Course Map/Chapters) 사용 — 덮개 없음
+  'waferTransfer':            { top: 0, height: 0 }, // iframe 시뮬 — 내부 헤더/챕터바 사용, 덮개 없음
 };
 const DEFAULT_TAB_OVERLAY = { top: 0, height: 58 };
 
