@@ -11,7 +11,6 @@ export default function WaferTransferSim({
   hideTabBar = false,     // 자료실에서 true 로 들어옴 (내부 탭바가 없으므로 미사용)
   controlledTab,          // 상위 탭 (본 시뮬은 단일 뷰라 미사용)
   onTabChange,            // 미사용
-  initialTab,             // 서고 카드에서 넘어오는 탭 id ('chapters' 또는 'ch5' 형태 허용)
   initialChapter,         // 1~15. 특정 챕터로 진입
   initialUnit,            // (별칭) initialChapter 와 동일
   initialWeek,            // (별칭) initialChapter 와 동일
@@ -19,18 +18,13 @@ export default function WaferTransferSim({
   hideOtherTabs = false,  // true 면 챕터 선택 바를 숨겨 그 챕터만 노출
   deckPath = '/topic-decks/wafer-transfer.html', // 시뮬 안 '교재' 버튼이 열 데크
 }) {
-  // 'ch5' · 'chapter5' · 'unit5' · 'week5' 형태의 문자열에서 챕터 번호를 뽑아낸다.
-  const parseChapter = (v) =>
-    typeof v === 'string' && /^(?:ch|chapter|unit|week)(\d+)$/.test(v)
-      ? Number(v.replace(/^(?:ch|chapter|unit|week)/, ''))
-      : undefined;
-
   const wk =
     initialChapter ??
     initialUnit ??
     initialWeek ??
-    parseChapter(initialTab) ??
-    parseChapter(initialTheme);
+    (typeof initialTheme === 'string' && /^(?:ch|chapter|unit|week)(\d+)$/.test(initialTheme)
+      ? Number(initialTheme.replace(/^(?:ch|chapter|unit|week)/, ''))
+      : undefined);
 
   const params = new URLSearchParams();
   if (wk) params.set('ch', String(wk));
