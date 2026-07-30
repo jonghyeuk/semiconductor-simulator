@@ -17,6 +17,7 @@ const TAB_OVERLAY = {
   'plasma':                   { top: 80, height: 52 },
   'plasma-ii':                { top: 80, height: 52 },
   'comprehensive-assessment': { top: 0, height: 0 },
+  'field-english':            { top: 0, height: 0 }, // 자체 탭(Course Map/Chapters) 사용 — 덮개 없음
 };
 const DEFAULT_TAB_OVERLAY = { top: 0, height: 58 };
 
