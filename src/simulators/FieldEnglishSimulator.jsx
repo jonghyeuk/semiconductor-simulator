@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CONTENT_CHAPTERS } from '../data/fieldEnglishChapters.data';
 import { ART } from '../data/fieldEnglishArt.data';
+import { MANGA } from '../data/fieldEnglishManga.data';
+import { SCENEBG } from '../data/fieldEnglishSceneBg.data';
 
 /**
  * FieldEnglishSimulator — 반도체 현장 실무영어 시뮬레이터 (서고 drop-in)
@@ -1040,29 +1042,37 @@ function PartDiagram() {
 
 // PPT처럼 한 화면씩 넘기는 슬라이드 뷰어 — 강의자는 '다음'만 누르면 순서대로 진행.
 // 마지막 슬라이드 도달 시 onReachEnd(chapterId) 로 챕터 완료를 알린다.
-function LessonDeck({ steps, chapterId, onReachEnd }) {
+function LessonDeck({ steps, chapterId, chapterNo, chapterTitle, onReachEnd }) {
   const [i, setI] = useState(0);
   const step = steps[i];
   const last = i === steps.length - 1;
   useEffect(() => { if (last && onReachEnd) onReachEnd(chapterId); }, [last, chapterId, onReachEnd]);
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') { if (i < steps.length - 1) setI(i + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { if (i > 0) setI(i - 1); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [i, steps.length]);
+  const stepLabel = step.type ? (({ scene: 'SET THE SCENE', mansample: 'MANUAL', story: 'STORY', eda: 'DESIGN TOOL' })[step.type] || String(step.type).toUpperCase()) : '';
   return (
     <div className="fes-ld">
-      <div className="fes-ld-dots">
-        {steps.map((s, j) => (
-          <button key={j} onClick={() => setI(j)}
-            className={`fes-ld-dot ${j === i ? 'on' : ''} ${j < i ? 'done' : ''}`} title={s.title} />
-        ))}
-      </div>
       <div className="fes-ld-slide">
         <div className="fes-ld-head">
-          <span className="fes-ld-step">STEP {i + 1} / {steps.length}{step.type ? ' · ' + String(step.type).toUpperCase() : ''}</span>
+          <span className="fes-ld-step">CH{chapterNo} · {chapterTitle}<span className="fes-ld-step-sep">/</span>STEP {i + 1} / {steps.length}{stepLabel ? ' · ' + stepLabel : ''}</span>
           <div className="fes-ld-title">{step.title}</div>
         </div>
         <div className="fes-ld-body">{step.body || <SlideRenderer slide={step} />}</div>
       </div>
       <div className="fes-ld-nav">
         <button className="fes-btn ghost" disabled={i === 0} onClick={() => setI(i - 1)}>◀ 이전</button>
-        <span className="fes-ld-count">{i + 1} / {steps.length}</span>
+        <div className="fes-ld-dots">
+          {steps.map((s, j) => (
+            <button key={j} onClick={() => setI(j)}
+              className={`fes-ld-dot ${j === i ? 'on' : ''} ${j < i ? 'done' : ''}`} title={s.title} />
+          ))}
+        </div>
         <button className="fes-btn" disabled={last} onClick={() => setI(i + 1)}>{last ? '이 챕터 끝 ✓' : '다음 ▶'}</button>
       </div>
     </div>
@@ -1391,10 +1401,256 @@ const SIM_REGISTRY = {
   layer: () => <ArtImage which="layer" cap="MOSFET device cross-section — 공정 레이어(도해). 각 레이어의 영어 이름은 번호 라벨 참고." />,
   pm: () => <PMChecklist />,
 };
-function SlideRenderer({ slide }) {
+// ===== 현장 자료 삽화 (장비에 붙은 스티커·화면·계기·로그를 직접 보여준다) =====
+function faRich(text) {
+  if (text == null) return null;
+  return String(text).split(/\[|\]/).map((s, i) => (i % 2 ? <em key={i}>{s}</em> : <React.Fragment key={i}>{s}</React.Fragment>));
+}
+function FieldArtifact({ f }) {
+  let body = null;
+  switch (f.kind) {
+    case 'sticker': {
+      const lv = f.level || 'info';
+      const word = { danger: 'DANGER', warn: 'WARNING', caution: 'CAUTION', info: 'NOTICE', note: 'NOTE' }[lv] || 'NOTICE';
+      body = (
+        <div className={`fa-sticker fa-${lv}`}>
+          <div className="fa-st-hd">{f.icon || '⚠'} {word}</div>
+          <div className="fa-st-bd"><div className="fa-en">{f.en}</div>{f.ko && <div className="fa-ko">{f.ko}</div>}</div>
+        </div>
+      );
+      break;
+    }
+    case 'hmi':
+      body = (
+        <div className="fa-hmi">
+          <div className="fa-hmi-top"><span>{f.tool || 'TOOL'}</span><span className={`fa-chip fa-s-${f.state || 'idle'}`}>{f.status || 'IDLE'}</span></div>
+          <div className="fa-hmi-body">{(f.rows || []).map((r, i) => <div key={i} className="fa-hmi-row"><span>{r[0]}</span><span className={r[2] ? `fa-v-${r[2]}` : ''}>{r[1]}</span></div>)}</div>
+          {f.banner && <div className={`fa-hmi-bn fa-${f.banner.level || 'danger'}`}>{f.banner.en}{f.banner.ko && <b>{f.banner.ko}</b>}</div>}
+        </div>
+      );
+      break;
+    case 'alarm':
+      body = (
+        <div className={`fa-alarm fa-${f.level || 'danger'}`}>
+          <div className="fa-al-ic">▲</div>
+          <div className="fa-al-tx"><div className="fa-en">{f.code ? <span className="fa-al-code">{f.code}</span> : null}{f.en}</div>{f.ko && <div className="fa-ko">{f.ko}</div>}</div>
+        </div>
+      );
+      break;
+    case 'meter': {
+      const st = f.state || 'ok';
+      body = (
+        <div className="fa-meter">
+          <div className="fa-mt-nm">{f.name}</div>
+          <div className="fa-mt-vals"><span className="fa-mt-sp">SP {f.sp}</span><span className={`fa-mt-pv fa-v-${st}`}>PV {f.pv}</span><span className="fa-mt-u">{f.unit}</span></div>
+          {f.note && <div className="fa-ko">{f.note}</div>}
+        </div>
+      );
+      break;
+    }
+    case 'buttons':
+      body = <div className="fa-btns">{(f.items || []).map((b, i) => <span key={i} className={`fa-btn fa-b-${b[1] || 'n'}`}>{b[0]}</span>)}</div>;
+      break;
+    case 'log':
+      body = (
+        <div className="fa-log">
+          <div className="fa-log-hd">▤ {f.title || 'LOG'}</div>
+          <div className="fa-log-bd">{(f.lines || []).map((l, i) => <div key={i} className="fa-log-ln">{faRich(l)}</div>)}</div>
+        </div>
+      );
+      break;
+    case 'note':
+      body = (
+        <div className="fa-note">
+          <div className="fa-nt-hd">{f.title || 'WORK INSTRUCTION'}</div>
+          <div className="fa-en">{faRich(f.en)}</div>{f.ko && <div className="fa-ko">{f.ko}</div>}
+        </div>
+      );
+      break;
+    case 'step':
+      body = (
+        <div className="fa-step">
+          <div className="fa-sp-hd">{f.title || 'SOP · PROCEDURE'}</div>
+          <ol className="fa-sp-ol">{(f.items || []).map((s, i) => <li key={i}><span className="fa-en">{faRich(Array.isArray(s) ? s[0] : s)}</span>{Array.isArray(s) && s[1] && <span className="fa-ko">{s[1]}</span>}</li>)}</ol>
+        </div>
+      );
+      break;
+    case 'stack':
+      body = (
+        <div className="fa-stack">{(f.layers || []).map((l, i) => <div key={i} className="fa-sk-row" style={{ background: l[2] || 'transparent' }}><span className="fa-en">{l[0]}</span><span className="fa-ko">{l[1]}</span></div>)}</div>
+      );
+      break;
+    default:
+      body = null;
+  }
+  if (!body) return null;
+  return <figure className="fa-fig">{body}{f.cap && <figcaption className="fa-cap">{f.cap}</figcaption>}</figure>;
+}
+function FieldFigs({ figs }) {
+  return <div className="fa-wrap">{figs.map((f, i) => <FieldArtifact key={i} f={f} />)}</div>;
+}
+// ===== 오늘의 현장 · 상황 설정 (학생이 장면을 머릿속에 세팅하고 들어가도록) =====
+function SceneCard({ s }) {
+  return (
+    <div className="fes-scene">
+      {s.bg && SCENEBG[s.bg] && <div className="fes-scene-bg" dangerouslySetInnerHTML={{ __html: SCENEBG[s.bg] }} />}
+      <div className="fes-scene-hd"><span className="fes-scene-k">🎬 오늘의 현장</span><span className="fes-scene-tag">SET THE SCENE</span></div>
+      <div className="fes-scene-rows">
+        <div className="fes-scene-row"><span className="fes-scene-ic">📍</span><div><div className="fes-scene-lbl">장소 · WHERE</div><div className="fes-scene-val">{s.where}</div></div></div>
+        <div className="fes-scene-row"><span className="fes-scene-ic">🔧</span><div><div className="fes-scene-lbl">장비 · WHAT</div><div className="fes-scene-val">{s.tool}</div></div></div>
+        <div className="fes-scene-row"><span className="fes-scene-ic">⚡</span><div><div className="fes-scene-lbl">상황 · SITUATION</div><div className="fes-scene-val">{s.situation}</div></div></div>
+      </div>
+      {s.meet && s.meet.length > 0 && (
+        <div className="fes-scene-meet">
+          <div className="fes-scene-lbl">🗣️ 오늘 이 현장에서 만날 영어</div>
+          <div className="fes-scene-chips">{s.meet.map((m, i) => <span key={i} className="fes-scene-chip">{m}</span>)}</div>
+        </div>
+      )}
+      {s.goal && <div className="fes-scene-goal"><b>🎯 오늘의 목표</b> — {s.goal}</div>}
+      <div className="fes-scene-cue">▸ 이 장면을 머릿속에 그려보고 시작하세요.</div>
+    </div>
+  );
+}
+// ===== 매뉴얼 표본 (실제 영어 문서를 그대로 읽어보는 맛보기) — 운전·조립·테스트·부품·메일 =====
+function DocNote({ n }) {
+  const w = { warning: 'WARNING', caution: 'CAUTION', note: 'NOTE', danger: 'DANGER' }[n.kind] || 'NOTE';
+  return <div className={`fes-doc-note fes-doc-${n.kind}`}><b>{n.kind === 'note' ? '📝' : '⚠'} {w}</b> {n.en}</div>;
+}
+function ManualSpecimen({ s }) {
+  const v = s.variant || 'manual';
+  let paper;
+  if (v === 'email') {
+    paper = (
+      <div className="fes-doc fes-doc-email">
+        <div className="fes-mail-hd">
+          <div><span>From</span> {s.from}</div>
+          <div><span>To</span> {s.to}</div>
+          <div><span>Subject</span> <b>{s.subject}</b></div>
+        </div>
+        <div className="fes-mail-body">{(s.lines || []).map((p, i) => <p key={i}>{faRich(p)}</p>)}</div>
+        {s.sign && <div className="fes-mail-sign">{s.sign}</div>}
+      </div>
+    );
+  } else if (v === 'parts') {
+    paper = (
+      <div className="fes-doc">
+        <div className="fes-doc-hd"><div className="fes-doc-name">{s.doc?.name || 'PARTS LIST'}</div><div className="fes-doc-meta">{s.doc ? `DOC ${s.doc.no} · REV ${s.doc.rev}` : ''}</div></div>
+        <div className="fes-doc-h">{s.heading}</div>
+        <table className="fes-parts"><thead><tr>{(s.cols || []).map((c, i) => <th key={i}>{c}</th>)}</tr></thead>
+          <tbody>{(s.rows || []).map((r, i) => <tr key={i}>{r.map((c, j) => <td key={j}>{c}</td>)}</tr>)}</tbody></table>
+        {s.callout && <DocNote n={s.callout} />}
+      </div>
+    );
+  } else {
+    paper = (
+      <div className="fes-doc">
+        <div className="fes-doc-hd"><div className="fes-doc-name">{s.doc?.name || 'OPERATING MANUAL'}</div><div className="fes-doc-meta">DOC {s.doc?.no} · SEC {s.doc?.sec} · REV {s.doc?.rev} · PG {s.doc?.page}</div></div>
+        <div className="fes-doc-h">{s.heading}</div>
+        {s.intro && <p className="fes-doc-intro">{s.intro}</p>}
+        <ol className="fes-doc-steps">
+          {(s.steps || []).map((st, i) => { const t = typeof st === 'string' ? st : st.t; return <li key={i}><span>{faRich(t)}</span>{st.note && <DocNote n={st.note} />}</li>; })}
+        </ol>
+        {s.callout && <DocNote n={s.callout} />}
+        {s.fig && <div className="fes-doc-fig">▣ {s.fig}</div>}
+      </div>
+    );
+  }
+  return (
+    <div>
+      <div className="fes-doc-tag">{v === 'email' ? '✉ 실제 이메일 표본' : v === 'parts' ? '🔩 부품 리스트 표본' : '📄 실제 매뉴얼 표본'} — 영어 원문 그대로 읽어보세요</div>
+      {paper}
+      {s.gloss && s.gloss.length > 0 && (
+        <div className="fes-doc-help">
+          <div className="fes-doc-help-h">🔑 읽기 도움말</div>
+          <div className="fes-doc-gloss">{s.gloss.map((g, i) => <span key={i}><b>{g[0]}</b> — {g[1]}</span>)}</div>
+        </div>
+      )}
+    </div>
+  );
+}
+// ===== 모사 EDA 툴 GUI (설계 챕터: 종이 매뉴얼 대신 실제 설계 프로그램 화면을 읽는다) =====
+function edaCanvas(kind) {
+  let art = '';
+  if (kind === 'layout') {
+    art = `<rect x="60" y="60" width="150" height="34" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.5"/><text x="66" y="82" font-family="monospace" font-size="11" fill="#d6ffe9">METAL1</text>
+      <rect x="90" y="110" width="90" height="70" fill="#6a4d8f" stroke="#c9a9ef" stroke-width="1.5"/><text x="96" y="150" font-family="monospace" font-size="11" fill="#efe3ff">POLY</text>
+      <rect x="230" y="96" width="130" height="90" fill="#8f6a3d" stroke="#e6c79a" stroke-width="1.5"/><text x="236" y="146" font-family="monospace" font-size="11" fill="#ffedd0">ACTIVE</text>
+      <rect x="250" y="66" width="16" height="16" fill="#c9d4e2"/><rect x="290" y="66" width="16" height="16" fill="#c9d4e2"/><text x="250" y="60" font-family="monospace" font-size="9" fill="#9fb2c9">CONTACT</text>`;
+  } else if (kind === 'rules') {
+    art = `<rect x="70" y="90" width="120" height="40" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.5"/><rect x="250" y="90" width="120" height="40" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.5"/>
+      <line x1="190" y1="110" x2="250" y2="110" stroke="#f2b23a" stroke-width="1.5"/><line x1="190" y1="103" x2="190" y2="117" stroke="#f2b23a" stroke-width="1.5"/><line x1="250" y1="103" x2="250" y2="117" stroke="#f2b23a" stroke-width="1.5"/>
+      <text x="196" y="100" font-family="monospace" font-size="11" font-weight="700" fill="#f2b23a">0.16µm ✓</text><text x="120" y="150" font-family="monospace" font-size="10" fill="#9fb2c9">min spacing = 0.14µm</text>`;
+  } else if (kind === 'place') {
+    art = [40, 90, 140, 190, 240, 290, 340].map((x, i) => `<rect x="${x}" y="${60 + (i % 2) * 0}" width="38" height="30" fill="#33506e" stroke="#8fb4dd" stroke-width="1.2"/>`).join('') +
+      [40, 90, 140, 240, 290, 340].map((x) => `<rect x="${x}" y="120" width="38" height="30" fill="#33506e" stroke="#8fb4dd" stroke-width="1.2"/>`).join('') +
+      `<rect x="182" y="128" width="38" height="30" fill="#4a2f2f" stroke="#e05a4a" stroke-width="1.6"/><circle cx="201" cy="143" r="16" fill="none" stroke="#e05a4a" stroke-width="1.8"/><text x="150" y="182" font-family="monospace" font-size="10" fill="#e07a6a">off-grid cell</text>`;
+  } else if (kind === 'drc') {
+    art = `<rect x="80" y="80" width="70" height="44" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.4"/><rect x="176" y="120" width="70" height="44" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.4"/>
+      <line x1="150" y1="100" x2="176" y2="100" stroke="#e05a4a" stroke-width="1.4"/><text x="150" y="94" font-family="monospace" font-size="9" font-weight="700" fill="#e05a4a">0.02µm</text>
+      <circle cx="163" cy="112" r="13" fill="none" stroke="#e05a4a" stroke-width="2"/><path d="M156 105 l14 14 M170 105 l-14 14" stroke="#e05a4a" stroke-width="2"/>
+      <circle cx="300" cy="150" r="13" fill="none" stroke="#e05a4a" stroke-width="2"/><path d="M293 143 l14 14 M307 143 l-14 14" stroke="#e05a4a" stroke-width="2"/><text x="250" y="196" font-family="monospace" font-size="10" fill="#e07a6a">2 markers shown</text>`;
+  } else { // lvs
+    art = `<rect x="30" y="60" width="170" height="120" fill="none" stroke="#3b5069" stroke-width="1.2"/><text x="36" y="54" font-family="monospace" font-size="10" fill="#8fb4dd">SCHEMATIC</text>
+      <circle cx="80" cy="110" r="10" fill="none" stroke="#8fb4dd" stroke-width="1.5"/><circle cx="150" cy="110" r="10" fill="none" stroke="#8fb4dd" stroke-width="1.5"/><line x1="90" y1="110" x2="140" y2="110" stroke="#8fb4dd" stroke-width="1.5"/><line x1="80" y1="120" x2="80" y2="160" stroke="#8fb4dd" stroke-width="1.5"/>
+      <text x="210" y="128" font-family="monospace" font-size="30" font-weight="800" fill="#e05a4a">≠</text>
+      <rect x="250" y="60" width="170" height="120" fill="none" stroke="#3b5069" stroke-width="1.2"/><text x="256" y="54" font-family="monospace" font-size="10" fill="#7fe3b0">LAYOUT</text>
+      <rect x="280" y="96" width="30" height="20" fill="#2f7d5b" stroke="#e05a4a" stroke-width="1.6"/><rect x="350" y="130" width="30" height="20" fill="#2f7d5b" stroke="#7fe3b0" stroke-width="1.3"/><line x1="310" y1="106" x2="350" y2="140" stroke="#8fb4dd" stroke-width="1.3"/>`;
+  }
+  return `<svg viewBox="0 0 440 230" preserveAspectRatio="xMinYMid meet" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;display:block">${art}</svg>`;
+}
+function EdaTool({ s }) {
+  return (
+    <div className="eda-slide">
+      <div className="fes-doc-tag">🖥️ 설계 프로그램 화면 (모사) — 실제 EDA 툴의 <b>영어 UI</b>를 읽어보세요</div>
+      <div className="eda">
+        <div className="eda-tb">
+          <span className="eda-dot" style={{ background: '#e05a4a' }} /><span className="eda-dot" style={{ background: '#e0a83a' }} /><span className="eda-dot" style={{ background: '#4ab86a' }} />
+          <span className="eda-app">{s.app || 'LayoutPro'}</span><span className="eda-doc">— {s.doc || 'chip_top'}</span>
+          <span className="eda-menus">{(s.menus || ['File', 'Edit', 'View', 'Tools', 'Verify', 'Window', 'Help']).map((m, i) => <span key={i}>{m}</span>)}</span>
+        </div>
+        <div className="eda-tools">{(s.tools || ['Select', 'Draw', 'Ruler', 'Zoom', 'Run']).map((t, i) => <span key={i} className={`eda-tool${s.run === t ? ' on' : ''}`}>{t}</span>)}</div>
+        <div className="eda-body">
+          <div className="eda-left">
+            <div className="eda-ph">{s.left?.title || 'Layers'}</div>
+            {(s.left?.items || []).map((it, i) => (
+              <div key={i} className="eda-row">
+                {it.color ? <span className="eda-sw" style={{ background: it.color }} /> : <span className="eda-sw off" />}
+                <span className={`eda-chk${it.on === false ? ' off' : ''}`}>{it.on === false ? '☐' : '☑'}</span>
+                <span className="eda-name">{it.name}</span>
+              </div>
+            ))}
+          </div>
+          <div className="eda-canvas" dangerouslySetInnerHTML={{ __html: edaCanvas(s.canvas || 'layout') }} />
+        </div>
+        <div className="eda-console">{(s.log || []).map((l, i) => <div key={i} className={`eda-log${/error|mismatch|not |fail|violation/i.test(l) ? ' err' : /done|clean|match|pass|ok/i.test(l) ? ' ok' : ''}`}>{l}</div>)}</div>
+        <div className="eda-status">{s.status || 'X: 12.40  Y: 8.10   Layer: METAL1   Zoom: 400%'}</div>
+      </div>
+      {s.gloss && s.gloss.length > 0 && (
+        <div className="fes-doc-help"><div className="fes-doc-help-h">🔑 화면 영어 읽기</div>
+          <div className="fes-doc-gloss">{s.gloss.map((g, i) => <span key={i}><b>{g[0]}</b> — {g[1]}</span>)}</div></div>
+      )}
+    </div>
+  );
+}
+function slideInner(slide) {
   switch (slide.type) {
-    case 'story':
-      return <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>;
+    case 'scene':
+      return <SceneCard s={slide} />;
+    case 'mansample':
+      return <ManualSpecimen s={slide} />;
+    case 'eda':
+      return <EdaTool s={slide} />;
+    case 'story': {
+      const hasManga = slide.art && MANGA[slide.art];
+      return (
+        <div className={hasManga ? 'fes-story-split' : ''}>
+          {hasManga && (
+            <figure className="fes-manga"><div className="fes-manga-svg" dangerouslySetInnerHTML={{ __html: MANGA[slide.art] }} /></figure>
+          )}
+          <div className="fes-wk-story"><div className="fes-wk-story-ic">{slide.icon || '🏭'}</div><div>{rich(slide.text)}</div></div>
+        </div>
+      );
+    }
     case 'read':
       return (
         <div className="fes-th">
@@ -1422,6 +1678,13 @@ function SlideRenderer({ slide }) {
       return slide.body || null;
   }
 }
+function SlideRenderer({ slide }) {
+  const hasFigs = slide.figs && slide.figs.length;
+  const inner = slideInner(slide);
+  // story already leads with its manga panel; field figs go after its narrative.
+  if (slide.type === 'story') return <>{inner}{hasFigs ? <FieldFigs figs={slide.figs} /> : null}</>;
+  return <>{hasFigs ? <FieldFigs figs={slide.figs} /> : null}{inner}</>;
+}
 
 // ============ 챕터 데이터 (책의 목차 · 이 배열만 갈아끼우면 다른 책이 된다) ============
 const CHAPTERS = CONTENT_CHAPTERS;
@@ -1446,30 +1709,30 @@ function ChapterBook() {
   const pct = Math.round(available.filter((c) => done.has(c.id)).length / available.length * 100);
 
   return (
-    <div>
-      <div className="fes-cb-progress">
-        <span>학습 진도</span>
+    <div className="fes-ppt">
+      <aside className="fes-ppt-side">
+        <div className="fes-cb-progress">
+          <span>학습 진도</span>
+          <span className="fes-mono">{pct}%</span>
+        </div>
         <div className="fes-cb-bar"><div style={{ width: `${pct}%` }} /></div>
-        <span className="fes-mono">{pct}%</span>
-      </div>
-      <div className="fes-cb-rail">
-        {CHAPTERS.map((c, idx) => (
-          <button key={c.id} disabled={c.locked} onClick={() => !c.locked && setSel(c.id)}
-            className={`fes-cb-chip ${sel === c.id ? 'on' : ''} ${c.locked ? 'off' : ''} ${done.has(c.id) ? 'done' : ''}`} title={c.title}>
-            <span className="fes-cb-chip-n">CH {idx + 1}</span>
-            <span className="fes-cb-chip-t">{c.title}</span>
-            {done.has(c.id) && <span className="fes-cb-check">✓</span>}
-            {c.locked && <span className="fes-cb-lock">🔒</span>}
-          </button>
-        ))}
-      </div>
-      <div className="fes-cb-head">
-        <div className="fes-cb-head-t">Chapter {curIdx + 1} · {cur.title}</div>
-        {done.has(cur.id) && <span className="fes-cb-done-tag">완료 ✓</span>}
-      </div>
-      {cur.locked
-        ? <div className="fes-wk-placeholder">이 챕터는 아직 <b>준비 중</b>입니다. 현재 <b>Chapter 1~2</b>가 완성되어 있어요.</div>
-        : <LessonDeck key={cur.id} chapterId={cur.id} steps={cur.slides} onReachEnd={markDone} />}
+        <div className="fes-ppt-rail">
+          {CHAPTERS.map((c, idx) => (
+            <button key={c.id} disabled={c.locked} onClick={() => !c.locked && setSel(c.id)}
+              className={`fes-ppt-chip ${sel === c.id ? 'on' : ''} ${c.locked ? 'off' : ''} ${done.has(c.id) ? 'done' : ''}`} title={c.title}>
+              <span className="fes-ppt-chip-n">CH{idx + 1}</span>
+              <span className="fes-ppt-chip-t">{c.title}</span>
+              {done.has(c.id) && <span className="fes-ppt-chip-mk">✓</span>}
+              {c.locked && <span className="fes-ppt-chip-mk">🔒</span>}
+            </button>
+          ))}
+        </div>
+      </aside>
+      <main className="fes-ppt-main">
+        {cur.locked
+          ? <div className="fes-wk-placeholder">이 챕터는 아직 <b>준비 중</b>입니다. 현재 <b>Chapter 1~2</b>가 완성되어 있어요.</div>
+          : <LessonDeck key={cur.id} chapterId={cur.id} chapterNo={curIdx + 1} chapterTitle={cur.title} steps={cur.slides} onReachEnd={markDone} />}
+      </main>
     </div>
   );
 }
@@ -1804,23 +2067,49 @@ function FesStyles() {
 .fes-wk-placeholder b{color:${C.text}}
 .fes-wk-ph-btns{display:flex;gap:8px;justify-content:center;margin-top:14px}
 
-/* Lesson deck (PPT-style) */
-.fes-ld-dots{display:flex;gap:7px;justify-content:center;margin-bottom:12px}
-.fes-ld-dot{width:34px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
+/* Lesson deck (PPT-style, fixed stage) */
+.fes-ppt{display:grid;grid-template-columns:196px minmax(0,1fr);gap:18px;align-items:start}
+@media(max-width:820px){.fes-ppt{grid-template-columns:1fr}}
+.fes-ppt-side{position:sticky;top:8px;display:flex;flex-direction:column;gap:8px}
+@media(max-width:820px){.fes-ppt-side{position:static}}
+.fes-ppt-rail{display:flex;flex-direction:column;gap:5px;max-height:min(74vh,620px);overflow-y:auto;padding-right:4px;margin-top:4px}
+@media(max-width:820px){.fes-ppt-rail{flex-direction:row;flex-wrap:nowrap;overflow-x:auto;max-height:none}}
+.fes-ppt-chip{position:relative;display:flex;align-items:baseline;gap:7px;text-align:left;background:${C.panel};border:1px solid ${C.line2};color:${C.text};border-radius:9px;padding:8px 10px;cursor:pointer;transition:.14s;white-space:nowrap}
+.fes-ppt-chip:hover:not(:disabled){border-color:${C.cyan}}
+.fes-ppt-chip.on{background:${C.cyan}1c;border-color:${C.cyan};box-shadow:inset 3px 0 0 ${C.cyan}}
+.fes-ppt-chip.off{opacity:.42;cursor:not-allowed}
+.fes-ppt-chip.done{border-color:${C.emerald}55}
+.fes-ppt-chip-n{font-family:${C.mono};font-size:10px;letter-spacing:.5px;color:${C.cyan};font-weight:700;flex:none}
+.fes-ppt-chip.off .fes-ppt-chip-n{color:${C.dim}}
+.fes-ppt-chip-t{font-size:11.5px;font-weight:600;color:#dfe8fb;overflow:hidden;text-overflow:ellipsis}
+.fes-ppt-chip.off .fes-ppt-chip-t{color:${C.dim}}
+.fes-ppt-chip-mk{margin-left:auto;font-size:10px;color:${C.emerald};flex:none}
+.fes-ppt-main{min-width:0}
+.fes-ld-dots{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;flex:1}
+.fes-ld-dot{width:26px;height:6px;border-radius:20px;background:#1b2c48;border:none;cursor:pointer;transition:.15s;padding:0}
 .fes-ld-dot.done{background:${C.cyan}66}
 .fes-ld-dot.on{background:${C.cyan};box-shadow:0 0 0 3px ${C.cyan}22}
-.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;min-height:min(58vh,500px);display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
-.fes-ld-head{position:relative;background:linear-gradient(90deg,${C.elec}22,${C.elec}08 60%,transparent);border-bottom:1px solid ${C.line};border-left:4px solid ${C.elec};padding:15px 24px}
-.fes-ld-head:after{content:'';position:absolute;right:20px;top:16px;width:34px;height:34px;border-radius:9px;background:radial-gradient(circle at 30% 30%,${C.neon}55,${C.elec}22);opacity:.5}
-.fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1.5px;color:${C.neon};font-weight:700}
-.fes-ld-title{font-size:23px;font-weight:800;color:#fff;margin-top:5px;letter-spacing:-.2px;text-wrap:balance;max-width:90%}
-.fes-ld-body{font-size:15px;line-height:1.75;padding:22px 26px 24px;flex:1;display:flex;flex-direction:column;justify-content:center}
+.fes-ld-slide{background:linear-gradient(180deg,#0f1524,#0a0e18);border:1px solid ${C.line};border-radius:14px;overflow:hidden;height:min(72vh,660px);display:flex;flex-direction:column;box-shadow:0 8px 30px #0006}
+.fes-ld-head{position:relative;background:linear-gradient(90deg,${C.elec}22,${C.elec}08 60%,transparent);border-bottom:1px solid ${C.line};border-left:4px solid ${C.elec};padding:13px 24px;flex:none}
+.fes-ld-head:after{content:'';position:absolute;right:20px;top:14px;width:30px;height:30px;border-radius:9px;background:radial-gradient(circle at 30% 30%,${C.neon}55,${C.elec}22);opacity:.5}
+.fes-ld-step{font-family:${C.mono};font-size:11px;letter-spacing:1.2px;color:${C.neon};font-weight:700}
+.fes-ld-step-sep{margin:0 8px;color:${C.dim};letter-spacing:0}
+.fes-ld-title{font-size:22px;font-weight:800;color:#fff;margin-top:4px;letter-spacing:-.2px;text-wrap:balance;max-width:92%}
+.fes-ld-body{font-size:15px;line-height:1.72;padding:22px 30px 24px;flex:1;min-height:0;overflow-y:auto}
+.fes-story-split{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:30px;align-items:center;height:100%}
+.fes-story-split .fes-manga{margin:0}
+.fes-story-split .fes-manga-svg{padding:16px}
+.fes-story-split .fes-wk-story{margin:0;font-size:15.5px;line-height:1.78;padding:20px 22px}
+.fes-story-split .fes-wk-story-ic{font-size:34px}
+@media(max-width:760px){.fes-story-split{grid-template-columns:1fr;align-items:start}}
 
 /* 이론(PPT) 슬라이드 */
-.fes-th-lead{font-size:16px;line-height:1.7;color:#eaf1ff;border-left:3px solid ${C.neon};background:${C.neon}0e;padding:11px 15px;border-radius:0 9px 9px 0;margin-bottom:15px}
+.fes-th{height:100%;display:flex;flex-direction:column;justify-content:center}
+.fes-th-lead{font-size:17px;line-height:1.7;color:#eaf1ff;border-left:3px solid ${C.neon};background:${C.neon}0e;padding:13px 17px;border-radius:0 9px 9px 0;margin-bottom:16px}
 .fes-th-lead b{color:${C.neon}}
-.fes-th-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
-.fes-th-point{position:relative;background:${C.panel};border:1px solid ${C.line2};border-radius:11px;padding:13px 15px 13px 42px;font-size:14.5px;line-height:1.65;color:${C.text}}
+.fes-th-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:900px){.fes-th-list{grid-template-columns:1fr}}
+.fes-th-point{position:relative;background:${C.panel};border:1px solid ${C.line2};border-radius:11px;padding:14px 16px 14px 42px;font-size:15px;line-height:1.66;color:${C.text}}
 .fes-th-point b{color:${C.neon};font-weight:700}
 .fes-th-mk{position:absolute;left:16px;top:17px;width:10px;height:10px;background:${C.elec};transform:rotate(45deg);border-radius:2px;box-shadow:0 0 8px ${C.elec}88}
 .fes-ld-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px}
@@ -1856,6 +2145,151 @@ function FesStyles() {
 .fes-wk-manual b{color:#bfe9f5;font-weight:700}
 .fes-wk-quiz-intro{font-size:12.5px;color:${C.dim};margin:0 0 12px}
 .fes-wk-qn{font-family:${C.mono};color:${C.cyan};font-size:12px;margin-right:4px}
+/* ===== 모사 EDA 툴 GUI ===== */
+.eda{border:1px solid ${C.line2};border-radius:9px;overflow:hidden;background:#101a28;font-family:${C.mono};box-shadow:0 6px 20px rgba(0,0,0,.32)}
+.eda-tb{display:flex;align-items:center;gap:7px;background:#0c1521;padding:6px 11px;border-bottom:1px solid #22334c}
+.eda-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.eda-app{font-weight:800;color:#dbe8fb;font-size:12px;margin-left:4px}.eda-doc{color:#6f86a6;font-size:11.5px}
+.eda-menus{margin-left:16px;display:flex;gap:13px;color:#8ea4c4;font-size:11px}
+.eda-tools{display:flex;gap:6px;padding:5px 11px;background:#0f1a29;border-bottom:1px solid #1c2c44}
+.eda-tool{font-size:10.5px;color:#a9bcd8;border:1px solid #2a3d5f;border-radius:4px;padding:2px 9px;background:#13202f}
+.eda-tool.on{background:${C.cyan};color:#062230;border-color:${C.cyan};font-weight:700}
+.eda-slide{height:100%;display:flex;flex-direction:column;justify-content:center}
+.eda-slide .fes-doc-tag{margin-bottom:6px}
+.eda-slide .fes-doc-help{margin-top:8px;padding:8px 13px}
+.eda-slide .fes-doc-help-h{margin-bottom:4px}
+.eda-slide .fes-doc-gloss{gap:4px 16px}
+.eda-slide .fes-doc-gloss span{font-size:12px}
+.eda-body{display:flex;height:clamp(160px,24vh,250px)}
+.eda-left{width:138px;flex:none;background:#0d1725;border-right:1px solid #1c2c44;padding:7px 8px}
+.eda-ph{font-size:9.5px;letter-spacing:1px;color:#7f96b6;margin-bottom:7px;text-transform:uppercase}
+.eda-row{display:flex;align-items:center;gap:5px;padding:2.5px 0;font-size:11px;color:#c2d2ea}
+.eda-sw{width:11px;height:11px;border-radius:2px;border:1px solid #33465f;flex:none}.eda-sw.off{background:transparent}
+.eda-chk{color:#6f86a6;font-size:11px}.eda-chk.off{color:#3d4d63}
+.eda-name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.eda-canvas{flex:1;min-width:0;background:#0a1420;background-image:linear-gradient(#26364a55 1px,transparent 1px),linear-gradient(90deg,#26364a55 1px,transparent 1px);background-size:48px 48px;background-position:-1px -1px;display:flex;align-items:stretch;overflow:hidden}
+.eda-canvas svg{display:block;width:100%;height:100%}
+.eda-console{background:#0a121e;border-top:1px solid #1c2c44;padding:5px 11px;font-size:11px;line-height:1.5;color:#8ea4c4}
+.eda-log.err{color:#f28b7d}.eda-log.ok{color:#6fe0a0}
+.eda-status{background:#0c1521;border-top:1px solid #22334c;padding:4px 11px;font-size:10px;color:#6f86a6}
+/* ===== 매뉴얼 표본 (printed English document look) ===== */
+.fes-doc-tag{font-size:11.5px;color:${C.dim};margin:0 0 8px;font-weight:600}
+.fes-doc{background:#f4efe2;color:#1c1913;border:1px solid #cabf9f;border-radius:8px;padding:18px 20px;box-shadow:0 6px 20px rgba(0,0,0,.3);font-family:'Georgia','Times New Roman',serif}
+.fes-doc-hd{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:2px solid #1c1913;padding-bottom:7px;margin-bottom:12px;flex-wrap:wrap}
+.fes-doc-name{font-weight:800;font-size:13px;letter-spacing:.3px;text-transform:uppercase}
+.fes-doc-meta{font-family:${C.mono};font-size:10.5px;color:#6b6350}
+.fes-doc-h{font-size:16px;font-weight:800;margin:0 0 10px}
+.fes-doc-intro{font-size:13.5px;line-height:1.6;margin:0 0 10px;color:#3a352a}
+.fes-doc-steps{margin:0;padding:0 0 0 4px;list-style:none;counter-reset:dc}
+.fes-doc-steps>li{counter-increment:dc;position:relative;padding:5px 0 5px 30px;font-size:14px;line-height:1.55;border-bottom:1px dotted #cabf9f}
+.fes-doc-steps>li:last-child{border-bottom:none}
+.fes-doc-steps>li::before{content:counter(dc) ".";position:absolute;left:0;top:5px;font-weight:800;color:#8a5a1a}
+.fes-doc em{font-style:normal;font-weight:800;background:#e4d29a;border-radius:3px;padding:0 3px}
+.fes-doc-note{margin:8px 0 4px;padding:7px 11px;border-radius:5px;font-family:${C.sans};font-size:12.5px;line-height:1.5;border-left:4px solid}
+.fes-doc-note b{font-family:${C.mono};font-size:11px;letter-spacing:.5px;margin-right:6px}
+.fes-doc-warning,.fes-doc-danger{background:#f6dcd6;border-color:#c4402f;color:#5c1810}
+.fes-doc-caution{background:#f6e6c8;border-color:#d38a25;color:#5a3c08}
+.fes-doc-note.fes-doc-note{background:#e6ecd6;border-color:#7a8a4a;color:#33401a}
+.fes-doc-fig{margin-top:11px;font-style:italic;font-size:12.5px;color:#6b6350}
+.fes-doc-email .fes-mail-hd{border-bottom:1px solid #cabf9f;padding-bottom:9px;margin-bottom:11px;font-family:${C.mono};font-size:12.5px;line-height:1.9}
+.fes-mail-hd span{display:inline-block;width:62px;color:#6b6350;font-size:10.5px;text-transform:uppercase;letter-spacing:.5px}
+.fes-mail-body p{font-size:13.5px;line-height:1.65;margin:0 0 9px}
+.fes-mail-sign{font-size:13px;color:#3a352a;border-top:1px dotted #cabf9f;padding-top:9px;white-space:pre-line}
+.fes-parts{width:100%;border-collapse:collapse;font-family:${C.mono};font-size:12px}
+.fes-parts th{text-align:left;background:#e6dcc0;border:1px solid #cabf9f;padding:6px 9px;font-size:10.5px;letter-spacing:.5px;text-transform:uppercase}
+.fes-parts td{border:1px solid #cabf9f;padding:6px 9px}
+.fes-doc-help{margin-top:10px;background:${C.panel};border:1px solid ${C.line2};border-radius:9px;padding:11px 14px}
+.fes-doc-help-h{font-size:11px;font-weight:700;letter-spacing:1px;color:${C.cyan};margin-bottom:7px}
+.fes-doc-gloss{display:flex;flex-wrap:wrap;gap:7px 18px}
+.fes-doc-gloss span{font-size:12.5px;color:${C.text}}
+.fes-doc-gloss b{color:#e8f6ff}
+/* ===== 오늘의 현장 · 상황 설정 브리핑 ===== */
+.fes-scene{background:linear-gradient(135deg,#111d33,#0b1626);border:1px solid ${C.line2};border-left:4px solid ${C.amber};border-radius:14px;padding:18px 20px;box-shadow:0 8px 26px rgba(0,0,0,.3)}
+.fes-scene-bg{margin:-4px -6px 15px;border-radius:10px;overflow:hidden;border:1px solid ${C.line2};box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.fes-scene-bg svg{width:100%;height:auto;display:block}
+.fes-scene-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:12px;border-bottom:1px dashed ${C.line2}}
+.fes-scene-k{font-size:16px;font-weight:800;color:${C.amber}}
+.fes-scene-tag{font-family:${C.mono};font-size:10.5px;font-weight:700;letter-spacing:2px;color:${C.dim};border:1px solid ${C.line2};border-radius:5px;padding:3px 9px}
+.fes-scene-rows{display:flex;flex-direction:column;gap:12px}
+.fes-scene-row{display:flex;gap:12px;align-items:flex-start}
+.fes-scene-ic{font-size:19px;flex:none;width:24px;text-align:center;margin-top:1px}
+.fes-scene-lbl{font-family:${C.mono};font-size:10.5px;font-weight:700;letter-spacing:1.2px;color:${C.dim};margin-bottom:3px}
+.fes-scene-val{font-size:14.5px;line-height:1.65;color:${C.text}}
+.fes-scene-meet{margin-top:15px;padding-top:13px;border-top:1px dashed ${C.line2}}
+.fes-scene-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
+.fes-scene-chip{font-size:12px;color:#dbe8fb;background:${C.cyan}14;border:1px solid ${C.cyan}44;border-radius:20px;padding:5px 12px}
+.fes-scene-goal{margin-top:15px;background:${C.amber}12;border:1px solid ${C.amber}44;border-radius:10px;padding:11px 14px;font-size:13.5px;line-height:1.6;color:#f4e6cf}
+.fes-scene-goal b{color:${C.amber}}
+.fes-scene-cue{margin-top:13px;font-size:12px;color:${C.dim};font-style:italic;text-align:center}
+/* ===== 현장 자료 삽화 (field artifacts) ===== */
+.fa-wrap{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 16px}
+.fa-fig{margin:0;flex:1 1 240px;min-width:0;display:flex;flex-direction:column}
+.fa-fig>*:first-child{flex:1}
+.fa-cap{font-size:11px;color:${C.dim};margin-top:6px;line-height:1.5}
+.fa-en{font-family:${C.sans};font-weight:800;color:#f3f6fb;letter-spacing:.2px}
+.fa-ko{font-size:11.5px;color:${C.dim};margin-top:3px;line-height:1.5}
+.fa-fig em,.fa-log em,.fa-note em,.fa-step em{font-style:normal;font-weight:800;color:${C.cyan};background:${C.cyan}1a;border-radius:4px;padding:0 3px}
+/* sticker / placard */
+.fa-sticker{border:2px solid;border-radius:10px;overflow:hidden;background:#0e1726}
+.fa-st-hd{font-family:${C.mono};font-size:11px;font-weight:800;letter-spacing:2px;padding:5px 11px;color:#0e1726}
+.fa-st-bd{padding:11px 13px}.fa-st-bd .fa-en{font-size:16px;line-height:1.35}
+.fa-danger{border-color:${C.red}}.fa-danger .fa-st-hd{background:${C.red}}
+.fa-warn{border-color:${C.amber}}.fa-warn .fa-st-hd{background:${C.amber}}
+.fa-caution{border-color:#eab308}.fa-caution .fa-st-hd{background:#eab308}
+.fa-info{border-color:${C.cyan}}.fa-info .fa-st-hd{background:${C.cyan}}
+.fa-note.fa-note{border:none}
+.fa-danger .fa-en{color:#ffd9d3}.fa-warn .fa-en,.fa-caution .fa-en{color:#ffe9c2}
+/* HMI screen */
+.fa-hmi{border:2px solid ${C.line2};border-radius:10px;background:#0a1420;overflow:hidden;box-shadow:inset 0 0 0 4px #060d16}
+.fa-hmi-top{display:flex;justify-content:space-between;align-items:center;padding:7px 11px;background:#0d1a2b;font-family:${C.mono};font-size:11px;color:${C.dim};border-bottom:1px solid ${C.line}}
+.fa-chip{font-weight:800;padding:2px 9px;border-radius:5px;font-size:10.5px;letter-spacing:1px}
+.fa-s-idle{background:#334155;color:#cbd5e1}.fa-s-run{background:${C.emerald};color:#052e1b}.fa-s-fault{background:${C.red};color:#3a0a06}.fa-s-down{background:${C.amber};color:#3a2a05}
+.fa-hmi-body{padding:9px 11px;font-family:${C.mono};font-size:12px}
+.fa-hmi-row{display:flex;justify-content:space-between;padding:3px 0;color:#b7c6de;border-bottom:1px dashed ${C.line}}
+.fa-hmi-row:last-child{border-bottom:none}
+.fa-v-ok{color:${C.emerald};font-weight:700}.fa-v-high,.fa-v-bad{color:${C.red};font-weight:800}.fa-v-warn{color:${C.amber};font-weight:800}
+.fa-hmi-bn{padding:6px 11px;font-family:${C.mono};font-size:12px;font-weight:800;text-align:center;color:#fff}
+.fa-hmi-bn b{display:block;font-weight:500;font-size:10.5px;opacity:.85;margin-top:1px}
+.fa-hmi-bn.fa-danger{background:${C.red}}.fa-hmi-bn.fa-warn{background:${C.amber};color:#3a2a05}
+/* alarm banner */
+.fa-alarm{display:flex;gap:10px;align-items:center;border-radius:9px;padding:10px 13px;border-left:5px solid}
+.fa-alarm.fa-danger{background:${C.red}1e;border-color:${C.red}}.fa-alarm.fa-warn{background:${C.amber}1e;border-color:${C.amber}}
+.fa-al-ic{font-size:18px}.fa-alarm.fa-danger .fa-al-ic{color:${C.red}}.fa-alarm.fa-warn .fa-al-ic{color:${C.amber}}
+.fa-al-tx .fa-en{font-size:14.5px}.fa-al-code{font-family:${C.mono};font-size:11px;background:#0e1726;color:${C.dim};padding:1px 6px;border-radius:4px;margin-right:7px}
+/* meter SP/PV */
+.fa-meter{border:1px solid ${C.line2};border-radius:9px;padding:10px 13px;background:${C.panel}}
+.fa-mt-nm{font-size:11px;color:${C.dim};font-family:${C.mono};margin-bottom:5px;text-transform:uppercase;letter-spacing:.5px}
+.fa-mt-vals{display:flex;align-items:baseline;gap:12px;font-family:${C.mono}}
+.fa-mt-sp{font-size:13px;color:#8aa0bf}.fa-mt-pv{font-size:19px;font-weight:800}.fa-mt-u{font-size:12px;color:${C.dim}}
+.fa-mt-pv.fa-v-ok{color:${C.emerald}}
+/* buttons */
+.fa-btns{display:flex;flex-wrap:wrap;gap:8px}
+.fa-btn{font-family:${C.mono};font-size:12px;font-weight:800;letter-spacing:1px;padding:8px 15px;border-radius:7px;border:1.5px solid ${C.line2};color:#c8d6ec;background:${C.panel2}}
+.fa-b-go{background:${C.emerald};color:#052e1b;border-color:${C.emerald}}.fa-b-stop{background:${C.red};color:#fff;border-color:${C.red}}.fa-b-warn{background:${C.amber};color:#3a2a05;border-color:${C.amber}}
+/* log printout */
+.fa-log{border:1px solid ${C.line2};border-radius:9px;overflow:hidden;background:#0b1422}
+.fa-log-hd{font-family:${C.mono};font-size:11px;font-weight:800;letter-spacing:1px;color:${C.amber};padding:7px 12px;background:#111e30;border-bottom:1px solid ${C.line}}
+.fa-log-bd{padding:9px 12px;font-family:${C.mono};font-size:11.5px;line-height:1.7;color:#b7c6de}
+.fa-log-ln{white-space:pre-wrap}
+/* work-instruction note */
+.fa-note{border:1px solid ${C.amber}66;border-left:4px solid ${C.amber};border-radius:9px;padding:10px 13px;background:${C.amber}12}
+.fa-nt-hd{font-family:${C.mono};font-size:10.5px;font-weight:800;letter-spacing:1.5px;color:${C.amber};margin-bottom:5px}
+.fa-note .fa-en{font-size:14.5px;line-height:1.4}
+/* SOP steps */
+.fa-step{border:1px solid ${C.line2};border-radius:9px;padding:10px 13px 10px 10px;background:${C.panel}}
+.fa-sp-hd{font-family:${C.mono};font-size:10.5px;font-weight:800;letter-spacing:1.5px;color:${C.cyan};margin:0 0 6px 3px}
+.fa-sp-ol{margin:0;padding:0 0 0 4px;list-style:none;counter-reset:sp}
+.fa-sp-ol li{counter-increment:sp;position:relative;padding:4px 0 4px 30px;border-bottom:1px dashed ${C.line}}
+.fa-sp-ol li:last-child{border-bottom:none}
+.fa-sp-ol li::before{content:counter(sp);position:absolute;left:0;top:4px;width:20px;height:20px;border-radius:50%;background:${C.cyan};color:#052430;font-weight:800;font-size:11px;text-align:center;line-height:20px}
+.fa-sp-ol .fa-en{font-size:13.5px;display:inline}.fa-sp-ol .fa-ko{display:inline;margin-left:8px}
+/* layer stack */
+.fa-stack{border:2px solid ${C.line2};border-radius:8px;overflow:hidden}
+.fa-sk-row{display:flex;justify-content:space-between;align-items:center;padding:7px 12px;border-bottom:1px solid #0006}
+.fa-sk-row:last-child{border-bottom:none}.fa-sk-row .fa-en{color:#10202e;font-size:13px}.fa-sk-row .fa-ko{color:#10202e;opacity:.7;margin-top:0}
+.fes-manga{margin:0 0 14px}
+.fes-manga-svg{background:linear-gradient(135deg,#132338,#0e1a2e);border:1px solid ${C.line2};border-radius:14px;padding:12px;box-shadow:0 6px 22px rgba(0,0,0,.28)}
+.fes-manga-svg svg{width:100%;height:auto;display:block;border-radius:6px}
 .fes-wk-story{display:flex;gap:14px;align-items:flex-start;background:linear-gradient(135deg,#132338,#0e1a2e);border:1px solid ${C.line2};border-left:3px solid ${C.amber};border-radius:12px;padding:16px 18px;font-size:14px;line-height:1.8;color:${C.text}}
 .fes-wk-story-ic{font-size:30px;flex:none}
 .fes-wk-story b{color:${C.amber}}.fes-wk-story i{color:#bfe9f5;font-style:italic}

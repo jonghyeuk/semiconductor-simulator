@@ -11,12 +11,23 @@ const contentTypes = {
   summary: { label: '요점정리', color: 'bg-indigo-500 text-white', textColor: 'text-indigo-600' },
   troubleshooting: { label: '트러블슈팅', color: 'bg-gray-500 text-white', textColor: 'text-gray-500' },
   guide: { label: '가이드', color: 'bg-teal-500 text-white', textColor: 'text-teal-600' },
+  english: { label: '직무영어', color: 'bg-cyan-500 text-white', textColor: 'text-cyan-600' },
 };
 
 // 전체 매트릭스 데이터
 // type: 콘텐츠 유형 (simulation/theory/experiment/quiz/overview/analysis/troubleshooting/guide)
 // coreReason: 핵심 추천 이유 (core tier만)
 const matrixData = [
+  {
+    id: 'field-english',
+    name: '직무영어',
+    icon: '🗣️',
+    color: '#0ea5e9',
+    tabs: [
+      // 클릭 시 initialTab='chapters' 로 넘어가 교재(챕터 PPT)가 바로 실행됨
+      { id: 'chapters', name: '반도체 현장 실무영어', icon: '🗣️', tier: 'basic', type: 'english' },
+    ]
+  },
   {
     id: 'vacuum',
     name: 'Vacuum 기초',
