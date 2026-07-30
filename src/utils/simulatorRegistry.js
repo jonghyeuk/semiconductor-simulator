@@ -12,6 +12,7 @@ import DepositionSimulator from '../simulators/DepositionSimulator';
 import MetallizationEDSPackagingSimulator from '../simulators/MetallizationEDSPackagingSimulator';
 import ComprehensiveAssessmentSimulator from '../simulators/ComprehensiveAssessmentSimulator';
 import FieldEnglishSimulator from '../simulators/FieldEnglishSimulator';
+import WaferTransferSim from '../simulators/WaferTransferSim';
 
 class SimulatorRegistry {
   constructor() {
@@ -321,6 +322,31 @@ class SimulatorRegistry {
           'LVS: Schematic vs Layout 비교 → mismatch 영문 해석',
           '영문 현장 보고서 작성 (Problem/Observed/Cause/Action/Result)',
           '현장 영어 용어 hover 사전 + 4단계 학습 루프'
+        ]
+      }
+    });
+
+    // 웨이퍼 이송 로봇·센서 시뮬레이터 (완성됨) — 서고 drop-in / 챕터별 강의자료
+    this.register({
+      id: 'waferTransfer',
+      name: '웨이퍼 이송',
+      icon: '🤖',
+      description: '이송 로봇·센서 Pick & Place 및 인터록',
+      component: WaferTransferSim,
+      available: true,
+      category: 'process',
+      order: 13,
+      metadata: {
+        version: '1.0.0',
+        lastUpdated: '2026-07-30',
+        author: 'Semiconductor Simulator Team',
+        features: [
+          '가상 이송 로봇(EFEM/Robot) Pick & Place 조작',
+          'Load Port · Load Lock · Transfer Chamber 웨이퍼 흐름',
+          'Door · Vacuum · Wafer Presence · Position 인터록 실습',
+          '영문 Alarm/Log 해석 → 원인·조치 판단',
+          '챕터별(15주) 강의 데크(교재) 연동',
+          '난이도별 개념 확인 퀴즈'
         ]
       }
     });

@@ -1,0 +1,1912 @@
+<!DOCTYPE html><html lang="ko"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>웨이퍼 이송 로봇과 센서</title>
+<link rel="stylesheet" href="deck-base.css?v=9" onerror="document.documentElement.classList.add('nobase')"/>
+<style>
+/* ═══ 디자인 토큰 ═══
+   청록 = 대기 영역(760 Torr) · 보라 = 진공 영역 · 호박 = 경고 · 적 = 금지
+   색이 압력 영역을 뜻하므로 도식에서 일관되게 지킬 것 */
+:root{
+  --ac:#35e0c8; --vc:#9b8cff; --wn:#ffb340; --bd:#ff5e5e;
+  --t1:#f2f9ff; --t2:#a9c4d8; --t3:#7fa3bd; --t4:#4f7590;
+  --bx:#132433; --ln:#3a6b8c; --ln2:#294357;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+.slide{ color:var(--t2); font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+.wt-pad{ padding:74px 96px 66px; height:100%; box-sizing:border-box; display:flex; flex-direction:column; position:relative; }
+
+/* 헤더 */
+.wt-eye{ font-family:var(--mono); font-size:23px; letter-spacing:.24em; color:var(--ac); margin-bottom:14px; }
+.wt-eye.v{ color:var(--vc); }
+.h-title{ font-size:64px; line-height:1.14; font-weight:800; letter-spacing:-.025em; margin:0; color:var(--t1); }
+h2.h-title{ font-size:54px; }
+.wt-lead{ font-size:29px; line-height:1.6; color:var(--t2); max-width:1420px; margin-top:16px; }
+.wt-lead b{ color:var(--ac); font-weight:700; }
+.wt-lead b.v{ color:var(--vc); }
+
+/* 본문 배치 */
+.wt-body{ flex:1; display:flex; gap:40px; margin-top:34px; min-height:0; }
+.wt-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.wt-fig{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; margin-top:26px; }
+.wt-fig svg{ width:100%; height:100%; max-height:100%; }
+.wt-figc{ font-family:var(--mono); font-size:20px; color:var(--t4); text-align:center; margin-top:10px; letter-spacing:.04em; }
+
+/* 카드 · 리스트 */
+.wt-card{ background:rgba(19,36,51,.72); border:1px solid var(--ln2); border-left:5px solid var(--ac);
+  border-radius:11px; padding:24px 28px; margin-bottom:16px; }
+.wt-card h3{ font-size:29px; margin:0 0 9px; color:var(--t1); font-weight:700; }
+.wt-card p{ font-size:24px; line-height:1.6; color:var(--t2); margin:0; }
+.wt-card.v{ border-left-color:var(--vc); }
+.wt-card.warn{ border-left-color:var(--bd); }
+.wt-num{ display:flex; gap:18px; align-items:flex-start; margin-bottom:20px; }
+.wt-num i{ flex:none; width:50px; height:50px; border-radius:13px; background:var(--ac); color:#03231e;
+  font-family:var(--mono); font-size:25px; font-weight:800; font-style:normal;
+  display:flex; align-items:center; justify-content:center; }
+.wt-num.v i{ background:var(--vc); color:#140f2e; }
+.wt-num div{ font-size:25px; line-height:1.5; color:var(--t2); padding-top:6px; }
+.wt-num div b{ color:var(--t1); display:block; font-size:28px; margin-bottom:3px; }
+.wt-tbl{ width:100%; border-collapse:collapse; font-size:23px; }
+.wt-tbl th,.wt-tbl td{ text-align:left; padding:13px 15px; border-bottom:1px solid var(--ln2); vertical-align:top; }
+.wt-tbl th{ font-family:var(--mono); font-size:19px; letter-spacing:.1em; color:var(--t3); font-weight:500; }
+.wt-tbl td b{ color:var(--ac); }
+.wt-note{ margin-top:auto; padding:19px 24px; background:rgba(53,224,200,.09); border:1px solid #2c6d63;
+  border-radius:10px; font-size:24px; line-height:1.5; color:#bfe9e1; }
+.wt-note b{ color:var(--ac); }
+.wt-note.warn{ background:rgba(255,94,94,.09); border-color:#7a3232; color:#ffc4c4; }
+.wt-note.warn b{ color:#ff8a8a; }
+.wt-note.v{ background:rgba(155,140,255,.1); border-color:#4d3f8c; color:#d5cdff; }
+.wt-note.v b{ color:var(--vc); }
+.wt-key{ display:inline-block; font-family:var(--mono); font-size:21px; padding:3px 11px;
+  border:1px solid #45688a; border-bottom-width:3px; border-radius:6px; background:#17293a; color:#dceaf5; margin:0 3px; }
+
+/* 시그니처: 미니 경로 지도 (JS가 data-here 로 생성) */
+.wt-map{ position:absolute; top:74px; right:96px; display:flex; align-items:center; gap:0; }
+.wt-map .n{ display:flex; flex-direction:column; align-items:center; gap:7px; }
+.wt-map .d{ width:13px; height:13px; border-radius:50%; background:#24425c; }
+.wt-map .n.on .d{ background:var(--ac); box-shadow:0 0 0 6px rgba(53,224,200,.16); }
+.wt-map .n.vac .d{ background:#2f2a52; }
+.wt-map .n.vac.on .d{ background:var(--vc); box-shadow:0 0 0 6px rgba(155,140,255,.18); }
+.wt-map .n span{ font-family:var(--mono); font-size:14px; letter-spacing:.1em; color:#3f6480; }
+.wt-map .n.on span{ color:var(--t1); }
+.wt-map .b{ width:30px; height:2px; background:#24425c; margin:0 5px 21px; }
+
+/* ─ 도식 공통 ─ */
+.fx-box{ fill:var(--bx); stroke:var(--ln); stroke-width:2.5; }
+.fx-vac{ fill:#161a35; stroke:#6f63c9; stroke-width:2.5; }
+.fx-w{ fill:#c9dced; stroke:#eef6ff; stroke-width:1.5; }
+.fx-lbl{ font-family:var(--mono); font-size:21px; fill:#9fc0d6; }
+.fx-sub{ font-family:var(--mono); font-size:17px; fill:#5d829c; }
+.fx-cap{ font-family:var(--mono); font-size:19px; fill:var(--ac); }
+.fx-cap.v{ fill:var(--vc); }
+.fx-arm{ fill:#2c4b66; stroke:#4a7ea6; stroke-width:2.5; }
+.fx-arm.v{ fill:#2f2a52; stroke:#8a7dff; }
+.fx-ln{ stroke:#35e0c8; stroke-width:3; fill:none; }
+.fx-ln.v{ stroke:#9b8cff; }
+.fx-bad{ stroke:var(--bd); stroke-width:4; fill:none; }
+.fx-dim{ opacity:.3; }
+.fx-panel{ fill:#0e1d29; stroke:#274357; stroke-width:2; }
+
+/* 폴백: deck-base.css 없을 때만 */
+.nobase body{ margin:0; background:#0a141c; overflow:hidden; }
+.nobase .deck-viewport{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+.nobase .deck-stage{ width:1920px; height:1080px; position:relative; transform-origin:center center; }
+.nobase .slide{ position:absolute; inset:0; display:none;
+  background:radial-gradient(1400px 800px at 18% -12%,#17293a 0%,transparent 62%),#0a141c; }
+.nobase .slide.on{ display:block; }
+.nobase #fbnav{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:7px;
+  z-index:9; font-family:var(--mono); font-size:13px; align-items:center; }
+.nobase #fbnav button{ background:#16293a; color:#cfe4f2; border:1px solid #2f5470; border-radius:6px; padding:7px 13px; cursor:pointer; }
+.nobase #fbnav button.on{ background:var(--ac); color:#03231e; border-color:var(--ac); }
+.nobase #fbnav span{ color:#6d90aa; padding:0 6px; }
+</style>
+</head><body>
+<!-- 전역 화살촉 정의. 슬라이드가 display:none 이어도 마커가 해석되도록 body 직속에 둔다.
+     mA 청록(대기) · mV 보라(진공) · mW 호박(경고) · mR 적(거부) · mB 청(블록 흐름) -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true"><defs>
+ <marker id="mA" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#35e0c8"/></marker>
+ <marker id="mV" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9b8cff"/></marker>
+ <marker id="mW" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ffb340"/></marker>
+ <marker id="mR" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ff5e5e"/></marker>
+ <marker id="mB" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 Z" fill="#4a7ea6"/></marker>
+ <radialGradient id="wg" cx="34%" cy="28%">
+  <stop offset="0%" stop-color="#e8f3fd"/><stop offset="55%" stop-color="#b8cddf"/><stop offset="100%" stop-color="#7d97ad"/></radialGradient>
+ <linearGradient id="pg" x1="0" x2="1">
+  <stop offset="0%" stop-color="#ffb340"/><stop offset="42%" stop-color="#c98a6a"/><stop offset="100%" stop-color="#9b8cff"/></linearGradient>
+</defs></svg>
+
+<div class="deck-viewport"><div class="deck-stage" id="stage">
+
+<!-- ══ 표지 ══ -->
+<section class="slide" id="s1" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">로봇및센서실습 · 반도체장비전공</div>
+  <div class="wt-body" style="margin-top:10px;align-items:center">
+   <div class="wt-col" style="flex:1.05">
+    <h1 class="h-title">웨이퍼는<br/>어떻게 움직이는가</h1>
+    <div class="wt-lead" style="margin-top:26px">반도체 공장에서 웨이퍼를 옮기는 것은 사람이 아니라 <b>로봇</b>입니다.
+     그리고 그 로봇이 지금 무엇을 하는지 아는 유일한 방법은 <b>센서</b>입니다.<br/><br/>
+     이 자료는 장비 안에서 웨이퍼 한 장이 통과하는 길을 순서대로 따라갑니다.</div>
+    <div class="wt-note" style="margin-top:44px;max-width:900px">
+     <b>사용법</b> — 슬라이드를 읽고, 시뮬레이터에서 같은 동작을 직접 해보세요.
+     읽은 것과 손으로 해본 것이 만나는 자리에서 이해가 생깁니다.</div>
+   </div>
+   <div class="wt-col" style="flex:.95">
+    <div class="wt-fig" style="margin:0">
+     <svg viewBox="0 0 640 640">
+      <circle cx="320" cy="320" r="252" fill="none" stroke="#1d3549" stroke-width="1"/>
+      <circle cx="320" cy="320" r="288" fill="none" stroke="#152836" stroke-width="1"/>
+      <circle cx="320" cy="320" r="216" fill="#151f2b" stroke="#2c4a63" stroke-width="2"/>
+      <circle cx="320" cy="320" r="216" fill="url(#wg)"/>
+      <path d="M320 104 L306 132 L334 132 Z" fill="#0a141c"/>
+      <g opacity=".22" stroke="#3a5a72" stroke-width="1">
+       <path d="M148 250 H492 M148 320 H492 M148 390 H492"/>
+       <path d="M250 148 V492 M320 148 V492 M390 148 V492"/></g>
+      <circle cx="320" cy="320" r="216" fill="none" stroke="#eef6ff" stroke-width="2" opacity=".5"/>
+      <text class="fx-cap" x="320" y="596" text-anchor="middle" style="font-size:22px">NOTCH = 12시 방향 기준점</text>
+      <path class="fx-ln" d="M320 152 L320 96" opacity=".8"/>
+     </svg>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 왜 로봇인가 ══ -->
+<section class="slide" id="s2" data-level="intro standard" data-here="foup">
+ <div class="wt-pad">
+  <div class="wt-eye">01 · 왜 로봇인가</div>
+  <h2 class="h-title">사람 손이 닿는 순간, 그 웨이퍼는 폐기됩니다</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.1">
+    <div class="wt-fig" style="margin-top:8px">
+     <svg viewBox="0 0 840 460">
+      <text class="fx-lbl" x="0" y="26">같은 배율로 그린 크기 비교</text>
+      <circle cx="150" cy="230" r="140" fill="#1b2c3c" stroke="#3a6b8c" stroke-width="2"/>
+      <text class="fx-lbl" x="150" y="228" text-anchor="middle" fill="#cfe4f2">머리카락</text>
+      <text class="fx-sub" x="150" y="256" text-anchor="middle">약 80 µm</text>
+      <circle cx="420" cy="230" r="34" fill="#3a2a1a" stroke="#c98a3a" stroke-width="2"/>
+      <text class="fx-lbl" x="420" y="316" text-anchor="middle" fill="#e0a860">먼지</text>
+      <text class="fx-sub" x="420" y="342" text-anchor="middle">약 10 µm</text>
+      <circle cx="660" cy="230" r="2.2" fill="#35e0c8"/>
+      <circle cx="660" cy="230" r="30" fill="none" stroke="#35e0c8" stroke-width="1.5" stroke-dasharray="4 6"/>
+      <path class="fx-ln" d="M660 200 L700 150" stroke-width="2"/>
+      <text class="fx-cap" x="706" y="144">회로 선폭</text>
+      <text class="fx-sub" x="706" y="170">0.01 µm 급</text>
+      <text class="fx-sub" x="606" y="300">← 이 점 하나가 회로 굵기</text>
+     </svg>
+    </div>
+    <div class="wt-figc">먼지 한 톨은 회로보다 1000배 굵다 — 얹히면 선이 끊기거나 붙는다</div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>같은 자리에, 수만 번</h3>
+     <p>웨이퍼는 공정마다 정해진 위치에 밀리미터 이하 오차로 놓여야 합니다.
+      사람은 이 정확도를 24시간 반복할 수 없습니다.</p></div>
+    <div class="wt-card v"><h3>진공 안에는 못 들어간다</h3>
+     <p>식각·증착은 공기를 거의 다 빼낸 진공에서 진행됩니다.
+      그 안에서 웨이퍼를 옮길 수 있는 것은 진공용 로봇뿐입니다.</p></div>
+    <div class="wt-card"><h3>웨이퍼 한 장의 값</h3>
+     <p>공정 후반의 웨이퍼 한 장에는 수천만 원어치 칩이 들어 있습니다. 떨어뜨리면 그걸로 끝입니다.</p></div>
+    <div class="wt-note"><b>그래서</b> 장비는 사람의 판단 대신 <b>센서 신호</b>로 상황을 확인하고,
+     조건이 맞지 않으면 <b>스스로 동작을 거부</b>합니다. 뒤에 나올 인터록입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 전체 지도 ══ -->
+<section class="slide" id="s3" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">02 · 전체 지도</div>
+  <h2 class="h-title">웨이퍼 한 장이 지나가는 길</h2>
+  <div class="wt-lead">이 순서만 외우면 장비 절반은 이해한 것입니다.
+   <b>왼쪽은 대기압</b>, <b class="v">오른쪽은 진공</b>, 그 사이에 Load Lock이 있습니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1740 470">
+    
+    <rect x="0" y="18" width="880" height="440" rx="14" fill="rgba(53,224,200,.04)" stroke="#1f4a48" stroke-dasharray="7 7"/>
+    <text class="fx-cap" x="20" y="46">대기 영역 · 760 Torr</text>
+    <rect x="900" y="18" width="840" height="440" rx="14" fill="rgba(155,140,255,.05)" stroke="#3c3470" stroke-dasharray="7 7"/>
+    <text class="fx-cap v" x="920" y="46">진공 영역 · 0.01 Torr 이하</text>
+
+    <rect class="fx-box" x="26" y="170" width="132" height="190" rx="8"/>
+    <text class="fx-lbl" x="48" y="146">FOUP</text>
+    <g stroke="#26445c" stroke-width="1.5">
+     <path d="M38 200 H146 M38 238 H146 M38 276 H146 M38 314 H146"/></g>
+    <ellipse class="fx-w" cx="92" cy="192" rx="44" ry="6"/>
+    <ellipse class="fx-w" cx="92" cy="230" rx="44" ry="6"/>
+    <ellipse class="fx-w" cx="92" cy="268" rx="44" ry="6"/>
+    <rect class="fx-box" x="176" y="170" width="72" height="190" rx="6"/>
+    <text class="fx-sub" x="182" y="392">LOAD PORT</text>
+
+    <rect class="fx-box" x="272" y="72" width="420" height="336" rx="12"/>
+    <text class="fx-lbl" x="292" y="104">EFEM</text>
+    <circle class="fx-box" cx="420" cy="162" r="50"/><circle class="fx-w" cx="420" cy="162" r="31"/>
+    <path d="M420 137 L412 152 L428 152 Z" fill="#101f2c"/>
+    <text class="fx-sub" x="484" y="160">PRE-ALIGNER</text>
+    <circle cx="472" cy="300" r="38" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+    <rect class="fx-arm" x="472" y="289" width="116" height="22" rx="8"/>
+    <text class="fx-sub" x="404" y="376">대기 이송 로봇</text>
+
+    <rect class="fx-box" x="726" y="196" width="188" height="140" rx="8" stroke="#6f63c9"/>
+    <text class="fx-lbl" x="742" y="176">LOAD LOCK</text>
+    <text class="fx-sub" x="742" y="272">760 ⇄ 0.01 Torr</text>
+    <ellipse class="fx-w" cx="820" cy="240" rx="34" ry="8"/>
+    <rect x="708" y="238" width="18" height="56" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <rect x="914" y="238" width="18" height="56" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <text class="fx-sub" x="668" y="230">ATM V</text><text class="fx-sub" x="936" y="230">TM V</text>
+
+    <rect class="fx-vac" x="956" y="72" width="450" height="336" rx="12"/>
+    <text class="fx-lbl" x="978" y="104" fill="#bcaeff">TRANSFER CHAMBER</text>
+    <circle cx="1120" cy="240" r="38" fill="#1c2340" stroke="#8a7dff" stroke-width="3"/>
+    <rect class="fx-arm v" x="1120" y="229" width="116" height="22" rx="8"/>
+    <text class="fx-sub" x="1058" y="330">진공 이송 로봇</text>
+    <circle class="fx-vac" cx="1310" cy="160" r="60"/><text class="fx-sub" x="1281" y="167">PM 1</text>
+    <circle class="fx-vac" cx="1310" cy="330" r="60"/><text class="fx-sub" x="1281" y="337">PM 2</text>
+    <text class="fx-lbl" x="1404" y="158" fill="#bcaeff">공정 챔버</text>
+    <text class="fx-sub" x="1404" y="186">식각 · 증착</text>
+
+    <path class="fx-ln" d="M162 250 H172" marker-end="url(#mA)"/>
+    <path class="fx-ln" d="M252 250 Q300 250 340 205" marker-end="url(#mA)"/>
+    <path class="fx-ln" d="M420 216 V246" marker-end="url(#mA)"/>
+    <path class="fx-ln" d="M596 292 Q660 280 700 262" marker-end="url(#mA)"/>
+    <path class="fx-ln v" d="M940 262 H1074" marker-end="url(#mV)"/>
+    <path class="fx-ln v" d="M1244 232 Q1280 220 1250 196" marker-end="url(#mV)"/>
+    <g font-family="ui-monospace,monospace" font-size="18" fill="#4f7590">
+     <text x="86" y="424">①</text><text x="196" y="424">②</text><text x="404" y="424">③</text>
+     <text x="466" y="424">④</text><text x="796" y="424">⑤</text><text x="1096" y="424">⑥</text><text x="1286" y="424">⑦</text></g>
+   </svg>
+  </div>
+  <div class="wt-note"><b>FOUP → Load Port → EFEM 로봇 → Pre-aligner → Load Lock → 진공 로봇 → 공정 챔버.</b>
+   되돌아 나올 때는 정확히 역순입니다.</div>
+ </div>
+</section>
+
+<!-- ══ FOUP ══ -->
+<section class="slide" id="s4" data-level="intro standard pro" data-here="foup">
+ <div class="wt-pad">
+  <div class="wt-eye">03 · 시작점</div>
+  <h2 class="h-title">FOUP — 웨이퍼를 담아 옮기는 밀폐 상자</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.05">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 760 500">
+      <rect x="60" y="40" width="330" height="420" rx="12" fill="#101d29" stroke="#3a6b8c" stroke-width="3"/>
+      <rect x="60" y="40" width="330" height="34" fill="#17293a" stroke="#3a6b8c" stroke-width="3"/>
+      <text class="fx-sub" x="76" y="64">FOUP · 질소 밀폐</text>
+      <g>
+       <g stroke="#274357" stroke-width="2">
+        <path d="M84 128 H366 M84 196 H366 M84 264 H366 M84 332 H366 M84 400 H366"/></g>
+       <ellipse class="fx-w" cx="225" cy="120" rx="126" ry="9"/>
+       <ellipse class="fx-w" cx="225" cy="188" rx="126" ry="9"/>
+       <ellipse class="fx-w" cx="225" cy="256" rx="126" ry="9"/>
+       <g font-family="ui-monospace,monospace" font-size="19" fill="#5d829c">
+        <text x="66" y="126">1</text><text x="66" y="194">2</text><text x="66" y="262">3</text>
+        <text x="66" y="330">4</text><text x="66" y="398">5</text></g>
+       <text class="fx-sub" x="404" y="336">4 · 5 = 빈 슬롯</text>
+      </g>
+      <rect x="392" y="34" width="18" height="432" fill="#25415a" stroke="#3a6b8c" stroke-width="2"/>
+      <text class="fx-sub" x="418" y="60">도어</text>
+      <g transform="translate(430,248)">
+       <rect class="fx-arm" x="0" y="-11" width="230" height="22" rx="8"/>
+       <path class="fx-arm" d="M-6 -20 L-70 -20 L-84 -10 L-84 10 L-70 20 L-6 20 Z" transform="translate(0,0)" fill="#3b6a8f" stroke="#7fc4ea"/>
+       <text class="fx-cap" x="126" y="-30">End Effector 진입</text>
+       <text class="fx-sub" x="126" y="46">Z축 = 슬롯 번호</text>
+      </g>
+      <path class="fx-ln" d="M700 248 L470 248" stroke-dasharray="6 6" opacity=".6"/>
+     </svg>
+    </div>
+    <div class="wt-figc">Z축을 올리고 내리면 겨냥하는 슬롯이 바뀐다</div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>안이 공장보다 깨끗하다</b>
+     내부를 질소로 채워 밀폐합니다. 공장 복도를 지나는 동안 웨이퍼는 바깥 공기를 만나지 않습니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>슬롯에 한 장씩</b>
+     실제는 25칸입니다. 시뮬레이터는 이해를 위해 5칸으로 줄였습니다. 몇 번 칸인지가 곧 <b>Z축 위치</b>입니다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>도킹 전엔 열리지 않는다</b>
+     FOUP 문은 장비에 붙은 뒤 장비 쪽 문과 함께 열립니다. 공장 공기가 들어갈 틈이 없습니다.</div></div>
+    <div class="wt-note warn"><b>자주 나오는 실수</b> — Z축이 빈 슬롯을 가리킨 채 Pick을 누르면
+     로봇은 정상 동작하지만 <b>Wafer Presence 센서가 OFF</b>라 알람이 납니다.
+     로봇 고장이 아니라 <b>겨냥이 틀린</b> 것입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ Load Port 3단계 ══ -->
+<section class="slide" id="s5" data-level="intro standard pro" data-here="port">
+ <div class="wt-pad">
+  <div class="wt-eye">04 · 문 여는 순서</div>
+  <h2 class="h-title">Load Port는 반드시 세 단계로만 열립니다</h2>
+  <div class="wt-lead">순서를 건너뛰면 장비가 거부합니다. 시뮬레이터에서도 똑같습니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1660 430">
+    
+    <g transform="translate(0,0)">
+     <rect class="fx-panel" x="10" y="10" width="480" height="400" rx="12"/>
+     <text class="fx-cap" x="34" y="52">① DOCKING</text>
+     <rect x="60" y="100" width="150" height="250" rx="8" fill="#101d29" stroke="#3a6b8c" stroke-width="2.5"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M74 150 H196 M74 200 H196 M74 250 H196 M74 300 H196"/></g>
+     <ellipse class="fx-w" cx="135" cy="142" rx="52" ry="6"/><ellipse class="fx-w" cx="135" cy="192" rx="52" ry="6"/>
+     <rect x="300" y="100" width="26" height="250" fill="#25415a" stroke="#3a6b8c" stroke-width="2"/>
+     <path class="fx-ln" d="M226 225 H288" marker-end="url(#mA)"/>
+     <text class="fx-sub" x="60" y="382">FOUP을 포트에 밀착 고정</text>
+    </g>
+    <g transform="translate(580,0)">
+     <rect class="fx-panel" x="10" y="10" width="480" height="400" rx="12"/>
+     <text class="fx-cap" x="34" y="52">② DOOR OPEN</text>
+     <rect x="86" y="100" width="150" height="250" rx="8" fill="#101d29" stroke="#3a6b8c" stroke-width="2.5"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M100 150 H222 M100 200 H222 M100 250 H222 M100 300 H222"/></g>
+     <ellipse class="fx-w" cx="161" cy="142" rx="52" ry="6"/><ellipse class="fx-w" cx="161" cy="192" rx="52" ry="6"/>
+     <rect x="252" y="290" width="26" height="60" fill="#0d2a25" stroke="#2fe0c0" stroke-width="2"/>
+     <path class="fx-ln" d="M265 130 V276" marker-end="url(#mA)" stroke-dasharray="7 6"/>
+     <circle cx="330" cy="120" r="9" fill="#35e0c8"/><text class="fx-sub" x="348" y="126">DOOR SENSOR ON</text>
+     <text class="fx-sub" x="86" y="382">문이 아래로 내려가 열림</text>
+    </g>
+    <g transform="translate(1160,0)">
+     <rect class="fx-panel" x="10" y="10" width="480" height="400" rx="12"/>
+     <text class="fx-cap" x="34" y="52">③ SLOT MAPPING</text>
+     <rect x="86" y="100" width="150" height="250" rx="8" fill="#101d29" stroke="#3a6b8c" stroke-width="2.5"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M100 150 H222 M100 200 H222 M100 250 H222 M100 300 H222"/></g>
+     <ellipse class="fx-w" cx="161" cy="142" rx="52" ry="6"/><ellipse class="fx-w" cx="161" cy="192" rx="52" ry="6"/>
+     <ellipse class="fx-w" cx="161" cy="242" rx="52" ry="6"/>
+     <path class="fx-ln" d="M290 120 V330" marker-end="url(#mA)"/>
+     <g font-family="ui-monospace,monospace" font-size="17" fill="#35e0c8">
+      <text x="312" y="148">1 ● 감지</text><text x="312" y="198">2 ● 감지</text>
+      <text x="312" y="248">3 ● 감지</text>
+      <text x="312" y="298" fill="#4f7590">4 ○ 없음</text><text x="312" y="338" fill="#4f7590">5 ○ 없음</text></g>
+     <text class="fx-sub" x="86" y="382">위에서 아래로 훑어 목록 확보</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note warn"><b>순서가 뒤집히면</b> — 도킹 전 Door Open은 ALM-305,
+   문이 닫힌 채 Mapping은 ALM-307, 문 닫힌 채 로봇 진입은 ALM-301로 거부됩니다.
+   막히는 것이 정상이며, <b>왜 막혔는지 읽는 것</b>이 이 책의 핵심입니다.</div>
+ </div>
+</section>
+
+<!-- ══ 매핑 정상 vs 오류 ══ -->
+<section class="slide" id="s6" data-level="standard pro" data-here="port">
+ <div class="wt-pad">
+  <div class="wt-eye">05 · 세어보기</div>
+  <h2 class="h-title">Mapping Error — 목록과 현실이 다를 때</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.25">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 900 420">
+      <g>
+       <text class="fx-cap" x="20" y="30">정상</text>
+       <rect x="20" y="52" width="150" height="300" rx="8" fill="#101d29" stroke="#3a6b8c" stroke-width="2.5"/>
+       <g stroke="#274357" stroke-width="1.5"><path d="M34 112 H156 M34 172 H156 M34 232 H156 M34 292 H156"/></g>
+       <ellipse class="fx-w" cx="95" cy="104" rx="52" ry="7"/>
+       <ellipse class="fx-w" cx="95" cy="164" rx="52" ry="7"/>
+       <ellipse class="fx-w" cx="95" cy="224" rx="52" ry="7"/>
+       <path class="fx-ln" d="M212 70 V340" stroke-dasharray="5 5"/>
+       <text class="fx-sub" x="196" y="366">스캔</text>
+       <g font-family="ui-monospace,monospace" font-size="18">
+        <text x="244" y="110" fill="#35e0c8">1 ●</text><text x="244" y="170" fill="#35e0c8">2 ●</text>
+        <text x="244" y="230" fill="#35e0c8">3 ●</text>
+        <text x="244" y="290" fill="#4f7590">4 ○</text><text x="244" y="350" fill="#4f7590">5 ○</text></g>
+       <text class="fx-sub" x="244" y="392">목록 = 실제</text>
+      </g>
+      <line x1="440" y1="30" x2="440" y2="400" stroke="#274357" stroke-dasharray="6 8"/>
+      <g transform="translate(470,0)">
+       <text class="fx-cap" x="20" y="30" fill="#ff8a8a">Cross Slot</text>
+       <rect x="20" y="52" width="150" height="300" rx="8" fill="#1d1114" stroke="#7a3232" stroke-width="2.5"/>
+       <g stroke="#3a2226" stroke-width="1.5"><path d="M34 112 H156 M34 172 H156 M34 232 H156 M34 292 H156"/></g>
+       <ellipse class="fx-w" cx="95" cy="104" rx="52" ry="7"/>
+       <g transform="rotate(-11 95 168)"><ellipse class="fx-w" cx="95" cy="168" rx="52" ry="7" stroke="#ff8a8a"/></g>
+       <ellipse class="fx-w" cx="95" cy="224" rx="52" ry="7"/>
+       <path class="fx-bad" d="M212 70 V340" stroke-dasharray="5 5"/>
+       <g font-family="ui-monospace,monospace" font-size="18">
+        <text x="244" y="110" fill="#35e0c8">1 ●</text>
+        <text x="244" y="170" fill="#ff5e5e">2 ✕ 겹침</text>
+        <text x="244" y="230" fill="#ff5e5e">3 ○ 놓침</text>
+        <text x="244" y="290" fill="#4f7590">4 ○</text><text x="244" y="350" fill="#4f7590">5 ○</text></g>
+       <text class="fx-sub" x="244" y="392" fill="#ff8a8a">목록 ≠ 실제</text>
+      </g>
+     </svg>
+    </div>
+    <div class="wt-figc">비스듬히 꽂힌 웨이퍼 하나가 목록 전체를 틀어놓는다</div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>어떻게 읽나</h3>
+     <p>매핑 센서가 FOUP 앞을 위에서 아래로 훑으며, 빛이 가려지는 구간을 웨이퍼로 셉니다.
+      결과가 "1·2·3번 칸에 있음" 목록으로 남습니다.</p></div>
+    <div class="wt-card"><h3>왜 미리 세나</h3>
+     <p>로봇은 눈이 없습니다. 빈 칸에 손을 넣거나 이미 있는 칸에 또 넣는 사고를 막으려면
+      <b>작업 전에 목록을 확보</b>해야 합니다.</p></div>
+    <div class="wt-note warn"><b>진단 요령</b> — 매핑 결과와 실제 슬롯 상태를 나란히 비교하세요.
+     시뮬레이터 <b>Load Port 탭</b>에 두 값이 표로 붙어 나오고, 다르면 빨갛게 표시됩니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ [실무] 매핑 오검출 ══ -->
+<section class="slide" id="s7" data-level="pro" data-here="port">
+ <div class="wt-pad">
+  <div class="wt-eye">실무 · 매핑</div>
+  <h2 class="h-title">매핑이 틀리는 세 가지 방식</h2>
+  <div class="wt-lead">"몇 장인가"만 세는 것이 아니라 <b>어떻게 틀렸는가</b>를 구분해야 조치가 갈립니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1660 320">
+    <g>
+     <rect x="10" y="10" width="520" height="300" rx="12" fill="rgba(255,94,94,.06)" stroke="#7a3232" stroke-width="2"/>
+     <text class="fx-cap" x="34" y="50" fill="#ff8a8a">CROSS — 비스듬히 걸침</text>
+     <g stroke="#3a2226" stroke-width="2"><path d="M60 120 H300 M60 190 H300 M60 260 H300"/></g>
+     <g transform="rotate(-13 180 155)"><ellipse class="fx-w" cx="180" cy="155" rx="105" ry="8" stroke="#ff8a8a"/></g>
+     <text class="fx-sub" x="330" y="150" fill="#ffabab">두 칸에 걸쳐</text>
+     <text class="fx-sub" x="330" y="178" fill="#ffabab">신호가 뜬다</text>
+     <text class="fx-sub" x="34" y="296" fill="#c98a8a">조치 — 로봇 진입 금지, 사람이 바로잡는다</text>
+    </g>
+    <g transform="translate(560,0)">
+     <rect x="10" y="10" width="520" height="300" rx="12" fill="rgba(255,179,64,.06)" stroke="#6b4a20" stroke-width="2"/>
+     <text class="fx-cap" x="34" y="50" fill="#ffb340">DOUBLE — 두 장 겹침</text>
+     <g stroke="#3a3226" stroke-width="2"><path d="M60 120 H300 M60 190 H300 M60 260 H300"/></g>
+     <ellipse class="fx-w" cx="180" cy="180" rx="105" ry="8"/>
+     <ellipse class="fx-w" cx="180" cy="168" rx="105" ry="8" stroke="#ffb340"/>
+     <text class="fx-sub" x="330" y="150" fill="#ffd49a">한 칸에서</text>
+     <text class="fx-sub" x="330" y="178" fill="#ffd49a">두께가 두 배</text>
+     <text class="fx-sub" x="34" y="296" fill="#c9a06a">조치 — 한 장씩 분리, 두 장 동시 Pick 방지</text>
+    </g>
+    <g transform="translate(1120,0)">
+     <rect x="10" y="10" width="520" height="300" rx="12" fill="rgba(74,168,255,.06)" stroke="#2f5f8a" stroke-width="2"/>
+     <text class="fx-cap" x="34" y="50" fill="#78b4e8">THIN — 감지 실패</text>
+     <g stroke="#26364a" stroke-width="2"><path d="M60 120 H300 M60 190 H300 M60 260 H300"/></g>
+     <ellipse cx="180" cy="182" rx="105" ry="4" fill="#8fa8bd" stroke="#c9dced"/>
+     <text class="fx-sub" x="330" y="150" fill="#9fcdf5">얇거나 투명해</text>
+     <text class="fx-sub" x="330" y="178" fill="#9fcdf5">빈 칸으로 읽힘</text>
+     <text class="fx-sub" x="34" y="296" fill="#7fa3bd">조치 — 센서 방식·감도 재설정</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note warn"><b>센서 방식에 따라 약점이 다릅니다</b> —
+   빛을 가로질러 보내는 방식은 얇은 웨이퍼에, 되돌아온 빛을 보는 방식은 표면 상태에 영향을 받습니다.
+   <b>매핑이 자꾸 틀리면 웨이퍼가 아니라 센서를 의심</b>하는 것이 순서입니다.</div>
+ </div>
+</section>
+
+<!-- ══ R θ Z ══ -->
+<section class="slide" id="s8" data-level="intro standard pro" data-chapter="3" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조</div>
+  <h2 class="h-title">움직임은 딱 세 가지뿐입니다</h2>
+  <div class="wt-lead">6축 관절 로봇을 떠올릴 필요가 없습니다. 웨이퍼 이송 로봇은 <b>R · θ · Z</b> 세 축이 전부입니다.</div>
+  <div class="wt-body" style="gap:56px">
+   <div class="wt-col" style="flex:1.2">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 820 440">
+      
+      <circle cx="270" cy="250" r="168" fill="none" stroke="#24425c" stroke-width="2" stroke-dasharray="6 9"/>
+      <path d="M 270 250 m -168 0 a 168 168 0 0 1 122 -161" class="fx-ln" marker-end="url(#mA)"/>
+      <text class="fx-cap" x="96" y="72">θ축 · 회전</text>
+      <rect class="fx-arm" x="270" y="237" width="212" height="26" rx="10"/>
+      <path d="M478 234 L524 234 L538 246 L538 256 L524 268 L478 268 Z" fill="#3b6a8f" stroke="#7fc4ea" stroke-width="2.5"/>
+      <circle class="fx-w" cx="552" cy="251" r="34"/>
+      <path d="M552 217 L545 231 L559 231 Z" fill="#0a141c"/>
+      <circle cx="270" cy="250" r="38" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+      <circle cx="270" cy="250" r="9" fill="#4f8bb5"/>
+      <path class="fx-ln" d="M320 316 H500" marker-end="url(#mA)"/>
+      <text class="fx-cap" x="352" y="352">R축 · 전진 / 후진</text>
+      <path class="fx-ln" d="M710 340 V150" marker-end="url(#mA)"/>
+      <path class="fx-ln" d="M710 150 V340" marker-end="url(#mA)"/>
+      <text class="fx-cap" x="646" y="126">Z축 · 상하</text>
+      <text class="fx-sub" x="662" y="378">= 슬롯 선택</text>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num"><i>R</i><div><b>전진 · 후진</b> 암을 뻗어 웨이퍼에 닿습니다. Extend / Retract.</div></div>
+    <div class="wt-num"><i>θ</i><div><b>회전</b> 몸을 돌려 다른 장치를 향합니다. FOUP ↔ 정렬기 ↔ 로드락.</div></div>
+    <div class="wt-num"><i>Z</i><div><b>상하</b> 높이를 맞춥니다. FOUP에서는 곧 슬롯 번호입니다.</div></div>
+    <div class="wt-note warn"><b>절대 규칙</b> — 암이 뻗은 상태로 회전하면 옆 장치를 칩니다.
+     <b>회전은 반드시 Retract 후에.</b> 시뮬레이터는 ALM-201로 막습니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ CH3 · 왜 6축이 아닌가 ══ -->
+<section class="slide" id="s9" data-level="intro standard pro" data-chapter="3" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조</div>
+  <h2 class="h-title">왜 공장 로봇처럼 안 생겼을까</h2>
+  <div class="wt-lead">자동차 공장의 6축 로봇은 어디든 갈 수 있습니다. 웨이퍼 로봇은 <b>일부러 그 자유도를 버렸습니다.</b></div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.2">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 880 400">
+      <g>
+       <rect class="fx-panel" x="10" y="10" width="410" height="380" rx="12"/>
+       <text class="fx-cap" x="34" y="50" fill="#c9a06a">6축 다관절</text>
+       <rect x="150" y="330" width="110" height="26" rx="5" fill="#1b2c3c" stroke="#3a6b8c" stroke-width="2"/>
+       <g stroke="#c9a06a" stroke-width="12" stroke-linecap="round" fill="none">
+        <path d="M205 330 V250"/><path d="M205 250 L280 180"/><path d="M280 180 L230 118"/><path d="M230 118 L296 82"/></g>
+       <g fill="#1b2c3c" stroke="#c9a06a" stroke-width="3">
+        <circle cx="205" cy="250" r="13"/><circle cx="280" cy="180" r="13"/><circle cx="230" cy="118" r="13"/></g>
+       <text class="fx-sub" x="34" y="392">관절이 많다 = 먼지 나는 곳이 많다</text>
+      </g>
+      <g transform="translate(460,0)">
+       <rect class="fx-panel" x="10" y="10" width="410" height="380" rx="12"/>
+       <text class="fx-cap" x="34" y="50">웨이퍼 로봇 · 3축</text>
+       <circle cx="130" cy="230" r="34" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+       <rect class="fx-arm" x="130" y="219" width="200" height="22" rx="8"/>
+       <path d="M326 216 L360 216 L372 226 L372 236 L360 246 L326 246 Z" fill="#3b6a8f" stroke="#7fc4ea" stroke-width="2.5"/>
+       <ellipse class="fx-w" cx="382" cy="231" rx="34" ry="7"/>
+       <path class="fx-ln" d="M150 300 H330" marker-end="url(#mA)"/>
+       <text class="fx-sub" x="176" y="330">한 평면에서 직선으로만</text>
+       <text class="fx-sub" x="34" y="392">움직이는 관절이 적을수록 깨끗하다</text>
+      </g>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>먼지</b> 관절 하나가 마모 부위 하나입니다. 청정실에서는 자유도가 곧 오염원입니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>직선 진입</b> 웨이퍼는 좁은 슬롯과 게이트로 <b>똑바로</b> 들어가야 합니다. 곡선 경로가 필요 없습니다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>반복</b> 같은 자리를 수십만 번 정확히 가는 것이 목표입니다. 단순할수록 흔들리지 않습니다.</div></div>
+    <div class="wt-note"><b>결론</b> — 웨이퍼 이송은 "어디든 갈 수 있는" 문제가 아니라
+     <b>"정해진 몇 곳을 정확히 반복하는"</b> 문제입니다. 그래서 축을 셋으로 줄였습니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ CH3 · 팔이 뻗는 원리 ══ -->
+<section class="slide" id="s10" data-level="intro standard pro" data-chapter="3" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조</div>
+  <h2 class="h-title">팔은 늘어나지 않습니다 — 펴지는 겁니다</h2>
+  <div class="wt-lead">R축은 망원경처럼 늘어나는 것이 아니라, <b>접혀 있던 링크가 펴지면서</b> 손끝이 앞으로 나갑니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1620 340">
+    <g>
+     <rect class="fx-panel" x="10" y="10" width="500" height="320" rx="12"/>
+     <text class="fx-cap" x="34" y="50">접힘 · RETRACT</text>
+     <circle cx="140" cy="200" r="26" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <g stroke="#4a7ea6" stroke-width="16" stroke-linecap="round" fill="none">
+      <path d="M140 200 L214 156"/><path d="M214 156 L288 200"/></g>
+     <circle cx="214" cy="156" r="10" fill="#1b2c3c" stroke="#7fc4ea" stroke-width="3"/>
+     <rect x="288" y="190" width="86" height="18" rx="6" fill="#3b6a8f" stroke="#7fc4ea" stroke-width="2"/>
+     <ellipse class="fx-w" cx="392" cy="199" rx="30" ry="6"/>
+     <text class="fx-sub" x="34" y="296">회전 반경 안에 손이 들어와 있다</text>
+    </g>
+    <g transform="translate(556,0)">
+     <rect class="fx-panel" x="10" y="10" width="500" height="320" rx="12"/>
+     <text class="fx-cap" x="34" y="50">중간</text>
+     <circle cx="120" cy="200" r="26" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <g stroke="#4a7ea6" stroke-width="16" stroke-linecap="round" fill="none">
+      <path d="M120 200 L226 138"/><path d="M226 138 L330 194"/></g>
+     <circle cx="226" cy="138" r="10" fill="#1b2c3c" stroke="#7fc4ea" stroke-width="3"/>
+     <rect x="330" y="185" width="86" height="18" rx="6" fill="#3b6a8f" stroke="#7fc4ea" stroke-width="2"/>
+     <ellipse class="fx-w" cx="434" cy="194" rx="30" ry="6"/>
+     <text class="fx-sub" x="34" y="296">두 링크의 각도가 함께 바뀐다</text>
+    </g>
+    <g transform="translate(1102,0)">
+     <rect class="fx-panel" x="10" y="10" width="500" height="320" rx="12"/>
+     <text class="fx-cap" x="34" y="50">펼침 · EXTEND</text>
+     <circle cx="90" cy="200" r="26" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <g stroke="#4a7ea6" stroke-width="16" stroke-linecap="round" fill="none">
+      <path d="M90 200 L240 196"/><path d="M240 196 L390 196"/></g>
+     <circle cx="240" cy="196" r="10" fill="#1b2c3c" stroke="#7fc4ea" stroke-width="3"/>
+     <rect x="390" y="187" width="86" height="18" rx="6" fill="#3b6a8f" stroke="#7fc4ea" stroke-width="2"/>
+     <ellipse class="fx-w" cx="480" cy="196" rx="30" ry="6"/>
+     <path class="fx-ln" d="M90 262 H470" marker-end="url(#mA)"/>
+     <text class="fx-sub" x="34" y="296">손끝은 직선으로만 나간다</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:14px">
+   <div class="wt-col"><div class="wt-card"><h3>손목은 돌지 않는다</h3>
+    <p>두 링크가 접었다 펴지는 동안에도 손은 <b>항상 같은 방향</b>을 봅니다.
+     벨트나 기어가 손의 각도를 붙잡아 주기 때문입니다. 그래서 웨이퍼가 돌아가지 않습니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card"><h3>접히면 자리를 덜 먹는다</h3>
+    <p>수축하면 회전 반경 안으로 들어오므로 좁은 이송실에서도 돌 수 있습니다.
+     <b>"빼고 나서 돈다"</b>는 규칙이 여기서 나옵니다.</p></div></div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ CH3 · 극좌표 ══ -->
+<section class="slide" id="s11" data-level="standard pro" data-chapter="3" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조</div>
+  <h2 class="h-title">가로세로가 아니라 방향과 거리로 셉니다</h2>
+  <div class="wt-lead">로봇은 자기 몸을 중심에 두고 <b>어느 방향(θ)으로 얼마나(R)</b> 나갈지로 위치를 기억합니다.</div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.15">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 780 420">
+      <g stroke="#1f3446" stroke-width="1" fill="none">
+       <circle cx="330" cy="220" r="70"/><circle cx="330" cy="220" r="120"/>
+       <circle cx="330" cy="220" r="170"/></g>
+      <g stroke="#24425c" stroke-width="1" stroke-dasharray="4 7">
+       <path d="M330 220 L500 220 M330 220 L330 50 M330 220 L160 220 M330 220 L330 390"/></g>
+      <path d="M 330 220 m 60 0 a 60 60 0 0 0 -42 -43" fill="none" stroke="#35e0c8" stroke-width="3" marker-end="url(#mA)"/>
+      <text class="fx-cap" x="352" y="164">θ</text>
+      <g stroke="#4a7ea6" stroke-width="13" stroke-linecap="round">
+       <path d="M330 220 L440 130"/></g>
+      <circle cx="330" cy="220" r="24" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+      <ellipse class="fx-w" cx="462" cy="112" rx="26" ry="24"/>
+      <path class="fx-ln" d="M330 220 L448 126" stroke-dasharray="6 5" stroke-width="2"/>
+      <text class="fx-cap" x="386" y="212">R</text>
+      <g font-family="ui-monospace,monospace" font-size="17" fill="#5d829c">
+       <text x="506" y="226">θ = 0°</text><text x="286" y="42">θ = 270°</text>
+       <text x="96" y="226">θ = 180°</text><text x="298" y="410">θ = 90°</text></g>
+      <g font-family="ui-monospace,monospace" font-size="16" fill="#7fa3bd">
+       <text x="560" y="120">FOUP</text><text x="560" y="150">ALIGNER</text><text x="560" y="180">LOAD LOCK</text>
+       <text x="656" y="120">θ 180°</text><text x="656" y="150">θ 270°</text><text x="656" y="180">θ 0°</text></g>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>왜 이 방식이 편한가</h3>
+     <p>스테이션들이 로봇을 <b>둘러싸고</b> 배치되기 때문입니다. "왼쪽으로 215 mm, 위로 0 mm"보다
+      "180° 방향으로 215 mm"가 장비 구조와 그대로 맞아떨어집니다.</p></div>
+    <div class="wt-card"><h3>축 하나가 곧 의미 하나</h3>
+     <p>θ만 바꾸면 <b>대상 장치가 바뀌고</b>, R만 바꾸면 <b>그 장치로 들어가고 나옵니다.</b>
+      동작과 의도가 1:1로 붙습니다.</p></div>
+    <div class="wt-note"><b>시뮬레이터에서</b> 회전 버튼이 각도를 조금씩 돌리는 대신
+     스테이션을 통째로 바꾸는 이유가 이것입니다. 실제 장비도 티칭된 θ 값으로 한 번에 이동합니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ CH3 · Home 과 리밋 ══ -->
+<section class="slide" id="s12" data-level="intro standard pro" data-chapter="3" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조</div>
+  <h2 class="h-title">Home을 먼저 하는 이유, 리밋이 세 겹인 이유</h2>
+  <div class="wt-lead">전원을 켠 로봇은 <b>자기가 어디 있는지 모릅니다.</b> 기준점을 한 번 찍어야 좌표가 의미를 갖습니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1620 300">
+    <rect x="120" y="120" width="1380" height="52" rx="8" fill="#101d29" stroke="#274357" stroke-width="2"/>
+    <rect x="300" y="120" width="1020" height="52" fill="rgba(53,224,200,.12)"/>
+    <text class="fx-cap" x="700" y="152">정상 동작 범위</text>
+    <g>
+     <rect x="220" y="120" width="80" height="52" fill="rgba(255,179,64,.16)"/>
+     <rect x="1320" y="120" width="80" height="52" fill="rgba(255,179,64,.16)"/>
+     <text class="fx-sub" x="196" y="106" fill="#ffb340">소프트 리밋</text>
+     <text class="fx-sub" x="1300" y="106" fill="#ffb340">소프트 리밋</text>
+    </g>
+    <g>
+     <rect x="160" y="120" width="60" height="52" fill="rgba(255,94,94,.18)"/>
+     <rect x="1400" y="120" width="60" height="52" fill="rgba(255,94,94,.18)"/>
+     <text class="fx-sub" x="120" y="200" fill="#ff8a8a">리밋 센서</text>
+     <text class="fx-sub" x="1382" y="200" fill="#ff8a8a">리밋 센서</text>
+    </g>
+    <g stroke="#ff5e5e" stroke-width="6">
+     <path d="M124 112 V180"/><path d="M1496 112 V180"/></g>
+    <text class="fx-sub" x="96" y="238" fill="#ffabab">하드 스톱</text>
+    <text class="fx-sub" x="1442" y="238" fill="#ffabab">하드 스톱</text>
+    <g><circle cx="360" cy="146" r="13" fill="#35e0c8"/>
+     <text class="fx-cap" x="322" y="212">HOME</text>
+     <text class="fx-sub" x="300" y="240">모든 좌표의 기준점</text></g>
+    <g font-family="ui-monospace,monospace" font-size="17" fill="#5d829c">
+     <text x="640" y="240">① 제어기가 스스로 막는다 → ② 센서가 잡는다 → ③ 그래도 넘으면 쇠가 막는다</text></g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:14px">
+   <div class="wt-col"><div class="wt-card"><h3>Home = 좌표의 원점</h3>
+    <p>엔코더는 "얼마나 움직였는지"는 알아도 "지금 어디인지"는 모릅니다.
+     Home 센서를 한 번 지나야 절대 위치가 정해지고, 그때부터 티칭 좌표가 맞아떨어집니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card warn"><h3>리밋이 세 겹인 이유</h3>
+    <p>소프트 리밋은 <b>소프트웨어</b>가 막고, 리밋 센서는 <b>전기</b>로 막고, 하드 스톱은 <b>물리적으로</b> 막습니다.
+     앞의 둘이 고장 나도 마지막 하나가 남습니다.</p></div></div>
+  </div>
+  <div class="wt-note"><b>시뮬레이터에서</b> Initialize → Home을 하지 않으면 축이 아예 안 움직이는 것(ALM-101 · 102),
+   Z를 끝까지 올리면 ALM-401이 뜨는 것이 각각 이 이야기입니다.</div>
+ </div>
+</section>
+
+<!-- ══ CH3 [실무] 정확도 vs 반복도 ══ -->
+<section class="slide" id="s13" data-level="pro" data-chapter="3" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조 · 실무</div>
+  <h2 class="h-title">정확도보다 반복도를 봅니다</h2>
+  <div class="wt-lead">시킨 자리에 정확히 가는 것과, 갈 때마다 <b>같은 자리에</b> 가는 것은 다른 이야기입니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1620 330">
+    <g>
+     <rect class="fx-panel" x="10" y="10" width="380" height="310" rx="12"/>
+     <text class="fx-cap" x="34" y="48" fill="#ff8a8a">정확 ✕ · 반복 ✕</text>
+     <circle cx="200" cy="180" r="86" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="46" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="8" fill="#35e0c8"/>
+     <g fill="#ff5e5e"><circle cx="140" cy="130" r="7"/><circle cx="252" cy="146" r="7"/>
+      <circle cx="168" cy="238" r="7"/><circle cx="262" cy="226" r="7"/><circle cx="118" cy="196" r="7"/></g>
+     <text class="fx-sub" x="34" y="298">못 쓴다</text>
+    </g>
+    <g transform="translate(410,0)">
+     <rect class="fx-panel" x="10" y="10" width="380" height="310" rx="12"/>
+     <text class="fx-cap" x="34" y="48" fill="#ffb340">정확 ○ · 반복 ✕</text>
+     <circle cx="200" cy="180" r="86" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="46" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="8" fill="#35e0c8"/>
+     <g fill="#ffb340"><circle cx="164" cy="152" r="7"/><circle cx="238" cy="166" r="7"/>
+      <circle cx="186" cy="222" r="7"/><circle cx="228" cy="212" r="7"/><circle cx="200" cy="140" r="7"/></g>
+     <text class="fx-sub" x="34" y="298">평균은 맞지만 매번 다르다 — 간헐 불량</text>
+    </g>
+    <g transform="translate(820,0)">
+     <rect class="fx-panel" x="10" y="10" width="380" height="310" rx="12"/>
+     <text class="fx-cap" x="34" y="48">정확 ✕ · 반복 ○</text>
+     <circle cx="200" cy="180" r="86" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="46" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="8" fill="#35e0c8"/>
+     <g fill="#4aa8ff"><circle cx="252" cy="128" r="7"/><circle cx="262" cy="136" r="7"/>
+      <circle cx="256" cy="142" r="7"/><circle cx="266" cy="126" r="7"/><circle cx="258" cy="134" r="7"/></g>
+     <text class="fx-sub" x="34" y="298">티칭으로 옮기면 된다 — 쓸 수 있다</text>
+    </g>
+    <g transform="translate(1230,0)">
+     <rect x="10" y="10" width="380" height="310" rx="12" fill="rgba(53,224,200,.07)" stroke="#2c6d63" stroke-width="2"/>
+     <text class="fx-cap" x="34" y="48">정확 ○ · 반복 ○</text>
+     <circle cx="200" cy="180" r="86" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="46" fill="none" stroke="#274357" stroke-width="2"/>
+     <circle cx="200" cy="180" r="8" fill="#35e0c8"/>
+     <g fill="#2fe0c0"><circle cx="198" cy="176" r="7"/><circle cx="204" cy="184" r="7"/>
+      <circle cx="194" cy="186" r="7"/><circle cx="206" cy="174" r="7"/><circle cx="200" cy="181" r="7"/></g>
+     <text class="fx-sub" x="34" y="298">목표</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:14px">
+   <div class="wt-col"><div class="wt-card"><h3>티칭이 정확도를 대신한다</h3>
+    <p>로봇이 늘 같은 자리로만 간다면, 그 자리를 <b>사람이 옮겨 잡으면</b> 됩니다.
+     그래서 카탈로그에서 먼저 보는 값이 정확도가 아니라 <b>반복도</b>입니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card warn"><h3>반복도가 나쁘면 손쓸 수 없다</h3>
+    <p>갈 때마다 자리가 다르면 티칭으로 보정이 안 됩니다. 열 번 중 한 번 긁히는
+     <b>간헐 불량</b>이 되고, 원인을 찾기도 가장 어렵습니다.</p></div></div>
+  </div>
+  <div class="wt-note"><b>실제 스펙</b> — 웨이퍼 반송 로봇의 위치 반복도는 모델에 따라
+   R·Z축 <b>±0.025 mm</b> 급부터 <b>±0.1 mm</b> 급, θ축은 <b>±0.01°</b> 수준으로 제시됩니다.
+   <span style="color:#7fa3bd">(장비사·세대별 편차가 크므로 해당 장비 사양서를 확인할 것)</span></div>
+ </div>
+</section>
+
+<!-- ══ CH3 [실무] 듀얼 암 ══ -->
+<section class="slide" id="s14" data-level="pro" data-chapter="3" data-here="tm">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조 · 실무</div>
+  <h2 class="h-title">손이 두 개면 챔버를 기다리게 하지 않습니다</h2>
+  <div class="wt-lead">공정이 끝난 웨이퍼를 빼고 새 웨이퍼를 넣는 사이, 챔버는 <b>놀고 있습니다.</b> 그 시간을 줄이는 구조입니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1620 330">
+    <g font-family="ui-monospace,monospace">
+     <text class="fx-cap" x="20" y="46">단일 암</text>
+     <rect x="150" y="24" width="200" height="34" rx="5" fill="#2c4b66" stroke="#4a7ea6" stroke-width="2"/>
+     <text font-size="17" fill="#cfe4f2" x="176" y="47">완료품 반출</text>
+     <rect x="356" y="24" width="200" height="34" rx="5" fill="#3a3468" stroke="#8a7dff" stroke-width="2"/>
+     <text font-size="17" fill="#cfe4f2" x="382" y="47">로드락 왕복</text>
+     <rect x="562" y="24" width="200" height="34" rx="5" fill="#2c4b66" stroke="#4a7ea6" stroke-width="2"/>
+     <text font-size="17" fill="#cfe4f2" x="596" y="47">신규품 반입</text>
+     <rect x="150" y="72" width="612" height="26" rx="4" fill="rgba(255,94,94,.16)" stroke="#7a3232"/>
+     <text font-size="16" fill="#ffabab" x="380" y="91">챔버 대기 시간</text>
+
+     <text class="fx-cap" x="20" y="182">듀얼 암</text>
+     <rect x="150" y="160" width="150" height="34" rx="5" fill="#2c4b66" stroke="#4a7ea6" stroke-width="2"/>
+     <text font-size="17" fill="#cfe4f2" x="166" y="183">빼고 넣기</text>
+     <text font-size="16" fill="#8ff0dd" x="316" y="183">← 한 번 진입으로 교체 (swap)</text>
+     <rect x="150" y="208" width="150" height="26" rx="4" fill="rgba(53,224,200,.16)" stroke="#2c6d63"/>
+     <text font-size="16" fill="#8ff0dd" x="166" y="227">짧다</text>
+     <path d="M150 268 H1560" stroke="#274357" stroke-width="2"/>
+     <text class="fx-sub" x="150" y="296">시간 →</text>
+     <g transform="translate(1060,140)">
+      <circle cx="60" cy="60" r="30" fill="#1c2340" stroke="#8a7dff" stroke-width="3"/>
+      <rect x="60" y="42" width="150" height="16" rx="6" fill="#3a3468" stroke="#8a7dff" stroke-width="2"/>
+      <rect x="60" y="66" width="150" height="16" rx="6" fill="#3a3468" stroke="#8a7dff" stroke-width="2"/>
+      <ellipse class="fx-w" cx="234" cy="50" rx="26" ry="6"/>
+      <text class="fx-sub" x="250" y="86">아래 손은 비어 있다</text>
+     </g>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:10px">
+   <div class="wt-col"><div class="wt-card v"><h3>한 번 들어가서 둘 다 한다</h3>
+    <p>빈 손으로 들어가 완료품을 집고, 살짝 회전·이동해 들고 있던 신규품을 놓고 나옵니다.
+     진입과 후퇴가 <b>두 번에서 한 번으로</b> 줄어듭니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card"><h3>대신 비싸고 무겁다</h3>
+    <p>손이 둘이면 구조가 복잡해지고 관성이 커집니다.
+     처리량이 병목이 아닌 장비라면 단일 암이 더 맞습니다.</p></div></div>
+  </div>
+  <div class="wt-note v"><b>참고</b> — 진공용 듀얼 암 로봇 중에는 시간당 <b>650장</b> 급 반송을 내세우는 제품도 있습니다.
+   처리량 목표가 곧 로봇 구조 선택으로 이어집니다.</div>
+ </div>
+</section>
+
+<!-- ══ CH3 [실무] 정정 시간 ══ -->
+<section class="slide" id="s15" data-level="pro" data-chapter="3" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">CH 03 · 로봇 구조 · 실무</div>
+  <h2 class="h-title">"도착했다"와 "집어도 된다"는 다릅니다</h2>
+  <div class="wt-lead">축이 목표값에 닿아도 팔 끝은 아직 떨고 있습니다. 그 떨림이 잦아드는 시간을 <b>정정 시간</b>이라고 합니다.</div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.3">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 940 360">
+      <line x1="90" y1="300" x2="900" y2="300" stroke="#274357" stroke-width="2"/>
+      <line x1="90" y1="30" x2="90" y2="300" stroke="#274357" stroke-width="2"/>
+      <text class="fx-sub" x="820" y="330">시간 →</text><text class="fx-sub" x="20" y="44">위치</text>
+      <line x1="90" y1="120" x2="900" y2="120" stroke="#2c6d63" stroke-width="2" stroke-dasharray="7 6"/>
+      <text class="fx-cap" x="800" y="112">목표</text>
+      <rect x="90" y="104" width="810" height="32" fill="rgba(53,224,200,.08)"/>
+      <text class="fx-sub" x="704" y="156" fill="#7fa3bd">허용 오차 대역</text>
+      <path d="M90 290 C 200 288, 300 150, 400 74 C 450 44, 500 176, 540 138 C 570 110, 600 132, 630 121 C 660 114, 700 122, 900 120"
+        fill="none" stroke="#4aa8ff" stroke-width="3.5"/>
+      <line x1="400" y1="30" x2="400" y2="300" stroke="#ffb340" stroke-width="2" stroke-dasharray="5 6"/>
+      <text class="fx-sub" x="330" y="52" fill="#ffb340">목표 도달</text>
+      <line x1="640" y1="30" x2="640" y2="300" stroke="#35e0c8" stroke-width="2" stroke-dasharray="5 6"/>
+      <text class="fx-cap" x="656" y="52">안정</text>
+      <path d="M400 268 H640" stroke="#35e0c8" stroke-width="2" marker-start="url(#mA)" marker-end="url(#mA)"/>
+      <text class="fx-cap" x="452" y="292">정정 시간</text>
+      <text class="fx-sub" x="418" y="88" fill="#ffb340">오버슈트</text>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card warn"><h3>급하게 굴리면 손해</h3>
+     <p>가속을 올리면 이동은 빨라지지만 진동이 커져 정정 시간이 늘어납니다.
+      전체 사이클이 오히려 길어지고, 심하면 웨이퍼가 손 위에서 미끄러집니다.</p></div>
+    <div class="wt-card"><h3>그래서 이렇게 만든다</h3>
+     <p>진동원을 줄이려 <b>직접구동 모터</b>를 쓰고, 링크에 <b>스틸 벨트</b>를 적용해 흔들림과
+      경로 오차를 줄입니다. 손 표면에 마찰 패드를 넣어 미끄러짐을 막기도 합니다.</p></div>
+    <div class="wt-note"><b>진단 관점</b> — Position Error가 <b>빠른 동작에서만</b> 나온다면
+     좌표가 아니라 <b>정정 시간과 진동</b>을 의심합니다. 속도를 낮춰 재현되지 않으면 거의 확정입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ Pick 4컷 ══ -->
+<section class="slide" id="s16" data-level="intro standard pro" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">07 · 집고 놓기</div>
+  <h2 class="h-title">Pick은 네 박자입니다</h2>
+  <div class="wt-lead">겨냥하고, 뻗고, 들고, 뺍니다. <b>뻗고 나서 집는다, 빼고 나서 돈다.</b></div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1680 400">
+    <g id="pk1">
+     <rect class="fx-panel" x="10" y="10" width="390" height="370" rx="12"/>
+     <text class="fx-cap" x="32" y="50">① 겨냥 · θ + Z</text>
+     <rect x="52" y="90" width="120" height="230" rx="6" fill="#101d29" stroke="#3a6b8c" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M64 150 H160 M64 210 H160 M64 270 H160"/></g>
+     <ellipse class="fx-w" cx="112" cy="200" rx="42" ry="6"/>
+     <rect class="fx-arm" x="300" y="192" width="76" height="18" rx="7"/>
+     <path class="fx-ln" d="M290 260 V206" marker-end="url(#mA)" stroke-width="2.5"/>
+     <text class="fx-sub" x="240" y="290">Z를 슬롯에 맞춤</text>
+     
+    </g>
+    <g transform="translate(424,0)">
+     <rect class="fx-panel" x="10" y="10" width="390" height="370" rx="12"/>
+     <text class="fx-cap" x="32" y="50">② EXTEND · R</text>
+     <rect x="52" y="90" width="120" height="230" rx="6" fill="#101d29" stroke="#3a6b8c" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M64 150 H160 M64 210 H160 M64 270 H160"/></g>
+     <ellipse class="fx-w" cx="112" cy="200" rx="42" ry="6"/>
+     <rect class="fx-arm" x="152" y="204" width="224" height="16" rx="6"/>
+     <path class="fx-ln" d="M330 262 H176" marker-end="url(#mA)" stroke-width="2.5"/>
+     <text class="fx-sub" x="196" y="292">웨이퍼 아래로 손 진입</text>
+    </g>
+    <g transform="translate(848,0)">
+     <rect class="fx-panel" x="10" y="10" width="390" height="370" rx="12"/>
+     <text class="fx-cap" x="32" y="50">③ PICK · Z 살짝 상승</text>
+     <rect x="52" y="90" width="120" height="230" rx="6" fill="#101d29" stroke="#3a6b8c" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M64 150 H160 M64 210 H160 M64 270 H160"/></g>
+     <rect class="fx-arm" x="152" y="186" width="224" height="16" rx="6"/>
+     <ellipse class="fx-w" cx="112" cy="182" rx="42" ry="6"/>
+     <path class="fx-ln" d="M112 222 V196" marker-end="url(#mA)" stroke-width="2.5"/>
+     <circle cx="330" cy="140" r="10" fill="#35e0c8"/>
+     <text class="fx-sub" x="212" y="146">WAFER PRESENCE ON</text>
+     <text class="fx-sub" x="196" y="292">얹어서 들어 올림</text>
+    </g>
+    <g transform="translate(1272,0)">
+     <rect class="fx-panel" x="10" y="10" width="390" height="370" rx="12"/>
+     <text class="fx-cap" x="32" y="50">④ RETRACT</text>
+     <rect x="52" y="90" width="120" height="230" rx="6" fill="#101d29" stroke="#3a6b8c" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M64 150 H160 M64 210 H160 M64 270 H160"/></g>
+     <rect class="fx-arm" x="300" y="186" width="76" height="16" rx="6"/>
+     <ellipse class="fx-w" cx="286" cy="182" rx="42" ry="6"/>
+     <path class="fx-ln" d="M200 262 H344" marker-end="url(#mA)" stroke-width="2.5"/>
+     <text class="fx-sub" x="196" y="292">이제 회전 가능</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="margin-top:18px;flex:none">
+   <div class="wt-col"><div class="wt-card"><h3>End Effector — 로봇의 손</h3>
+    <p>집게가 아닙니다. 얇은 포크 판 위에 웨이퍼를 <b>얹어서</b> 옮깁니다.
+     가장자리만 닿게 설계되어 회로면에 흠집을 내지 않습니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card warn"><h3>Place는 반대 순서</h3>
+    <p>Extend → 내려놓기 → Retract. 대상 자리가 <b>비어 있어야</b> 합니다.
+     이미 웨이퍼가 있으면 겹쳐 놓게 되므로 거부됩니다(ALM-505).</p></div></div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ [실무] End Effector ══ -->
+<section class="slide" id="s17" data-level="pro" data-here="efem">
+ <div class="wt-pad">
+  <div class="wt-eye">실무 · 취급</div>
+  <h2 class="h-title">손을 무엇으로 만드느냐가 갈린다</h2>
+  <div class="wt-lead">웨이퍼를 얹는 방식은 하나가 아닙니다. <b>어디서 쓰느냐</b>에 따라 고릅니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1660 340">
+    <g>
+     <rect class="fx-panel" x="10" y="10" width="520" height="320" rx="12"/>
+     <text class="fx-cap" x="34" y="50">마찰 · 에지 그립</text>
+     <rect class="fx-arm" x="70" y="180" width="380" height="20" rx="7"/>
+     <ellipse class="fx-w" cx="270" cy="170" rx="170" ry="10"/>
+     <g fill="none" stroke="#7fc4ea" stroke-width="3"><path d="M108 178 V162 M432 178 V162"/></g>
+     <text class="fx-sub" x="34" y="248">가장자리만 닿게 얹거나 살짝 물어 고정</text>
+     <text class="fx-sub" x="34" y="276" fill="#8ff0dd">진공에서도 쓸 수 있다</text>
+     <text class="fx-sub" x="34" y="304" fill="#c9a06a">급가속하면 미끄러질 수 있다</text>
+    </g>
+    <g transform="translate(560,0)">
+     <rect class="fx-panel" x="10" y="10" width="520" height="320" rx="12"/>
+     <text class="fx-cap" x="34" y="50">진공 흡착</text>
+     <rect class="fx-arm" x="70" y="180" width="380" height="20" rx="7"/>
+     <ellipse class="fx-w" cx="270" cy="170" rx="170" ry="10"/>
+     <g stroke="#35e0c8" stroke-width="3"><path d="M180 200 V232 M270 200 V232 M360 200 V232"/></g>
+     <text class="fx-sub" x="34" y="248">뒷면을 빨아 고정 — 잘 안 미끄러진다</text>
+     <text class="fx-sub" x="34" y="276" fill="#ff9a9a">진공 챔버 안에서는 못 쓴다</text>
+     <text class="fx-sub" x="34" y="304" fill="#7fa3bd">빨아들일 압력차가 없기 때문</text>
+    </g>
+    <g transform="translate(1120,0)">
+     <rect class="fx-panel" x="10" y="10" width="520" height="320" rx="12"/>
+     <text class="fx-cap" x="34" y="50">비접촉 (베르누이 등)</text>
+     <rect class="fx-arm" x="70" y="190" width="380" height="20" rx="7"/>
+     <ellipse class="fx-w" cx="270" cy="150" rx="170" ry="10"/>
+     <g stroke="#9b8cff" stroke-width="2.5" stroke-dasharray="5 5">
+      <path d="M180 186 V166 M270 186 V166 M360 186 V166"/></g>
+     <text class="fx-sub" x="34" y="248">기체 흐름으로 살짝 띄워 잡는다</text>
+     <text class="fx-sub" x="34" y="276" fill="#8ff0dd">얇거나 휜 웨이퍼에 유리</text>
+     <text class="fx-sub" x="34" y="304" fill="#7fa3bd">기체를 쓸 수 있는 곳에 한정</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note"><b>고르는 기준</b> — 대기냐 진공이냐, 웨이퍼가 두껍냐 얇냐, 얼마나 빨리 움직이느냐.
+   <b>진공 이송 로봇이 흡착을 쓸 수 없다</b>는 점이 대기 로봇과 갈리는 대표적인 이유입니다.</div>
+ </div>
+</section>
+
+<!-- ══ 이 책의 전제 · 티칭 ══ -->
+<section class="slide" id="s18" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">08 · 이 책의 전제</div>
+  <h2 class="h-title">로봇은 그 위치를 어떻게 아는가</h2>
+  <div class="wt-lead">로봇은 웨이퍼를 찾지 않습니다. <b>사람이 미리 좌표를 잡아 저장해 둔 자리</b>로 갈 뿐입니다.
+   이 작업을 <b>티칭(Teaching)</b>이라고 합니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1600 380">
+    <g>
+     <rect x="10" y="10" width="740" height="360" rx="12" fill="rgba(255,94,94,.06)" stroke="#7a3232" stroke-width="2"/>
+     <text class="fx-cap" x="34" y="52" fill="#ff8a8a">좌표가 틀어졌을 때</text>
+     <rect x="56" y="96" width="250" height="220" rx="6" fill="#101d29" stroke="#3a6b8c" stroke-width="2.5"/>
+     <g stroke="#274357" stroke-width="2"><path d="M68 168 H294 M68 268 H294"/></g>
+     <ellipse class="fx-w" cx="181" cy="258" rx="98" ry="9"/>
+     <rect class="fx-arm" x="330" y="238" width="380" height="15" rx="6" stroke="#a04545"/>
+     <path class="fx-bad" d="M258 240 L296 268 M296 240 L258 268"/>
+     <text class="fx-sub" x="330" y="300" fill="#ffabab">블레이드가 웨이퍼 모서리를 친다</text>
+     <path d="M700 196 V236" stroke="#ff5e5e" stroke-width="2" marker-end="url(#mR)"/>
+     <text class="fx-sub" x="636" y="188" fill="#ffabab">Δ 2 mm</text>
+     <text class="fx-sub" x="330" y="332" fill="#c98a8a">ALM-2xx Position Error 반복</text>
+    </g>
+    <g transform="translate(840,0)">
+     <rect x="10" y="10" width="740" height="360" rx="12" fill="rgba(53,224,200,.06)" stroke="#2c6d63" stroke-width="2"/>
+     <text class="fx-cap" x="34" y="52">티칭이 맞을 때</text>
+     <rect x="56" y="96" width="250" height="220" rx="6" fill="#101d29" stroke="#3a6b8c" stroke-width="2.5"/>
+     <g stroke="#274357" stroke-width="2"><path d="M68 168 H294 M68 268 H294"/></g>
+     <ellipse class="fx-w" cx="181" cy="252" rx="98" ry="9"/>
+     <rect class="fx-arm" x="150" y="258" width="560" height="15" rx="6"/>
+     <text class="fx-sub" x="330" y="300">웨이퍼 아래로 정확히 들어간다</text>
+     <text class="fx-sub" x="330" y="332" fill="#8ff0dd">저장된 좌표 그대로 재현</text>
+     <g transform="translate(556,86)">
+      <rect x="0" y="0" width="152" height="94" rx="8" fill="#0e1d29" stroke="#274357" stroke-width="2"/>
+      <text class="fx-sub" x="14" y="26">JOG</text>
+      <g fill="#16283a" stroke="#3a6b8c" stroke-width="1.5">
+       <rect x="14" y="36" width="40" height="30" rx="5"/><rect x="58" y="36" width="40" height="30" rx="5"/>
+       <rect x="102" y="36" width="36" height="30" rx="5"/></g>
+      <text class="fx-sub" x="14" y="88">0.1 mm 단위로 사람이 잡는다</text>
+     </g>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:14px">
+   <div class="wt-col"><div class="wt-card"><h3>티칭이란</h3>
+    <p>각 스테이션에서 로봇이 멈출 좌표를, 사람이 조그 버튼으로 0.1 mm씩 움직여 잡고 저장하는 작업입니다.
+     FOUP 슬롯마다, 정렬기·로드락·챔버마다 따로 잡습니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card warn"><h3>틀어지면 어떻게 되나</h3>
+    <p>좌표가 몇 mm만 어긋나도 블레이드가 웨이퍼를 긁거나, 얹는 순간 미끄러지거나,
+     Position Error가 반복됩니다. 장비 셋업 시간의 상당 부분이 여기에 들어갑니다.</p></div></div>
+  </div>
+  <div class="wt-note"><b>이 책의 전제</b> — 여기서는 <b>티칭이 이미 끝난 장비</b>를 다룹니다.
+   그래서 Extend를 누르면 로봇은 언제나 정확한 자리에 섭니다.
+   실제 현장은 이 좌표를 잡는 데서부터 일이 시작됩니다. 그 과정은 이어지는 <b>실무 수준 슬라이드</b>에서 다룹니다.</div>
+ </div>
+</section>
+
+<!-- ══ [실무] 티칭 1 · 좌표 테이블 ══ -->
+<section class="slide" id="s19" data-level="pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">실무 · 티칭 ①</div>
+  <h2 class="h-title">장비가 기억하는 것은 좌표표 한 장입니다</h2>
+  <div class="wt-lead">로봇은 "FOUP으로 가라"를 모릅니다. <b>FOUP = R 215.4 / θ 180.0 / Z 44.0</b> 같은
+   숫자 묶음만 압니다. 이 표를 채우는 것이 티칭입니다.</div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.15">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 880 400">
+      <rect x="20" y="20" width="840" height="360" rx="10" fill="#0e1d29" stroke="#274357" stroke-width="2"/>
+      <g font-family="ui-monospace,monospace">
+       <text class="fx-cap" x="46" y="60">TEACH TABLE</text>
+       <line x1="46" y1="80" x2="834" y2="80" stroke="#274357" stroke-width="2"/>
+       <text class="fx-sub" x="46" y="112">STATION</text><text class="fx-sub" x="330" y="112">R (mm)</text>
+       <text class="fx-sub" x="500" y="112">θ (deg)</text><text class="fx-sub" x="666" y="112">Z (mm)</text>
+       <line x1="46" y1="128" x2="834" y2="128" stroke="#1f3446"/>
+       <g font-size="21" fill="#cfe4f2">
+        <text x="46" y="164">FOUP · Slot 1</text><text x="330" y="164">215.4</text><text x="500" y="164">180.00</text><text x="666" y="164">44.0</text>
+        <text x="46" y="204">FOUP · Slot 25</text><text x="330" y="204">215.4</text><text x="500" y="204">180.00</text><text x="666" y="204">284.0</text>
+        <text x="46" y="244">PRE-ALIGNER</text><text x="330" y="244">128.7</text><text x="500" y="244">270.00</text><text x="666" y="244">96.5</text>
+        <text x="46" y="284">LOAD LOCK</text><text x="330" y="284">204.9</text><text x="500" y="284">0.00</text><text x="666" y="284">88.2</text>
+        <text x="46" y="324">PM 1</text><text x="330" y="324">120.2</text><text x="500" y="324">90.00</text><text x="666" y="324">91.0</text></g>
+       <rect x="36" y="142" width="808" height="30" rx="4" fill="rgba(53,224,200,.1)" stroke="#2c6d63"/>
+       <text class="fx-sub" x="46" y="366" fill="#7fa3bd">스테이션 하나가 행 하나 · 값 하나가 틀리면 그 스테이션만 사고가 난다</text>
+      </g>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>세 숫자가 한 자리를 만든다</h3>
+     <p><b>R</b> 얼마나 뻗을지 · <b>θ</b> 어느 방향인지 · <b>Z</b> 어느 높이인지.
+      이 셋이 스테이션마다 따로 저장됩니다.</p></div>
+    <div class="wt-card"><h3>표가 곧 장비의 기억</h3>
+     <p>제어기를 교체하거나 좌표 파일이 날아가면 로봇은 아무 데도 갈 수 없습니다.
+      티칭 데이터 백업이 정기 점검 항목인 이유입니다.</p></div>
+    <div class="wt-note warn"><b>입문·표준 수준에서는</b> 이 표가 이미 완벽히 채워진 상태를 가정했습니다.
+     여기서부터는 그 표를 사람이 어떻게 채우는지를 봅니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ [실무] 티칭 2 · 왜 정밀해야 하나 ══ -->
+<section class="slide" id="s20" data-level="pro" data-here="foup">
+ <div class="wt-pad">
+  <div class="wt-eye">실무 · 티칭 ②</div>
+  <h2 class="h-title">10 mm 안에 전부 들어가야 합니다</h2>
+  <div class="wt-lead">300 mm FOUP의 슬롯 간격은 <b>10 mm</b>입니다. 그 안에 웨이퍼와 블레이드와 여유가 모두 들어갑니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1560 380">
+    <g transform="translate(60,30)">
+     <line x1="0" y1="20" x2="700" y2="20" stroke="#3a6b8c" stroke-width="2.5"/>
+     <line x1="0" y1="300" x2="700" y2="300" stroke="#3a6b8c" stroke-width="2.5"/>
+     <text class="fx-sub" x="0" y="14">슬롯 n+1 지지대</text>
+     <text class="fx-sub" x="0" y="324">슬롯 n 지지대</text>
+     <rect x="90" y="196" width="520" height="12" fill="#c9dced" stroke="#eef6ff" stroke-width="1.5"/>
+     <text class="fx-cap" x="620" y="206">웨이퍼 775 µm</text>
+     <rect x="150" y="232" width="400" height="18" rx="4" fill="#2c4b66" stroke="#4a7ea6" stroke-width="2"/>
+     <text class="fx-cap" x="560" y="248">블레이드</text>
+     <line x1="40" y1="20" x2="40" y2="300" stroke="#35e0c8" stroke-width="2" marker-start="url(#mA)" marker-end="url(#mA)"/>
+     <text class="fx-cap" x="-16" y="168" transform="rotate(-90 -16 168)">피치 10 mm</text>
+     <line x1="700" y1="208" x2="700" y2="232" stroke="#ffb340" stroke-width="2"/>
+     <text class="fx-sub" x="712" y="228" fill="#ffb340">진입 여유</text>
+     <line x1="700" y1="250" x2="700" y2="300" stroke="#ffb340" stroke-width="2"/>
+     <text class="fx-sub" x="712" y="284" fill="#ffb340">들어올림 여유</text>
+    </g>
+    <g transform="translate(900,40)">
+     <rect x="0" y="0" width="600" height="290" rx="10" fill="#0e1d29" stroke="#274357" stroke-width="2"/>
+     <g font-family="ui-monospace,monospace" font-size="22">
+      <text class="fx-cap" x="28" y="46">한 슬롯의 예산</text>
+      <text fill="#9fc0d6" x="28" y="96">슬롯 피치</text><text fill="#f2f9ff" x="420" y="96">10.00 mm</text>
+      <text fill="#9fc0d6" x="28" y="136">− 웨이퍼 두께</text><text fill="#f2f9ff" x="420" y="136">0.78 mm</text>
+      <text fill="#9fc0d6" x="28" y="176">− 웨이퍼 위치 공차</text><text fill="#f2f9ff" x="420" y="176">± 0.5 mm</text>
+      <line x1="28" y1="196" x2="572" y2="196" stroke="#274357" stroke-width="2"/>
+      <text fill="#35e0c8" x="28" y="234">블레이드 · 진입 · 들어올림</text>
+      <text fill="#35e0c8" x="420" y="234">나머지 전부</text>
+      <text class="fx-sub" x="28" y="272">Z 티칭 오차는 이 나머지를 갉아먹는다</text></g>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note warn"><b>그래서 mm 단위로는 부족합니다</b> —
+   Z가 1 mm만 어긋나도 진입 여유가 사라져 블레이드가 웨이퍼 뒷면을 긁거나 위 슬롯 웨이퍼를 밀어 올립니다.
+   조그를 <b>0.1 mm 단위</b>로 쓰는 이유입니다.
+   <span style="color:#7fa3bd">(피치 10 mm·두께 775 µm·위치 공차 ±0.5 mm 비누적은 300 mm FOUP 기준 SEMI 규격값)</span></div>
+ </div>
+</section>
+
+<!-- ══ [실무] 티칭 3 · 절차 ══ -->
+<section class="slide" id="s21" data-level="pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">실무 · 티칭 ③</div>
+  <h2 class="h-title">티칭은 여섯 걸음으로 진행합니다</h2>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1700 300">
+    <g font-family="ui-monospace,monospace">
+     <path d="M40 190 H1660" stroke="#274357" stroke-width="2"/>
+     <g><circle cx="140" cy="190" r="32" fill="#35e0c8"/><text x="131" y="199" font-size="24" font-weight="800" fill="#03231e">1</text>
+      <text x="84" y="120" font-size="23" fill="#f2f9ff">안전 확보</text>
+      <text x="56" y="150" font-size="17" fill="#7fa3bd">저속 · 웨이퍼 없이</text></g>
+     <g><circle cx="400" cy="190" r="32" fill="#35e0c8"/><text x="391" y="199" font-size="24" font-weight="800" fill="#03231e">2</text>
+      <text x="352" y="120" font-size="23" fill="#f2f9ff">개략 접근</text>
+      <text x="326" y="150" font-size="17" fill="#7fa3bd">큰 스텝으로 근처까지</text></g>
+     <g><circle cx="660" cy="190" r="32" fill="#35e0c8"/><text x="651" y="199" font-size="24" font-weight="800" fill="#03231e">3</text>
+      <text x="600" y="120" font-size="23" fill="#f2f9ff">미세 조정</text>
+      <text x="576" y="150" font-size="17" fill="#7fa3bd">0.1 mm 스텝 조그</text></g>
+     <g><circle cx="920" cy="190" r="32" fill="#9b8cff"/><text x="911" y="199" font-size="24" font-weight="800" fill="#140f2e">4</text>
+      <text x="866" y="120" font-size="23" fill="#f2f9ff">기준 맞춤</text>
+      <text x="836" y="150" font-size="17" fill="#7fa3bd">중심·간격 눈으로 확인</text></g>
+     <g><circle cx="1180" cy="190" r="32" fill="#9b8cff"/><text x="1171" y="199" font-size="24" font-weight="800" fill="#140f2e">5</text>
+      <text x="1140" y="120" font-size="23" fill="#f2f9ff">저장</text>
+      <text x="1104" y="150" font-size="17" fill="#7fa3bd">좌표표에 기록</text></g>
+     <g><circle cx="1440" cy="190" r="32" fill="#9b8cff"/><text x="1431" y="199" font-size="24" font-weight="800" fill="#140f2e">6</text>
+      <text x="1396" y="120" font-size="23" fill="#f2f9ff">검증</text>
+      <text x="1346" y="150" font-size="17" fill="#7fa3bd">더미 웨이퍼로 반복</text></g>
+     <text x="400" y="256" font-size="19" fill="#35e0c8" text-anchor="middle">— 웨이퍼 없이 진행 —</text>
+     <text x="1310" y="256" font-size="19" fill="#9b8cff" text-anchor="middle">— 더미 웨이퍼 투입 —</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:8px">
+   <div class="wt-col"><div class="wt-card"><h3>1~3 · 절대 실물 웨이퍼로 하지 않는다</h3>
+    <p>좌표가 틀린 상태에서 움직이는 것이 티칭이므로, 초반에는 반드시 웨이퍼를 빼고 저속으로 합니다.
+     제품 웨이퍼를 올려놓고 티칭하는 것은 사고를 예약하는 일입니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card v"><h3>4~6 · 눈으로 보고, 저장하고, 다시 확인</h3>
+    <p>블레이드와 웨이퍼 사이 간격을 위·아래에서 확인하고 저장합니다.
+     저장했다고 끝이 아니라 <b>더미 웨이퍼로 여러 번 반복</b>해 같은 자리에 서는지 봅니다.</p></div></div>
+  </div>
+  <div class="wt-note warn"><b>가장 흔한 실수</b> — 6번을 건너뛰는 것.
+   한 번 성공한 것과 스무 번 반복해도 같은 것은 다릅니다. 반복하지 않으면 간헐 불량으로 돌아옵니다.</div>
+ </div>
+</section>
+
+<!-- ══ [실무] 티칭 4 · 슬롯 ══ -->
+<section class="slide" id="s22" data-level="pro" data-here="foup">
+ <div class="wt-pad">
+  <div class="wt-eye">실무 · 티칭 ④</div>
+  <h2 class="h-title">25칸을 하나씩 잡지는 않습니다</h2>
+  <div class="wt-lead">슬롯 간격이 일정하다는 것을 이용합니다. <b>기준 한 칸 + 피치</b>로 나머지를 계산합니다.</div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.1">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 820 420">
+      <rect x="140" y="20" width="300" height="380" rx="8" fill="#101d29" stroke="#3a6b8c" stroke-width="2.5"/>
+      <g stroke="#274357" stroke-width="1.5">
+       <path d="M152 60 H428 M152 100 H428 M152 140 H428 M152 300 H428 M152 340 H428 M152 380 H428"/></g>
+      <g font-family="ui-monospace,monospace" font-size="17" fill="#5d829c">
+       <text x="112" y="56">25</text><text x="112" y="96">24</text><text x="112" y="136">23</text>
+       <text x="120" y="216">⋮</text>
+       <text x="118" y="296">3</text><text x="118" y="336">2</text><text x="118" y="376">1</text></g>
+      <ellipse class="fx-w" cx="290" cy="372" rx="120" ry="7"/>
+      <ellipse class="fx-w" cx="290" cy="52" rx="120" ry="7"/>
+      <rect x="150" y="358" width="290" height="30" rx="4" fill="rgba(53,224,200,.13)" stroke="#2fe0c0" stroke-width="2"/>
+      <rect x="150" y="38" width="290" height="30" rx="4" fill="rgba(155,140,255,.13)" stroke="#8a7dff" stroke-width="2"/>
+      <text class="fx-cap" x="460" y="380">기준 · 직접 티칭</text>
+      <text class="fx-cap v" x="460" y="58">최상단 · 확인만</text>
+      <line x1="86" y1="52" x2="86" y2="372" stroke="#35e0c8" stroke-width="2" marker-start="url(#mA)" marker-end="url(#mA)"/>
+      <text class="fx-cap" x="30" y="216" transform="rotate(-90 30 216)">24 × 10 mm</text>
+      <text class="fx-sub" x="460" y="216">Z(n) = Z(1) + (n−1) × 10 mm</text>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>기준 한 칸만 잡는다</h3>
+     <p>1번 슬롯을 정확히 잡고, 나머지는 피치 10 mm를 더해 계산합니다.
+      25칸을 따로 잡으면 시간도 오래 걸리고 사람 손에서 오차가 더 들어갑니다.</p></div>
+    <div class="wt-card v"><h3>대신 최상단은 반드시 확인</h3>
+     <p>계산값이 맞는지는 반대쪽 끝에서 드러납니다. 25번 슬롯에서 간격이 어긋나면
+      기준이 틀렸거나 캐리어가 기울어진 것입니다.</p></div>
+    <div class="wt-note warn"><b>주의</b> — 이 방식은 캐리어가 규격대로일 때만 성립합니다.
+     손상되었거나 다른 피치의 캐리어를 쓰면 계산이 전부 빗나갑니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ [실무] 티칭 5 · 드리프트와 자동 티칭 ══ -->
+<section class="slide" id="s23" data-level="pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">실무 · 티칭 ⑤</div>
+  <h2 class="h-title">한 번 잡으면 끝나지 않습니다</h2>
+  <div class="wt-lead">좌표는 시간이 지나며 조금씩 어긋납니다. <b>언제 다시 잡아야 하는지</b>를 아는 것이 실력입니다.</div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.15">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 860 380">
+      <line x1="80" y1="300" x2="820" y2="300" stroke="#274357" stroke-width="2"/>
+      <line x1="80" y1="40" x2="80" y2="300" stroke="#274357" stroke-width="2"/>
+      <text class="fx-sub" x="740" y="330">시간 →</text>
+      <text class="fx-sub" x="16" y="46">위치 오차</text>
+      <line x1="80" y1="120" x2="820" y2="120" stroke="#7a3232" stroke-width="1.5" stroke-dasharray="7 6"/>
+      <text class="fx-cap" x="686" y="112" fill="#ff8a8a">재티칭 기준선</text>
+      <path d="M80 286 C 220 280, 300 262, 380 250 S 520 226, 600 214" fill="none" stroke="#35e0c8" stroke-width="3.5"/>
+      <path d="M600 214 L604 108" stroke="#ffb340" stroke-width="3.5"/>
+      <circle cx="604" cy="108" r="10" fill="#ffb340"/>
+      <text class="fx-sub" x="470" y="96" fill="#ffb340">충돌 · 부품 교체</text>
+      <path d="M604 108 L620 286" stroke="#9b8cff" stroke-width="3.5" stroke-dasharray="8 5"/>
+      <text class="fx-cap v" x="632" y="272">재티칭</text>
+      <text class="fx-sub" x="150" y="270">마모 · 열 · 진동으로 천천히</text>
+     </svg>
+    </div>
+    <div class="wt-figc">서서히 밀리다가, 사고 한 번에 단숨에 튄다</div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card warn"><h3>즉시 재티칭해야 하는 때</h3>
+     <p>충돌이 발생한 뒤 · 로봇이나 스테이션 부품을 교체한 뒤 · 장비를 이설한 뒤.
+      "괜찮아 보인다"는 근거가 되지 못합니다.</p></div>
+    <div class="wt-card"><h3>서서히 밀리는 경우</h3>
+     <p>구동부 마모, 반복적인 열팽창과 수축, 주변 설비의 진동.
+      Position Error 발생 빈도가 조금씩 늘어나는 형태로 나타납니다.</p></div>
+    <div class="wt-card v"><h3>Auto-teach 의 몫과 한계</h3>
+     <p>지그와 센서로 기준점을 찾아 좌표를 자동 보정하는 기능입니다.
+      정기 미세 보정에는 강하지만, <b>기준 자체가 망가진 상태</b>(충돌 후 변형 등)는
+      사람이 다시 잡아야 합니다.</p></div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 정렬 전후 ══ -->
+<section class="slide" id="s24" data-level="intro standard pro" data-here="align">
+ <div class="wt-pad">
+  <div class="wt-eye">08 · 방향 맞추기</div>
+  <h2 class="h-title">Pre-aligner — 웨이퍼에도 위아래가 있습니다</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.15">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 800 420">
+      
+      <g>
+       <text class="fx-cap" x="40" y="34" fill="#ffb340">정렬 전</text>
+       <circle cx="180" cy="220" r="152" fill="none" stroke="#24425c" stroke-width="1.5" stroke-dasharray="5 7"/>
+       <circle cx="196" cy="234" r="130" fill="#1b2a38" stroke="#6d8ba3" stroke-width="2.5"/>
+       <g transform="rotate(52 196 234)"><path d="M196 104 L186 128 L206 128 Z" fill="#0a141c"/></g>
+       <circle cx="180" cy="220" r="5" fill="#35e0c8"/>
+       <circle cx="196" cy="234" r="5" fill="#ffb340"/>
+       <path d="M180 220 L196 234" stroke="#ffb340" stroke-width="2.5" marker-end="url(#mW)"/>
+       <text class="fx-sub" x="228" y="216" fill="#ffb340">중심 편차</text>
+       <text class="fx-sub" x="266" y="122" fill="#ffb340">Notch 52°</text>
+      </g>
+      <path class="fx-ln" d="M382 220 H442" marker-end="url(#mA)" stroke-width="3.5"/>
+      <text class="fx-cap" x="376" y="196">ALIGN</text>
+      <g transform="translate(300,0)">
+       <text class="fx-cap" x="140" y="34">정렬 후</text>
+       <circle cx="196" cy="220" r="152" fill="none" stroke="#1f4a48" stroke-width="1.5" stroke-dasharray="5 7"/>
+       <circle cx="196" cy="220" r="130" fill="#20313f" stroke="#8fb8cf" stroke-width="2.5"/>
+       <path d="M196 90 L186 114 L206 114 Z" fill="#0a141c"/>
+       <circle cx="196" cy="220" r="5" fill="#35e0c8"/>
+       <path class="fx-ln" d="M196 220 V104" stroke-dasharray="4 5" stroke-width="2"/>
+       <text class="fx-sub" x="222" y="106" fill="#35e0c8">Notch 0°</text>
+       <text class="fx-sub" x="222" y="240">중심 일치</text>
+      </g>
+     </svg>
+    </div>
+    <div class="wt-figc">중심 편차와 Notch 각도를 동시에 잡는다</div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>Notch, 방향의 기준점</h3>
+     <p>웨이퍼 가장자리에 V자 홈이 하나 있습니다. 이 홈이 웨이퍼의 <b>12시 방향</b>이며,
+      결정 방향과 이전 공정 패턴이 모두 이 기준을 따릅니다.</p></div>
+    <div class="wt-card warn"><h3>정렬을 건너뛰면</h3>
+     <p>챔버 안에서 웨이퍼가 비뚤게 놓입니다. 노광이면 패턴이 이전 층과 어긋나고,
+      식각이면 엉뚱한 자리가 깎입니다. <b>제품 전체가 불량</b>입니다.</p></div>
+    <div class="wt-note"><b>실습</b> — 정렬 전 웨이퍼는 홈이 아무 방향이나 향합니다.
+     Align을 실행하면 홈이 12시로 맞춰지고 웨이퍼 색이 밝아집니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 압력 스케일 ══ -->
+<section class="slide" id="s25" data-level="intro standard pro" data-here="lock">
+ <div class="wt-pad">
+  <div class="wt-eye v">09 · 경계</div>
+  <h2 class="h-title">Load Lock — 대기와 진공 사이의 방</h2>
+  <div class="wt-lead">공정 챔버의 진공을 깨지 않고 대기 중의 웨이퍼를 넣기 위한 <b class="v">완충실</b>입니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1620 300">
+    <rect x="80" y="142" width="1440" height="10" rx="5" fill="url(#pg)"/>
+    <g font-family="ui-monospace,monospace">
+     <circle cx="110" cy="147" r="15" fill="#ffb340"/>
+     <text class="fx-lbl" x="80" y="206" fill="#ffb340">760 Torr</text><text class="fx-sub" x="80" y="232">대기압</text>
+     <text class="fx-sub" x="86" y="112">FOUP · EFEM</text>
+     <circle cx="690" cy="147" r="11" fill="#d99a5c"/>
+     <text class="fx-lbl" x="646" y="206">1 Torr</text><text class="fx-sub" x="618" y="232">진공 판정선</text>
+     <circle cx="1180" cy="147" r="15" fill="#9b8cff"/>
+     <text class="fx-lbl" x="1122" y="206" fill="#9b8cff">0.01 Torr</text><text class="fx-sub" x="1116" y="232">이송 가능 진공</text>
+     <circle cx="1492" cy="147" r="11" fill="#6f63c9"/>
+     <text class="fx-sub" x="1428" y="206">공정 진공</text>
+    </g>
+    <path d="M140 74 H1148" class="fx-ln v" marker-end="url(#mV)"/>
+    <text class="fx-cap v" x="560" y="58">Pump Down · 배기</text>
+    <path d="M1148 274 H140" class="fx-ln" stroke="#ffb340" marker-end="url(#mW)"/>
+    
+    <text class="fx-cap" x="588" y="296" fill="#ffb340">Vent · 대기 복귀</text>
+   </svg>
+  </div>
+  <div class="wt-note v"><b>왜 필요한가</b> — 챔버 문을 그냥 열면 진공이 깨져 복구에 몇 시간이 걸립니다.
+   Load Lock은 <b>웨이퍼 크기의 작은 방</b>만 대기↔진공을 오가게 해서 이 손실을 없앱니다.</div>
+ </div>
+</section>
+
+<!-- ══ Gate Valve 3상태 ══ -->
+<section class="slide" id="s26" data-level="standard pro" data-here="lock">
+ <div class="wt-pad">
+  <div class="wt-eye v">10 · 상호잠금</div>
+  <h2 class="h-title">두 밸브는 절대 동시에 열리지 않습니다</h2>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1680 400">
+    <g>
+     <rect class="fx-panel" x="10" y="10" width="390" height="380" rx="12"/>
+     <text class="fx-cap" x="32" y="50">① 웨이퍼 반입</text>
+     <rect x="120" y="120" width="170" height="150" rx="8" fill="#132433" stroke="#3a6b8c" stroke-width="2.5"/>
+     <ellipse class="fx-w" cx="205" cy="195" rx="52" ry="8"/>
+     <rect x="102" y="160" width="18" height="70" fill="#0d2a25" stroke="#2fe0c0" stroke-width="2"/>
+     <rect x="290" y="160" width="18" height="70" fill="#7a2e2e" stroke="#a04545" stroke-width="2"/>
+     <text class="fx-sub" x="52" y="150">ATM</text><text class="fx-sub" x="316" y="150">TM</text>
+     <text class="fx-cap" x="68" y="316">ATM 열림 · TM 닫힘</text>
+     <text class="fx-sub" x="68" y="344">760 Torr</text>
+    </g>
+    <g transform="translate(424,0)">
+     <rect class="fx-panel" x="10" y="10" width="390" height="380" rx="12"/>
+     <text class="fx-cap" x="32" y="50">② 배기 · Pump Down</text>
+     <rect x="120" y="120" width="170" height="150" rx="8" fill="#141b2e" stroke="#5a5a9c" stroke-width="2.5"/>
+     <ellipse class="fx-w" cx="205" cy="195" rx="52" ry="8"/>
+     <rect x="102" y="160" width="18" height="70" fill="#7a2e2e" stroke="#a04545" stroke-width="2"/>
+     <rect x="290" y="160" width="18" height="70" fill="#7a2e2e" stroke="#a04545" stroke-width="2"/>
+     <path class="fx-ln v" d="M205 278 V330" marker-end="url(#mV)"/>
+     <text class="fx-sub" x="228" y="316">펌프</text>
+     <text class="fx-cap v" x="68" y="360">양쪽 모두 닫힘</text>
+    </g>
+    <g transform="translate(848,0)">
+     <rect class="fx-panel" x="10" y="10" width="390" height="380" rx="12"/>
+     <text class="fx-cap v" x="32" y="50">③ 웨이퍼 반출</text>
+     <rect x="120" y="120" width="170" height="150" rx="8" fill="#161a35" stroke="#6f63c9" stroke-width="2.5"/>
+     <ellipse class="fx-w" cx="205" cy="195" rx="52" ry="8"/>
+     <rect x="102" y="160" width="18" height="70" fill="#7a2e2e" stroke="#a04545" stroke-width="2"/>
+     <rect x="290" y="160" width="18" height="70" fill="#1c1a3a" stroke="#9b8cff" stroke-width="2"/>
+     <text class="fx-cap v" x="68" y="316">TM 열림 · ATM 닫힘</text>
+     <text class="fx-sub" x="68" y="344">0.01 Torr</text>
+    </g>
+    <g transform="translate(1272,0)">
+     <rect x="10" y="10" width="390" height="380" rx="12" fill="rgba(255,94,94,.07)" stroke="#7a3232" stroke-width="2"/>
+     <text class="fx-cap" x="32" y="50" fill="#ff8a8a">✕ 금지 — 동시 개방</text>
+     <rect x="120" y="120" width="170" height="150" rx="8" fill="#1d1114" stroke="#a04545" stroke-width="2.5"/>
+     <rect x="102" y="160" width="18" height="70" fill="#0d2a25" stroke="#2fe0c0" stroke-width="2"/>
+     <rect x="290" y="160" width="18" height="70" fill="#1c1a3a" stroke="#9b8cff" stroke-width="2"/>
+     <path class="fx-ln" d="M60 195 H340" stroke="#ff5e5e" stroke-width="4" stroke-dasharray="10 7"/>
+     <path class="fx-bad" d="M150 130 L268 260 M268 130 L150 260"/>
+     <text class="fx-sub" x="44" y="322" fill="#ffc4c4">공장 공기가 챔버까지 밀려 들어감</text>
+     <text class="fx-sub" x="44" y="350" fill="#ffc4c4">설비 전체를 며칠 세우는 사고</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:16px">
+   <div class="wt-col"><table class="wt-tbl">
+    <tr><th>밸브</th><th>열리는 조건</th></tr>
+    <tr><td><b>대기측 ATM</b></td><td>압력 ≥ 700 Torr · 진공측 닫힘</td></tr>
+    <tr><td><b>진공측 TM</b></td><td>압력 ≤ 1 Torr · 대기측 닫힘</td></tr>
+   </table></div>
+   <div class="wt-col"><div class="wt-note v" style="margin:0"><b>넣는 순서</b>
+    ① ATM 열기 → ② Place → ③ 로봇 빼기 → ④ ATM 닫기 → ⑤ Pump Down → ⑥ TM 열기.
+    <b>꺼낼 때는 정확히 역순</b>입니다.</div></div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 두 로봇 · 자기 커플링 ══ -->
+<section class="slide" id="s27" data-level="standard pro" data-here="tm">
+ <div class="wt-pad">
+  <div class="wt-eye v">11 · 두 로봇</div>
+  <h2 class="h-title">진공 로봇은 구동부가 밖에 있습니다</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.15">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 800 400">
+      <rect x="40" y="40" width="380" height="320" rx="10" fill="rgba(155,140,255,.06)" stroke="#3c3470" stroke-dasharray="6 7"/>
+      <text class="fx-cap v" x="58" y="72">진공 측 · 0.01 Torr</text>
+      <rect x="420" y="40" width="340" height="320" rx="10" fill="rgba(53,224,200,.05)" stroke="#1f4a48" stroke-dasharray="6 7"/>
+      <text class="fx-cap" x="440" y="72">대기 측 · 760 Torr</text>
+      <rect x="404" y="24" width="32" height="352" fill="#1b2b3a" stroke="#4a7ea6" stroke-width="2.5"/>
+      <text class="fx-sub" x="352" y="392">챔버 벽 (기밀)</text>
+      <circle cx="300" cy="200" r="62" fill="#1c2340" stroke="#8a7dff" stroke-width="3"/>
+      <text class="fx-sub" x="262" y="206" fill="#bcaeff">내측</text>
+      <text class="fx-sub" x="256" y="230" fill="#bcaeff">회전자</text>
+      <rect class="fx-arm v" x="300" y="189" width="120" height="22" rx="8" transform="translate(-160,-92) rotate(-28 300 200)"/>
+      <circle cx="540" cy="200" r="62" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+      <text class="fx-sub" x="506" y="206">외측</text><text class="fx-sub" x="502" y="230">자석</text>
+      <g stroke="#9b8cff" stroke-width="2.5" stroke-dasharray="6 6" opacity=".9">
+       <path d="M362 176 H478"/><path d="M362 200 H478"/><path d="M362 224 H478"/></g>
+      <text class="fx-cap v" x="366" y="150">자기력만 통과</text>
+      <rect x="614" y="160" width="110" height="80" rx="8" fill="#132433" stroke="#3a6b8c" stroke-width="2.5"/>
+      <text class="fx-sub" x="640" y="206">모터</text>
+      <path class="fx-ln" d="M614 200 H606" stroke-width="3"/>
+     </svg>
+    </div>
+    <div class="wt-figc">기름도 열도 진공 안으로 들이지 않는 구조</div>
+   </div>
+   <div class="wt-col">
+    <table class="wt-tbl">
+     <tr><th></th><th>대기 로봇</th><th>진공 로봇</th></tr>
+     <tr><td><b>환경</b></td><td>760 Torr</td><td>0.01 Torr 이하</td></tr>
+     <tr><td><b>윤활</b></td><td>일반 그리스</td><td>진공용 특수 윤활</td></tr>
+     <tr><td><b>발열</b></td><td>공기로 식음</td><td>전도로만 식음</td></tr>
+     <tr><td><b>구동부</b></td><td>실내 배치</td><td>자기 커플링</td></tr>
+     <tr><td><b>구간</b></td><td>FOUP ↔ 로드락</td><td>로드락 ↔ 챔버</td></tr>
+    </table>
+    <div class="wt-note v" style="margin-top:22px"><b>왜 나눴나</b> — 진공에서는 기름이 증발해 웨이퍼를 오염시키고,
+     대류가 없어 모터 열이 쌓입니다. 그래서 구동부를 밖에 두고 자석으로 힘만 전달합니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 센서 위치 맵 ══ -->
+<section class="slide" id="s28" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">12 · 감각기관</div>
+  <h2 class="h-title">센서는 장비의 어디에 붙어 있나</h2>
+  <div class="wt-lead">장비에는 눈이 없습니다. 아래 열 개의 신호가 켜지고 꺼지는 것만으로 모든 판단을 합니다.</div>
+  <div class="wt-body" style="gap:36px">
+   <div class="wt-col" style="flex:1.5">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 1000 430">
+      <rect class="fx-box" x="20" y="130" width="96" height="170" rx="6"/>
+      <g stroke="#274357" stroke-width="1.5"><path d="M30 176 H106 M30 216 H106 M30 256 H106"/></g>
+      <ellipse class="fx-w" cx="68" cy="168" rx="32" ry="5"/><ellipse class="fx-w" cx="68" cy="208" rx="32" ry="5"/>
+      <rect class="fx-box" x="130" y="130" width="40" height="170" rx="4"/>
+      <rect class="fx-box" x="192" y="60" width="300" height="310" rx="10"/>
+      <circle class="fx-box" cx="300" cy="126" r="40"/><circle class="fx-w" cx="300" cy="126" r="25"/>
+      <circle cx="322" cy="252" r="30" fill="#16283a" stroke="#4f8bb5" stroke-width="2.5"/>
+      <rect class="fx-arm" x="322" y="243" width="104" height="18" rx="7"/>
+      <ellipse class="fx-w" cx="446" cy="252" rx="26" ry="5"/>
+      <rect class="fx-box" x="524" y="186" width="130" height="110" rx="6" stroke="#6f63c9"/>
+      <rect x="508" y="216" width="16" height="50" fill="#7a2e2e"/><rect x="654" y="216" width="16" height="50" fill="#7a2e2e"/>
+      <rect class="fx-vac" x="694" y="60" width="286" height="310" rx="10"/>
+      <circle cx="820" cy="252" r="30" fill="#1c2340" stroke="#8a7dff" stroke-width="2.5"/>
+      <rect class="fx-arm v" x="820" y="243" width="104" height="18" rx="7"/>
+      <circle class="fx-vac" cx="880" cy="130" r="42"/>
+      <g font-family="ui-monospace,monospace" font-size="17" font-weight="700">
+       <g><circle cx="446" cy="228" r="14" fill="#35e0c8"/><text x="441" y="234" fill="#03231e">1</text></g>
+       <g><circle cx="150" cy="112" r="14" fill="#35e0c8"/><text x="145" y="118" fill="#03231e">2</text></g>
+       <g><circle cx="300" cy="296" r="14" fill="#35e0c8"/><text x="295" y="302" fill="#03231e">3</text></g>
+       <g><circle cx="378" cy="296" r="14" fill="#35e0c8"/><text x="373" y="302" fill="#03231e">4</text></g>
+       <g><circle cx="252" cy="222" r="14" fill="#35e0c8"/><text x="247" y="228" fill="#03231e">5</text></g>
+       <g><circle cx="322" cy="200" r="14" fill="#35e0c8"/><text x="317" y="206" fill="#03231e">6</text></g>
+       <g><circle cx="150" cy="318" r="14" fill="#35e0c8"/><text x="145" y="324" fill="#03231e">7</text></g>
+       <g><circle cx="590" cy="160" r="14" fill="#9b8cff"/><text x="585" y="166" fill="#140f2e">8</text></g>
+       <g><circle cx="590" cy="322" r="14" fill="#9b8cff"/><text x="585" y="328" fill="#140f2e">9</text></g>
+       <g><circle cx="820" cy="200" r="14" fill="#9b8cff"/><text x="812" y="206" fill="#140f2e">10</text></g>
+      </g>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col" style="flex:1">
+    <table class="wt-tbl" style="font-size:21px">
+     <tr><th>#</th><th>센서</th><th>무엇을 보는가</th></tr>
+     <tr><td><b>1</b></td><td>Wafer Presence</td><td>손 위에 웨이퍼가 있는가</td></tr>
+     <tr><td><b>2</b></td><td>Slot Mapping</td><td>어느 칸에 있는가</td></tr>
+     <tr><td><b>3</b></td><td>Home</td><td>기준 위치인가</td></tr>
+     <tr><td><b>4</b></td><td>Limit</td><td>축 한계를 넘었는가</td></tr>
+     <tr><td><b>5</b></td><td>Position</td><td>도착했는가</td></tr>
+     <tr><td><b>6</b></td><td>Encoder</td><td>몇 도 · 몇 mm인가</td></tr>
+     <tr><td><b>7</b></td><td>Door</td><td>문이 열렸는가</td></tr>
+     <tr><td><b>8</b></td><td>Pressure</td><td>압력이 얼마인가</td></tr>
+     <tr><td><b>9</b></td><td>Vacuum</td><td>목표 진공에 닿았는가</td></tr>
+     <tr><td><b>10</b></td><td>Collision</td><td>부딪혔는가</td></tr>
+    </table>
+   </div>
+  </div>
+  <div class="wt-note"><b>핵심</b> — 고장 진단은 결국 <b>어느 센서가 예상과 다른 값을 내는가</b>를 찾는 일입니다.</div>
+ </div>
+</section>
+
+<!-- ══ 인터록 판정 흐름 ══ -->
+<section class="slide" id="s29" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">13 · 안전</div>
+  <h2 class="h-title">인터록 — 막는 것이 임무입니다</h2>
+  <div class="wt-lead">인터록은 <b>조건이 맞지 않으면 명령을 실행하지 않는</b> 장치입니다. 버그가 아니라 설계입니다.</div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.3">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 940 400">
+      
+      <rect x="20" y="160" width="176" height="76" rx="10" fill="#16283a" stroke="#4f8bb5" stroke-width="2.5"/>
+      <text class="fx-lbl" x="52" y="196" fill="#dbe9f4">작업자 명령</text>
+      <text class="fx-sub" x="60" y="220">Extend · Pick …</text>
+      <path class="fx-ln" d="M200 198 H262" marker-end="url(#mA)"/>
+      <path d="M400 118 L520 198 L400 278 L280 198 Z" fill="#132433" stroke="#35e0c8" stroke-width="2.5"/>
+      <text class="fx-cap" x="400" y="188" text-anchor="middle">센서 조건</text>
+      <text class="fx-cap" x="400" y="216" text-anchor="middle">모두 만족?</text>
+      <path class="fx-ln" d="M524 198 H616" marker-end="url(#mA)"/>
+      <text class="fx-cap" x="548" y="182">YES</text>
+      <rect x="620" y="160" width="290" height="76" rx="10" fill="#0d2a25" stroke="#2fe0c0" stroke-width="2.5"/>
+      <text class="fx-lbl" x="654" y="196" fill="#8ff0dd">동작 실행</text>
+      <text class="fx-sub" x="654" y="220">축 이동 · 웨이퍼 취급</text>
+      <path class="fx-ln" d="M400 282 V336" stroke="#ff5e5e" marker-end="url(#mR)"/>
+      <text class="fx-cap" x="416" y="316" fill="#ff8a8a">NO</text>
+      <rect x="440" y="304" width="470" height="76" rx="10" fill="#1d1114" stroke="#a04545" stroke-width="2.5"/>
+      <text class="fx-lbl" x="472" y="340" fill="#ffabab">명령 거부 · 알람 발생</text>
+      <text class="fx-sub" x="472" y="364" fill="#c98a8a">ALM 코드 + 조건 문구를 로그에 기록</text>
+      <text class="fx-sub" x="20" y="76">인터록은 명령과 동작 사이에서 매번 검사한다</text>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <table class="wt-tbl">
+     <tr><th>종류</th><th>막는 상황</th></tr>
+     <tr><td><b>Door</b></td><td>문 닫힌 채 로봇 진입</td></tr>
+     <tr><td><b>Vacuum</b></td><td>압력 조건 미달인데 밸브 개방</td></tr>
+     <tr><td><b>Wafer Presence</b></td><td>없는 웨이퍼 집기 · 빈손으로 놓기</td></tr>
+     <tr><td><b>Position</b></td><td>Home 안 된 채 축 이동</td></tr>
+     <tr><td><b>Collision</b></td><td>암을 뻗은 채 회전</td></tr>
+    </table>
+    <div class="wt-note warn" style="margin-top:20px"><b>현장 감각</b> — 인터록을 자주 만나는 사람은 초보가 아니라
+     <b>장비를 시험해보는 사람</b>입니다. CH 13 실습 목표가 인터록 4종을 일부러 걸어보는 것입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ Error vs Timeout 곡선 ══ -->
+<section class="slide" id="s30" data-level="standard pro" data-here="lock">
+ <div class="wt-pad">
+  <div class="wt-eye">14 · 로그 읽기</div>
+  <h2 class="h-title">Error는 순서 문제, Timeout은 성능 문제</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.35">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 960 400">
+      <line x1="90" y1="330" x2="900" y2="330" stroke="#274357" stroke-width="2"/>
+      <line x1="90" y1="40" x2="90" y2="330" stroke="#274357" stroke-width="2"/>
+      <text class="fx-sub" x="820" y="360">시간 →</text>
+      <text class="fx-sub" x="14" y="60">760</text><text class="fx-sub" x="24" y="200">45</text>
+      <text class="fx-sub" x="8" y="298">0.01</text>
+      <text class="fx-sub" x="8" y="36">Torr</text>
+      <line x1="90" y1="290" x2="900" y2="290" stroke="#2c6d63" stroke-width="1.5" stroke-dasharray="7 6"/>
+      <text class="fx-cap" x="770" y="282">목표 진공선</text>
+      <path d="M90 56 C 200 62, 260 200, 340 262 S 440 288, 620 290 L 880 290"
+        fill="none" stroke="#9b8cff" stroke-width="3.5"/>
+      <text class="fx-cap v" x="640" y="322">정상 — 목표 도달 후 완료</text>
+      <path d="M90 56 C 190 70, 250 150, 320 186 S 470 200, 880 202"
+        fill="none" stroke="#ff5e5e" stroke-width="3.5" stroke-dasharray="9 6"/>
+      <text class="fx-sub" x="620" y="180" fill="#ffabab">고장 — 45 Torr 부근에서 정체</text>
+      <line x1="700" y1="40" x2="700" y2="330" stroke="#7a3232" stroke-width="2" stroke-dasharray="5 6"/>
+      <text class="fx-cap" x="712" y="64" fill="#ff8a8a">제한 시간</text>
+      <circle cx="700" cy="202" r="11" fill="#ff5e5e"/>
+      <text class="fx-cap" x="716" y="240" fill="#ff8a8a">ALM-701 Vacuum Timeout</text>
+     </svg>
+    </div>
+    <div class="wt-figc">같은 명령, 같은 절차 — 그런데 설비가 따라오지 못한다</div>
+   </div>
+   <div class="wt-col">
+    <table class="wt-tbl">
+     <tr><th>코드대</th><th>계열</th></tr>
+     <tr><td><b>ALM-1xx</b></td><td>준비 상태 — Initialize · Home 미완료</td></tr>
+     <tr><td><b>ALM-2xx</b></td><td>로봇 자세 — 전진 중 회전 · 전진 없이 Pick</td></tr>
+     <tr><td><b>ALM-3xx</b></td><td>문 · 밸브 — Door 닫힘 · 압력 미달</td></tr>
+     <tr><td><b>ALM-4xx</b></td><td>축 한계 — Z축 Limit 초과</td></tr>
+     <tr><td><b>ALM-5xx</b></td><td>웨이퍼 취급 — 빈 슬롯 Pick · 이중 Place</td></tr>
+     <tr><td><b>ALM-7xx</b></td><td>공정 설비 — Vacuum Timeout</td></tr>
+    </table>
+    <div class="wt-note warn" style="margin-top:18px"><b>대응 부서가 다릅니다</b> —
+     Error는 <b>사람이 순서를 틀린 것</b>, Timeout은 <b>설비가 못 따라간 것</b>.
+     펌프 성능 저하 · 누설 · 밸브 미개방이 후보입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 시퀀스 블록 ══ -->
+<section class="slide" id="s31" data-level="standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">15 · 자동화</div>
+  <h2 class="h-title">시퀀스 — 동작을 글로 적어 두는 것</h2>
+  <div class="wt-lead">사람이 누르던 순서를 그대로 목록으로 적으면 자동 운전이 됩니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1700 330">
+    
+    <g font-family="ui-monospace,monospace" font-size="21">
+     <g><rect x="10" y="60" width="176" height="66" rx="9" fill="#16283a" stroke="#4a7ea6" stroke-width="2"/>
+      <text x="46" y="100" fill="#cfe4f2">MOVE foup</text></g>
+     <path d="M190 93 H228" stroke="#4a7ea6" stroke-width="2.5" marker-end="url(#mB)"/>
+     <g><rect x="232" y="60" width="160" height="66" rx="9" fill="#16283a" stroke="#4a7ea6" stroke-width="2"/>
+      <text x="268" y="100" fill="#cfe4f2">EXTEND</text></g>
+     <path d="M396 93 H434" stroke="#4a7ea6" stroke-width="2.5" marker-end="url(#mB)"/>
+     <g><rect x="438" y="60" width="140" height="66" rx="9" fill="#16283a" stroke="#4a7ea6" stroke-width="2"/>
+      <text x="482" y="100" fill="#cfe4f2">PICK</text></g>
+     <path d="M582 93 H620" stroke="#4a7ea6" stroke-width="2.5" marker-end="url(#mB)"/>
+     <g><rect x="624" y="60" width="176" height="66" rx="9" fill="#16283a" stroke="#4a7ea6" stroke-width="2"/>
+      <text x="662" y="100" fill="#cfe4f2">RETRACT</text></g>
+     <path d="M804 93 H842" stroke="#4a7ea6" stroke-width="2.5" marker-end="url(#mB)"/>
+     <g><rect x="846" y="46" width="240" height="94" rx="9" fill="#132433" stroke="#35e0c8" stroke-width="2.5"/>
+      <text x="878" y="86" fill="#35e0c8">CHECK wafer</text>
+      <text x="878" y="118" font-size="17" fill="#5d829c">센서 조건 확인</text></g>
+     <path d="M1090 93 H1128" stroke="#35e0c8" stroke-width="2.5" marker-end="url(#mA)"/>
+     <text x="1092" y="72" font-size="17" fill="#35e0c8">OK</text>
+     <g><rect x="1132" y="60" width="230" height="66" rx="9" fill="#16283a" stroke="#4a7ea6" stroke-width="2"/>
+      <text x="1160" y="100" fill="#cfe4f2">MOVE aligner</text></g>
+     <path d="M1366 93 H1404" stroke="#4a7ea6" stroke-width="2.5" marker-end="url(#mB)"/>
+     <g><rect x="1408" y="60" width="150" height="66" rx="9" fill="#16283a" stroke="#4a7ea6" stroke-width="2"/>
+      <text x="1442" y="100" fill="#cfe4f2">…</text></g>
+     <path d="M966 144 V212" stroke="#ff5e5e" stroke-width="2.5" marker-end="url(#mR)"/>
+     <text x="982" y="186" font-size="17" fill="#ff8a8a">NG</text>
+     <g><rect x="806" y="216" width="330" height="72" rx="9" fill="#1d1114" stroke="#a04545" stroke-width="2.5"/>
+      <text x="838" y="252" fill="#ffabab" font-size="20">시퀀스 정지</text>
+      <text x="838" y="278" font-size="17" fill="#c98a8a">SEQ-002 · 조건 불만족</text></g>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:6px">
+   <div class="wt-col"><div class="wt-card"><h3>블록 여섯 종류면 충분</h3>
+    <p><b>MOVE</b> 향하기 · <b>EXTEND / RETRACT</b> 뻗고 빼기 · <b>PICK / PLACE</b> 집고 놓기 ·
+     <b>WAIT</b> 기다리기 · <b>CHECK</b> 조건 확인 · <b>PUMP / VENT</b> 압력 만들기</p></div></div>
+   <div class="wt-col"><div class="wt-note" style="margin:0"><b>실습</b> — 자동 시퀀스 탭에서
+    "예시 시퀀스 불러오기"를 누르면 26줄이 그대로 들어옵니다. 블록 하나를 지우고 다시 돌려
+    <b>어디서 멈추는지</b> 확인해 보세요.</div></div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 진단 6단계 ══ -->
+<section class="slide" id="s32" data-level="standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">16 · 진단</div>
+  <h2 class="h-title">고장은 여섯 칸으로 정리합니다</h2>
+  <div class="wt-lead">현장 엔지니어가 실제로 쓰는 순서입니다. 벗어나면 원인이 아니라 추측이 남습니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1700 300">
+    <g font-family="ui-monospace,monospace">
+     <path d="M40 200 H1660" stroke="#274357" stroke-width="2"/>
+     <g><circle cx="150" cy="200" r="34" fill="#35e0c8"/><text x="140" y="209" font-size="26" font-weight="800" fill="#03231e">1</text>
+      <text x="88" y="128" font-size="24" fill="#f2f9ff">Problem</text>
+      <text x="70" y="158" font-size="18" fill="#7fa3bd">관찰된 현상</text></g>
+     <g><circle cx="420" cy="200" r="34" fill="#35e0c8"/><text x="410" y="209" font-size="26" font-weight="800" fill="#03231e">2</text>
+      <text x="332" y="128" font-size="24" fill="#f2f9ff">Observed Sensor</text>
+      <text x="356" y="158" font-size="18" fill="#7fa3bd">어긋난 신호</text></g>
+     <g><circle cx="690" cy="200" r="34" fill="#35e0c8"/><text x="680" y="209" font-size="26" font-weight="800" fill="#03231e">3</text>
+      <text x="618" y="128" font-size="24" fill="#f2f9ff">Observed Log</text>
+      <text x="628" y="158" font-size="18" fill="#7fa3bd">알람 코드 · 시각</text></g>
+     <g><circle cx="960" cy="200" r="34" fill="#9b8cff"/><text x="950" y="209" font-size="26" font-weight="800" fill="#140f2e">4</text>
+      <text x="884" y="128" font-size="24" fill="#f2f9ff">Possible Cause</text>
+      <text x="908" y="158" font-size="18" fill="#7fa3bd">설명 가능한 원인</text></g>
+     <g><circle cx="1230" cy="200" r="34" fill="#9b8cff"/><text x="1220" y="209" font-size="26" font-weight="800" fill="#140f2e">5</text>
+      <text x="1136" y="128" font-size="24" fill="#f2f9ff">Corrective Action</text>
+      <text x="1194" y="158" font-size="18" fill="#7fa3bd">조치</text></g>
+     <g><circle cx="1500" cy="200" r="34" fill="#9b8cff"/><text x="1490" y="209" font-size="26" font-weight="800" fill="#140f2e">6</text>
+      <text x="1456" y="128" font-size="24" fill="#f2f9ff">Result</text>
+      <text x="1420" y="158" font-size="18" fill="#7fa3bd">재발 여부 확인</text></g>
+     <text x="150" y="266" font-size="19" fill="#35e0c8" text-anchor="middle">— 관찰 —</text>
+     <text x="690" y="266" font-size="19" fill="#35e0c8" text-anchor="middle">사실만 적는 구간</text>
+     <text x="1230" y="266" font-size="19" fill="#9b8cff" text-anchor="middle">판단과 조치 구간</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note warn"><b>흔한 함정</b> — 1번을 건너뛰고 4번부터 적는 것.
+   "펌프 고장인 것 같다"로 시작하면, 정작 밸브가 열려 있었다는 사실을 놓칩니다.</div>
+ </div>
+</section>
+
+<!-- ══ 시뮬레이터 화면 안내 ══ -->
+<section class="slide" id="s33" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">17 · 실습 준비</div>
+  <h2 class="h-title">시뮬레이터, 이렇게 씁니다</h2>
+  <div class="wt-lead">처음 여는 사람도 3분이면 웨이퍼 한 장을 옮길 수 있습니다.</div>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.45">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 1020 480">
+      <rect x="14" y="14" width="992" height="452" rx="12" fill="#0d1a24" stroke="#274357" stroke-width="2.5"/>
+      <rect x="14" y="14" width="992" height="52" rx="12" fill="#101d29"/>
+      <g><rect x="118" y="28" width="34" height="26" rx="4" fill="#35e0c8"/>
+       <rect x="158" y="28" width="34" height="26" rx="4" fill="#1a2c3c" stroke="#25405a"/>
+       <rect x="198" y="28" width="34" height="26" rx="4" fill="#1a2c3c" stroke="#25405a"/>
+       <rect x="238" y="28" width="34" height="26" rx="4" fill="#1a2c3c" stroke="#25405a"/>
+       <rect x="278" y="28" width="34" height="26" rx="4" fill="#1a2c3c" stroke="#25405a"/></g>
+      <rect x="908" y="28" width="82" height="26" rx="4" fill="#3a1414" stroke="#6b2020"/>
+      <rect x="30" y="80" width="640" height="66" rx="8" fill="#101d29" stroke="#1f3446"/>
+      <rect x="30" y="160" width="640" height="240" rx="8" fill="#0b1620" stroke="#1f3446"/>
+      <g opacity=".85">
+       <rect x="58" y="230" width="60" height="96" rx="4" fill="#132433" stroke="#3a6b8c"/>
+       <rect x="140" y="196" width="180" height="168" rx="6" fill="#132433" stroke="#3a6b8c"/>
+       <circle cx="200" cy="236" r="22" fill="#101f2c" stroke="#3a6b8c"/>
+       <circle cx="216" cy="300" r="17" fill="#16283a" stroke="#4f8bb5"/>
+       <rect x="216" y="294" width="62" height="12" rx="5" fill="#2c4b66" stroke="#4a7ea6"/>
+       <rect x="346" y="252" width="82" height="66" rx="5" fill="#132433" stroke="#6f63c9"/>
+       <rect x="452" y="196" width="186" height="168" rx="6" fill="#161a35" stroke="#6f63c9"/>
+       <circle cx="546" cy="300" r="17" fill="#1c2340" stroke="#8a7dff"/></g>
+      <rect x="30" y="414" width="640" height="38" rx="6" fill="#0a131b" stroke="#1f3446"/>
+      <rect x="686" y="80" width="304" height="372" rx="8" fill="#101d29" stroke="#1f3446"/>
+      <g><rect x="700" y="92" width="60" height="26" rx="4" fill="rgba(47,224,192,.12)" stroke="#2fe0c0"/>
+       <rect x="766" y="92" width="70" height="26" rx="4" fill="#14222f" stroke="#1f3446"/>
+       <rect x="842" y="92" width="70" height="26" rx="4" fill="#14222f" stroke="#1f3446"/></g>
+      <rect x="700" y="132" width="276" height="60" rx="6" fill="#14222f" stroke="#25405a"/>
+      <rect x="700" y="204" width="276" height="52" rx="6" fill="rgba(74,168,255,.12)" stroke="#2f5f8a"/>
+      <g fill="#1a2c3c" stroke="#25405a">
+       <rect x="700" y="272" width="88" height="36" rx="5"/><rect x="794" y="272" width="88" height="36" rx="5"/>
+       <rect x="888" y="272" width="88" height="36" rx="5"/>
+       <rect x="700" y="318" width="88" height="36" rx="5"/><rect x="794" y="318" width="88" height="36" rx="5"/>
+       <rect x="888" y="318" width="88" height="36" rx="5"/></g>
+      <g font-family="ui-monospace,monospace" font-size="17" font-weight="700">
+       <g><circle cx="100" cy="41" r="15" fill="#35e0c8"/><text x="94" y="47" fill="#03231e">1</text></g>
+       <g><circle cx="46" cy="180" r="15" fill="#35e0c8"/><text x="40" y="186" fill="#03231e">2</text></g>
+       <g><circle cx="700" cy="60" r="15" fill="#35e0c8"/><text x="694" y="66" fill="#03231e">3</text></g>
+       <g><circle cx="668" cy="230" r="15" fill="#35e0c8"/><text x="662" y="236" fill="#03231e">4</text></g>
+       <g><circle cx="668" cy="296" r="15" fill="#35e0c8"/><text x="662" y="302" fill="#03231e">5</text></g>
+       <g><circle cx="46" cy="433" r="15" fill="#35e0c8"/><text x="40" y="439" fill="#03231e">6</text></g></g>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>챕터 선택</b> 고른 챕터에 필요 없는 장치는 흐려지고 탭은 잠깁니다. 처음이면 01부터.</div></div>
+    <div class="wt-num"><i>2</i><div><b>장비 도면</b> 장치를 클릭하면 그게 무엇인지 설명이 뜹니다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>탭</b> 학습 · 수동조작 · 센서 · 시퀀스 · 알람 로그 · 고장 진단.</div></div>
+    <div class="wt-num"><i>4</i><div><b>지금 할 일</b> 눌러야 할 버튼이 한 줄씩 안내되고, 끝나면 다음 줄로 넘어갑니다.</div></div>
+    <div class="wt-num"><i>5</i><div><b>조작 버튼</b> Initialize · Home · 회전 · Extend · Pick · Place.</div></div>
+    <div class="wt-num"><i>6</i><div><b>상태바</b> 지금 어느 축이 어디 있고 압력이 얼마인지 항상 표시됩니다.</div></div>
+    <div class="wt-note"><b>망가뜨려도 됩니다</b> — 챕터 버튼을 다시 누르면 초기 상태로 돌아갑니다.
+     일부러 틀려보는 것이 가장 빠른 학습법입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 혼자 하는 4단계 ══ -->
+<section class="slide" id="s34" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">18 · 혼자 하기</div>
+  <h2 class="h-title">혼자 해보는 네 단계 코스</h2>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1700 250">
+    <g font-family="ui-monospace,monospace">
+     <rect x="20" y="60" width="380" height="140" rx="12" fill="rgba(53,224,200,.07)" stroke="#2c6d63" stroke-width="2"/>
+     <circle cx="70" cy="104" r="22" fill="#35e0c8"/><text x="62" y="112" font-size="21" font-weight="800" fill="#03231e">1</text>
+     <text x="106" y="112" font-size="24" fill="#f2f9ff">손에 익히기</text>
+     <text x="46" y="152" font-size="19" fill="#7fa3bd">CH 3 · Initialize → Home</text>
+     <text x="46" y="180" font-size="19" fill="#7fa3bd">회전 · 전진 · 후진 · 상하</text>
+     <path d="M408 130 H432" stroke="#35e0c8" stroke-width="3" marker-end="url(#mA)"/>
+     <rect x="440" y="60" width="380" height="140" rx="12" fill="rgba(53,224,200,.07)" stroke="#2c6d63" stroke-width="2"/>
+     <circle cx="490" cy="104" r="22" fill="#35e0c8"/><text x="482" y="112" font-size="21" font-weight="800" fill="#03231e">2</text>
+     <text x="526" y="112" font-size="24" fill="#f2f9ff">한 장 옮기기</text>
+     <text x="466" y="152" font-size="19" fill="#7fa3bd">CH 5 · FOUP → 정렬기</text>
+     <text x="466" y="180" font-size="19" fill="#7fa3bd">인터록 두세 번은 반드시 만남</text>
+     <path d="M828 130 H852" stroke="#9b8cff" stroke-width="3" marker-end="url(#mV)"/>
+     <rect x="860" y="60" width="380" height="140" rx="12" fill="rgba(155,140,255,.08)" stroke="#4d3f8c" stroke-width="2"/>
+     <circle cx="910" cy="104" r="22" fill="#9b8cff"/><text x="902" y="112" font-size="21" font-weight="800" fill="#140f2e">3</text>
+     <text x="946" y="112" font-size="24" fill="#f2f9ff">진공 넘어가기</text>
+     <text x="886" y="152" font-size="19" fill="#7fa3bd">CH 10~11 · Pump Down</text>
+     <text x="886" y="180" font-size="19" fill="#7fa3bd">밸브 순서가 관건</text>
+     <path d="M1248 130 H1272" stroke="#9b8cff" stroke-width="3" marker-end="url(#mV)"/>
+     <rect x="1280" y="60" width="390" height="140" rx="12" fill="rgba(155,140,255,.08)" stroke="#4d3f8c" stroke-width="2"/>
+     <circle cx="1330" cy="104" r="22" fill="#9b8cff"/><text x="1322" y="112" font-size="21" font-weight="800" fill="#140f2e">4</text>
+     <text x="1366" y="112" font-size="24" fill="#f2f9ff">자동으로 돌리기</text>
+     <text x="1306" y="152" font-size="19" fill="#7fa3bd">CH 12 · 시퀀스 실행</text>
+     <text x="1306" y="180" font-size="19" fill="#7fa3bd">블록을 빼서 멈추는 지점 확인</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-body" style="flex:none;margin-top:10px">
+   <div class="wt-col"><div class="wt-card"><h3>① 손에 익히기 · ② 한 장 옮기기</h3>
+    <p>버튼을 하나씩 누르며 팔이 어떻게 움직이는지만 보면 됩니다.
+     그다음 FOUP 1번 칸의 웨이퍼를 정렬기까지 옮깁니다.</p></div></div>
+   <div class="wt-col"><div class="wt-card v"><h3>③ 진공 넘어가기 · ④ 자동으로 돌리기</h3>
+    <p>Load Lock에 넣고 배기해 챔버까지 보낸 뒤, 시퀀스로 같은 일을 자동화합니다.
+     여기까지 하면 이 책은 끝난 겁니다.</p></div></div>
+  </div>
+  <div class="wt-note"><b>막혔을 때</b> — 알람 로그를 위에서부터 읽고, 센서 모니터에서 꺼진 신호를 찾으세요.
+   이 둘로 설명되지 않는 고장은 이 시뮬레이터에 없습니다.</div>
+ </div>
+</section>
+
+<!-- ══ 실무 ══ -->
+<section class="slide" id="s35" data-level="pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye v">19 · 실무</div>
+  <h2 class="h-title">현장에서는 여기까지 봅니다</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>Teaching · 위치 좌표 잡기</h3>
+     <p>로봇이 각 스테이션에서 멈출 정확한 좌표를 사람이 직접 잡아 저장하는 작업입니다.
+      이 값이 틀어지면 Position Error가 반복됩니다. 최근 장비는 센서로 자동 보정(Auto-teach)합니다.
+      <b>조그 조작과 검증 절차는 실무 수준에서 자세히 다룹니다.</b></p></div>
+    <div class="wt-card"><h3>파티클과 진공 부품</h3>
+     <p>진공 로봇의 마모 가루는 곧바로 웨이퍼 오염입니다.
+      정기적으로 파티클 카운트를 측정하고, 규격을 넘으면 부품을 교체합니다.</p></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card v"><h3>Throughput — 시간당 몇 장</h3>
+     <p>이송 경로가 겹치지 않게 순서를 짜면 처리량이 올라갑니다.
+      챔버 두 개를 번갈아 쓰거나, 로봇 손을 두 개(Dual Arm) 달아 넣고 빼기를 한 번에 합니다.</p></div>
+    <div class="wt-card v"><h3>로그가 곧 자산</h3>
+     <p>알람 이력을 모으면 어느 부품이 언제쯤 고장 날지 예측할 수 있습니다.
+      Timeout이 조금씩 길어지는 추세가 보이면 펌프 교체 시점이 다가온 것입니다.</p></div>
+   </div>
+  </div>
+  <div class="wt-note v"><b>공통점</b> — 넷 다 <b>기록</b>에서 출발합니다. 좌표값, 파티클 수치, 처리 시간, 알람 이력.
+   측정하지 않은 것은 관리할 수 없습니다.</div>
+ </div>
+</section>
+
+<!-- ══ 정리 ══ -->
+<section class="slide" id="s36" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">20 · 정리</div>
+  <h2 class="h-title">이 책에서 남길 것</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>경로는 하나다</b> FOUP → Load Port → EFEM → 정렬기 → Load Lock → 진공 로봇 → 챔버.</div></div>
+    <div class="wt-num"><i>2</i><div><b>축은 셋뿐이다</b> R 전진, θ 회전, Z 상하. 뻗고 나서 집고, 빼고 나서 돈다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>센서가 전부다</b> 장비는 센서 신호로만 상황을 안다. 진단은 어긋난 신호 찾기다.</div></div>
+    <div class="wt-num"><i>4</i><div><b>막히는 것이 정상이다</b> 인터록은 고장이 아니라 안전 설계다.</div></div>
+   </div>
+   <div class="wt-col" style="flex:1.05">
+    <div class="wt-card"><h3>스스로 확인해 보세요</h3>
+     <p>① 암을 뻗은 채 회전하면 왜 안 되는가?<br/>
+      ② Door Sensor가 OFF인데 Extend를 누르면 무슨 일이 생기는가?<br/>
+      ③ 대기압에서 진공측 밸브를 열 수 없는 이유는?<br/>
+      ④ Pick을 눌렀는데 Wafer Presence 알람이 났다. 무엇부터 확인하는가?<br/>
+      ⑤ Error와 Timeout은 어떻게 다른가?</p></div>
+    <div class="wt-note"><b>답이 막히면</b> 시뮬레이터에서 그 상황을 직접 만들어 보세요. 알람 메시지가 곧 답입니다.</div>
+    <div class="wt-note warn" style="margin-top:14px"><b>더 볼 것이 있다면</b> —
+     티칭 · End Effector 선택 · 매핑 오검출 판정 · 처리량 설계는 <b>실무 수준</b>에서 이어집니다.
+     수준을 실무로 바꾸면 슬라이드가 늘어납니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+</div></div>
+
+<script>
+/* 시그니처: 미니 경로 지도 — data-here 값으로 슬라이드마다 현재 구간 표시.
+   deck-base.js 유무와 무관하게 동작하는 자체 스크립트. */
+(function(){
+  var NODES=[['foup','FOUP',0],['port','PORT',0],['efem','EFEM',0],['align','ALIGN',0],
+             ['lock','LOCK',0],['tm','TM',1],['pm','PM',1]];
+  document.querySelectorAll('.slide[data-here]').forEach(function(sl){
+    var here=sl.getAttribute('data-here'), pad=sl.querySelector('.wt-pad');
+    if(!pad) return;
+    var wrap=document.createElement('div'); wrap.className='wt-map';
+    NODES.forEach(function(n,i){
+      if(i) wrap.insertAdjacentHTML('beforeend','<div class="b"></div>');
+      var on=(here==='all'||here===n[0])?' on':'';
+      wrap.insertAdjacentHTML('beforeend',
+        '<div class="n'+(n[2]?' vac':'')+on+'"><div class="d"></div><span>'+n[1]+'</span></div>');
+    });
+    pad.appendChild(wrap);
+  });
+})();
+</script>
+
+<script src="deck-base.js?v=8" onerror="window.__noDeckBase=1"></script>
+<script>
+/* deck-base.js 가 없을 때(레포 밖 단독 열람)만 동작하는 최소 폴백.
+   서고 레포에서는 onerror 가 발생하지 않으므로 실행되지 않는다. */
+(function(){
+  if(!window.__noDeckBase) return;
+  var stage=document.getElementById('stage'),
+      all=[].slice.call(stage.querySelectorAll('.slide')),
+      lv='standard', list=[], i=0;
+  function build(){ list=all.filter(function(s){return s.dataset.level.split(' ').indexOf(lv)>=0;});
+    all.forEach(function(s){s.classList.remove('on');}); i=Math.min(Math.max(i,0),list.length-1); show(); }
+  function show(){ list.forEach(function(s,k){s.classList.toggle('on',k===i);});
+    document.getElementById('pos').textContent=(i+1)+' / '+list.length;
+    var h=list[i].querySelector('.h-title');
+    document.getElementById('ttl').textContent=h?h.textContent:''; }
+  function fit(){ stage.style.transform='scale('+Math.min(innerWidth/1920,innerHeight/1080)+')'; }
+  var nav=document.createElement('div'); nav.id='fbnav';
+  nav.innerHTML='<button data-d="-1">◀</button><span id="pos"></span><button data-d="1">▶</button>'+
+    '<span id="ttl" style="max-width:320px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>'+
+    ['intro','standard','pro'].map(function(t){return '<button data-l="'+t+'">'+t+'</button>';}).join('');
+  document.body.appendChild(nav);
+  nav.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.d){ i=Math.max(0,Math.min(list.length-1,i+ +b.dataset.d)); show(); }
+    if(b.dataset.l){ lv=b.dataset.l;
+      [].forEach.call(nav.querySelectorAll('[data-l]'),function(x){x.classList.toggle('on',x.dataset.l===lv);});
+      build(); } });
+  addEventListener('keydown',function(e){ if(e.key==='ArrowRight'||e.key===' '){i=Math.min(list.length-1,i+1);show();}
+    if(e.key==='ArrowLeft'){i=Math.max(0,i-1);show();} });
+  addEventListener('resize',fit);
+  nav.querySelector('[data-l="standard"]').classList.add('on');
+  build(); fit();
+})();
+</script>
+</body></html>

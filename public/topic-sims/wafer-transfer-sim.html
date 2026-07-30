@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>웨이퍼 이송장치 시뮬레이터 · 로봇및센서실습</title>
+<style>
+:root{
+  --bg:#0b141c; --bg2:#101d28; --panel:#14222f; --panel2:#1a2c3c;
+  --line:#25405a; --line2:#1a2f42;
+  --tx:#d7e6f2; --tx2:#7e9bb3; --tx3:#4d6c85;
+  --ok:#2fe0c0; --run:#4aa8ff; --warn:#ffb340; --bad:#ff5e5e;
+  --wafer:#b9cede; --vac:#9b8cff; --atm:#3fd0e6;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:
+    radial-gradient(1200px 600px at 20% -10%, #16293a 0%, transparent 60%),
+    var(--bg);
+  color:var(--tx); font-family:var(--sans); font-size:14px; overflow:hidden;
+}
+button{font-family:inherit;color:inherit;cursor:pointer;border:0;background:none}
+button:focus-visible,select:focus-visible{outline:2px solid var(--ok);outline-offset:2px}
+
+/* ── 헤더 ─────────────────────────── */
+#top{
+  height:52px;display:flex;align-items:center;gap:14px;padding:0 16px;
+  border-bottom:1px solid var(--line2); background:rgba(9,17,24,.9);
+}
+#brand{font-family:var(--mono);font-size:12px;letter-spacing:.16em;color:var(--tx3)}
+#brand b{color:var(--ok);font-weight:600}
+#weekbar{display:flex;gap:3px;overflow-x:auto;flex:1;padding:2px}
+#weekbar::-webkit-scrollbar{height:0}
+.wk{
+  min-width:34px;height:30px;border-radius:4px;background:var(--panel);
+  border:1px solid var(--line2); font-family:var(--mono);font-size:12px;color:var(--tx2);
+  transition:.12s;
+}
+.wk:hover{border-color:var(--line);color:var(--tx)}
+.wk.on{background:var(--ok);color:#052b25;border-color:var(--ok);font-weight:700}
+.wk.rev{border-color:#4a5c3a;color:#b9d09a}
+.wk.rev.on{background:#9fd06a;color:#16250a;border-color:#9fd06a}
+#estop{
+  padding:0 14px;height:32px;border-radius:4px;background:#3a1414;color:#ff8a8a;
+  border:1px solid #6b2020;font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+}
+#estop.on{background:var(--bad);color:#fff;animation:blink .6s infinite}
+@keyframes blink{50%{opacity:.45}}
+
+/* ── 본체 ─────────────────────────── */
+#main{display:flex;height:calc(100vh - 52px)}
+#left{flex:1;min-width:0;display:flex;flex-direction:column}
+#right{width:396px;border-left:1px solid var(--line2);display:flex;flex-direction:column;background:var(--bg2)}
+
+/* 학습 헤더 */
+#lesson{padding:12px 18px 10px;border-bottom:1px solid var(--line2)}
+#lsTag{font-family:var(--mono);font-size:11px;color:var(--ok);letter-spacing:.14em}
+#lsTitle{font-size:19px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+#lsGoal{color:var(--tx2);font-size:13px;margin-top:4px;line-height:1.5}
+
+/* 도면 */
+#stagewrap{flex:1;position:relative;min-height:0;padding:6px 10px 0}
+svg#fab{width:100%;height:100%;display:block}
+.chm{fill:#101f2c;stroke:var(--line);stroke-width:1.5}
+.chm.dim{opacity:.26}
+.lbl{font-family:var(--mono);font-size:11px;fill:var(--tx3);letter-spacing:.08em}
+.lbl2{font-family:var(--mono);font-size:9px;fill:#3d5f7a}
+.hot{cursor:pointer}
+.hot:hover .chm{stroke:var(--ok)}
+.wf{fill:var(--wafer);stroke:#e8f4ff;stroke-width:1}
+.notch{fill:#0b141c}
+.led{stroke:#0b141c;stroke-width:1}
+.arm{fill:#2c4b66;stroke:#4a7ea6;stroke-width:1.5}
+.eff{fill:#3b6a8f;stroke:#7fc4ea;stroke-width:1.5}
+.flash{animation:fl .35s 3}
+@keyframes fl{0%,100%{stroke:var(--bad);stroke-width:4}50%{stroke:#ff9f9f;stroke-width:1}}
+
+/* 상태바 */
+#status{
+  height:30px;display:flex;align-items:center;gap:0;border-top:1px solid var(--line2);
+  font-family:var(--mono);font-size:11px;background:#0a131b;
+}
+#status div{padding:0 12px;border-right:1px solid var(--line2);color:var(--tx3);white-space:nowrap}
+#status b{color:var(--tx);font-weight:500}
+#toast{
+  position:absolute;left:50%;bottom:16px;transform:translateX(-50%);
+  padding:9px 16px;border-radius:5px;font-family:var(--mono);font-size:12px;
+  background:#2a1010;color:#ffb0b0;border:1px solid #7a2a2a;opacity:0;
+  transition:.2s;pointer-events:none;max-width:80%;
+}
+#toast.show{opacity:1}
+#toast.ok{background:#0d2a25;color:#8ff0dd;border-color:#1f6b5c}
+
+/* 탭 */
+#tabs{display:flex;border-bottom:1px solid var(--line2);background:#0d1a24;flex-wrap:wrap}
+.tb{
+  padding:9px 11px;font-size:12px;color:var(--tx3);border-bottom:2px solid transparent;
+}
+.tb:hover{color:var(--tx)}
+.tb.on{color:var(--ok);border-bottom-color:var(--ok);background:rgba(47,224,192,.06)}
+.tb[disabled]{opacity:.25;cursor:not-allowed}
+#pane{flex:1;overflow-y:auto;padding:14px}
+#pane::-webkit-scrollbar{width:8px}
+#pane::-webkit-scrollbar-thumb{background:#1f3446;border-radius:4px}
+.hide{display:none!important}
+
+h4.sec{
+  font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--tx3);
+  margin:16px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line2);
+}
+h4.sec:first-child{margin-top:0}
+.grid{display:grid;gap:6px}
+.g2{grid-template-columns:1fr 1fr}
+.g3{grid-template-columns:1fr 1fr 1fr}
+.g4{grid-template-columns:repeat(4,1fr)}
+.btn{
+  padding:9px 6px;border-radius:5px;background:var(--panel);border:1px solid var(--line2);
+  font-size:12px;color:var(--tx);text-align:center;transition:.1s;
+}
+.btn:hover:not([disabled]){background:var(--panel2);border-color:var(--line)}
+.btn:active:not([disabled]){transform:translateY(1px)}
+.btn[disabled]{opacity:.3;cursor:not-allowed}
+.btn.k{font-family:var(--mono);font-size:11px}
+.btn.on{background:rgba(47,224,192,.16);border-color:var(--ok);color:var(--ok)}
+.btn.hot{border-color:#6b4a20;color:var(--warn)}
+.btn.danger{border-color:#6b2626;color:#ff9a9a}
+.seg{display:flex;gap:0;border:1px solid var(--line2);border-radius:5px;overflow:hidden}
+.seg button{flex:1;padding:8px;font-size:12px;background:var(--panel);color:var(--tx2)}
+.seg button.on{background:var(--ok);color:#052b25;font-weight:700}
+
+.row{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:4px;background:var(--panel);margin-bottom:4px;font-size:12px}
+.row .v{font-family:var(--mono);font-size:11px}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:7px;vertical-align:middle}
+.hint{font-size:11px;color:var(--tx3);line-height:1.6;margin-top:8px}
+.hint b{color:var(--tx2);font-weight:600}
+
+/* 미션 */
+.ms{display:flex;gap:9px;padding:8px 9px;border-radius:5px;background:var(--panel);margin-bottom:5px;font-size:12px;line-height:1.45;align-items:flex-start}
+.ms .cb{width:16px;height:16px;border-radius:3px;border:1px solid var(--line);flex:none;margin-top:1px;font-family:var(--mono);font-size:11px;text-align:center;line-height:14px;color:transparent}
+.ms.done{background:rgba(47,224,192,.08)}
+.ms.done .cb{background:var(--ok);border-color:var(--ok);color:#052b25}
+.ms.done span{color:var(--tx2);text-decoration:line-through}
+#msBar{height:3px;background:var(--line2);border-radius:2px;overflow:hidden;margin-bottom:10px}
+#msBar i{display:block;height:100%;background:var(--ok);width:0;transition:.3s}
+
+/* 시퀀스 */
+#seqList{min-height:80px;border:1px dashed var(--line2);border-radius:6px;padding:6px;margin-bottom:8px}
+.sq{display:flex;align-items:center;gap:7px;padding:5px 7px;border-radius:4px;background:var(--panel);margin-bottom:3px;font-family:var(--mono);font-size:11px}
+.sq .n{color:var(--tx3);width:18px}
+.sq .x{margin-left:auto;color:var(--tx3);padding:0 4px}
+.sq .x:hover{color:var(--bad)}
+.sq.cur{background:rgba(74,168,255,.18);border:1px solid var(--run)}
+.sq.ok{color:var(--ok)}
+.sq.err{background:rgba(255,94,94,.14);color:#ff9a9a}
+.empty{color:var(--tx3);font-size:11px;text-align:center;padding:16px;font-family:var(--mono)}
+
+/* 로그 */
+#log{font-family:var(--mono);font-size:11px;line-height:1.65}
+.lg{padding:5px 8px;border-left:2px solid var(--line);margin-bottom:3px;background:#0f1c26;border-radius:0 4px 4px 0}
+.lg.E{border-left-color:var(--bad);color:#ffabab;background:#1d1114}
+.lg.W{border-left-color:var(--warn);color:#ffd49a}
+.lg.I{border-left-color:var(--run);color:#9fcdf5}
+.lg.S{border-left-color:var(--ok);color:#8ff0dd}
+.lg .t{color:var(--tx3);margin-right:7px}
+
+textarea,input,select{
+  width:100%;background:var(--panel);border:1px solid var(--line2);border-radius:4px;
+  color:var(--tx);padding:7px 9px;font-family:var(--mono);font-size:11px;resize:vertical;
+}
+label.f{display:block;font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.1em;margin:9px 0 3px}
+table.tb2{width:100%;border-collapse:collapse;font-size:11px}
+.tb2 th,.tb2 td{text-align:left;padding:6px 7px;border-bottom:1px solid var(--line2);vertical-align:top}
+.tb2 th{font-family:var(--mono);font-size:10px;color:var(--tx3);letter-spacing:.1em;font-weight:400}
+
+.why{font-size:12.5px;line-height:1.75;color:#a9c4d8;background:var(--panel);border-left:3px solid var(--ok);
+  border-radius:0 6px 6px 0;padding:11px 14px;margin-bottom:2px}
+.nowb{background:rgba(74,168,255,.12);border:1px solid #2f5f8a;border-radius:7px;padding:11px 13px;margin-bottom:10px}
+.nowb .nl{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:#78b4e8;margin-bottom:5px}
+.nowb b{display:block;font-size:13px;color:#eaf5ff;line-height:1.5;font-weight:600}
+.nowb em{display:block;font-style:normal;font-size:12px;line-height:1.65;color:#9fc4de;margin-top:7px;
+  padding-top:7px;border-top:1px dashed #2f5f8a}
+.nowb.ok{background:rgba(47,224,192,.1);border-color:#1f6b5c;color:#9ff0e0;font-size:12.5px;line-height:1.6}
+.ms.at{background:rgba(74,168,255,.1);border:1px solid #2f5f8a}
+.qz{background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:11px 12px;margin-bottom:8px}
+.qq{font-size:12.5px;line-height:1.55;color:#eaf5ff;margin-bottom:9px;font-weight:600}
+.qa{display:block;width:100%;text-align:left;padding:8px 11px;border-radius:5px;background:var(--panel2);
+  border:1px solid var(--line2);font-size:12px;color:var(--tx);margin-bottom:4px;transition:.12s}
+.qa:hover{border-color:var(--line)}
+.qa.ok{background:rgba(47,224,192,.16);border-color:var(--ok);color:var(--ok)}
+.qa.no{background:rgba(255,94,94,.14);border-color:#7a3232;color:#ff9a9a}
+.qe{font-size:11.5px;line-height:1.65;color:var(--tx2);margin-top:7px;padding-top:7px;border-top:1px solid var(--line2)}
+
+.drun{background:rgba(74,168,255,.12);border:1px solid #2f5f8a;border-radius:8px;padding:12px;margin-bottom:12px}
+.drun .dl{font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:#78b4e8;margin-bottom:8px}
+.dtg{display:flex;align-items:baseline;gap:10px;margin-bottom:5px}
+.dtg span{font-size:19px;font-weight:700;color:#eaf5ff}
+.dtg b{font-family:var(--mono);font-size:17px;color:var(--ok)}
+.dsub{font-size:11px;color:var(--tx3);line-height:1.6;margin-bottom:3px}
+.dstat{display:flex;gap:14px;margin-top:9px;padding-top:8px;border-top:1px dashed #2f5f8a;
+  font-size:11px;color:var(--tx3);font-family:var(--mono)}
+.dstat b{color:#eaf5ff;font-weight:600}
+.chip{display:inline-block;font-family:var(--mono);font-size:10px;padding:3px 7px;border-radius:4px;
+  background:var(--panel);border:1px solid var(--line2);color:var(--tx3);margin-right:4px}
+.chip.on{background:rgba(47,224,192,.16);border-color:var(--ok);color:var(--ok)}
+.dcard{background:var(--panel);border:1px solid var(--line2);border-radius:7px;padding:11px 12px;margin-bottom:7px}
+.dcard.done{border-color:#1f6b5c;background:rgba(47,224,192,.06)}
+.dcard .dt{font-size:13px;font-weight:700;color:#eaf5ff;margin-bottom:5px}
+.dcard .ck{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;color:var(--ok);margin-left:7px}
+.dcard .dd{font-size:11.5px;line-height:1.6;color:var(--tx2)}
+.dcard .drec{font-family:var(--mono);font-size:10.5px;color:var(--ok);margin-top:5px}
+.dfail{background:rgba(255,94,94,.13);border:1px solid #7a3232;border-radius:7px;padding:10px 12px;
+  font-size:12px;color:#ffabab;margin-bottom:10px;line-height:1.5}
+.dok{background:rgba(47,224,192,.11);border:1px solid #1f6b5c;border-radius:7px;padding:10px 12px;
+  font-size:12px;color:#8ff0dd;margin-bottom:10px;line-height:1.5}
+
+#bookbtn{padding:0 13px;height:32px;border-radius:4px;background:var(--panel);color:var(--tx2);
+  border:1px solid var(--line);font-size:12px;white-space:nowrap;transition:.12s}
+#bookbtn:hover{background:var(--panel2);color:var(--ok);border-color:var(--ok)}
+#bookwrap{position:fixed;inset:0;z-index:60;background:#070f16;display:flex;flex-direction:column}
+#bookbar{height:44px;display:flex;align-items:center;gap:12px;padding:0 14px;
+  border-bottom:1px solid var(--line2);background:#0b141c;flex:none}
+#bookbar .t{font-size:13px;color:var(--tx);font-weight:600}
+#bookbar .s{font-family:var(--mono);font-size:11px;color:var(--tx3);letter-spacing:.1em}
+#bookbar .sp{flex:1}
+#bookbar button{padding:6px 13px;border-radius:4px;background:var(--panel);border:1px solid var(--line2);
+  font-size:12px;color:var(--tx2)}
+#bookbar button:hover{color:var(--tx);border-color:var(--line)}
+#book{flex:1;width:100%;border:0;background:#0a141c}
+#bookerr{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;
+  color:var(--tx3);font-size:13px;line-height:1.9;padding:40px}
+@media(max-width:1100px){#right{width:340px}}
+</style>
+</head>
+<body>
+
+<div id="top">
+  <div id="brand">WAFER TRANSFER <b>SIM</b></div>
+  <div id="weekbar"></div>
+  <button id="bookbtn">📖 교재</button>
+  <button id="estop">E-STOP</button>
+</div>
+
+<div id="main">
+  <div id="left">
+    <div id="lesson">
+      <div id="lsTag"></div>
+      <div id="lsTitle"></div>
+      <div id="lsGoal"></div>
+    </div>
+    <div id="stagewrap">
+      <svg id="fab" viewBox="0 0 900 520" preserveAspectRatio="xMidYMid meet"></svg>
+      <div id="toast"></div>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <div id="right">
+    <div id="tabs"></div>
+    <div id="pane"></div>
+  </div>
+</div>
+
+<div id="bookwrap" class="hide">
+  <div id="bookbar">
+    <span class="s">교재</span><span class="t">웨이퍼 이송 로봇과 센서</span>
+    <span class="sp"></span>
+    <span class="s">← → 슬라이드 넘기기 · Esc 닫기</span>
+    <button id="bookclose">닫기 ✕</button>
+  </div>
+  <iframe id="book" title="교과서 데크"></iframe>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   1. 장비 모델 (엔진) — UI와 분리. 나중에 React 시뮬로 이식할 때 이 블록만 가져감
+   ========================================================================= */
+const RET = 60;                       // 로봇 암 수축 위치(px)
+const ST = {                          // 스테이션 정의 (각도는 SVG 좌표계, y-down)
+  efem:[
+    {k:'foup',   n:'FOUP',        ang:180, d:209},
+    {k:'aligner',n:'Pre-aligner', ang:-90, d:120},
+    {k:'ll',     n:'Load Lock',   ang:0,   d:205}
+  ],
+  vac:[
+    {k:'ll',  n:'Load Lock',        ang:180, d:185},
+    {k:'pm1', n:'Process Chamber1', ang:-90, d:120},
+    {k:'pm2', n:'Process Chamber2', ang:90,  d:120}
+  ]
+};
+const CX={efem:[320,260], vac:[750,260]};
+
+let S, C, LOG, HIST;
+function reset(hard){
+  S = {
+    who:'efem',
+    efem:{homed:false,init:false,si:0,R:RET,Rt:RET,a:180,at:180,z:3,wafer:null},
+    vac :{homed:false,init:false,si:0,R:RET,Rt:RET,a:180,at:180,z:3,wafer:null},
+    lp  :{docked:false,door:false,mapped:false,map:[]},
+    ll  :{p:760,pump:false,vent:false,atmV:false,tmV:false,wafer:null,et:0},
+    al  :{wafer:null,notch:0,aligning:false},
+    pm1 :{wafer:null}, pm2:{wafer:null},
+    foup:[1,2,3,4,5].map(i=>({slot:i,wafer:i<=3?{id:'W'+i,al:false,notch:(i*47)%360}:null})),
+    estop:false, fault:{pump:false,map:false,wps:false,enc:false},
+    inspect:{}
+  };
+  if(hard){ C={pick:0,place:0,align:0,pump:0,vent:0,map:0,dock:0,seq:0,home:0,rot:0,ext:0,zmv:0,alarm:0,fix:0,ins:0,ilk:{}}; LOG=[]; HIST=[]; }
+}
+reset(true);
+
+const now=()=>new Date().toLocaleTimeString('en-GB',{hour12:false});
+function log(lv,code,msg){
+  LOG.unshift({lv,code,msg,t:now()});
+  if(lv==='E'){C.alarm++;}
+  if(LOG.length>200)LOG.pop();
+  renderLog(); renderStatus();
+}
+function fail(code,msg,part){
+  log('E',code,msg); toast(msg,false); flash(part);
+  C.ilk[code]=(C.ilk[code]||0)+1;
+}
+const R=()=>S[S.who], other=()=>S[S.who==='efem'?'vac':'efem'];
+const sts=()=>ST[S.who];
+const cur=()=>sts()[R().si];
+const busy=r=>Math.abs(r.R-r.Rt)>0.7||Math.abs(r.a-r.at)>0.7;
+const extended=r=>r.R>RET+3;
+
+/* 스테이션에 놓인 웨이퍼 읽기/쓰기 */
+function stW(who,k,val){
+  const set=arguments.length>2;
+  if(k==='foup'){ const s=S.foup.find(x=>x.slot===S[who].z); if(!s)return null;
+                  if(set){s.wafer=val;} return s.wafer; }
+  if(k==='aligner'){ if(set){S.al.wafer=val; if(!val)S.al.notch=0;} return S.al.wafer; }
+  if(k==='ll'){ if(set){S.ll.wafer=val;} return S.ll.wafer; }
+  if(k==='pm1'||k==='pm2'){ if(set){S[k].wafer=val;} return S[k].wafer; }
+  return null;
+}
+
+/* ── 인터록: 동작 전에 반드시 통과해야 하는 조건 ───────────────── */
+function guard(act){
+  const r=R(), w=S.who, st=cur();
+  if(S.estop && act!=='reset'){ fail('ALM-000','비상정지 상태입니다. Reset으로 해제하세요.','estop'); return false; }
+  if(act!=='init'&&act!=='reset'&&!r.init){ fail('ALM-101','Initialize가 완료되지 않았습니다.','robot'); return false; }
+  if(['ext','rot','pick','place','z'].includes(act)&&!r.homed){ fail('ALM-102','Home 미완료 상태에서는 축을 움직일 수 없습니다.','robot'); return false; }
+  if(busy(r)&&act!=='reset'){ fail('ALM-103','축이 이동 중입니다. 정지 후 실행하세요.','robot'); return false; }
+
+  if(act==='rot'&&extended(r)){ fail('ALM-201','암이 전진한 상태에서 회전 → Collision Interlock.','robot'); return false; }
+  if(act==='z' &&extended(r)){ fail('ALM-202','암이 전진한 상태에서 Z축 이동 금지.','robot'); return false; }
+
+  if(act==='ext'){
+    if(w==='efem'&&st.k==='foup'&&!S.lp.door){ fail('ALM-301','Load Port Door가 닫혀 있습니다 (Door Interlock).','lp'); return false; }
+    if(w==='efem'&&st.k==='foup'&&!S.lp.docked){ fail('ALM-302','FOUP이 Docking되지 않았습니다.','lp'); return false; }
+    if(w==='efem'&&st.k==='ll'&&!S.ll.atmV){ fail('ALM-303','대기측 Gate Valve가 닫혀 있습니다.','ll'); return false; }
+    if(w==='vac' &&st.k==='ll'&&!S.ll.tmV){ fail('ALM-304','진공측 Gate Valve가 닫혀 있습니다.','ll'); return false; }
+  }
+  if(act==='pick'||act==='place'){
+    if(!extended(r)){ fail('ALM-203','암이 전진(Extend)하지 않았습니다.','robot'); return false; }
+  }
+  return true;
+}
+
+/* ── 동작 프리미티브 ───────────────────────────────────────── */
+const A={};
+A.init=()=>{ const r=R(); r.init=true; r.homed=false; log('I','INIT',(S.who==='efem'?'EFEM':'Vacuum')+' Robot 초기화 완료. Home을 실행하세요.'); ok('Initialize 완료'); return true; };
+A.home=()=>{ if(!guard('home'))return false; const r=R(); r.Rt=RET; r.at=sts()[r.si].ang; r.homed=true; C.home++; log('S','HOME','Home Position 복귀. Home Sensor ON.'); ok('Home 완료'); return true; };
+A.ext =()=>{ if(!guard('ext'))return false; const r=R(); r.Rt=cur().d; C.ext++; log('I','EXT','Extend → '+cur().n); return true; };
+A.ret =()=>{ if(!guard('ret'))return false; const r=R(); r.Rt=RET; log('I','RET','Retract 완료 대기'); return true; };
+A.rotL=()=>rot(-1); A.rotR=()=>rot(1);
+function rot(d){
+  if(!guard('rot'))return false;
+  const r=R(), n=sts().length; r.si=(r.si+d+n)%n;
+  let t=sts()[r.si].ang; while(t-r.a>180)t-=360; while(t-r.a<-180)t+=360;
+  r.at=t; C.rot++; log('I','ROT','θ축 회전 → '+sts()[r.si].n); return true;
+}
+A.up  =()=>zmv(-1); A.dn=()=>zmv(1);
+function zmv(d){
+  if(!guard('z'))return false;
+  const r=R(), nz=r.z+d;
+  if(nz<1||nz>5){ fail('ALM-401','Z축 이동 한계 초과 (Axis Limit).','robot'); return false; }
+  r.z=nz; C.zmv++; log('I','ZAXIS','Z축 이동 → Slot / Level '+nz); return true;
+}
+A.pick=()=>{
+  if(!guard('pick'))return false;
+  const r=R(), st=cur();
+  if(r.wafer){ fail('ALM-501','End Effector에 이미 웨이퍼가 있습니다.','robot'); return false; }
+  const w=stW(S.who,st.k);
+  if(!w){ fail('ALM-502','Wafer Presence Sensor OFF 위치에서 Pick 시도.',st.k); return false; }
+  if(S.fault.wps){ fail('ALM-503','Wafer Presence Sensor 신호 이상 (센서 고장 의심).','robot'); return false; }
+  stW(S.who,st.k,null); r.wafer=w; C.pick++;
+  log('S','PICK','Pick 완료 : '+w.id+' ← '+st.n+(st.k==='foup'?(' Slot '+r.z):''));
+  ok('Pick '+w.id); return true;
+};
+A.place=()=>{
+  if(!guard('place'))return false;
+  const r=R(), st=cur();
+  if(!r.wafer){ fail('ALM-504','End Effector가 비어 있습니다 (Wafer Presence OFF).','robot'); return false; }
+  if(stW(S.who,st.k)){ fail('ALM-505','대상 위치에 이미 웨이퍼가 있습니다 (Double Place).',st.k); return false; }
+  const w=r.wafer; stW(S.who,st.k,w); r.wafer=null; C.place++;
+  log('S','PLACE','Place 완료 : '+w.id+' → '+st.n+(st.k==='foup'?(' Slot '+r.z):''));
+  ok('Place '+w.id); return true;
+};
+A.dock=()=>{ S.lp.docked=!S.lp.docked; if(!S.lp.docked){S.lp.door=false;S.lp.mapped=false;}
+  else C.dock++; log('I','LP','FOUP '+(S.lp.docked?'Docking 완료':'Undocking')); return true; };
+A.door=()=>{
+  if(!S.lp.docked){ fail('ALM-305','Docking 전에는 Door를 열 수 없습니다.','lp'); return false; }
+  if(!S.lp.door && extended(S.efem) && ST.efem[S.efem.si].k==='foup'){ fail('ALM-306','로봇이 진입한 상태입니다.','lp'); return false; }
+  S.lp.door=!S.lp.door; if(!S.lp.door)S.lp.mapped=false;
+  log('I','DOOR','Load Port Door '+(S.lp.door?'OPEN':'CLOSE')); return true;
+};
+A.map=()=>{
+  if(!S.lp.door){ fail('ALM-307','Door가 열려야 Slot Mapping이 가능합니다.','lp'); return false; }
+  S.lp.map=S.foup.map(s=>!!s.wafer);
+  if(S.fault.map){ S.lp.map[1]=!S.lp.map[1]; S.lp.mapped=true; C.map++;
+    log('W','MAP','Mapping 결과와 실제 웨이퍼 상태 불일치 가능성 (Slot 2).'); toast('매핑 결과를 센서 탭에서 실제와 비교해 보세요',false); return true; }
+  S.lp.mapped=true; C.map++;
+  log('S','MAP','Slot Mapping 완료 : '+S.lp.map.map((v,i)=>v?(i+1):'').filter(Boolean).join(',')+'번 슬롯에 웨이퍼 감지'); return true;
+};
+A.align=()=>{
+  if(!S.al.wafer){ fail('ALM-601','Pre-aligner에 웨이퍼가 없습니다.','aligner'); return false; }
+  S.al.aligning=true; log('I','ALIGN','웨이퍼 중심 및 Notch 정렬 시작'); return true;
+};
+A.pump=()=>{
+  if(S.ll.atmV){ fail('ALM-308','대기측 Gate Valve가 열린 상태에서 Pump Down 불가.','ll'); return false; }
+  if(S.ll.tmV){ fail('ALM-309','진공측 Gate Valve가 열린 상태입니다.','ll'); return false; }
+  S.ll.pump=true; S.ll.vent=false; S.ll.et=0; C.pump++;
+  log('I','PUMP','Load Lock Pump Down 시작 (목표 1.0E-2 Torr)'); return true;
+};
+A.vent=()=>{
+  if(S.ll.tmV){ fail('ALM-310','진공측 Gate Valve가 열린 상태에서 Vent 불가.','ll'); return false; }
+  S.ll.vent=true; S.ll.pump=false; C.vent++; log('I','VENT','Load Lock Vent 시작 (목표 760 Torr)'); return true;
+};
+A.atmV=()=>{
+  if(!S.ll.atmV){
+    if(S.ll.p<700){ fail('ALM-311','Load Lock 압력이 대기압이 아닙니다 ('+fmtP()+') — Vacuum Interlock.','ll'); return false; }
+    if(S.ll.tmV){ fail('ALM-312','양쪽 Gate Valve 동시 개방 불가.','ll'); return false; }
+  } else if(extended(S.efem)&&ST.efem[S.efem.si].k==='ll'){ fail('ALM-313','로봇이 진입한 상태에서 Valve를 닫을 수 없습니다.','ll'); return false; }
+  S.ll.atmV=!S.ll.atmV; log('I','VALVE','대기측 Gate Valve '+(S.ll.atmV?'OPEN':'CLOSE')); return true;
+};
+A.tmV=()=>{
+  if(!S.ll.tmV){
+    if(S.ll.p>1){ fail('ALM-314','Load Lock 압력이 진공에 도달하지 않았습니다 ('+fmtP()+') — Vacuum Interlock.','ll'); return false; }
+    if(S.ll.atmV){ fail('ALM-315','양쪽 Gate Valve 동시 개방 불가.','ll'); return false; }
+  } else if(extended(S.vac)&&ST.vac[S.vac.si].k==='ll'){ fail('ALM-316','로봇이 진입한 상태에서 Valve를 닫을 수 없습니다.','ll'); return false; }
+  S.ll.tmV=!S.ll.tmV; log('I','VALVE','진공측 Gate Valve '+(S.ll.tmV?'OPEN':'CLOSE')); return true;
+};
+A.swap=()=>{ S.who=S.who==='efem'?'vac':'efem'; log('I','SEL','제어 대상 : '+(S.who==='efem'?'EFEM Robot (대기)':'Vacuum Robot (진공)')); return true; };
+A.estop=()=>{ S.estop=!S.estop;
+  if(S.estop){ ['efem','vac'].forEach(k=>{S[k].Rt=S[k].R;S[k].at=S[k].a;S[k].init=false;S[k].homed=false;});
+    S.ll.pump=false;S.ll.vent=false; log('E','E-STOP','비상정지 작동. 모든 축 정지 및 서보 OFF.'); }
+  else log('W','E-STOP','비상정지 해제. Reset 후 Initialize부터 다시 시작하세요.');
+  return true; };
+A.reset=()=>{ S.estop=false; S.fault={pump:false,map:false,wps:false,enc:false}; C.fix++;
+  log('S','RESET','알람 및 고장 상태 해제. Initialize → Home 순서로 복귀하세요.'); ok('Reset 완료'); return true; };
+
+/* ── 물리 업데이트(압력·정렬·모션) ───────────────────────────── */
+function tick(dt){
+  ['efem','vac'].forEach(k=>{
+    const r=S[k], sp=260*dt, asp=170*dt;
+    if(Math.abs(r.R-r.Rt)>0.7) r.R+=Math.sign(r.Rt-r.R)*Math.min(sp,Math.abs(r.Rt-r.R)); else r.R=r.Rt;
+    if(Math.abs(r.a-r.at)>0.7) r.a+=Math.sign(r.at-r.a)*Math.min(asp,Math.abs(r.at-r.a)); else r.a=r.at;
+  });
+  const L=S.ll;
+  if(L.pump){
+    L.et+=dt;
+    if(S.fault.pump){ L.p=Math.max(L.p*Math.pow(0.55,dt),45);
+      if(L.et>9){ L.pump=false; fail('ALM-701','Vacuum Timeout : 제한시간(9초) 내 목표 압력 미도달.','ll'); } }
+    else { L.p=Math.max(L.p*Math.pow(0.02,dt),0.01); if(L.p<=0.0101){L.p=0.01;L.pump=false;log('S','PUMP','진공 도달 1.0E-2 Torr (Vacuum Sensor ON).');} }
+  }
+  if(L.vent){ L.p=Math.min(L.p*Math.pow(900,dt)+8*dt,760); if(L.p>=759){L.p=760;L.vent=false;log('S','VENT','대기압 복귀 완료.');} }
+  if(S.al.aligning){
+    const w=S.al.wafer; if(!w){S.al.aligning=false;}
+    else { let d=(0-w.notch+540)%360-180; if(Math.abs(d)<3){w.notch=0;w.al=true;S.al.aligning=false;C.align++;
+        log('S','ALIGN','정렬 완료 : Notch 0°, 중심오차 보정.'); ok('Align 완료'); }
+      else w.notch=(w.notch+Math.sign(d)*160*dt+360)%360; }
+  }
+}
+const fmtP=()=>S.ll.p>=1?S.ll.p.toFixed(1)+' Torr':S.ll.p.toExponential(1).replace('e','E')+' Torr';
+
+/* =========================================================================
+   2. 챕터 구성 — 여기만 고치면 목차가 바뀜
+   ========================================================================= */
+const ALL=['guide','manual','drill','port','vac','seq','sensor','log','trouble'];
+const WEEK=[
+{n:1,t:'장치 이해',ti:'반도체 자동화와 시뮬레이터 익히기',
+ g:'반도체 제조장비에서 로봇과 센서가 하는 역할을 이해하고, 시뮬레이터 화면 구성을 익힌다.',
+ scope:['all'],tabs:['guide','manual','sensor'],
+ m:[['도면의 장치를 3개 이상 클릭해 이름과 역할을 확인한다',()=>C.ins>=3],
+    ['EFEM Robot을 Initialize 한다',()=>S.efem.init],
+    ['Home을 실행해 Home Sensor가 ON 되는 것을 확인한다',()=>C.home>=1]]},
+{n:2,t:'장치 구성',ti:'웨이퍼 이송 시스템의 구성 장치',
+ g:'FOUP · Load Port · EFEM · Pre-aligner · Load Lock · Process Chamber의 위치와 기능을 구분한다.',
+ scope:['all'],tabs:['guide','manual','sensor'],
+ m:[['6개 장치를 모두 클릭해 설명을 읽는다',()=>C.ins>=6],
+    ['대기(Atmosphere) 영역과 진공(Vacuum) 영역의 경계를 확인한다',()=>!!S.inspect.ll]]},
+{n:3,t:'로봇 구조',ti:'로봇의 R축 · θ축 · Z축',
+ g:'웨이퍼 이송 로봇의 3개 운동축이 각각 어떤 동작에 대응하는지 설명한다.',
+ scope:['foup','lp','efem','aligner'],tabs:['guide','manual','drill','sensor'],
+ m:[['Initialize → Home 순서로 준비한다',()=>C.home>=1],
+    ['θ축(회전)으로 스테이션을 2회 이상 바꾼다',()=>C.rot>=2],
+    ['R축(Extend/Retract)을 동작시킨다',()=>C.ext>=1],
+    ['Z축을 위/아래로 이동시킨다',()=>C.zmv>=2],
+    ['훈련 탭의 드릴 4개를 모두 완료한다',()=>(DRILL[3]||[]).every(d=>DR.done[d.id])]]},
+{n:4,t:'수동조작',ti:'Manual Mode 기본 조작',
+ g:'Home · Extend · Retract · Rotate · Up · Down을 목적에 맞게 조작한다.',
+ scope:['foup','lp','efem','aligner'],tabs:['guide','manual','port','sensor'],
+ m:[['FOUP을 Docking하고 Door를 연다',()=>S.lp.docked&&S.lp.door],
+    ['FOUP 앞까지 회전 후 Extend 한다',()=>C.ext>=1],
+    ['Retract로 안전 위치까지 복귀한다',()=>!extended(S.efem)&&C.ext>=1],
+    ['전진 상태에서 회전을 시도해 Collision Interlock을 확인한다',()=>!!C.ilk['ALM-201']]]},
+{n:5,t:'이송 실습',ti:'Pick — Transfer — Place',
+ g:'FOUP의 웨이퍼를 Pre-aligner까지 이송한다.',
+ scope:['foup','lp','efem','aligner'],tabs:['guide','manual','port','sensor'],
+ m:[['Docking → Door Open → Mapping을 수행한다',()=>S.lp.mapped],
+    ['Slot 1의 웨이퍼를 Pick 한다',()=>C.pick>=1],
+    ['Pre-aligner에 Place 한다',()=>!!S.al.wafer],
+    ['Retract 후 Home으로 복귀한다',()=>C.home>=2&&!extended(S.efem)]]},
+{n:6,t:'센서',ti:'이송장치의 주요 센서',
+ g:'Wafer Presence · Home · Limit · Position · Encoder 센서의 신호 변화를 관찰한다.',
+ scope:['foup','lp','efem','aligner'],tabs:['guide','manual','port','sensor','log'],
+ m:[['Pick 전후로 Wafer Presence Sensor의 ON/OFF 변화를 확인한다',()=>C.pick>=1],
+    ['Home Sensor가 OFF → ON 되는 조건을 확인한다',()=>C.home>=1&&C.ext>=1],
+    ['Z축을 한계까지 올려 Limit Sensor 알람을 발생시킨다',()=>!!C.ilk['ALM-401']]]},
+{n:7,t:'Load Port',ti:'FOUP 장착과 Slot Mapping',
+ g:'Docking → Door Open → Slot Mapping 순서를 수행하고 웨이퍼 유무를 판정한다.',
+ scope:['foup','lp','efem'],tabs:['guide','manual','port','sensor','log'],
+ m:[['Door가 닫힌 상태에서 Extend를 시도해 Door Interlock을 확인한다',()=>!!C.ilk['ALM-301']],
+    ['Docking → Door Open → Mapping을 순서대로 수행한다',()=>S.lp.mapped],
+    ['매핑 결과와 실제 슬롯 상태를 센서 탭에서 비교한다',()=>C.map>=1&&!!S.inspect.foup]]},
+{n:8,t:'종합 실습 1',ti:'여기까지 이어서 해보기 — 구성 · 동작 · 센서',
+ g:'FOUP에서 Load Lock까지 웨이퍼 1장을 규정 순서대로 이송한다.',
+ scope:['all'],tabs:['guide','manual','port','sensor','log'],review:1,
+ m:[['Mapping까지 완료한다',()=>S.lp.mapped],
+    ['웨이퍼를 Pre-aligner에서 정렬한다',()=>C.align>=1],
+    ['Load Lock까지 이송을 완료한다',()=>!!S.ll.wafer],
+    ['알람 없이 완료한다 (알람 0건)',()=>C.alarm===0&&!!S.ll.wafer]]},
+{n:9,t:'정렬',ti:'EFEM Robot과 Pre-aligner',
+ g:'웨이퍼 중심과 Notch 방향을 정렬하는 이유와 절차를 설명한다.',
+ scope:['foup','lp','efem','aligner'],tabs:['guide','manual','port','sensor','log'],
+ m:[['웨이퍼를 Pre-aligner에 올린다',()=>!!S.al.wafer],
+    ['Align을 실행해 Notch를 0°로 맞춘다',()=>C.align>=1],
+    ['정렬된 웨이퍼를 다시 Pick 한다',()=>C.align>=1&&C.pick>=2]]},
+{n:10,t:'Load Lock',ti:'진공 형성과 압력 센서',
+ g:'Pump Down · Vent · Gate Valve · Pressure Sensor의 상호 조건을 이해한다.',
+ scope:['efem','ll','vac'],tabs:['guide','manual','vac','sensor','log'],
+ m:[['대기압 상태에서 진공측 Valve를 열어 Interlock을 확인한다',()=>!!C.ilk['ALM-314']],
+    ['Pump Down으로 1.0E-2 Torr 이하까지 배기한다',()=>S.ll.p<=0.02],
+    ['Vent로 대기압까지 복귀시킨다',()=>C.vent>=1&&S.ll.p>=759]]},
+{n:11,t:'진공 이송',ti:'Vacuum Robot과 Process Chamber',
+ g:'대기 로봇과 진공 로봇의 차이를 이해하고 Chamber까지 이송한다.',
+ scope:['all'],tabs:['guide','manual','port','vac','sensor','log'],
+ m:[['Load Lock에 웨이퍼를 넣고 Pump Down 한다',()=>!!S.ll.wafer&&S.ll.p<=0.02],
+    ['진공측 Gate Valve를 연다',()=>S.ll.tmV],
+    ['Vacuum Robot으로 Process Chamber까지 이송한다',()=>!!S.pm1.wafer||!!S.pm2.wafer]]},
+{n:12,t:'시퀀스',ti:'블록형 자동 이송 시퀀스',
+ g:'MOVE · PICK · PLACE · WAIT · SENSOR CHECK · IF 조건으로 이송 시퀀스를 구성한다.',
+ scope:['all'],tabs:['guide','manual','port','vac','seq','sensor','log'],
+ m:[['블록 6개 이상으로 시퀀스를 구성한다',()=>SEQ.length>=6],
+    ['시퀀스를 끝까지 실행한다',()=>C.seq>=1],
+    ['자동 실행으로 웨이퍼를 Load Lock까지 보낸다',()=>C.seq>=1&&!!S.ll.wafer]]},
+{n:13,t:'인터록',ti:'인터록과 비정상 동작 판별',
+ g:'Door · Vacuum · Wafer Presence · Position Interlock이 왜 필요한지 설명한다.',
+ scope:['all'],tabs:['guide','manual','port','vac','seq','sensor','log','trouble'],
+ m:[['Door Interlock을 발생시킨다',()=>!!C.ilk['ALM-301']],
+    ['Vacuum Interlock을 발생시킨다',()=>!!C.ilk['ALM-311']||!!C.ilk['ALM-314']],
+    ['Wafer Presence 관련 알람을 발생시킨다',()=>!!C.ilk['ALM-502']||!!C.ilk['ALM-504']],
+    ['서로 다른 인터록 4종을 경험한다',()=>Object.keys(C.ilk).length>=4]]},
+{n:14,t:'고장 진단',ti:'알람 로그 분석과 고장 진단',
+ g:'고장 시나리오를 주입하고 로그·센서로 원인을 추정해 보고서를 작성한다.',
+ scope:['all'],tabs:['guide','manual','port','vac','seq','sensor','log','trouble'],
+ m:[['고장 시나리오를 1개 이상 주입한다',()=>Object.values(S.fault).some(Boolean)||C.fix>=1],
+    ['알람 로그에서 오류 코드를 확인한다',()=>C.alarm>=1],
+    ['Reset으로 복구한다',()=>C.fix>=1],
+    ['보고서 6개 항목을 모두 작성한다',()=>RPT_DONE]]},
+{n:15,t:'종합 실습 2',ti:'전 구간 자동 이송과 오류 복구',
+ g:'시퀀스로 FOUP → Chamber 전 구간을 이송하고, 발생한 오류를 진단·복구한다.',
+ scope:['all'],tabs:['guide','manual','port','vac','seq','sensor','log','trouble'],review:1,
+ m:[['시퀀스를 실행해 웨이퍼를 Load Lock까지 보낸다',()=>C.seq>=1&&(!!S.ll.wafer||!!S.pm1.wafer||!!S.pm2.wafer)],
+    ['Process Chamber까지 이송을 완료한다',()=>!!S.pm1.wafer||!!S.pm2.wafer],
+    ['발생한 알람을 복구하고 보고서를 작성한다',()=>RPT_DONE]]}
+];
+
+const INFO={
+ foup:['FOUP','25장(본 시뮬 5장)의 웨이퍼를 담아 이송하는 밀폐 용기. 내부는 청정 상태로 유지되며 Load Port에 장착되어야 열린다.'],
+ lp:['Load Port','FOUP을 장비에 연결하는 문. Docking → Door Open → Slot Mapping 순서로 동작하며 Door Sensor로 개폐를 확인한다.'],
+ efem:['EFEM','Equipment Front End Module. 대기압 상태에서 FOUP·Aligner·Load Lock 사이의 웨이퍼를 옮기는 대기 로봇이 들어 있다.'],
+ aligner:['Pre-aligner','웨이퍼의 중심 편차와 Notch(방향 기준 홈)를 맞추는 장치. 정렬되지 않으면 이후 공정 위치가 어긋난다.'],
+ ll:['Load Lock','대기 영역과 진공 영역을 잇는 완충실. 양쪽 Gate Valve는 절대 동시에 열리지 않으며, 압력 조건을 만족해야 열린다.'],
+ vac:['Transfer Chamber','진공이 유지되는 이송실. 내부의 Vacuum Robot이 Load Lock과 각 Process Chamber 사이를 이송한다.'],
+ pm1:['Process Chamber 1','실제 공정(식각·증착 등)이 진행되는 챔버. 진공 상태에서만 웨이퍼가 반입된다.'],
+ pm2:['Process Chamber 2','두 번째 공정 챔버. 하나의 이송실에 여러 챔버를 붙여 처리량을 높인다.']
+};
+
+/* =========================================================================
+   2-B. 챕터별 학습 자료 — 왜 배우나 / 지금 뭘 누르나 / 자가점검
+        (WEEK 배열은 그대로 두고 챕터번호로 얹는다)
+   ========================================================================= */
+const GUIDE={
+1:{why:'반도체 공장에서 웨이퍼를 옮기는 것은 사람이 아니라 로봇입니다. 사람 손이 닿으면 먼지 한 톨로 회로가 끊어지고, 진공 챔버 안에는 애초에 들어갈 수도 없기 때문입니다. 첫 주에는 장비 전체를 눈으로 훑고, 로봇을 깨우는 두 개의 버튼만 익힙니다.',
+  how:['왼쪽 그림에서 FOUP · EFEM · Load Lock 같은 사각형을 클릭하세요. 그게 무엇인지 설명이 뜹니다.',
+       '수동조작 탭에서 Initialize를 누르세요. 로봇에 전원과 좌표계를 잡아주는 첫 동작입니다.',
+       'Home을 누르세요. 로봇이 기준 위치로 돌아가고 Home 램프가 켜집니다.'],
+  qz:[{q:'로봇을 처음 켰을 때 가장 먼저 해야 하는 두 동작은?',a:['Pick → Place','Initialize → Home','Extend → Retract'],c:1,
+       e:'Initialize로 로봇을 깨우고, Home으로 기준 위치를 잡아야 이후 모든 좌표가 의미를 갖습니다.'},
+      {q:'장비가 지금 어떤 상태인지 아는 유일한 수단은?',a:['작업자의 눈','센서 신호','작업 일지'],c:1,
+       e:'장비에는 눈이 없습니다. 모든 판단은 센서 ON/OFF로만 이루어집니다.'}]},
+2:{why:'장비는 하나의 덩어리가 아니라 역할이 다른 방들이 붙어 있는 구조입니다. 왼쪽 절반은 대기압, 오른쪽 절반은 진공이고, 그 경계에 Load Lock이 있습니다. 이 지도만 머리에 있으면 나머지는 세부사항입니다.',
+  how:['FOUP · Load Port · EFEM · Pre-aligner · Load Lock · Transfer Chamber를 차례로 클릭하세요.',
+       'Load Lock을 클릭해 설명을 읽으세요. 여기가 대기와 진공이 만나는 유일한 지점입니다.'],
+  qz:[{q:'대기 영역과 진공 영역을 이어주는 장치는?',a:['Pre-aligner','Load Lock','FOUP'],c:1,
+       e:'Load Lock은 웨이퍼 크기의 작은 방만 대기↔진공으로 오가게 해서 챔버 진공을 지킵니다.'},
+      {q:'FOUP의 역할은?',a:['웨이퍼 방향 정렬','웨이퍼를 밀폐 상태로 운반','웨이퍼 식각'],c:1,
+       e:'FOUP은 내부를 질소로 채운 밀폐 용기로, 공장 안을 이동하는 동안 웨이퍼를 외부 공기로부터 지킵니다.'}]},
+3:{why:'6축 관절 로봇을 떠올릴 필요가 없습니다. 웨이퍼 이송 로봇의 움직임은 R(전진·후진), θ(회전), Z(상하) 셋뿐입니다. 단순한 대신 정확해야 하고, 그래서 순서가 엄격합니다.',
+  how:['Initialize와 Home을 먼저 누르세요. 준비가 안 되면 축이 움직이지 않습니다.',
+       '◀ Rotate / Rotate ▶ 를 눌러 목표 스테이션을 바꿔보세요. 팔이 도는 것이 보입니다.',
+       'Extend를 눌러 팔을 뻗고, Retract로 다시 넣으세요.',
+       '▲ Z Up / ▼ Z Down으로 높이를 바꿔보세요. FOUP에서는 이 값이 곧 슬롯 번호입니다.',
+       '훈련 탭으로 가서 ① 워밍업부터 ④ 정밀 순회까지 차례로 하세요. 여기가 이 챕터의 본 실습입니다.'],
+  qz:[{q:'FOUP 앞에서 Z축이 의미하는 것은?',a:['팔의 길이','몇 번 슬롯을 겨냥하는가','회전 각도'],c:1,
+       e:'FOUP은 웨이퍼가 층층이 꽂혀 있으므로 높이(Z)가 곧 슬롯 선택입니다.'},
+      {q:'θ축이 하는 일은?',a:['팔을 뻗는다','몸을 돌려 다른 장치를 향한다','웨이퍼를 든다'],c:1,
+       e:'θ는 회전축입니다. FOUP ↔ 정렬기 ↔ 로드락으로 방향을 바꿉니다.'}]},
+4:{why:'수동조작은 자동운전의 기초입니다. 자동 시퀀스도 결국 이 버튼들을 순서대로 누르는 것에 지나지 않습니다. 이 챕터에서는 특히 "뻗은 채로 돌면 안 된다"는 규칙을 몸으로 확인합니다.',
+  how:['Load Port 탭에서 Docking을 누르고, 이어서 Door Open을 누르세요.',
+       '수동조작 탭에서 FOUP 방향으로 회전한 뒤 Extend를 누르세요.',
+       'Retract로 팔을 다시 넣으세요.',
+       '일부러 Extend 상태에서 회전을 눌러보세요. 막히는 것이 정상입니다.'],
+  qz:[{q:'팔을 뻗은 상태에서 회전하면 어떻게 되나?',a:['속도가 느려진다','옆 장치와 충돌해 Collision Interlock이 걸린다','아무 일 없다'],c:1,
+       e:'뻗은 팔은 회전 반경 밖으로 나가 있어 벽이나 다른 장치를 칩니다. 그래서 장비가 명령 자체를 거부합니다.'},
+      {q:'Door가 닫힌 채 Extend를 누르면?',a:['문이 자동으로 열린다','Door Interlock으로 거부된다','팔이 문을 밀고 들어간다'],c:1,
+       e:'ALM-301이 발생합니다. 문을 먼저 열지 않으면 로봇은 절대 진입하지 않습니다.'}]},
+5:{why:'이송의 최소 단위가 Pick → Transfer → Place입니다. 여기서 중요한 것은 순서입니다. 겨냥하고, 뻗고, 집고, 빼고, 그다음에 돕니다. 이 네 박자를 흐트러뜨리면 반드시 어딘가에서 걸립니다.',
+  how:['Load Port 탭에서 Docking → Door Open → Mapping을 순서대로 누르세요.',
+       '수동조작에서 FOUP을 향하게 하고 Z축으로 Slot 1을 겨냥한 뒤, Extend → Pick.',
+       'Retract 후 Rotate로 Pre-aligner를 향하고, Extend → Place.',
+       'Retract하고 Home을 눌러 마무리하세요.'],
+  qz:[{q:'Pick이 가능한 조건은?',a:['팔이 뻗어 있고 대상 위치에 웨이퍼가 있을 때','로봇이 Home에 있을 때','문이 닫혀 있을 때'],c:0,
+       e:'Extend된 상태에서만 손이 웨이퍼 아래로 들어갑니다. 그리고 그 자리에 웨이퍼가 실제로 있어야 합니다.'},
+      {q:'빈 슬롯에 대고 Pick을 누르면?',a:['빈손으로 그냥 돌아온다','Wafer Presence 알람이 발생한다','다음 슬롯을 자동으로 집는다'],c:1,
+       e:'ALM-502가 뜹니다. 로봇 고장이 아니라 겨냥이 틀린 것입니다.'}]},
+6:{why:'센서는 장비의 감각기관입니다. 인터록도, 알람도, 자동운전의 조건 분기도 전부 센서 신호 하나하나로 판정됩니다. 이 챕터은 조작할 때마다 어떤 신호가 바뀌는지를 눈으로 붙잡는 것이 목표입니다.',
+  how:['센서 모니터 탭을 열어두면 신호가 실시간으로 바뀝니다. Pick 직전과 직후에 Wafer Presence Sensor를 비교하세요.',
+       'Home 상태에서 Extend를 하면 Home Sensor가 꺼지는 것을 확인하세요.',
+       'Z축을 끝까지 올려 Limit Sensor 알람(ALM-401)을 일부러 내보세요.'],
+  qz:[{q:'Wafer Presence Sensor가 보는 것은?',a:['FOUP 안의 웨이퍼 수','End Effector 위에 웨이퍼가 있는지','챔버 압력'],c:1,
+       e:'로봇 손 위에 웨이퍼가 실려 있는지를 봅니다. Pick 성공 여부를 판정하는 신호입니다.'},
+      {q:'Home Sensor가 ON 되는 조건은?',a:['전원이 켜지면','로봇이 기준 위치로 완전히 복귀했을 때','웨이퍼를 들었을 때'],c:1,
+       e:'Home 실행 후 팔이 수축 위치에 도달해야 켜집니다. 뻗으면 꺼집니다.'}]},
+7:{why:'Load Port는 반드시 세 단계로만 열립니다. Docking → Door Open → Slot Mapping. 이 순서는 공장 공기가 웨이퍼에 닿지 않게 하려고 만들어진 것이고, 하나라도 건너뛰면 장비가 거부합니다.',
+  how:['먼저 순서를 일부러 어겨보세요. Docking 없이 Door Open(ALM-305), Door 닫힌 채 Extend(ALM-301).',
+       '이제 Docking → Door Open → Mapping을 순서대로 수행하세요.',
+       'Load Port 탭의 표에서 매핑 신호와 실제 웨이퍼를 나란히 비교하세요.'],
+  qz:[{q:'Slot Mapping을 하는 이유는?',a:['웨이퍼를 세척하려고','작업 전에 어느 칸에 웨이퍼가 있는지 목록을 확보하려고','압력을 낮추려고'],c:1,
+       e:'로봇은 눈이 없습니다. 빈 칸 Pick이나 이중 Place를 막으려면 미리 세어둬야 합니다.'},
+      {q:'매핑 결과와 실제가 다르면 무엇이 문제인가?',a:['Mapping Error — 이 목록으로 작업하면 사고가 난다','문제없다','압력 센서 고장'],c:0,
+       e:'웨이퍼가 비스듬히 꽂혔거나 센서가 오염되면 목록이 틀립니다. 틀린 목록으로 작업하면 빈 칸을 집으러 갑니다.'}]},
+8:{why:'지금까지 배운 것을 한 번에 이어서 수행하는 챕터입니다. FOUP에서 웨이퍼를 꺼내 정렬하고 Load Lock까지 보내되, 알람 없이 완주하는 것이 목표입니다. 알람이 뜨면 순서 어딘가가 틀린 것입니다.',
+  how:['Docking → Door Open → Mapping까지 완료하세요.',
+       'Slot 1의 웨이퍼를 Pre-aligner로 옮기고 Align을 실행하세요.',
+       '대기측 Gate Valve를 열고 Load Lock까지 이송하세요.',
+       '처음부터 끝까지 알람 0건으로 완주하세요. 알람이 났다면 챕터 버튼을 다시 눌러 초기화하고 재시도하세요.'],
+  qz:[{q:'Load Lock에 웨이퍼를 넣기 전에 반드시 해야 하는 것은?',a:['진공측 밸브 열기','대기측 Gate Valve 열기','Pump Down'],c:1,
+       e:'대기 로봇이 들어가려면 대기측 밸브가 열려 있어야 하고, 그러려면 Load Lock이 대기압이어야 합니다.'},
+      {q:'알람이 계속 뜰 때 가장 먼저 할 일은?',a:['같은 버튼을 다시 누른다','알람 메시지에 적힌 조건을 읽는다','전원을 끈다'],c:1,
+       e:'알람 문구에 막힌 이유가 그대로 적혀 있습니다. 다시 누르는 것은 원인 파악이 아닙니다.'}]},
+9:{why:'웨이퍼 가장자리에는 V자 홈(Notch)이 하나 있고, 그것이 웨이퍼의 12시 방향입니다. 이전 공정에서 그린 패턴이 모두 이 기준을 따르기 때문에, 정렬 없이 챔버에 넣으면 패턴이 어긋나 제품 전체가 불량이 됩니다.',
+  how:['웨이퍼를 Pre-aligner 위에 Place 하세요.',
+       'Align을 누르세요. 웨이퍼가 회전하며 홈이 12시로 맞춰집니다.',
+       '정렬이 끝난 웨이퍼를 다시 Pick 하세요. 색이 밝아진 것이 정렬 완료 표시입니다.'],
+  qz:[{q:'Notch는 무엇인가?',a:['웨이퍼 표면의 흠집','웨이퍼 방향의 기준이 되는 홈','웨이퍼를 잡는 손잡이'],c:1,
+       e:'가장자리에 파인 V자 홈으로, 결정 방향과 패턴 정렬의 기준점입니다.'},
+      {q:'정렬을 건너뛰고 챔버에 넣으면?',a:['처리 시간만 조금 늘어난다','패턴이 이전 층과 어긋나 불량이 된다','아무 문제 없다'],c:1,
+       e:'노광이라면 겹침이 틀어지고, 식각이라면 엉뚱한 자리가 깎입니다.'}]},
+10:{why:'공정 챔버는 진공입니다. 문을 그냥 열면 진공이 깨져 복구에 몇 시간이 걸립니다. Load Lock은 웨이퍼 크기의 작은 방만 대기↔진공을 오가게 해서 이 손실을 없앱니다. 그래서 밸브 두 개는 절대 동시에 열리지 않습니다.',
+  how:['Load Lock 탭에서 압력을 확인하세요(760 Torr = 대기압). 이 상태로 진공측 Gate Valve를 누르면 거부됩니다(ALM-314).',
+       'Pump Down을 눌러 1.0E-2 Torr까지 배기하세요. 압력 막대가 줄어듭니다.',
+       'Vent를 눌러 다시 대기압으로 되돌리세요.'],
+  qz:[{q:'진공측 Gate Valve가 열리는 조건은?',a:['압력 1 Torr 이하 + 대기측 밸브 닫힘','언제든지','압력 760 Torr'],c:0,
+       e:'양쪽 동시 개방은 공장 공기가 챔버까지 밀려 들어가는 사고로 이어집니다.'},
+      {q:'Pump Down이 시간 내에 끝나지 않으면?',a:['Vacuum Timeout 알람','자동으로 다시 시도','정상 진행'],c:0,
+       e:'ALM-701입니다. 명령이 틀린 것이 아니라 펌프 성능·누설 같은 설비 문제입니다.'}]},
+11:{why:'진공 안에서는 기름이 증발해 웨이퍼를 오염시키고, 공기가 없어 열도 빠져나가지 못합니다. 그래서 진공 로봇은 대기 로봇과 다른 물건이며, 구동부를 진공 밖에 두고 자석으로 힘만 전달합니다.',
+  how:['웨이퍼를 Load Lock에 넣고 대기측 밸브를 닫은 뒤 Pump Down 하세요.',
+       '진공에 도달하면 진공측 Gate Valve를 여세요.',
+       '수동조작 탭 위에서 Vacuum Robot으로 전환해 Initialize → Home 한 뒤, Load Lock에서 Pick 해서 Process Chamber로 Place 하세요.'],
+  qz:[{q:'진공 로봇의 구동부가 진공 밖에 있는 이유는?',a:['수리가 편해서','윤활유 증발로 인한 오염과 발열을 피하려고','전기를 아끼려고'],c:1,
+       e:'진공에서는 그리스가 증발해 웨이퍼를 오염시키고, 대류가 없어 모터 열이 쌓입니다.'},
+      {q:'진공 로봇이 담당하는 구간은?',a:['FOUP ↔ 정렬기','Load Lock ↔ 공정 챔버','공장 복도'],c:1,
+       e:'대기 로봇은 로드락까지, 진공 로봇은 로드락부터입니다.'}]},
+12:{why:'자동 운전은 마법이 아닙니다. 사람이 누르던 순서를 그대로 목록으로 적어둔 것뿐입니다. 다만 사람과 달리 프로그램은 상황을 눈으로 보지 못하므로, 중간중간 CHECK로 조건을 확인해야 합니다.',
+  how:['자동 시퀀스 탭에서 "예시 시퀀스 불러오기"를 누르세요. 26줄이 들어옵니다.',
+       '▶ 실행을 누르고 로봇이 순서대로 움직이는 것을 지켜보세요.',
+       '블록 하나를 지워 어디서 멈추는지 확인한 뒤, 팔레트로 직접 시퀀스를 만들어 Load Lock까지 보내세요.'],
+  qz:[{q:'CHECK 블록의 역할은?',a:['속도를 조절한다','조건이 맞지 않으면 그 자리에서 시퀀스를 정지시킨다','로그를 지운다'],c:1,
+       e:'잘못된 상태로 진행해 웨이퍼를 깨뜨리는 것보다 멈추고 사람을 부르는 편이 낫습니다.'},
+      {q:'MOVE 블록 앞에 RETRACT가 필요한 이유는?',a:['속도 때문','뻗은 채 회전하면 충돌하므로','전력 절약'],c:1,
+       e:'회전 전에는 반드시 팔을 넣어야 합니다. 수동조작과 같은 규칙입니다.'}]},
+13:{why:'인터록은 조건이 맞지 않으면 명령을 실행하지 않는 장치입니다. 버그가 아니라 설계입니다. 이 챕터에서는 일부러 인터록을 걸어보면서, 각각이 무엇으로부터 장비를 지키고 있는지 확인합니다.',
+  how:['Door를 닫은 채 FOUP으로 Extend → Door Interlock(ALM-301).',
+       '대기압에서 진공측 밸브 열기 → Vacuum Interlock(ALM-314).',
+       '빈 슬롯에서 Pick 또는 빈손으로 Place → Wafer Presence 알람.',
+       '서로 다른 인터록을 4종 이상 발생시키고, 알람 로그에서 코드를 확인하세요.'],
+  qz:[{q:'인터록이 자주 걸리는 것은 무엇을 뜻하나?',a:['장비 고장','작업 순서가 조건을 만족하지 않았다는 뜻','센서 불량'],c:1,
+       e:'인터록은 정상 동작입니다. 막힌 이유를 읽는 것이 진단의 시작입니다.'},
+      {q:'인터록이 없다면 가장 먼저 생길 일은?',a:['속도가 빨라진다','충돌·오염·진공 파괴 같은 물리적 사고','전기 요금 증가'],c:1,
+       e:'인터록은 사람의 실수가 설비 파손으로 이어지지 않게 막는 마지막 방어선입니다.'}]},
+14:{why:'실제 현장의 일은 정상 운전이 아니라 고장 대응입니다. 그리고 고장 진단은 추측이 아니라 절차입니다. 현상 → 센서 → 로그 → 원인 → 조치 → 확인. 이 순서를 지키면 초보도 원인에 도달하고, 건너뛰면 숙련자도 헛짚습니다.',
+  how:['고장 진단 탭에서 시나리오를 하나 주입하세요. "무작위 고장"을 쓰면 무엇인지 모른 채 시작합니다.',
+       '평소처럼 조작해 보고, 어디서 막히는지 관찰하세요.',
+       '센서 모니터에서 꺼져 있는 신호를, 알람 로그에서 오류 코드를 찾으세요.',
+       '보고서 6칸을 채우고 Reset으로 복구하세요.'],
+  qz:[{q:'진단 보고서에서 가장 먼저 적어야 하는 칸은?',a:['Possible Cause','Problem — 관찰된 현상','Corrective Action'],c:1,
+       e:'원인부터 적으면 관찰을 놓칩니다. "펌프 고장 같다"로 시작하면 밸브가 열려 있었다는 사실을 못 봅니다.'},
+      {q:'Error와 Timeout의 차이는?',a:['같은 말이다','Error는 조건 위반, Timeout은 설비 성능 미달','Timeout이 더 가볍다'],c:1,
+       e:'Error는 사람이 순서를 틀린 것, Timeout은 설비가 못 따라간 것입니다. 대응 부서가 다릅니다.'}]},
+15:{why:'마지막 챕터입니다. 자동 시퀀스로 전 구간을 이송하고, 도중에 발생하는 문제를 스스로 진단해 복구합니다. 이 책에서 배운 것 전부 — 순서, 센서, 인터록, 로그 — 를 한 번에 씁니다.',
+  how:['시퀀스를 구성해 웨이퍼를 Load Lock까지 보내세요.',
+       'Vacuum Robot으로 전환해 Process Chamber까지 이송을 완료하세요.',
+       '발생한 알람을 로그에서 확인하고 복구한 뒤, 보고서 6칸을 채우세요.'],
+  qz:[{q:'전 구간 이송의 올바른 순서는?',a:['FOUP → 정렬기 → 로드락 → 챔버','FOUP → 챔버 → 정렬기','로드락 → FOUP → 챔버'],c:0,
+       e:'정렬을 거치지 않으면 챔버에서 패턴이 어긋납니다. 로드락은 대기와 진공의 유일한 통로입니다.'},
+      {q:'자동 운전 중 시퀀스가 멈췄다. 가장 먼저 볼 것은?',a:['전원','멈춘 블록과 그때의 알람 로그','FOUP 잔량'],c:1,
+       e:'어느 블록에서 멈췄는지가 곧 조건 위반 지점입니다. 로그에 이유가 적혀 있습니다.'}]}
+};
+let QZ={};
+/* =========================================================================
+   2-C. 훈련(드릴) 엔진 — 챕터별 반복 실습
+        type:'tour'  제시된 자세를 만들기를 n회 반복
+        type:'codes' 지정한 알람 코드를 모두 발생시키기
+        옵션: limitSec(제한시간) · maxOps(조작 제한) · noAlarm(알람 나면 실패)
+        새 챕터에 붙일 때는 DRILL[챕터번호] 에 항목만 추가하면 된다.
+   ========================================================================= */
+const DRILL={
+ 3:[
+  {id:'ch3-warm',type:'tour',n:10,title:'① 워밍업 순회',
+   desc:'제시된 자세(스테이션 + Z)를 만들면 다음 목표가 나옵니다. 제한 없음. 축 감각을 붙이는 단계입니다.',
+   tip:'회전 ◀▶, 높이 ▲▼. 팔이 전진한 상태면 회전이 막히니 먼저 Retract 하세요.'},
+  {id:'ch3-ilk',type:'codes',codes:['ALM-201','ALM-202','ALM-401'],title:'② 금지 동작 3종',
+   desc:'막히는 동작을 일부러 만들어 봅니다. 세 알람을 모두 띄우면 완료.',
+   tip:'Pre-aligner에서 Extend한 뒤 회전과 Z를 시도해 보세요. Z는 한계까지 올려 봅니다.'},
+  {id:'ch3-speed',type:'tour',n:20,limitSec:180,record:'time',title:'③ 속도 순회',
+   desc:'목표 20개를 3분 안에. 걸린 시간이 기록으로 남습니다. 여러 번 도전해 기록을 줄여보세요.',
+   tip:'반대편 스테이션은 어느 방향으로 도는 게 빠른지 생각해 보세요. 망설이는 시간이 곧 기록입니다.'},
+  {id:'ch3-route',type:'route',n:6,maxOps:12,record:'ops',title:'④ 경로 계획',
+   desc:'목표 6개를 한꺼번에 줍니다. 어떤 순서로 돌지는 학생이 정합니다. 조작 12회 이내 — 최단 경로는 9~10회입니다.',
+   tip:'같은 스테이션끼리 묶고 Z를 한 방향으로 훑으면 조작이 줄어듭니다. 순서를 먼저 종이에 적어보세요.'},
+  {id:'ch3-exact',type:'tour',n:10,maxOps:34,maxAlarm:2,record:'ops',title:'⑤ 정밀 순회',
+   desc:'목표 10개를 조작 34회 이내, 알람 2회까지만 허용. 넘기면 그 자리에서 실패입니다.',
+   tip:'헛도는 회전 한 번이 치명적입니다. 누르기 전에 최단 경로를 정하세요.'}
+ ]
+};
+let OPS=0;
+let DR={d:null,idx:0,t0:0,ops0:0,alarm0:0,tgt:null,rem:[],got:[],done:{},best:{},msg:'',fail:''};
+
+function drillStart(id){
+  const d=(DRILL[WEEK[WK].n]||[]).find(x=>x.id===id); if(!d)return;
+  DR.d=d; DR.idx=0; DR.t0=Date.now(); DR.ops0=OPS; DR.alarm0=C.alarm;
+  DR.got=[]; DR.msg=''; DR.fail='';
+  if(d.type==='tour') DR.tgt=newTarget();
+  if(d.type==='route'){ DR.rem=[]; 
+    while(DR.rem.length<d.n){ const t=newTarget();
+      if(!DR.rem.some(x=>x.st===t.st&&x.z===t.z)) DR.rem.push(t); } }
+  log('I','DRILL',d.title+' 시작');
+}
+function drillStop(reason){
+  if(!DR.d)return;
+  if(reason){ DR.fail=reason; log('W','DRILL',DR.d.title+' 중단 — '+reason); }
+  DR.d=null; DR.tgt=null;
+}
+function newTarget(){
+  const sts=ST.efem, r=S.efem;
+  let t,guard=0;
+  do{ t={st:Math.floor(Math.random()*sts.length), z:1+Math.floor(Math.random()*5)}; guard++; }
+  while(guard<40 && t.st===r.si && t.z===r.z);
+  return t;
+}
+const drillElapsed=()=>DR.d?Math.floor((Date.now()-DR.t0)/1000):0;
+function drillTick(){
+  const d=DR.d; if(!d)return;
+  if(S.who!=='efem'){ return; }
+  const r=S.efem;
+  if(d.maxAlarm!==undefined && C.alarm-DR.alarm0>d.maxAlarm){
+    drillStop('알람 허용 횟수('+d.maxAlarm+'회)를 넘었습니다'); return; }
+  if(d.maxOps && OPS-DR.ops0>d.maxOps){ drillStop('조작 제한('+d.maxOps+'회)을 넘었습니다'); return; }
+  if(d.limitSec && drillElapsed()>d.limitSec){ drillStop('제한 시간('+d.limitSec+'초)을 넘었습니다'); return; }
+
+  if(d.type==='tour'){
+    const t=DR.tgt;
+    if(t && !busy(r) && r.si===t.st && r.z===t.z && !extended(r)){
+      DR.idx++;
+      if(DR.idx>=d.n){ drillFinish(); return; }
+      DR.tgt=newTarget();
+    }
+  } else if(d.type==='route'){
+    if(!busy(r) && !extended(r)){
+      const k=DR.rem.findIndex(t=>t.st===r.si&&t.z===r.z);
+      if(k>=0){ DR.rem.splice(k,1); DR.idx++;
+        if(!DR.rem.length){ drillFinish(); return; } }
+    }
+  } else if(d.type==='codes'){
+    d.codes.forEach(c=>{ if(C.ilk[c] && !DR.got.includes(c)) DR.got.push(c); });
+    if(DR.got.length>=d.codes.length){ drillFinish(); return; }
+  }
+}
+function drillFinish(){
+  const d=DR.d, sec=drillElapsed(), ops=OPS-DR.ops0;
+  DR.done[d.id]=true;
+  if(d.record==='time'){ const b=DR.best[d.id]; if(b===undefined||sec<b) DR.best[d.id]=sec; }
+  if(d.record==='ops'){ const b=DR.best[d.id]; if(b===undefined||ops<b) DR.best[d.id]=ops; }
+  log('S','DRILL',d.title+' 완료 — '+sec+'초 · 조작 '+ops+'회');
+  ok(d.title+' 완료');
+  DR.msg=d.title+' 완료 · '+sec+'초 · 조작 '+ops+'회';
+  DR.d=null; DR.tgt=null;
+}
+
+/* =========================================================================
+   3. 도면 렌더링
+   ========================================================================= */
+let SEQ=[], RPT_DONE=false, WK=0;
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const svg=$('#fab');
+
+function waferSVG(id,cx,cy,r){
+  return `<g id="${id}" class="wfg"><circle class="wf" cx="0" cy="0" r="${r}"/>
+    <rect class="notch" x="${-3}" y="${-r-1}" width="6" height="7" rx="1"/></g>`;
+}
+function ledSVG(id,x,y,label){
+  return `<g><circle id="${id}" class="led" cx="${x}" cy="${y}" r="5" fill="#2a3d4e"/>
+   <text class="lbl2" x="${x+9}" y="${y+3.5}">${label}</text></g>`;
+}
+svg.innerHTML=`
+<g id="g-foup" class="hot" data-k="foup">
+  <rect class="chm" x="32" y="168" width="118" height="184" rx="4"/>
+  <text class="lbl" x="32" y="160">FOUP</text>
+  ${[0,1,2,3,4].map(i=>`
+    <rect id="slotbg${i+1}" x="40" y="${178+i*36}" width="102" height="26" rx="2" fill="#0c1822" stroke="#1c3245"/>
+    <text class="lbl2" x="45" y="${195+i*36}">${i+1}</text>
+    <g id="fw${i+1}" transform="translate(95,${191+i*36})"><g class="wfg"><ellipse class="wf" rx="38" ry="7"/></g></g>`).join('')}
+</g>
+<g id="g-lp" class="hot" data-k="lp">
+  <rect id="lpdoor" class="chm" x="152" y="168" width="14" height="184" rx="2" fill="#25415a"/>
+  <text class="lbl" x="152" y="365">LOAD PORT</text>
+  ${ledSVG('led-door',158,150,'DOOR')}
+  ${ledSVG('led-map',158,132,'MAP')}
+</g>
+<g id="g-efem" class="hot" data-k="efem">
+  <rect class="chm" x="172" y="68" width="298" height="384" rx="6"/>
+  <text class="lbl" x="182" y="88">EFEM · ATMOSPHERE</text>
+  <text class="lbl2" x="182" y="102">760 Torr</text>
+</g>
+<g id="g-aligner" class="hot" data-k="aligner">
+  <circle class="chm" cx="320" cy="120" r="38"/>
+  <text class="lbl" x="366" y="118">PRE-ALIGNER</text>
+  <g id="alw" transform="translate(320,120)">${waferSVG('alwi',0,0,26)}</g>
+</g>
+<g id="g-ll" class="hot" data-k="ll">
+  <rect class="chm" x="488" y="206" width="114" height="108" rx="4"/>
+  <text class="lbl" x="488" y="198">LOAD LOCK</text>
+  <text id="pTxt" class="lbl2" x="488" y="330">760.0 Torr</text>
+  <g id="llw" transform="translate(545,260)">${waferSVG('llwi',0,0,26)}</g>
+  <rect id="vatm" x="470" y="238" width="18" height="44" fill="#7a2e2e" stroke="#a04545"/>
+  <rect id="vtm"  x="602" y="238" width="18" height="44" fill="#7a2e2e" stroke="#a04545"/>
+  <text class="lbl2" x="452" y="232">ATM V</text>
+  <text class="lbl2" x="604" y="232">TM V</text>
+  ${ledSVG('led-press',488,346,'PRESSURE')}
+  ${ledSVG('led-vac',488,364,'VACUUM')}
+</g>
+<g id="g-vac" class="hot" data-k="vac">
+  <rect class="chm" x="620" y="68" width="258" height="384" rx="6"/>
+  <text class="lbl" x="634" y="88">TRANSFER CHAMBER · VACUUM</text>
+</g>
+<g id="g-pm1" class="hot" data-k="pm1">
+  <circle class="chm" cx="750" cy="120" r="44"/>
+  <text class="lbl" x="800" y="118">PM 1</text>
+  <g id="pm1w" transform="translate(750,120)">${waferSVG('pm1wi',0,0,26)}</g>
+</g>
+<g id="g-pm2" class="hot" data-k="pm2">
+  <circle class="chm" cx="750" cy="400" r="44"/>
+  <text class="lbl" x="800" y="404">PM 2</text>
+  <g id="pm2w" transform="translate(750,400)">${waferSVG('pm2wi',0,0,26)}</g>
+</g>
+${['efem','vac'].map(k=>{const [x,y]=CX[k];return `
+<g id="rb-${k}">
+  <g id="arm-${k}" transform="translate(${x},${y})">
+    <rect id="link-${k}" class="arm" x="0" y="-11" width="60" height="22" rx="6"/>
+    <g id="eff-${k}" transform="translate(60,0)">
+      <path class="eff" d="M -6 -13 L 26 -13 L 34 -5 L 34 5 L 26 13 L -6 13 Z"/>
+      <g id="hw-${k}">${waferSVG('hw'+k+'i',0,0,20)}</g>
+    </g>
+  </g>
+  <circle cx="${x}" cy="${y}" r="24" fill="#16283a" stroke="#3d6a8e" stroke-width="2"/>
+  <circle cx="${x}" cy="${y}" r="6" fill="#4f8bb5"/>
+  <text class="lbl" x="${x-30}" y="${y+48}">${k==='efem'?'EFEM ROBOT':'VACUUM ROBOT'}</text>
+  ${ledSVG('led-home-'+k,x-30,y+62,'HOME')}
+  ${ledSVG('led-wps-'+k,x+38,y+62,'WAFER')}
+</g>`}).join('')}
+`;
+
+const E=id=>document.getElementById(id);
+function setLed(id,on,color){
+  const e=E(id); if(!e)return;
+  e.setAttribute('fill',on?(color||'#2fe0c0'):'#2a3d4e');
+  e.style.filter=on?'drop-shadow(0 0 5px '+(color||'#2fe0c0')+')':'none';
+}
+function showW(gid,w){
+  const g=E(gid); if(!g)return;
+  const vis=!!w; g.style.display=vis?'':'none';
+  if(vis){ const c=g.querySelector('.wfg')||g;
+    c.setAttribute('transform','rotate('+(w.notch||0)+')');
+    g.querySelector('.wf').setAttribute('fill',w.al?'#d8ecff':'#b9cede'); }
+}
+function draw(){
+  // 로봇
+  ['efem','vac'].forEach(k=>{
+    const r=S[k], [x,y]=CX[k];
+    E('arm-'+k).setAttribute('transform',`translate(${x},${y}) rotate(${r.a})`);
+    E('link-'+k).setAttribute('width',Math.max(r.R,10));
+    E('eff-'+k).setAttribute('transform',`translate(${r.R},0)`);
+    showW('hw-'+k,r.wafer);
+    setLed('led-home-'+k, r.homed&&r.R<=RET+1);
+    setLed('led-wps-'+k, !!r.wafer,'#4aa8ff');
+  });
+  // FOUP
+  S.foup.forEach(s=>{ showW('fw'+s.slot,s.wafer?{notch:0,al:s.wafer.al}:null);
+    E('slotbg'+s.slot).setAttribute('stroke', (S.who==='efem'&&S.efem.z===s.slot)?'#2fe0c0':'#1c3245'); });
+  // Load Port
+  E('lpdoor').setAttribute('fill',S.lp.door?'#0d2a25':'#25415a');
+  E('lpdoor').setAttribute('height',S.lp.door?46:184);
+  setLed('led-door',S.lp.door); setLed('led-map',S.lp.mapped,'#ffb340');
+  // 정렬기 / LL / PM
+  showW('alw',S.al.wafer); showW('llw',S.ll.wafer);
+  showW('pm1w',S.pm1.wafer); showW('pm2w',S.pm2.wafer);
+  E('vatm').setAttribute('fill',S.ll.atmV?'#1f6b5c':'#7a2e2e');
+  E('vtm').setAttribute('fill',S.ll.tmV?'#1f6b5c':'#7a2e2e');
+  E('pTxt').textContent=fmtP();
+  setLed('led-press',S.ll.p<700,'#ffb340'); setLed('led-vac',S.ll.p<1,'#9b8cff');
+  // 챕터 범위 밖 장치는 흐리게
+  const sc=WEEK[WK].scope, all=sc.includes('all');
+  ['foup','lp','efem','aligner','ll','vac','pm1','pm2'].forEach(k=>{
+    const g=E('g-'+k); if(!g)return;
+    const on=all||sc.includes(k)||(k==='pm1'||k==='pm2')&&sc.includes('vac');
+    g.querySelectorAll('.chm').forEach(c=>c.classList.toggle('dim',!on));
+    g.style.opacity=on?1:.45;
+  });
+  E('rb-vac').style.opacity=(all||sc.includes('vac'))?1:.3;
+  E('rb-efem').style.opacity=(all||sc.includes('efem'))?1:.3;
+}
+function flash(part){
+  const map={robot:'rb-'+S.who,lp:'g-lp',ll:'g-ll',foup:'g-foup',aligner:'g-aligner',estop:'g-efem'};
+  const g=E(map[part]||'g-'+part); if(!g)return;
+  g.querySelectorAll('.chm,.arm').forEach(c=>{c.classList.remove('flash');void c.offsetWidth;c.classList.add('flash');
+    setTimeout(()=>c.classList.remove('flash'),1200);});
+}
+let tt;
+function toast(m,good){ const t=$('#toast'); t.textContent=m; t.className='show'+(good?' ok':'');
+  clearTimeout(tt); tt=setTimeout(()=>t.className='',2600); }
+const ok=m=>toast(m,true);
+
+/* 장치 클릭 → 설명 */
+$$('.hot').forEach(g=>g.addEventListener('click',()=>{
+  const k=g.dataset.k, i=INFO[k]; if(!i)return;
+  if(!S.inspect[k]){S.inspect[k]=1;C.ins++;}
+  toast(i[0]+' — '+i[1],true); renderMissions();
+}));
+
+/* =========================================================================
+   4. 패널 UI
+   ========================================================================= */
+const TABN={guide:'학습',manual:'수동조작',drill:'훈련',port:'Load Port',vac:'Load Lock',seq:'자동 시퀀스',sensor:'센서 모니터',log:'알람 로그',trouble:'고장 진단'};
+let TAB='guide';
+
+function renderTabs(){
+  const w=WEEK[WK];
+  $('#tabs').innerHTML=ALL.map(k=>{
+    const en=w.tabs.includes(k);
+    return `<button class="tb ${TAB===k?'on':''}" data-tab="${k}" ${en?'':'disabled'}>${TABN[k]}</button>`;
+  }).join('');
+  if(!w.tabs.includes(TAB)){TAB=w.tabs[0];renderTabs();return;}
+  $$('#tabs .tb').forEach(b=>b.onclick=()=>{TAB=b.dataset.tab;renderTabs();renderPane();});
+}
+
+function sensors(){
+  const r=R(), st=cur();
+  return [
+   ['Wafer Presence (End Effector)', !!r.wafer, r.wafer?r.wafer.id:'없음'],
+   ['Slot Mapping', S.lp.mapped, S.lp.mapped?S.lp.map.map((v,i)=>v?(i+1):'-').join(' '):'미실행'],
+   ['Home Sensor', r.homed&&r.R<=RET+1, r.homed?(r.R<=RET+1?'ON':'전진중'):'OFF'],
+   ['Limit Sensor (Z)', r.z>=1&&r.z<=5, 'Z = '+r.z+' / 5'],
+   ['Position Sensor', !busy(r), busy(r)?'이동중':st.n+' 정위치'],
+   ['Encoder (θ)', true, r.a.toFixed(0)+'°'+(S.fault.enc?' (편차)':'')],
+   ['Door Sensor', S.lp.door, S.lp.door?'OPEN':'CLOSE'],
+   ['Pressure Sensor', S.ll.p<700, fmtP()],
+   ['Vacuum Sensor', S.ll.p<1, S.ll.p<1?'진공 도달':'미도달'],
+   ['Collision Sensor', !(extended(r)&&busy(r)&&Math.abs(r.a-r.at)>1), '정상']
+  ];
+}
+
+function paneGuide(){
+  const w=WEEK[WK], g=GUIDE[w.n]||{};
+  const qz=(g.qz||[]).map((q,i)=>{
+    const pick=QZ[w.n+'-'+i];
+    return `<div class="qz"><div class="qq">Q${i+1}. ${q.q}</div>
+      ${q.a.map((a,j)=>{
+        const st=pick===undefined?'':(j===q.c?'ok':(j===pick?'no':''));
+        return `<button class="qa ${st}" data-a="qz:${w.n}:${i}:${j}">${a}</button>`;}).join('')}
+      ${pick===undefined?'':`<div class="qe">${pick===q.c?'맞았습니다. ':'다시 보세요. '}${q.e}</div>`}</div>`;
+  }).join('');
+  return `<h4 class="sec">왜 배우나</h4>
+  <div class="why">${g.why||w.g}</div>
+  <button class="btn k" data-a="book" style="width:100%;margin-top:8px">📖 교재에서 이 내용 자세히 읽기</button>
+  <h4 class="sec">따라하기</h4><div id="msBar"><i></i></div><div id="msList"></div>
+  ${qz?`<h4 class="sec">자가점검</h4>${qz}`:''}
+  <h4 class="sec">핵심 용어</h4>
+  <table class="tb2"><tbody>
+  ${(w.terms||[['FOUP','웨이퍼를 밀폐 상태로 운반하는 용기'],['EFEM','대기압에서 웨이퍼를 옮기는 이송 모듈'],
+     ['Load Lock','대기와 진공을 잇는 완충실'],['Notch','웨이퍼 방향의 기준이 되는 홈'],
+     ['Interlock','조건이 맞지 않으면 명령을 거부하는 안전 장치']])
+    .map(t=>`<tr><th style="width:32%">${t[0]}</th><td>${t[1]}</td></tr>`).join('')}
+  </tbody></table>
+  <h4 class="sec">단축키</h4>
+  <div class="hint"><b>← →</b> 회전 · <b>↑ ↓</b> Z축 · <b>E</b> Extend · <b>R</b> Retract · <b>H</b> Home · <b>P</b> Pick · <b>O</b> Place · <b>Tab</b> 로봇 전환</div>
+  <div class="hint">틀려도 괜찮습니다. 위쪽 챕터 버튼을 다시 누르면 장비가 초기 상태로 돌아갑니다.</div>
+  <h4 class="sec">이 책의 전제</h4>
+  <div class="hint">이 시뮬레이터는 <b>로봇 좌표(티칭)가 이미 정확히 잡혀 있다고 가정</b>합니다.
+   그래서 Extend를 누르면 언제나 정확한 자리에 섭니다.
+   실제 장비에서는 각 스테이션의 좌표를 사람이 0.1&nbsp;mm 단위로 잡아 저장해야 하고,
+   그 작업이 셋업 시간의 상당 부분을 차지합니다. 티칭은 교재를 <b>실무 수준</b>으로 열면 자세히 나옵니다.</div>`;
+}
+function paneManual(){
+  const r=R(), st=cur(), sc=WEEK[WK].scope, hasVac=sc.includes('all')||sc.includes('vac');
+  return `
+  ${hasVac?`<h4 class="sec">제어 대상</h4>
+  <div class="seg"><button class="${S.who==='efem'?'on':''}" data-a="selE">EFEM Robot (대기)</button>
+  <button class="${S.who==='vac'?'on':''}" data-a="selV">Vacuum Robot (진공)</button></div>`:''}
+  <h4 class="sec">현재 상태</h4>
+  <div class="row"><span>목표 스테이션</span><span class="v" id="mvst" style="color:var(--ok)">${st.n}</span></div>
+  <div class="row"><span>R축 (전진)</span><span class="v" id="mvr">${(r.R-RET).toFixed(0)} mm</span></div>
+  <div class="row"><span>θ축 (회전)</span><span class="v" id="mva">${r.a.toFixed(0)}°</span></div>
+  <div class="row"><span>Z축 (높이/슬롯)</span><span class="v" id="mvz">${r.z}</span></div>
+  <h4 class="sec">준비 동작</h4>
+  <div class="grid g3">
+    <button class="btn k ${r.init?'on':''}" data-a="init">Initialize</button>
+    <button class="btn k ${r.homed?'on':''}" data-a="home">Home</button>
+    <button class="btn k" data-a="reset">Reset</button>
+  </div>
+  <h4 class="sec">축 조작</h4>
+  <div class="grid g3">
+    <button class="btn k" data-a="rotL">◀ Rotate</button>
+    <button class="btn k" data-a="up">▲ Z Up</button>
+    <button class="btn k" data-a="rotR">Rotate ▶</button>
+    <button class="btn k" data-a="ext">Extend</button>
+    <button class="btn k" data-a="dn">▼ Z Down</button>
+    <button class="btn k" data-a="ret">Retract</button>
+  </div>
+  <h4 class="sec">웨이퍼 취급</h4>
+  <div class="grid g3">
+    <button class="btn k" data-a="pick">Pick</button>
+    <button class="btn k" data-a="place">Place</button>
+    <button class="btn k ${S.al.aligning?'on':''}" data-a="align">Align</button>
+  </div>
+  <div class="hint">Pick/Place는 <b>암이 전진(Extend)한 상태</b>에서만 됩니다. 전진한 채로 회전하면 Collision Interlock이 걸립니다 — 실제 장비와 같은 조건입니다.</div>`;
+}
+
+function paneDrill(){
+  const list=DRILL[WEEK[WK].n]||[];
+  if(!list.length) return '<div class="empty">이 챕터에는 훈련이 없습니다</div>';
+  const d=DR.d;
+  let head='';
+  if(d){
+    const t=DR.tgt;
+    head=`<div class="drun">
+      <div class="dl">진행 중 · ${d.title}</div>
+      ${d.type==='tour'&&t?`<div class="dtg"><span>${ST.efem[t.st].n}</span><b>Z ${t.z}</b></div>
+        <div class="dsub">팔은 수축(Retract) 상태여야 인정됩니다</div>`:''}
+      ${d.type==='route'?`<div class="dsub" style="margin-bottom:6px">남은 목표 ${DR.rem.length}개 — 순서는 자유</div>
+        <div class="dsub">${DR.rem.map(t=>
+          `<span class="chip">${ST.efem[t.st].n.split(' ')[0]} Z${t.z}</span>`).join('')}</div>`:''}
+      ${d.type==='codes'?`<div class="dsub">${d.codes.map(c=>
+          `<span class="chip ${DR.got.includes(c)?'on':''}">${c}</span>`).join('')}</div>`:''}
+      <div class="dstat">
+        <span>진행 <b id="dpg">${d.type==='codes'?(DR.got.length+' / '+d.codes.length):(DR.idx+' / '+d.n)}</b></span>
+        <span>시간 <b id="dtm">${drillElapsed()}s</b></span>
+        <span>조작 <b id="dop">${OPS-DR.ops0}</b></span>
+      </div>
+      ${d.limitSec?`<div class="dsub">제한 ${d.limitSec}초</div>`:''}
+      ${d.maxOps?`<div class="dsub">조작 ${d.maxOps}회 이내</div>`:''}
+      ${d.maxAlarm!==undefined?`<div class="dsub" style="color:var(--warn)">알람 ${d.maxAlarm}회까지 허용 · 현재 ${C.alarm-DR.alarm0}회</div>`:''}
+      <button class="btn k danger" data-a="drStop" style="width:100%;margin-top:9px">중단</button>
+      <div class="hint" style="margin-top:8px">${d.tip}</div>
+    </div>`;
+  }
+  const cards=list.map(x=>{
+    const done=DR.done[x.id], best=DR.best[x.id];
+    const rec = best===undefined?'':(x.record==='time'?` · 최고 ${best}초`:` · 최소 ${best}회`);
+    return `<div class="dcard ${done?'done':''}">
+      <div class="dt">${x.title}${done?'<span class="ck">완료</span>':''}</div>
+      <div class="dd">${x.desc}</div>
+      ${rec?`<div class="drec">기록${rec}</div>`:''}
+      <button class="btn k ${done?'':'on'}" data-a="drGo:${x.id}" ${d?'disabled':''}
+        style="width:100%;margin-top:8px">${done?'다시 하기':'시작'}</button>
+    </div>`;}).join('');
+  const fin=list.every(x=>DR.done[x.id]);
+  return `<h4 class="sec">훈련</h4>
+  ${DR.fail?`<div class="dfail">실패 — ${DR.fail}. 다시 시작하세요.</div>`:''}
+  ${DR.msg&&!d?`<div class="dok">${DR.msg}</div>`:''}
+  ${head}
+  ${cards}
+  ${fin?'<div class="dok" style="margin-top:10px">네 가지를 모두 마쳤습니다. 기록을 줄여보거나 다음 챕터로 넘어가세요.</div>':''}
+  <div class="hint">훈련은 <b>제어 대상이 EFEM Robot일 때</b>만 판정됩니다.</div>`;
+}
+
+function panePort(){
+  return `<h4 class="sec">Load Port 조작</h4>
+  <div class="grid g3">
+    <button class="btn k ${S.lp.docked?'on':''}" data-a="dock">${S.lp.docked?'Undock':'Docking'}</button>
+    <button class="btn k ${S.lp.door?'on':''}" data-a="door">Door ${S.lp.door?'Close':'Open'}</button>
+    <button class="btn k ${S.lp.mapped?'on':''}" data-a="map">Mapping</button>
+  </div>
+  <h4 class="sec">Slot Mapping 결과 vs 실제</h4>
+  <table class="tb2"><thead><tr><th>SLOT</th><th>매핑 신호</th><th>실제 웨이퍼</th></tr></thead><tbody>
+  ${S.foup.map((s,i)=>{
+    const m=S.lp.mapped?S.lp.map[i]:null, real=!!s.wafer;
+    const bad=S.lp.mapped&&m!==real;
+    return `<tr style="${bad?'color:#ff9a9a':''}"><td>${s.slot}</td>
+      <td>${m===null?'—':(m?'감지':'없음')}</td><td>${real?(s.wafer.id+(s.wafer.al?' (정렬됨)':'')):'없음'}</td></tr>`;}).join('')}
+  </tbody></table>
+  <div class="hint">매핑 신호와 실제가 다르면 <b>Mapping Error</b>입니다. 이 상태로 Pick하면 빈 슬롯을 집으러 가서 Wafer Presence 알람이 납니다.</div>`;
+}
+
+function paneVac(){
+  const pct=Math.max(0,Math.min(1,Math.log10(S.ll.p/0.01)/Math.log10(760/0.01)));
+  return `<h4 class="sec">Load Lock 압력</h4>
+  <div class="row"><span>Pressure Sensor</span><span class="v" id="vvp" style="color:${S.ll.p<1?'var(--vac)':'var(--warn)'}">${fmtP()}</span></div>
+  <div id="msBar" style="height:8px"><i id="vvb" style="width:${(pct*100).toFixed(0)}%;background:${S.ll.p<1?'var(--vac)':'var(--warn)'}"></i></div>
+  <h4 class="sec">펌프 / 밸브</h4>
+  <div class="grid g2">
+    <button class="btn k ${S.ll.pump?'on':''}" data-a="pump">Pump Down</button>
+    <button class="btn k ${S.ll.vent?'on':''}" data-a="vent">Vent</button>
+    <button class="btn k ${S.ll.atmV?'on':''}" data-a="atmV">대기측 Gate Valve</button>
+    <button class="btn k ${S.ll.tmV?'on':''}" data-a="tmV">진공측 Gate Valve</button>
+  </div>
+  <h4 class="sec">밸브 개방 조건</h4>
+  <table class="tb2"><tbody>
+   <tr><th>대기측 Valve</th><td>압력 ≥ 700 Torr, 진공측 닫힘</td></tr>
+   <tr><th>진공측 Valve</th><td>압력 ≤ 1 Torr, 대기측 닫힘</td></tr>
+   <tr><th>공통</th><td>양쪽 동시 개방 금지 · 로봇 진입 중 닫기 금지</td></tr>
+  </tbody></table>
+  <div class="hint">Load Lock이 존재하는 이유: 공정 챔버의 진공을 깨지 않고 대기 중의 웨이퍼를 넣기 위해서입니다.</div>`;
+}
+
+function paneSensor(){
+  return `<h4 class="sec">센서 상태 (실시간)</h4>
+  ${sensors().map((s,i)=>`<div class="row"><span><span class="dot" id="sd${i}" style="background:${s[1]?'var(--ok)':'#39536b'}"></span>${s[0]}</span><span class="v" id="sv${i}" style="color:${s[1]?'var(--ok)':'var(--tx2)'}">${s[2]}</span></div>`).join('')}
+  <div class="hint">센서는 <b>장비가 지금 어떤 상태인지 판단하는 유일한 근거</b>입니다. 인터록도 알람도 모두 이 신호로 판정합니다.</div>`;
+}
+
+function paneLog(){
+  return `<h4 class="sec">알람 · 이벤트 로그</h4>
+  <div style="display:flex;gap:6px;margin-bottom:8px">
+    <button class="btn k" data-a="clearlog" style="flex:1">로그 지우기</button>
+    <button class="btn k" data-a="copylog" style="flex:1">로그 복사</button>
+  </div><div id="log"></div>`;
+}
+
+const FAULTS=[
+ ['pump','Vacuum Timeout','진공펌프 성능 저하 — Pump Down 시 목표 압력 미도달'],
+ ['map','Mapping Error','매핑 신호와 실제 슬롯 상태 불일치'],
+ ['wps','Wafer Presence 이상','End Effector 센서 신호 불량으로 Pick 실패'],
+ ['enc','Encoder 편차','θ축 위치 신호에 오차 발생']
+];
+function paneTrouble(){
+  return `<h4 class="sec">고장 시나리오 주입</h4>
+  <div class="grid">${FAULTS.map(f=>`<button class="btn k ${S.fault[f[0]]?'danger on':''}" data-a="flt:${f[0]}" style="text-align:left">${S.fault[f[0]]?'■':'□'} ${f[1]} — <span style="color:var(--tx3)">${f[2]}</span></button>`).join('')}</div>
+  <div class="grid g2" style="margin-top:6px">
+    <button class="btn k hot" data-a="rndFault">무작위 고장</button>
+    <button class="btn k" data-a="reset">Reset (복구)</button>
+  </div>
+  <h4 class="sec">고장 진단 보고서</h4>
+  ${['Problem','Observed Sensor','Observed Log','Possible Cause','Corrective Action','Result']
+    .map(k=>`<label class="f">${k}</label><textarea rows="2" data-rpt="${k}"></textarea>`).join('')}
+  <div class="grid g2" style="margin-top:8px">
+    <button class="btn k" data-a="rptFill">센서·로그 자동 채우기</button>
+    <button class="btn k on" data-a="rptCopy">보고서 복사</button>
+  </div>
+  <div class="hint">진단 순서: <b>현상 → 센서 → 로그 → 원인 → 조치 → 확인</b>. 이 순서가 실제 장비 엔지니어의 작업 순서입니다.</div>`;
+}
+
+/* ── 시퀀스 ─────────────────────────────────────────────── */
+const CMDS=[
+ ['INIT','로봇 초기화'],['HOME','원점 복귀'],['SELECT efem','EFEM 로봇 선택'],['SELECT vac','진공 로봇 선택'],
+ ['DOCK','FOUP 도킹'],['DOOR OPEN','도어 열기'],['MAP','슬롯 매핑'],
+ ['SLOT 1','슬롯 1 선택'],['SLOT 2','슬롯 2 선택'],['SLOT 3','슬롯 3 선택'],
+ ['MOVE foup','FOUP로 회전'],['MOVE aligner','정렬기로 회전'],['MOVE ll','로드락으로 회전'],
+ ['MOVE pm1','PM1으로 회전'],['MOVE pm2','PM2로 회전'],
+ ['EXTEND','암 전진'],['RETRACT','암 수축'],['PICK','웨이퍼 집기'],['PLACE','웨이퍼 놓기'],['ALIGN','정렬 실행'],
+ ['ATM VALVE','대기측 밸브 토글'],['TM VALVE','진공측 밸브 토글'],['PUMP','배기'],['VENT','대기 복귀'],
+ ['WAIT 2','2초 대기'],['CHECK wafer','웨이퍼 감지 확인'],['CHECK vacuum','진공 도달 확인'],['CHECK door','도어 열림 확인']
+];
+function paneSeq(){
+  return `<h4 class="sec">시퀀스 (블록 ${SEQ.length})</h4>
+  <div id="seqList"></div>
+  <div class="grid g3">
+    <button class="btn k on" data-a="seqRun">▶ 실행</button>
+    <button class="btn k" data-a="seqStop">■ 정지</button>
+    <button class="btn k" data-a="seqClear">비우기</button>
+  </div>
+  <div class="grid g2" style="margin-top:6px">
+    <button class="btn k" data-a="seqSample">예시 시퀀스 불러오기</button>
+    <button class="btn k" data-a="seqCopy">시퀀스 복사</button>
+  </div>
+  <h4 class="sec">블록 팔레트 (눌러서 추가)</h4>
+  <div class="grid g2">${CMDS.map(c=>`<button class="btn k" data-a="seqAdd:${c[0]}" title="${c[1]}" style="font-size:10px;padding:7px 4px">${c[0]}</button>`).join('')}</div>
+  <div class="hint">CHECK 블록은 조건이 만족되지 않으면 <b>그 자리에서 시퀀스를 정지</b>시킵니다. 실제 장비의 조건 분기와 같은 역할입니다.</div>`;
+}
+function renderSeq(){
+  const el=$('#seqList'); if(!el)return;
+  el.innerHTML=SEQ.length?SEQ.map((s,i)=>
+    `<div class="sq ${s.st||''}" data-i="${i}"><span class="n">${String(i+1).padStart(2,'0')}</span><span>${s.c}</span><button class="x" data-a="seqDel:${i}">✕</button></div>`).join('')
+    :'<div class="empty">아래 팔레트를 눌러 블록을 추가하세요</div>';
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+let RUNNING=false;
+function moveTo(k){
+  const r=R(), i=sts().findIndex(s=>s.k===k);
+  if(i<0){ fail('SEQ-001','현재 로봇으로 갈 수 없는 스테이션: '+k,'robot'); return false; }
+  if(extended(r)){ fail('ALM-201','전진 상태에서 이동 명령 — 먼저 Retract 하세요.','robot'); return false; }
+  if(!guard('rot'))return false;
+  r.si=i; let t=sts()[i].ang; while(t-r.a>180)t-=360; while(t-r.a<-180)t+=360; r.at=t;
+  log('I','MOVE','스테이션 이동 → '+sts()[i].n); return true;
+}
+function execCmd(line){
+  const [c,arg]=[line.split(' ')[0],line.split(' ').slice(1).join(' ')];
+  switch(c){
+    case 'INIT':return A.init(); case 'HOME':return A.home();
+    case 'SELECT':S.who=arg;log('I','SEL','제어 대상 '+arg);return true;
+    case 'DOCK':return S.lp.docked?true:A.dock();
+    case 'DOOR':return S.lp.door?true:A.door();
+    case 'MAP':return A.map();
+    case 'SLOT':{const r=R();if(!guard('z'))return false;r.z=+arg;log('I','ZAXIS','Slot '+arg+' 선택');return true;}
+    case 'MOVE':return moveTo(arg);
+    case 'EXTEND':return A.ext(); case 'RETRACT':return A.ret();
+    case 'PICK':return A.pick(); case 'PLACE':return A.place(); case 'ALIGN':return A.align();
+    case 'ATM':return A.atmV(); case 'TM':return A.tmV();
+    case 'PUMP':return A.pump(); case 'VENT':return A.vent();
+    case 'WAIT':return true;
+    case 'CHECK':{
+      const m={wafer:()=>!!R().wafer,vacuum:()=>S.ll.p<1,door:()=>S.lp.door}[arg];
+      if(m&&m()){log('S','CHECK','조건 만족 : '+arg);return true;}
+      fail('SEQ-002','SENSOR CHECK 실패 : '+arg+' 조건 불만족으로 시퀀스 정지','robot');return false;}
+  }
+  return true;
+}
+async function settle(line){
+  const c=line.split(' ')[0];
+  if(c==='WAIT'){await sleep((+line.split(' ')[1]||1)*1000);return;}
+  const t0=Date.now();
+  while(Date.now()-t0<12000){
+    if(!RUNNING)return;
+    const b=busy(R())||S.al.aligning||S.ll.pump||S.ll.vent;
+    if(!b)break; await sleep(60);
+  }
+  await sleep(150);
+}
+async function runSeq(){
+  if(RUNNING)return; if(!SEQ.length){toast('시퀀스가 비어 있습니다',false);return;}
+  RUNNING=true; SEQ.forEach(s=>s.st=''); log('I','SEQ','자동 시퀀스 실행 시작 ('+SEQ.length+' 스텝)');
+  for(let i=0;i<SEQ.length;i++){
+    if(!RUNNING)break;
+    SEQ.forEach((s,j)=>s.st=j<i?s.st:''); SEQ[i].st='cur'; renderSeq();
+    const good=execCmd(SEQ[i].c);
+    if(!good){SEQ[i].st='err';renderSeq();RUNNING=false;log('E','SEQ','시퀀스 중단 — '+(i+1)+'번 블록에서 오류');toast('시퀀스 중단: '+SEQ[i].c,false);return;}
+    await settle(SEQ[i].c);
+    SEQ[i].st='ok'; renderSeq();
+  }
+  if(RUNNING){C.seq++;log('S','SEQ','시퀀스 정상 완료');ok('시퀀스 완료');}
+  RUNNING=false;
+}
+const SAMPLE=['INIT','HOME','DOCK','DOOR OPEN','MAP','MOVE foup','SLOT 1','EXTEND','PICK','RETRACT',
+  'MOVE aligner','EXTEND','PLACE','RETRACT','ALIGN','EXTEND','PICK','RETRACT',
+  'ATM VALVE','MOVE ll','EXTEND','PLACE','RETRACT','ATM VALVE','PUMP','CHECK vacuum'];
+
+/* =========================================================================
+   5. 화면 갱신 · 이벤트 · 메인 루프
+   ========================================================================= */
+const RPT={};
+function renderPane(){
+  const f={guide:paneGuide,manual:paneManual,drill:paneDrill,port:panePort,vac:paneVac,seq:paneSeq,sensor:paneSensor,log:paneLog,trouble:paneTrouble}[TAB];
+  $('#pane').innerHTML=f?f():'';
+  if(TAB==='seq')renderSeq();
+  if(TAB==='log')renderLog();
+  if(TAB==='guide')renderMissions();
+  if(TAB==='trouble'){
+    $$('[data-rpt]').forEach(t=>{ t.value=RPT[t.dataset.rpt]||'';
+      t.oninput=()=>{ RPT[t.dataset.rpt]=t.value;
+        RPT_DONE=['Problem','Observed Sensor','Observed Log','Possible Cause','Corrective Action','Result'].every(k=>(RPT[k]||'').trim().length>1); }; });
+  }
+}
+function renderLog(){
+  const el=$('#log'); if(!el)return;
+  el.innerHTML=LOG.length?LOG.map(l=>`<div class="lg ${l.lv}"><span class="t">${l.t}</span>[${l.code}] ${l.msg}</div>`).join('')
+    :'<div class="empty">기록된 이벤트가 없습니다</div>';
+}
+function renderMissions(){
+  const el=$('#msList'); if(!el)return;
+  const w=WEEK[WK], g=GUIDE[w.n]||{}, m=w.m;
+  const done=m.map(x=>{try{return !!x[1]()}catch(e){return false}});
+  const at=done.indexOf(false);
+  const nowBox = at<0
+    ? `<div class="nowb ok">이 챕터을 모두 마쳤습니다. 다음 챕터으로 넘어가거나, 다른 방법으로도 되는지 확인해 보세요.</div>`
+    : `<div class="nowb"><span class="nl">지금 할 일 ${at+1} / ${m.length}</span>
+       <b>${m[at][0]}</b>${(g.how&&g.how[at])?`<em>${g.how[at]}</em>`:''}</div>`;
+  el.innerHTML = nowBox + m.map((x,i)=>
+    `<div class="ms ${done[i]?'done':''} ${i===at?'at':''}"><span class="cb">✓</span><span>${x[0]}</span></div>`).join('');
+  const bar=$('#msBar i'); if(bar)bar.style.width=(done.filter(Boolean).length/m.length*100)+'%';
+}
+function liveUpdate(){
+  const r=R(), st=cur(), q=id=>document.getElementById(id);
+  if(TAB==='manual'){
+    if(q('mvst')){ q('mvst').textContent=st.n;
+      q('mvr').textContent=(r.R-RET).toFixed(0)+' mm '+(extended(r)?'· EXTEND':'· RETRACT');
+      q('mva').textContent=r.a.toFixed(0)+'°'; q('mvz').textContent=r.z; }
+  } else if(TAB==='sensor'){
+    sensors().forEach((s,i)=>{ const d=q('sd'+i), v=q('sv'+i); if(!d)return;
+      d.style.background=s[1]?'var(--ok)':'#39536b';
+      v.textContent=s[2]; v.style.color=s[1]?'var(--ok)':'var(--tx2)'; });
+  } else if(TAB==='drill'){
+    if(DR.d){ const g=q('dpg'), tm=q('dtm'), op=q('dop');
+      if(tm){ tm.textContent=drillElapsed()+'s'; op.textContent=OPS-DR.ops0;
+        g.textContent = DR.d.type==='codes' ? (DR.got.length+' / '+DR.d.codes.length)
+                                            : (DR.idx+' / '+DR.d.n); } }
+  } else if(TAB==='vac'){
+    const p=q('vvp'), b=q('vvb'); if(!p)return;
+    const c=S.ll.p<1?'var(--vac)':'var(--warn)';
+    p.textContent=fmtP(); p.style.color=c;
+    b.style.width=(Math.max(0,Math.min(1,Math.log10(S.ll.p/0.01)/Math.log10(760/0.01)))*100).toFixed(0)+'%';
+    b.style.background=c;
+  }
+}
+function renderStatus(){
+  const r=R(), st=cur();
+  $('#status').innerHTML=[
+    ['제어',(S.who==='efem'?'EFEM':'VACUUM')],
+    ['STATION',st.n],['R',(r.R-RET).toFixed(0)],['θ',r.a.toFixed(0)+'°'],['Z',r.z],
+    ['HAND',r.wafer?r.wafer.id:'—'],['LL',fmtP()],
+    ['ALARM',C.alarm]
+  ].map(x=>`<div>${x[0]} <b>${x[1]}</b></div>`).join('')
+   +(S.estop?'<div style="color:var(--bad)"><b>E-STOP</b></div>':'');
+}
+function renderLesson(){
+  const w=WEEK[WK];
+  $('#lsTag').textContent='CH '+String(w.n).padStart(2,'0')+' · '+w.t;
+  $('#lsTitle').textContent=w.ti;
+  $('#lsGoal').textContent=w.g;
+}
+function renderWeeks(){
+  $('#weekbar').innerHTML=WEEK.map((w,i)=>
+    `<button class="wk ${i===WK?'on':''} ${w.review?'rev':''}" data-w="${i}" title="${w.ti}">${String(w.n).padStart(2,'0')}</button>`).join('');
+  $$('#weekbar .wk').forEach(b=>b.onclick=()=>setWeek(+b.dataset.w));
+}
+function setWeek(i){
+  WK=i; RUNNING=false; reset(true); SEQ=[]; RPT_DONE=false; QZ={};
+  DR={d:null,idx:0,t0:0,ops0:0,alarm0:0,tgt:null,rem:[],got:[],done:{},best:{},msg:'',fail:''}; OPS=0;
+  const w=WEEK[i];
+  log('I','CH','CH '+String(w.n).padStart(2,'0')+' — '+w.ti+' 시작. 장비 초기 상태로 복귀했습니다.');
+  TAB=w.tabs.includes(TAB)?TAB:w.tabs[0];
+  renderWeeks(); renderLesson(); renderTabs(); renderPane(); renderStatus(); draw();
+}
+
+/* 액션 라우팅 */
+const UI={
+  selE:()=>{S.who='efem';return true;}, selV:()=>{S.who='vac';return true;},
+  book:()=>{openBook();return true;},
+  drStop:()=>{drillStop('사용자 중단');return true;},
+  clearlog:()=>{LOG.length=0;return true;},
+  copylog:()=>{navigator.clipboard&&navigator.clipboard.writeText(LOG.map(l=>`${l.t} [${l.code}] ${l.msg}`).join('\n'));ok('로그를 복사했습니다');return true;},
+  rndFault:()=>{const f=FAULTS[Math.floor(Math.random()*FAULTS.length)][0];S.fault[f]=true;
+    log('W','FAULT','원인이 표시되지 않는 고장이 주입되었습니다. 센서와 로그로 찾아내세요.');toast('고장이 주입되었습니다 — 진단하세요',false);return true;},
+  rptFill:()=>{const s=sensors().filter(x=>!x[1]).map(x=>x[0]+'='+x[2]).join(' / ');
+    RPT['Observed Sensor']=s||'이상 센서 없음';
+    RPT['Observed Log']=LOG.filter(l=>l.lv==='E').slice(0,3).map(l=>`[${l.code}] ${l.msg}`).join(' | ')||'오류 로그 없음';
+    renderPane();ok('센서·로그를 채웠습니다');return true;},
+  rptCopy:()=>{const t=['Problem','Observed Sensor','Observed Log','Possible Cause','Corrective Action','Result']
+      .map(k=>k+': '+(RPT[k]||'')).join('\n');
+    navigator.clipboard&&navigator.clipboard.writeText(t);ok('보고서를 복사했습니다');return true;},
+  seqRun:()=>{runSeq();return true;}, seqStop:()=>{RUNNING=false;log('W','SEQ','사용자 정지');return true;},
+  seqClear:()=>{SEQ=[];return true;},
+  seqSample:()=>{SEQ=SAMPLE.map(c=>({c}));ok('예시 시퀀스를 불러왔습니다');return true;},
+  seqCopy:()=>{navigator.clipboard&&navigator.clipboard.writeText(SEQ.map(s=>s.c).join('\n'));ok('시퀀스를 복사했습니다');return true;}
+};
+$('#pane').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]'); if(!b)return;
+  const p=b.dataset.a.split(':'), a=p[0], arg=p.slice(1).join(':');
+  if(a==='seqAdd'){SEQ.push({c:arg});renderPane();return;}
+  if(a==='seqDel'){SEQ.splice(+arg,1);renderPane();return;}
+  if(a==='qz'){ const [wn,qi,ai]=arg.split(':'); QZ[wn+'-'+qi]=+ai; renderPane(); return; }
+  if(a==='drGo'){ drillStart(arg); renderPane(); return; }
+  if(a==='flt'){S.fault[arg]=!S.fault[arg];log(S.fault[arg]?'W':'I','FAULT',(S.fault[arg]?'주입':'해제')+' : '+FAULTS.find(f=>f[0]===arg)[1]);renderPane();return;}
+  if(A[a]) OPS++;                        // 로봇 조작만 센다
+  (UI[a]||A[a]||(()=>{}))();
+  renderPane(); renderStatus(); renderMissions();
+});
+$('#estop').onclick=()=>{A.estop();$('#estop').classList.toggle('on',S.estop);renderPane();renderStatus();};
+
+/* 단축키 */
+addEventListener('keydown',e=>{
+  if(/INPUT|TEXTAREA/.test(e.target.tagName))return;
+  if(bookOpen())return;                       // 교재를 보는 동안엔 장비 단축키 차단
+  const k={ArrowLeft:'rotL',ArrowRight:'rotR',ArrowUp:'up',ArrowDown:'dn',
+    e:'ext',r:'ret',h:'home',p:'pick',o:'place',i:'init'}[e.key];
+  if(e.key==='Tab'){e.preventDefault();A.swap();renderPane();renderStatus();return;}
+  if(!k)return; e.preventDefault(); OPS++; A[k](); renderPane(); renderStatus();
+});
+
+/* 메인 루프 */
+let last=performance.now(), acc=0;
+function loop(t){
+  const dt=Math.min((t-last)/1000,0.05); last=t; acc+=dt;
+  tick(dt); draw(); drillTick();
+  liveUpdate();
+  if(acc>0.4){ acc=0; renderStatus(); renderMissions(); }
+  requestAnimationFrame(loop);
+}
+/* ── 교재(데크) 오버레이 ────────────────────────────────
+   데크 경로는 URL 파라미터 deck 으로 받는다.
+   · 서고: /topic-sims/ 와 /topic-decks/ 가 다른 폴더 → 래퍼(jsx)가 절대경로를 넘김
+   · 단독 실행: 같은 폴더에 둔다고 보고 상대경로
+   경로를 코드가 추측해서 만들지 않도록 기본값을 하나로만 둔다. */
+const DECK=new URLSearchParams(location.search).get('deck')||'./wafer-transfer.html';
+let bookLoaded=false;
+function openBook(){
+  const w=$('#bookwrap'), f=$('#book');
+  if(!bookLoaded){
+    bookLoaded=true; f.src=DECK;
+    f.onerror=()=>{ f.style.display='none';
+      const d=document.createElement('div'); d.id='bookerr';
+      d.innerHTML='교재 파일을 찾지 못했습니다.<br><span style="font-family:var(--mono);font-size:11px;color:#6d90aa">'
+        +DECK+'</span><br>시뮬레이터와 같은 폴더에 <b>wafer-transfer.html</b> 을 두거나, 주소 끝에 <b>?deck=경로</b> 를 붙여 주세요.';
+      w.appendChild(d); };
+  }
+  w.classList.remove('hide');
+}
+function closeBook(){ $('#bookwrap').classList.add('hide'); }
+const bookOpen=()=>!$('#bookwrap').classList.contains('hide');
+$('#bookbtn').onclick=openBook;
+$('#bookclose').onclick=closeBook;
+addEventListener('keydown',e=>{ if(e.key==='Escape'&&bookOpen()){ e.preventDefault(); closeBook(); } });
+
+/* 서고에서 mount 옵션으로 특정 챕터만 열 수 있게: ?ch=5&lock=1
+   (이전에 쓰던 unit= · week= 도 계속 인식한다) */
+const QP=new URLSearchParams(location.search);
+const W0=Math.max(1,Math.min(WEEK.length,+QP.get('ch')||+QP.get('unit')||+QP.get('week')||1))-1;
+if(QP.get('lock')==='1'){ $('#weekbar').style.display='none'; }
+setWeek(W0);
+log('I','BOOT','시뮬레이터 준비 완료. 챕터을 선택하면 장비가 초기 상태로 돌아갑니다.');
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

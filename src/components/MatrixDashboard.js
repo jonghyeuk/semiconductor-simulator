@@ -29,6 +29,16 @@ const matrixData = [
     ]
   },
   {
+    id: 'waferTransfer',
+    name: '웨이퍼 이송',
+    icon: '🤖',
+    color: '#14b8a6',
+    tabs: [
+      // 클릭 시 이송 로봇·센서 시뮬레이터(챕터별 강의자료)가 실행됨
+      { id: 'chapters', name: '이송 로봇·센서', icon: '🤖', tier: 'basic', type: 'simulation' },
+    ]
+  },
+  {
     id: 'vacuum',
     name: 'Vacuum 기초',
     icon: '⚡',
