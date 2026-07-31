@@ -1,0 +1,857 @@
+<!DOCTYPE html><html lang="ko" class="nobase"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ch.1 장치 이해 — 반도체 자동화와 시뮬레이터</title>
+<style>
+/* ═══ 디자인 토큰 (본 챕터 데크는 wafer-transfer.html 과 동일 시스템) ═══
+   청록 = 대기 영역(760 Torr) · 보라 = 진공 영역 · 호박 = 경고 · 적 = 금지 */
+:root{
+  --ac:#35e0c8; --vc:#9b8cff; --wn:#ffb340; --bd:#ff5e5e;
+  --t1:#f2f9ff; --t2:#a9c4d8; --t3:#7fa3bd; --t4:#4f7590;
+  --bx:#132433; --ln:#3a6b8c; --ln2:#294357;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+.slide{ color:var(--t2); font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+.wt-pad{ padding:74px 96px 66px; height:100%; box-sizing:border-box; display:flex; flex-direction:column; position:relative; }
+.wt-eye{ font-family:var(--mono); font-size:23px; letter-spacing:.24em; color:var(--ac); margin-bottom:14px; }
+.wt-eye.v{ color:var(--vc); }
+.h-title{ font-size:64px; line-height:1.14; font-weight:800; letter-spacing:-.025em; margin:0; color:var(--t1); }
+h2.h-title{ font-size:54px; }
+.wt-lead{ font-size:29px; line-height:1.6; color:var(--t2); max-width:1420px; margin-top:16px; }
+.wt-lead b{ color:var(--ac); font-weight:700; }
+.wt-lead b.v{ color:var(--vc); }
+.wt-body{ flex:1; display:flex; gap:40px; margin-top:34px; min-height:0; }
+.wt-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.wt-fig{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; margin-top:26px; }
+.wt-fig svg{ width:100%; height:100%; max-height:100%; }
+.wt-figc{ font-family:var(--mono); font-size:20px; color:var(--t4); text-align:center; margin-top:10px; letter-spacing:.04em; }
+.wt-card{ background:rgba(19,36,51,.72); border:1px solid var(--ln2); border-left:5px solid var(--ac);
+  border-radius:11px; padding:24px 28px; margin-bottom:16px; }
+.wt-card h3{ font-size:29px; margin:0 0 9px; color:var(--t1); font-weight:700; }
+.wt-card p{ font-size:24px; line-height:1.6; color:var(--t2); margin:0; }
+.wt-card.v{ border-left-color:var(--vc); }
+.wt-card.warn{ border-left-color:var(--bd); }
+.wt-num{ display:flex; gap:18px; align-items:flex-start; margin-bottom:20px; }
+.wt-num i{ flex:none; width:50px; height:50px; border-radius:13px; background:var(--ac); color:#03231e;
+  font-family:var(--mono); font-size:25px; font-weight:800; font-style:normal;
+  display:flex; align-items:center; justify-content:center; }
+.wt-num.v i{ background:var(--vc); color:#140f2e; }
+.wt-num div{ font-size:25px; line-height:1.5; color:var(--t2); padding-top:6px; }
+.wt-num div b{ color:var(--t1); display:block; font-size:28px; margin-bottom:3px; }
+.wt-tbl{ width:100%; border-collapse:collapse; font-size:23px; }
+.wt-tbl th,.wt-tbl td{ text-align:left; padding:13px 15px; border-bottom:1px solid var(--ln2); vertical-align:top; }
+.wt-tbl th{ font-family:var(--mono); font-size:19px; letter-spacing:.1em; color:var(--t3); font-weight:500; }
+.wt-tbl td b{ color:var(--ac); }
+.wt-tbl td b.v{ color:var(--vc); }
+.wt-note{ margin-top:auto; padding:19px 24px; background:rgba(53,224,200,.09); border:1px solid #2c6d63;
+  border-radius:10px; font-size:24px; line-height:1.5; color:#bfe9e1; }
+.wt-note b{ color:var(--ac); }
+.wt-note.warn{ background:rgba(255,94,94,.09); border-color:#7a3232; color:#ffc4c4; }
+.wt-note.warn b{ color:#ff8a8a; }
+.wt-note.v{ background:rgba(155,140,255,.1); border-color:#4d3f8c; color:#d5cdff; }
+.wt-note.v b{ color:var(--vc); }
+.wt-key{ display:inline-block; font-family:var(--mono); font-size:21px; padding:3px 11px;
+  border:1px solid #45688a; border-bottom-width:3px; border-radius:6px; background:#17293a; color:#dceaf5; margin:0 3px; }
+.wt-map{ position:absolute; top:74px; right:96px; display:flex; align-items:center; gap:0; }
+.wt-map .n{ display:flex; flex-direction:column; align-items:center; gap:7px; }
+.wt-map .d{ width:13px; height:13px; border-radius:50%; background:#24425c; }
+.wt-map .n.on .d{ background:var(--ac); box-shadow:0 0 0 6px rgba(53,224,200,.16); }
+.wt-map .n.vac .d{ background:#2f2a52; }
+.wt-map .n.vac.on .d{ background:var(--vc); box-shadow:0 0 0 6px rgba(155,140,255,.18); }
+.wt-map .n span{ font-family:var(--mono); font-size:14px; letter-spacing:.1em; color:#3f6480; }
+.wt-map .n.on span{ color:var(--t1); }
+.wt-map .b{ width:30px; height:2px; background:#24425c; margin:0 5px 21px; }
+.fx-box{ fill:var(--bx); stroke:var(--ln); stroke-width:2.5; }
+.fx-vac{ fill:#161a35; stroke:#6f63c9; stroke-width:2.5; }
+.fx-w{ fill:#c9dced; stroke:#eef6ff; stroke-width:1.5; }
+.fx-lbl{ font-family:var(--mono); font-size:21px; fill:#9fc0d6; }
+.fx-sub{ font-family:var(--mono); font-size:17px; fill:#5d829c; }
+.fx-cap{ font-family:var(--mono); font-size:19px; fill:var(--ac); }
+.fx-cap.v{ fill:var(--vc); }
+.fx-arm{ fill:#2c4b66; stroke:#4a7ea6; stroke-width:2.5; }
+.fx-arm.v{ fill:#2f2a52; stroke:#8a7dff; }
+.fx-ln{ stroke:#35e0c8; stroke-width:3; fill:none; }
+.fx-ln.v{ stroke:#9b8cff; }
+.fx-bad{ stroke:var(--bd); stroke-width:4; fill:none; }
+.fx-dim{ opacity:.3; }
+.fx-panel{ fill:#0e1d29; stroke:#274357; stroke-width:2; }
+/* 베이스리스 표시 (단독/서랍 공통) */
+.nobase body{ margin:0; background:#0a141c; overflow:hidden; }
+.nobase .deck-viewport{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+.nobase .deck-stage{ width:1920px; height:1080px; position:relative; transform-origin:center center; }
+.nobase .slide{ position:absolute; inset:0; display:none;
+  background:radial-gradient(1400px 800px at 18% -12%,#17293a 0%,transparent 62%),#0a141c; }
+.nobase .slide.on{ display:block; }
+.nobase #fbnav{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:7px;
+  z-index:9; font-family:var(--mono); font-size:13px; align-items:center; }
+.nobase #fbnav button{ background:#16293a; color:#cfe4f2; border:1px solid #2f5470; border-radius:6px; padding:7px 13px; cursor:pointer; }
+.nobase #fbnav button.on{ background:var(--ac); color:#03231e; border-color:var(--ac); }
+.nobase #fbnav span{ color:#6d90aa; padding:0 6px; }
+</style>
+</head><body>
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true"><defs>
+ <marker id="mA" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#35e0c8"/></marker>
+ <marker id="mV" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9b8cff"/></marker>
+ <marker id="mW" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ffb340"/></marker>
+ <marker id="mR" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ff5e5e"/></marker>
+ <radialGradient id="wg" cx="34%" cy="28%">
+  <stop offset="0%" stop-color="#e8f3fd"/><stop offset="55%" stop-color="#b8cddf"/><stop offset="100%" stop-color="#7d97ad"/></radialGradient>
+</defs></svg>
+
+<div class="deck-viewport"><div class="deck-stage" id="stage">
+
+<!-- ══ 1. 표지 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">로봇및센서실습 · 반도체장비전공 · CHAPTER 1</div>
+  <div class="wt-body" style="margin-top:10px;align-items:center">
+   <div class="wt-col" style="flex:1.05">
+    <h1 class="h-title">장치 이해<br/>웨이퍼는 어떻게 움직이는가</h1>
+    <div class="wt-lead" style="margin-top:26px">반도체 공장에서 웨이퍼를 옮기는 것은 사람이 아니라 <b>로봇</b>입니다.
+     그리고 그 로봇이 지금 무엇을 하는지 아는 유일한 방법은 <b>센서</b>입니다.<br/><br/>
+     1강에서는 장비 전체 그림과, 이 과정을 실습할 <b>시뮬레이터 화면</b>을 익힙니다.</div>
+    <div class="wt-note" style="margin-top:44px;max-width:960px">
+     <b>이 강의의 방식</b> — 슬라이드로 원리를 읽고, 곧바로 왼쪽 시뮬레이터에서 같은 동작을 직접 해봅니다.
+     <b>읽기 → 조작 → 로그 해석 → 정리</b> 의 4단계를 매 챕터 반복합니다.</div>
+   </div>
+   <div class="wt-col" style="flex:.95">
+    <div class="wt-fig" style="margin:0">
+     <svg viewBox="0 0 640 640">
+      <circle cx="320" cy="320" r="252" fill="none" stroke="#1d3549" stroke-width="1"/>
+      <circle cx="320" cy="320" r="288" fill="none" stroke="#152836" stroke-width="1"/>
+      <circle cx="320" cy="320" r="216" fill="#151f2b" stroke="#2c4a63" stroke-width="2"/>
+      <circle cx="320" cy="320" r="216" fill="url(#wg)"/>
+      <path d="M320 104 L306 132 L334 132 Z" fill="#0a141c"/>
+      <g opacity=".22" stroke="#3a5a72" stroke-width="1">
+       <path d="M148 250 H492 M148 320 H492 M148 390 H492"/>
+       <path d="M250 148 V492 M320 148 V492 M390 148 V492"/></g>
+      <circle cx="320" cy="320" r="216" fill="none" stroke="#eef6ff" stroke-width="2" opacity=".5"/>
+      <text class="fx-cap" x="320" y="596" text-anchor="middle" style="font-size:22px">300 mm Wafer · NOTCH = 12시 기준점</text>
+      <path class="fx-ln" d="M320 152 L320 96" opacity=".8"/>
+     </svg>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 2. 학습 목표 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">학습 목표</div>
+  <h2 class="h-title">이 강의가 끝나면 할 수 있는 것</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>장비의 큰 그림을 그린다</b>
+     웨이퍼가 FOUP에서 공정 챔버까지 지나가는 길을 순서대로 말할 수 있다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>세 요소를 구분한다</b>
+     자동화 장비를 <b>구동(로봇)·감지(센서)·제어(인터록/시퀀스)</b> 로 나눠 설명한다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>대기와 진공을 나눈다</b>
+     760&nbsp;Torr 대기 영역과 진공 영역, 그 사이 Load Lock의 역할을 안다.</div></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num v"><i>4</i><div><b>시뮬레이터를 다룬다</b>
+     챕터 바 · 장비 도면 · 학습 패널 · 상태바/로그의 위치와 쓰임을 익힌다.</div></div>
+    <div class="wt-num v"><i>5</i><div><b>첫 조작을 해낸다</b>
+     장치를 클릭해 이름을 확인하고, EFEM 로봇을 <b>Initialize → Home</b> 시킨다.</div></div>
+    <div class="wt-note v"><b>키워드</b> — FOUP · Load Port · EFEM · Pre-aligner · Load Lock ·
+     Transfer Chamber · 인터록 · Home. 지금은 위치만, 자세한 원리는 2강부터.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 3. 왜 로봇인가 ══ -->
+<section class="slide" data-level="intro standard pro" data-here="foup">
+ <div class="wt-pad">
+  <div class="wt-eye">01 · 왜 사람이 아닌가</div>
+  <h2 class="h-title">사람 손이 닿는 순간, 그 웨이퍼는 폐기됩니다</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.1">
+    <div class="wt-fig" style="margin-top:8px">
+     <svg viewBox="0 0 840 460">
+      <text class="fx-lbl" x="0" y="26">같은 배율로 그린 크기 비교</text>
+      <circle cx="150" cy="230" r="140" fill="#1b2c3c" stroke="#3a6b8c" stroke-width="2"/>
+      <text class="fx-lbl" x="150" y="228" text-anchor="middle" fill="#cfe4f2">머리카락</text>
+      <text class="fx-sub" x="150" y="256" text-anchor="middle">약 80 µm</text>
+      <circle cx="420" cy="230" r="34" fill="#3a2a1a" stroke="#c98a3a" stroke-width="2"/>
+      <text class="fx-lbl" x="420" y="316" text-anchor="middle" fill="#e0a860">먼지</text>
+      <text class="fx-sub" x="420" y="342" text-anchor="middle">약 10 µm</text>
+      <circle cx="660" cy="230" r="2.2" fill="#35e0c8"/>
+      <circle cx="660" cy="230" r="30" fill="none" stroke="#35e0c8" stroke-width="1.5" stroke-dasharray="4 6"/>
+      <path class="fx-ln" d="M660 200 L700 150" stroke-width="2"/>
+      <text class="fx-cap" x="706" y="144">회로 선폭</text>
+      <text class="fx-sub" x="706" y="170">0.01 µm 급</text>
+      <text class="fx-sub" x="606" y="300">← 이 점 하나가 회로 굵기</text>
+     </svg>
+    </div>
+    <div class="wt-figc">먼지 한 톨은 회로보다 1000배 굵다 — 얹히면 선이 끊기거나 붙는다</div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>같은 자리에, 수만 번</h3>
+     <p>웨이퍼는 공정마다 정해진 위치에 밀리미터 이하 오차로 놓여야 합니다.
+      사람은 이 정확도를 24시간 반복할 수 없습니다.</p></div>
+    <div class="wt-card v"><h3>진공 안에는 못 들어간다</h3>
+     <p>식각·증착은 공기를 거의 다 빼낸 진공에서 진행됩니다.
+      그 안에서 웨이퍼를 옮길 수 있는 것은 진공용 로봇뿐입니다.</p></div>
+    <div class="wt-card"><h3>웨이퍼 한 장의 값</h3>
+     <p>공정 후반의 웨이퍼 한 장에는 수천만 원어치 칩이 들어 있습니다. 떨어뜨리면 그걸로 끝입니다.</p></div>
+    <div class="wt-note"><b>그래서</b> 장비는 사람의 판단 대신 <b>센서 신호</b>로 상황을 확인하고,
+     조건이 맞지 않으면 <b>스스로 동작을 거부</b>합니다 — 뒤에 나올 인터록입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 4. 수율과 오염 ══ -->
+<section class="slide" data-level="standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">02 · 왜 이렇게까지</div>
+  <h2 class="h-title">한 장의 결함이 공장 전체의 수율입니다</h2>
+  <div class="wt-lead">웨이퍼 한 장에는 수백 개의 칩이 들어 있습니다. 이송 중 생긴 <b>흠집·파티클·정렬 오차</b>는
+   그대로 <b>불량 칩</b>이 되고, 그 비율이 <b>수율(Yield)</b> 입니다.</div>
+  <div class="wt-body">
+   <div class="wt-col">
+    <table class="wt-tbl">
+     <tr><th>이송이 만드는 결함</th><th>결과</th></tr>
+     <tr><td>파티클(먼지) 부착</td><td><b>회로 단선/단락</b> → 해당 칩 불량</td></tr>
+     <tr><td>웨이퍼 뒷면 스크래치</td><td>후속 공정 초점 흐트러짐</td></tr>
+     <tr><td>중심·Notch 정렬 오차</td><td>패턴 겹침 불량(오버레이)</td></tr>
+     <tr><td>낙하·충돌</td><td><b class="v">웨이퍼 1장 전량 손실</b></td></tr>
+    </table>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>클린룸 등급</h3>
+     <p>이송 공간은 Class 1 수준(공기 1ft³당 0.1µm 입자 극소수)으로 관리됩니다.
+      그래서 웨이퍼는 <b>밀폐된 FOUP</b> 안에서만 공장을 이동합니다.</p></div>
+    <div class="wt-note warn"><b>핵심</b> — 이송 장치의 목표는 "빨리 옮기기"가 아니라
+     <b>웨이퍼를 건드리지 않고, 정확한 자리에, 오염 없이</b> 옮기는 것입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 5. 전체 지도 ══ -->
+<section class="slide" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">03 · 전체 지도</div>
+  <h2 class="h-title">웨이퍼 한 장이 지나가는 길</h2>
+  <div class="wt-lead">이 순서만 외우면 장비 절반은 이해한 것입니다.
+   <b>왼쪽은 대기압</b>, <b class="v">오른쪽은 진공</b>, 그 사이에 Load Lock이 있습니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1740 470">
+    <rect x="0" y="18" width="880" height="440" rx="14" fill="rgba(53,224,200,.04)" stroke="#1f4a48" stroke-dasharray="7 7"/>
+    <text class="fx-cap" x="20" y="46">대기 영역 · 760 Torr</text>
+    <rect x="900" y="18" width="840" height="440" rx="14" fill="rgba(155,140,255,.05)" stroke="#3c3470" stroke-dasharray="7 7"/>
+    <text class="fx-cap v" x="920" y="46">진공 영역 · 0.01 Torr 이하</text>
+    <rect class="fx-box" x="26" y="170" width="132" height="190" rx="8"/>
+    <text class="fx-lbl" x="48" y="146">FOUP</text>
+    <g stroke="#26445c" stroke-width="1.5"><path d="M38 200 H146 M38 238 H146 M38 276 H146 M38 314 H146"/></g>
+    <ellipse class="fx-w" cx="92" cy="192" rx="44" ry="6"/>
+    <ellipse class="fx-w" cx="92" cy="230" rx="44" ry="6"/>
+    <ellipse class="fx-w" cx="92" cy="268" rx="44" ry="6"/>
+    <rect class="fx-box" x="176" y="170" width="72" height="190" rx="6"/>
+    <text class="fx-sub" x="182" y="392">LOAD PORT</text>
+    <rect class="fx-box" x="272" y="72" width="420" height="336" rx="12"/>
+    <text class="fx-lbl" x="292" y="104">EFEM</text>
+    <circle class="fx-box" cx="420" cy="162" r="50"/><circle class="fx-w" cx="420" cy="162" r="31"/>
+    <path d="M420 137 L412 152 L428 152 Z" fill="#101f2c"/>
+    <text class="fx-sub" x="484" y="160">PRE-ALIGNER</text>
+    <circle cx="472" cy="300" r="38" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+    <rect class="fx-arm" x="472" y="289" width="116" height="22" rx="8"/>
+    <text class="fx-sub" x="404" y="376">대기 이송 로봇</text>
+    <rect class="fx-box" x="726" y="196" width="188" height="140" rx="8" stroke="#6f63c9"/>
+    <text class="fx-lbl" x="742" y="176">LOAD LOCK</text>
+    <text class="fx-sub" x="742" y="272">760 ⇄ 0.01 Torr</text>
+    <ellipse class="fx-w" cx="820" cy="240" rx="34" ry="8"/>
+    <rect x="708" y="238" width="18" height="56" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <rect x="914" y="238" width="18" height="56" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <text class="fx-sub" x="668" y="230">ATM V</text><text class="fx-sub" x="936" y="230">TM V</text>
+    <rect class="fx-vac" x="956" y="72" width="450" height="336" rx="12"/>
+    <text class="fx-lbl" x="978" y="104" fill="#bcaeff">TRANSFER CHAMBER</text>
+    <circle cx="1120" cy="240" r="38" fill="#1c2340" stroke="#8a7dff" stroke-width="3"/>
+    <rect class="fx-arm v" x="1120" y="229" width="116" height="22" rx="8"/>
+    <text class="fx-sub" x="1058" y="330">진공 이송 로봇</text>
+    <circle class="fx-vac" cx="1310" cy="160" r="60"/><text class="fx-sub" x="1281" y="167">PM 1</text>
+    <circle class="fx-vac" cx="1310" cy="330" r="60"/><text class="fx-sub" x="1281" y="337">PM 2</text>
+    <text class="fx-lbl" x="1404" y="158" fill="#bcaeff">공정 챔버</text>
+    <text class="fx-sub" x="1404" y="186">식각 · 증착</text>
+    <path class="fx-ln" d="M162 250 H172" marker-end="url(#mA)"/>
+    <path class="fx-ln" d="M252 250 Q300 250 340 205" marker-end="url(#mA)"/>
+    <path class="fx-ln" d="M420 216 V246" marker-end="url(#mA)"/>
+    <path class="fx-ln" d="M596 292 Q660 280 700 262" marker-end="url(#mA)"/>
+    <path class="fx-ln v" d="M940 262 H1074" marker-end="url(#mV)"/>
+    <path class="fx-ln v" d="M1244 232 Q1280 220 1250 196" marker-end="url(#mV)"/>
+    <g font-family="ui-monospace,monospace" font-size="18" fill="#4f7590">
+     <text x="86" y="424">①</text><text x="196" y="424">②</text><text x="404" y="424">③</text>
+     <text x="466" y="424">④</text><text x="796" y="424">⑤</text><text x="1096" y="424">⑥</text><text x="1286" y="424">⑦</text></g>
+   </svg>
+  </div>
+  <div class="wt-note"><b>FOUP → Load Port → EFEM 로봇 → Pre-aligner → Load Lock → 진공 로봇 → 공정 챔버.</b>
+   되돌아 나올 때는 정확히 역순입니다.</div>
+ </div>
+</section>
+
+<!-- ══ 6. 대기 vs 진공 ══ -->
+<section class="slide" data-level="intro standard pro" data-here="lock">
+ <div class="wt-pad">
+  <div class="wt-eye">04 · 두 개의 세계</div>
+  <h2 class="h-title">대기 영역과 진공 영역, 그리고 사이의 방</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>대기 영역 · 760 Torr</h3>
+     <p>FOUP · Load Port · EFEM · Pre-aligner. 청정한 공기(또는 질소)로 채워진 상압 공간.
+      여기서 일하는 것이 <b>대기 이송 로봇</b>입니다.</p></div>
+    <div class="wt-card v"><h3>진공 영역 · 0.01 Torr 이하</h3>
+     <p>Transfer Chamber와 공정 챔버. 공기를 거의 다 빼낸 공간.
+      <b class="v">진공 이송 로봇</b>이 웨이퍼를 챔버로 나릅니다.</p></div>
+    <div class="wt-card warn"><h3>Load Lock — 사이의 방</h3>
+     <p>대기와 진공을 직접 이으면 진공이 깨집니다. 그래서 웨이퍼를 작은 방에 넣고
+      <b>펌핑(Pump Down)</b> 하거나 <b>벤트(Vent)</b> 해 압력을 맞춘 뒤 통과시킵니다.</p></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 720 520">
+      <rect x="20" y="120" width="250" height="300" rx="12" fill="rgba(53,224,200,.05)" stroke="#2c6d63" stroke-width="2"/>
+      <text class="fx-cap" x="40" y="152">대기 · 760 Torr</text>
+      <rect x="300" y="180" width="120" height="180" rx="10" class="fx-box" stroke="#6f63c9"/>
+      <text class="fx-lbl" x="316" y="160">LOAD LOCK</text>
+      <ellipse class="fx-w" cx="360" cy="272" rx="40" ry="9"/>
+      <rect x="282" y="250" width="20" height="60" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+      <rect x="418" y="250" width="20" height="60" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+      <text class="fx-sub" x="250" y="242">ATM V</text><text class="fx-sub" x="444" y="242">TM V</text>
+      <rect x="450" y="120" width="250" height="300" rx="12" fill="rgba(155,140,255,.06)" stroke="#4d3f8c" stroke-width="2"/>
+      <text class="fx-cap v" x="470" y="152">진공 · 0.01 Torr</text>
+      <path class="fx-ln" d="M270 300 H300" marker-end="url(#mA)"/>
+      <path class="fx-ln v" d="M420 300 H450" marker-end="url(#mV)"/>
+      <text class="fx-sub" x="300" y="410">두 밸브는 절대 동시에 열리지 않음</text>
+     </svg>
+    </div>
+   </div>
+  </div>
+  <div class="wt-note v"><b>규칙</b> — Load Lock의 두 문(ATM 밸브 · TM 밸브)이 동시에 열리면 진공이 무너집니다.
+   장비는 이를 <b>인터록</b>으로 물리적으로 막습니다. (10강에서 실습)</div>
+ </div>
+</section>
+
+<!-- ══ 7. 자동화 3요소 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">05 · 장비를 보는 틀</div>
+  <h2 class="h-title">자동화 장비는 세 가지로 나눠 보면 쉽습니다</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.15">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 720 520">
+      <circle cx="360" cy="150" r="70" fill="#12283a" stroke="#35e0c8" stroke-width="3"/>
+      <text class="fx-cap" x="360" y="140" text-anchor="middle" style="font-size:24px">구동</text>
+      <text class="fx-sub" x="360" y="168" text-anchor="middle">로봇 · 밸브 · 모터</text>
+      <circle cx="200" cy="390" r="70" fill="#12283a" stroke="#35e0c8" stroke-width="3"/>
+      <text class="fx-cap" x="200" y="380" text-anchor="middle" style="font-size:24px">감지</text>
+      <text class="fx-sub" x="200" y="408" text-anchor="middle">센서</text>
+      <circle cx="520" cy="390" r="70" fill="#161a35" stroke="#9b8cff" stroke-width="3"/>
+      <text class="fx-cap v" x="520" y="380" text-anchor="middle" style="font-size:24px">제어</text>
+      <text class="fx-sub" x="520" y="408" text-anchor="middle">인터록 · 시퀀스</text>
+      <path class="fx-ln" d="M300 200 L250 330" marker-end="url(#mA)"/>
+      <path class="fx-ln v" d="M270 400 H450" marker-end="url(#mV)"/>
+      <path class="fx-ln" d="M470 330 L420 200" marker-end="url(#mA)"/>
+      <text class="fx-sub" x="196" y="270" transform="rotate(-69 196 270)">움직이면</text>
+      <text class="fx-sub" x="360" y="430" text-anchor="middle">신호를 읽어</text>
+      <text class="fx-sub" x="520" y="270" transform="rotate(69 520 270)">허가/거부</text>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num"><i>구</i><div><b>구동 — 움직이는 것</b>
+     이송 로봇(R/θ/Z축), 게이트 밸브, FOUP 도어. "무엇을 어떻게 움직이나".</div></div>
+    <div class="wt-num"><i>감</i><div><b>감지 — 상태를 읽는 것</b>
+     위치·유무·압력·한계 센서. "지금 어떤 상태인가"를 신호로 알려줍니다.</div></div>
+    <div class="wt-num v"><i>제</i><div><b>제어 — 판단하는 것</b>
+     센서가 조건을 만족해야만 다음 구동을 허가. 아니면 <b>인터록</b>으로 거부.</div></div>
+    <div class="wt-note"><b>이 강의의 뼈대</b> — 3~5강은 <b>구동</b>, 6강은 <b>감지</b>,
+     10·13강은 <b>제어</b>를 집중적으로 다룹니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 8. 두 로봇 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">06 · 구동 · 로봇</div>
+  <h2 class="h-title">일하는 로봇은 둘 — 대기 로봇과 진공 로봇</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <table class="wt-tbl">
+     <tr><th></th><th>대기 이송 로봇</th><th>진공 이송 로봇</th></tr>
+     <tr><td>위치</td><td><b>EFEM</b> (상압)</td><td><b class="v">Transfer Chamber</b> (진공)</td></tr>
+     <tr><td>임무</td><td>FOUP ↔ Pre-aligner ↔ Load Lock</td><td>Load Lock ↔ 공정 챔버</td></tr>
+     <tr><td>구동부</td><td>본체 내부</td><td><b class="v">진공 밖</b>에 두고 자력 전달</td></tr>
+     <tr><td>손(팔)</td><td>1~2 암, End Effector</td><td>고온·진공용 재질</td></tr>
+    </table>
+    <div class="wt-note"><b>공통점</b> — 둘 다 <b>R축(신축)·θ축(회전)·Z축(승강)</b> 세 축으로 움직입니다.
+     이 3축은 3강에서 자세히.</div>
+   </div>
+   <div class="wt-col" style="flex:1.05">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 720 460">
+      <rect class="fx-box" x="40" y="70" width="300" height="320" rx="12"/>
+      <text class="fx-lbl" x="60" y="102">EFEM · 대기</text>
+      <circle cx="190" cy="250" r="46" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+      <circle cx="190" cy="250" r="8" fill="#4f8bb5"/>
+      <rect class="fx-arm" x="190" y="239" width="130" height="22" rx="8"/>
+      <ellipse class="fx-w" cx="316" cy="250" rx="30" ry="7"/>
+      <rect class="fx-vac" x="380" y="70" width="300" height="320" rx="12"/>
+      <text class="fx-lbl" x="400" y="102" fill="#bcaeff">TM · 진공</text>
+      <circle cx="530" cy="250" r="46" fill="#1c2340" stroke="#8a7dff" stroke-width="3"/>
+      <circle cx="530" cy="250" r="8" fill="#8a7dff"/>
+      <rect class="fx-arm v" x="530" y="239" width="130" height="22" rx="8"/>
+      <ellipse class="fx-w" cx="656" cy="250" rx="30" ry="7"/>
+      <text class="fx-sub" x="120" y="360">R · θ · Z</text>
+      <text class="fx-sub" x="460" y="360">R · θ · Z</text>
+     </svg>
+    </div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 9. 센서 개관 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">07 · 감지 · 센서</div>
+  <h2 class="h-title">로봇은 눈이 없습니다 — 센서가 눈입니다</h2>
+  <div class="wt-lead">로봇은 "지금 웨이퍼가 손에 있는지, 팔이 어디까지 갔는지" 스스로 보지 못합니다.
+   대신 <b>센서 신호</b>로 그 상태를 압니다.</div>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>①</i><div><b>웨이퍼 유무 (Presence)</b>
+     End Effector 위에 웨이퍼가 있는지. Pick/Place가 성공했는지 판정.</div></div>
+    <div class="wt-num"><i>②</i><div><b>위치 · Home</b>
+     팔이 기준 위치(Home)에 있는지, 지금 각도·거리는 얼마인지.</div></div>
+    <div class="wt-num"><i>③</i><div><b>한계 (Limit)</b>
+     축이 움직일 수 있는 끝. 넘으면 알람으로 멈춥니다.</div></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num v"><i>④</i><div><b>압력 (Pressure)</b>
+     Load Lock·챔버의 진공도. 목표 압력에 닿아야 밸브를 엽니다.</div></div>
+    <div class="wt-num v"><i>⑤</i><div><b>엔코더 (Encoder)</b>
+     모터가 실제로 몇 도/몇 mm 돌았는지 되읽어 정밀도를 보장.</div></div>
+    <div class="wt-note"><b>실습 팁</b> — 6강 <b>센서</b> 탭에서 Pick 전후 Presence 신호가
+     <b>OFF → ON</b> 으로 바뀌는 것을 직접 봅니다. 신호가 곧 진실입니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 10. 인터록 개념 ══ -->
+<section class="slide" data-level="standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">08 · 제어 · 인터록</div>
+  <h2 class="h-title">인터록 — 조건이 안 맞으면 "안 합니다"</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.1">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 780 420">
+      <rect class="fx-panel" x="40" y="60" width="220" height="90" rx="10"/>
+      <text class="fx-lbl" x="60" y="112">명령: Extend</text>
+      <path class="fx-ln" d="M260 105 H360" marker-end="url(#mA)"/>
+      <polygon points="360,60 500,60 540,105 500,150 360,150" fill="#161a35" stroke="#9b8cff" stroke-width="2.5"/>
+      <text class="fx-cap v" x="450" y="100" text-anchor="middle">조건 OK?</text>
+      <text class="fx-sub" x="450" y="128" text-anchor="middle">센서 확인</text>
+      <path class="fx-ln" d="M540 105 H650" marker-end="url(#mA)"/>
+      <rect class="fx-box" x="650" y="60" width="100" height="90" rx="10" stroke="#35e0c8"/>
+      <text class="fx-cap" x="700" y="112" text-anchor="middle">동작</text>
+      <path class="fx-bad" d="M450 150 V250" marker-end="url(#mR)"/>
+      <rect x="360" y="250" width="180" height="90" rx="10" fill="rgba(255,94,94,.08)" stroke="#7a3232" stroke-width="2.5"/>
+      <text x="450" y="298" text-anchor="middle" fill="#ff8a8a" font-family="ui-monospace,monospace" font-size="22">거부 · ALARM</text>
+      <text class="fx-sub" x="450" y="326" text-anchor="middle">동작 안 함</text>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card warn"><h3>고장이 아니라 보호입니다</h3>
+     <p>Door가 닫혔는데 Extend, 대기압인데 진공 밸브 — 이런 명령을 장비는
+      <b>거부</b>합니다. 알람이 떠도 로봇이 망가진 게 아닙니다.</p></div>
+    <table class="wt-tbl">
+     <tr><th>대표 인터록</th><th>막는 상황</th></tr>
+     <tr><td>Door</td><td>문 닫힘 상태로 진입</td></tr>
+     <tr><td>Vacuum</td><td>압력 안 맞는데 밸브 개방</td></tr>
+     <tr><td>Collision</td><td>팔 편 채로 회전</td></tr>
+     <tr><td>Presence</td><td>웨이퍼 없는데 Place</td></tr>
+    </table>
+    <div class="wt-note warn"><b>13강</b>에서 네 가지 인터록을 일부러 발생시켜 봅니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 11. 자동화 수준 ══ -->
+<section class="slide" data-level="pro">
+ <div class="wt-pad">
+  <div class="wt-eye">09 · 운전 방식</div>
+  <h2 class="h-title">수동에서 자동 시퀀스까지</h2>
+  <div class="wt-lead">같은 장비라도 운전 방식은 셋입니다. 이 강의는 <b>수동</b>으로 원리를 익힌 뒤
+   <b>시퀀스</b>로 자동화하는 순서를 따릅니다.</div>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>수동 (Manual)</b>
+     버튼 하나에 동작 하나. Home·Extend·Rotate를 사람이 순서대로. — 4·5강</div></div>
+    <div class="wt-num"><i>2</i><div><b>반자동 (Semi-Auto)</b>
+     Pick·Place 같은 묶음 동작을 한 번에. 사람이 흐름을 감독.</div></div>
+    <div class="wt-num v"><i>3</i><div><b>자동 시퀀스 (Auto)</b>
+     MOVE·PICK·PLACE·WAIT·IF 블록으로 전 구간을 무인 실행. — 12강</div></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-note"><b>왜 수동부터?</b> 자동 시퀀스가 멈췄을 때 원인을 찾으려면,
+     각 동작이 <b>어떤 조건</b>에서 되고 안 되는지를 손으로 겪어봐야 합니다.
+     그래서 1~6강은 손으로, 12강부터 자동으로 갑니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 12. 팹 자동화 계층 ══ -->
+<section class="slide" data-level="pro">
+ <div class="wt-pad">
+  <div class="wt-eye">10 · 더 큰 그림</div>
+  <h2 class="h-title">장비 한 대는 공장 자동화의 한 층입니다</h2>
+  <div class="wt-body">
+   <div class="wt-col" style="flex:1.05">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 720 460">
+      <rect class="fx-panel" x="60" y="40" width="600" height="80" rx="10"/>
+      <text class="fx-lbl" x="80" y="78">MES · 생산관리 시스템</text>
+      <text class="fx-sub" x="80" y="102">어떤 웨이퍼를 어느 장비로 · 레시피 지정</text>
+      <rect class="fx-panel" x="60" y="170" width="600" height="80" rx="10"/>
+      <text class="fx-lbl" x="80" y="208">AMHS · OHT (천장 반송)</text>
+      <text class="fx-sub" x="80" y="232">FOUP을 장비 Load Port까지 자동 운반</text>
+      <rect class="fx-box" x="60" y="300" width="600" height="110" rx="10" stroke="#35e0c8"/>
+      <text class="fx-cap" x="80" y="338">장비 내부 · EFEM / TM 로봇</text>
+      <text class="fx-sub" x="80" y="366">이 강의의 범위 — 웨이퍼 한 장의 이송</text>
+      <path class="fx-ln" d="M360 120 V170" marker-end="url(#mA)"/>
+      <path class="fx-ln" d="M360 250 V300" marker-end="url(#mA)"/>
+     </svg>
+    </div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>위에서 내려온다</h3>
+     <p>MES가 "이 FOUP을 3번 장비로" 지시하면, OHT가 천장 레일로 FOUP을 나르고,
+      장비 안에서 이송 로봇이 웨이퍼를 처리합니다.</p></div>
+    <div class="wt-note"><b>우리의 자리</b> — 이 강의는 가장 아래층,
+     <b>장비 안에서 웨이퍼 한 장이 움직이는 부분</b>을 다룹니다.
+     위 두 층은 맥락으로만 알아두세요.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 13. 표준 ══ -->
+<section class="slide" data-level="pro">
+ <div class="wt-pad">
+  <div class="wt-eye">11 · 왜 다 비슷한가</div>
+  <h2 class="h-title">서로 다른 회사 장비가 맞물리는 이유 — 표준</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>SEMI 표준</h3>
+     <p>FOUP 크기, Load Port 높이, 통신 규약까지 <b>SEMI 국제표준</b>으로 정해져 있습니다.
+      그래서 A사 FOUP이 B사 장비에 그대로 붙습니다.</p></div>
+    <div class="wt-card"><h3>300 mm 시대</h3>
+     <p>웨이퍼 지름 300 mm가 주력. 무겁고 비싸서 <b>사람 손 운반 금지</b>,
+      전 구간 자동 반송이 기본이 되었습니다.</p></div>
+   </div>
+   <div class="wt-col">
+    <table class="wt-tbl">
+     <tr><th>표준이 정하는 것</th><th>예</th></tr>
+     <tr><td>기구</td><td>FOUP·Load Port 치수, 도킹 높이</td></tr>
+     <tr><td>매핑</td><td>슬롯 25칸, Notch 방향</td></tr>
+     <tr><td>안전</td><td>도어·인터록 신호(E84 등)</td></tr>
+     <tr><td>통신</td><td>장비 ↔ 호스트 메시지 규약</td></tr>
+    </table>
+    <div class="wt-note"><b>실습과의 연결</b> — 시뮬레이터의 FOUP·Load Port·Mapping은
+     이 표준을 단순화해 담은 것입니다. (7강 Load Port)</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 14. 시뮬레이터 전체 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">12 · 실습 도구</div>
+  <h2 class="h-title">시뮬레이터 화면 — 네 구역으로 익힙니다</h2>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1680 760">
+    <rect x="20" y="20" width="1640" height="720" rx="14" fill="#0c1a26" stroke="#274357" stroke-width="2"/>
+    <!-- top bar -->
+    <rect x="20" y="20" width="1640" height="70" rx="14" fill="#0f1d2b"/>
+    <text class="fx-cap" x="46" y="64">① 챕터 바 · 상태</text>
+    <g fill="#16293a" stroke="#2f5470"><rect x="360" y="38" width="46" height="34" rx="6"/><rect x="416" y="38" width="46" height="34" rx="6"/><rect x="472" y="38" width="46" height="34" rx="6"/></g>
+    <rect x="360" y="38" width="46" height="34" rx="6" fill="#123" stroke="#35e0c8"/>
+    <!-- left sim -->
+    <rect x="40" y="110" width="1040" height="560" rx="10" fill="#0e1d29" stroke="#22405a" stroke-width="2"/>
+    <text class="fx-lbl" x="66" y="150">② 장비 도면 — 클릭하면 이름·역할</text>
+    <rect class="fx-box" x="120" y="230" width="150" height="150" rx="8"/><text class="fx-sub" x="140" y="212">FOUP</text>
+    <rect class="fx-box" x="330" y="190" width="330" height="240" rx="10"/><text class="fx-sub" x="352" y="182">EFEM</text>
+    <circle cx="470" cy="300" r="30" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+    <rect class="fx-arm" x="470" y="292" width="90" height="16" rx="6"/>
+    <rect class="fx-box" x="700" y="250" width="130" height="120" rx="8" stroke="#6f63c9"/><text class="fx-sub" x="716" y="238">LOAD LOCK</text>
+    <rect class="fx-vac" x="860" y="190" width="190" height="240" rx="10"/><text class="fx-sub" x="882" y="182">TM</text>
+    <!-- right panel -->
+    <rect x="1100" y="110" width="540" height="560" rx="10" fill="#0f1a2e" stroke="#25405a" stroke-width="2"/>
+    <text class="fx-cap" x="1126" y="150">③ 학습 패널</text>
+    <g fill="#132139" stroke="#25405a"><rect x="1126" y="176" width="490" height="70" rx="8"/><rect x="1126" y="262" width="490" height="120" rx="8"/><rect x="1126" y="398" width="490" height="150" rx="8"/></g>
+    <text class="fx-sub" x="1146" y="216">왜 배우나</text>
+    <text class="fx-sub" x="1146" y="300">따라하기 (체크리스트)</text>
+    <text class="fx-sub" x="1146" y="436">자가 점검 (퀴즈)</text>
+    <!-- bottom -->
+    <rect x="40" y="686" width="1600" height="40" rx="8" fill="#0f1d2b"/>
+    <text class="fx-cap" x="66" y="712">④ 상태바 · 알람 로그</text>
+   </svg>
+  </div>
+  <div class="wt-note"><b>왼쪽에서 조작하고, 오른쪽에서 확인합니다.</b> 다음 네 슬라이드에서 구역별로 하나씩 봅니다.</div>
+ </div>
+</section>
+
+<!-- ══ 15. 화면 ① 챕터바 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">12 · 화면 ①</div>
+  <h2 class="h-title">챕터 바 — 지금 몇 강, 무엇을 하는가</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>상단 01~15 버튼</b>
+     누르면 그 챕터로 이동하고 <b>장비가 초기 상태</b>로 돌아갑니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>현재 챕터 제목</b>
+     "CH 11 · 진공 이송"처럼 지금 위치를 항상 표시합니다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>📖 교재 버튼</b>
+     지금 이 강의자료를 <b>이 챕터에 맞춰</b> 옆에 펼칩니다.</div></div>
+    <div class="wt-num warn"><i>!</i><div><b>E-STOP</b>
+     비상 정지. 모든 동작을 즉시 멈춥니다.</div></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 720 240">
+      <rect x="20" y="30" width="680" height="80" rx="10" fill="#0f1d2b" stroke="#274357" stroke-width="2"/>
+      <g fill="#16293a" stroke="#2f5470">
+       <rect x="40" y="52" width="40" height="36" rx="6"/><rect x="86" y="52" width="40" height="36" rx="6"/>
+       <rect x="132" y="52" width="40" height="36" rx="6"/><rect x="178" y="52" width="40" height="36" rx="6"/></g>
+      <rect x="132" y="52" width="40" height="36" rx="6" fill="#123" stroke="#35e0c8"/>
+      <text class="fx-sub" x="146" y="76" fill="#35e0c8">08</text>
+      <rect x="470" y="52" width="90" height="36" rx="6" fill="#16293a" stroke="#2f5470"/>
+      <text class="fx-sub" x="486" y="76">📖 교재</text>
+      <rect x="580" y="52" width="100" height="36" rx="6" fill="#3a1414" stroke="#ff5e5e"/>
+      <text class="fx-sub" x="596" y="76" fill="#ff8a8a">E-STOP</text>
+      <text class="fx-sub" x="40" y="150">현재 선택된 챕터가 청록으로 표시됩니다</text>
+     </svg>
+    </div>
+    <div class="wt-note"><b>지금 해보기</b> — 상단에서 <b>1강</b>이 선택돼 있는지 확인하세요.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 16. 화면 ② 도면 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">12 · 화면 ②</div>
+  <h2 class="h-title">장비 도면 — 클릭이 곧 학습입니다</h2>
+  <div class="wt-lead">가운데 도면의 장치를 <b>클릭</b>하면 이름과 역할이 뜹니다.
+   1강 미션은 "<b>3개 이상 클릭</b>"으로 시작합니다.</div>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>클릭해서 확인</h3>
+     <p>FOUP · Load Port · EFEM · Pre-aligner · Load Lock · Transfer Chamber ·
+      공정 챔버 — 각 장치를 눌러 설명을 읽습니다.</p></div>
+    <div class="wt-card"><h3>조작도 여기서</h3>
+     <p>로봇의 Initialize·Home·Extend 같은 버튼도 도면 주변에 있습니다.
+      누르면 도면의 팔이 실제로 움직입니다.</p></div>
+    <div class="wt-card v"><h3>색이 곧 압력</h3>
+     <p><b>청록</b>은 대기 영역, <b class="v">보라</b>는 진공 영역.
+      교재와 시뮬이 같은 색 규칙을 씁니다.</p></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-note"><b>지금 해보기</b> — 도면에서 <b>FOUP · EFEM · Load Lock</b>을 차례로 클릭해
+     설명을 읽어보세요. 세 개를 채우면 1강 첫 미션이 완료됩니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 17. 화면 ③ 학습 패널 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">12 · 화면 ③</div>
+  <h2 class="h-title">오른쪽 학습 패널 — 왜·어떻게·확인</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>왜</i><div><b>왜 배우나</b>
+     이 챕터를 배우는 이유를 한 문단으로. 실무 맥락을 먼저 잡습니다.</div></div>
+    <div class="wt-num"><i>따</i><div><b>따라하기</b>
+     "지금 할 일" 체크리스트. 순서대로 조작하면 자동으로 체크됩니다.</div></div>
+    <div class="wt-num v"><i>점</i><div><b>자가 점검</b>
+     짧은 퀴즈로 방금 한 것을 확인. 틀리면 이유를 알려줍니다.</div></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>교재로 이어지는 다리</h3>
+     <p>학습 패널의 <b>"📖 교재에서 이 내용 자세히 읽기"</b>를 누르면
+      바로 이 강의 데크의 해당 부분이 열립니다.</p></div>
+    <div class="wt-note"><b>흐름</b> — 왼쪽에서 조작 → 오른쪽 체크리스트로 순서 확인 →
+     막히면 교재로 → 자가 점검으로 마무리.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 18. 화면 ④ 상태바/로그 ══ -->
+<section class="slide" data-level="standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">12 · 화면 ④</div>
+  <h2 class="h-title">하단 상태바와 알람 로그 — 진실은 여기 적힙니다</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>상태바</h3>
+     <p>제어 대상(EFEM/TM), 현재 스테이션, R·θ·Z 값, Load Lock 압력, 알람 수를
+      한 줄로 계속 보여줍니다.</p></div>
+    <div class="wt-card warn"><h3>알람 로그</h3>
+     <p>동작이 거부되면 <b>ALM-코드</b>와 이유가 로그에 남습니다.
+      14강 고장 진단은 이 로그를 읽는 훈련입니다.</p></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 720 240">
+      <rect x="20" y="30" width="680" height="50" rx="8" fill="#0f1d2b" stroke="#274357" stroke-width="2"/>
+      <text class="fx-sub" x="40" y="60">제어 EFEM · STATION FOUP · R 0 · θ 180° · Z 3 · LL 760 Torr · ALARM 0</text>
+      <rect x="20" y="100" width="680" height="110" rx="8" fill="#0d1a26" stroke="#274357" stroke-width="2"/>
+      <text class="fx-sub" x="40" y="132" fill="#7fa3bd">[I] BOOT 시뮬레이터 준비 완료</text>
+      <text class="fx-sub" x="40" y="160" fill="#ffb340">[W] ALM-301 Door Interlock — 문이 닫혀 있습니다</text>
+      <text class="fx-sub" x="40" y="188" fill="#7fa3bd">[I] HOME 완료</text>
+     </svg>
+    </div>
+    <div class="wt-note warn"><b>습관</b> — 동작이 안 되면 먼저 <b>로그</b>를 보세요. 원인은 대개 거기 적혀 있습니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 19. 이번 챕터 미션 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">13 · 실습 미션</div>
+  <h2 class="h-title">1강에서 직접 해볼 것</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>장치 3개 이상 클릭</b>
+     도면에서 장치를 눌러 이름·역할을 확인합니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>EFEM Robot · Initialize</b>
+     로봇에 전원·기준을 잡아줍니다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>Home 실행</b>
+     팔을 기준 위치로. <b>Home Sensor가 ON</b> 되는 것을 확인합니다.</div></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-note"><b>완료 기준</b> — 오른쪽 "따라하기" 체크리스트 3개가 모두 채워지면 1강 실습 완료입니다.
+     막히면 이 교재의 화면 설명(12번대 슬라이드)으로 돌아오세요.</div>
+    <div class="wt-note v" style="margin-top:16px"><b>왜 Home부터?</b> 로봇은 전원을 켜도 자기 위치를 모릅니다.
+     Home으로 <b>기준점</b>을 잡아야 이후 모든 좌표가 의미를 갖습니다. (자세히는 4강)</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 20. 요점 정리 ══ -->
+<section class="slide" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad">
+  <div class="wt-eye">정리</div>
+  <h2 class="h-title">1강에서 남길 다섯 가지</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>사람이 아니라 로봇·센서</b>
+     오염·정밀·반복·진공·가치 때문에 웨이퍼는 자동으로 옮깁니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>길: FOUP→…→공정 챔버</b>
+     대기 영역 · Load Lock · 진공 영역의 순서.</div></div>
+    <div class="wt-num"><i>3</i><div><b>세 요소</b>
+     구동(로봇) · 감지(센서) · 제어(인터록/시퀀스).</div></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-num v"><i>4</i><div><b>센서가 눈, 인터록이 브레이크</b>
+     신호로 상태를 알고, 조건이 안 맞으면 거부합니다.</div></div>
+    <div class="wt-num v"><i>5</i><div><b>시뮬레이터 네 구역</b>
+     챕터 바 · 도면 · 학습 패널 · 상태바/로그.</div></div>
+    <div class="wt-note"><b>다음 강</b> — 2강 <b>장치 구성</b>: 여섯 장치의 위치와 기능을
+     하나씩 뜯어봅니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+<!-- ══ 21. 자가 점검 ══ -->
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad">
+  <div class="wt-eye">자가 점검</div>
+  <h2 class="h-title">스스로 답해 보세요</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>Q1</h3>
+     <p>웨이퍼를 사람이 옮기지 않는 이유를 <b>세 가지</b> 말해 보세요.</p></div>
+    <div class="wt-card"><h3>Q2</h3>
+     <p>대기 영역과 진공 영역 사이에서 <b>압력을 맞추는 장치</b>의 이름은?</p></div>
+   </div>
+   <div class="wt-col">
+    <div class="wt-card v"><h3>Q3</h3>
+     <p>자동화 장비의 <b>세 요소</b>는 무엇이며, 이 강의에서 각각 어느 챕터가 다루나요?</p></div>
+    <div class="wt-note"><b>정답 확인</b> — 다시 시뮬레이터로 가서 도면을 클릭하고 로봇을 Home 시키며
+     확인해 보세요. 답은 손으로 해볼 때 확실해집니다.</div>
+   </div>
+  </div>
+ </div>
+</section>
+
+</div></div>
+
+<script>
+/* data-here 미니 경로 지도 생성 (wafer-transfer.html 과 동일) */
+(function(){
+  var NODES=[['foup','FOUP',0],['port','PORT',0],['efem','EFEM',0],['align','ALIGN',0],
+             ['lock','LOCK',0],['tm','TM',1],['pm','PM',1]];
+  document.querySelectorAll('.slide[data-here]').forEach(function(sl){
+    var here=sl.getAttribute('data-here'), pad=sl.querySelector('.wt-pad');
+    if(!pad) return;
+    var wrap=document.createElement('div'); wrap.className='wt-map';
+    NODES.forEach(function(n,i){
+      if(i) wrap.insertAdjacentHTML('beforeend','<div class="b"></div>');
+      var on=(here==='all'||here===n[0])?' on':'';
+      wrap.insertAdjacentHTML('beforeend',
+        '<div class="n'+(n[2]?' vac':'')+on+'"><div class="d"></div><span>'+n[1]+'</span></div>');
+    });
+    pad.appendChild(wrap);
+  });
+})();
+/* 발표 네비게이션 (Next/Prev · 화살표 · intro/standard/pro 레벨) */
+(function(){
+  var stage=document.getElementById('stage'),
+      all=[].slice.call(stage.querySelectorAll('.slide')),
+      lv='standard', list=[], i=0;
+  function build(){ list=all.filter(function(s){return (s.dataset.level||'standard').split(' ').indexOf(lv)>=0;});
+    all.forEach(function(s){s.classList.remove('on');}); i=Math.min(Math.max(i,0),list.length-1); show(); }
+  function show(){ list.forEach(function(s,k){s.classList.toggle('on',k===i);});
+    document.getElementById('pos').textContent=(i+1)+' / '+list.length;
+    var h=list[i].querySelector('.h-title');
+    document.getElementById('ttl').textContent=h?h.textContent:''; }
+  function fit(){ stage.style.transform='scale('+Math.min(innerWidth/1920,innerHeight/1080)+')'; }
+  var nav=document.createElement('div'); nav.id='fbnav';
+  nav.innerHTML='<button data-d="-1">◀</button><span id="pos"></span><button data-d="1">▶</button>'+
+    '<span id="ttl" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>'+
+    ['intro','standard','pro'].map(function(t){return '<button data-l="'+t+'">'+t+'</button>';}).join('');
+  document.body.appendChild(nav);
+  nav.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.d){ i=Math.max(0,Math.min(list.length-1,i+ +b.dataset.d)); show(); }
+    if(b.dataset.l){ lv=b.dataset.l;
+      [].forEach.call(nav.querySelectorAll('[data-l]'),function(x){x.classList.toggle('on',x.dataset.l===lv);});
+      build(); } });
+  addEventListener('keydown',function(e){ if(e.key==='ArrowRight'||e.key===' '){i=Math.min(list.length-1,i+1);show();}
+    if(e.key==='ArrowLeft'){i=Math.max(0,i-1);show();} });
+  addEventListener('resize',fit);
+  nav.querySelector('[data-l="standard"]').classList.add('on');
+  build(); fit();
+})();
+</script>
+</body></html>
