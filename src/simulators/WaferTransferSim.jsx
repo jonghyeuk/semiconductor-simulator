@@ -16,7 +16,7 @@ export default function WaferTransferSim({
   initialWeek,            // (별칭) initialChapter 와 동일
   initialTheme,           // 'week5' 형태도 허용 (레지스트리 관례 호환)
   hideOtherTabs = false,  // true 면 챕터 선택 바를 숨겨 그 챕터만 노출
-  deckPath = '/topic-decks/wafer-transfer.html', // 시뮬 안 '교재' 버튼이 열 데크
+  deckDir = '/topic-decks/wafer-transfer', // 챕터별 교재 데크 폴더 (시뮬이 ch{N}.html 로 로드)
 }) {
   const wk =
     initialChapter ??
@@ -29,7 +29,7 @@ export default function WaferTransferSim({
   const params = new URLSearchParams();
   if (wk) params.set('ch', String(wk));
   if (hideOtherTabs) params.set('lock', '1');
-  if (deckPath) params.set('deck', deckPath);
+  if (deckDir) params.set('deckdir', deckDir);
   const qs = params.toString();
   const src = `/topic-sims/wafer-transfer-sim.html${qs ? `?${qs}` : ''}`;
 

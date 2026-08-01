@@ -219,7 +219,12 @@ table.tb2{width:100%;border-collapse:collapse;font-size:11px}
 #bookbtn{padding:0 13px;height:32px;border-radius:4px;background:var(--panel);color:var(--tx2);
   border:1px solid var(--line);font-size:12px;white-space:nowrap;transition:.12s}
 #bookbtn:hover{background:var(--panel2);color:var(--ok);border-color:var(--ok)}
-#bookwrap{position:fixed;inset:0;z-index:60;background:#070f16;display:flex;flex-direction:column}
+:root{--bookw:46vw}
+#bookwrap{position:fixed;top:0;right:0;bottom:0;width:var(--bookw);z-index:60;background:#070f16;
+  display:flex;flex-direction:column;border-left:1px solid var(--line);box-shadow:-18px 0 46px rgba(0,0,0,.5)}
+body.book-open #top,body.book-open #main{margin-right:var(--bookw)}
+#top,#main{transition:margin-right .18s ease}
+@media(max-width:1000px){:root{--bookw:100vw} body.book-open #top,body.book-open #main{margin-right:0}}
 #bookbar{height:44px;display:flex;align-items:center;gap:12px;padding:0 14px;
   border-bottom:1px solid var(--line2);background:#0b141c;flex:none}
 #bookbar .t{font-size:13px;color:var(--tx);font-weight:600}
@@ -265,7 +270,7 @@ table.tb2{width:100%;border-collapse:collapse;font-size:11px}
 
 <div id="bookwrap" class="hide">
   <div id="bookbar">
-    <span class="s">교재</span><span class="t">웨이퍼 이송 로봇과 센서</span>
+    <span class="s">교재</span><span class="t" id="bookTitle">웨이퍼 이송 로봇과 센서</span>
     <span class="sp"></span>
     <span class="s">← → 슬라이드 넘기기 · Esc 닫기</span>
     <button id="bookclose">닫기 ✕</button>
@@ -1367,6 +1372,7 @@ function setWeek(i){
   log('I','CH','CH '+String(w.n).padStart(2,'0')+' — '+w.ti+' 시작. 장비 초기 상태로 복귀했습니다.');
   TAB=w.tabs.includes(TAB)?TAB:w.tabs[0];
   renderWeeks(); renderLesson(); renderTabs(); renderPane(); renderStatus(); draw();
+  if(typeof bookOpen==='function'&&bookOpen()) loadBook();
 }
 
 /* 액션 라우팅 */
@@ -1428,23 +1434,28 @@ function loop(t){
    · 서고: /topic-sims/ 와 /topic-decks/ 가 다른 폴더 → 래퍼(jsx)가 절대경로를 넘김
    · 단독 실행: 같은 폴더에 둔다고 보고 상대경로
    경로를 코드가 추측해서 만들지 않도록 기본값을 하나로만 둔다. */
-const DECK=new URLSearchParams(location.search).get('deck')||'./wafer-transfer.html';
-let bookLoaded=false;
-function openBook(){
-  const w=$('#bookwrap'), f=$('#book');
-  if(!bookLoaded){
-    bookLoaded=true; f.src=DECK;
-    f.onerror=()=>{ f.style.display='none';
-      const d=document.createElement('div'); d.id='bookerr';
-      d.innerHTML='교재 파일을 찾지 못했습니다.<br><span style="font-family:var(--mono);font-size:11px;color:#6d90aa">'
-        +DECK+'</span><br>시뮬레이터와 같은 폴더에 <b>wafer-transfer.html</b> 을 두거나, 주소 끝에 <b>?deck=경로</b> 를 붙여 주세요.';
-      w.appendChild(d); };
-  }
-  w.classList.remove('hide');
-}
-function closeBook(){ $('#bookwrap').classList.add('hide'); }
+const _BQP=new URLSearchParams(location.search);
+const DECKDIR=_BQP.get('deckdir')||'/topic-decks/wafer-transfer';
+const DECKONE=_BQP.get('deck'); // 명시적 단일 데크(하위호환)
+function deckURL(i){ return DECKONE || (DECKDIR+'/ch'+String(WEEK[i].n).padStart(2,'0')+'.html'); }
+let bookCh=-1;
+function updateBookBar(){ const w=WEEK[WK], t=$('#bookTitle');
+  if(t) t.textContent='CH '+String(w.n).padStart(2,'0')+' · '+w.t; }
+function refitBook(){ const f=$('#book');
+  try{ f&&f.contentWindow&&f.contentWindow.dispatchEvent(new Event('resize')); }catch(e){} }
+function loadBook(){ const f=$('#book'); if(!f) return;
+  if(bookCh!==WK){ bookCh=WK; const e=$('#bookerr'); if(e) e.remove(); f.style.display=''; f.src=deckURL(WK);
+    f.onload=refitBook;
+    f.onerror=()=>{ f.style.display='none'; const d=document.createElement('div'); d.id='bookerr';
+      d.innerHTML='교재 파일을 찾지 못했습니다.<br><span style="font-family:var(--mono);font-size:11px;color:#6d90aa">'+deckURL(WK)+'</span>';
+      $('#bookwrap').appendChild(d); }; }
+  else { refitBook(); }
+  updateBookBar(); }
+function openBook(){ document.body.classList.add('book-open'); $('#bookwrap').classList.remove('hide'); loadBook();
+  [80,260,520].forEach(t=>setTimeout(refitBook,t)); }
+function closeBook(){ document.body.classList.remove('book-open'); $('#bookwrap').classList.add('hide'); }
 const bookOpen=()=>!$('#bookwrap').classList.contains('hide');
-$('#bookbtn').onclick=openBook;
+$('#bookbtn').onclick=()=>{ bookOpen()?closeBook():openBook(); };
 $('#bookclose').onclick=closeBook;
 addEventListener('keydown',e=>{ if(e.key==='Escape'&&bookOpen()){ e.preventDefault(); closeBook(); } });
 
