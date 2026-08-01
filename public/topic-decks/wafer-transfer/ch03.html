@@ -1,0 +1,346 @@
+<!DOCTYPE html><html lang="ko" class="nobase"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ch.3 로봇 구조 — R축·θ축·Z축</title>
+<style>
+/* ═══ 디자인 토큰 (본 챕터 데크는 wafer-transfer.html 과 동일 시스템) ═══
+   청록 = 대기 영역(760 Torr) · 보라 = 진공 영역 · 호박 = 경고 · 적 = 금지 */
+:root{
+  --ac:#35e0c8; --vc:#9b8cff; --wn:#ffb340; --bd:#ff5e5e;
+  --t1:#f2f9ff; --t2:#a9c4d8; --t3:#7fa3bd; --t4:#4f7590;
+  --bx:#132433; --ln:#3a6b8c; --ln2:#294357;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+.slide{ color:var(--t2); font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+.wt-pad{ padding:74px 96px 66px; height:100%; box-sizing:border-box; display:flex; flex-direction:column; position:relative; }
+.wt-eye{ font-family:var(--mono); font-size:23px; letter-spacing:.24em; color:var(--ac); margin-bottom:14px; }
+.wt-eye.v{ color:var(--vc); }
+.h-title{ font-size:64px; line-height:1.14; font-weight:800; letter-spacing:-.025em; margin:0; color:var(--t1); }
+h2.h-title{ font-size:54px; }
+.wt-lead{ font-size:29px; line-height:1.6; color:var(--t2); max-width:1420px; margin-top:16px; }
+.wt-lead b{ color:var(--ac); font-weight:700; }
+.wt-lead b.v{ color:var(--vc); }
+.wt-body{ flex:1; display:flex; gap:40px; margin-top:34px; min-height:0; }
+.wt-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.wt-fig{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; margin-top:26px; }
+.wt-fig svg{ width:100%; height:100%; max-height:100%; }
+.wt-figc{ font-family:var(--mono); font-size:20px; color:var(--t4); text-align:center; margin-top:10px; letter-spacing:.04em; }
+.wt-card{ background:rgba(19,36,51,.72); border:1px solid var(--ln2); border-left:5px solid var(--ac);
+  border-radius:11px; padding:24px 28px; margin-bottom:16px; }
+.wt-card h3{ font-size:29px; margin:0 0 9px; color:var(--t1); font-weight:700; }
+.wt-card p{ font-size:24px; line-height:1.6; color:var(--t2); margin:0; }
+.wt-card.v{ border-left-color:var(--vc); }
+.wt-card.warn{ border-left-color:var(--bd); }
+.wt-num{ display:flex; gap:18px; align-items:flex-start; margin-bottom:20px; }
+.wt-num i{ flex:none; width:50px; height:50px; border-radius:13px; background:var(--ac); color:#03231e;
+  font-family:var(--mono); font-size:25px; font-weight:800; font-style:normal;
+  display:flex; align-items:center; justify-content:center; }
+.wt-num.v i{ background:var(--vc); color:#140f2e; }
+.wt-num div{ font-size:25px; line-height:1.5; color:var(--t2); padding-top:6px; }
+.wt-num div b{ color:var(--t1); display:block; font-size:28px; margin-bottom:3px; }
+.wt-tbl{ width:100%; border-collapse:collapse; font-size:23px; }
+.wt-tbl th,.wt-tbl td{ text-align:left; padding:13px 15px; border-bottom:1px solid var(--ln2); vertical-align:top; }
+.wt-tbl th{ font-family:var(--mono); font-size:19px; letter-spacing:.1em; color:var(--t3); font-weight:500; }
+.wt-tbl td b{ color:var(--ac); }
+.wt-tbl td b.v{ color:var(--vc); }
+.wt-note{ margin-top:auto; padding:19px 24px; background:rgba(53,224,200,.09); border:1px solid #2c6d63;
+  border-radius:10px; font-size:24px; line-height:1.5; color:#bfe9e1; }
+.wt-note b{ color:var(--ac); }
+.wt-note.warn{ background:rgba(255,94,94,.09); border-color:#7a3232; color:#ffc4c4; }
+.wt-note.warn b{ color:#ff8a8a; }
+.wt-note.v{ background:rgba(155,140,255,.1); border-color:#4d3f8c; color:#d5cdff; }
+.wt-note.v b{ color:var(--vc); }
+.wt-key{ display:inline-block; font-family:var(--mono); font-size:21px; padding:3px 11px;
+  border:1px solid #45688a; border-bottom-width:3px; border-radius:6px; background:#17293a; color:#dceaf5; margin:0 3px; }
+.wt-map{ position:absolute; top:74px; right:96px; display:flex; align-items:center; gap:0; }
+.wt-map .n{ display:flex; flex-direction:column; align-items:center; gap:7px; }
+.wt-map .d{ width:13px; height:13px; border-radius:50%; background:#24425c; }
+.wt-map .n.on .d{ background:var(--ac); box-shadow:0 0 0 6px rgba(53,224,200,.16); }
+.wt-map .n.vac .d{ background:#2f2a52; }
+.wt-map .n.vac.on .d{ background:var(--vc); box-shadow:0 0 0 6px rgba(155,140,255,.18); }
+.wt-map .n span{ font-family:var(--mono); font-size:14px; letter-spacing:.1em; color:#3f6480; }
+.wt-map .n.on span{ color:var(--t1); }
+.wt-map .b{ width:30px; height:2px; background:#24425c; margin:0 5px 21px; }
+.fx-box{ fill:var(--bx); stroke:var(--ln); stroke-width:2.5; }
+.fx-vac{ fill:#161a35; stroke:#6f63c9; stroke-width:2.5; }
+.fx-w{ fill:#c9dced; stroke:#eef6ff; stroke-width:1.5; }
+.fx-lbl{ font-family:var(--mono); font-size:21px; fill:#9fc0d6; }
+.fx-sub{ font-family:var(--mono); font-size:17px; fill:#5d829c; }
+.fx-cap{ font-family:var(--mono); font-size:19px; fill:var(--ac); }
+.fx-cap.v{ fill:var(--vc); }
+.fx-arm{ fill:#2c4b66; stroke:#4a7ea6; stroke-width:2.5; }
+.fx-arm.v{ fill:#2f2a52; stroke:#8a7dff; }
+.fx-ln{ stroke:#35e0c8; stroke-width:3; fill:none; }
+.fx-ln.v{ stroke:#9b8cff; }
+.fx-bad{ stroke:var(--bd); stroke-width:4; fill:none; }
+.fx-dim{ opacity:.3; }
+.fx-panel{ fill:#0e1d29; stroke:#274357; stroke-width:2; }
+/* 베이스리스 표시 (단독/서랍 공통) */
+.nobase body{ margin:0; background:#0a141c; overflow:hidden; }
+.nobase .deck-viewport{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+.nobase .deck-stage{ width:1920px; height:1080px; position:relative; transform-origin:center center; }
+.nobase .slide{ position:absolute; inset:0; display:none;
+  background:radial-gradient(1400px 800px at 18% -12%,#17293a 0%,transparent 62%),#0a141c; }
+.nobase .slide.on{ display:block; }
+.nobase #fbnav{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:7px;
+  z-index:9; font-family:var(--mono); font-size:13px; align-items:center; }
+.nobase #fbnav button{ background:#16293a; color:#cfe4f2; border:1px solid #2f5470; border-radius:6px; padding:7px 13px; cursor:pointer; }
+.nobase #fbnav button.on{ background:var(--ac); color:#03231e; border-color:var(--ac); }
+.nobase #fbnav span{ color:#6d90aa; padding:0 6px; }
+</style>
+</head><body>
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true"><defs>
+ <marker id="mA" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#35e0c8"/></marker>
+ <marker id="mV" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9b8cff"/></marker>
+ <marker id="mW" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ffb340"/></marker>
+ <marker id="mR" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ff5e5e"/></marker>
+ <radialGradient id="wg" cx="34%" cy="28%">
+  <stop offset="0%" stop-color="#e8f3fd"/><stop offset="55%" stop-color="#b8cddf"/><stop offset="100%" stop-color="#7d97ad"/></radialGradient>
+</defs></svg>
+
+<div class="deck-viewport"><div class="deck-stage" id="stage">
+
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad"><div class="wt-eye">로봇및센서실습 · 반도체장비전공 · CHAPTER 3</div>
+  <div class="wt-body" style="margin-top:10px;align-items:center">
+   <div class="wt-col" style="flex:1.05"><h1 class="h-title">로봇 구조<br/>R축 · θ축 · Z축</h1>
+    <div class="wt-lead" style="margin-top:26px">이송 로봇은 딱 <b>세 방향</b>으로만 움직입니다.
+     이 세 축의 조합으로 FOUP·Pre-aligner·Load Lock 어디든 웨이퍼를 가져다 놓습니다.</div>
+    <div class="wt-note" style="margin-top:40px;max-width:960px"><b>이 강의</b> — 세 축이 각각 어떤 동작인지 보고,
+     시뮬에서 Initialize → Home → θ·R·Z를 직접 움직여 봅니다.</div></div>
+   <div class="wt-col" style="flex:.95"><div class="wt-fig" style="margin:0">
+    <svg viewBox="0 0 560 520">
+     <circle cx="280" cy="300" r="150" fill="none" stroke="#24425c" stroke-width="1.5" stroke-dasharray="5 6"/>
+     <circle cx="280" cy="300" r="20" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <rect class="fx-arm" x="280" y="290" width="150" height="20" rx="8"/>
+     <ellipse class="fx-w" cx="440" cy="300" rx="26" ry="7"/>
+     <path class="fx-ln" d="M330 250 A70 70 0 0 1 360 300" marker-end="url(#mA)"/>
+     <text class="fx-cap" x="360" y="240">θ 회전</text>
+     <path class="fx-ln" d="M300 300 H420" marker-end="url(#mA)" opacity=".8"/>
+     <text class="fx-cap" x="330" y="335">R 신축</text>
+     <path class="fx-ln" d="M280 300 V180" marker-end="url(#mA)"/>
+     <text class="fx-cap" x="292" y="180">Z 승강</text>
+    </svg></div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad"><div class="wt-eye">학습 목표</div><h2 class="h-title">이 강의가 끝나면</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>세 축을 구분한다</b> θ(회전)·R(신축)·Z(승강)이 각각 무슨 동작인지 말한다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>좌표를 읽는다</b> 위치를 "가로세로"가 아니라 <b>방향(θ)과 거리(R), 높이(Z)</b>로 센다.</div></div></div>
+   <div class="wt-col">
+    <div class="wt-num v"><i>3</i><div><b>Home의 의미</b> 왜 전원 뒤 반드시 Home부터 하는지 안다.</div></div>
+    <div class="wt-note"><b>실습</b> — Initialize→Home, θ 2회, R 1회, Z 2회, 훈련 드릴 4개 완료.</div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro" data-here="efem">
+ <div class="wt-pad"><div class="wt-eye">01 · 왜 세 축</div><h2 class="h-title">왜 공장 로봇처럼 안 생겼을까</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>웨이퍼는 눕혀서 옮긴다</h3><p>웨이퍼는 항상 수평을 유지해야 합니다.
+     그래서 팔을 접었다 펴는 <b>수평 신축</b> 구조를 씁니다.</p></div>
+    <div class="wt-card"><h3>좁은 곳을 드나든다</h3><p>슬롯·챔버 입구는 좁습니다.
+     팔을 편 채 다니면 부딪히므로, <b>접은 상태로 회전</b>하고 목표 앞에서만 폅니다.</p></div>
+    <div class="wt-card v"><h3>세 축이면 충분하다</h3><p>어느 스테이션이든 <b>θ(방향)+R(거리)+Z(높이)</b>로 지정됩니다.</p></div></div>
+   <div class="wt-col">
+    <div class="wt-note warn"><b>그래서 규칙 하나</b> — <b>팔을 편(Extend) 상태로 회전하면</b> 옆 장치와 충돌합니다.
+     장비는 이를 Collision 인터록으로 막습니다. (4강에서 직접 겪어봅니다)</div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro" data-here="efem">
+ <div class="wt-pad"><div class="wt-eye">02 · θ축</div><h2 class="h-title">θ축 — 몸통을 돌려 방향을 고른다</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>회전으로 스테이션 선택</b> FOUP·Pre-aligner·Load Lock이 로봇을 둘러싸고,
+     θ로 몸통을 돌려 그 앞을 바라봅니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>접은 상태로만 회전</b> 안전을 위해 팔을 <b>Retract</b>한 뒤 돕니다.</div></div>
+    <div class="wt-num v"><i>3</i><div><b>각도는 엔코더로 확인</b> 실제로 몇 도 돌았는지 되읽어 정밀도를 보장합니다.</div></div></div>
+   <div class="wt-col"><div class="wt-fig" style="margin-top:0">
+    <svg viewBox="0 0 520 440">
+     <circle cx="260" cy="230" r="150" fill="none" stroke="#24425c" stroke-width="1.5"/>
+     <g font-family="ui-monospace,monospace" font-size="17" fill="#5d829c">
+      <text x="250" y="66">FOUP</text><text x="404" y="236">LOCK</text><text x="230" y="410">PORT</text><text x="78" y="236">ALIGN</text></g>
+     <circle cx="260" cy="230" r="22" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <rect class="fx-arm" x="260" y="221" width="90" height="18" rx="8" transform="rotate(-40 260 230)"/>
+     <path class="fx-ln" d="M320 150 A100 100 0 0 1 360 230" marker-end="url(#mA)"/>
+     <text class="fx-cap" x="336" y="150">θ</text>
+    </svg></div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro" data-here="efem">
+ <div class="wt-pad"><div class="wt-eye">03 · R축</div><h2 class="h-title">R축 — 팔은 늘어나지 않습니다, 펴집니다</h2>
+  <div class="wt-body">
+   <div class="wt-col"><div class="wt-fig" style="margin-top:0">
+    <svg viewBox="0 0 560 420">
+     <circle cx="120" cy="210" r="22" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <g opacity=".4"><rect class="fx-arm" x="120" y="200" width="70" height="20" rx="8" transform="rotate(-35 120 210)"/>
+      <rect class="fx-arm" x="168" y="168" width="70" height="20" rx="8" transform="rotate(35 168 178)"/></g>
+     <text class="fx-sub" x="90" y="300">접힘 (Retract)</text>
+     <path class="fx-ln" d="M250 210 H330" marker-end="url(#mA)"/>
+     <circle cx="400" cy="210" r="22" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <rect class="fx-arm" x="400" y="200" width="130" height="20" rx="8"/>
+     <ellipse class="fx-w" cx="530" cy="210" rx="24" ry="7"/>
+     <text class="fx-sub" x="420" y="300">펴짐 (Extend)</text></svg></div></div>
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>링크가 펴지는 구조</b> 두 개의 링크(팔꿈치)가 펴지며 End Effector가 <b>직선</b>으로 나갑니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>Extend / Retract</b> 목표 앞에서 펴서 넣고(Pick/Place), 다시 접어 안전 위치로.</div></div>
+    <div class="wt-num v"><i>3</i><div><b>편 채 회전 금지</b> Extend 상태의 θ 회전은 충돌 인터록으로 거부됩니다.</div></div>
+    <div class="wt-note"><b>기억할 말</b> — "다닐 땐 접고, 넣을 때만 편다."</div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro" data-here="foup">
+ <div class="wt-pad"><div class="wt-eye">04 · Z축</div><h2 class="h-title">Z축 — 높이가 곧 슬롯 번호</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>위아래 승강</b> FOUP 25칸 중 몇 번 칸을 겨냥하느냐가 <b>Z 높이</b>로 정해집니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>Pick/Place의 마지막 동작</b> 팔을 편 뒤 살짝 올리거나 내려 웨이퍼를 들어올리거나 내려놓습니다.</div></div>
+    <div class="wt-num v"><i>3</i><div><b>한계(Limit)</b> 위·아래 끝을 넘으면 Limit 센서가 알람으로 멈춥니다. (6강)</div></div>
+    <div class="wt-note warn"><b>흔한 실수</b> — Z가 빈 슬롯을 가리킨 채 Pick → 로봇은 정상이지만
+     <b>Wafer Presence OFF</b>로 알람. 겨냥이 틀린 것.</div></div>
+   <div class="wt-col"><div class="wt-fig" style="margin-top:0">
+    <svg viewBox="0 0 440 460">
+     <rect x="120" y="30" width="200" height="400" rx="10" fill="#101d29" stroke="#3a6b8c" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="2"><path d="M140 110 H300 M140 190 H300 M140 270 H300 M140 350 H300"/></g>
+     <ellipse class="fx-w" cx="220" cy="150" rx="72" ry="7"/><ellipse class="fx-w" cx="220" cy="230" rx="72" ry="7"/>
+     <g font-family="ui-monospace,monospace" font-size="16" fill="#5d829c"><text x="96" y="112">1</text><text x="96" y="192">2</text><text x="96" y="272">3</text><text x="96" y="352">4</text></g>
+     <path class="fx-ln" d="M360 150 V370" marker-end="url(#mA)" marker-start="url(#mA)"/><text class="fx-cap" x="372" y="270">Z</text>
+    </svg></div></div></div></div>
+</section>
+
+<section class="slide" data-level="standard pro" data-here="efem">
+ <div class="wt-pad"><div class="wt-eye">05 · 좌표</div><h2 class="h-title">가로세로가 아니라, 방향·거리·높이</h2>
+  <div class="wt-lead">이송 로봇의 위치는 <b>극좌표</b>로 생각하면 쉽습니다.
+   "어느 방향(θ)으로 돌아, 얼마나 뻗어(R), 어느 높이(Z)"의 세 숫자면 한 점이 정해집니다.</div>
+  <div class="wt-body">
+   <div class="wt-col"><div class="wt-fig" style="margin-top:0">
+    <svg viewBox="0 0 520 400">
+     <circle cx="130" cy="300" r="16" fill="#16283a" stroke="#4f8bb5" stroke-width="3"/>
+     <path class="fx-ln" d="M130 300 L360 150" marker-end="url(#mA)"/>
+     <path d="M130 300 m40 0 a40 40 0 0 0 -12 -30" fill="none" stroke="#35e0c8" stroke-width="2"/>
+     <text class="fx-cap" x="180" y="285">θ</text>
+     <text class="fx-cap" x="250" y="210">R</text>
+     <ellipse class="fx-w" cx="360" cy="150" rx="22" ry="6"/>
+     <text class="fx-sub" x="300" y="330">한 점 = (θ, R, Z)</text></svg></div></div>
+   <div class="wt-col">
+    <table class="wt-tbl"><tr><th>축</th><th>무엇</th><th>단위</th></tr>
+     <tr><td><b>θ</b></td><td>방향(회전각)</td><td>도(°)</td></tr>
+     <tr><td><b>R</b></td><td>팔 뻗은 거리</td><td>mm</td></tr>
+     <tr><td><b>Z</b></td><td>높이(슬롯)</td><td>mm / 칸</td></tr></table>
+    <div class="wt-note v"><b>시뮬 상태바</b>에 R·θ·Z 값이 항상 표시됩니다. 조작하며 숫자가 어떻게 변하는지 보세요.</div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad"><div class="wt-eye">06 · 기준점</div><h2 class="h-title">Home을 먼저 하는 이유</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>전원만으론 위치를 모른다</b> 로봇은 켜져도 지금 팔이 어디 있는지 모릅니다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>Home = 기준 0점</b> 정해진 기준 위치로 가서 <b>Home 센서 ON</b>을 확인하면,
+     이후 모든 θ·R·Z 좌표가 의미를 갖습니다.</div></div>
+    <div class="wt-num v"><i>3</i><div><b>Initialize → Home</b> 먼저 전원·서보를 잡고(Initialize), 그다음 Home.</div></div></div>
+   <div class="wt-col">
+    <div class="wt-note"><b>비유</b> — 지도를 봐도 "현재 위치"를 모르면 길을 못 찾습니다.
+     Home이 그 <b>현재 위치 핀</b>을 꽂는 일입니다.</div>
+    <div class="wt-note warn" style="margin-top:16px"><b>Home 전에는</b> 정밀 이동 명령이 거부되거나 위험할 수 있어,
+     장비는 Home을 강제합니다.</div></div></div></div>
+</section>
+
+<section class="slide" data-level="pro" data-here="efem">
+ <div class="wt-pad"><div class="wt-eye">07 · 한계</div><h2 class="h-title">리밋이 세 겹인 이유</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>소프트 리밋</b> 제어기가 좌표 한계를 먼저 막습니다(정상 운전 범위).</div></div>
+    <div class="wt-num"><i>2</i><div><b>하드(센서) 리밋</b> 소프트를 넘으면 Limit 센서가 물리적으로 감지해 정지.</div></div>
+    <div class="wt-num warn"><i>3</i><div><b>기구 스토퍼</b> 그마저 넘으면 기계적 스토퍼가 최후로 막습니다.</div></div></div>
+   <div class="wt-col">
+    <div class="wt-note warn"><b>왜 세 겹?</b> 웨이퍼 한 장·장비 손상을 막기 위해 안전은 <b>중복</b>으로 설계합니다.
+     하나가 실패해도 다음이 잡습니다.</div></div></div></div>
+</section>
+
+<section class="slide" data-level="standard pro">
+ <div class="wt-pad"><div class="wt-eye">08 · 손</div><h2 class="h-title">End Effector — 로봇의 손</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-card"><h3>진공 흡착 또는 모서리 지지</h3><p>웨이퍼 뒷면을 진공으로 살짝 붙들거나,
+     가장자리만 받쳐 <b>표면을 건드리지 않게</b> 듭니다.</p></div>
+    <div class="wt-card v"><h3>재질이 갈린다</h3><p>대기용과 달리 진공·고온 구간은 세라믹 등 <b>내열 재질</b>을 씁니다.</p></div></div>
+   <div class="wt-col">
+    <div class="wt-num"><i>정</i><div><b>정확도(Accuracy)</b> 목표 좌표에 얼마나 가깝게 가는가.</div></div>
+    <div class="wt-num v"><i>반</i><div><b>반복도(Repeatability)</b> <b>같은 명령에 늘 같은 자리</b>로 가는가.
+     이송에선 반복도가 더 중요합니다 — 티칭한 자리에 매번 똑같이 놓여야 하니까요.</div></div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">3강에서 직접 해볼 것</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>Initialize → Home</b> 로봇을 준비하고 기준점을 잡는다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>θ 2회</b> 스테이션을 두 번 이상 바꿔 회전을 느낀다.</div></div>
+    <div class="wt-num"><i>3</i><div><b>R 1회 · Z 2회</b> 팔을 펴고 접고, 높이를 올리고 내린다.</div></div></div>
+   <div class="wt-col">
+    <div class="wt-num v"><i>4</i><div><b>훈련 드릴 4개 완료</b> 훈련 탭의 드릴을 모두 통과한다.</div></div>
+    <div class="wt-note"><b>완료 기준</b> — "따라하기" 체크가 모두 채워지면 3강 완료.
+     조작할 때 상태바의 R·θ·Z 숫자 변화를 같이 보세요.</div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad"><div class="wt-eye">정리 · 자가 점검</div><h2 class="h-title">3강에서 남길 것</h2>
+  <div class="wt-body">
+   <div class="wt-col">
+    <div class="wt-num"><i>1</i><div><b>세 축</b> θ 방향 · R 거리 · Z 높이.</div></div>
+    <div class="wt-num"><i>2</i><div><b>다닐 땐 접고, 넣을 때만 편다</b> 편 채 회전은 충돌.</div></div>
+    <div class="wt-num v"><i>3</i><div><b>Home이 기준점</b> 없으면 좌표가 무의미.</div></div></div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>Q1</h3><p>팔을 편 상태로 회전하면 왜 안 되나요?</p></div>
+    <div class="wt-card v"><h3>Q2</h3><p>정확도와 반복도 중 이송에서 더 중요한 것과 그 이유는?</p></div>
+    <div class="wt-note"><b>다음 강</b> — 4강 <b>수동조작</b>: 이 세 축을 실제 버튼으로 다뤄 FOUP 문을 열고 팔을 뻗습니다.</div></div></div></div>
+</section>
+</div></div>
+
+<script>
+/* data-here 미니 경로 지도 생성 (wafer-transfer.html 과 동일) */
+(function(){
+  var NODES=[['foup','FOUP',0],['port','PORT',0],['efem','EFEM',0],['align','ALIGN',0],
+             ['lock','LOCK',0],['tm','TM',1],['pm','PM',1]];
+  document.querySelectorAll('.slide[data-here]').forEach(function(sl){
+    var here=sl.getAttribute('data-here'), pad=sl.querySelector('.wt-pad');
+    if(!pad) return;
+    var wrap=document.createElement('div'); wrap.className='wt-map';
+    NODES.forEach(function(n,i){
+      if(i) wrap.insertAdjacentHTML('beforeend','<div class="b"></div>');
+      var on=(here==='all'||here===n[0])?' on':'';
+      wrap.insertAdjacentHTML('beforeend',
+        '<div class="n'+(n[2]?' vac':'')+on+'"><div class="d"></div><span>'+n[1]+'</span></div>');
+    });
+    pad.appendChild(wrap);
+  });
+})();
+/* 발표 네비게이션 (Next/Prev · 화살표 · intro/standard/pro 레벨) */
+(function(){
+  var stage=document.getElementById('stage'),
+      all=[].slice.call(stage.querySelectorAll('.slide')),
+      lv='standard', list=[], i=0;
+  function build(){ list=all.filter(function(s){return (s.dataset.level||'standard').split(' ').indexOf(lv)>=0;});
+    all.forEach(function(s){s.classList.remove('on');}); i=Math.min(Math.max(i,0),list.length-1); show(); }
+  function show(){ list.forEach(function(s,k){s.classList.toggle('on',k===i);});
+    document.getElementById('pos').textContent=(i+1)+' / '+list.length;
+    var h=list[i].querySelector('.h-title');
+    document.getElementById('ttl').textContent=h?h.textContent:''; }
+  function fit(){ stage.style.transform='scale('+Math.min(innerWidth/1920,innerHeight/1080)+')'; }
+  var nav=document.createElement('div'); nav.id='fbnav';
+  nav.innerHTML='<button data-d="-1">◀</button><span id="pos"></span><button data-d="1">▶</button>'+
+    '<span id="ttl" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>'+
+    ['intro','standard','pro'].map(function(t){return '<button data-l="'+t+'">'+t+'</button>';}).join('');
+  document.body.appendChild(nav);
+  nav.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.d){ i=Math.max(0,Math.min(list.length-1,i+ +b.dataset.d)); show(); }
+    if(b.dataset.l){ lv=b.dataset.l;
+      [].forEach.call(nav.querySelectorAll('[data-l]'),function(x){x.classList.toggle('on',x.dataset.l===lv);});
+      build(); } });
+  addEventListener('keydown',function(e){ if(e.key==='ArrowRight'||e.key===' '){i=Math.min(list.length-1,i+1);show();}
+    if(e.key==='ArrowLeft'){i=Math.max(0,i-1);show();} });
+  addEventListener('resize',fit);
+  nav.querySelector('[data-l="standard"]').classList.add('on');
+  build(); fit();
+})();
+</script>
+</body></html>
