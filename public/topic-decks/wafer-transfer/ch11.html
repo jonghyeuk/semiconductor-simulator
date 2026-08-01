@@ -202,6 +202,45 @@ h2.h-title{ font-size:54px; }
   <div class="wt-col"><div class="wt-note"><b>대응</b> — 압력·Presence를 먼저 확인하고 로그로 원인 좁히기.</div></div></div></div>
 </section>
 
+<section class="slide" data-here="tm"><div class="wt-pad"><div class="wt-eye">개념 · 커플링</div>
+ <h2 class="h-title">자석으로 힘을 넘긴다 — 마그네틱 커플링</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num v"><i>1</i><div><b>벽 너머로</b> 진공 벽을 사이에 두고 바깥 자석이 안쪽 자석을 돌립니다.</div></div>
+  <div class="wt-num v"><i>2</i><div><b>밀봉 유지</b> 축이 벽을 관통하지 않아 진공 누설 위험이 없음.</div></div></div>
+  <div class="wt-col"><div class="wt-note v"><b>핵심</b> — "구동부는 밖, 동력만 안으로." 진공 로봇의 정체성.</div></div></div></div>
+</section>
+<section class="slide" data-here="pm"><div class="wt-pad"><div class="wt-eye">개념 · 아키텍처</div>
+ <h2 class="h-title">클러스터 툴 구조</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>중앙 허브형</h3><p>Transfer Chamber를 중심으로 Load Lock·여러 PM이 방사형으로 붙습니다.</p></div>
+  <div class="wt-card v"><h3>장점</h3><p>한 번 진공에 들어온 웨이퍼가 여러 공정을 <b>진공을 깨지 않고</b> 연속 처리.</p></div></div>
+  <div class="wt-col"><div class="wt-fig" style="margin-top:0">
+   <svg viewBox="0 0 300 240"><circle class="fx-vac" cx="150" cy="120" r="46"/>
+    <circle class="fx-vac" cx="150" cy="40" r="26"/><circle class="fx-vac" cx="240" cy="120" r="26"/>
+    <circle class="fx-vac" cx="150" cy="200" r="26"/><circle class="fx-vac" cx="60" cy="120" r="26"/>
+    <text class="fx-sub" x="132" y="124">TM</text></svg></div></div></div></div>
+</section>
+<section class="slide" data-here="pm"><div class="wt-pad"><div class="wt-eye">개념 · 스케줄링</div>
+ <h2 class="h-title">어느 챔버로 먼저 보낼까</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>비는 챔버 우선</b> 준비된 PM으로 보내 대기 없이.</div></div>
+  <div class="wt-num"><i>2</i><div><b>공정 시간 고려</b> 오래 걸리는 챔버를 먼저 채워 병렬 처리.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>연결</b> — 이 판단 로직이 12강 시퀀스의 IF·분기로 자동화됩니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="tm"><div class="wt-pad"><div class="wt-eye">개념 · 관리</div>
+ <h2 class="h-title">진공 속 열과 오염 관리</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>열</b> 진공은 대류 냉각이 없어 열이 안 빠짐 → 구동부를 밖에.</div></div>
+  <div class="wt-num v"><i>2</i><div><b>오염</b> 윤활유 증기가 웨이퍼에 앉으면 불량 → 무윤활·내열 재질.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>정리</b> — 진공 로봇의 모든 설계는 "열·오염 회피"로 설명됩니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 흐름</div>
+ <h2 class="h-title">대기와 진공, 손을 바꿔 잡는다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>인계 지점</h3><p>Load Lock에서 대기 로봇 → (압력 전환) → 진공 로봇으로 웨이퍼가 넘어갑니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>한 줄</b> — 두 로봇은 Load Lock을 사이에 두고 "릴레이"하듯 웨이퍼를 넘깁니다.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">11강에서 직접 해볼 것</h2>
   <div class="wt-body">
