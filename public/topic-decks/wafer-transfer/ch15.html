@@ -1,0 +1,212 @@
+<!DOCTYPE html><html lang="ko" class="nobase"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Ch.15 종합 실습 2 — 전 구간 자동 이송과 복구</title>
+<style>
+/* ═══ 디자인 토큰 (본 챕터 데크는 wafer-transfer.html 과 동일 시스템) ═══
+   청록 = 대기 영역(760 Torr) · 보라 = 진공 영역 · 호박 = 경고 · 적 = 금지 */
+:root{
+  --ac:#35e0c8; --vc:#9b8cff; --wn:#ffb340; --bd:#ff5e5e;
+  --t1:#f2f9ff; --t2:#a9c4d8; --t3:#7fa3bd; --t4:#4f7590;
+  --bx:#132433; --ln:#3a6b8c; --ln2:#294357;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+}
+.slide{ color:var(--t2); font-family:Pretendard,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif; }
+.wt-pad{ padding:74px 96px 66px; height:100%; box-sizing:border-box; display:flex; flex-direction:column; position:relative; }
+.wt-eye{ font-family:var(--mono); font-size:23px; letter-spacing:.24em; color:var(--ac); margin-bottom:14px; }
+.wt-eye.v{ color:var(--vc); }
+.h-title{ font-size:64px; line-height:1.14; font-weight:800; letter-spacing:-.025em; margin:0; color:var(--t1); }
+h2.h-title{ font-size:54px; }
+.wt-lead{ font-size:29px; line-height:1.6; color:var(--t2); max-width:1420px; margin-top:16px; }
+.wt-lead b{ color:var(--ac); font-weight:700; }
+.wt-lead b.v{ color:var(--vc); }
+.wt-body{ flex:1; display:flex; gap:40px; margin-top:34px; min-height:0; }
+.wt-col{ flex:1; min-width:0; display:flex; flex-direction:column; }
+.wt-fig{ flex:1; display:flex; align-items:center; justify-content:center; min-height:0; margin-top:26px; }
+.wt-fig svg{ width:100%; height:100%; max-height:100%; }
+.wt-figc{ font-family:var(--mono); font-size:20px; color:var(--t4); text-align:center; margin-top:10px; letter-spacing:.04em; }
+.wt-card{ background:rgba(19,36,51,.72); border:1px solid var(--ln2); border-left:5px solid var(--ac);
+  border-radius:11px; padding:24px 28px; margin-bottom:16px; }
+.wt-card h3{ font-size:29px; margin:0 0 9px; color:var(--t1); font-weight:700; }
+.wt-card p{ font-size:24px; line-height:1.6; color:var(--t2); margin:0; }
+.wt-card.v{ border-left-color:var(--vc); }
+.wt-card.warn{ border-left-color:var(--bd); }
+.wt-num{ display:flex; gap:18px; align-items:flex-start; margin-bottom:20px; }
+.wt-num i{ flex:none; width:50px; height:50px; border-radius:13px; background:var(--ac); color:#03231e;
+  font-family:var(--mono); font-size:25px; font-weight:800; font-style:normal;
+  display:flex; align-items:center; justify-content:center; }
+.wt-num.v i{ background:var(--vc); color:#140f2e; }
+.wt-num div{ font-size:25px; line-height:1.5; color:var(--t2); padding-top:6px; }
+.wt-num div b{ color:var(--t1); display:block; font-size:28px; margin-bottom:3px; }
+.wt-tbl{ width:100%; border-collapse:collapse; font-size:23px; }
+.wt-tbl th,.wt-tbl td{ text-align:left; padding:13px 15px; border-bottom:1px solid var(--ln2); vertical-align:top; }
+.wt-tbl th{ font-family:var(--mono); font-size:19px; letter-spacing:.1em; color:var(--t3); font-weight:500; }
+.wt-tbl td b{ color:var(--ac); }
+.wt-tbl td b.v{ color:var(--vc); }
+.wt-note{ margin-top:auto; padding:19px 24px; background:rgba(53,224,200,.09); border:1px solid #2c6d63;
+  border-radius:10px; font-size:24px; line-height:1.5; color:#bfe9e1; }
+.wt-note b{ color:var(--ac); }
+.wt-note.warn{ background:rgba(255,94,94,.09); border-color:#7a3232; color:#ffc4c4; }
+.wt-note.warn b{ color:#ff8a8a; }
+.wt-note.v{ background:rgba(155,140,255,.1); border-color:#4d3f8c; color:#d5cdff; }
+.wt-note.v b{ color:var(--vc); }
+.wt-key{ display:inline-block; font-family:var(--mono); font-size:21px; padding:3px 11px;
+  border:1px solid #45688a; border-bottom-width:3px; border-radius:6px; background:#17293a; color:#dceaf5; margin:0 3px; }
+.wt-map{ position:absolute; top:74px; right:96px; display:flex; align-items:center; gap:0; }
+.wt-map .n{ display:flex; flex-direction:column; align-items:center; gap:7px; }
+.wt-map .d{ width:13px; height:13px; border-radius:50%; background:#24425c; }
+.wt-map .n.on .d{ background:var(--ac); box-shadow:0 0 0 6px rgba(53,224,200,.16); }
+.wt-map .n.vac .d{ background:#2f2a52; }
+.wt-map .n.vac.on .d{ background:var(--vc); box-shadow:0 0 0 6px rgba(155,140,255,.18); }
+.wt-map .n span{ font-family:var(--mono); font-size:14px; letter-spacing:.1em; color:#3f6480; }
+.wt-map .n.on span{ color:var(--t1); }
+.wt-map .b{ width:30px; height:2px; background:#24425c; margin:0 5px 21px; }
+.fx-box{ fill:var(--bx); stroke:var(--ln); stroke-width:2.5; }
+.fx-vac{ fill:#161a35; stroke:#6f63c9; stroke-width:2.5; }
+.fx-w{ fill:#c9dced; stroke:#eef6ff; stroke-width:1.5; }
+.fx-lbl{ font-family:var(--mono); font-size:21px; fill:#9fc0d6; }
+.fx-sub{ font-family:var(--mono); font-size:17px; fill:#5d829c; }
+.fx-cap{ font-family:var(--mono); font-size:19px; fill:var(--ac); }
+.fx-cap.v{ fill:var(--vc); }
+.fx-arm{ fill:#2c4b66; stroke:#4a7ea6; stroke-width:2.5; }
+.fx-arm.v{ fill:#2f2a52; stroke:#8a7dff; }
+.fx-ln{ stroke:#35e0c8; stroke-width:3; fill:none; }
+.fx-ln.v{ stroke:#9b8cff; }
+.fx-bad{ stroke:var(--bd); stroke-width:4; fill:none; }
+.fx-dim{ opacity:.3; }
+.fx-panel{ fill:#0e1d29; stroke:#274357; stroke-width:2; }
+/* 베이스리스 표시 (단독/서랍 공통) */
+.nobase body{ margin:0; background:#0a141c; overflow:hidden; }
+.nobase .deck-viewport{ position:fixed; inset:0; display:flex; align-items:center; justify-content:center; }
+.nobase .deck-stage{ width:1920px; height:1080px; position:relative; transform-origin:center center; }
+.nobase .slide{ position:absolute; inset:0; display:none;
+  background:radial-gradient(1400px 800px at 18% -12%,#17293a 0%,transparent 62%),#0a141c; }
+.nobase .slide.on{ display:block; }
+.nobase #fbnav{ position:fixed; bottom:16px; left:50%; transform:translateX(-50%); display:flex; gap:7px;
+  z-index:9; font-family:var(--mono); font-size:13px; align-items:center; }
+.nobase #fbnav button{ background:#16293a; color:#cfe4f2; border:1px solid #2f5470; border-radius:6px; padding:7px 13px; cursor:pointer; }
+.nobase #fbnav button.on{ background:var(--ac); color:#03231e; border-color:var(--ac); }
+.nobase #fbnav span{ color:#6d90aa; padding:0 6px; }
+</style>
+</head><body>
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true"><defs>
+ <marker id="mA" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#35e0c8"/></marker>
+ <marker id="mV" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#9b8cff"/></marker>
+ <marker id="mW" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ffb340"/></marker>
+ <marker id="mR" markerWidth="11" markerHeight="9" refX="10" refY="4.5" orient="auto"><path d="M0,0 L11,4.5 L0,9 Z" fill="#ff5e5e"/></marker>
+ <radialGradient id="wg" cx="34%" cy="28%">
+  <stop offset="0%" stop-color="#e8f3fd"/><stop offset="55%" stop-color="#b8cddf"/><stop offset="100%" stop-color="#7d97ad"/></radialGradient>
+</defs></svg>
+
+<div class="deck-viewport"><div class="deck-stage" id="stage">
+
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad"><div class="wt-eye">로봇및센서실습 · 반도체장비전공 · CHAPTER 15</div>
+  <div class="wt-body" style="margin-top:10px;align-items:center">
+   <div class="wt-col" style="flex:1.05"><h1 class="h-title">종합 실습 2<br/>전 구간 자동 이송과 오류 복구</h1>
+    <div class="wt-lead" style="margin-top:26px">마지막입니다. <b>시퀀스로 FOUP → 공정 챔버 전 구간</b>을 자동 이송하고,
+     도중에 생긴 오류를 <b>스스로 진단·복구</b>합니다.</div>
+    <div class="wt-note v" style="margin-top:40px;max-width:960px"><b>이 강의는 실습 가이드</b> —
+     1~14강 전부를 하나의 흐름으로 합칩니다. 새 개념은 없고, 통합과 응용입니다.</div></div>
+   <div class="wt-col" style="flex:.95"><div class="wt-fig" style="margin:0">
+    <svg viewBox="0 0 560 420">
+     <rect class="fx-box" x="20" y="170" width="60" height="110" rx="6"/><text class="fx-sub" x="28" y="160">FOUP</text>
+     <rect class="fx-box" x="150" y="150" width="120" height="150" rx="8"/><text class="fx-sub" x="166" y="140">EFEM</text>
+     <rect class="fx-box" x="300" y="190" width="80" height="90" rx="6" stroke="#6f63c9"/><text class="fx-sub" x="312" y="180">LL</text>
+     <rect class="fx-vac" x="410" y="150" width="130" height="150" rx="8"/><text class="fx-sub" x="426" y="140" fill="#bcaeff">TM+PM</text>
+     <path class="fx-ln" d="M80 225 H150" marker-end="url(#mA)"/><path class="fx-ln" d="M270 225 H300" marker-end="url(#mA)"/>
+     <path class="fx-ln v" d="M380 235 H410" marker-end="url(#mV)"/></svg></div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro">
+ <div class="wt-pad"><div class="wt-eye">목표</div><h2 class="h-title">이번 실습의 성공 기준</h2>
+  <div class="wt-body">
+   <div class="wt-col"><div class="wt-num"><i>1</i><div><b>시퀀스로 Load Lock까지</b> 자동 실행으로 웨이퍼를 보낸다.</div></div>
+    <div class="wt-num v"><i>2</i><div><b>진공 이송</b> Pump Down·Gate Valve를 거쳐 공정 챔버까지.</div></div></div>
+   <div class="wt-col"><div class="wt-num warn"><i>3</i><div><b>오류 대응</b> 도중 발생한 알람을 진단·복구해 완주한다.</div></div>
+    <div class="wt-num"><i>4</i><div><b>보고</b> 겪은 오류를 6칸 보고서로 남긴다.</div></div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad"><div class="wt-eye">순서표</div><h2 class="h-title">전 구간 체크리스트</h2>
+  <div class="wt-body"><div class="wt-col">
+   <table class="wt-tbl"><tr><th>구간</th><th>핵심 동작</th><th>확인</th></tr>
+    <tr><td>대기</td><td>Docking·Door·Mapping·Pick</td><td>Presence ON</td></tr>
+    <tr><td>정렬</td><td>Pre-aligner Align</td><td>Notch 0°</td></tr>
+    <tr><td>관문</td><td>LL Place·Pump Down</td><td>목표 진공</td></tr>
+    <tr><td>진공</td><td>Gate Valve·진공 Pick</td><td>Presence ON</td></tr>
+    <tr><td>공정</td><td>PM Place</td><td>PM Presence ON</td></tr></table></div>
+   <div class="wt-col"><div class="wt-note v"><b>완료</b> — 웨이퍼가 공정 챔버에 놓이고, 발생한 오류를 모두 복구했으면
+    <b>과정 수료</b>입니다.</div></div></div></div>
+</section>
+
+<section class="slide" data-level="standard pro">
+ <div class="wt-pad"><div class="wt-eye">응용</div><h2 class="h-title">막히면 — 지금까지 배운 순서로</h2>
+  <div class="wt-body"><div class="wt-col">
+   <table class="wt-tbl"><tr><th>증상</th><th>어느 강</th><th>조치</th></tr>
+    <tr><td>회전 거부</td><td>3·4·13강</td><td>Retract 후 회전</td></tr>
+    <tr><td>밸브 거부</td><td>10·13강</td><td>압력 맞추고 재시도</td></tr>
+    <tr><td>Pick 실패</td><td>5·6강</td><td>겨냥·Presence 확인</td></tr>
+    <tr><td>Pump timeout</td><td>10·14강</td><td>누설 점검·재-Pump</td></tr></table></div>
+   <div class="wt-col"><div class="wt-note"><b>이게 이 과정의 목적</b> — 알람 앞에서 당황하지 않고
+    <b>어느 강의 지식</b>으로 풀지 아는 것.</div></div></div></div>
+</section>
+
+<section class="slide" data-level="intro standard pro" data-here="all">
+ <div class="wt-pad"><div class="wt-eye">마무리</div><h2 class="h-title">이 과정에서 남길 것</h2>
+  <div class="wt-body">
+   <div class="wt-col"><div class="wt-num"><i>1</i><div><b>웨이퍼의 여정</b> FOUP에서 공정 챔버까지 전 구간을 안다.</div></div>
+    <div class="wt-num"><i>2</i><div><b>구동·감지·제어</b> 로봇·센서·인터록을 손으로 다뤘다.</div></div></div>
+   <div class="wt-col"><div class="wt-num v"><i>3</i><div><b>자동화와 진단</b> 시퀀스를 짜고, 로그로 고장을 푼다.</div></div>
+    <div class="wt-note"><b>수고하셨습니다.</b> 이제 실제 장비의 이송 화면을 봐도
+     "무엇이·왜·어떻게"가 읽힐 것입니다.</div></div></div></div>
+</section>
+</div></div>
+
+<script>
+/* data-here 미니 경로 지도 생성 (wafer-transfer.html 과 동일) */
+(function(){
+  var NODES=[['foup','FOUP',0],['port','PORT',0],['efem','EFEM',0],['align','ALIGN',0],
+             ['lock','LOCK',0],['tm','TM',1],['pm','PM',1]];
+  document.querySelectorAll('.slide[data-here]').forEach(function(sl){
+    var here=sl.getAttribute('data-here'), pad=sl.querySelector('.wt-pad');
+    if(!pad) return;
+    var wrap=document.createElement('div'); wrap.className='wt-map';
+    NODES.forEach(function(n,i){
+      if(i) wrap.insertAdjacentHTML('beforeend','<div class="b"></div>');
+      var on=(here==='all'||here===n[0])?' on':'';
+      wrap.insertAdjacentHTML('beforeend',
+        '<div class="n'+(n[2]?' vac':'')+on+'"><div class="d"></div><span>'+n[1]+'</span></div>');
+    });
+    pad.appendChild(wrap);
+  });
+})();
+/* 발표 네비게이션 (Next/Prev · 화살표 · intro/standard/pro 레벨) */
+(function(){
+  var stage=document.getElementById('stage'),
+      all=[].slice.call(stage.querySelectorAll('.slide')),
+      lv='standard', list=[], i=0;
+  function build(){ list=all.filter(function(s){return (s.dataset.level||'standard').split(' ').indexOf(lv)>=0;});
+    all.forEach(function(s){s.classList.remove('on');}); i=Math.min(Math.max(i,0),list.length-1); show(); }
+  function show(){ list.forEach(function(s,k){s.classList.toggle('on',k===i);});
+    document.getElementById('pos').textContent=(i+1)+' / '+list.length;
+    var h=list[i].querySelector('.h-title');
+    document.getElementById('ttl').textContent=h?h.textContent:''; }
+  function fit(){ stage.style.transform='scale('+Math.min(innerWidth/1920,innerHeight/1080)+')'; }
+  var nav=document.createElement('div'); nav.id='fbnav';
+  nav.innerHTML='<button data-d="-1">◀</button><span id="pos"></span><button data-d="1">▶</button>'+
+    '<span id="ttl" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>'+
+    ['intro','standard','pro'].map(function(t){return '<button data-l="'+t+'">'+t+'</button>';}).join('');
+  document.body.appendChild(nav);
+  nav.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return;
+    if(b.dataset.d){ i=Math.max(0,Math.min(list.length-1,i+ +b.dataset.d)); show(); }
+    if(b.dataset.l){ lv=b.dataset.l;
+      [].forEach.call(nav.querySelectorAll('[data-l]'),function(x){x.classList.toggle('on',x.dataset.l===lv);});
+      build(); } });
+  addEventListener('keydown',function(e){ if(e.key==='ArrowRight'||e.key===' '){i=Math.min(list.length-1,i+1);show();}
+    if(e.key==='ArrowLeft'){i=Math.max(0,i-1);show();} });
+  addEventListener('resize',fit);
+  nav.querySelector('[data-l="standard"]').classList.add('on');
+  build(); fit();
+})();
+</script>
+</body></html>
