@@ -207,6 +207,47 @@ h2.h-title{ font-size:54px; }
   <div class="wt-col"><div class="wt-note"><b>진단</b> — 압력 센서 값과 로그를 함께 봅니다(14강).</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 진공 기초</div>
+ <h2 class="h-title">Torr — 진공을 재는 단위</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>대기 = 760 Torr</b> 우리가 사는 압력.</div></div>
+  <div class="wt-num"><i>2</i><div><b>공정 진공 = 0.01 Torr 이하</b> 대기의 수만 분의 1.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>왜 진공</b> 공기 분자가 웨이퍼를 오염·산란시키지 않도록.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>감각</b> — 숫자가 <b>작을수록</b> 더 높은 진공(공기 적음)입니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 펌프</div>
+ <h2 class="h-title">진공은 어떻게 만드나 — 두 단계</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>러핑(1차)</h3><p>대기에서 중간 진공까지 큰 흐름으로 빼냅니다.</p></div>
+  <div class="wt-card v"><h3>하이 배큠(2차)</h3><p>중간 진공에서 고진공까지 정밀하게 낮춥니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>왜 두 단계</b> — 한 종류 펌프로 전 구간을 효율적으로 못 커버하기 때문.</div></div></div></div>
+</section>
+<section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">개념 · 곡선</div>
+ <h2 class="h-title">Pump Down 곡선 읽기</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>처음엔 빠르게</b> 공기가 많아 압력이 급히 떨어짐.</div></div>
+  <div class="wt-num"><i>2</i><div><b>뒤로 갈수록 느리게</b> 목표 근처에서 완만.</div></div>
+  <div class="wt-num warn"><i>!</i><div><b>안 떨어지면</b> 누설·오염 의심(14강 Timeout).</div></div></div>
+  <div class="wt-col"><div class="wt-fig" style="margin-top:0">
+   <svg viewBox="0 0 420 240"><path d="M40 30 V210 H400" stroke="#3a6b8c" stroke-width="2" fill="none"/>
+    <path class="fx-ln v" d="M50 40 C120 120 160 190 390 200" marker-end="url(#mV)"/>
+    <text class="fx-sub" x="44" y="56">760</text><text class="fx-sub" x="330" y="228">시간</text></svg></div></div></div></div>
+</section>
+<section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">개념 · 사이클타임</div>
+ <h2 class="h-title">Load Lock이 곧 병목일 수 있다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>펌프·벤트에 시간</h3><p>압력 전환은 즉시가 아닙니다. 이 시간이 장비 처리량(throughput)을 좌우.</p></div>
+  <div class="wt-card v"><h3>듀얼 Load Lock</h3><p>방을 둘 두어 하나가 펌핑하는 동안 다른 하나로 처리해 대기를 줄입니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>관점</b> — 이송 설계는 "어디서 기다리게 되나"를 줄이는 싸움.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 안전</div>
+ <h2 class="h-title">왜 두 밸브 동시 개방이 치명적인가</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num warn"><i>1</i><div><b>진공 붕괴</b> 대기가 진공으로 쏟아져 챔버 오염·정지.</div></div>
+  <div class="wt-num warn"><i>2</i><div><b>웨이퍼 비산</b> 급격한 기류가 웨이퍼를 날릴 수 있음.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>그래서</b> — 이 조건은 소프트뿐 아니라 하드웨어로도 막는 <b>안전 인터록</b>.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">10강에서 직접 해볼 것</h2>
   <div class="wt-body">
