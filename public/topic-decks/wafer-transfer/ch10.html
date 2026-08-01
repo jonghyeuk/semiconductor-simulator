@@ -190,13 +190,63 @@ h2.h-title{ font-size:54px; }
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">05 · 순서</div>
  <h2 class="h-title">올바른 통과 순서</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>#</th><th>동작</th></tr>
-   <tr><td>1</td><td>ATM 열기 → 웨이퍼 투입</td></tr>
-   <tr><td>2</td><td>ATM 닫기</td></tr>
-   <tr><td>3</td><td>Pump Down (목표 압력)</td></tr>
-   <tr><td>4</td><td>TM 열기 → 진공 로봇이 Pick</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>역방향</b> — 나올 때는 TM 닫기 → Vent → ATM 열기 순.</div></div></div></div>
+ <div class="wt-fig">
+  <svg viewBox="0 0 1680 520">
+   <!-- 4단계 패널 -->
+   <g font-family="ui-monospace,monospace">
+   <!-- 공통 매크로 대신 개별 배치 -->
+   <!-- 1 ATM 열기 -->
+   <g transform="translate(20,80)">
+    <rect x="0" y="0" width="360" height="300" rx="14" fill="rgba(53,224,200,.05)" stroke="#2c6d63" stroke-width="1.5"/>
+    <text class="fx-cap" x="20" y="34" style="font-size:20px">① ATM 열기 · 투입</text>
+    <rect class="fx-box" x="120" y="90" width="120" height="140" rx="10" stroke="#6f63c9"/>
+    <ellipse class="fx-w" cx="180" cy="165" rx="42" ry="9"/>
+    <rect x="100" y="150" width="20" height="46" fill="#2e7d5a" stroke="#35e0c8" stroke-width="2"/>
+    <rect x="240" y="150" width="20" height="46" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <text class="fx-sub" x="70" y="270">ATM 열림</text><text class="fx-sub" x="250" y="270">TM 닫힘</text>
+    <path class="fx-ln" d="M40 173 H100" marker-end="url(#mA)"/>
+   </g>
+   <path class="fx-ln" d="M392 230 H432" marker-end="url(#mA)"/>
+   <!-- 2 ATM 닫기 -->
+   <g transform="translate(440,80)">
+    <rect x="0" y="0" width="360" height="300" rx="14" fill="#101d29" stroke="#25405a" stroke-width="1.5"/>
+    <text class="fx-cap" x="20" y="34" style="font-size:20px">② ATM 닫기</text>
+    <rect class="fx-box" x="120" y="90" width="120" height="140" rx="10" stroke="#6f63c9"/>
+    <ellipse class="fx-w" cx="180" cy="165" rx="42" ry="9"/>
+    <rect x="100" y="150" width="20" height="46" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <rect x="240" y="150" width="20" height="46" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <text class="fx-sub" x="70" y="270">닫힘</text><text class="fx-sub" x="250" y="270">닫힘</text>
+   </g>
+   <path class="fx-ln" d="M812 230 H852" marker-end="url(#mA)"/>
+   <!-- 3 Pump Down -->
+   <g transform="translate(860,80)">
+    <rect x="0" y="0" width="360" height="300" rx="14" fill="rgba(155,140,255,.05)" stroke="#4d3f8c" stroke-width="1.5"/>
+    <text class="fx-cap v" x="20" y="34" style="font-size:20px">③ Pump Down</text>
+    <rect class="fx-box" x="120" y="90" width="120" height="140" rx="10" stroke="#6f63c9"/>
+    <ellipse class="fx-w" cx="180" cy="165" rx="42" ry="9"/>
+    <path class="fx-ln v" d="M180 236 V286" marker-end="url(#mV)"/>
+    <text class="fx-sub v" x="150" y="308" fill="#bcaeff">배기 ↓</text>
+    <text class="fx-sub" x="120" y="270">760 → 0.01 Torr</text>
+   </g>
+   <path class="fx-ln v" d="M1232 230 H1272" marker-end="url(#mV)"/>
+   <!-- 4 TM 열기 -->
+   <g transform="translate(1280,80)">
+    <rect x="0" y="0" width="360" height="300" rx="14" fill="rgba(155,140,255,.05)" stroke="#4d3f8c" stroke-width="1.5"/>
+    <text class="fx-cap v" x="20" y="34" style="font-size:20px">④ TM 열기 · Pick</text>
+    <rect class="fx-box" x="90" y="90" width="120" height="140" rx="10" stroke="#6f63c9"/>
+    <ellipse class="fx-w" cx="150" cy="165" rx="42" ry="9"/>
+    <rect x="70" y="150" width="20" height="46" fill="#7a2e2e" stroke="#a04545" stroke-width="1.5"/>
+    <rect x="210" y="150" width="20" height="46" fill="#3a2e6a" stroke="#9b8cff" stroke-width="2"/>
+    <circle cx="300" cy="173" r="26" fill="#1c2340" stroke="#8a7dff" stroke-width="3"/>
+    <rect class="fx-arm v" x="255" y="165" width="60" height="16" rx="6"/>
+    <path class="fx-ln v" d="M232 173 H250" marker-end="url(#mV)"/>
+    <text class="fx-sub" x="60" y="270">진공측 열림 → 진공 로봇</text>
+   </g>
+   </g>
+  </svg>
+ </div>
+ <div class="wt-note"><b>역방향(웨이퍼가 나올 때)</b> — TM 닫기 → <b>Vent</b>(질소 주입) → ATM 열기. 들어온 길을 정확히 거꾸로 되짚습니다.</div>
+ </div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">06 · 흔한 문제</div>
  <h2 class="h-title">Load Lock에서 자주 나는 문제</h2>
