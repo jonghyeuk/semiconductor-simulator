@@ -165,6 +165,64 @@ h2.h-title{ font-size:54px; }
     로그 캡처와 함께 남기면 다음 사람이 빨리 이해합니다.</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개요</div>
+ <h2 class="h-title">고장 진단은 추리다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>증거 → 원인</h3><p>로그와 센서라는 증거로 원인을 좁혀갑니다. 감이 아니라 신호로.</p></div>
+  <div class="wt-card v"><h3>순서가 있다</h3><p>등급 → 코드 → 메시지 → 직전 동작. 이 순서로 읽으면 대개 풀립니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>이 강의</b> — 로그 읽기, 원인 좁히기, 복구, 보고까지 방법을 익힙니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">01 · 코드 체계</div>
+ <h2 class="h-title">알람 코드가 부위를 알려준다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th>코드대</th><th>부위</th><th>예</th></tr>
+   <tr><td>2xx</td><td>로봇 동작</td><td>201 충돌</td></tr>
+   <tr><td>3xx</td><td>문·압력</td><td>301 도어 · 314 진공</td></tr>
+   <tr><td>4xx</td><td>축 한계</td><td>401 리밋</td></tr>
+   <tr><td>5xx</td><td>웨이퍼 유무</td><td>502/504 Presence</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note"><b>요령</b> — 코드 앞자리만 봐도 어디를 볼지 정해집니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">02 · 진단 흐름</div>
+ <h2 class="h-title">네 단계로 좁힌다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>등급</b> [E]부터 본다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>코드</b> 부위 파악.</div></div>
+  <div class="wt-num"><i>3</i><div><b>메시지</b> 무엇이 실패했나.</div></div>
+  <div class="wt-num v"><i>4</i><div><b>맥락</b> 직전에 무슨 동작을 했나.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>대개 여기서</b> 원인이 드러납니다. 아니면 센서 값을 추가로 봅니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">03 · 시나리오 A</div>
+ <h2 class="h-title">사례 — Pump Timeout</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>증상</i><div>[E] 목표 압력 미도달.</div></div>
+  <div class="wt-num"><i>추정</i><div>누설 또는 펌프 성능.</div></div>
+  <div class="wt-num v"><i>조치</i><div>밸브 상태·누설 점검 후 재-Pump.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>Timeout류</b> — 순서가 아니라 <b>상태·장치</b> 문제. 압력 센서를 본다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">04 · 시나리오 B</div>
+ <h2 class="h-title">사례 — Pick 실패</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>증상</i><div>Pick 후 Presence OFF.</div></div>
+  <div class="wt-num"><i>추정</i><div>빈 칸 겨냥 또는 얕은 Extend.</div></div>
+  <div class="wt-num v"><i>조치</i><div>매핑 재확인·깊이 조정 후 재-Pick.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>Error/겨냥류</b> — 순서·위치 문제. 매핑과 좌표를 본다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">05 · 복구</div>
+ <h2 class="h-title">원인 제거 → Reset → 재시도</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>원인 제거</b> 순서/상태를 바로잡는다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>Reset</b> 알람 해제.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>재시도</b> 통과하는지 확인.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>금지</b> — 원인 없이 Reset만 반복하면 같은 알람이 또 납니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">06 · 예방</div>
+ <h2 class="h-title">같은 고장을 두 번 겪지 않기</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>기록으로 남긴다</h3><p>원인·조치를 보고서로 남기면 다음 사람이 빨리 해결합니다.</p></div>
+  <div class="wt-card v"><h3>절차 보완</h3><p>순서 문제였다면 체크리스트/시퀀스에 확인 단계를 추가.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>현장</b> — 좋은 엔지니어는 고친 뒤 <b>재발 방지</b>까지 적습니다.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">14강에서 직접 해볼 것</h2>
   <div class="wt-body">
