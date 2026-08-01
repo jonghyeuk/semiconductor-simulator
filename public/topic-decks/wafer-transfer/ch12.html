@@ -196,7 +196,7 @@ h2.h-title{ font-size:54px; }
   var stage=document.getElementById('stage'),
       all=[].slice.call(stage.querySelectorAll('.slide')),
       lv='standard', list=[], i=0;
-  function build(){ list=all.filter(function(s){return (s.dataset.level||'standard').split(' ').indexOf(lv)>=0;});
+  function build(){ list=all.slice();
     all.forEach(function(s){s.classList.remove('on');}); i=Math.min(Math.max(i,0),list.length-1); show(); }
   function show(){ list.forEach(function(s,k){s.classList.toggle('on',k===i);});
     document.getElementById('pos').textContent=(i+1)+' / '+list.length;
@@ -205,18 +205,14 @@ h2.h-title{ font-size:54px; }
   function fit(){ stage.style.transform='scale('+Math.min(innerWidth/1920,innerHeight/1080)+')'; }
   var nav=document.createElement('div'); nav.id='fbnav';
   nav.innerHTML='<button data-d="-1">◀</button><span id="pos"></span><button data-d="1">▶</button>'+
-    '<span id="ttl" style="max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>'+
-    ['intro','standard','pro'].map(function(t){return '<button data-l="'+t+'">'+t+'</button>';}).join('');
+    '<span id="ttl" style="max-width:560px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>';
   document.body.appendChild(nav);
   nav.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b)return;
     if(b.dataset.d){ i=Math.max(0,Math.min(list.length-1,i+ +b.dataset.d)); show(); }
-    if(b.dataset.l){ lv=b.dataset.l;
-      [].forEach.call(nav.querySelectorAll('[data-l]'),function(x){x.classList.toggle('on',x.dataset.l===lv);});
-      build(); } });
+  });
   addEventListener('keydown',function(e){ if(e.key==='ArrowRight'||e.key===' '){i=Math.min(list.length-1,i+1);show();}
     if(e.key==='ArrowLeft'){i=Math.max(0,i-1);show();} });
   addEventListener('resize',fit);
-  nav.querySelector('[data-l="standard"]').classList.add('on');
   build(); fit();
 })();
 </script>
