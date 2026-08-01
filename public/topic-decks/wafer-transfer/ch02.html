@@ -398,6 +398,58 @@ h2.h-title{ font-size:54px; }
 </section>
 
 <!-- ══ 11. 경계 정리 ══ -->
+<section class="slide" data-here="all"><div class="wt-pad"><div class="wt-eye">배치</div>
+ <h2 class="h-title">왜 이 순서로 늘어서 있나</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>흐름을 따라</h3><p>담고(FOUP)→붙이고(Port)→옮기고(EFEM)→맞추고(Aligner)→압력바꾸고(LL)→공정(Chamber).
+   장치 배치가 곧 웨이퍼의 여정입니다.</p></div>
+  <div class="wt-card v"><h3>대기는 왼쪽, 진공은 오른쪽</h3><p>Load Lock을 경계로 왼쪽 상압, 오른쪽 진공. 색으로도 구분합니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>암기 팁</b> — 순서만 외우면 장비 절반은 이해한 셈.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">청정</div>
+ <h2 class="h-title">청정도 — 왜 밀폐하고 다운플로우인가</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>FOUP 밀폐</b> 이동 중 외기 차단.</div></div>
+  <div class="wt-num"><i>2</i><div><b>EFEM 다운플로우</b> 위→아래 청정 공기로 먼지가 웨이퍼에 앉지 못하게.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>진공</b> 챔버 구간은 공기 자체가 거의 없음.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>이유</b> — 먼지 한 톨이 회로보다 굵어 한 장을 불량으로 만들 수 있어서(1강).</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">두 로봇</div>
+ <h2 class="h-title">대기 로봇 vs 진공 로봇 — 한 장 비교</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th></th><th>대기(EFEM)</th><th>진공(TM)</th></tr>
+   <tr><td>환경</td><td>760 Torr</td><td><b class="v">0.01 Torr</b></td></tr>
+   <tr><td>구동부</td><td>본체 내부</td><td><b class="v">진공 밖</b></td></tr>
+   <tr><td>손</td><td>흡착/지지</td><td>내열 지지</td></tr>
+   <tr><td>축</td><td>R·θ·Z</td><td>R·θ·Z</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note"><b>같은 원리</b> — 환경만 다를 뿐 세 축과 리듬은 동일(3·11강).</div></div></div></div>
+</section>
+<section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">경계</div>
+ <h2 class="h-title">Load Lock — 유일한 관문 다시 보기</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card warn"><h3>왜 하나뿐</h3><p>대기와 진공을 잇는 문이 여럿이면 진공 유지가 어렵습니다. 하나로 통제합니다.</p></div>
+  <div class="wt-card"><h3>두 밸브</h3><p>ATM·TM 밸브는 절대 동시 개방 금지(10·13강).</p></div></div>
+  <div class="wt-col"><div class="wt-note v"><b>핵심 개념</b> — 이 경계가 인터록·시퀀스를 이해하는 열쇠.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">용어</div>
+ <h2 class="h-title">이번 강의 용어 정리</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th>용어</th><th>뜻</th></tr>
+   <tr><td>FOUP</td><td>밀폐 웨이퍼 카세트</td></tr>
+   <tr><td>EFEM</td><td>대기 이송 모듈</td></tr>
+   <tr><td>Pre-aligner</td><td>정렬 회전대</td></tr>
+   <tr><td>Load Lock</td><td>압력 전환 관문</td></tr>
+   <tr><td>TM / PM</td><td>이송 챔버 / 공정 챔버</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note"><b>팁</b> — 시뮬 도면에서 각 용어를 클릭하면 같은 설명이 뜹니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">확인</div>
+ <h2 class="h-title">배치를 손가락으로 짚어보기</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>Q</i><div><b>대기 4장치는?</b> FOUP·Load Port·EFEM·Pre-aligner.</div></div>
+  <div class="wt-num v"><i>Q</i><div><b>진공 2장치는?</b> Transfer Chamber·Process Chamber.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>바로 실습</b> — 도면에서 여섯 장치를 순서대로 클릭해 확인.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad">
   <div class="wt-eye">정리 · 경계</div>

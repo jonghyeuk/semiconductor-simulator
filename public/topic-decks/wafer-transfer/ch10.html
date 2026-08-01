@@ -151,6 +151,62 @@ h2.h-title{ font-size:54px; }
    <div class="wt-col"><div class="wt-note warn"><b>핵심</b> — "압력이 맞아야 문이 열린다." 압력 센서가 목표에 닿았는지 확인 후에만 밸브가 허가됩니다.</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개요</div>
+ <h2 class="h-title">진공을 지키며 웨이퍼를 넘기려면</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>본진공은 못 건드린다</h3><p>Transfer Chamber의 진공은 늘 유지돼야 합니다. 그래서 중간 방(Load Lock)에서만 압력을 바꿉니다.</p></div>
+  <div class="wt-card v"><h3>작은 방의 경제성</h3><p>웨이퍼 하나 들어갈 작은 방만 배기/주입하면 되니 빠르고 효율적입니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>이 강의</b> — Pump/Vent, 압력 조건, 두 밸브 규칙과 Vacuum 인터록.</div></div></div></div>
+</section>
+<section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">01 · 구조</div>
+ <h2 class="h-title">두 개의 문을 가진 방</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>ATM 밸브</b> 대기측 문.</div></div>
+  <div class="wt-num v"><i>2</i><div><b>TM 밸브</b> 진공측 문.</div></div>
+  <div class="wt-num"><i>3</i><div><b>압력 센서</b> 방 안의 현재 압력.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>철칙</b> — 두 문이 동시에 열리면 진공이 무너집니다. 절대 금지.</div></div></div></div>
+</section>
+<section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">02 · Pump Down</div>
+ <h2 class="h-title">배기 — 대기에서 진공으로</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>ATM 닫기</b> 웨이퍼 넣고 대기측 문을 닫는다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>펌프 가동</b> 공기를 빼 목표 압력까지 낮춘다.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>도달 확인</b> 압력 센서가 목표(≤1×10⁻² Torr)에 닿아야 TM 개방 허가.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>Timeout</b> — 시간 내 목표 미달이면 알람. 누설·펌프 문제를 의심(14강).</div></div></div></div>
+</section>
+<section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">03 · Vent</div>
+ <h2 class="h-title">벤트 — 진공에서 대기로</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>질소 주입</h3><p>TM 닫은 뒤 질소를 넣어 대기압(760 Torr)까지 천천히 올립니다.</p></div>
+  <div class="wt-card v"><h3>왜 천천히</h3><p>급격한 압력 변화는 웨이퍼를 흔들 수 있어 부드럽게 조절합니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>완료</b> — 대기압 도달 후에야 ATM 밸브를 열 수 있습니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">04 · 인터록</div>
+ <h2 class="h-title">압력이 맞아야 문이 열린다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num warn"><i>!</i><div><b>ALM-314</b> 대기압에서 TM(진공측) 밸브 개방 시도 → 거부.</div></div>
+  <div class="wt-num warn"><i>!</i><div><b>ALM-311</b> 진공 미달 등 압력 조건 위반.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>실습</b> — 대기압에서 진공측 밸브를 열어 ALM-314를 재현해 보세요.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">05 · 순서</div>
+ <h2 class="h-title">올바른 통과 순서</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th>#</th><th>동작</th></tr>
+   <tr><td>1</td><td>ATM 열기 → 웨이퍼 투입</td></tr>
+   <tr><td>2</td><td>ATM 닫기</td></tr>
+   <tr><td>3</td><td>Pump Down (목표 압력)</td></tr>
+   <tr><td>4</td><td>TM 열기 → 진공 로봇이 Pick</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note"><b>역방향</b> — 나올 때는 TM 닫기 → Vent → ATM 열기 순.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">06 · 흔한 문제</div>
+ <h2 class="h-title">Load Lock에서 자주 나는 문제</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th>증상</th><th>원인</th></tr>
+   <tr><td>Pump Timeout</td><td>누설 · 펌프 성능</td></tr>
+   <tr><td>밸브 거부</td><td>압력 조건 미충족</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note"><b>진단</b> — 압력 센서 값과 로그를 함께 봅니다(14강).</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">10강에서 직접 해볼 것</h2>
   <div class="wt-body">

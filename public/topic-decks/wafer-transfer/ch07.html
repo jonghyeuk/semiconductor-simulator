@@ -162,6 +162,69 @@ h2.h-title{ font-size:54px; }
    <div class="wt-col"><div class="wt-note"><b>시뮬은 단순화</b> — 25칸을 5칸으로 줄였지만 순서·판정 논리는 실장비와 같습니다.</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개요</div>
+ <h2 class="h-title">FOUP을 여는 일이 왜 정교한가</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>오염을 막으며 연다</h3><p>문을 여는 순간에도 바깥 공기가 웨이퍼에 닿으면 안 됩니다. 그래서 순서가 엄격합니다.</p></div>
+  <div class="wt-card v"><h3>목록을 먼저 만든다</h3><p>꺼내기 전에 어느 칸에 무엇이 있는지 알아야 헛손질과 사고를 막습니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>이 강의</b> — 도킹·개방·매핑의 원리와, 매핑이 틀리는 경우, Door 인터록을 봅니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">01 · 도킹</div>
+ <h2 class="h-title">Docking — 항상 같은 자리에 놓기</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>정렬 핀</b> FOUP이 핀에 물려 매번 동일 위치에 안착.</div></div>
+  <div class="wt-num"><i>2</i><div><b>클램프 고정</b> 흔들리지 않게 잠급니다.</div></div>
+  <div class="wt-num warn"><i>!</i><div><b>어긋나면</b> 매핑·Pick 좌표가 전부 틀어집니다.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>기억</b> — 도킹이 이 스테이션의 "0점". 여기가 정확해야 뒤가 정확합니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">02 · 개방</div>
+ <h2 class="h-title">Door Open — 두 문을 함께</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>동시 개방</h3><p>FOUP 문과 장비 문이 맞물려 함께 열려, 그 사이로 외기가 들어갈 틈이 없습니다.</p></div>
+  <div class="wt-card warn"><h3>순서 위반</h3><p>도킹 전 개방·닫힌 채 진입은 인터록으로 거부.</p></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>ALM-301</b> — 문 닫힌 채 Extend 시 Door Interlock. 실습에서 재현해 봅니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">03 · 매핑 원리</div>
+ <h2 class="h-title">한 번 훑어 목록을 만든다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>스캔</b> 센서가 위아래로 지나며 각 슬롯을 확인.</div></div>
+  <div class="wt-num"><i>2</i><div><b>목록화</b> "1·2·3 있음, 4·5 비었음" 형태로 기록.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>계획 수립</b> 있는 칸만, 정해진 순서로 Pick.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>왜 먼저</b> — 빈 칸 Pick(Presence OFF 알람)을 원천 차단합니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">04 · 매핑 오류</div>
+ <h2 class="h-title">목록과 현실이 다를 때</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th>유형</th><th>상태</th><th>위험</th></tr>
+   <tr><td>Cross</td><td>두 칸에 걸침</td><td>Pick 시 충돌</td></tr>
+   <tr><td>Double</td><td>한 칸 두 장</td><td>이중 파지</td></tr>
+   <tr><td>Protrude</td><td>덜 들어감</td><td>위치 이탈</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note warn"><b>대응</b> — 이런 상태는 Pick 전에 걸러야 합니다. 매핑 결과와 실제를 센서 탭에서 대조.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">05 · 검증</div>
+ <h2 class="h-title">매핑을 믿되, 확인하라</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>이중 확인</h3><p>매핑 목록과 실제 슬롯 상태(센서)를 비교해 불일치를 잡습니다.</p></div>
+  <div class="wt-card v"><h3>불일치 처리</h3><p>어긋나면 재매핑하거나 해당 칸을 건너뜁니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>실습</b> — 매핑 후 결과와 실제를 비교하는 항목이 미션에 포함됩니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">06 · 표준</div>
+ <h2 class="h-title">왜 모든 FOUP이 맞물리나 — 표준</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>SEMI 규격</h3><p>FOUP 치수·슬롯 25칸·도킹 높이가 표준화되어 회사가 달라도 호환됩니다.</p></div>
+  <div class="wt-card"><h3>안전 신호</h3><p>반송장치와 장비가 정해진 신호로 FOUP을 안전하게 주고받습니다(E84 등).</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>시뮬 단순화</b> — 25칸을 5칸으로 줄였지만 순서·판정 논리는 실장비와 같습니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">07 · 흔한 실수</div>
+ <h2 class="h-title">Load Port에서 자주 나는 문제</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th>증상</th><th>원인</th></tr>
+   <tr><td>Extend 거부(ALM-301)</td><td>Door 미개방</td></tr>
+   <tr><td>매핑 결과 이상</td><td>웨이퍼 삐뚤어짐</td></tr>
+   <tr><td>Pick 후 Presence OFF</td><td>빈 칸 겨냥</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note"><b>공통</b> — 순서(도킹→개방→매핑)를 지키면 대부분 예방됩니다.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">7강에서 직접 해볼 것</h2>
   <div class="wt-body">

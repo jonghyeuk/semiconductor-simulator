@@ -179,6 +179,72 @@ h2.h-title{ font-size:54px; }
     Encoder가 그 차이를 잡아 정밀도를 유지합니다.</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개요 · 왜 센서</div>
+ <h2 class="h-title">센서가 없으면 자동화도 없다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>판단의 근거</h3><p>모든 다음 동작의 허가/거부는 센서 신호에서 나옵니다. 센서 = 장비의 감각기관.</p></div>
+  <div class="wt-card v"><h3>두 종류</h3><p><b>디지털(예/아니오)</b> — 유무·Home·Limit. <b>아날로그(숫자)</b> — 압력·위치·엔코더.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>이 강의</b> — 다섯 센서가 각각 언제 바뀌는지, 그 신호로 무엇을 판정하는지 봅니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">01 · Presence 심화</div>
+ <h2 class="h-title">유무 센서 — 어디에나 있다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>로봇 손</b> Pick/Place 성공 판정.</div></div>
+  <div class="wt-num"><i>2</i><div><b>Pre-aligner</b> 정렬대에 웨이퍼가 있나.</div></div>
+  <div class="wt-num"><i>3</i><div><b>Load Lock·챔버</b> 각 위치의 웨이퍼 유무.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>원리</b> — 광학(빛 차단) 또는 정전용량 방식으로 웨이퍼 존재를 감지합니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">02 · Home 심화</div>
+ <h2 class="h-title">Home 센서 — 좌표계의 원점</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>기준을 증명한다</h3><p>Home ON은 "지금 기준 위치에 정확히 있다"는 증거. 이게 있어야 θ·R·Z가 의미를 가집니다.</p></div>
+  <div class="wt-card warn"><h3>없으면</h3><p>Home 미확립 상태의 정밀 이동은 거부되거나 위험합니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>실습</b> — Initialize 후 Home을 실행해 OFF→ON 전환을 확인하세요.</div></div></div></div>
+</section>
+<section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">03 · Limit 심화</div>
+ <h2 class="h-title">Limit 센서 — 넘지 말아야 할 선</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>양 끝을 지킨다</b> 각 축의 이동 가능 범위 끝을 감지.</div></div>
+  <div class="wt-num warn"><i>2</i><div><b>넘으면 정지</b> Z 상한 초과 → <b>ALM-401</b>로 즉시 멈춤.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>3강 연결</b> — 소프트/하드/기구 리밋 중 이 Limit 센서가 "하드" 층입니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">04 · Position</div>
+ <h2 class="h-title">Position — 지금 정확히 어디</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>실시간 좌표</h3><p>θ·R·Z 현재값을 계속 알려줘 상태바에 표시됩니다.</p></div>
+  <div class="wt-card v"><h3>도착 판정</h3><p>목표값과 현재값이 일치하면 "도착". 시퀀스의 WAIT 조건으로도 쓰입니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>습관</b> — 명령 후 Position이 안 변하면 정지/인터록을 의심.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">05 · Encoder</div>
+ <h2 class="h-title">Encoder — 명령과 실제의 차이를 잡는다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num v"><i>1</i><div><b>되읽기</b> 모터 회전을 실제로 측정해 명령대로 움직였는지 확인.</div></div>
+  <div class="wt-num v"><i>2</i><div><b>반복도의 근거</b> 매번 같은 자리에 놓이게 하는 핵심.</div></div></div>
+  <div class="wt-col"><div class="wt-note v"><b>왜 필요</b> — 미끄러짐·부하로 명령과 실제가 어긋날 수 있어, 엔코더가 이를 보정합니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">06 · 압력</div>
+ <h2 class="h-title">압력 센서 — 진공의 눈</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card v"><h3>Load Lock·챔버</h3><p>목표 진공에 도달했는지 판정. 밸브 개방 허가의 조건입니다.</p></div>
+  <div class="wt-card"><h3>단위</h3><p>Torr로 표시. 760(대기) ↔ 0.01 이하(진공).</p></div></div>
+  <div class="wt-col"><div class="wt-note v"><b>10강 연결</b> — Pump Down이 목표 압력에 닿아야만 진공측 밸브가 열립니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">07 · 신호 읽기</div>
+ <h2 class="h-title">센서 탭 — 신호를 한눈에</h2>
+ <div class="wt-body"><div class="wt-col">
+  <table class="wt-tbl"><tr><th>센서</th><th>정상</th><th>이상 예</th></tr>
+   <tr><td>Presence</td><td>동작과 일치</td><td>Place인데 계속 ON</td></tr>
+   <tr><td>Home</td><td>준비 후 ON</td><td>이동 후에도 ON</td></tr>
+   <tr><td>Pressure</td><td>목표 도달</td><td>Timeout</td></tr></table></div>
+  <div class="wt-col"><div class="wt-note"><b>진단의 출발</b> — 이상 신호를 먼저 찾고, 로그의 코드와 맞춰봅니다(14강).</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">08 · 흔한 오해</div>
+ <h2 class="h-title">"움직였으니 됐다"는 착각</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card warn"><h3>동작 ≠ 성공</h3><p>팔이 움직여도 웨이퍼를 못 집었을 수 있습니다. 성공은 <b>Presence</b>가 증명합니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>한 줄</b> — 눈을 믿지 말고 신호를 믿어라. 신호가 곧 진실.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">6강에서 직접 해볼 것</h2>
   <div class="wt-body">
