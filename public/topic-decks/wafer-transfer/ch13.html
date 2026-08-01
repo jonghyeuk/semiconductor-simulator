@@ -198,6 +198,35 @@ h2.h-title{ font-size:54px; }
   <div class="wt-col"><div class="wt-note"><b>한 줄</b> — 인터록은 "막아서 지킨다". 잘 막히는 장비가 좋은 장비.</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 계층</div>
+ <h2 class="h-title">안전은 두 층으로 — 하드와이어와 소프트</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card warn"><h3>하드와이어 인터록</h3><p>배선·릴레이로 물리 차단. 소프트웨어가 죽어도 동작. 최후의 안전.</p></div>
+  <div class="wt-card"><h3>소프트 인터록</h3><p>제어기 로직이 조건을 검사해 명령을 거부. 유연하지만 SW에 의존.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>왜 둘 다</b> — 소프트가 놓쳐도 하드가 잡도록 <b>이중</b>으로 설계.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · Fail-safe</div>
+ <h2 class="h-title">고장 나면 "안전한 쪽"으로</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>정전 시</b> 밸브는 닫힘, 로봇은 정지 — 위험을 만들지 않는 상태로.</div></div>
+  <div class="wt-num"><i>2</i><div><b>신호 끊김 시</b> "모름"을 "위험"으로 간주해 멈춤.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>원칙</b> — 애매하면 진행이 아니라 <b>정지</b>. 웨이퍼·사람이 우선.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 구분</div>
+ <h2 class="h-title">인터록과 알람은 다르다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>인터록</h3><p>위험한 동작을 <b>미리 막는</b> 예방 장치.</p></div>
+  <div class="wt-card v"><h3>알람</h3><p>일어난 이상을 <b>알리는</b> 통지. 인터록이 걸리면 알람도 함께 뜹니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>정리</b> — 인터록 = 브레이크, 알람 = 경고등.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 문화</div>
+ <h2 class="h-title">인터록을 우회하지 않는다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num warn"><i>!</i><div><b>임의 해제 금지</b> "귀찮다고" 인터록을 끄면 사고로 직결.</div></div>
+  <div class="wt-num"><i>✓</i><div><b>원인 제거</b> 막혔으면 조건을 맞추지, 안전장치를 끄지 않습니다.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>현장 원칙</b> — 안전장치가 자주 걸리면 "장치를 끄기"가 아니라 "절차를 고치기".</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">13강에서 직접 해볼 것 — 네 인터록 발생</h2>
   <div class="wt-body">

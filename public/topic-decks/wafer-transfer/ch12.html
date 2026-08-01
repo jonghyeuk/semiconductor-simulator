@@ -215,6 +215,34 @@ h2.h-title{ font-size:54px; }
   <div class="wt-col"><div class="wt-note"><b>교훈</b> — 사람이 손으로 지키던 순서를, 블록에서도 그대로 지켜야 합니다.</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 상태</div>
+ <h2 class="h-title">시퀀스는 상태를 따라 흐른다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>지금 상태 → 다음 상태</h3><p>"웨이퍼 집음" → "정렬 완료" → "LL 안착"처럼, 각 블록이 상태를 한 칸 전진시킵니다.</p></div>
+  <div class="wt-card v"><h3>조건이 전이의 열쇠</h3><p>다음 상태로 가려면 센서 조건이 충족돼야 합니다(SENSOR CHECK).</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>관점</b> — 좋은 시퀀스 = 상태와 전이 조건이 분명한 시퀀스.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 예외</div>
+ <h2 class="h-title">잘못됐을 때의 길도 그려둔다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>정상 경로</b> 조건 충족 시 다음으로.</div></div>
+  <div class="wt-num warn"><i>2</i><div><b>예외 경로</b> 조건 실패 시 멈춤·알람·복구 블록으로.</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>실무</b> — 예외 처리 없는 시퀀스는 작은 이상에도 통째로 멈춥니다.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 병렬</div>
+ <h2 class="h-title">둘을 동시에 — 듀얼 암 스케줄</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>겹쳐서 일한다</h3><p>한 손이 새 웨이퍼를 집는 사이 다른 손이 완료품을 빼내, 시간을 겹칩니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>효과</b> — 같은 장비로 처리량↑. 5강 "손이 둘"의 자동화 버전.</div></div></div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 레시피</div>
+ <h2 class="h-title">시퀀스와 레시피</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>레시피</b> 어떤 공정을 어떤 조건으로 할지의 설정.</div></div>
+  <div class="wt-num v"><i>2</i><div><b>시퀀스</b> 그 레시피대로 웨이퍼를 옮기고 처리하는 순서.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>역할 분담</b> — 이송 시퀀스는 "웨이퍼를 제때 제자리에" 두는 데 집중합니다.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">12강에서 직접 해볼 것</h2>
   <div class="wt-body">

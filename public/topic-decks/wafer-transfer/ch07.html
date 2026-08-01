@@ -225,6 +225,37 @@ h2.h-title{ font-size:54px; }
   <div class="wt-col"><div class="wt-note"><b>공통</b> — 순서(도킹→개방→매핑)를 지키면 대부분 예방됩니다.</div></div></div></div>
 </section>
 
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · FOUP</div>
+ <h2 class="h-title">FOUP은 그냥 상자가 아니다</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>RFID 태그</b> FOUP마다 ID가 있어, 어떤 로트·공정 이력인지 장비가 읽습니다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>질소 퍼지 포트</b> 보관 중 내부를 질소로 유지해 자연산화·수분을 막습니다.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>기구 표준</b> 25슬롯·핸들·도어 위치가 규격화(호환).</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>왜 중요</b> — FOUP이 "웨이퍼 신분증"을 들고 다니므로 잘못된 로트 투입을 막습니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">개념 · 핸드셰이크</div>
+ <h2 class="h-title">반송장치와 장비의 약속 (E84)</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-card"><h3>신호로 주고받는다</h3><p>OHT가 FOUP을 내려놓기 전, 장비와 <b>정해진 신호</b>를 교환해 "받을 준비 됐는지" 확인합니다.</p></div>
+  <div class="wt-card v"><h3>왜 표준</h3><p>회사가 달라도 이 약속(E84)이 같아 어떤 반송장치·장비끼리도 안전하게 인계됩니다.</p></div></div>
+  <div class="wt-col"><div class="wt-note"><b>안전</b> — 준비 안 된 장비에 FOUP을 떨어뜨리는 사고를 신호로 원천 차단.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">개념 · 매핑 원리</div>
+ <h2 class="h-title">매핑 센서는 어떻게 25칸을 읽나</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>수직 스캔</b> 센서가 위아래로 지나며 각 슬롯 높이에서 반사/차광을 감지.</div></div>
+  <div class="wt-num"><i>2</i><div><b>있음/없음/이상</b> 신호 패턴으로 정상·빈칸·겹침(cross)을 구분.</div></div></div>
+  <div class="wt-col"><div class="wt-note"><b>연결</b> — 6강의 광학 유무센서 원리가 여기에 그대로 쓰입니다.</div></div></div></div>
+</section>
+<section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">개념 · 도어</div>
+ <h2 class="h-title">도어 개폐 메커니즘</h2>
+ <div class="wt-body"><div class="wt-col">
+  <div class="wt-num"><i>1</i><div><b>래치 해제</b> 장비 도어가 FOUP 도어를 붙잡아 함께 뒤로 뺍니다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>다운 포지션</b> 도어를 아래로 내려 로봇 진입 경로를 엽니다.</div></div>
+  <div class="wt-num warn"><i>!</i><div><b>인터록</b> 도어가 완전히 열리기 전 Extend는 거부(ALM-301).</div></div></div>
+  <div class="wt-col"><div class="wt-note warn"><b>핵심</b> — "문이 열렸다"는 신호가 있어야 다음이 허가됩니다.</div></div></div></div>
+</section>
+
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">실습 미션</div><h2 class="h-title">7강에서 직접 해볼 것</h2>
   <div class="wt-body">
