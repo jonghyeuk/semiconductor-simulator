@@ -130,13 +130,13 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro" data-here="port">
  <div class="wt-pad"><div class="wt-eye">01 · 준비</div><h2 class="h-title">FOUP을 도킹하고 문을 연다</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-num"><i>1</i><div><b>Docking</b> FOUP을 Load Port에 안착. 위치가 맞아야 다음이 진행됩니다.</div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>Docking</b> FOUP을 Load Port에 안착. 위치가 맞아야 다음이 진행됩니다.</div></div>
     <div class="wt-num"><i>2</i><div><b>Door Open</b> FOUP 문과 장비 문이 함께 열려 내부가 이어집니다.</div></div>
-    <div class="wt-num v"><i>3</i><div><b>그 다음에야 Extend</b> 문이 닫힌 채 팔을 넣으면 <b>Door 인터록(ALM-301)</b>으로 거부됩니다.</div></div></div>
-   <div class="wt-col"><div class="wt-note warn"><b>순서가 안전이다</b> — 도킹 안 된 FOUP, 닫힌 문으로의 진입은
-    모두 인터록이 막습니다. "왜 안 되지?"의 답은 대개 <b>순서</b>입니다.</div></div></div></div>
+    <div class="wt-num v"><i>3</i><div><b>그 다음에야 Extend</b> 문이 닫힌 채 팔을 넣으면 <b>Door 인터록(ALM-301)</b>으로 거부됩니다.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>순서가 안전이다</b> — 도킹 안 된 FOUP, 닫힌 문으로의 진입은
+    모두 인터록이 막습니다. "왜 안 되지?"의 답은 대개 <b>순서</b>입니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro" data-here="efem">
@@ -180,81 +180,89 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="standard pro">
  <div class="wt-pad"><div class="wt-eye">04 · 되돌리기</div><h2 class="h-title">안전 위치로 복귀 — Retract & Home</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-card"><h3>일을 마치면 접는다</h3><p>Pick/Place 뒤에는 반드시 <b>Retract</b>. 편 팔로 이동하면 사고가 납니다.</p></div>
-    <div class="wt-card v"><h3>기준으로 돌아오기</h3><p>다음 작업 전 <b>Home</b>으로 복귀하면 위치 오차가 쌓이지 않습니다.</p></div></div>
-   <div class="wt-col"><div class="wt-note"><b>정리 리듬</b> — 접고 → 돌고 → 펴서 작업 → <b>접고 → Home</b>.
-    이 한 사이클이 5강 Pick&Place의 뼈대가 됩니다.</div></div></div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>일을 마치면 접는다</h3><p>Pick/Place 뒤에는 반드시 <b>Retract</b>. 편 팔로 이동하면 사고가 납니다.</p></div>
+    <div class="wt-card v"><h3>기준으로 돌아오기</h3><p>다음 작업 전 <b>Home</b>으로 복귀하면 위치 오차가 쌓이지 않습니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>정리 리듬</b> — 접고 → 돌고 → 펴서 작업 → <b>접고 → Home</b>.
+    이 한 사이클이 5강 Pick&Place의 뼈대가 됩니다.</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">01 · 개념</div>
  <h2 class="h-title">Manual Mode — 한 손에 하나씩</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>동작 하나 = 버튼 하나</h3><p>자동 시퀀스와 달리, 수동은 사람이 각 축을 직접 명령합니다.
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>동작 하나 = 버튼 하나</h3><p>자동 시퀀스와 달리, 수동은 사람이 각 축을 직접 명령합니다.
    그래서 "언제 되고 언제 거부되는지"를 몸으로 배우는 데 가장 좋습니다.</p></div>
   <div class="wt-card v"><h3>왜 수동을 먼저</h3><p>자동이 멈췄을 때 원인을 찾으려면, 각 동작의 <b>조건</b>을 알아야 합니다.
-   그 조건은 손으로 눌러봐야 남습니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>이 강의 목표</b> — 6개 기본 동작을 목적에 맞게 조합해
-   FOUP을 열고 팔을 뻗는 <b>한 사이클</b>을 스스로 해내는 것.</div></div></div></div>
+   그 조건은 손으로 눌러봐야 남습니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>이 강의 목표</b> — 6개 기본 동작을 목적에 맞게 조합해
+   FOUP을 열고 팔을 뻗는 <b>한 사이클</b>을 스스로 해내는 것.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">02 · 조작 패널</div>
  <h2 class="h-title">버튼 지도 — 무엇이 어디에</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>버튼</th><th>축</th><th>하는 일</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>버튼</th><th>축</th><th>하는 일</th></tr>
    <tr><td>Home</td><td>전체</td><td>기준 위치로 복귀</td></tr>
    <tr><td>Extend / Retract</td><td><b>R</b></td><td>팔 펴기 / 접기</td></tr>
    <tr><td>Rotate</td><td><b>θ</b></td><td>스테이션 선택(회전)</td></tr>
    <tr><td>Up / Down</td><td><b>Z</b></td><td>높이(슬롯) 조정</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note v"><b>상태바를 같이 보라</b> — 버튼을 누를 때마다 하단의
-   R·θ·Z 값이 바뀝니다. 숫자와 동작을 연결해 기억하세요.</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>상태바를 같이 보라</b> — 버튼을 누를 때마다 하단의
+   R·θ·Z 값이 바뀝니다. 숫자와 동작을 연결해 기억하세요.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">03 · 준비</div>
  <h2 class="h-title">Initialize와 Home은 다르다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>Initialize</b> 서보 전원·엔코더를 잡아 로봇을 "깨우는" 단계.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>Initialize</b> 서보 전원·엔코더를 잡아 로봇을 "깨우는" 단계.</div></div>
   <div class="wt-num"><i>2</i><div><b>Home</b> 기준 위치로 이동해 <b>좌표 0점</b>을 확정. Home 센서 ON 확인.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>순서 고정</b> Initialize → Home. 건너뛰면 정밀 이동이 거부됩니다.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>왜 중요</b> — Home 없이는 로봇이 자기 위치를 몰라
-   모든 좌표가 무의미합니다. 3강에서 배운 "기준점"을 실제로 잡는 단계.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>순서 고정</b> Initialize → Home. 건너뛰면 정밀 이동이 거부됩니다.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>왜 중요</b> — Home 없이는 로봇이 자기 위치를 몰라
+   모든 좌표가 무의미합니다. 3강에서 배운 "기준점"을 실제로 잡는 단계.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">04 · 도킹 상세</div>
  <h2 class="h-title">Docking — 정렬이 다음 전부를 좌우한다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>정렬 핀</b> FOUP이 Load Port의 핀에 맞물려 항상 같은 자리에 놓입니다.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>정렬 핀</b> FOUP이 Load Port의 핀에 맞물려 항상 같은 자리에 놓입니다.</div></div>
   <div class="wt-num"><i>2</i><div><b>클램프</b> 고정되어야 문을 열 수 있습니다.</div></div>
-  <div class="wt-num warn"><i>!</i><div><b>어긋나면</b> 도킹 위치가 틀리면 매핑·Pick이 전부 어긋납니다.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>기억</b> — "도킹이 0점을 만든다." 여기가 틀리면 뒤가 다 틀립니다.</div></div></div></div>
+  <div class="wt-num warn"><i>!</i><div><b>어긋나면</b> 도킹 위치가 틀리면 매핑·Pick이 전부 어긋납니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>기억</b> — "도킹이 0점을 만든다." 여기가 틀리면 뒤가 다 틀립니다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">05 · 문 열기</div>
  <h2 class="h-title">Door Open — 공기 없이 이어붙이기</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>동시에 열린다</h3><p>FOUP 문과 장비 문이 함께 열려, 바깥 공기가 들어갈 틈 없이 내부가 연결됩니다.</p></div>
-  <div class="wt-card warn"><h3>닫힌 채 Extend 금지</h3><p>문이 닫힌 상태로 팔을 넣으면 <b>ALM-301 Door Interlock</b>으로 거부됩니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>실습에서</b> — 일부러 문 닫힌 채 Extend를 눌러 ALM-301을 한 번 내보세요.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>동시에 열린다</h3><p>FOUP 문과 장비 문이 함께 열려, 바깥 공기가 들어갈 틈 없이 내부가 연결됩니다.</p></div>
+  <div class="wt-card warn"><h3>닫힌 채 Extend 금지</h3><p>문이 닫힌 상태로 팔을 넣으면 <b>ALM-301 Door Interlock</b>으로 거부됩니다.</p></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>실습에서</b> — 일부러 문 닫힌 채 Extend를 눌러 ALM-301을 한 번 내보세요.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">06 · θ 상세</div>
  <h2 class="h-title">Rotate — 접은 채, 최단으로</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>접은 상태 확인</b> 회전 전 반드시 Retract. 편 채 돌면 충돌.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>접은 상태 확인</b> 회전 전 반드시 Retract. 편 채 돌면 충돌.</div></div>
   <div class="wt-num"><i>2</i><div><b>스테이션 선택</b> FOUP·Pre-aligner·Load Lock 중 목표 앞으로.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>도착 확인</b> 상태바의 STATION 표시와 θ 값으로 확인.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>리듬</b> — Retract → Rotate → (도착) → Extend. 이 순서가 몸에 배면 실수가 준다.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>도착 확인</b> 상태바의 STATION 표시와 θ 값으로 확인.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>리듬</b> — Retract → Rotate → (도착) → Extend. 이 순서가 몸에 배면 실수가 준다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="foup"><div class="wt-pad"><div class="wt-eye">07 · Z 상세</div>
  <h2 class="h-title">Up / Down — 겨냥은 높이로</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>슬롯 = 높이</b> 몇 번 칸을 집을지가 Z 값으로 정해집니다.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>슬롯 = 높이</b> 몇 번 칸을 집을지가 Z 값으로 정해집니다.</div></div>
   <div class="wt-num"><i>2</i><div><b>Pick의 마무리</b> 팔을 편 뒤 살짝 Up 해 웨이퍼를 들어올립니다.</div></div>
-  <div class="wt-num warn"><i>!</i><div><b>빈 칸 겨냥</b> 잘못된 높이는 Presence OFF 알람으로 이어집니다.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>확인 습관</b> — 매핑 목록에서 "있는 칸"인지 보고 그 높이로 Z를 맞춥니다.</div></div></div></div>
+  <div class="wt-num warn"><i>!</i><div><b>빈 칸 겨냥</b> 잘못된 높이는 Presence OFF 알람으로 이어집니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>확인 습관</b> — 매핑 목록에서 "있는 칸"인지 보고 그 높이로 Z를 맞춥니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">08 · 좌표로 조작</div>
  <h2 class="h-title">눈이 아니라 숫자로 확인한다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>도착의 근거</h3><p>"팔이 간 것 같다"가 아니라 <b>θ·R·Z 값</b>과 STATION 표시로 도착을 확인합니다.</p></div>
-  <div class="wt-card v"><h3>이상 감지</h3><p>명령했는데 값이 안 변하면 인터록·정지 신호를 의심합니다. 로그를 봅니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note v"><b>연결</b> — 6강 센서에서 이 값들이 어떤 센서에서 오는지 배웁니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>도착의 근거</h3><p>"팔이 간 것 같다"가 아니라 <b>θ·R·Z 값</b>과 STATION 표시로 도착을 확인합니다.</p></div>
+  <div class="wt-card v"><h3>이상 감지</h3><p>명령했는데 값이 안 변하면 인터록·정지 신호를 의심합니다. 로그를 봅니다.</p></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>연결</b> — 6강 센서에서 이 값들이 어떤 센서에서 오는지 배웁니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">09 · 안전 수칙</div>
  <h2 class="h-title">수동 조작 5대 수칙</h2>
@@ -268,13 +276,14 @@ h2.h-title{ font-size:54px; }
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">10 · 흔한 실수</div>
  <h2 class="h-title">이런 실수가 자주 납니다</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>실수</th><th>결과</th><th>고치기</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>실수</th><th>결과</th><th>고치기</th></tr>
    <tr><td>편 채 Rotate</td><td>ALM-201</td><td>Retract 후 회전</td></tr>
    <tr><td>문 닫고 Extend</td><td>ALM-301</td><td>Door Open 먼저</td></tr>
    <tr><td>빈 칸 Pick</td><td>Presence OFF</td><td>매핑 보고 겨냥</td></tr>
    <tr><td>Home 생략</td><td>이동 거부</td><td>Init→Home</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note warn"><b>공통 교훈</b> — 대부분의 "안 됨"은 고장이 아니라 <b>순서/조건</b> 문제입니다.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>공통 교훈</b> — 대부분의 "안 됨"은 고장이 아니라 <b>순서/조건</b> 문제입니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro">

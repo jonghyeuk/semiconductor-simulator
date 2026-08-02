@@ -502,9 +502,16 @@ h2.h-title{ font-size:54px; }
      MOVE·PICK·PLACE·WAIT·IF 블록으로 전 구간을 무인 실행. — 12강</div></div>
    </div>
    <div class="wt-col">
-    <div class="wt-note"><b>왜 수동부터?</b> 자동 시퀀스가 멈췄을 때 원인을 찾으려면,
-     각 동작이 <b>어떤 조건</b>에서 되고 안 되는지를 손으로 겪어봐야 합니다.
-     그래서 1~6강은 손으로, 12강부터 자동으로 갑니다.</div>
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 460 340">
+      <rect class="fx-box" x="20" y="240" width="130" height="80" rx="8"/><text class="fx-cap" x="46" y="288" style="font-size:19px">수동</text>
+      <rect class="fx-box" x="165" y="170" width="130" height="150" rx="8"/><text class="fx-cap" x="181" y="218" style="font-size:19px">반자동</text>
+      <rect class="fx-vac" x="310" y="90" width="130" height="230" rx="8"/><text class="fx-cap v" x="336" y="138" style="font-size:19px">자동</text>
+      <path class="fx-ln" d="M40 232 L410 82" marker-end="url(#mA)" opacity=".75"/>
+      <text class="fx-sub" x="150" y="336">사람 개입 ↓ · 자동화 ↑</text>
+     </svg></div>
+    <div class="wt-note"><b>왜 수동부터?</b> 자동이 멈췄을 때 원인을 찾으려면 각 동작이
+     <b>어떤 조건</b>에서 되는지 손으로 겪어야 합니다. 그래서 1~6강 수동, 12강부터 자동.</div>
    </div>
   </div>
  </div>
@@ -670,8 +677,17 @@ h2.h-title{ font-size:54px; }
       교재와 시뮬이 같은 색 규칙을 씁니다.</p></div>
    </div>
    <div class="wt-col">
-    <div class="wt-note"><b>지금 해보기</b> — 도면에서 <b>FOUP · EFEM · Load Lock</b>을 차례로 클릭해
-     설명을 읽어보세요. 세 개를 채우면 1강 첫 미션이 완료됩니다.</div>
+    <div class="wt-fig" style="margin-top:0">
+     <svg viewBox="0 0 460 340">
+      <rect class="fx-box" x="20" y="150" width="60" height="120" rx="6"/><text class="fx-sub" x="24" y="140">FOUP</text>
+      <rect class="fx-box" x="100" y="110" width="160" height="180" rx="8"/><text class="fx-sub" x="116" y="100">EFEM</text>
+      <circle cx="180" cy="190" r="24" fill="#16283a" stroke="#4f8bb5" stroke-width="2"/><rect class="fx-arm" x="180" y="181" width="64" height="16" rx="6"/>
+      <rect class="fx-box" x="280" y="165" width="70" height="100" rx="6" stroke="#6f63c9"/><text class="fx-sub" x="292" y="155">LOAD LOCK</text>
+      <rect class="fx-vac" x="370" y="110" width="70" height="180" rx="8"/><text class="fx-sub" x="386" y="100" fill="#bcaeff">TM</text>
+      <g transform="translate(300,150)"><path d="M0 0 L0 30 L8 23 L14 34 L19 31 L13 20 L23 20 Z" fill="#eaf5ff" stroke="#0b141c" stroke-width="1"/></g>
+      <text class="fx-cap" x="150" y="325" style="font-size:16px">장치 클릭 → 이름·역할 표시</text>
+     </svg></div>
+    <div class="wt-note"><b>지금 해보기</b> — <b>FOUP · EFEM · Load Lock</b>을 차례로 클릭. 세 개면 1강 첫 미션 완료.</div>
    </div>
   </div>
  </div>
@@ -748,10 +764,10 @@ h2.h-title{ font-size:54px; }
      팔을 기준 위치로. <b>Home Sensor가 ON</b> 되는 것을 확인합니다.</div></div>
    </div>
    <div class="wt-col">
-    <div class="wt-note"><b>완료 기준</b> — 오른쪽 "따라하기" 체크리스트 3개가 모두 채워지면 1강 실습 완료입니다.
-     막히면 이 교재의 화면 설명(12번대 슬라이드)으로 돌아오세요.</div>
-    <div class="wt-note v" style="margin-top:16px"><b>왜 Home부터?</b> 로봇은 전원을 켜도 자기 위치를 모릅니다.
-     Home으로 <b>기준점</b>을 잡아야 이후 모든 좌표가 의미를 갖습니다. (자세히는 4강)</div>
+    <div class="wt-card"><h3>미션 체크리스트</h3>
+     <p style="line-height:2.2">☐ 장치 3개 이상 클릭<br/>☐ EFEM Robot · Initialize<br/>☐ Home 실행 → <b>Home Sensor ON</b></p></div>
+    <div class="wt-note v"><b>왜 Home부터?</b> 로봇은 전원을 켜도 자기 위치를 모릅니다.
+     Home으로 <b>기준점</b>을 잡아야 이후 모든 좌표가 의미를 갖습니다. (4강)</div>
    </div>
   </div>
  </div>

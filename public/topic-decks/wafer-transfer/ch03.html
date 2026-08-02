@@ -135,16 +135,15 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro" data-here="efem">
  <div class="wt-pad"><div class="wt-eye">01 · 왜 세 축</div><h2 class="h-title">왜 공장 로봇처럼 안 생겼을까</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-card"><h3>웨이퍼는 눕혀서 옮긴다</h3><p>웨이퍼는 항상 수평을 유지해야 합니다.
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>웨이퍼는 눕혀서 옮긴다</h3><p>웨이퍼는 항상 수평을 유지해야 합니다.
      그래서 팔을 접었다 펴는 <b>수평 신축</b> 구조를 씁니다.</p></div>
     <div class="wt-card"><h3>좁은 곳을 드나든다</h3><p>슬롯·챔버 입구는 좁습니다.
      팔을 편 채 다니면 부딪히므로, <b>접은 상태로 회전</b>하고 목표 앞에서만 폅니다.</p></div>
-    <div class="wt-card v"><h3>세 축이면 충분하다</h3><p>어느 스테이션이든 <b>θ(방향)+R(거리)+Z(높이)</b>로 지정됩니다.</p></div></div>
-   <div class="wt-col">
-    <div class="wt-note warn"><b>그래서 규칙 하나</b> — <b>팔을 편(Extend) 상태로 회전하면</b> 옆 장치와 충돌합니다.
-     장비는 이를 Collision 인터록으로 막습니다. (4강에서 직접 겪어봅니다)</div></div></div></div>
+    <div class="wt-card v"><h3>세 축이면 충분하다</h3><p>어느 스테이션이든 <b>θ(방향)+R(거리)+Z(높이)</b>로 지정됩니다.</p></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>그래서 규칙 하나</b> — <b>팔을 편(Extend) 상태로 회전하면</b> 옆 장치와 충돌합니다.
+     장비는 이를 Collision 인터록으로 막습니다. (4강에서 직접 겪어봅니다)</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro" data-here="efem">
@@ -231,29 +230,27 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">06 · 기준점</div><h2 class="h-title">Home을 먼저 하는 이유</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-num"><i>1</i><div><b>전원만으론 위치를 모른다</b> 로봇은 켜져도 지금 팔이 어디 있는지 모릅니다.</div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>전원만으론 위치를 모른다</b> 로봇은 켜져도 지금 팔이 어디 있는지 모릅니다.</div></div>
     <div class="wt-num"><i>2</i><div><b>Home = 기준 0점</b> 정해진 기준 위치로 가서 <b>Home 센서 ON</b>을 확인하면,
      이후 모든 θ·R·Z 좌표가 의미를 갖습니다.</div></div>
-    <div class="wt-num v"><i>3</i><div><b>Initialize → Home</b> 먼저 전원·서보를 잡고(Initialize), 그다음 Home.</div></div></div>
-   <div class="wt-col">
-    <div class="wt-note"><b>비유</b> — 지도를 봐도 "현재 위치"를 모르면 길을 못 찾습니다.
+    <div class="wt-num v"><i>3</i><div><b>Initialize → Home</b> 먼저 전원·서보를 잡고(Initialize), 그다음 Home.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>비유</b> — 지도를 봐도 "현재 위치"를 모르면 길을 못 찾습니다.
      Home이 그 <b>현재 위치 핀</b>을 꽂는 일입니다.</div>
     <div class="wt-note warn" style="margin-top:16px"><b>Home 전에는</b> 정밀 이동 명령이 거부되거나 위험할 수 있어,
-     장비는 Home을 강제합니다.</div></div></div></div>
+     장비는 Home을 강제합니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="pro" data-here="efem">
  <div class="wt-pad"><div class="wt-eye">07 · 한계</div><h2 class="h-title">리밋이 세 겹인 이유</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-num"><i>1</i><div><b>소프트 리밋</b> 제어기가 좌표 한계를 먼저 막습니다(정상 운전 범위).</div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>소프트 리밋</b> 제어기가 좌표 한계를 먼저 막습니다(정상 운전 범위).</div></div>
     <div class="wt-num"><i>2</i><div><b>하드(센서) 리밋</b> 소프트를 넘으면 Limit 센서가 물리적으로 감지해 정지.</div></div>
-    <div class="wt-num warn"><i>3</i><div><b>기구 스토퍼</b> 그마저 넘으면 기계적 스토퍼가 최후로 막습니다.</div></div></div>
-   <div class="wt-col">
-    <div class="wt-note warn"><b>왜 세 겹?</b> 웨이퍼 한 장·장비 손상을 막기 위해 안전은 <b>중복</b>으로 설계합니다.
-     하나가 실패해도 다음이 잡습니다.</div></div></div></div>
+    <div class="wt-num warn"><i>3</i><div><b>기구 스토퍼</b> 그마저 넘으면 기계적 스토퍼가 최후로 막습니다.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>왜 세 겹?</b> 웨이퍼 한 장·장비 손상을 막기 위해 안전은 <b>중복</b>으로 설계합니다.
+     하나가 실패해도 다음이 잡습니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="standard pro">
@@ -271,48 +268,54 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">비교</div>
  <h2 class="h-title">공장 로봇(6축)과 무엇이 다른가</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>6축 관절 로봇</h3><p>자유롭게 기울이고 돌립니다. 대신 크고, 오염원이 많습니다.</p></div>
-  <div class="wt-card v"><h3>웨이퍼 이송 로봇</h3><p>수평 유지가 절대. 그래서 <b>R·θ·Z 3축</b>의 단순·정밀 구조를 씁니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>결론</b> — "단순해서 정밀하고, 정밀해서 신뢰할 수 있다."</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>6축 관절 로봇</h3><p>자유롭게 기울이고 돌립니다. 대신 크고, 오염원이 많습니다.</p></div>
+  <div class="wt-card v"><h3>웨이퍼 이송 로봇</h3><p>수평 유지가 절대. 그래서 <b>R·θ·Z 3축</b>의 단순·정밀 구조를 씁니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>결론</b> — "단순해서 정밀하고, 정밀해서 신뢰할 수 있다."</div>
+  </div></div>
 </section>
 <section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">기구</div>
  <h2 class="h-title">링크가 펴지는 구조(SCARA/Frog-leg)</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>접힌 팔꿈치</b> 두 링크가 접혔다 펴지며 손이 직선으로 나갑니다.</div></div>
-  <div class="wt-num"><i>2</i><div><b>직선 신축</b> 회전을 직선 운동으로 바꿔 좁은 입구에 정확히 진입.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>그래서</b> — "늘어나는" 게 아니라 "펴지는" 것(4강 Extend).</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>접힌 팔꿈치</b> 두 링크가 접혔다 펴지며 손이 직선으로 나갑니다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>직선 신축</b> 회전을 직선 운동으로 바꿔 좁은 입구에 정확히 진입.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>그래서</b> — "늘어나는" 게 아니라 "펴지는" 것(4강 Extend).</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">정밀</div>
  <h2 class="h-title">정확도와 반복도, 다시</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>정확도</h3><p>목표 절대 좌표에 얼마나 가까운가.</p></div>
-  <div class="wt-card v"><h3>반복도</h3><p><b>같은 명령에 늘 같은 자리.</b> 이송에선 이게 더 중요합니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>이유</b> — 티칭한 자리에 매번 똑같이 놓여야 하므로.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>정확도</h3><p>목표 절대 좌표에 얼마나 가까운가.</p></div>
+  <div class="wt-card v"><h3>반복도</h3><p><b>같은 명령에 늘 같은 자리.</b> 이송에선 이게 더 중요합니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>이유</b> — 티칭한 자리에 매번 똑같이 놓여야 하므로.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">티칭</div>
  <h2 class="h-title">좌표는 어떻게 정하나 — 티칭</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>지점 등록</b> 각 스테이션의 정확한 θ·R·Z를 한 번 가르쳐(티칭) 저장.</div></div>
-  <div class="wt-num"><i>2</i><div><b>재현</b> 이후엔 저장된 좌표로 정확히 반복.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>장비의 기억</b> — 좌표표 한 장이 로봇의 지도입니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>지점 등록</b> 각 스테이션의 정확한 θ·R·Z를 한 번 가르쳐(티칭) 저장.</div></div>
+  <div class="wt-num"><i>2</i><div><b>재현</b> 이후엔 저장된 좌표로 정확히 반복.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>장비의 기억</b> — 좌표표 한 장이 로봇의 지도입니다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">안전 여유</div>
  <h2 class="h-title">왜 리밋이 세 겹인가</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>소프트</b> 제어기 범위 제한.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>소프트</b> 제어기 범위 제한.</div></div>
   <div class="wt-num"><i>2</i><div><b>센서</b> 물리적 한계 감지.</div></div>
-  <div class="wt-num warn"><i>3</i><div><b>기구 스토퍼</b> 최후의 물리 차단.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>철학</b> — 웨이퍼·장비를 지키려 안전은 중복 설계.</div></div></div></div>
+  <div class="wt-num warn"><i>3</i><div><b>기구 스토퍼</b> 최후의 물리 차단.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>철학</b> — 웨이퍼·장비를 지키려 안전은 중복 설계.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">좌표 예제</div>
  <h2 class="h-title">한 점을 (θ,R,Z)로 읽어보기</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>스테이션</th><th>θ</th><th>R</th><th>Z</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>스테이션</th><th>θ</th><th>R</th><th>Z</th></tr>
    <tr><td>FOUP slot1</td><td>180°</td><td>뻗음</td><td>1번 높이</td></tr>
    <tr><td>Aligner</td><td>90°</td><td>뻗음</td><td>정렬 높이</td></tr>
    <tr><td>Home</td><td>0°</td><td>접힘</td><td>기준</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>연습</b> — 시뮬 상태바에서 각 스테이션의 값이 어떻게 바뀌는지 보세요.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>연습</b> — 시뮬 상태바에서 각 스테이션의 값이 어떻게 바뀌는지 보세요.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro">
