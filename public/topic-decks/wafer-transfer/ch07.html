@@ -121,12 +121,42 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro" data-here="port">
  <div class="wt-pad"><div class="wt-eye">01 · 순서</div><h2 class="h-title">반드시 세 단계로만 열립니다</h2>
-  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
-   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>Docking</b> FOUP을 Load Port에 정확히 안착.</div></div>
-   <div class="wt-num"><i>2</i><div><b>Door Open</b> FOUP·장비 문이 함께 열림(공기 차단 유지).</div></div>
-   <div class="wt-num v"><i>3</i><div><b>Mapping</b> 센서가 25칸을 훑어 웨이퍼 유무 목록 작성.</div></div></div></div>
-   <div class="wt-note warn" style="margin-top:0"><b>순서 위반은 거부</b> — 도킹 전 개방, 문 닫힌 채 Extend는
-    <b>Door 인터록(ALM-301)</b>으로 막힙니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1560 420">
+    <g font-family="ui-monospace,monospace">
+     <!-- ① Docking -->
+     <g transform="translate(20,60)">
+      <rect x="0" y="0" width="440" height="300" rx="14" fill="#101d29" stroke="#25405a" stroke-width="1.5"/>
+      <text class="fx-cap" x="24" y="40" style="font-size:20px">① Docking</text>
+      <rect x="250" y="90" width="90" height="170" rx="8" class="fx-box"/><text class="fx-sub" x="256" y="82">PORT</text>
+      <rect x="120" y="110" width="110" height="130" rx="8" fill="#101d29" stroke="#3a6b8c" stroke-width="2"/><text class="fx-sub" x="128" y="102">FOUP</text>
+      <path class="fx-ln" d="M232 175 H250" marker-end="url(#mA)"/>
+      <text class="fx-sub" x="60" y="286">핀에 안착·클램프</text></g>
+     <path class="fx-ln" d="M472 210 H520" marker-end="url(#mA)"/>
+     <!-- ② Door Open -->
+     <g transform="translate(560,60)">
+      <rect x="0" y="0" width="440" height="300" rx="14" fill="#101d29" stroke="#25405a" stroke-width="1.5"/>
+      <text class="fx-cap" x="24" y="40" style="font-size:20px">② Door Open</text>
+      <rect x="150" y="90" width="150" height="170" rx="8" class="fx-box"/>
+      <rect x="150" y="90" width="18" height="170" fill="#25415a" stroke="#3a6b8c"/>
+      <path class="fx-ln" d="M168 175 H120" marker-end="url(#mA)" opacity=".8"/><text class="fx-sub" x="60" y="182">문 개방 ↓</text>
+      <ellipse class="fx-w" cx="230" cy="150" rx="50" ry="7"/><ellipse class="fx-w" cx="230" cy="210" rx="50" ry="7"/>
+      <text class="fx-sub" x="60" y="286">FOUP·장비 문 동시</text></g>
+     <path class="fx-ln" d="M1012 210 H1060" marker-end="url(#mA)"/>
+     <!-- ③ Mapping -->
+     <g transform="translate(1100,60)">
+      <rect x="0" y="0" width="440" height="300" rx="14" fill="rgba(53,224,200,.05)" stroke="#2c6d63" stroke-width="1.5"/>
+      <text class="fx-cap" x="24" y="40" style="font-size:20px">③ Mapping</text>
+      <rect x="140" y="80" width="160" height="190" rx="8" class="fx-box"/>
+      <g stroke="#274357" stroke-width="1.2"><path d="M150 120 H290 M150 160 H290 M150 200 H290 M150 240 H290"/></g>
+      <ellipse class="fx-w" cx="220" cy="112" rx="60" ry="6"/><ellipse class="fx-w" cx="220" cy="152" rx="60" ry="6"/>
+      <line x1="330" y1="80" x2="330" y2="270" stroke="#35e0c8" stroke-width="3" stroke-dasharray="6 6"/>
+      <path class="fx-ln" d="M330 92 V262" marker-end="url(#mA)" marker-start="url(#mA)"/>
+      <text class="fx-cap" x="60" y="292" style="font-size:16px">센서가 25칸 스캔 → 목록</text></g>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note warn"><b>순서 위반은 거부</b> — 도킹 전 개방·문 닫힌 채 Extend는 <b>Door 인터록(ALM-301)</b>으로 막힙니다.</div>
   </div></div>
 </section>
 
