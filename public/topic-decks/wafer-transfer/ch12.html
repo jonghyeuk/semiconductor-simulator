@@ -184,15 +184,29 @@ h2.h-title{ font-size:54px; }
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">03 · 예시</div>
  <h2 class="h-title">FOUP→Load Lock 시퀀스 예</h2>
- <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
-   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>#</th><th>블록</th></tr>
-   <tr><td>1</td><td>MOVE FOUP</td></tr>
-   <tr><td>2</td><td>PICK slot1</td></tr>
-   <tr><td>3</td><td>SENSOR? Presence ON</td></tr>
-   <tr><td>4</td><td>MOVE Aligner → PLACE</td></tr>
-   <tr><td>5</td><td>WAIT Align done</td></tr>
-   <tr><td>6</td><td>PICK → MOVE LL → PLACE</td></tr></table></div>
-   <div class="wt-note" style="margin-top:0"><b>읽는 법</b> — 위에서 아래로 한 줄씩. 각 줄이 곧 한 동작.</div>
+ <div class="wt-body">
+   <div class="wt-col" style="flex:1.15"><div class="wt-fig" style="margin-top:0">
+    <svg viewBox="0 0 560 640">
+     <g font-family="ui-monospace,monospace" font-size="20">
+      <rect x="120" y="20" width="320" height="64" rx="9" fill="#12283a" stroke="#4a7ea6" stroke-width="2"/><text x="150" y="60" fill="#cfe4f2">MOVE  FOUP</text>
+      <rect x="120" y="112" width="320" height="64" rx="9" fill="#12283a" stroke="#4a7ea6" stroke-width="2"/><text x="150" y="152" fill="#cfe4f2">PICK  slot1</text>
+      <polygon points="120,204 440,204 410,268 150,268" fill="#161a35" stroke="#8a7dff" stroke-width="2"/><text x="150" y="244" fill="#cdbcff">SENSOR? Presence ON</text>
+      <rect x="120" y="296" width="320" height="64" rx="9" fill="#12283a" stroke="#4a7ea6" stroke-width="2"/><text x="150" y="336" fill="#cfe4f2">MOVE Aligner → PLACE</text>
+      <rect x="120" y="388" width="320" height="64" rx="9" fill="#2a2412" stroke="#c9a23a" stroke-width="2"/><text x="150" y="428" fill="#ffd48a">WAIT  Align done</text>
+      <rect x="120" y="480" width="320" height="64" rx="9" fill="#12283a" stroke="#4a7ea6" stroke-width="2"/><text x="150" y="520" fill="#cfe4f2">PICK → MOVE LL → PLACE</text>
+      <g stroke="#4a7ea6" stroke-width="3" fill="none">
+       <path d="M280 84 V112" marker-end="url(#mB)"/><path d="M280 176 V204" marker-end="url(#mB)"/>
+       <path d="M280 268 V296" marker-end="url(#mB)"/><path d="M280 360 V388" marker-end="url(#mB)"/><path d="M280 452 V480" marker-end="url(#mB)"/></g>
+     </g>
+    </svg></div></div>
+   <div class="wt-col">
+    <div class="wt-card"><h3>블록 색 = 종류</h3>
+     <p><span class="wt-key" style="border-color:#4a7ea6">동작</span> MOVE·PICK·PLACE<br/>
+      <span class="wt-key" style="border-color:#8a7dff">조건</span> SENSOR·IF<br/>
+      <span class="wt-key" style="border-color:#c9a23a">대기</span> WAIT</p></div>
+    <div class="wt-note"><b>읽는 법</b> — 위에서 아래로 한 줄씩. 동작 사이의 <b>조건·대기</b> 블록이
+     "안전하게 흐르게" 하는 핵심입니다.</div>
+   </div>
   </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">04 · 안전</div>
