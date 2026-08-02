@@ -253,13 +253,37 @@ h2.h-title{ font-size:54px; }
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 흐름 관점</div>
  <h2 class="h-title">한 장의 여정을 위에서 내려다보기</h2>
- <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
-   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>정거장</th><th>넘겨주는 것</th></tr>
-   <tr><td>Load Port</td><td>매핑된 웨이퍼 목록</td></tr>
-   <tr><td>EFEM</td><td>집힌 웨이퍼</td></tr>
-   <tr><td>Pre-aligner</td><td>방향 맞춘 웨이퍼</td></tr>
-   <tr><td>Load Lock</td><td>진공 준비된 웨이퍼</td></tr></table></div>
-   <div class="wt-note v" style="margin-top:0"><b>큰 그림</b> — 각 정거장이 다음을 위해 무엇을 완성해 넘기는지 보면 흐름이 이해됩니다.</div>
+ <div class="wt-fig">
+   <svg viewBox="0 0 1580 400">
+    <g font-family="ui-monospace,monospace">
+     <!-- 4 정거장 -->
+     <g>
+      <rect x="20" y="80" width="320" height="150" rx="12" class="fx-box"/>
+      <text class="fx-lbl" x="44" y="120" style="font-size:22px">Load Port</text>
+      <rect x="44" y="150" width="120" height="60" rx="8" fill="#101d29" stroke="#3a6b8c"/><ellipse class="fx-w" cx="104" cy="180" rx="44" ry="7"/>
+      <text class="fx-cap" x="44" y="270" style="font-size:17px">→ 매핑된 목록</text></g>
+     <path class="fx-ln" d="M344 155 H404" marker-end="url(#mA)"/>
+     <g>
+      <rect x="408" y="80" width="320" height="150" rx="12" class="fx-box"/>
+      <text class="fx-lbl" x="432" y="120" style="font-size:22px">EFEM</text>
+      <circle cx="500" cy="180" r="24" fill="#16283a" stroke="#4f8bb5" stroke-width="2"/><rect class="fx-arm" x="500" y="172" width="70" height="16" rx="6"/>
+      <text class="fx-cap" x="432" y="270" style="font-size:17px">→ 집힌 웨이퍼</text></g>
+     <path class="fx-ln" d="M732 155 H792" marker-end="url(#mA)"/>
+     <g>
+      <rect x="796" y="80" width="320" height="150" rx="12" class="fx-box"/>
+      <text class="fx-lbl" x="820" y="120" style="font-size:22px">Pre-aligner</text>
+      <circle cx="880" cy="180" r="34" fill="url(#wg)"/><path d="M880 148 l-8 16 h16 z" fill="#0a141c"/>
+      <text class="fx-cap" x="820" y="270" style="font-size:17px">→ 방향 맞춘 웨이퍼</text></g>
+     <path class="fx-ln" d="M1120 155 H1180" marker-end="url(#mA)"/>
+     <g>
+      <rect x="1184" y="80" width="360" height="150" rx="12" class="fx-box" stroke="#6f63c9"/>
+      <text class="fx-lbl" x="1208" y="120" style="font-size:22px">Load Lock</text>
+      <rect x="1208" y="150" width="120" height="60" rx="8" fill="#101d29" stroke="#6f63c9"/><ellipse class="fx-w" cx="1268" cy="180" rx="44" ry="7"/>
+      <text class="fx-cap v" x="1208" y="270" style="font-size:17px">→ 진공 준비 완료</text></g>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note v"><b>큰 그림</b> — 각 정거장이 <b>다음을 위해 무엇을 완성해 넘기는지</b> 보면 이송 전체가 하나의 릴레이로 이해됩니다.</div>
   </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 자기점검</div>
