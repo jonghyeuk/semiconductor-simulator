@@ -116,26 +116,27 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">01 · 개념</div><h2 class="h-title">Error는 순서 문제, Timeout은 성능 문제</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-card"><h3>Error (조건 위반)</h3><p>"하면 안 되는 것을 하려 함." 문 닫힌 채 Extend, 편 채 회전.
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>Error (조건 위반)</h3><p>"하면 안 되는 것을 하려 함." 문 닫힌 채 Extend, 편 채 회전.
      <b>순서·조건</b>이 틀린 것.</p></div>
     <div class="wt-card v"><h3>Timeout (도달 실패)</h3><p>"해야 할 것이 시간 내 안 됨." 목표 압력에 못 미침, Home 미완.
-     <b>성능·상태</b>의 문제.</p></div></div>
-   <div class="wt-col"><div class="wt-note"><b>구분이 진단의 시작</b> — Error면 <b>순서</b>를 고치고,
-    Timeout이면 <b>상태(압력·정렬 등)</b>를 확인합니다.</div></div></div></div>
+     <b>성능·상태</b>의 문제.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>구분이 진단의 시작</b> — Error면 <b>순서</b>를 고치고,
+    Timeout이면 <b>상태(압력·정렬 등)</b>를 확인합니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">02 · 네 가지</div><h2 class="h-title">대표 인터록 정리</h2>
-  <div class="wt-body"><div class="wt-col">
-   <table class="wt-tbl"><tr><th>인터록</th><th>코드</th><th>막는 상황</th></tr>
+  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>인터록</th><th>코드</th><th>막는 상황</th></tr>
     <tr><td>Door</td><td>ALM-301</td><td>문 닫힘 상태로 진입</td></tr>
     <tr><td>Vacuum</td><td>ALM-311/314</td><td>압력 안 맞는데 밸브 개방</td></tr>
     <tr><td>Collision</td><td>ALM-201</td><td>팔 편 채 회전</td></tr>
     <tr><td>Presence</td><td>ALM-502/504</td><td>웨이퍼 유무 불일치</td></tr></table></div>
-   <div class="wt-col"><div class="wt-note warn"><b>공통 성격</b> — 모두 <b>웨이퍼·장비·사람</b>을 지키기 위한 거부.
-    알람은 "지금 그거 하면 위험하다"는 경고입니다.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>공통 성격</b> — 모두 <b>웨이퍼·장비·사람</b>을 지키기 위한 거부.
+    알람은 "지금 그거 하면 위험하다"는 경고입니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="standard pro" data-here="lock">
@@ -151,51 +152,91 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개요</div>
  <h2 class="h-title">인터록은 왜 존재하나</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>지키는 것들</h3><p>웨이퍼(수천만 원), 장비(수십억), 사람. 이 셋을 지키려 위험한 명령을 거부합니다.</p></div>
-  <div class="wt-card v"><h3>거부 = 정상</h3><p>알람은 고장이 아니라 "지금 그건 위험하다"는 안전 신호.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>이 강의</b> — 네 인터록을 원리와 재현법으로 하나씩 봅니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>지키는 것들</h3><p>웨이퍼(수천만 원), 장비(수십억), 사람. 이 셋을 지키려 위험한 명령을 거부합니다.</p></div>
+  <div class="wt-card v"><h3>거부 = 정상</h3><p>알람은 고장이 아니라 "지금 그건 위험하다"는 안전 신호.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>이 강의</b> — 네 인터록을 원리와 재현법으로 하나씩 봅니다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">01 · Collision</div>
  <h2 class="h-title">Collision — 편 채 회전 금지 (ALM-201)</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num warn"><i>!</i><div><b>왜</b> 팔을 편 채 돌면 옆 장치와 충돌.</div></div>
-  <div class="wt-num"><i>✓</i><div><b>지키기</b> 회전 전 Retract 확인.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>재현</b> — Extend 상태에서 Rotate를 눌러 ALM-201을 확인.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num warn"><i>!</i><div><b>왜</b> 팔을 편 채 돌면 옆 장치와 충돌.</div></div>
+  <div class="wt-num"><i>✓</i><div><b>지키기</b> 회전 전 Retract 확인.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>재현</b> — Extend 상태에서 Rotate를 눌러 ALM-201을 확인.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">02 · Door</div>
  <h2 class="h-title">Door — 닫힌 문으로 진입 금지 (ALM-301)</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num warn"><i>!</i><div><b>왜</b> 문 닫힘 상태 진입은 충돌·오염.</div></div>
-  <div class="wt-num"><i>✓</i><div><b>지키기</b> Docking → Door Open 후 Extend.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>재현</b> — 문 닫은 채 Extend → ALM-301.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num warn"><i>!</i><div><b>왜</b> 문 닫힘 상태 진입은 충돌·오염.</div></div>
+  <div class="wt-num"><i>✓</i><div><b>지키기</b> Docking → Door Open 후 Extend.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>재현</b> — 문 닫은 채 Extend → ALM-301.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">03 · Vacuum</div>
  <h2 class="h-title">Vacuum — 압력 안 맞는 개방 금지 (ALM-314)</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num warn"><i>!</i><div><b>왜</b> 대기압에서 진공측 개방은 진공 붕괴·웨이퍼 비산.</div></div>
-  <div class="wt-num"><i>✓</i><div><b>지키기</b> 목표 압력 도달 후에만 밸브 개방.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>재현</b> — 대기압에서 TM 밸브 개방 → ALM-314.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num warn"><i>!</i><div><b>왜</b> 대기압에서 진공측 개방은 진공 붕괴·웨이퍼 비산.</div></div>
+  <div class="wt-num"><i>✓</i><div><b>지키기</b> 목표 압력 도달 후에만 밸브 개방.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>재현</b> — 대기압에서 TM 밸브 개방 → ALM-314.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">04 · Presence</div>
  <h2 class="h-title">Presence — 유무 불일치 금지 (ALM-502/504)</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num warn"><i>!</i><div><b>왜</b> 없는 웨이퍼 Place·있는데 또 Pick → 충돌·낙하.</div></div>
-  <div class="wt-num"><i>✓</i><div><b>지키기</b> 매핑·Presence로 상태 확인 후 동작.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>재현</b> — 빈 칸 Pick 또는 웨이퍼 든 채 Pick 재시도.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num warn"><i>!</i><div><b>왜</b> 없는 웨이퍼 Place·있는데 또 Pick → 충돌·낙하.</div></div>
+  <div class="wt-num"><i>✓</i><div><b>지키기</b> 매핑·Presence로 상태 확인 후 동작.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>재현</b> — 빈 칸 Pick 또는 웨이퍼 든 채 Pick 재시도.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">05 · Error vs Timeout</div>
  <h2 class="h-title">거부에도 두 종류가 있다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>Error(순서)</h3><p>하면 안 되는 걸 시도. 시작에서 즉시 거부. → 순서·조건을 고친다.</p></div>
-  <div class="wt-card v"><h3>Timeout(성능)</h3><p>해야 할 게 시간 내 안 됨. → 상태·장치를 확인한다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>구분이 진단</b> — 14강 고장 진단의 출발점입니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>Error(순서)</h3><p>하면 안 되는 걸 시도. 시작에서 즉시 거부. → 순서·조건을 고친다.</p></div>
+  <div class="wt-card v"><h3>Timeout(성능)</h3><p>해야 할 게 시간 내 안 됨. → 상태·장치를 확인한다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>구분이 진단</b> — 14강 고장 진단의 출발점입니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">06 · 철학</div>
  <h2 class="h-title">안전은 중복으로 설계한다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>여러 겹</h3><p>소프트 리밋·센서·기구 스토퍼처럼, 하나가 실패해도 다음이 잡도록 겹칩니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>한 줄</b> — 인터록은 "막아서 지킨다". 잘 막히는 장비가 좋은 장비.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>여러 겹</h3><p>소프트 리밋·센서·기구 스토퍼처럼, 하나가 실패해도 다음이 잡도록 겹칩니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>한 줄</b> — 인터록은 "막아서 지킨다". 잘 막히는 장비가 좋은 장비.</div>
+  </div></div>
+</section>
+
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 계층</div>
+ <h2 class="h-title">안전은 두 층으로 — 하드와이어와 소프트</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card warn"><h3>하드와이어 인터록</h3><p>배선·릴레이로 물리 차단. 소프트웨어가 죽어도 동작. 최후의 안전.</p></div>
+  <div class="wt-card"><h3>소프트 인터록</h3><p>제어기 로직이 조건을 검사해 명령을 거부. 유연하지만 SW에 의존.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>왜 둘 다</b> — 소프트가 놓쳐도 하드가 잡도록 <b>이중</b>으로 설계.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · Fail-safe</div>
+ <h2 class="h-title">고장 나면 "안전한 쪽"으로</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>정전 시</b> 밸브는 닫힘, 로봇은 정지 — 위험을 만들지 않는 상태로.</div></div>
+  <div class="wt-num"><i>2</i><div><b>신호 끊김 시</b> "모름"을 "위험"으로 간주해 멈춤.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>원칙</b> — 애매하면 진행이 아니라 <b>정지</b>. 웨이퍼·사람이 우선.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 구분</div>
+ <h2 class="h-title">인터록과 알람은 다르다</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>인터록</h3><p>위험한 동작을 <b>미리 막는</b> 예방 장치.</p></div>
+  <div class="wt-card v"><h3>알람</h3><p>일어난 이상을 <b>알리는</b> 통지. 인터록이 걸리면 알람도 함께 뜹니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>정리</b> — 인터록 = 브레이크, 알람 = 경고등.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 문화</div>
+ <h2 class="h-title">인터록을 우회하지 않는다</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num warn"><i>!</i><div><b>임의 해제 금지</b> "귀찮다고" 인터록을 끄면 사고로 직결.</div></div>
+  <div class="wt-num"><i>✓</i><div><b>원인 제거</b> 막혔으면 조건을 맞추지, 안전장치를 끄지 않습니다.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>현장 원칙</b> — 안전장치가 자주 걸리면 "장치를 끄기"가 아니라 "절차를 고치기".</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 계층</div>

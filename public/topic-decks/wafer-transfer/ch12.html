@@ -121,98 +121,138 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">01 · 왜</div><h2 class="h-title">동작을 글로 적어 두는 것</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-num"><i>1</i><div><b>재현성</b> 사람마다 다른 순서가 아니라, 적힌 대로 <b>항상 같게</b> 실행됩니다.</div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>재현성</b> 사람마다 다른 순서가 아니라, 적힌 대로 <b>항상 같게</b> 실행됩니다.</div></div>
     <div class="wt-num"><i>2</i><div><b>무인 운전</b> 한 번 짜두면 사람 없이 반복합니다.</div></div>
-    <div class="wt-num v"><i>3</i><div><b>수동을 먼저 한 이유</b> 각 블록이 곧 1~11강에서 손으로 하던 그 동작입니다.</div></div></div>
-   <div class="wt-col"><div class="wt-note"><b>연결</b> — 수동으로 "언제 되고 안 되는지"를 익혔기에,
-    시퀀스가 멈춰도 어디가 문제인지 압니다.</div></div></div></div>
+    <div class="wt-num v"><i>3</i><div><b>수동을 먼저 한 이유</b> 각 블록이 곧 1~11강에서 손으로 하던 그 동작입니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>연결</b> — 수동으로 "언제 되고 안 되는지"를 익혔기에,
+    시퀀스가 멈춰도 어디가 문제인지 압니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro">
  <div class="wt-pad"><div class="wt-eye">02 · 블록</div><h2 class="h-title">여섯 가지 블록</h2>
-  <div class="wt-body"><div class="wt-col">
-   <table class="wt-tbl"><tr><th>블록</th><th>하는 일</th></tr>
+  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>블록</th><th>하는 일</th></tr>
     <tr><td><b>MOVE</b></td><td>지정 스테이션으로 이동(θ)</td></tr>
     <tr><td><b>PICK</b></td><td>웨이퍼를 집는다</td></tr>
     <tr><td><b>PLACE</b></td><td>웨이퍼를 놓는다</td></tr>
     <tr><td><b>WAIT</b></td><td>조건/시간까지 기다린다</td></tr>
     <tr><td><b>SENSOR CHECK</b></td><td>신호가 맞는지 확인</td></tr>
     <tr><td><b class="v">IF</b></td><td>조건에 따라 분기</td></tr></table></div>
-   <div class="wt-col"><div class="wt-note v"><b>WAIT와 IF가 핵심</b> — 압력이 목표에 닿을 때까지 <b>기다리고</b>,
-    센서 상태에 따라 <b>다르게</b> 행동해야 진짜 자동화입니다.</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>WAIT와 IF가 핵심</b> — 압력이 목표에 닿을 때까지 <b>기다리고</b>,
+    센서 상태에 따라 <b>다르게</b> 행동해야 진짜 자동화입니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="standard pro">
  <div class="wt-pad"><div class="wt-eye">03 · 안전</div><h2 class="h-title">자동이라도 인터록은 그대로</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-card warn"><h3>블록도 거부당한다</h3><p>편 채 회전하는 MOVE, 압력 안 맞는데 여는 블록은
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card warn"><h3>블록도 거부당한다</h3><p>편 채 회전하는 MOVE, 압력 안 맞는데 여는 블록은
      수동과 똑같이 <b>인터록</b>이 막습니다.</p></div>
-    <div class="wt-card"><h3>그래서 SENSOR CHECK</h3><p>다음 블록 전에 조건을 확인하면 시퀀스가 안전하게 흐릅니다.</p></div></div>
-   <div class="wt-col"><div class="wt-note"><b>좋은 시퀀스</b> = 동작 블록 사이에 <b>확인·대기</b>가 적절히 들어간 시퀀스입니다.</div></div></div></div>
+    <div class="wt-card"><h3>그래서 SENSOR CHECK</h3><p>다음 블록 전에 조건을 확인하면 시퀀스가 안전하게 흐릅니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>좋은 시퀀스</b> = 동작 블록 사이에 <b>확인·대기</b>가 적절히 들어간 시퀀스입니다.</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개요</div>
  <h2 class="h-title">왜 시퀀스로 자동화하나</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>재현성</b> 사람마다 다른 순서가 아니라 늘 같게.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>재현성</b> 사람마다 다른 순서가 아니라 늘 같게.</div></div>
   <div class="wt-num"><i>2</i><div><b>무인 운전</b> 한 번 짜면 반복.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>기록</b> 무슨 순서로 했는지 그대로 남습니다.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>전제</b> — 1~11강에서 손으로 익힌 동작이 곧 블록이 됩니다.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>기록</b> 무슨 순서로 했는지 그대로 남습니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>전제</b> — 1~11강에서 손으로 익힌 동작이 곧 블록이 됩니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">01 · 블록 심화 ①</div>
  <h2 class="h-title">MOVE · PICK · PLACE</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>M</i><div><b>MOVE</b> 지정 스테이션으로 회전·이동. (수동의 Rotate+Extend에 해당)</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>M</i><div><b>MOVE</b> 지정 스테이션으로 회전·이동. (수동의 Rotate+Extend에 해당)</div></div>
   <div class="wt-num"><i>P</i><div><b>PICK</b> 집기(Extend·Up·Retract).</div></div>
-  <div class="wt-num v"><i>Pl</i><div><b>PLACE</b> 놓기(Extend·Down·Retract).</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>대응</b> — 각 블록 = 앞서 손으로 한 동작 묶음. 낯설지 않습니다.</div></div></div></div>
+  <div class="wt-num v"><i>Pl</i><div><b>PLACE</b> 놓기(Extend·Down·Retract).</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>대응</b> — 각 블록 = 앞서 손으로 한 동작 묶음. 낯설지 않습니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">02 · 블록 심화 ②</div>
  <h2 class="h-title">WAIT · SENSOR CHECK · IF</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>W</i><div><b>WAIT</b> 조건/시간까지 기다림(예: 목표 압력 도달).</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>W</i><div><b>WAIT</b> 조건/시간까지 기다림(예: 목표 압력 도달).</div></div>
   <div class="wt-num"><i>S</i><div><b>SENSOR CHECK</b> 신호가 맞는지 확인 후 진행.</div></div>
-  <div class="wt-num v"><i>IF</i><div><b>IF</b> 조건에 따라 분기(예: 챔버 비었으면 PM1, 아니면 PM2).</div></div></div>
-  <div class="wt-col"><div class="wt-note v"><b>핵심</b> — WAIT·IF·CHECK가 있어야 상황에 대응하는 "진짜" 자동화.</div></div></div></div>
+  <div class="wt-num v"><i>IF</i><div><b>IF</b> 조건에 따라 분기(예: 챔버 비었으면 PM1, 아니면 PM2).</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>핵심</b> — WAIT·IF·CHECK가 있어야 상황에 대응하는 "진짜" 자동화.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">03 · 예시</div>
  <h2 class="h-title">FOUP→Load Lock 시퀀스 예</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>#</th><th>블록</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>#</th><th>블록</th></tr>
    <tr><td>1</td><td>MOVE FOUP</td></tr>
    <tr><td>2</td><td>PICK slot1</td></tr>
    <tr><td>3</td><td>SENSOR? Presence ON</td></tr>
    <tr><td>4</td><td>MOVE Aligner → PLACE</td></tr>
    <tr><td>5</td><td>WAIT Align done</td></tr>
    <tr><td>6</td><td>PICK → MOVE LL → PLACE</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>읽는 법</b> — 위에서 아래로 한 줄씩. 각 줄이 곧 한 동작.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>읽는 법</b> — 위에서 아래로 한 줄씩. 각 줄이 곧 한 동작.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">04 · 안전</div>
  <h2 class="h-title">자동이라도 인터록은 살아있다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card warn"><h3>블록도 거부된다</h3><p>편 채 MOVE, 압력 안 맞는 개방 블록은 수동과 똑같이 인터록으로 멈춥니다.</p></div>
-  <div class="wt-card"><h3>그래서 CHECK</h3><p>동작 블록 사이에 SENSOR CHECK/WAIT를 넣어 조건을 보장합니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>좋은 시퀀스</b> = 동작 사이에 확인·대기가 적절히 낀 시퀀스.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card warn"><h3>블록도 거부된다</h3><p>편 채 MOVE, 압력 안 맞는 개방 블록은 수동과 똑같이 인터록으로 멈춥니다.</p></div>
+  <div class="wt-card"><h3>그래서 CHECK</h3><p>동작 블록 사이에 SENSOR CHECK/WAIT를 넣어 조건을 보장합니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>좋은 시퀀스</b> = 동작 사이에 확인·대기가 적절히 낀 시퀀스.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">05 · 디버깅</div>
  <h2 class="h-title">시퀀스가 멈추면</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>멈춘 줄 확인</b> 어느 블록에서 섰는지 본다.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>멈춘 줄 확인</b> 어느 블록에서 섰는지 본다.</div></div>
   <div class="wt-num"><i>2</i><div><b>로그 확인</b> 그 블록의 알람 코드.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>조건 보강</b> 앞에 WAIT/CHECK를 추가.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>대개</b> — 멈춤은 "조건이 아직 안 됐는데 다음을 시도"해서입니다.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>조건 보강</b> 앞에 WAIT/CHECK를 추가.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>대개</b> — 멈춤은 "조건이 아직 안 됐는데 다음을 시도"해서입니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">06 · 흔한 실수</div>
  <h2 class="h-title">시퀀스 작성 실수</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>실수</th><th>결과</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>실수</th><th>결과</th></tr>
    <tr><td>WAIT 누락</td><td>압력 미달 상태로 개방 → 알람</td></tr>
    <tr><td>CHECK 없음</td><td>빈 손으로 Place 진행</td></tr>
    <tr><td>Retract 빠짐</td><td>편 채 MOVE → 충돌</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>교훈</b> — 사람이 손으로 지키던 순서를, 블록에서도 그대로 지켜야 합니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>교훈</b> — 사람이 손으로 지키던 순서를, 블록에서도 그대로 지켜야 합니다.</div>
+  </div></div>
+</section>
+
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 상태</div>
+ <h2 class="h-title">시퀀스는 상태를 따라 흐른다</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>지금 상태 → 다음 상태</h3><p>"웨이퍼 집음" → "정렬 완료" → "LL 안착"처럼, 각 블록이 상태를 한 칸 전진시킵니다.</p></div>
+  <div class="wt-card v"><h3>조건이 전이의 열쇠</h3><p>다음 상태로 가려면 센서 조건이 충족돼야 합니다(SENSOR CHECK).</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>관점</b> — 좋은 시퀀스 = 상태와 전이 조건이 분명한 시퀀스.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 예외</div>
+ <h2 class="h-title">잘못됐을 때의 길도 그려둔다</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>정상 경로</b> 조건 충족 시 다음으로.</div></div>
+  <div class="wt-num warn"><i>2</i><div><b>예외 경로</b> 조건 실패 시 멈춤·알람·복구 블록으로.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>실무</b> — 예외 처리 없는 시퀀스는 작은 이상에도 통째로 멈춥니다.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 병렬</div>
+ <h2 class="h-title">둘을 동시에 — 듀얼 암 스케줄</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>겹쳐서 일한다</h3><p>한 손이 새 웨이퍼를 집는 사이 다른 손이 완료품을 빼내, 시간을 겹칩니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>효과</b> — 같은 장비로 처리량↑. 5강 "손이 둘"의 자동화 버전.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 레시피</div>
+ <h2 class="h-title">시퀀스와 레시피</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>레시피</b> 어떤 공정을 어떤 조건으로 할지의 설정.</div></div>
+  <div class="wt-num v"><i>2</i><div><b>시퀀스</b> 그 레시피대로 웨이퍼를 옮기고 처리하는 순서.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>역할 분담</b> — 이송 시퀀스는 "웨이퍼를 제때 제자리에" 두는 데 집중합니다.</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 상태</div>

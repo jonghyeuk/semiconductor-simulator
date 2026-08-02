@@ -151,99 +151,109 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="standard pro" data-here="efem">
  <div class="wt-pad"><div class="wt-eye">02 · 판정</div><h2 class="h-title">"도착했다"와 "집어도 된다"는 다릅니다</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-card"><h3>위치만으론 부족</h3><p>팔이 슬롯 앞에 도착해도, <b>거기 웨이퍼가 실제로 있는지</b>는 센서가 말해줍니다.</p></div>
-    <div class="wt-card warn"><h3>빈 슬롯 Pick</h3><p>웨이퍼 없는 칸에서 Pick하면 동작은 되지만 <b>Presence OFF</b> — 알람.</p></div></div>
-   <div class="wt-col"><div class="wt-note v"><b>원칙</b> — 동작 성공 여부는 <b>센서</b>로 판정합니다.
-    "팔이 갔으니 됐겠지"가 아니라 "Presence가 ON이니 됐다".</div></div></div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>위치만으론 부족</h3><p>팔이 슬롯 앞에 도착해도, <b>거기 웨이퍼가 실제로 있는지</b>는 센서가 말해줍니다.</p></div>
+    <div class="wt-card warn"><h3>빈 슬롯 Pick</h3><p>웨이퍼 없는 칸에서 Pick하면 동작은 되지만 <b>Presence OFF</b> — 알람.</p></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>원칙</b> — 동작 성공 여부는 <b>센서</b>로 판정합니다.
+    "팔이 갔으니 됐겠지"가 아니라 "Presence가 ON이니 됐다".</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro" data-here="align">
  <div class="wt-pad"><div class="wt-eye">03 · Place</div><h2 class="h-title">Place는 Pick의 거울입니다</h2>
-  <div class="wt-body">
-   <div class="wt-col">
-    <div class="wt-num"><i>1</i><div><b>Extend</b> Pre-aligner 위로 팔을 뻗는다.</div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>Extend</b> Pre-aligner 위로 팔을 뻗는다.</div></div>
     <div class="wt-num"><i>2</i><div><b>Down</b> 살짝 내려 웨이퍼를 얹는다.</div></div>
     <div class="wt-num"><i>3</i><div><b>Retract</b> 빈 손으로 접어 빠진다.</div></div>
-    <div class="wt-num v"><i>4</i><div><b>확인</b> Pre-aligner의 <b>Presence ON</b>, 로봇 손은 OFF.</div></div></div>
-   <div class="wt-col"><div class="wt-note"><b>같은 동작, 반대 방향</b> — Pick은 Up으로 들고, Place는 Down으로 놓습니다.
-    나머지는 똑같습니다.</div></div></div></div>
+    <div class="wt-num v"><i>4</i><div><b>확인</b> Pre-aligner의 <b>Presence ON</b>, 로봇 손은 OFF.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>같은 동작, 반대 방향</b> — Pick은 Up으로 들고, Place는 Down으로 놓습니다.
+    나머지는 똑같습니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-here="foup"><div class="wt-pad"><div class="wt-eye">02 · Pick 상세 ①</div>
  <h2 class="h-title">Extend — 웨이퍼 아래로 정확히</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>높이 먼저</b> 목표 슬롯의 Z에 맞춘 뒤 팔을 뻗습니다.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>높이 먼저</b> 목표 슬롯의 Z에 맞춘 뒤 팔을 뻗습니다.</div></div>
   <div class="wt-num"><i>2</i><div><b>깊이</b> End Effector가 웨이퍼 중심 아래까지 충분히 들어가야 안정적으로 듭니다.</div></div>
-  <div class="wt-num warn"><i>!</i><div><b>얕으면</b> 가장자리만 걸려 기울거나 떨어질 수 있습니다.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>확인</b> — Extend 완료 후 R 값이 목표에 도달했는지 상태바로 봅니다.</div></div></div></div>
+  <div class="wt-num warn"><i>!</i><div><b>얕으면</b> 가장자리만 걸려 기울거나 떨어질 수 있습니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>확인</b> — Extend 완료 후 R 값이 목표에 도달했는지 상태바로 봅니다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="foup"><div class="wt-pad"><div class="wt-eye">03 · Pick 상세 ②</div>
  <h2 class="h-title">Up — 슬롯에서 살짝 들어올린다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>왜 살짝만</h3><p>슬롯 레일에서 웨이퍼를 띄우는 최소 높이면 충분합니다. 과하면 위 칸과 간섭.</p></div>
-  <div class="wt-card v"><h3>흡착/지지</h3><p>진공 흡착식은 이때 흡착이 켜지고, 모서리 지지식은 받침에 얹힙니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>신호</b> — 들어올리면 <b>Wafer Presence가 ON</b>으로 바뀝니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>왜 살짝만</h3><p>슬롯 레일에서 웨이퍼를 띄우는 최소 높이면 충분합니다. 과하면 위 칸과 간섭.</p></div>
+  <div class="wt-card v"><h3>흡착/지지</h3><p>진공 흡착식은 이때 흡착이 켜지고, 모서리 지지식은 받침에 얹힙니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>신호</b> — 들어올리면 <b>Wafer Presence가 ON</b>으로 바뀝니다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">04 · Pick 상세 ③</div>
  <h2 class="h-title">Retract — 접어서 안전하게 빼낸다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>수평 유지</b> 접는 동안 웨이퍼는 계속 수평을 유지해야 합니다.</div></div>
-  <div class="wt-num"><i>2</i><div><b>간섭 회피</b> 완전히 접혀야 회전으로 넘어갈 수 있습니다.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>규칙</b> — Retract 완료 전 Rotate 금지(충돌). 항상 접힘 확인 후 회전.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>수평 유지</b> 접는 동안 웨이퍼는 계속 수평을 유지해야 합니다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>간섭 회피</b> 완전히 접혀야 회전으로 넘어갈 수 있습니다.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>규칙</b> — Retract 완료 전 Rotate 금지(충돌). 항상 접힘 확인 후 회전.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="efem"><div class="wt-pad"><div class="wt-eye">05 · Transfer</div>
  <h2 class="h-title">Transfer — 접은 채 목표로 회전</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>이동은 회전</h3><p>웨이퍼를 든 채 θ로 Pre-aligner 앞으로 돕니다. 팔은 접힌 상태.</p></div>
-  <div class="wt-card v"><h3>속도와 안정</h3><p>급가속은 웨이퍼가 미끄러질 수 있어, 장비는 부드러운 가감속으로 이동합니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>확인</b> — 도착 STATION 표시가 목표(ALIGN)로 바뀌었는지 봅니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>이동은 회전</h3><p>웨이퍼를 든 채 θ로 Pre-aligner 앞으로 돕니다. 팔은 접힌 상태.</p></div>
+  <div class="wt-card v"><h3>속도와 안정</h3><p>급가속은 웨이퍼가 미끄러질 수 있어, 장비는 부드러운 가감속으로 이동합니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>확인</b> — 도착 STATION 표시가 목표(ALIGN)로 바뀌었는지 봅니다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="align"><div class="wt-pad"><div class="wt-eye">06 · Place 상세</div>
  <h2 class="h-title">Place — Down으로 살며시 놓기</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>Extend</b> Pre-aligner 위로 팔을 뻗는다.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>Extend</b> Pre-aligner 위로 팔을 뻗는다.</div></div>
   <div class="wt-num"><i>2</i><div><b>Down</b> 살짝 내려 웨이퍼를 받침에 얹고 흡착을 끈다.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>Retract</b> 빈 손으로 접어 빠진다.</div></div></div>
-  <div class="wt-col"><div class="wt-note v"><b>신호</b> — Pre-aligner <b>Presence ON</b>, 로봇 손 <b>Presence OFF</b>. 둘 다 확인해야 완료.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>Retract</b> 빈 손으로 접어 빠진다.</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>신호</b> — Pre-aligner <b>Presence ON</b>, 로봇 손 <b>Presence OFF</b>. 둘 다 확인해야 완료.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">07 · 판정</div>
  <h2 class="h-title">센서로 읽는 성공/실패</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>동작</th><th>로봇 손</th><th>대상</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>동작</th><th>로봇 손</th><th>대상</th></tr>
    <tr><td>Pick 성공</td><td><b>ON</b></td><td>OFF</td></tr>
    <tr><td>Place 성공</td><td>OFF</td><td><b>ON</b></td></tr>
    <tr><td>Pick 실패</td><td>OFF</td><td>OFF</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>원칙</b> — 두 위치의 Presence 조합이 곧 성공 여부입니다. 눈이 아니라 신호.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>원칙</b> — 두 위치의 Presence 조합이 곧 성공 여부입니다. 눈이 아니라 신호.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="align"><div class="wt-pad"><div class="wt-eye">08 · 왜 Pre-aligner</div>
  <h2 class="h-title">여기서 잠깐 — 왜 정렬대에 놓나</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>방향을 맞추려고</h3><p>공정 전에 웨이퍼의 중심·Notch 방향을 규격에 맞춰야 합니다(9강).</p></div>
-  <div class="wt-card v"><h3>이송 흐름의 한 정거장</h3><p>FOUP → (정렬) → Load Lock. 정렬은 이송 중 거치는 필수 정거장.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>다음</b> — 정렬이 끝나면 웨이퍼를 <b>다시 Pick</b>해 Load Lock으로 옮깁니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>방향을 맞추려고</h3><p>공정 전에 웨이퍼의 중심·Notch 방향을 규격에 맞춰야 합니다(9강).</p></div>
+  <div class="wt-card v"><h3>이송 흐름의 한 정거장</h3><p>FOUP → (정렬) → Load Lock. 정렬은 이송 중 거치는 필수 정거장.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>다음</b> — 정렬이 끝나면 웨이퍼를 <b>다시 Pick</b>해 Load Lock으로 옮깁니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">09 · 실패 시나리오</div>
  <h2 class="h-title">이럴 때 Pick이 실패합니다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num warn"><i>1</i><div><b>빈 슬롯 겨냥</b> Presence OFF. 매핑을 다시 확인.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num warn"><i>1</i><div><b>빈 슬롯 겨냥</b> Presence OFF. 매핑을 다시 확인.</div></div>
   <div class="wt-num warn"><i>2</i><div><b>얕은 Extend</b> 웨이퍼가 걸려 기움. 깊이 확인.</div></div>
-  <div class="wt-num warn"><i>3</i><div><b>편 채 회전 시도</b> ALM-201. Retract 먼저.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>대응</b> — 실패는 대부분 <b>겨냥·순서</b> 문제. 로그의 코드가 어느 쪽인지 알려줍니다.</div></div></div></div>
+  <div class="wt-num warn"><i>3</i><div><b>편 채 회전 시도</b> ALM-201. Retract 먼저.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>대응</b> — 실패는 대부분 <b>겨냥·순서</b> 문제. 로그의 코드가 어느 쪽인지 알려줍니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">10 · 왕복</div>
  <h2 class="h-title">돌아 나올 땐 정확히 역순</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>역순의 원리</h3><p>공정을 마친 웨이퍼는 들어온 길을 거꾸로 되짚어 FOUP으로 돌아갑니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>같은 동작</b> — Pick/Place·회전 규칙은 방향만 반대일 뿐 동일합니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>역순의 원리</h3><p>공정을 마친 웨이퍼는 들어온 길을 거꾸로 되짚어 FOUP으로 돌아갑니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>같은 동작</b> — Pick/Place·회전 규칙은 방향만 반대일 뿐 동일합니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">11 · 효율</div>
  <h2 class="h-title">손이 두 개면 기다리지 않는다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card v"><h3>듀얼 암</h3><p>많은 이송 로봇은 팔이 둘입니다. 한 손이 새 웨이퍼를 집는 동안
-   다른 손이 처리된 웨이퍼를 빼내 <b>대기 시간을 줄입니다.</b></p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>맛보기</b> — 이 "동시에 처리" 개념이 12강 시퀀스에서 자동화의 효율로 이어집니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card v"><h3>듀얼 암</h3><p>많은 이송 로봇은 팔이 둘입니다. 한 손이 새 웨이퍼를 집는 동안
+   다른 손이 처리된 웨이퍼를 빼내 <b>대기 시간을 줄입니다.</b></p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>맛보기</b> — 이 "동시에 처리" 개념이 12강 시퀀스에서 자동화의 효율로 이어집니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro">

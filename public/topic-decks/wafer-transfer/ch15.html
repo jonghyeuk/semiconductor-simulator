@@ -128,99 +128,144 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro" data-here="all">
  <div class="wt-pad"><div class="wt-eye">순서표</div><h2 class="h-title">전 구간 체크리스트</h2>
-  <div class="wt-body"><div class="wt-col">
-   <table class="wt-tbl"><tr><th>구간</th><th>핵심 동작</th><th>확인</th></tr>
+  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>구간</th><th>핵심 동작</th><th>확인</th></tr>
     <tr><td>대기</td><td>Docking·Door·Mapping·Pick</td><td>Presence ON</td></tr>
     <tr><td>정렬</td><td>Pre-aligner Align</td><td>Notch 0°</td></tr>
     <tr><td>관문</td><td>LL Place·Pump Down</td><td>목표 진공</td></tr>
     <tr><td>진공</td><td>Gate Valve·진공 Pick</td><td>Presence ON</td></tr>
     <tr><td>공정</td><td>PM Place</td><td>PM Presence ON</td></tr></table></div>
-   <div class="wt-col"><div class="wt-note v"><b>완료</b> — 웨이퍼가 공정 챔버에 놓이고, 발생한 오류를 모두 복구했으면
-    <b>과정 수료</b>입니다.</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>완료</b> — 웨이퍼가 공정 챔버에 놓이고, 발생한 오류를 모두 복구했으면
+    <b>과정 수료</b>입니다.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="standard pro">
  <div class="wt-pad"><div class="wt-eye">응용</div><h2 class="h-title">막히면 — 지금까지 배운 순서로</h2>
-  <div class="wt-body"><div class="wt-col">
-   <table class="wt-tbl"><tr><th>증상</th><th>어느 강</th><th>조치</th></tr>
+  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>증상</th><th>어느 강</th><th>조치</th></tr>
     <tr><td>회전 거부</td><td>3·4·13강</td><td>Retract 후 회전</td></tr>
     <tr><td>밸브 거부</td><td>10·13강</td><td>압력 맞추고 재시도</td></tr>
     <tr><td>Pick 실패</td><td>5·6강</td><td>겨냥·Presence 확인</td></tr>
     <tr><td>Pump timeout</td><td>10·14강</td><td>누설 점검·재-Pump</td></tr></table></div>
-   <div class="wt-col"><div class="wt-note"><b>이게 이 과정의 목적</b> — 알람 앞에서 당황하지 않고
-    <b>어느 강의 지식</b>으로 풀지 아는 것.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>이게 이 과정의 목적</b> — 알람 앞에서 당황하지 않고
+    <b>어느 강의 지식</b>으로 풀지 아는 것.</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">준비</div>
  <h2 class="h-title">전 구간 자동 이송 — 시작 전 점검</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>초기화</b> 알람 0 · 로봇 Home.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>초기화</b> 알람 0 · 로봇 Home.</div></div>
   <div class="wt-num"><i>2</i><div><b>FOUP</b> 웨이퍼 적재 확인.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>시퀀스</b> FOUP→Chamber 블록 준비.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>목표</b> — 자동으로 전 구간을 돌리고, 도중 오류를 진단·복구해 완주.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>시퀀스</b> FOUP→Chamber 블록 준비.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>목표</b> — 자동으로 전 구간을 돌리고, 도중 오류를 진단·복구해 완주.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">01 · 시퀀스</div>
  <h2 class="h-title">전 구간 블록 구성</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>구간</th><th>블록</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>구간</th><th>블록</th></tr>
    <tr><td>대기</td><td>MOVE·PICK·CHECK</td></tr>
    <tr><td>정렬</td><td>PLACE·WAIT·PICK</td></tr>
    <tr><td>관문</td><td>PLACE·Pump·WAIT</td></tr>
    <tr><td>진공</td><td>Valve·PICK·MOVE·PLACE</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>포인트</b> — 압력·Presence WAIT/CHECK를 빠뜨리지 말 것.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>포인트</b> — 압력·Presence WAIT/CHECK를 빠뜨리지 말 것.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">02 · 실행</div>
  <h2 class="h-title">돌리며 지켜보기</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>진행 관찰</b> 어느 블록을 수행 중인지 본다.</div></div>
-  <div class="wt-num"><i>2</i><div><b>상태바</b> 압력·좌표·알람 수를 주시.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>멈추면</b> — 멈춘 블록과 로그를 즉시 확인(14강 방식).</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>진행 관찰</b> 어느 블록을 수행 중인지 본다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>상태바</b> 압력·좌표·알람 수를 주시.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>멈추면</b> — 멈춘 블록과 로그를 즉시 확인(14강 방식).</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">03 · 오류 대응</div>
  <h2 class="h-title">주입된 고장을 풀어낸다</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>증상</th><th>어느 강</th><th>조치</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>증상</th><th>어느 강</th><th>조치</th></tr>
    <tr><td>회전 거부</td><td>3·4·13</td><td>Retract 후 회전</td></tr>
    <tr><td>밸브 거부</td><td>10·13</td><td>압력 맞추기</td></tr>
    <tr><td>Pump timeout</td><td>10·14</td><td>누설 점검·재Pump</td></tr>
    <tr><td>Pick 실패</td><td>5·6</td><td>겨냥·Presence</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note warn"><b>핵심 역량</b> — 알람 앞에서 "어느 강 지식으로 풀지" 아는 것.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>핵심 역량</b> — 알람 앞에서 "어느 강 지식으로 풀지" 아는 것.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">04 · 보고</div>
  <h2 class="h-title">겪은 오류를 6칸으로 정리</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>항목</th><th>내용</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>항목</th><th>내용</th></tr>
    <tr><td>Problem</td><td>무슨 일</td></tr>
    <tr><td>Observed</td><td>로그·센서</td></tr>
    <tr><td>Cause</td><td>원인</td></tr>
    <tr><td>Action</td><td>조치</td></tr>
    <tr><td>Result</td><td>복구 여부</td></tr>
    <tr><td>Prevent</td><td>재발 방지</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>습관화</b> — 현장 보고 양식 그대로. 로그 캡처를 곁들입니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>습관화</b> — 현장 보고 양식 그대로. 로그 캡처를 곁들입니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">05 · 완주</div>
  <h2 class="h-title">성공 기준 재확인</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>공정 챔버 도착</b> 웨이퍼가 PM에 안착.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>공정 챔버 도착</b> 웨이퍼가 PM에 안착.</div></div>
   <div class="wt-num v"><i>2</i><div><b>오류 복구</b> 발생한 알람을 모두 해결.</div></div>
-  <div class="wt-num"><i>3</i><div><b>보고 완료</b> 6칸 보고서 작성.</div></div></div>
-  <div class="wt-col"><div class="wt-note v"><b>이 셋을 채우면</b> — 과정 수료.</div></div></div></div>
+  <div class="wt-num"><i>3</i><div><b>보고 완료</b> 6칸 보고서 작성.</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>이 셋을 채우면</b> — 과정 수료.</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">되돌아보기</div>
  <h2 class="h-title">이 과정이 준 세 가지 눈</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>구조를 보는 눈</b> 웨이퍼의 여정과 장치 배치.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>구조를 보는 눈</b> 웨이퍼의 여정과 장치 배치.</div></div>
   <div class="wt-num"><i>2</i><div><b>신호를 읽는 눈</b> 센서·로그로 상태 판단.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>문제를 푸는 눈</b> 인터록·고장을 순서로 해결.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>이제</b> — 실제 장비 화면을 봐도 "무엇이·왜·어떻게"가 읽힙니다.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>문제를 푸는 눈</b> 인터록·고장을 순서로 해결.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>이제</b> — 실제 장비 화면을 봐도 "무엇이·왜·어떻게"가 읽힙니다.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">현장으로</div>
  <h2 class="h-title">현장에서는 여기까지 본다</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>운전</h3><p>레시피대로 이송이 도는지, 알람이 없는지.</p></div>
-  <div class="wt-card v"><h3>대응</h3><p>알람 시 로그로 원인 파악·복구·보고.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>다음 단계</b> — 실제 장비 매뉴얼과 알람 리스트를 이 틀로 읽으면 빠릅니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>운전</h3><p>레시피대로 이송이 도는지, 알람이 없는지.</p></div>
+  <div class="wt-card v"><h3>대응</h3><p>알람 시 로그로 원인 파악·복구·보고.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>다음 단계</b> — 실제 장비 매뉴얼과 알람 리스트를 이 틀로 읽으면 빠릅니다.</div>
+  </div></div>
+</section>
+
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 위치</div>
+ <h2 class="h-title">전체 공정에서 이송의 자리</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>이송은 혈관</h3><p>산화·리소·식각·증착… 모든 공정 사이를 웨이퍼가 오갑니다. 그 이동을 책임지는 게 이송.</p></div>
+  <div class="wt-card v"><h3>멈추면 다 멈춘다</h3><p>이송이 서면 뒤의 모든 공정이 굶습니다. 그래서 신뢰성이 생명.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>큰 그림</b> — 이송은 눈에 안 띄지만 팹 전체의 흐름을 좌우합니다.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 지표</div>
+ <h2 class="h-title">수율과 가동률로 말한다</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>수율</b> 이송의 오염·정렬 오차가 곧 불량률.</div></div>
+  <div class="wt-num v"><i>2</i><div><b>가동률</b> 알람·정지가 적을수록 생산 시간↑.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>엔지니어의 언어</b> — "잘한다"는 결국 수율·가동률 숫자로 증명됩니다.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 역할</div>
+ <h2 class="h-title">현장 엔지니어는 무엇을 하나</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>운전·감시</b> 레시피대로 도는지, 알람은 없는지.</div></div>
+  <div class="wt-num"><i>2</i><div><b>진단·복구</b> 이상 시 로그로 원인 찾고 복구.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>개선</b> 재발 방지·절차 보완.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>이 과정</b>이 그 세 가지를 축소판으로 연습시킨 것입니다.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 다음</div>
+ <h2 class="h-title">여기서 어디로 더 갈까</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>실장비 매뉴얼</b> 이 틀로 읽으면 빠르게 익힙니다.</div></div>
+  <div class="wt-num"><i>2</i><div><b>공정 과목</b> 각 챔버 안에서 무슨 일이 일어나는지.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>자동화·SW</b> 시퀀스·호스트 통신 심화.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>수고하셨습니다</b> — 웨이퍼 한 장의 여정을 처음부터 끝까지 익혔습니다.</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 위치</div>

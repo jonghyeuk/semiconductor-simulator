@@ -131,98 +131,145 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro" data-here="all">
  <div class="wt-pad"><div class="wt-eye">순서표 · 앞부분</div><h2 class="h-title">단계별 체크리스트 (1/2)</h2>
-  <div class="wt-body"><div class="wt-col">
-   <table class="wt-tbl"><tr><th>#</th><th>동작</th><th>확인 신호</th></tr>
+  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>#</th><th>동작</th><th>확인 신호</th></tr>
     <tr><td>1</td><td>EFEM Initialize → Home</td><td><b>Home ON</b></td></tr>
     <tr><td>2</td><td>FOUP Docking</td><td>Docked</td></tr>
     <tr><td>3</td><td>Door Open</td><td>Door Open</td></tr>
     <tr><td>4</td><td>Mapping</td><td>슬롯 목록 생성</td></tr>
     <tr><td>5</td><td>Slot 1 앞 θ 회전 → Extend</td><td>위치 도달</td></tr>
     <tr><td>6</td><td>Up → Retract (Pick)</td><td><b>Presence ON</b></td></tr></table></div>
-   <div class="wt-col"><div class="wt-note"><b>팁</b> — 각 단계 뒤에는 항상 <b>확인 신호</b>를 보고 다음으로.
-    "됐겠지"가 아니라 "신호가 떴으니 됐다".</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>팁</b> — 각 단계 뒤에는 항상 <b>확인 신호</b>를 보고 다음으로.
+    "됐겠지"가 아니라 "신호가 떴으니 됐다".</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="intro standard pro" data-here="all">
  <div class="wt-pad"><div class="wt-eye">순서표 · 뒷부분</div><h2 class="h-title">단계별 체크리스트 (2/2)</h2>
-  <div class="wt-body"><div class="wt-col">
-   <table class="wt-tbl"><tr><th>#</th><th>동작</th><th>확인 신호</th></tr>
+  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>#</th><th>동작</th><th>확인 신호</th></tr>
     <tr><td>7</td><td>θ 회전 → Pre-aligner Place</td><td>Aligner <b>Presence ON</b></td></tr>
     <tr><td>8</td><td>Align (Notch 0°)</td><td>정렬 완료</td></tr>
     <tr><td>9</td><td>다시 Pick</td><td>Presence ON</td></tr>
     <tr><td>10</td><td>θ 회전 → Load Lock Place</td><td>LL <b>Presence ON</b></td></tr>
     <tr><td>11</td><td>Retract → Home</td><td>Home ON</td></tr></table></div>
-   <div class="wt-col"><div class="wt-note v"><b>완료</b> — Load Lock에 웨이퍼가 놓이고 <b>알람 0</b>이면 종합 실습 1 성공.</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>완료</b> — Load Lock에 웨이퍼가 놓이고 <b>알람 0</b>이면 종합 실습 1 성공.</div>
+  </div></div>
 </section>
 
 <section class="slide" data-level="standard pro">
  <div class="wt-pad"><div class="wt-eye">막힐 때</div><h2 class="h-title">알람이 뜨면 — 빠른 점검표</h2>
-  <div class="wt-body"><div class="wt-col">
-   <table class="wt-tbl"><tr><th>증상</th><th>먼저 볼 것</th></tr>
+  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>증상</th><th>먼저 볼 것</th></tr>
     <tr><td>Extend가 거부됨</td><td>Door 열렸나 · 팔 접혔나</td></tr>
     <tr><td>회전이 거부됨</td><td>팔이 편(Extend) 상태인가</td></tr>
     <tr><td>Pick 후 Presence OFF</td><td>빈 슬롯을 겨냥했나</td></tr></table></div>
-   <div class="wt-col"><div class="wt-note warn"><b>습관</b> — 안 되면 먼저 <b>하단 로그</b>를 보세요.
-    ALM 코드가 원인을 알려줍니다. (14강에서 본격적으로)</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>습관</b> — 안 되면 먼저 <b>하단 로그</b>를 보세요.
+    ALM 코드가 원인을 알려줍니다. (14강에서 본격적으로)</div>
+  </div></div>
 </section>
 
 <section class="slide" data-here="all"><div class="wt-pad"><div class="wt-eye">준비</div>
  <h2 class="h-title">시작 전 점검 — 초기 상태 확인</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>알람 0</b> 이전 알람이 남아 있으면 Reset.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>알람 0</b> 이전 알람이 남아 있으면 Reset.</div></div>
   <div class="wt-num"><i>2</i><div><b>로봇 Home</b> Initialize → Home 완료 상태.</div></div>
-  <div class="wt-num"><i>3</i><div><b>FOUP 준비</b> 웨이퍼가 든 FOUP이 있는지 확인.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>원칙</b> — 깨끗한 초기 상태에서 시작해야 도중 문제의 원인을 좁힐 수 있습니다.</div></div></div></div>
+  <div class="wt-num"><i>3</i><div><b>FOUP 준비</b> 웨이퍼가 든 FOUP이 있는지 확인.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>원칙</b> — 깨끗한 초기 상태에서 시작해야 도중 문제의 원인을 좁힐 수 있습니다.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="port"><div class="wt-pad"><div class="wt-eye">구간 1 · 대기</div>
  <h2 class="h-title">FOUP 열고 첫 웨이퍼 집기</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>Docking → Door Open</b> 순서대로.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>Docking → Door Open</b> 순서대로.</div></div>
   <div class="wt-num"><i>2</i><div><b>Mapping</b> 있는 칸 확인.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>Slot Pick</b> 첫 칸에서 Pick → <b>Presence ON</b>.</div></div></div>
-  <div class="wt-col"><div class="wt-note warn"><b>막히면</b> Extend 거부 = Door 확인 / 회전 거부 = Retract 확인.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>Slot Pick</b> 첫 칸에서 Pick → <b>Presence ON</b>.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>막히면</b> Extend 거부 = Door 확인 / 회전 거부 = Retract 확인.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="align"><div class="wt-pad"><div class="wt-eye">구간 2 · 정렬</div>
  <h2 class="h-title">Pre-aligner에서 방향 맞추기</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>Place</b> 정렬대에 올린다(Aligner Presence ON).</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>Place</b> 정렬대에 올린다(Aligner Presence ON).</div></div>
   <div class="wt-num"><i>2</i><div><b>Align</b> Notch 0°로.</div></div>
-  <div class="wt-num v"><i>3</i><div><b>재-Pick</b> 정렬된 웨이퍼를 다시 집는다.</div></div></div>
-  <div class="wt-col"><div class="wt-note"><b>왜</b> — 공정 방향을 맞추기 위해 이송 중 반드시 거치는 정거장.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>재-Pick</b> 정렬된 웨이퍼를 다시 집는다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>왜</b> — 공정 방향을 맞추기 위해 이송 중 반드시 거치는 정거장.</div>
+  </div></div>
 </section>
 <section class="slide" data-here="lock"><div class="wt-pad"><div class="wt-eye">구간 3 · 관문</div>
  <h2 class="h-title">Load Lock까지 안착</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-num"><i>1</i><div><b>θ 회전</b> 접은 채 Load Lock 앞으로.</div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>θ 회전</b> 접은 채 Load Lock 앞으로.</div></div>
   <div class="wt-num"><i>2</i><div><b>Place</b> Load Lock에 내려놓기(LL Presence ON).</div></div>
-  <div class="wt-num v"><i>3</i><div><b>Retract → Home</b> 접고 복귀.</div></div></div>
-  <div class="wt-col"><div class="wt-note v"><b>완료</b> — LL에 웨이퍼가 놓이고 <b>알람 0</b>이면 종합 실습 1 성공.</div></div></div></div>
+  <div class="wt-num v"><i>3</i><div><b>Retract → Home</b> 접고 복귀.</div></div></div></div>
+   <div class="wt-note v" style="margin-top:0"><b>완료</b> — LL에 웨이퍼가 놓이고 <b>알람 0</b>이면 종합 실습 1 성공.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">확인</div>
  <h2 class="h-title">각 구간의 성공 신호 정리</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>구간</th><th>확인 신호</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>구간</th><th>확인 신호</th></tr>
    <tr><td>대기 Pick</td><td>로봇 손 <b>Presence ON</b></td></tr>
    <tr><td>정렬</td><td>Aligner Presence ON · Notch 0°</td></tr>
    <tr><td>관문</td><td>Load Lock <b>Presence ON</b></td></tr>
    <tr><td>복귀</td><td>Home ON · 알람 0</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note"><b>습관</b> — 구간마다 신호를 확인하고 다음으로. 신호 없이 넘어가지 않기.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>습관</b> — 구간마다 신호를 확인하고 다음으로. 신호 없이 넘어가지 않기.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">막힐 때</div>
  <h2 class="h-title">알람별 빠른 대응표</h2>
- <div class="wt-body"><div class="wt-col">
-  <table class="wt-tbl"><tr><th>알람</th><th>의미</th><th>조치</th></tr>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>알람</th><th>의미</th><th>조치</th></tr>
    <tr><td>ALM-201</td><td>편 채 회전</td><td>Retract 후 회전</td></tr>
    <tr><td>ALM-301</td><td>문 닫힘</td><td>Door Open</td></tr>
    <tr><td>Presence OFF</td><td>빈 칸/미파지</td><td>겨냥·깊이 확인</td></tr></table></div>
-  <div class="wt-col"><div class="wt-note warn"><b>순서</b> — 로그에서 코드 확인 → 원인 제거 → Reset → 재시도.</div></div></div></div>
+   <div class="wt-note warn" style="margin-top:0"><b>순서</b> — 로그에서 코드 확인 → 원인 제거 → Reset → 재시도.</div>
+  </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">되짚기</div>
  <h2 class="h-title">무알람 완주가 목표인 이유</h2>
- <div class="wt-body"><div class="wt-col">
-  <div class="wt-card"><h3>알람 0 = 순서 이해</h3><p>알람 없이 끝났다면 조건·순서를 정확히 지켰다는 뜻입니다.</p></div>
-  <div class="wt-card v"><h3>알람이 났다면</h3><p>그 지점이 바로 아직 덜 익은 조건. 복습 포인트로 삼습니다.</p></div></div>
-  <div class="wt-col"><div class="wt-note"><b>연결</b> — 이 수동 완주 경험이 12강 자동 시퀀스의 밑바탕입니다.</div></div></div></div>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>알람 0 = 순서 이해</h3><p>알람 없이 끝났다면 조건·순서를 정확히 지켰다는 뜻입니다.</p></div>
+  <div class="wt-card v"><h3>알람이 났다면</h3><p>그 지점이 바로 아직 덜 익은 조건. 복습 포인트로 삼습니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>연결</b> — 이 수동 완주 경험이 12강 자동 시퀀스의 밑바탕입니다.</div>
+  </div></div>
+</section>
+
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 통합</div>
+ <h2 class="h-title">왜 "이어서" 해보는가</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-card"><h3>낱개 ≠ 흐름</h3><p>각 동작을 따로 할 줄 아는 것과, 끊김 없이 <b>이어서</b> 하는 것은 다른 능력입니다.</p></div>
+  <div class="wt-card v"><h3>인수인계</h3><p>한 스테이션의 결과(정렬된 웨이퍼)가 다음 단계의 입력이 됩니다. 그 연결을 몸에 익힙니다.</p></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>관점</b> — 이송은 "정거장 릴레이". 각 정거장의 완료 신호가 다음의 출발 신호.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 품질</div>
+ <h2 class="h-title">"알람 0"이 왜 목표인가</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>조건 준수의 증거</b> 무알람 = 순서·조건을 다 지켰다는 뜻.</div></div>
+  <div class="wt-num"><i>2</i><div><b>생산성</b> 알람은 곧 정지·지연. 현장에선 가동률로 직결됩니다.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>습관</b> — "됐다"가 아니라 "알람 없이 됐다"를 목표로.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 흐름 관점</div>
+ <h2 class="h-title">한 장의 여정을 위에서 내려다보기</h2>
+ <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
+   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>정거장</th><th>넘겨주는 것</th></tr>
+   <tr><td>Load Port</td><td>매핑된 웨이퍼 목록</td></tr>
+   <tr><td>EFEM</td><td>집힌 웨이퍼</td></tr>
+   <tr><td>Pre-aligner</td><td>방향 맞춘 웨이퍼</td></tr>
+   <tr><td>Load Lock</td><td>진공 준비된 웨이퍼</td></tr></table></div>
+   <div class="wt-note v" style="margin-top:0"><b>큰 그림</b> — 각 정거장이 다음을 위해 무엇을 완성해 넘기는지 보면 흐름이 이해됩니다.</div>
+  </div></div>
+</section>
+<section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 자기점검</div>
+ <h2 class="h-title">막히면 스스로 묻는 3가지</h2>
+ <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>지금 어느 정거장?</b> 현재 상태를 먼저 특정.</div></div>
+  <div class="wt-num"><i>2</i><div><b>완료 신호가 떴나?</b> 이전 단계가 진짜 끝났는지.</div></div>
+  <div class="wt-num v"><i>3</i><div><b>다음 조건은 충족?</b> 문·압력·유무를 확인.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>이 습관</b>이 14강 고장 진단의 기초가 됩니다.</div>
+  </div></div>
 </section>
 
 <section class="slide"><div class="wt-pad"><div class="wt-eye">개념 · 통합</div>
@@ -260,10 +307,11 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="intro standard pro" data-here="all">
  <div class="wt-pad"><div class="wt-eye">정리</div><h2 class="h-title">8강에서 남길 것</h2>
-  <div class="wt-body">
-   <div class="wt-col"><div class="wt-num"><i>1</i><div><b>흐름의 완성</b> 낱개 동작이 하나의 이송으로 이어졌다.</div></div>
-    <div class="wt-num v"><i>2</i><div><b>신호로 진행</b> 매 단계 확인 신호로 다음을 판단.</div></div></div>
-   <div class="wt-col"><div class="wt-note"><b>다음 강</b> — 9강 <b>정렬</b>: 방금 지나친 Pre-aligner의 원리를 자세히 봅니다.</div></div></div></div>
+  <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
+   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>흐름의 완성</b> 낱개 동작이 하나의 이송으로 이어졌다.</div></div>
+    <div class="wt-num v"><i>2</i><div><b>신호로 진행</b> 매 단계 확인 신호로 다음을 판단.</div></div></div></div>
+   <div class="wt-note" style="margin-top:0"><b>다음 강</b> — 9강 <b>정렬</b>: 방금 지나친 Pre-aligner의 원리를 자세히 봅니다.</div>
+  </div></div>
 </section>
 </div></div>
 
