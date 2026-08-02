@@ -143,13 +143,46 @@ h2.h-title{ font-size:54px; }
 
 <section class="slide" data-level="standard pro" data-here="port">
  <div class="wt-pad"><div class="wt-eye">03 · 오류</div><h2 class="h-title">Mapping Error — 목록과 현실이 다를 때</h2>
-  <div class="wt-body" style="flex-direction:column;gap:24px;justify-content:center">
-   <div class="wt-col" style="flex:none;width:100%;max-width:1240px;margin:0 auto"><table class="wt-tbl"><tr><th>틀리는 방식</th><th>원인</th></tr>
-     <tr><td>비스듬히 꽂힘(Cross)</td><td>웨이퍼가 두 칸에 걸침</td></tr>
-     <tr><td>이중 적재(Double)</td><td>한 칸에 두 장</td></tr>
-     <tr><td>튀어나옴(Protrude)</td><td>덜 들어가 위치 이탈</td></tr></table></div>
-   <div class="wt-note warn" style="margin-top:0"><b>매핑을 믿되 검증하라</b> — 이런 상태로 Pick하면 충돌·낙하 위험.
-    매핑 결과와 실제 슬롯을 센서 탭에서 비교합니다.</div>
+  <div class="wt-fig">
+   <svg viewBox="0 0 1560 430">
+    <g font-family="ui-monospace,monospace">
+    <!-- 정상 -->
+    <g transform="translate(20,40)">
+     <text class="fx-cap" x="40" y="0" style="font-size:19px">정상</text>
+     <rect x="30" y="16" width="230" height="300" rx="8" fill="#101d29" stroke="#3a6b8c" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M44 96 H246 M44 176 H246 M44 256 H246"/></g>
+     <ellipse class="fx-w" cx="145" cy="86" rx="86" ry="8"/><ellipse class="fx-w" cx="145" cy="166" rx="86" ry="8"/><ellipse class="fx-w" cx="145" cy="246" rx="86" ry="8"/>
+    </g>
+    <!-- Cross -->
+    <g transform="translate(400,40)">
+     <text class="fx-cap" x="30" y="0" style="font-size:19px" fill="#ffb340">Cross · 두 칸 걸침</text>
+     <rect x="30" y="16" width="230" height="300" rx="8" fill="#101d29" stroke="#a07030" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M44 96 H246 M44 176 H246 M44 256 H246"/></g>
+     <ellipse class="fx-w" cx="145" cy="86" rx="86" ry="8"/>
+     <g transform="rotate(-13 145 200)"><ellipse cx="145" cy="200" rx="86" ry="8" fill="#c9dced" stroke="#ffb340" stroke-width="2"/></g>
+    </g>
+    <!-- Double -->
+    <g transform="translate(780,40)">
+     <text class="fx-cap" x="30" y="0" style="font-size:19px" fill="#ffb340">Double · 한 칸 2장</text>
+     <rect x="30" y="16" width="230" height="300" rx="8" fill="#101d29" stroke="#a07030" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M44 96 H246 M44 176 H246 M44 256 H246"/></g>
+     <ellipse class="fx-w" cx="145" cy="86" rx="86" ry="8"/>
+     <ellipse cx="145" cy="160" rx="86" ry="8" fill="#c9dced" stroke="#ffb340" stroke-width="2"/>
+     <ellipse cx="145" cy="176" rx="86" ry="8" fill="#c9dced" stroke="#ffb340" stroke-width="2"/>
+    </g>
+    <!-- Protrude -->
+    <g transform="translate(1160,40)">
+     <text class="fx-cap" x="30" y="0" style="font-size:19px" fill="#ff8a8a">Protrude · 튀어나옴</text>
+     <rect x="30" y="16" width="230" height="300" rx="8" fill="#101d29" stroke="#7a3232" stroke-width="2"/>
+     <g stroke="#274357" stroke-width="1.5"><path d="M44 96 H246 M44 176 H246 M44 256 H246"/></g>
+     <ellipse class="fx-w" cx="145" cy="86" rx="86" ry="8"/>
+     <ellipse cx="200" cy="176" rx="86" ry="8" fill="#c9dced" stroke="#ff5e5e" stroke-width="2"/>
+     <path class="fx-bad" d="M300 176 H330"/>
+    </g>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note warn"><b>매핑을 믿되 검증하라</b> — 이 상태로 Pick하면 충돌·낙하. 매핑 결과와 실제 슬롯을 센서 탭에서 비교합니다.</div>
   </div></div>
 </section>
 

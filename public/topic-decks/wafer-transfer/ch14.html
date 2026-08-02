@@ -188,12 +188,24 @@ h2.h-title{ font-size:54px; }
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">02 · 진단 흐름</div>
  <h2 class="h-title">네 단계로 좁힌다</h2>
- <div class="wt-body" style="flex-direction:column;gap:22px;justify-content:center">
-   <div class="wt-col" style="flex:none"><div style="display:grid;grid-template-columns:1fr 1fr;gap:16px 46px;align-content:center"><div class="wt-num"><i>1</i><div><b>등급</b> [E]부터 본다.</div></div>
-  <div class="wt-num"><i>2</i><div><b>코드</b> 부위 파악.</div></div>
-  <div class="wt-num"><i>3</i><div><b>메시지</b> 무엇이 실패했나.</div></div>
-  <div class="wt-num v"><i>4</i><div><b>맥락</b> 직전에 무슨 동작을 했나.</div></div></div></div>
-   <div class="wt-note" style="margin-top:0"><b>대개 여기서</b> 원인이 드러납니다. 아니면 센서 값을 추가로 봅니다.</div>
+ <div class="wt-fig">
+   <svg viewBox="0 0 1560 340">
+    <g font-family="ui-monospace,monospace">
+     <rect x="20" y="110" width="330" height="120" rx="12" fill="#3a1414" stroke="#ff5e5e" stroke-width="2"/>
+     <text x="60" y="170" fill="#ff8a8a" font-size="26">① 등급</text><text class="fx-sub" x="60" y="206">[E] 오류부터</text>
+     <path class="fx-ln" d="M356 170 H406" marker-end="url(#mA)"/>
+     <rect x="410" y="110" width="330" height="120" rx="12" fill="#132433" stroke="#3a6b8c" stroke-width="2"/>
+     <text x="450" y="170" fill="#cfe4f2" font-size="26">② 코드</text><text class="fx-sub" x="450" y="206">부위 파악 (3xx=압력…)</text>
+     <path class="fx-ln" d="M746 170 H796" marker-end="url(#mA)"/>
+     <rect x="800" y="110" width="330" height="120" rx="12" fill="#132433" stroke="#3a6b8c" stroke-width="2"/>
+     <text x="840" y="170" fill="#cfe4f2" font-size="26">③ 메시지</text><text class="fx-sub" x="840" y="206">무엇이 실패했나</text>
+     <path class="fx-ln" d="M1136 170 H1186" marker-end="url(#mA)"/>
+     <rect x="1190" y="110" width="350" height="120" rx="12" fill="#161a35" stroke="#8a7dff" stroke-width="2"/>
+     <text x="1230" y="170" fill="#cdbcff" font-size="26">④ 맥락</text><text class="fx-sub" x="1230" y="206">직전 동작은?</text>
+    </g>
+   </svg>
+  </div>
+  <div class="wt-note"><b>대개 여기서</b> 원인이 드러납니다. 부족하면 센서 값을 추가로 봅니다.</div>
   </div></div>
 </section>
 <section class="slide"><div class="wt-pad"><div class="wt-eye">03 · 시나리오 A</div>
