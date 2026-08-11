@@ -2,8 +2,10 @@ import { describe, it, expect } from 'vitest';
 import {
   calculateTurboSpeed,
   convertSccmToTorrLs,
+  convertM3hToLs,
   calculatePumpingSpeed,
   calculatePumpingTime,
+  calculatePumpingTimeFromCurve,
   calculateConductance,
   calculateEffectivePumpingSpeed,
   pressureToSliderValue,
@@ -133,8 +135,10 @@ describe('calculatePumpingTime — 경계값', () => {
 describe('calculatePumpingTime — 단위 검증', () => {
   /*
    * t = (V/S)·ln(Pi/Pf). V 를 L, S 를 L/s 로 넣으면 t 는 초다.
-   * UI 가 챔버 부피를 L 로 표시하므로 분으로 바꿀 땐 60 으로만 나눈다.
-   * 예전 구현은 분모에 `/1000` 이 더 붙어 (부피를 m³ 로 받는 식) 1000배로 나왔다.
+   * 예전 구현은 분모에 `/1000` 이 더 붙어 (부피를 m³ 로 받는 식) 값이 어긋났다.
+   *
+   * 주의: 펌프 모델 곡선은 m³/h 단위다. 화면도 "{pumpingSpeed} m³/h" 로 표시한다.
+   * 그대로 넣으면 3.6배 틀리므로 convertM3hToLs 를 거쳐야 한다.
    */
 
   /** 이론식: V[L], S[L/s] → 분 */
@@ -142,7 +146,7 @@ describe('calculatePumpingTime — 단위 검증', () => {
 
   it('이론식과 정확히 일치한다', () => {
     for (const V of [10, 100, 500, 1000]) {
-      for (const S of [50, 250, 900, 3600]) {
+      for (const S of [50, 250, 500, 2000]) {
         for (const Pf of [1, 0.1, 0.02]) {
           expect(calculatePumpingTime(V, 760, Pf, S)).toBeCloseTo(theoretical(V, 760, Pf, S), 12);
         }
@@ -150,18 +154,98 @@ describe('calculatePumpingTime — 단위 검증', () => {
     }
   });
 
-  it('100 L 챔버를 250 L/s 로 760→1 Torr 배기하면 3초 정도다', () => {
-    const minutes = calculatePumpingTime(100, 760, 1, 250);
-    expect(minutes * 60).toBeCloseTo(2.65, 1);
+  it('m³/h → L/s 환산이 맞는다', () => {
+    // 1 m³/h = 1000 L / 3600 s
+    expect(convertM3hToLs(3600)).toBeCloseTo(1000, 9);
+    expect(convertM3hToLs(1800)).toBeCloseTo(500, 9);
+    expect(convertM3hToLs(0)).toBe(0);
   });
 
-  it('UI 슬라이더 전 범위에서 배기 시간이 3분을 넘지 않는다', () => {
-    // 챔버 10~1000 L, 펌프 50~7200 L/s
+  it('m³/h 를 그대로 넣으면 3.6배 빨라진다 — 환산을 거쳐야 한다', () => {
+    const wrong = calculatePumpingTime(100, 760, 1, 1800); // m³/h 를 L/s 로 오인
+    const right = calculatePumpingTime(100, 760, 1, convertM3hToLs(1800));
+    expect(right / wrong).toBeCloseTo(3.6, 9);
+  });
+});
+
+describe('calculatePumpingTimeFromCurve', () => {
+  /*
+   * 실제 러프 펌핑에서 배기 속도는 압력에 따라 크게 변한다 (모델 2 기준
+   * 760 Torr 에서 250 m³/h, 10 Torr 에서 1720 m³/h — 7배). 한 점의 속도를
+   * 전 구간 상수로 쓰면 시간이 2배 이상 어긋나므로
+   *   t = ∫ V/S(P) · d(ln P)
+   * 를 적분한다.
+   */
+  const model = (max) => ({
+    maxSpeed: max,
+    data: [
+      [0.02, max / 18], [0.1, max / 7.2], [1.0, max / 1.64], [5.0, max],
+      [10, max * 0.956], [50, max * 0.667], [100, max * 0.5], [300, max * 0.278],
+      [760, max * 0.139],
+    ].map(([pressure, speed]) => ({ pressure, speed })),
+  });
+  const MODELS = { 1: model(900), 2: model(1800), 3: model(3600), 4: model(7200) };
+
+  it('부피에 비례한다', () => {
+    const a = calculatePumpingTimeFromCurve(100, 760, 1, MODELS, 2);
+    const b = calculatePumpingTimeFromCurve(200, 760, 1, MODELS, 2);
+    expect(b / a).toBeCloseTo(2, 6);
+  });
+
+  it('펌프가 클수록 빠르다 (단조 감소)', () => {
+    let prev = Infinity;
+    for (const m of [1, 2, 3, 4]) {
+      const t = calculatePumpingTimeFromCurve(100, 760, 1, MODELS, m);
+      expect(t).toBeLessThan(prev);
+      prev = t;
+    }
+  });
+
+  it('목표 압력이 낮을수록 오래 걸린다', () => {
+    let prev = -Infinity;
+    for (const Pf of [100, 10, 1, 0.02]) {
+      const t = calculatePumpingTimeFromCurve(100, 760, Pf, MODELS, 2);
+      expect(t).toBeGreaterThan(prev);
+      prev = t;
+    }
+  });
+
+  it('속도가 일정한 가상 펌프에서는 상수 속도 해석해와 일치한다', () => {
+    const flat = { 0: { maxSpeed: 1800, data: [{ pressure: 0.02, speed: 1800 }, { pressure: 760, speed: 1800 }] } };
+    const curve = calculatePumpingTimeFromCurve(100, 760, 1, flat, 0);
+    const exact = calculatePumpingTime(100, 760, 1, convertM3hToLs(1800));
+    expect(curve).toBeCloseTo(exact, 6);
+  });
+
+  it('상수 속도 근사보다 느리다 — 대기압 근처에서 속도가 떨어지므로', () => {
+    const curve = calculatePumpingTimeFromCurve(100, 760, 1, MODELS, 2);
+    const atMaxSpeed = calculatePumpingTime(100, 760, 1, convertM3hToLs(1800));
+    expect(curve).toBeGreaterThan(atMaxSpeed);
+  });
+
+  it('적분 분할 수를 늘려도 값이 수렴한다', () => {
+    const coarse = calculatePumpingTimeFromCurve(100, 760, 1, MODELS, 2, 128);
+    const fine = calculatePumpingTimeFromCurve(100, 760, 1, MODELS, 2, 8192);
+    expect(Math.abs(coarse / fine - 1)).toBeLessThan(0.01);
+  });
+
+  it('UI 전 범위(10~1000 L × 모델 1~4)에서 1분을 넘지 않는다', () => {
     for (const V of [10, 100, 500, 1000]) {
-      for (const S of [50, 250, 900, 3600, 7200]) {
-        expect(calculatePumpingTime(V, 760, 1, S)).toBeLessThan(3);
+      for (const m of [1, 2, 3, 4]) {
+        const t = calculatePumpingTimeFromCurve(V, 760, 1, MODELS, m);
+        expect(t).toBeGreaterThan(0);
+        expect(t).toBeLessThan(1);
       }
     }
+  });
+
+  it('경계값: 목표 압력이 초기 압력보다 높으면 0', () => {
+    expect(calculatePumpingTimeFromCurve(100, 1, 10, MODELS, 2)).toBe(0);
+  });
+
+  it('경계값: 부피가 0 이하면 0', () => {
+    expect(calculatePumpingTimeFromCurve(0, 760, 1, MODELS, 2)).toBe(0);
+    expect(calculatePumpingTimeFromCurve(-100, 760, 1, MODELS, 2)).toBe(0);
   });
 });
 

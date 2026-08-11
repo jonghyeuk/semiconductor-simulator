@@ -4,7 +4,7 @@ import {
   calculateTurboSpeed,
   convertSccmToTorrLs,
   calculatePumpingSpeed as computePumpingSpeed,
-  calculatePumpingTime,
+  calculatePumpingTimeFromCurve,
   calculateConductance,
   calculateEffectivePumpingSpeed,
   pressureToSliderValue,
@@ -491,20 +491,26 @@ const VacuumSimulator = ({ initialTab }) => {
     return `${(minutes * 60).toFixed(1)}초`;
   };
 
-  // 임계값은 760 → 1 Torr 러프 펌핑 시간 기준이다. 배기 시간이 1000배로 계산되던
-  // 시절의 10분/20분 임계값은 이제 어떤 조합으로도 닿지 않아 실제 분포에 맞춰 다시 잡았다.
-  // (10~1000 L 챔버 × 50~7200 L/s 펌프 → 0.003 ~ 2.2분)
-  const getPumpEfficiencyAssessment = () => {
-    const pumpingTimeTo1Torr = calculatePumpingTime(chamberVolume, 760, 1, pumpingSpeed);
+  // 배기 시간은 압력에 따라 변하는 펌프 곡선을 적분해서 구한다.
+  // 한 점의 속도를 전 구간 상수로 쓰면 (러프 구간에서 속도가 7배까지 변하므로)
+  // 시간이 2배 이상 어긋난다.
+  const pumpingTimeTo = (finalPressure) =>
+    calculatePumpingTimeFromCurve(chamberVolume, 760, finalPressure, pumpModels, selectedModel);
 
-    if (pumpingTimeTo1Torr > 1.5) {
+  // 임계값은 760 → 1 Torr 러프 펌핑 시간(분) 기준이다. 배기 시간이 잘못된 단위로
+  // 계산되던 시절의 10분/20분 임계값은 이제 어떤 조합으로도 닿지 않아 다시 잡았다.
+  // 실제 분포: 챔버 10~1000 L × 모델 1~4 → 0.1초 ~ 54초.
+  const getPumpEfficiencyAssessment = () => {
+    const pumpingTimeTo1Torr = pumpingTimeTo(1);
+
+    if (pumpingTimeTo1Torr > 0.5) {
       return {
         status: 'very-slow',
         message: '매우 느림 - 펌프 용량 부족',
         color: 'text-red-600 bg-red-50 border-red-200',
         time: pumpingTimeTo1Torr
       };
-    } else if (pumpingTimeTo1Torr > 0.5) {
+    } else if (pumpingTimeTo1Torr > 0.15) {
       return {
         status: 'somewhat-slow',
         message: '다소 느림 - 펌핑 시간 과다',
@@ -2335,7 +2341,7 @@ const VacuumSimulator = ({ initialTab }) => {
                           <h5 className="font-semibold mb-1">{assessment.message}</h5>
                           <div className="text-sm space-y-1">
                             <p>760 Torr → 1 Torr 도달시간: <strong>{formatPumpingTime(assessment.time)}</strong></p>
-                            <p>760 Torr → 20 mTorr 도달시간: <strong>{formatPumpingTime(calculatePumpingTime(chamberVolume, 760, 0.02, pumpingSpeed))}</strong></p>
+                            <p>760 Torr → 20 mTorr 도달시간: <strong>{formatPumpingTime(pumpingTimeTo(0.02))}</strong></p>
                             {assessment.status === 'very-slow' && (
                               <p className="text-xs">💡 더 큰 펌프나 다단계 펌핑 시스템 필요</p>
                             )}

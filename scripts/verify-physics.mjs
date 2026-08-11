@@ -482,11 +482,26 @@ const oldImplantRp = (energy, dopant) => {
   const eps = (32.5 * m * energy) / (Z1 * 14 * (m + 28.1) * (Math.pow(Z1, 0.23) + Math.pow(14, 0.23)));
   return Math.max((m / 28.1) * Math.pow(eps, 0.8) * 100, 1);
 };
+// 예전 식. S 는 펌프 모델 곡선 단위(m³/h)로 들어왔다.
 const oldPumpTime = (V, Pi, Pf, S) => {
   if (Pf <= 0.02) Pf = 0.02;
   if (Pi <= Pf) return 0;
   return (V * Math.log(Pi / Pf)) / ((S * 60) / 1000);
 };
+
+// 펌프 모델 곡선 (m³/h). 실제 컴포넌트의 pumpModels 와 같은 형태.
+const PUMP_CURVE = (max) => ({
+  maxSpeed: max,
+  data: [
+    [0.02, max / 18], [0.05, max / 12], [0.1, max / 7.2], [0.2, max / 4.5],
+    [0.5, max / 2.57], [1.0, max / 1.64], [2.0, max / 1.24], [3.0, max / 1.09],
+    [5.0, max], [7.0, max * 0.989], [10, max * 0.956], [15, max * 0.9],
+    [25, max * 0.822], [50, max * 0.667], [100, max * 0.5], [200, max * 0.361],
+    [300, max * 0.278], [400, max * 0.222], [500, max * 0.194], [600, max * 0.167],
+    [700, max * 0.15], [760, max * 0.139],
+  ].map(([pressure, speed]) => ({ pressure, speed })),
+});
+const UI_MODELS = { 1: PUMP_CURVE(900), 2: PUMP_CURVE(1800), 3: PUMP_CURVE(3600), 4: PUMP_CURVE(7200) };
 const oldConductance = (D, L) => ((3.27e-2 * Math.pow(D, 4)) / L) * 1000;
 const oldReflected = (Z, P) => P * Math.pow(Math.abs(Z - 50) / 50, 2);
 const oldSpinThickness = (rpm) => {
@@ -508,8 +523,10 @@ push('② 이온주입 Rp', 'B 50 keV', oldImplantRp(50, 'B'), dp.calculateImpla
 push('② 이온주입 Rp', 'P 50 keV', oldImplantRp(50, 'P'), dp.calculateImplantParams(50, 'P').Rp * 1000, 'nm');
 push('② 이온주입 Rp', 'As 50 keV', oldImplantRp(50, 'As'), dp.calculateImplantParams(50, 'As').Rp * 1000, 'nm');
 push('② 이온주입 Rp', 'As 30 keV (S/D)', oldImplantRp(30, 'As'), dp.calculateImplantParams(30, 'As').Rp * 1000, 'nm');
-push('③ 배기 시간', 'V=100L S=250L/s 760→1', oldPumpTime(100, 760, 1, 250), vac.calculatePumpingTime(100, 760, 1, 250), '분');
-push('③ 배기 시간', 'V=1000L S=900L/s 760→1', oldPumpTime(1000, 760, 1, 900), vac.calculatePumpingTime(1000, 760, 1, 900), '분');
+// 배기 시간은 분 단위로 재면 전부 0.0 으로 뭉개져서 초로 보고한다.
+push('③ 배기 시간', 'V=100L 모델2 760→1', oldPumpTime(100, 760, 1, 1800) * 60, vac.calculatePumpingTimeFromCurve(100, 760, 1, UI_MODELS, 2) * 60, '초');
+push('③ 배기 시간', 'V=1000L 모델1 760→1', oldPumpTime(1000, 760, 1, 900) * 60, vac.calculatePumpingTimeFromCurve(1000, 760, 1, UI_MODELS, 1) * 60, '초');
+push('③ 배기 시간', 'V=10L 모델4 760→1', oldPumpTime(10, 760, 1, 7200) * 60, vac.calculatePumpingTimeFromCurve(10, 760, 1, UI_MODELS, 4) * 60, '초');
 push('④ Conductance', 'D=10cm L=100cm', oldConductance(10, 100), vac.calculateConductance(10, 100, 'straight'), 'L/s');
 push('④ Conductance', 'D=20cm L=100cm', oldConductance(20, 100), vac.calculateConductance(20, 100, 'straight'), 'L/s');
 push('⑤ 반사 전력', 'Z=100Ω, 1000W', oldReflected(100, 1000), pl.calculateReflectedPower(100, 1000), 'W');

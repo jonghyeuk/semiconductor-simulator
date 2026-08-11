@@ -22,6 +22,16 @@ export function convertSccmToTorrLs(sccm) {
 }
 
 /**
+ * 배기 속도 m³/h → L/s.
+ * 이 시뮬레이터의 펌프 모델 곡선(pumpModels)은 m³/h 단위이고 화면도 그렇게 표시한다.
+ * 반면 배기 시간 식은 L/s 를 쓰므로 반드시 여기를 거쳐야 한다.
+ * 1 m³/h = 1000 L / 3600 s
+ */
+export function convertM3hToLs(speedM3h) {
+  return speedM3h / 3.6;
+}
+
+/**
  * 펌프 모델의 속도 곡선을 log(압력)으로 선형 보간한다.
  * @param {number} pressure Torr
  * @param {Array<{data: Array<{pressure:number, speed:number}>, maxSpeed:number}>} pumpModels
@@ -63,13 +73,15 @@ export function pressureToSliderValue(pressure) {
 }
 
 /**
- * 챔버를 initialPressure → finalPressure 까지 배기하는 시간.
+ * 배기 속도가 일정하다고 볼 때의 배기 시간.
  *
  *   t = (V / S) · ln(Pi / Pf)
  *
- * V 를 L, S 를 L/s 로 넣으면 t 는 초다. UI 가 챔버 부피를 L 로 표시하므로
- * 분으로 바꾸려면 60 으로만 나누면 된다. 예전 구현은 분모에 `/1000` 이 더 붙어
- * (부피를 m³ 로 받는 식) 결과가 1000배로 나왔다.
+ * V 를 L, S 를 **L/s** 로 넣으면 t 는 초다. 분으로 바꾸려면 60 으로 나눈다.
+ *
+ * 주의: 펌프 모델 곡선은 m³/h 단위이므로 그대로 넣으면 안 된다.
+ * convertM3hToLs 를 거치거나, 압력에 따라 속도가 변하는 실제 상황에서는
+ * calculatePumpingTimeFromCurve 를 쓸 것.
  *
  * @param {number} volume 챔버 부피 (L)
  * @param {number} initialPressure Torr
@@ -83,6 +95,50 @@ export function calculatePumpingTime(volume, initialPressure, finalPressure, pum
   if (!(volume > 0)) return 0; // 부피가 없으면 뺄 기체도 없다 (음수 부피는 성립 불가)
   if (!(pumpSpeed > 0)) return Infinity; // 펌프가 안 돌면 영원히 안 내려간다
   return (volume * Math.log(initialPressure / finalPressure)) / (pumpSpeed * 60);
+}
+
+/**
+ * 압력에 따라 배기 속도가 변하는 실제 펌프의 배기 시간.
+ *
+ *   V·dP/dt = −S(P)·P   →   t = ∫ V / S(P) · dP/P = ∫ V / S(P) · d(ln P)
+ *
+ * 러프 펌핑 구간에서 배기 속도는 대기압 근처에서 크게 떨어진다 (모델 2 기준
+ * 760 Torr 에서 250 m³/h, 10 Torr 에서 1720 m³/h — 7배 차이). 한 점의 속도를
+ * 전 구간에 상수로 쓰면 시간이 2배 이상 어긋난다.
+ *
+ * @param {number} volume 챔버 부피 (L)
+ * @param {number} initialPressure Torr
+ * @param {number} finalPressure Torr
+ * @param {Array} pumpModels 펌프 모델 배열 (속도 단위 m³/h)
+ * @param {number} modelNumber 모델 인덱스
+ * @param {number} steps 적분 분할 수
+ * @returns {number} 분
+ */
+export function calculatePumpingTimeFromCurve(
+  volume,
+  initialPressure,
+  finalPressure,
+  pumpModels,
+  modelNumber,
+  steps = 512
+) {
+  if (finalPressure <= 0.02) finalPressure = 0.02;
+  if (initialPressure <= finalPressure) return 0;
+  if (!(volume > 0)) return 0;
+
+  const lnLo = Math.log(finalPressure);
+  const lnHi = Math.log(initialPressure);
+  const dlnP = (lnHi - lnLo) / steps;
+
+  let seconds = 0;
+  for (let i = 0; i < steps; i++) {
+    // 각 구간의 기하평균 압력에서 속도를 읽는다 (중점법).
+    const P = Math.exp(lnLo + dlnP * (i + 0.5));
+    const speedLs = convertM3hToLs(calculatePumpingSpeed(P, pumpModels, modelNumber));
+    if (!(speedLs > 0)) return Infinity;
+    seconds += (volume / speedLs) * dlnP;
+  }
+  return seconds / 60;
 }
 
 /**

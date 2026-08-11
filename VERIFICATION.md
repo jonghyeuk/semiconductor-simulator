@@ -17,7 +17,7 @@ npm run verify
 | `npm run lint` | 에러 0 유지 (case 블록 변수 누출, `==` 등). 기존 경고 187건은 상한으로 묶어 둠 |
 | `npm run lint:physics` | `src/physics`, `scripts` 는 경고 0 |
 | `npm run verify:physics` | 회귀 대조 58,874개 + 물리 수정으로 값이 얼마나 바뀌었는지 보고 |
-| `npm run test` | 물리 성질 검증 270개 |
+| `npm run test` | 물리 성질 검증 279개 |
 | `npm run verify:guides` | 리팩터링이 정적 가이드 HTML을 바꿨는지 (55페이지) |
 
 가이드 대조는 리팩터링할 때만 쓴다:
@@ -88,19 +88,31 @@ src/physics/
 
 문헌 대조 (50 keV): B 161 nm (문헌 160), P 67 nm (62), As 38 nm (33).
 
-### ③ 진공: 배기 시간이 1000배로 나왔음
+### ③ 진공: 배기 시간의 단위가 어긋나 있었고, 압력 의존 속도를 무시했음
 
-`src/physics/vacuum.js` — `calculatePumpingTime`
+`src/physics/vacuum.js` — `calculatePumpingTime`, `calculatePumpingTimeFromCurve`
 
-분모에 `/1000` 이 붙어 있었다. 부피를 m³ 로 받는 식인데 UI 는 `{chamberVolume} L`
-로 표시한다. 100 L 챔버 + 250 L/s 펌프의 760 → 1 Torr 배기가 실제 2.7초인데
-화면엔 44.2분으로 떴다.
+**단위**: 분모에 `/1000` 이 붙어 있었다. 부피를 m³ 로 받는 식인데 UI 는
+`{chamberVolume} L` 로 표시한다. 게다가 펌프 속도는 **m³/h** 인데
+(`pumpModels` 곡선과 화면 표시 모두 m³/h) L/s 로 쓰는 식이었다.
+100 L 챔버 + 모델 2 의 760 → 1 Torr 배기가 실제 2.7초인데 화면엔 6.1분으로 떴다.
 
-**수정**: `t[분] = V·ln(Pi/Pf) / (S·60)`.
+**압력 의존성**: 러프 펌핑 구간에서 배기 속도는 압력에 따라 크게 변한다
+(모델 2 기준 760 Torr 에서 250 m³/h, 10 Torr 에서 1720 m³/h — 7배 차이).
+그런데 코드는 **목표 압력 한 점의 속도**를 760 → 1 Torr 전 구간에 상수로 썼다.
+그러면 시간이 2배 이상 어긋난다.
+
+**수정**:
+
+- `convertM3hToLs` 를 명시적으로 두어 단위 경계를 드러냈다 (1 m³/h = 1000 L / 3600 s).
+- `calculatePumpingTimeFromCurve` 로 실제 속도 곡선을 적분한다:
+  `V·dP/dt = −S(P)·P` → `t = ∫ V/S(P) · d(ln P)`.
+- `calculatePumpingTime` 은 속도가 일정한 경우의 해석해로 남겨 뒀다 (L/s 입력).
 
 배기 시간이 대개 1분 미만이 되므로 UI 는 1분 미만을 초로 표시하도록 고쳤고,
-펌프 성능 판정 임계값(10분/20분 → 0.5분/1.5분)도 실제 분포에 맞춰 다시 잡았다.
-예전 임계값은 어떤 조합으로도 닿지 않아 정상 펌프가 전부 "매우 느림" 으로 떴다.
+펌프 성능 판정 임계값(10분/20분 → 0.15분/0.5분)도 실제 분포(10~1000 L ×
+모델 1~4 → 0.1초 ~ 54초)에 맞춰 다시 잡았다. 예전 임계값은 어떤 조합으로도
+닿지 않아 정상 펌프가 전부 "매우 느림" 으로 떴다.
 
 ### ④ 진공: 분자류 영역인데 점성류 식을 쓰고 있었음
 
@@ -158,7 +170,7 @@ src/physics/
 | ① 산화 두께 | wet 1000°C 60분 | 250.8 nm | **449.4 nm** |
 | ② 이온주입 Rp | B 50 keV | 65.9 nm | **161.4 nm** |
 | ② 이온주입 Rp | As 50 keV | 183.8 nm | **37.9 nm** |
-| ③ 배기 시간 | V=100L S=250L/s 760→1 Torr | 44.2분 | **2.7초** |
+| ③ 배기 시간 | V=100L 모델2 760→1 Torr | 6.1분 | **2.7초** |
 | ④ Conductance | D=10cm L=100cm | 3,270 L/s | **106.8 L/s** |
 | ⑤ 반사 전력 | Z=150Ω, 1000W 입력 | 4,000 W | **250 W** |
 | ⑥ 자동 매칭 | 부하 50 Ω | NaN | **50.0 Ω** |
@@ -193,6 +205,28 @@ src/physics/
 유한한 입력 전 범위를 훑어 NaN·무한대·물리적으로 불가능한 값이 남아 있지 않음을
 확인했다. `NaN`/`Infinity` 를 직접 넣는 경우는 어느 슬라이더로도 도달할 수 없어 막지 않았다.
 
+## 단위 대조
+
+계산 오류만큼 흔한 게 단위 불일치다. 모듈 입출력 단위를 UI 표시와 하나씩 맞춰 뒀다.
+
+| 함수 | 입력 | 출력 | UI 표시 |
+|---|---|---|---|
+| `calculateOxideGrowth` | °C, 분, sccm | nm | °C(800~1200), 분(10~180), sccm, nm |
+| `calculateImplantParams` | keV, deg | **μm** | keV(10~400), nm (컴포넌트가 ×1000) |
+| `calculateDiffusionCoefficient` | °C | cm²/s | — |
+| `calculatePumpingTime` | L, Torr, **L/s** | 분 | — (내부용) |
+| `calculatePumpingTimeFromCurve` | L, Torr, **m³/h 곡선** | 분 | L, m³/h, 초/분 |
+| `calculateConductance` | cm, cm | L/s | cm(2~20, 50~300), L/s |
+| `calculateEffectivePumpingSpeed` | L/s, L/s | L/s | L/s |
+| `calculateInputImpedance` | MHz, nH, pF, Ω | Ω | MHz(0.4~100), nH/pF(10~1000), Ω(10~200) |
+| `calculateReflectedPower` | Ω(복소), W | W | W |
+| `calculateEtchRate` | sccm, W, mTorr | nm/min | 동일 |
+| `calculateSpinCoatResults` | rpm, 초 | nm | rpm(1000~6000), nm |
+| `calculateTempProfile` | 초 | °C | 초, °C |
+
+특히 진공 모듈은 **m³/h 와 L/s 가 섞여 있다**. 펌프 모델 곡선과 화면 표시는 m³/h,
+배기 시간 식과 conductance 는 L/s 다. 경계에서 반드시 `convertM3hToLs` 를 거쳐야 한다.
+
 ## 남겨 둔 모델링 가정
 
 물리 오류는 아니지만 임의로 잡은 값들이다. 바꾸려면 판단이 필요하다.
@@ -204,6 +238,10 @@ src/physics/
 - **해상도 88~92%** (`calculateSpinCoatResults`) — 공정 파라미터와 무관한 난수다.
 - **Drive-in 사전 확산 조건** (`calculateDiffusionProfile`) — 1000°C 30분으로 고정.
 - **Paschen 곡선** (`plasma.js`) — 가스별 실측 테이블 보간. 식이 아니라 표다.
+- **성장 속도 표시** (`Oxidation.js`) — `두께 / 시간` 이라 구간 **평균** 속도다.
+  Deal-Grove 순간 속도 `dx/dt = B/(2x + A)` 와는 다르다.
+- **이온주입 고에너지 정확도** — Schiøtt 근사라 가벼운 이온의 고에너지 쪽에서
+  오차가 커진다 (B 180 keV 에서 문헌 대비 0.81배). 전 범위 문헌 대비 0.81~1.20배.
 - **PECVD 막질 상관식** (`pecvd.js`) — 문헌 데이터에 맞춘 구간별 근사다.
 
 ## 남은 정리 대상
