@@ -33,10 +33,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cra": "react-scripts test --passWithNoTests",
-    "verify:extraction": "node scripts/verify-extraction.mjs",
+    "verify:physics": "node scripts/verify-physics.mjs",
     "verify:guides:snapshot": "node scripts/verify-guides.mjs snapshot",
     "verify:guides": "node scripts/verify-guides.mjs compare",
-    "verify": "npm run lint && npm run lint:physics && npm run verify:extraction && npm run test && npm run build",
+    "verify": "npm run lint && npm run lint:physics && npm run verify:physics && npm run test && npm run build",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

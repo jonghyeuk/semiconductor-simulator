@@ -50,6 +50,9 @@ export const PASCHEN_MINIMA = {
 
 /** 압력·에너지에 따른 상대 이온화 인자 (0~1). */
 export function plasmaFactor(gasPressure, plasmaEnergy) {
+  // 에너지가 음수면 이온화가 없다. 가드가 없으면 −50 eV 에서 0 으로 나눠
+  // 이온화도가 무한대가 된다 (물리적으로 불가능).
+  if (!(plasmaEnergy > 0)) return 0;
   const optimalPressure = 3.0;
   const pressureFactor = Math.exp(-Math.pow((gasPressure - optimalPressure) / 2, 2));
   const energyFactor = plasmaEnergy / (plasmaEnergy + 50);
@@ -97,42 +100,87 @@ export function getTownsendInfo(pd) {
   };
 }
 
+/** 계통 특성 임피던스 (Ω). */
+export const Z0 = 50;
+
 /**
- * L-type 매칭망의 입력 임피던스 크기 (Ω).
+ * L-type 매칭망의 입력 임피던스 (복소수).
+ *
+ * 토폴로지는 부하에 따라 달라진다:
+ *   - 승압 (R_L > Z₀): 부하와 **병렬**인 C + 입력 쪽 **직렬** L
+ *       Z_in = jX_L + (R_L ∥ −jX_C)
+ *   - 강압 (R_L < Z₀): 부하 쪽 **직렬** L + 입력 쪽 **병렬** C
+ *       Z_in = (−jX_C) ∥ (R_L + jX_L)
+ *
+ * 예전 구현은 승압 토폴로지 하나만 모델링해 놓고 calculateOptimalLC 는 강압일 때
+ * 뒤집힌 회로의 L·C 를 돌려줬다. 두 함수가 서로 다른 회로를 가정하는 바람에
+ * 50 Ω 이하 부하에서는 "자동 매칭" 을 눌러도 정합이 되지 않았다.
+ *
  * @param {number} frequency MHz
  * @param {number} inductance nH
  * @param {number} capacitance pF
- * @param {number} loadImpedance Ω
+ * @param {number} loadImpedance Ω (실수 부하로 가정)
+ * @returns {{real: number, imag: number}} Ω
+ */
+export function calculateInputImpedanceComplex(frequency, inductance, capacitance, loadImpedance) {
+  const omega = 2 * Math.PI * frequency * 1e6;
+  const XL = omega * (inductance * 1e-9);
+  // C = 0 은 개방(리액턴스 무한대)이다. 1/0 을 그대로 두면 NaN 이 번진다.
+  const susceptance = omega * (capacitance * 1e-12); // B = ωC, C=0 이면 0 (개방)
+  const R = loadImpedance;
+
+  if (R >= Z0) {
+    // 승압: 부하와 병렬인 C → 어드미턴스 Y = 1/R + jB, 그 뒤에 직렬 L
+    const denom = 1 / (R * R) + susceptance * susceptance;
+    if (!(denom > 0)) return { real: R, imag: XL };
+    const real = 1 / R / denom;
+    const imag = -susceptance / denom;
+    return { real, imag: imag + XL };
+  }
+
+  // 강압: 부하와 직렬인 L (= R + jX_L), 그 앞에 병렬 C
+  const sr = R;
+  const si = XL;
+  // Y_total = 1/(sr + j·si) + jB
+  const mag2 = sr * sr + si * si;
+  if (!(mag2 > 0)) return { real: 0, imag: 0 };
+  const yr = sr / mag2;
+  const yi = -si / mag2 + susceptance;
+  const yMag2 = yr * yr + yi * yi;
+  if (!(yMag2 > 0)) return { real: 0, imag: 0 };
+  return { real: yr / yMag2, imag: -yi / yMag2 };
+}
+
+/**
+ * L-type 매칭망의 입력 임피던스 크기 (Ω).
+ * 화면에는 이 크기만 표시하지만, 반사 전력은 복소수 쪽을 써야 한다.
  */
 export function calculateInputImpedance(frequency, inductance, capacitance, loadImpedance) {
-  const omega = 2 * Math.PI * frequency * 1e6;
-  const L = inductance * 1e-9;
-  const C = capacitance * 1e-12;
-  const XL = omega * L;
-  const XC = 1 / (omega * C);
-
-  const Z_load = loadImpedance;
-
-  // 병렬 C와 부하의 합성 임피던스
-  const Z_parallel_real = (Z_load * XC * XC) / (Z_load * Z_load + XC * XC);
-  const Z_parallel_imag = -(Z_load * Z_load * XC) / (Z_load * Z_load + XC * XC);
-
-  // 직렬 L 추가
-  const Z_in_imag = XL + Z_parallel_imag;
-
-  return Math.sqrt(Z_parallel_real * Z_parallel_real + Z_in_imag * Z_in_imag);
+  const { real, imag } = calculateInputImpedanceComplex(
+    frequency,
+    inductance,
+    capacitance,
+    loadImpedance
+  );
+  return Math.sqrt(real * real + imag * imag);
 }
 
 /** 50 Ω 정합을 위한 L, C 값. */
 export function calculateOptimalLC(frequency, loadImpedance) {
-  const f = frequency * 1e6;
-  const omega = 2 * Math.PI * f;
+  const omega = 2 * Math.PI * frequency * 1e6;
   const Z_load = loadImpedance;
-  const Z_source = 50;
 
-  if (Z_load > Z_source) {
-    const Q = Math.sqrt(Z_load / Z_source - 1);
-    const X_L = Q * Z_source;
+  // 부하가 이미 50 Ω 이면 정합망이 필요 없다 (Q = 0).
+  // 예전에는 여기서 X_C = 50/0 = ∞ 를 거쳐 L = C = 0 이 설정되고,
+  // 그 C = 0 이 다시 입력 임피던스를 NaN 으로 만들었다. 슬라이더 기본값이 정확히
+  // 50 Ω 이라 화면에 들어와 버튼만 눌러도 바로 걸리는 경로였다.
+  if (Z_load === Z0) {
+    return { L: '0', C: '0', type: '정합망 불필요 (부하 = 50 Ω)' };
+  }
+
+  if (Z_load > Z0) {
+    const Q = Math.sqrt(Z_load / Z0 - 1);
+    const X_L = Q * Z0;
     const X_C = Z_load / Q;
     return {
       L: ((X_L / omega) * 1e9).toFixed(0), // nH
@@ -140,8 +188,9 @@ export function calculateOptimalLC(frequency, loadImpedance) {
       type: 'L-type (직렬L-병렬C)',
     };
   }
-  const Q = Math.sqrt(Z_source / Z_load - 1);
-  const X_C = Z_source / Q;
+
+  const Q = Math.sqrt(Z0 / Z_load - 1);
+  const X_C = Z0 / Q;
   const X_L = Q * Z_load;
   return {
     L: ((X_L / omega) * 1e9).toFixed(0), // nH
@@ -152,10 +201,34 @@ export function calculateOptimalLC(frequency, loadImpedance) {
 
 /**
  * 반사 전력 (W).
- * @param {number} zIn 입력 임피던스 크기 (Ω)
+ *
+ *   Γ = (Z_in − Z₀) / (Z_in + Z₀),   P_refl = P_in · |Γ|²
+ *
+ * |Γ| ≤ 1 이므로 반사 전력은 절대 입력 전력을 넘지 않는다. 예전 구현은 분모를
+ * Z₀ 로 써서 |Z_in − 50| > 50 인 순간 반사 전력이 입력을 초과했다 (에너지 보존 위반).
+ *
+ * @param {{real:number, imag:number}|number} zIn 입력 임피던스 (복소수 또는 실수)
  * @param {number} rfPower 입력 전력 (W)
  */
 export function calculateReflectedPower(zIn, rfPower) {
-  const impedanceMismatch = Math.abs(zIn - 50) / 50;
-  return rfPower * Math.pow(impedanceMismatch, 2);
+  const z = typeof zIn === 'number' ? { real: zIn, imag: 0 } : zIn;
+  const numR = z.real - Z0;
+  const numI = z.imag;
+  const denR = z.real + Z0;
+  const denI = z.imag;
+  const denMag2 = denR * denR + denI * denI;
+  if (!(denMag2 > 0)) return rfPower;
+  const gammaMag2 = (numR * numR + numI * numI) / denMag2;
+  return rfPower * Math.min(1, gammaMag2);
+}
+
+/**
+ * 정재파비 VSWR = (1 + |Γ|) / (1 − |Γ|).
+ * 완전 반사(|Γ| = 1) 면 무한대다.
+ */
+export function calculateVSWR(zIn) {
+  const z = typeof zIn === 'number' ? { real: zIn, imag: 0 } : zIn;
+  const gammaMag = Math.sqrt(calculateReflectedPower(z, 1));
+  if (gammaMag >= 1) return Infinity;
+  return (1 + gammaMag) / (1 - gammaMag);
 }

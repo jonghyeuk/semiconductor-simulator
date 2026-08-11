@@ -96,9 +96,22 @@ describe('calculateImplantParams — 정상 경로', () => {
     expect(tilted).toBeCloseTo(straight / Math.cos((30 * Math.PI) / 180), 9);
   });
 
-  it('ΔRp 는 Rp 의 절반이다', () => {
-    const { Rp, deltaRp } = calculateImplantParams(100, 'P');
-    expect(deltaRp).toBeCloseTo(Rp * 0.5, 12);
+  it('ΔRp/Rp 는 이온 질량으로만 정해지고 에너지와 무관하다', () => {
+    for (const d of DOPANTS) {
+      const ratios = [10, 50, 100, 200].map((E) => {
+        const { Rp, deltaRp } = calculateImplantParams(E, d);
+        return deltaRp / Rp;
+      });
+      for (const r of ratios) expect(r).toBeCloseTo(ratios[0], 9);
+    }
+  });
+
+  it('ΔRp/Rp 가 문헌 범위(0.2~0.4)에 있다', () => {
+    for (const d of DOPANTS) {
+      const { Rp, deltaRp } = calculateImplantParams(100, d);
+      expect(deltaRp / Rp).toBeGreaterThan(0.2);
+      expect(deltaRp / Rp).toBeLessThan(0.4);
+    }
   });
 
   it('결정적이다', () => {
@@ -107,85 +120,79 @@ describe('calculateImplantParams — 정상 경로', () => {
 });
 
 describe('calculateImplantParams — 경계값', () => {
-  it('에너지 0 이면 Rp 가 하한 1 nm 로 clamp 된다', () => {
-    const { Rp } = calculateImplantParams(0, 'B');
-    expect(Rp).toBe(1e-3); // 1 nm = 0.001 μm
+  it('에너지 0 이면 이온이 안 들어간다', () => {
+    const { Rp, deltaRp } = calculateImplantParams(0, 'B');
+    expect(Rp).toBe(0);
+    expect(deltaRp).toBe(0);
   });
 
-  it('Rp 하한 clamp 가 걸리면 ΔRp 는 함께 clamp 되지 않는다 (현재 동작)', () => {
-    // deltaRp 는 Math.max(Rp, 1) 이전 값으로 계산되므로 clamp 구간에서
-    // deltaRp > Rp/2 관계가 깨진다. 에너지 0 근처에서만 발생한다.
-    const { Rp, deltaRp } = calculateImplantParams(0, 'B');
+  it('음수 에너지에서도 0 이고 NaN 이 아니다', () => {
+    const { Rp, deltaRp } = calculateImplantParams(-50, 'B');
+    expect(Rp).toBe(0);
     expect(deltaRp).toBe(0);
-    expect(Rp).toBe(1e-3);
   });
 
   it('틸트 0 과 음수 틸트는 같다 (보정 미적용)', () => {
     expect(calculateImplantParams(50, 'B', -10).Rp).toBe(calculateImplantParams(50, 'B', 0).Rp);
   });
 
-  it('틸트 90° 는 물리적으로 말이 안 되는 값으로 발산한다 (가드 없음)', () => {
-    // cos(90°) 는 부동소수점상 정확히 0 이 아니라 6.1e-17 이라 Infinity 대신
-    // 1e15 μm 급 값이 나온다. 어느 쪽이든 UI 로 흘러가면 그래프가 깨진다.
-    const { Rp } = calculateImplantParams(50, 'B', 90);
-    expect(Rp).toBeGreaterThan(1e12);
+  it('틸트 90° 이상은 89° 로 막혀 발산하지 않는다', () => {
+    const at89 = calculateImplantParams(50, 'B', 89).Rp;
+    expect(calculateImplantParams(50, 'B', 90).Rp).toBe(at89);
+    expect(calculateImplantParams(50, 'B', 180).Rp).toBe(at89);
+    expect(Number.isFinite(at89)).toBe(true);
   });
 });
 
 describe('calculateImplantParams — 문헌값 대조', () => {
   /*
-   * ── 확인된 물리 오류 ②: 이온 질량에 따른 비정 순서가 뒤집혔다 ──
-   *
-   * 코드: Rp = (m/28.1) · ε^0.8 · 100,  ε ∝ m·E / (Z₁·Z₂·(m+28.1)·(Z₁^0.23+Z₂^0.23))
-   *
-   * 앞의 (m/28.1) 인자가 질량에 선형으로 커져서, ε^0.8 이 줄어드는 것보다 빠르다.
-   * 결과적으로 무거운 이온일수록 **깊게** 박히는 것으로 계산된다.
-   *
-   * 실제로는 무거운 이온일수록 핵 저지능(nuclear stopping)이 커서 얕게 박힌다.
-   * 50 keV 기준 문헌값: B 160 nm > P 62 nm > As 33 nm.
-   * 현재 코드:          B  66 nm < P 119 nm < As 184 nm  ← 순서가 정반대.
-   *
-   * 이걸 고치면 이온주입 탭의 깊이·프로파일 숫자가 전부 바뀌므로 임의로 고치지
-   * 않고 it.fails 로 올바른 기댓값만 남긴다.
+   * LSS/ZBL 적분 모델. 무거운 이온일수록 핵 저지능이 커서 얕게 박힌다.
+   * 예전 구현은 환산 에너지 분자에 타겟 질량 M₂ 대신 이온 질량 M₁ 을 쓰고
+   * Rp 앞에 (M₁/M₂) 를 곱하는 바람에 순서가 정반대였다.
    */
 
-  it('현재 동작: 무거운 이온일수록 깊게 박힌다 (뒤집힘)', () => {
-    const B = calculateImplantParams(50, 'B').Rp;
-    const P = calculateImplantParams(50, 'P').Rp;
-    const As = calculateImplantParams(50, 'As').Rp;
-    expect(B).toBeLessThan(P);
-    expect(P).toBeLessThan(As);
+  it('같은 에너지에서 무거운 이온일수록 얕게 박힌다', () => {
+    for (const E of [15, 30, 50, 100, 180]) {
+      const B = calculateImplantParams(E, 'B').Rp;
+      const P = calculateImplantParams(E, 'P').Rp;
+      const As = calculateImplantParams(E, 'As').Rp;
+      const Sb = calculateImplantParams(E, 'Sb').Rp;
+      expect(B).toBeGreaterThan(P);
+      expect(P).toBeGreaterThan(As);
+      expect(As).toBeGreaterThan(Sb);
+    }
   });
 
-  it.fails('같은 에너지에서 무거운 이온일수록 얕게 박혀야 한다', () => {
-    // 측정값 (50 keV): B 65.9 nm, P 118.8 nm, As 183.8 nm
-    // 문헌값 (50 keV): B 160 nm,  P 62 nm,   As 33 nm
-    const B = calculateImplantParams(50, 'B').Rp;
-    const P = calculateImplantParams(50, 'P').Rp;
-    const As = calculateImplantParams(50, 'As').Rp;
-    expect(B).toBeGreaterThan(P);
-    expect(P).toBeGreaterThan(As);
+  it('문헌 Rp 값의 ±25% 안에 든다', () => {
+    // Si 기준 투영 비정 (nm)
+    const lit = {
+      B: { 30: 100, 50: 160, 100: 300 },
+      P: { 30: 39, 50: 62, 100: 130 },
+      As: { 30: 22, 50: 33, 100: 60 },
+    };
+    for (const [ion, table] of Object.entries(lit)) {
+      for (const [E, expected] of Object.entries(table)) {
+        const Rp = calculateImplantParams(Number(E), ion).Rp * 1000; // nm
+        expect(Math.abs(Rp / expected - 1)).toBeLessThan(0.25);
+      }
+    }
   });
 
-  it.fails('B 50 keV 의 Rp 가 문헌값 160 nm 의 ±40% 안에 들어야 한다', () => {
-    // 측정값 65.9 nm (문헌 대비 0.41배)
-    const Rp = calculateImplantParams(50, 'B').Rp * 1000; // nm
-    expect(Math.abs(Rp / 160 - 1)).toBeLessThan(0.4);
-  });
-
-  it.fails('As 50 keV 의 Rp 가 문헌값 33 nm 의 ±40% 안에 들어야 한다', () => {
-    // 측정값 183.8 nm (문헌 대비 5.57배)
-    const Rp = calculateImplantParams(50, 'As').Rp * 1000; // nm
-    expect(Math.abs(Rp / 33 - 1)).toBeLessThan(0.4);
-  });
-
-  it.fails('ΔRp/Rp 는 이온마다 달라야 한다 (지금은 전부 0.5 고정)', () => {
-    // 문헌: B 는 ΔRp/Rp ≈ 0.3, As 는 ≈ 0.25 로 이온·에너지에 따라 다르다.
+  it('ΔRp/Rp 가 이온마다 다르다 (예전엔 전부 0.5 고정이었다)', () => {
     const ratios = DOPANTS.map((d) => {
       const { Rp, deltaRp } = calculateImplantParams(100, d);
-      return deltaRp / Rp;
+      return Number((deltaRp / Rp).toFixed(4));
     });
-    expect(new Set(ratios.map((r) => r.toFixed(4))).size).toBeGreaterThan(1);
+    expect(new Set(ratios).size).toBeGreaterThan(1);
+  });
+
+  it('에너지에 대해 단조 증가하지만 선형보다 느리다 (저지능 증가)', () => {
+    for (const d of DOPANTS) {
+      const r50 = calculateImplantParams(50, d).Rp;
+      const r100 = calculateImplantParams(100, d).Rp;
+      expect(r100).toBeGreaterThan(r50);
+      expect(r100 / r50).toBeLessThan(2.0);
+    }
   });
 });
 
@@ -237,22 +244,19 @@ describe('calculateDiffusionProfile', () => {
     expect(calculateDiffusionProfile(base)).toEqual(calculateDiffusionProfile(base));
   });
 
-  /*
-   * ── 방어 부족 ──
-   * 시간 0 이면 √(Dt)=0 이라 predeposition 은 표면에서 0/0, drive-in 은 전 구간 0/0 이
-   * 되어 NaN 이 나온다. "시간 0 이면 확산이 없다" 라는 당연한 성질이 성립하지 않는다.
-   * UI 슬라이더 하한이 0 보다 크면 화면에는 안 보이지만, 가드가 없다는 사실을 고정해 둔다.
-   */
-  it('현재 동작: 시간 0 인 predeposition 은 표면에서 NaN 을 낸다', () => {
+  it('시간이 0 이면 확산이 없다 (predeposition: 표면만 C0)', () => {
     const p = calculateDiffusionProfile({ ...base, currentTime: 0 });
-    expect(Number.isNaN(p[0].concentration)).toBe(true);
-    // 표면 밖은 0/0 이 아니라 x/0 = Infinity → erfc(∞)=0 → 배경 농도로 떨어진다.
+    expect(p[0].concentration).toBe(1e20);
     expect(p[10].concentration).toBe(1e15);
+    for (const pt of p) expect(Number.isNaN(pt.concentration)).toBe(false);
   });
 
-  it('현재 동작: 시간 0 인 drive-in 은 전 구간 NaN 을 낸다', () => {
+  it('시간이 0 이면 확산이 없다 (drive-in: 전 구간 배경 농도)', () => {
     const p = calculateDiffusionProfile({ ...base, processType: 'drivein', currentTime: 0 });
-    expect(Number.isNaN(p[10].concentration)).toBe(true);
+    for (const pt of p) {
+      expect(Number.isNaN(pt.concentration)).toBe(false);
+      expect(pt.concentration).toBe(1e15);
+    }
   });
 });
 
@@ -309,6 +313,7 @@ describe('calculateImplantationProfile', () => {
   it('경계값: 어닐 시간 0 이면 as-implanted 와 같다', () => {
     const a = calculateImplantationProfile(base);
     const b = calculateImplantationProfile({ ...base, annealing: true, annealTemp: 1000, annealTime: 0 });
-    expect(b[50].concentration).toBeCloseTo(a[50].concentration, 6);
+    // 농도가 1e19 급이라 절대 오차 비교는 의미가 없다. 상대 오차로 본다.
+    expect(b[50].concentration / a[50].concentration).toBeCloseTo(1, 9);
   });
 });

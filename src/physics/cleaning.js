@@ -12,6 +12,12 @@
  * @param {object} params 방식별 공정 파라미터
  */
 export function calculateOxideRemovalEfficiency(method, params) {
+  // 제거 효율은 백분율이라 0% 아래로 내려갈 수 없다. 각 분기에 상한(Math.min)만
+  // 있고 하한이 없어서, 입력이 정상 범위를 벗어나면 음수 효율이 나왔다.
+  return Math.max(0, rawOxideRemovalEfficiency(method, params));
+}
+
+function rawOxideRemovalEfficiency(method, params) {
   switch (method) {
     case 'wet': {
       // 습식 세정에서 산화막 제거는 주로 HF 기반 용액의 특성에 의존

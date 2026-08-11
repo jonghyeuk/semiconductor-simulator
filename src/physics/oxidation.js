@@ -9,36 +9,58 @@
 export const K_EV = 8.617e-5;
 
 /**
- * Deal-Grove 산화막 두께.
+ * Deal-Grove 속도 상수 (Plummer, "Silicon VLSI Technology" Table 6.2, <100> Si).
+ *
+ *   포물선 상수      B    = B0  · exp(−EaB  / kT)   [μm²/hr]
+ *   선형/포물선 비   B/A  = BA0 · exp(−EaBA / kT)   [μm/hr]
+ *
+ * A 는 이 둘의 비(A = B / (B/A))로 얻는다. 지수를 따로 곱하지 않는 게 핵심이다.
+ * 예전 구현은 A 에 exp(−2.0/kT) 를 그대로 곱해서 A ≈ 0 이 되었고, 그 결과
+ * 계면 반응 律速인 선형 영역이 사라져 두께가 항상 √t 로만 자랐다.
+ */
+const DEAL_GROVE = {
+  dry: { B0: 7.72e2, EaB: 1.23, BA0: 6.23e6, EaBA: 2.0 },
+  wet: { B0: 3.86e2, EaB: 0.78, BA0: 1.63e8, EaBA: 2.05 },
+};
+
+/** UI 가 닿을 수 있는 최대(wet 1200°C 180분 ≈ 1.55 μm)보다 넉넉한 상한. */
+const MAX_THICKNESS_NM = 5000;
+
+/**
+ * Deal-Grove 산화막 두께: x² + A·x = B·t 를 x 에 대해 푼 것.
+ *
+ * 초기 산화막 오프셋 τ 는 넣지 않았다(τ = 0, 맨 실리콘 기준). dry 산화 초기의
+ * 급속 성장 구간을 보려면 τ 항이 추가로 필요하다.
+ *
  * @param {number} temp 온도 (°C)
  * @param {number} time 시간 (분)
- * @param {'dry'|'wet'} atm 산화 분위기
- * @param {number} gasFlowRate 가스 유량 (sccm 기준 상대값, 100 = 기준)
- * @returns {number} 두께 (nm), 0~1000 으로 clamp
+ * @param {'dry'|'wet'} atm 산화 분위기 ('dry' 외에는 wet 으로 처리)
+ * @param {number} gasFlowRate 가스 유량 (100 = 기준)
+ * @returns {number} 두께 (nm)
  */
 export function calculateOxideGrowth(temp, time, atm, gasFlowRate = 100) {
   const tempK = temp + 273.15;
-  let B, A;
+  // 시간이 0 이하거나 절대영도 이하면 산화가 일어나지 않는다.
+  if (!(time > 0) || !(tempK > 0)) return 0;
 
-  if (atm === 'dry') {
-    const B0 = 3.0e7;
-    const Ea = 1.23;
-    B = B0 * Math.exp(-Ea / (K_EV * tempK));
-    A = 165 * Math.exp(-2.0 / (K_EV * tempK));
-  } else {
-    const B0 = 7.7e7;
-    const Ea = 0.78;
-    B = B0 * Math.exp(-Ea / (K_EV * tempK));
-    A = 226 * Math.exp(-2.0 / (K_EV * tempK));
-  }
+  const { B0, EaB, BA0, EaBA } = atm === 'dry' ? DEAL_GROVE.dry : DEAL_GROVE.wet;
+  const kT = K_EV * tempK;
+  const B = B0 * Math.exp(-EaB / kT); // μm²/hr
+  const BoverA = BA0 * Math.exp(-EaBA / kT); // μm/hr
+  const A = B / BoverA; // μm
 
-  const flowFactor = 0.5 + (gasFlowRate / 100) * 0.5;
-  const timeHours = time / 60;
-  const discriminant = A * A + 4 * B * timeHours;
-  let thickness = (-A + Math.sqrt(discriminant)) / 2;
-  thickness = thickness * flowFactor;
+  // 가스 유량은 표면 산화종 농도 C* 를 통해 들어온다. B 와 B/A 가 **둘 다** C* 에
+  // 비례하므로 A = B/(B/A) 는 그대로고, 결과적으로 시간이 f 배 되는 것과 같다.
+  //
+  // 예전에는 완성된 두께에 f 를 그냥 곱했다. 그러면 x² + A·x = B·t 관계가 깨져서
+  // 유량이 낮을 때 선형/포물선 이행 지점까지 같이 밀린다.
+  const flowFactor = Math.max(0, 0.5 + (gasFlowRate / 100) * 0.5);
+  const timeHours = (time / 60) * flowFactor;
+  const thicknessUm = (-A + Math.sqrt(A * A + 4 * B * timeHours)) / 2;
+  const thickness = thicknessUm * 1000; // nm
 
-  return Math.max(0, Math.min(thickness, 1000));
+  if (!Number.isFinite(thickness)) return 0;
+  return Math.max(0, Math.min(thickness, MAX_THICKNESS_NM));
 }
 
 /** 결정 방위별 상대 산화 속도. */
@@ -53,10 +75,14 @@ export function calculateDopingRate(dopingLevel) {
   return 1.0 + (dopingLevel / 10) * 2.0;
 }
 
-/** 초기 산화막이 있을 때의 상대 성장 속도. */
+/**
+ * 초기 산화막이 있을 때의 상대 성장 속도.
+ * 두께는 음수가 될 수 없다 (−100 nm 면 분모가 0 이 되어 발산한다).
+ */
 export function calculateInitialOxideRate(initialThickness) {
-  if (initialThickness === 0) return 1.0;
-  return 1.0 / (1.0 + initialThickness / 100);
+  const thickness = Math.max(0, initialThickness);
+  if (thickness === 0) return 1.0;
+  return 1.0 / (1.0 + thickness / 100);
 }
 
 /** 온도·압력에 따른 상대 산화 속도 (1000°C, 1 atm 기준). */

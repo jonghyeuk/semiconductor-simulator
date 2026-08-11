@@ -1691,26 +1691,10 @@ const EtchSimulator = ({ initialTab }) => {
     // 기존의 "random 제외" 사본과 값이 완전히 같다.
     const er = calculateEtchRate(etchTarget, gasFlows, power, pressure, () => 0.5);
 
-    // 결정적 선택비
-    let sel = 5;
-    switch (etchTarget) {
-      case 'Si':
-        sel = 8 + (gasFlows.HBr / 10) * 8 - Math.max(0, (gasFlows.Cl2 - 50) * 0.35) - Math.max(0, (gasFlows.Ar - 80) * 0.25);
-        break;
-      case 'SiO2':
-        sel = 5 + (gasFlows.CHF3 / 10) * 4 - Math.max(0, (gasFlows.CF4 - 30) * 0.3) - Math.max(0, (gasFlows.Ar - 70) * 0.25);
-        break;
-      case 'Si3N4':
-        sel = 5 + (gasFlows.CHF3 / 10) * 3 - Math.max(0, (gasFlows.O2 - 15) * 0.5);
-        break;
-      case 'PR':
-        sel = 32;
-        break;
-      default: sel = 5;
-    }
-    sel -= power > 500 ? (power - 500) / 150 : 0;
-    sel -= pressure < 40 ? (40 - pressure) / 20 : 0;
-    sel = Math.max(1, sel);
+    // 결정적 선택비: 식각률과 같은 난수원 고정 방식으로 모듈 하나에서 뽑는다.
+    // (예전엔 여기에 계산식 사본이 따로 있었고 PR 만 32 로 하드코딩돼 있어
+    //  실행 결과의 선택비와 미리보기 값이 어긋났다.)
+    const sel = calculateSelectivity(etchTarget, gasFlows, power, pressure, () => 0.5);
 
     // 결정적 균일성
     const uni = calculateUniformity(pressure, power, gasFlows);

@@ -1,0 +1,559 @@
+/**
+ * 물리 계산 모듈 검증.
+ *
+ * 두 가지를 한다.
+ *
+ * 1) 회귀 대조 — 물리 수정 대상이 **아니었던** 함수들은 컴포넌트에서 모듈로 옮기기
+ *    이전 코드와 값이 한 자리도 달라지면 안 된다. 아래 baseline 은 추출 이전
+ *    컴포넌트 안에 있던 코드를 그대로 복사한 것이다.
+ *
+ * 2) 변경 보고 — 물리 오류를 고친 함수들은 값이 **의도적으로** 바뀌었다.
+ *    화면에 보이는 숫자가 얼마나 움직였는지 대표 입력에서 옛 식과 새 식을 나란히 찍는다.
+ *
+ * 실행: node scripts/verify-physics.mjs
+ * 회귀 대조에 불일치가 1건이라도 있으면 exit code 1.
+ */
+import * as ox from '../src/physics/oxidation.js';
+import * as dp from '../src/physics/doping.js';
+import * as vac from '../src/physics/vacuum.js';
+import * as pl from '../src/physics/plasma.js';
+import * as et from '../src/physics/etching.js';
+import * as li from '../src/physics/lithography.js';
+import * as pe from '../src/physics/pecvd.js';
+import * as rta from '../src/physics/rta.js';
+import * as cl from '../src/physics/cleaning.js';
+
+let compared = 0;
+let mismatched = 0;
+const failures = [];
+
+function same(a, b) {
+  if (typeof a === 'number' && typeof b === 'number') {
+    return Object.is(a, b) || (Number.isNaN(a) && Number.isNaN(b));
+  }
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function check(label, expected, actual) {
+  compared++;
+  if (!same(expected, actual)) {
+    mismatched++;
+    if (failures.length < 20) {
+      failures.push(`${label}\n    baseline=${JSON.stringify(expected)}\n    module  =${JSON.stringify(actual)}`);
+    }
+  }
+}
+
+/** 결정적 난수원 (mulberry32). */
+function makeRng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const range = (from, to, step) => {
+  const out = [];
+  for (let v = from; v <= to + 1e-12; v += step) out.push(Number(v.toFixed(10)));
+  return out;
+};
+
+// ═════════════════════ 1) 회귀 대조 ═════════════════════
+// 물리 수정 대상이 아니었던 함수들. 추출 이전 코드와 값이 같아야 한다.
+
+// ── 산화: 상대 속도 인자들 + 품질 평가 ──
+const baseOrientationRate = (orientation) => {
+  const rates = { 100: 1.0, 110: 1.25, 111: 1.68 };
+  return rates[orientation] || 1.0;
+};
+const baseDopingRate = (d) => (d === 0 ? 1.0 : 1.0 + (d / 10) * 2.0);
+const baseInitialOxideRate = (t) => (t === 0 ? 1.0 : 1.0 / (1.0 + t / 100));
+const baseTempPressureRate = (temp, pressure) => {
+  const tempEffect =
+    Math.exp(-1.23 / (8.617e-5 * (temp + 273.15))) / Math.exp(-1.23 / (8.617e-5 * (1000 + 273.15)));
+  return tempEffect * pressure;
+};
+
+for (const o of ['100', '110', '111', '211', 100, 110, 111]) {
+  check(`orient(${o})`, baseOrientationRate(o), ox.calculateOrientationRate(o));
+}
+for (const d of range(0, 20, 0.25)) check(`dopingRate(${d})`, baseDopingRate(d), ox.calculateDopingRate(d));
+for (const t of range(0, 500, 5)) check(`initOx(${t})`, baseInitialOxideRate(t), ox.calculateInitialOxideRate(t));
+for (const T of range(700, 1250, 5)) {
+  for (const p of range(0.5, 5, 0.25)) {
+    check(`tempPress(${T},${p})`, baseTempPressureRate(T, p), ox.calculateTempPressureRate(T, p));
+  }
+}
+
+// ── 확산: 확산계수 / erfc / 확산 프로파일 (시간 > 0 구간) ──
+const baseDopantProps = {
+  B: { Qd: 3.69, D0: 0.76 },
+  P: { Qd: 3.66, D0: 3.85 },
+  As: { Qd: 4.08, D0: 0.32 },
+  In: { Qd: 3.9, D0: 0.5 },
+  Sb: { Qd: 4.0, D0: 0.4 },
+};
+const baseDiffCoef = (temp, dopant) => {
+  const { Qd, D0 } = baseDopantProps[dopant];
+  return D0 * Math.exp(-Qd / (8.617e-5 * (temp + 273.15)));
+};
+const baseErfc = (x) => {
+  const t = 1 / (1 + 0.3275911 * Math.abs(x));
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429;
+  const erf = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return x >= 0 ? 1 - erf : 1 + erf;
+};
+const baseDiffusionProfile = (currentTime, T, dopant, type, C0, Cb) => {
+  const D = baseDiffCoef(T, dopant);
+  const t = currentTime * 60;
+  const profile = [];
+  for (let i = 0; i <= 100; i++) {
+    const x = (i / 100) * 3 * 1e-4;
+    let c;
+    if (type === 'predeposition') c = C0 * baseErfc(x / (2 * Math.sqrt(D * t)));
+    else {
+      const Dp = baseDiffCoef(1000, dopant);
+      const Q = 2 * C0 * Math.sqrt((Dp * 1800) / Math.PI);
+      c = (Q / Math.sqrt(Math.PI * D * t)) * Math.exp((-x * x) / (4 * D * t));
+    }
+    c = Math.max(c, Cb);
+    profile.push({ depth: (i / 100) * 3, concentration: c, logConcentration: Math.log10(c) });
+  }
+  return profile;
+};
+
+const DOPANTS = ['B', 'P', 'As', 'In', 'Sb'];
+for (const d of DOPANTS) {
+  for (const T of range(700, 1300, 10)) check(`D(${d},${T})`, baseDiffCoef(T, d), dp.calculateDiffusionCoefficient(T, d));
+}
+for (const x of range(-4, 4, 0.02)) check(`erfc(${x})`, baseErfc(x), dp.erfc(x));
+for (const d of DOPANTS) {
+  for (const T of [900, 1000, 1100, 1200]) {
+    for (const time of [1, 10, 30, 60, 120]) {
+      for (const type of ['predeposition', 'drivein']) {
+        check(
+          `diffProfile(${d},${T},${time},${type})`,
+          baseDiffusionProfile(time, T, d, type, 1e20, 1e15),
+          dp.calculateDiffusionProfile({
+            currentTime: time, temperature: T, dopant: d,
+            processType: type, surfaceConc: 1e20, backgroundConc: 1e15,
+          })
+        );
+      }
+    }
+  }
+}
+
+// ── 진공: 터보 속도 / sccm / 펌프 곡선 / 슬라이더 / 유효 속도 / 등급 ──
+const baseTurboSpeed = (p) => {
+  if (p <= 1e-6) return 300;
+  if (p <= 1e-5) return 300;
+  if (p <= 1e-4) return 295;
+  if (p <= 1e-3) return 280;
+  if (p <= 1e-2) return 250;
+  if (p <= 1e-1) return 180;
+  if (p <= 1) return 80;
+  return 20;
+};
+const basePressureToSlider = (p) =>
+  ((Math.log10(p) - Math.log10(0.02)) / (Math.log10(760) - Math.log10(0.02))) * 100;
+const baseEffSpeed = (s, c) => (s * c) / (s + c);
+const baseVacuumStage = (p) => {
+  if (p > 100) return '대기압/초기배기';
+  if (p > 1) return '저진공';
+  if (p > 1e-3) return '중진공';
+  if (p > 1e-6) return '고진공';
+  return '초고진공';
+};
+
+for (let e = -8; e <= 3; e += 0.1) {
+  const p = Math.pow(10, e);
+  check(`turbo(${p})`, baseTurboSpeed(p), vac.calculateTurboSpeed(p));
+  check(`slider(${p})`, basePressureToSlider(p), vac.pressureToSliderValue(p));
+  check(`stage(${p})`, baseVacuumStage(p), vac.getVacuumStage(p));
+}
+for (const sccm of range(0, 500, 5)) check(`sccm(${sccm})`, sccm * 0.0095, vac.convertSccmToTorrLs(sccm));
+for (const s of range(50, 1000, 25)) {
+  for (const c of range(50, 5000, 100)) check(`effS(${s},${c})`, baseEffSpeed(s, c), vac.calculateEffectivePumpingSpeed(s, c));
+}
+
+const PUMP_MODELS = [
+  { maxSpeed: 300, data: [{ pressure: 0.02, speed: 250 }, { pressure: 1, speed: 300 }, { pressure: 100, speed: 280 }, { pressure: 760, speed: 200 }] },
+  { maxSpeed: 600, data: [{ pressure: 0.02, speed: 500 }, { pressure: 1, speed: 600 }, { pressure: 100, speed: 560 }, { pressure: 760, speed: 400 }] },
+];
+const basePumpingSpeed = (pressure, modelNumber) => {
+  const model = PUMP_MODELS[Math.round(modelNumber)];
+  if (!model) return 250;
+  if (pressure <= 0.02) return model.data[0].speed;
+  if (pressure >= 760) return model.data[model.data.length - 1].speed;
+  const lp = Math.log10(pressure);
+  for (let i = 0; i < model.data.length - 1; i++) {
+    const cur = model.data[i], next = model.data[i + 1];
+    if (lp >= Math.log10(cur.pressure) && lp <= Math.log10(next.pressure)) {
+      const r = (lp - Math.log10(cur.pressure)) / (Math.log10(next.pressure) - Math.log10(cur.pressure));
+      return cur.speed + (next.speed - cur.speed) * r;
+    }
+  }
+  return model.maxSpeed / 2;
+};
+for (let e = -3; e <= 3; e += 0.05) {
+  const p = Math.pow(10, e);
+  for (const m of [0, 1, 5]) check(`pumpSpeed(${p},${m})`, basePumpingSpeed(p, m), vac.calculatePumpingSpeed(p, PUMP_MODELS, m));
+}
+
+// ── 플라즈마: Paschen / Townsend / 이온화도 (에너지 > 0 구간) ──
+const baseIonization = (p, E) => {
+  const pf = Math.exp(-Math.pow((p - 3.0) / 2, 2));
+  return pf * (E / (E + 50)) * 0.0018;
+};
+const baseProb = (p, E) => {
+  const pf = Math.exp(-Math.pow((p - 3.0) / 2, 2));
+  return pf * (E / (E + 50)) * 100;
+};
+const baseTownsend = (pd) => {
+  let alpha;
+  if (pd < 0.5) alpha = pd * 20;
+  else if (pd <= 2.0) alpha = 10 + (pd - 0.5) * 20;
+  else alpha = 40 * Math.exp(-(pd - 2) / 3);
+  const isOptimal = pd >= 0.7 && pd <= 1.5;
+  return { alpha, isOptimal, efficiency: isOptimal ? '최적' : pd < 0.7 ? '부족' : '과다' };
+};
+const basePaschen = (p, d, gasType) => {
+  const pd = p * d;
+  if (pd < 0.1 || pd > 100) return null;
+  const data = pl.PASCHEN_TABLE[gasType] || pl.PASCHEN_TABLE.argon;
+  for (let i = 0; i < data.length - 1; i++) {
+    if (pd >= data[i].pd && pd <= data[i + 1].pd) {
+      const r = (pd - data[i].pd) / (data[i + 1].pd - data[i].pd);
+      return data[i].voltage + r * (data[i + 1].voltage - data[i].voltage);
+    }
+  }
+  return data[data.length - 1].voltage;
+};
+
+for (const p of range(0.1, 10, 0.1)) {
+  for (const E of range(10, 500, 10)) {
+    check(`ioniz(${p},${E})`, baseIonization(p, E), pl.calculateBasicIonizationDegree(p, E));
+    check(`prob(${p},${E})`, baseProb(p, E), pl.calculateBasicPlasmaGenerationProbability(p, E));
+  }
+}
+for (const g of ['argon', 'air', 'helium', 'nitrogen', 'neon', 'unknown']) {
+  for (const pd of range(0.05, 120, 0.25)) {
+    check(`paschen(${g},${pd})`, basePaschen(pd, 1.0, g), pl.calculateBreakdownVoltage(pd, 1.0, g));
+    check(`townsend(${pd})`, baseTownsend(pd), pl.getTownsendInfo(pd));
+  }
+}
+
+// ── 식각: 선택비 / 균일도 / 보조 인자 ──
+const baseSelectivity = (target, gasFlow, power, pressure) => {
+  let sel = 5;
+  switch (target) {
+    case 'Si':
+      sel = 8 + (gasFlow.HBr / 10) * 8 - Math.max(0, (gasFlow.Cl2 - 50) * 0.35) - Math.max(0, (gasFlow.Ar - 80) * 0.25);
+      break;
+    case 'SiO2':
+      sel = 5 + (gasFlow.CHF3 / 10) * 4 - Math.max(0, (gasFlow.CF4 - 30) * 0.3) - Math.max(0, (gasFlow.Ar - 70) * 0.25);
+      break;
+    case 'Si3N4':
+      sel = 5 + (gasFlow.CHF3 / 10) * 3 - Math.max(0, (gasFlow.O2 - 15) * 0.5);
+      break;
+    case 'PR': sel = 30 + Math.random() * 5; break;
+    default: sel = 5 + Math.random() * 5;
+  }
+  sel -= power > 500 ? (power - 500) / 150 : 0;
+  sel -= pressure < 40 ? (40 - pressure) / 20 : 0;
+  return Math.max(1, sel);
+};
+const baseUniformity = (pressure, power, gasFlow) => {
+  const pe2 = Math.max(0, 100 - Math.abs(pressure - 100) / 1.5);
+  const pw = Math.max(0, 100 - Math.abs(power - 300) / 5);
+  let u = (pe2 + pw) / 2;
+  if (gasFlow) {
+    const total = Object.values(gasFlow).reduce((a, b) => a + b, 0);
+    if (total > 350) u -= (total - 350) / 6;
+  }
+  return Math.max(40, Math.min(100, u));
+};
+
+const realRandom = Math.random;
+let seed = 1;
+for (const m of ['Si', 'SiO2', 'Si3N4', 'PR', 'W']) {
+  for (const power of range(50, 1200, 50)) {
+    for (const pressure of range(5, 300, 15)) {
+      for (const gf of [
+        { Cl2: 50, HBr: 20, CF4: 40, CHF3: 30, O2: 10, Ar: 60 },
+        { Cl2: 80, HBr: 60, CF4: 20, CHF3: 60, O2: 30, Ar: 120 },
+        { Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 0, Ar: 0 },
+      ]) {
+        seed++;
+        Math.random = makeRng(seed);
+        const expSel = baseSelectivity(m, gf, power, pressure);
+        Math.random = realRandom;
+        check(`selectivity(${m},${power},${pressure},${seed})`, expSel, et.calculateSelectivity(m, gf, power, pressure, makeRng(seed)));
+        check(`uniformity(${power},${pressure})`, baseUniformity(pressure, power, gf), et.calculateUniformity(pressure, power, gf));
+      }
+    }
+  }
+}
+for (const p of range(0, 300, 5)) check(`pEff(${p})`, Math.min(2.0, 0.5 + p / 100), et.calculatePressureEffect(p));
+for (const p of range(0, 1200, 25)) check(`powEff(${p})`, Math.min(3.0, 0.5 + p / 200), et.calculatePowerEffect(p));
+for (const r of range(0, 200, 2)) check(`gasEff(${r})`, Math.min(2.0, 0.8 + r / 50), et.calculateGasRatioEffect(r));
+
+// ── 리소: 균일도 / 해상도 / 결함 밀도 (두께 외 항목) ──
+const baseSpinCoatUniformity = (pp) => {
+  const { step1_rpm, step1_time, step2_rpm, step2_time, step3_rpm, step3_time } = pp;
+  let u = 99;
+  if (step1_rpm >= 400 && step1_rpm <= 600 && step1_time >= 4) u += 0;
+  else {
+    if (step1_rpm < 300) u -= 8;
+    else if (step1_rpm > 800) u -= 6;
+    else u -= 3;
+    if (step1_time < 4) u -= 4;
+  }
+  if (step2_rpm >= 2500 && step2_rpm <= 3500 && step2_time >= 20) u += 0;
+  else {
+    if (step2_rpm < 1500) u -= 15;
+    else if (step2_rpm < 2000) u -= 8;
+    else if (step2_rpm > 5000) u -= 12;
+    else if (step2_rpm > 4500) u -= 6;
+    else u -= 2;
+    if (step2_time < 15) u -= 5;
+    else if (step2_time > 50) u -= 3;
+  }
+  if (step3_rpm === 0 && step3_time >= 2) u += 0;
+  else {
+    if (step3_rpm > 0) u -= 2;
+    if (step3_time < 2) u -= 1;
+  }
+  return Math.min(99.5, Math.max(70, u));
+};
+for (const r1 of [200, 500, 900]) {
+  for (const t1 of [2, 5]) {
+    for (const r2 of range(1000, 6000, 250)) {
+      for (const t2 of [10, 25, 60]) {
+        for (const r3 of [0, 500]) {
+          for (const t3 of [1, 3]) {
+            const pp = { step1_rpm: r1, step1_time: t1, step2_rpm: r2, step2_time: t2, step3_rpm: r3, step3_time: t3 };
+            const expectedU = baseSpinCoatUniformity(pp);
+            const actual = li.calculateSpinCoatResults(pp, makeRng(++seed));
+            check(`spinUniformity(${r1},${t1},${r2},${t2},${r3},${t3})`, expectedU, actual.uniformity);
+            check(`spinDefect(${r1},${t1},${r2},${t2},${r3},${t3})`, Math.max(0.1, (100 - expectedU) * 0.15), actual.defectDensity);
+          }
+        }
+      }
+    }
+  }
+}
+
+// ── PECVD: SiNx 하한 밖 구간 제외한 전부 ──
+const baseN = (r) => {
+  if (r < 10) return 1.55 - (r - 5) * 0.012;
+  if (r < 14) return 1.49 - (r - 10) * 0.0075;
+  if (r <= 18) return 1.46 - (r - 14) * 0.003;
+  return 1.448 - (r - 18) * 0.001;
+};
+const baseSiNxN = (r) => {
+  if (r < 5) return 2.3 - (r - 2) * 0.06;
+  if (r < 10) return 2.12 - (r - 5) * 0.024;
+  return 2.0 - (r - 10) * 0.03;
+};
+const baseDB = (d) => {
+  if (d < 3) return 50 - d * 5;
+  if (d < 10) return 35 - (d - 3) * 2.5;
+  if (d < 20) return 17.5 - (d - 10) * 1.0;
+  return Math.max(3, 7.5 - (d - 20) * 0.3);
+};
+const baseASiH = (d) => {
+  if (d < 5) return 15 - d * 0.4;
+  if (d < 15) return 13 - (d - 5) * 0.2;
+  return Math.max(8, 11 - (d - 15) * 0.1);
+};
+for (const r of range(0, 40, 0.1)) {
+  check(`n(${r})`, baseN(r), pe.calculateRefractiveIndex(r));
+  check(`nSi(${r})`, Math.min(1.6, 0.6 + r * 0.07), pe.calculateNSiRatio(r));
+  check(`db(${r})`, baseDB(r), pe.calculateDanglingBondDensity(r));
+  check(`aSiH(${r})`, baseASiH(r), pe.calculateaSiHContent(r));
+  // SiNx 는 하한 1.8 이 걸리기 전 구간(비율 ≤ 16.6)만 회귀 대조 대상이다.
+  if (baseSiNxN(r) >= 1.8) check(`siNxN(${r})`, baseSiNxN(r), pe.calculateSiNxRefractiveIndex(r));
+}
+for (const T of range(100, 600, 2)) {
+  check(`H(${T})`, Math.max(5, 35 - T * 0.07), pe.calculateHydrogenContent(T));
+  check(`dens(${T})`, Math.min(100, 60 + T * 0.1), pe.calculateFilmDensity(T));
+}
+
+// ── RTA: 존 설정 온도 + 온도 프로파일의 램프업/soak 구간 ──
+const baseZoneSetpoints = (gsp, lampPower) =>
+  lampPower.map((_, idx) => {
+    const pf = lampPower[idx] / 100;
+    const offset = idx === 0 ? 0 : idx < 3 ? 2 : idx < 5 ? 5 : 8;
+    return Math.max(25, gsp - offset + pf * 10);
+  });
+for (const gsp of range(100, 1200, 50)) {
+  for (const lp of [[100, 100, 100, 100, 100, 100], [80, 90, 100, 70, 60, 50], [0, 0, 0, 0, 0, 0]]) {
+    check(`zoneSp(${gsp})`, baseZoneSetpoints(gsp, lp), rta.computeZoneSetpoints(gsp, lp));
+  }
+}
+const baseRampAndSoak = (time, targetTemp, rampRate, processTime) => {
+  const gas = 10;
+  const up = (targetTemp - 25) / rampRate;
+  if (time <= gas) return 25;
+  if (time <= gas + up) return 25 + rampRate * (time - gas);
+  if (time <= gas + up + processTime) return targetTemp;
+  return null; // 냉각 구간은 의도적으로 바뀌었으므로 제외
+};
+for (const target of [400, 700, 1000, 1100]) {
+  for (const ramp of [10, 50, 100, 200]) {
+    for (const pt of [5, 30, 60]) {
+      for (const t of range(0, 200, 0.5)) {
+        const expected = baseRampAndSoak(t, target, ramp, pt);
+        if (expected !== null) {
+          check(`rtaT(${target},${ramp},${pt},${t})`, expected, rta.calculateTempProfile(t, { targetTemp: target, rampRate: ramp, processTime: pt }));
+        }
+      }
+    }
+  }
+}
+
+// ── 세정: 하한 clamp 가 걸리지 않는 정상 범위 ──
+const baseCleaning = (method, params) => {
+  switch (method) {
+    case 'wet': {
+      const tf = (params.temperature - 25) / 75;
+      const cf = params.concentration / 10;
+      const timef = Math.min(params.time / 15, 1);
+      const sf = params.solution === 'BOE' ? 1.2 : params.solution === 'SC1' ? 0.3 : params.solution === 'SC2' ? 0.2 : 0.8;
+      return Math.min(98, 20 + tf * 25 + cf * 30 + timef * 20 + sf * 15);
+    }
+    case 'dry': {
+      return Math.min(85, 35 + (params.power / 500) * 30 + ((0.5 - params.pressure) / 0.4) * 20);
+    }
+    case 'ultrasonic': {
+      const ff = Math.abs(params.frequency - 40) / 40;
+      return Math.min(60, 30 + (1 - ff) * 15 + (params.power / 150) * 15);
+    }
+    default: return 0;
+  }
+};
+for (const sol of ['BOE', 'SC1', 'SC2', 'SPM']) {
+  for (const T of range(25, 100, 2)) {
+    for (const conc of range(0, 20, 1)) {
+      for (const time of [1, 10, 30]) {
+        const p = { temperature: T, concentration: conc, time, solution: sol };
+        check(`clean(wet,${sol},${T},${conc},${time})`, baseCleaning('wet', p), cl.calculateOxideRemovalEfficiency('wet', p));
+      }
+    }
+  }
+}
+for (const power of range(0, 1000, 25)) {
+  for (const pressure of range(0, 0.5, 0.05)) {
+    const p = { power, pressure };
+    check(`clean(dry,${power},${pressure})`, baseCleaning('dry', p), cl.calculateOxideRemovalEfficiency('dry', p));
+  }
+  for (const freq of range(10, 80, 5)) {
+    const p = { power, frequency: freq };
+    check(`clean(us,${power},${freq})`, baseCleaning('ultrasonic', p), cl.calculateOxideRemovalEfficiency('ultrasonic', p));
+  }
+}
+
+// ═════════════════════ 2) 변경 보고 ═════════════════════
+// 물리 오류를 고친 함수들. 값이 의도적으로 바뀌었으므로 변화량을 보여 준다.
+
+const oldOxide = (temp, time, atm, flow = 100) => {
+  const tempK = temp + 273.15;
+  let B, A;
+  if (atm === 'dry') {
+    B = 3.0e7 * Math.exp(-1.23 / (8.617e-5 * tempK));
+    A = 165 * Math.exp(-2.0 / (8.617e-5 * tempK));
+  } else {
+    B = 7.7e7 * Math.exp(-0.78 / (8.617e-5 * tempK));
+    A = 226 * Math.exp(-2.0 / (8.617e-5 * tempK));
+  }
+  const th = ((-A + Math.sqrt(A * A + 4 * B * (time / 60))) / 2) * (0.5 + (flow / 100) * 0.5);
+  return Math.max(0, Math.min(th, 1000));
+};
+const oldImplantRp = (energy, dopant) => {
+  const masses = { B: 10.8, P: 31.0, As: 74.9, In: 114.8, Sb: 121.8 };
+  const zs = { B: 5, P: 15, As: 33, In: 49, Sb: 51 };
+  const m = masses[dopant], Z1 = zs[dopant];
+  const eps = (32.5 * m * energy) / (Z1 * 14 * (m + 28.1) * (Math.pow(Z1, 0.23) + Math.pow(14, 0.23)));
+  return Math.max((m / 28.1) * Math.pow(eps, 0.8) * 100, 1);
+};
+const oldPumpTime = (V, Pi, Pf, S) => {
+  if (Pf <= 0.02) Pf = 0.02;
+  if (Pi <= Pf) return 0;
+  return (V * Math.log(Pi / Pf)) / ((S * 60) / 1000);
+};
+const oldConductance = (D, L) => ((3.27e-2 * Math.pow(D, 4)) / L) * 1000;
+const oldReflected = (Z, P) => P * Math.pow(Math.abs(Z - 50) / 50, 2);
+const oldSpinThickness = (rpm) => {
+  if (rpm < 2000) return 1000 + (2000 - rpm) * 0.1;
+  if (rpm > 4000) return 1000 - (rpm - 4000) * 0.05;
+  return 1000;
+};
+
+const rows = [];
+const pct = (o, n) => (o === 0 ? '—' : `${(((n - o) / o) * 100).toFixed(0)}%`);
+const push = (item, cond, o, n, unit) =>
+  rows.push([item, cond, typeof o === 'number' ? o.toFixed(1) : o, typeof n === 'number' ? n.toFixed(1) : n, unit, pct(o, n)]);
+
+push('① 산화 두께', 'dry 1000°C 60분', oldOxide(1000, 60, 'dry'), ox.calculateOxideGrowth(1000, 60, 'dry'), 'nm');
+push('① 산화 두께', 'dry 1100°C 60분', oldOxide(1100, 60, 'dry'), ox.calculateOxideGrowth(1100, 60, 'dry'), 'nm');
+push('① 산화 두께', 'wet 1000°C 60분', oldOxide(1000, 60, 'wet'), ox.calculateOxideGrowth(1000, 60, 'wet'), 'nm');
+push('① 산화 두께', 'wet 1100°C 120분', oldOxide(1100, 120, 'wet'), ox.calculateOxideGrowth(1100, 120, 'wet'), 'nm');
+push('② 이온주입 Rp', 'B 50 keV', oldImplantRp(50, 'B'), dp.calculateImplantParams(50, 'B').Rp * 1000, 'nm');
+push('② 이온주입 Rp', 'P 50 keV', oldImplantRp(50, 'P'), dp.calculateImplantParams(50, 'P').Rp * 1000, 'nm');
+push('② 이온주입 Rp', 'As 50 keV', oldImplantRp(50, 'As'), dp.calculateImplantParams(50, 'As').Rp * 1000, 'nm');
+push('② 이온주입 Rp', 'As 30 keV (S/D)', oldImplantRp(30, 'As'), dp.calculateImplantParams(30, 'As').Rp * 1000, 'nm');
+push('③ 배기 시간', 'V=100L S=250L/s 760→1', oldPumpTime(100, 760, 1, 250), vac.calculatePumpingTime(100, 760, 1, 250), '분');
+push('③ 배기 시간', 'V=1000L S=900L/s 760→1', oldPumpTime(1000, 760, 1, 900), vac.calculatePumpingTime(1000, 760, 1, 900), '분');
+push('④ Conductance', 'D=10cm L=100cm', oldConductance(10, 100), vac.calculateConductance(10, 100, 'straight'), 'L/s');
+push('④ Conductance', 'D=20cm L=100cm', oldConductance(20, 100), vac.calculateConductance(20, 100, 'straight'), 'L/s');
+push('⑤ 반사 전력', 'Z=100Ω, 1000W', oldReflected(100, 1000), pl.calculateReflectedPower(100, 1000), 'W');
+push('⑤ 반사 전력', 'Z=150Ω, 1000W', oldReflected(150, 1000), pl.calculateReflectedPower(150, 1000), 'W');
+push('⑤ 반사 전력', 'Z=200Ω, 1000W', oldReflected(200, 1000), pl.calculateReflectedPower(200, 1000), 'W');
+push('⑦ PR 두께', '2000 rpm', oldSpinThickness(2000), li.calculateSpinCoatResults({ step1_rpm: 500, step1_time: 5, step2_rpm: 2000, step2_time: 30, step3_rpm: 0, step3_time: 3 }, () => 0.5).prThickness, 'nm');
+push('⑦ PR 두께', '3000 rpm', oldSpinThickness(3000), li.calculateSpinCoatResults({ step1_rpm: 500, step1_time: 5, step2_rpm: 3000, step2_time: 30, step3_rpm: 0, step3_time: 3 }, () => 0.5).prThickness, 'nm');
+push('⑦ PR 두께', '5000 rpm', oldSpinThickness(5000), li.calculateSpinCoatResults({ step1_rpm: 500, step1_time: 5, step2_rpm: 5000, step2_time: 30, step3_rpm: 0, step3_time: 3 }, () => 0.5).prThickness, 'nm');
+
+// ⑥ 자동 매칭: 부하별 정합 후 입력 임피던스
+const matchRows = [];
+for (const Z of [10, 25, 40, 50, 100, 200]) {
+  const o = pl.calculateOptimalLC(13.56, Z);
+  const after = pl.calculateInputImpedance(13.56, Number(o.L), Number(o.C), Z);
+  matchRows.push([`${Z} Ω`, after.toFixed(1), `${(((after - 50) / 50) * 100).toFixed(1)}%`]);
+}
+
+// ═════════════════════ 출력 ═════════════════════
+const pad = (v, w) => String(v).padEnd(w);
+const padS = (v, w) => String(v).padStart(w);
+
+console.log('');
+console.log('1) 회귀 대조 — 물리 수정 대상이 아닌 함수는 추출 이전과 값이 같아야 한다');
+console.log('─'.repeat(72));
+console.log(`  비교한 값   : ${compared.toLocaleString()} 개`);
+console.log(`  불일치      : ${mismatched.toLocaleString()} 개`);
+if (failures.length) {
+  console.log('\n  불일치 상세 (최대 20건):');
+  failures.forEach((f) => console.log('  - ' + f));
+}
+
+console.log('');
+console.log('2) 변경 보고 — 물리 오류를 고쳐 값이 의도적으로 바뀐 항목');
+console.log('─'.repeat(72));
+console.log(`  ${pad('항목', 16)} ${pad('조건', 24)} ${padS('수정 전', 10)} ${padS('수정 후', 10)} ${pad('', 5)} 변화`);
+for (const [item, cond, o, n, unit, p] of rows) {
+  console.log(`  ${pad(item, 16)} ${pad(cond, 24)} ${padS(o, 10)} ${padS(n, 10)} ${pad(unit, 5)} ${p}`);
+}
+console.log('');
+console.log('  ⑥ RF 자동 매칭 후 입력 임피던스 (목표 50 Ω)');
+console.log(`     ${pad('부하', 10)} ${padS('Z_in', 10)}  오차`);
+for (const [z, after, err] of matchRows) {
+  console.log(`     ${pad(z, 10)} ${padS(after, 10)}  ${err}`);
+}
+console.log('');
+
+process.exit(mismatched === 0 ? 0 : 1);

@@ -52,6 +52,11 @@ describe('calculateRefractiveIndex (SiO2)', () => {
     expect(Number.isFinite(calculateRefractiveIndex(0))).toBe(true);
     expect(calculateRefractiveIndex(0)).toBeLessThan(1.7);
   });
+
+  it('O-rich 쪽 하한 1.4 로 clamp 된다 (하한이 없으면 결국 음수까지 내려간다)', () => {
+    expect(calculateRefractiveIndex(1e6)).toBe(1.4);
+    expect(calculateRefractiveIndex(500)).toBe(1.4);
+  });
 });
 
 describe('calculateSiNxRefractiveIndex', () => {
@@ -61,7 +66,7 @@ describe('calculateSiNxRefractiveIndex', () => {
 
   it('NH3/SiH4 비가 커질수록(N-rich) 굴절률이 낮아진다', () => {
     let prev = Infinity;
-    for (const r of [2, 4, 5, 8, 10, 12, 15]) {
+    for (const r of [2, 4, 5, 8, 10, 12]) {
       const n = calculateSiNxRefractiveIndex(r);
       expect(n).toBeLessThan(prev);
       prev = n;
@@ -72,14 +77,17 @@ describe('calculateSiNxRefractiveIndex', () => {
     expect(calculateSiNxRefractiveIndex(8)).toBeCloseTo(2.0, 1);
   });
 
-  it('경계값: 비율이 아주 크면 굴절률이 1 아래로 떨어진다 (하한 없음, 현재 동작)', () => {
-    // 2.0 − (ratio − 10)*0.03 이라 ratio > 43.3 이면 n < 1 로 물리적으로 불가능한 값이 된다.
-    expect(calculateSiNxRefractiveIndex(50)).toBeLessThan(1);
+  it('N-rich 쪽 하한 1.8 로 clamp 된다 (질화막 굴절률의 물리적 하한)', () => {
+    expect(calculateSiNxRefractiveIndex(50)).toBe(1.8);
+    expect(calculateSiNxRefractiveIndex(1000)).toBe(1.8);
   });
 
-  it.fails('굴절률은 어떤 입력에서도 1 미만이 될 수 없다', () => {
-    // 측정값: ratio 50 → n = 0.8
-    expect(calculateSiNxRefractiveIndex(50)).toBeGreaterThanOrEqual(1);
+  it('전 구간에서 SiNx 물리 범위(1.8~2.5) 안이다', () => {
+    for (let r = 0; r <= 100; r += 0.5) {
+      const n = calculateSiNxRefractiveIndex(r);
+      expect(n).toBeGreaterThanOrEqual(1.8);
+      expect(n).toBeLessThan(2.5);
+    }
   });
 });
 
@@ -87,6 +95,12 @@ describe('calculateNSiRatio', () => {
   it('NH3 비가 커질수록 N/Si 비가 커지고 1.6 에서 포화한다', () => {
     expect(calculateNSiRatio(2)).toBeLessThan(calculateNSiRatio(8));
     expect(calculateNSiRatio(100)).toBe(1.6);
+  });
+
+  it('원자비는 음수가 되지 않는다', () => {
+    for (const r of [-1000, -100, -8.6, 0, 10]) {
+      expect(calculateNSiRatio(r)).toBeGreaterThanOrEqual(0);
+    }
   });
 
   it('화학량론 Si3N4 의 N/Si = 1.33 을 ratio 8 부근에서 지난다', () => {

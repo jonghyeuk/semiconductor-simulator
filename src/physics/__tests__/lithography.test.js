@@ -71,60 +71,49 @@ describe('calculateSpinCoatResults — 정상 경로', () => {
 
 describe('calculateSpinCoatResults — 두께 물리', () => {
   /*
-   * ── 확인된 물리 오류 ⑦: 스핀 코팅 두께가 회전수를 거의 안 따라간다 ──
-   *
-   * 스핀 코팅의 기본 관계는 Emslie–Bonner–Peck 해에서 나오는
-   *   t ∝ ω^(−1/2)
-   * 즉 회전수를 4배로 올리면 두께가 절반이 된다. 이건 리소 공정 교육의 핵심 관계다.
-   *
-   * 코드는 대신 구간별 1차식을 쓰고, 심지어 2000~4000 rpm 구간은
-   *   thickness = 1000 + (random() − 0.5) * 20
-   * 이라 **회전수와 아무 상관이 없다**. 2000 rpm 과 4000 rpm 의 기대 두께가 똑같다.
-   *
-   *   rpm    코드 두께   ω^(−1/2) 기준(3000 rpm=1000 nm)
-   *   1000   1100 nm     1732 nm
-   *   2000   1000 nm     1225 nm
-   *   3000   1000 nm     1000 nm
-   *   4000   1000 nm      866 nm
-   *   6000    900 nm      707 nm
-   *
-   * 전 구간을 통틀어 6배 회전수 변화에 두께는 18% 밖에 안 변한다 (실제 2.4배).
-   *
-   * 계산식을 고치면 화면의 PR 두께가 전부 바뀌므로 임의로 고치지 않고
-   * it.fails 로 올바른 기댓값만 남긴다.
+   * 스핀 코팅의 기본 관계는 Emslie–Bonner–Peck 해에서 나오는 t ∝ ω^(−1/2) 다.
+   * 예전 구현은 구간별 1차식이었고 2000~4000 rpm 구간은 난수만 돌려 회전수와
+   * 무관했다 (2000 rpm 과 4000 rpm 의 두께가 같았다).
    */
 
   const thickness = (rpm) => calculateSpinCoatResults(params({ step2_rpm: rpm }), mid).prThickness;
 
-  it('현재 동작: 2000~4000 rpm 구간에서 두께가 회전수와 무관하다', () => {
-    expect(thickness(2000)).toBe(thickness(4000));
-    expect(thickness(2500)).toBe(thickness(3500));
-  });
-
-  it('현재 동작: 회전수를 6배 해도 두께가 20% 도 안 변한다', () => {
-    expect(thickness(6000) / thickness(1000)).toBeGreaterThan(0.8);
-  });
-
-  it.fails('회전수가 오르면 두께는 반드시 얇아져야 한다 (구간 무관하게 단조 감소)', () => {
-    // 측정값: 2000 rpm 과 4000 rpm 이 둘 다 1000 nm 로 동일
+  it('회전수가 오르면 두께가 단조 감소한다', () => {
     let prev = Infinity;
-    for (const rpm of [1000, 2000, 3000, 4000, 5000, 6000]) {
-      expect(thickness(rpm)).toBeLessThan(prev);
-      prev = thickness(rpm);
+    for (const rpm of [500, 1000, 2000, 2500, 3000, 3500, 4000, 5000, 6000]) {
+      const t = thickness(rpm);
+      expect(t).toBeLessThan(prev);
+      prev = t;
     }
   });
 
-  it.fails('회전수 4배면 두께가 절반이 되어야 한다 (t ∝ ω^-1/2)', () => {
-    // 측정값: 1000→4000 rpm 두께비 0.909 / 이론값 0.5
-    expect(thickness(4000) / thickness(1000)).toBeCloseTo(0.5, 1);
+  it('회전수 4배면 두께가 절반이 된다 (t ∝ ω^(−1/2))', () => {
+    for (const rpm of [500, 1000, 1500]) {
+      expect(thickness(4 * rpm) / thickness(rpm)).toBeCloseTo(0.5, 2);
+    }
+  });
+
+  it('기준점 3000 rpm 에서 1000 nm 다', () => {
+    expect(thickness(3000)).toBeCloseTo(1000, 0);
+  });
+
+  it('두께 × √rpm 이 전 구간에서 일정하다', () => {
+    const invariants = [500, 1000, 2000, 3000, 4000, 6000].map((rpm) => thickness(rpm) * Math.sqrt(rpm));
+    for (const v of invariants) expect(v).toBeCloseTo(invariants[0], 0);
+  });
+
+  it('런투런 산포는 ±1% 안이다', () => {
+    const lo = calculateSpinCoatResults(params(), fixed(0)).prThickness;
+    const hi = calculateSpinCoatResults(params(), fixed(1)).prThickness;
+    expect(hi / lo).toBeCloseTo(1.01 / 0.99, 6);
   });
 });
 
 describe('calculateSpinCoatResults — 경계값', () => {
-  it('RPM 0 이어도 유한한 값이 나온다', () => {
+  it('RPM 0 이어도 발산하지 않는다', () => {
     const r = calculateSpinCoatResults(params({ step2_rpm: 0 }), mid);
     expect(Number.isFinite(r.prThickness)).toBe(true);
-    expect(r.prThickness).toBe(1200); // 1000 + 2000*0.1
+    expect(r.prThickness).toBeGreaterThan(0);
   });
 
   it('시간 0 이어도 NaN 이 아니다', () => {
@@ -132,14 +121,19 @@ describe('calculateSpinCoatResults — 경계값', () => {
     expect(Number.isNaN(r.uniformity)).toBe(false);
   });
 
-  it('극단적으로 높은 RPM 에서는 두께가 음수가 된다 (하한 없음, 현재 동작)', () => {
-    // 1000 − (rpm − 4000)*0.05 이므로 24000 rpm 을 넘으면 음수 두께가 나온다.
-    expect(calculateSpinCoatResults(params({ step2_rpm: 30000 }), mid).prThickness).toBeLessThan(0);
+  it('두께는 어떤 입력에서도 음수가 되지 않는다', () => {
+    for (const rpm of [-1000, 0, 1, 3000, 30000, 1e9]) {
+      const t = calculateSpinCoatResults(params({ step2_rpm: rpm }), mid).prThickness;
+      expect(t).toBeGreaterThanOrEqual(0);
+      expect(Number.isFinite(t)).toBe(true);
+    }
   });
 
-  it.fails('두께는 어떤 입력에서도 음수가 될 수 없다', () => {
-    // 측정값: 30000 rpm → −300 nm
-    expect(calculateSpinCoatResults(params({ step2_rpm: 30000 }), mid).prThickness).toBeGreaterThanOrEqual(0);
+  it('극단적으로 높은 RPM 에서는 두께가 0 으로 수렴한다', () => {
+    // ω^(−1/2) 이라 0 에 점근할 뿐 음수로 넘어가지 않는다.
+    const t = calculateSpinCoatResults(params({ step2_rpm: 1e9 }), mid).prThickness;
+    expect(t).toBeGreaterThan(0);
+    expect(t).toBeLessThan(1000 / 100); // 기준 두께의 1% 미만
   });
 
   it('해상도는 난수 범위 88~92% 안이다', () => {

@@ -64,7 +64,14 @@ export function pressureToSliderValue(pressure) {
 
 /**
  * 챔버를 initialPressure → finalPressure 까지 배기하는 시간.
- * @param {number} volume 챔버 부피 (UI 는 L 로 표시)
+ *
+ *   t = (V / S) · ln(Pi / Pf)
+ *
+ * V 를 L, S 를 L/s 로 넣으면 t 는 초다. UI 가 챔버 부피를 L 로 표시하므로
+ * 분으로 바꾸려면 60 으로만 나누면 된다. 예전 구현은 분모에 `/1000` 이 더 붙어
+ * (부피를 m³ 로 받는 식) 결과가 1000배로 나왔다.
+ *
+ * @param {number} volume 챔버 부피 (L)
  * @param {number} initialPressure Torr
  * @param {number} finalPressure Torr
  * @param {number} pumpSpeed L/s
@@ -73,27 +80,44 @@ export function pressureToSliderValue(pressure) {
 export function calculatePumpingTime(volume, initialPressure, finalPressure, pumpSpeed) {
   if (finalPressure <= 0.02) finalPressure = 0.02;
   if (initialPressure <= finalPressure) return 0;
-  const timeInMinutes =
-    (volume * Math.log(initialPressure / finalPressure)) / ((pumpSpeed * 60) / 1000);
-  return timeInMinutes;
+  if (!(volume > 0)) return 0; // 부피가 없으면 뺄 기체도 없다 (음수 부피는 성립 불가)
+  if (!(pumpSpeed > 0)) return Infinity; // 펌프가 안 돌면 영원히 안 내려간다
+  return (volume * Math.log(initialPressure / finalPressure)) / (pumpSpeed * 60);
 }
 
-/** 배관 형태별 conductance (L/s). */
+/**
+ * 분자류(molecular flow) 영역의 긴 원통관 conductance.
+ *
+ *   C[L/s] = 3.81 · √(T/M) · D³ / L_eff      (D, L 은 cm)
+ *
+ * 공기(M = 29 g/mol), 20°C 에서 계수는 12.1 이다. L_eff = L + 4D/3 은 관 입구
+ * 효과(Clausing 보정)를 대략 반영해 짧은 관에서 과대평가되는 걸 막아 준다.
+ *
+ * 예전 구현은 D⁴ (점성류 형태) 이면서 압력 항이 없었다. 이 시뮬레이터는
+ * 터보펌프로 1e-6 Torr 까지 내려가는 분자류 영역을 다루므로 D³ 가 맞다.
+ *
+ * @param {number} diameter 관 안지름 (cm)
+ * @param {number} length 관 길이 (cm)
+ * @param {'straight'|'elbow'|'spiral'} pipeType
+ * @returns {number} L/s
+ */
 export function calculateConductance(diameter, length, pipeType) {
-  // 기본 원통형 배관의 conductance (L/s)
   const D = diameter; // cm
   const L = length; // cm
-  const baseConductance = (3.27e-2 * Math.pow(D, 4)) / L;
+  if (!(D > 0)) return 0;
+  if (!(L >= 0)) return 0;
+
+  const effectiveLength = L + (4 * D) / 3;
+  const baseConductance = (12.1 * Math.pow(D, 3)) / effectiveLength;
 
   switch (pipeType) {
-    case 'straight':
-      return baseConductance * 1000;
     case 'elbow':
-      return baseConductance * 0.7 * 1000; // 엘보로 인한 손실
+      return baseConductance * 0.7; // 엘보로 인한 손실
     case 'spiral':
-      return baseConductance * 0.4 * 1000; // 스파이럴로 인한 큰 손실
+      return baseConductance * 0.4; // 스파이럴로 인한 큰 손실
+    case 'straight':
     default:
-      return baseConductance * 1000;
+      return baseConductance;
   }
 }
 

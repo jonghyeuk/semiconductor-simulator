@@ -73,33 +73,35 @@ describe('calculateEtchRate — 정상 경로', () => {
 });
 
 describe('calculateEtchRate — 경계값', () => {
-  it('가스를 모두 0 으로 해도 하한 5 nm/min 이 유지된다', () => {
+  it('반응 가스가 없으면 식각도 없다', () => {
     const zeroGas = { Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 0, Ar: 0 };
     for (const m of ['Si', 'SiO2', 'Si3N4', 'PR']) {
-      expect(calculateEtchRate(m, zeroGas, 300, 80, mid)).toBe(5);
+      expect(calculateEtchRate(m, zeroGas, 300, 80, mid)).toBe(0);
     }
   });
 
-  it('파워 0 이어도 하한 5 nm/min 이라 식각이 멈추지 않는다 (현재 동작)', () => {
-    // 물리적으로는 플라즈마 파워가 0 이면 식각률도 0 이어야 한다.
-    expect(calculateEtchRate('Si', GAS, 0, 80, mid)).toBe(5);
+  it('플라즈마 파워가 0 이면 식각이 일어나지 않는다', () => {
+    for (const m of ['Si', 'SiO2', 'Si3N4', 'PR']) {
+      expect(calculateEtchRate(m, GAS, 0, 80, mid)).toBe(0);
+    }
   });
 
-  it.fails('파워가 0 이면 식각이 일어나지 않아야 한다', () => {
-    // 측정값 5 nm/min — Math.max(5, ...) 하한이 0 을 덮어쓴다.
-    expect(calculateEtchRate('Si', GAS, 0, 80, mid)).toBe(0);
+  it('식각률은 음수가 되지 않는다 (passivation 이 과할 때도 0 에서 멈춘다)', () => {
+    // Si 에서 HBr 과다는 측벽 passivation 으로 baseRate 를 음수로 만든다.
+    const heavyHBr = { ...GAS, Cl2: 5, HBr: 200 };
+    expect(calculateEtchRate('Si', heavyHBr, 300, 80, mid)).toBe(0);
   });
 
   it('알 수 없는 재료는 기본 baseRate 50 을 쓴다', () => {
     const w = calculateEtchRate('W', GAS, 300, 80, mid);
-    expect(w).toBeGreaterThan(5);
+    expect(w).toBeGreaterThan(0);
     expect(Number.isFinite(w)).toBe(true);
   });
 
-  it('극단적으로 높은 압력에서도 하한 계수 0.5 이하로 안 내려간다', () => {
+  it('극단적으로 높은 압력에서도 유한하고 음수가 아니다', () => {
     const r = calculateEtchRate('Si', GAS, 300, 10000, mid);
     expect(Number.isFinite(r)).toBe(true);
-    expect(r).toBeGreaterThanOrEqual(5);
+    expect(r).toBeGreaterThan(0);
   });
 
   it('음수 압력에서도 NaN 이 아니다', () => {

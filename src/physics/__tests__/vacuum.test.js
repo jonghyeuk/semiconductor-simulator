@@ -118,58 +118,66 @@ describe('calculatePumpingTime — 경계값', () => {
     expect(calculatePumpingTime(100, 760, 1e-6, 250)).toBe(calculatePumpingTime(100, 760, 0.02, 250));
   });
 
-  it('펌프 속도 0 은 무한대가 된다 (가드 없음)', () => {
+  it('펌프 속도 0 이면 영원히 안 내려간다', () => {
     expect(calculatePumpingTime(100, 760, 1, 0)).toBe(Infinity);
+    expect(calculatePumpingTime(100, 760, 1, -50)).toBe(Infinity);
+  });
+
+  it('배기 시간은 음수가 되지 않는다', () => {
+    for (const V of [-1000, -1, 0, 100]) {
+      expect(calculatePumpingTime(V, 760, 1, 250)).toBeGreaterThanOrEqual(0);
+    }
   });
 });
 
 describe('calculatePumpingTime — 단위 검증', () => {
   /*
-   * ── 확인된 물리 오류 ③: 배기 시간이 1000배로 나온다 ──
-   *
-   * 코드: timeInMinutes = V·ln(Pi/Pf) / (S · 60 / 1000)
-   *
-   * 이론식은 t[s] = (V/S)·ln(Pi/Pf) 이고, V[L]·S[L/s] 이면
-   *   t[분] = V·ln(Pi/Pf) / (S·60)
-   * 이다. 분모에 있는 `/1000` 은 V 가 m³ 일 때 붙는 환산인데,
-   * UI 는 chamberVolume 을 **L 로 표시**한다 (`{chamberVolume} L`).
-   * 즉 표시 단위와 식이 어긋나 결과가 정확히 1000배로 나온다.
-   *
-   * 영향: 100 L 챔버 + 250 L/s 펌프로 760 → 1 Torr 배기가 실제로는 2.7초인데
-   * 화면에는 "44.2분" 으로 표시된다. 게다가 펌프 성능 판정(getPumpEfficiencyAssessment)이
-   * 10분/20분을 임계값으로 쓰기 때문에, 정상적인 펌프가 전부 "매우 느림 - 펌프 용량 부족"
-   * 으로 뜬다.
-   *
-   * 계산식을 고치면 사용자에게 보이는 시간과 판정 문구가 모두 바뀌므로 임의로 고치지 않고
-   * it.fails 로 올바른 기댓값만 남긴다.
+   * t = (V/S)·ln(Pi/Pf). V 를 L, S 를 L/s 로 넣으면 t 는 초다.
+   * UI 가 챔버 부피를 L 로 표시하므로 분으로 바꿀 땐 60 으로만 나눈다.
+   * 예전 구현은 분모에 `/1000` 이 더 붙어 (부피를 m³ 로 받는 식) 1000배로 나왔다.
    */
 
   /** 이론식: V[L], S[L/s] → 분 */
   const theoretical = (V, Pi, Pf, S) => (V * Math.log(Pi / Pf)) / (S * 60);
 
-  it('현재 동작: 이론값의 정확히 1000배가 나온다', () => {
-    for (const [V, S] of [[100, 250], [500, 250], [100, 1000]]) {
-      const ratio = calculatePumpingTime(V, 760, 1, S) / theoretical(V, 760, 1, S);
-      expect(ratio).toBeCloseTo(1000, 6);
+  it('이론식과 정확히 일치한다', () => {
+    for (const V of [10, 100, 500, 1000]) {
+      for (const S of [50, 250, 900, 3600]) {
+        for (const Pf of [1, 0.1, 0.02]) {
+          expect(calculatePumpingTime(V, 760, Pf, S)).toBeCloseTo(theoretical(V, 760, Pf, S), 12);
+        }
+      }
     }
   });
 
-  it.fails('100 L 챔버를 250 L/s 로 760→1 Torr 배기하면 1분 안에 끝나야 한다', () => {
-    // 측정값 44.2분 / 이론값 0.044분 (2.7초)
-    expect(calculatePumpingTime(100, 760, 1, 250)).toBeLessThan(1);
+  it('100 L 챔버를 250 L/s 로 760→1 Torr 배기하면 3초 정도다', () => {
+    const minutes = calculatePumpingTime(100, 760, 1, 250);
+    expect(minutes * 60).toBeCloseTo(2.65, 1);
   });
 
-  it.fails('배기 시간이 V·ln(Pi/Pf)/(S·60) 과 일치해야 한다', () => {
-    expect(calculatePumpingTime(100, 760, 1, 250)).toBeCloseTo(theoretical(100, 760, 1, 250), 6);
+  it('UI 슬라이더 전 범위에서 배기 시간이 3분을 넘지 않는다', () => {
+    // 챔버 10~1000 L, 펌프 50~7200 L/s
+    for (const V of [10, 100, 500, 1000]) {
+      for (const S of [50, 250, 900, 3600, 7200]) {
+        expect(calculatePumpingTime(V, 760, 1, S)).toBeLessThan(3);
+      }
+    }
   });
 });
 
 describe('calculateConductance', () => {
-  it('관이 길수록 conductance 가 작다 (1/L)', () => {
-    expect(calculateConductance(10, 200, 'straight')).toBeCloseTo(
-      calculateConductance(10, 100, 'straight') / 2,
-      9
-    );
+  it('관이 길수록 conductance 가 작다 (단조 감소)', () => {
+    let prev = Infinity;
+    for (const L of [10, 50, 100, 200, 400]) {
+      const c = calculateConductance(10, L, 'straight');
+      expect(c).toBeLessThan(prev);
+      prev = c;
+    }
+  });
+
+  it('관이 충분히 길면 1/L 에 수렴한다 (입구 보정이 무시될 때)', () => {
+    const ratio = calculateConductance(10, 2000, 'straight') / calculateConductance(10, 1000, 'straight');
+    expect(ratio).toBeCloseTo(0.5, 2);
   });
 
   it('굽은 배관일수록 conductance 가 작다', () => {
@@ -184,8 +192,15 @@ describe('calculateConductance', () => {
     expect(calculateConductance(10, 100, 'zigzag')).toBe(calculateConductance(10, 100, 'straight'));
   });
 
-  it('경계값: 길이 0 은 무한대가 된다 (가드 없음)', () => {
-    expect(calculateConductance(10, 0, 'straight')).toBe(Infinity);
+  it('경계값: 길이 0 (오리피스) 도 유한하다 — 입구 보정 덕분', () => {
+    const c = calculateConductance(10, 0, 'straight');
+    expect(Number.isFinite(c)).toBe(true);
+    expect(c).toBeGreaterThan(0);
+  });
+
+  it('경계값: 음수 직경/길이에서 0 을 낸다', () => {
+    expect(calculateConductance(-5, 100, 'straight')).toBe(0);
+    expect(calculateConductance(10, -100, 'straight')).toBe(0);
   });
 
   it('경계값: 직경 0 이면 0 이다', () => {
@@ -193,39 +208,34 @@ describe('calculateConductance', () => {
   });
 
   /*
-   * ── 확인된 물리 오류 ④: 분자류 영역인데 점성류 식을 쓴다 ──
+   * 분자류(molecular flow) 영역의 긴 원통관 conductance:
+   *   C[L/s] = 12.1 · D³ / L_eff  (공기 20°C, D·L 은 cm, L_eff = L + 4D/3)
    *
-   * 코드: C = 3.27e-2 · D⁴ / L · 1000
-   *
-   * D⁴ 의존성은 **점성류(viscous flow)** 형태다. 점성류 conductance 는
-   * 평균 압력 P̄ 에 비례하는데(C ≈ 180·D⁴·P̄/L, L/s·cm·Torr), 이 식에는 압력 항이 아예 없다.
-   *
-   * 이 시뮬레이터는 터보펌프로 1e-6 Torr 까지 내려가는 **분자류(molecular flow)** 영역을
-   * 다루고, 분자류의 긴 원통관 conductance 는 D³ 에 비례한다:
-   *   C[L/s] ≈ 12.1 · D³ / L   (공기, 20°C, D·L 은 cm)
-   *
-   * 결과적으로 직경이 커질수록 오차가 벌어진다 (D=5cm 13배 → D=20cm 54배).
-   * 게다가 D 의 거듭제곱이 틀렸으므로 "배관 직경을 2배로 하면 conductance 가 몇 배"
-   * 라는 교육적 결론 자체가 잘못 전달된다 (실제 8배, 이 코드 16배).
+   * 예전 구현은 D⁴ (점성류 형태) 인데 압력 항이 없었다. 이 시뮬레이터는
+   * 터보펌프로 1e-6 Torr 까지 내려가는 분자류 영역을 다루므로 D³ 가 맞다.
    */
 
-  /** 분자류 긴 원통관 conductance (공기, 20°C). */
+  /** 분자류 긴 원통관 conductance (입구 보정 없음). */
   const molecularFlow = (D, L) => (12.1 * Math.pow(D, 3)) / L;
 
-  it('현재 동작: 직경 2배면 conductance 가 16배 (D⁴)', () => {
-    expect(calculateConductance(20, 100, 'straight') / calculateConductance(10, 100, 'straight')).toBeCloseTo(16, 6);
+  it('직경 2배면 conductance 가 약 8배다 (D³)', () => {
+    for (const D of [5, 10, 20]) {
+      const ratio = calculateConductance(2 * D, 100, 'straight') / calculateConductance(D, 100, 'straight');
+      // 입구 보정(L_eff = L + 4D/3) 때문에 정확히 8 보다 살짝 작다.
+      expect(ratio).toBeGreaterThan(6.5);
+      expect(ratio).toBeLessThanOrEqual(8);
+    }
   });
 
-  it.fails('분자류에서는 직경 2배면 conductance 가 8배여야 한다 (D³)', () => {
-    // 측정값 16배 / 이론값 8배
-    const ratio = calculateConductance(20, 100, 'straight') / calculateConductance(10, 100, 'straight');
-    expect(ratio).toBeCloseTo(8, 1);
+  it('긴 관에서는 분자류 이론값의 ±10% 안에 든다', () => {
+    for (const D of [2, 5, 10]) {
+      const L = 500; // L >> D 라 입구 보정이 작다
+      expect(Math.abs(calculateConductance(D, L, 'straight') / molecularFlow(D, L) - 1)).toBeLessThan(0.1);
+    }
   });
 
-  it.fails('D=10cm, L=100cm 배관의 conductance 가 분자류 이론값의 ±50% 안이어야 한다', () => {
-    // 측정값 3270 L/s / 이론값 121 L/s (27배)
-    const actual = calculateConductance(10, 100, 'straight');
-    expect(Math.abs(actual / molecularFlow(10, 100) - 1)).toBeLessThan(0.5);
+  it('대표값이 문헌 자릿수와 맞는다 (D=10cm, L=100cm → 약 107 L/s)', () => {
+    expect(calculateConductance(10, 100, 'straight')).toBeCloseTo(106.8, 0);
   });
 });
 

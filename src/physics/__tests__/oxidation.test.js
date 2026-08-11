@@ -66,10 +66,25 @@ describe('calculateOxideGrowth — 정상 경로', () => {
 });
 
 describe('calculateOxideGrowth — 경계값', () => {
-  it('유량 0 이면 두께가 절반이 된다 (flowFactor 하한 0.5)', () => {
-    const full = calculateOxideGrowth(1000, 60, 'dry', 100);
-    const zero = calculateOxideGrowth(1000, 60, 'dry', 0);
-    expect(zero).toBeCloseTo(full * 0.5, 9);
+  it('유량 0 은 산화종 공급이 절반인 것과 같다 (= 시간 절반)', () => {
+    // 유량은 표면 산화종 농도를 통해 들어오므로 B 와 B/A 가 함께 스케일되고,
+    // 결과적으로 시간이 절반인 것과 같아진다. 두께 자체가 절반이 되는 게 아니다.
+    const zeroFlow = calculateOxideGrowth(1000, 60, 'dry', 0);
+    const halfTime = calculateOxideGrowth(1000, 30, 'dry', 100);
+    expect(zeroFlow).toBeCloseTo(halfTime, 9);
+  });
+
+  it('유량을 줄여도 Deal-Grove 관계 x² + A·x = B·t 가 유지된다', () => {
+    // 두께를 사후에 곱해 버리면 이 관계가 깨진다.
+    const kT = 8.617e-5 * (1000 + 273.15);
+    const B = 7.72e2 * Math.exp(-1.23 / kT);
+    const BA = 6.23e6 * Math.exp(-2.0 / kT);
+    const A = B / BA;
+    for (const flow of [0, 50, 100, 200]) {
+      const f = 0.5 + (flow / 100) * 0.5;
+      const x = calculateOxideGrowth(1000, 60, 'dry', flow) / 1000; // μm
+      expect(x * x + A * x).toBeCloseTo(B * (1 * f), 9);
+    }
   });
 
   it('UI 슬라이더 전 범위(800~1200°C, 10~180분)에서 유한한 값만 나온다', () => {
@@ -84,23 +99,37 @@ describe('calculateOxideGrowth — 경계값', () => {
     }
   });
 
-  /*
-   * ── 방어 부족 (UI 로는 도달 불가) ──
-   * 음수 시간이면 판별식이 음수가 되어 sqrt 가 NaN 을 낸다.
-   * 절대영도 이하면 exp 인자가 뒤집혀 B, A 가 Infinity → Infinity−Infinity = NaN.
-   * 현재 UI 슬라이더(800~1200°C, 10~180분)로는 닿지 않으므로 화면에는 안 보이지만,
-   * 입력 가드가 없다는 사실을 여기 고정해 둔다. 가드를 넣으면 이 테스트가 깨진다.
-   */
-  it('현재 동작: 음수 시간은 NaN 을 낸다 (가드 없음)', () => {
-    expect(Number.isNaN(calculateOxideGrowth(1000, -10, 'dry'))).toBe(true);
+  it('음수 시간이면 산화가 없다 (NaN 아님)', () => {
+    expect(calculateOxideGrowth(1000, -10, 'dry')).toBe(0);
   });
 
-  it('현재 동작: 절대영도 이하는 NaN 을 낸다 (가드 없음)', () => {
-    expect(Number.isNaN(calculateOxideGrowth(-300, 60, 'dry'))).toBe(true);
+  it('절대영도 이하이면 산화가 없다 (NaN 아님)', () => {
+    expect(calculateOxideGrowth(-300, 60, 'dry')).toBe(0);
+    expect(calculateOxideGrowth(-273.15, 60, 'dry')).toBe(0);
   });
 
-  it('극단적으로 긴 시간에서도 1000 nm 로 clamp 된다', () => {
-    expect(calculateOxideGrowth(1200, 1e6, 'wet')).toBe(1000);
+  it('어떤 입력에서도 NaN 이나 음수가 나오지 않는다', () => {
+    for (const T of [-500, -273.15, 0, 800, 1200, 5000]) {
+      for (const t of [-100, 0, 1, 1e6]) {
+        for (const f of [-50, 0, 100, 1e6]) {
+          const x = calculateOxideGrowth(T, t, 'dry', f);
+          expect(Number.isFinite(x)).toBe(true);
+          expect(x).toBeGreaterThanOrEqual(0);
+        }
+      }
+    }
+  });
+
+  it('극단적으로 긴 시간에서도 상한으로 clamp 된다', () => {
+    expect(calculateOxideGrowth(1200, 1e6, 'wet')).toBe(5000);
+  });
+
+  it('UI 로 닿을 수 있는 최대 두께가 상한에 걸리지 않는다', () => {
+    // 상한이 실제 공정 범위를 잘라내면 안 된다.
+    // 예전 상한 1000 nm 는 wet 1200°C 180분(≈1.5 μm)을 잘라먹었다.
+    const maxReachable = calculateOxideGrowth(1200, 180, 'wet', 200);
+    expect(maxReachable).toBeLessThan(5000);
+    expect(maxReachable).toBeGreaterThan(1000);
   });
 
   it('알 수 없는 분위기 문자열은 wet 으로 처리된다 (else 분기)', () => {
@@ -110,47 +139,58 @@ describe('calculateOxideGrowth — 경계값', () => {
 
 describe('calculateOxideGrowth — 문헌값 대조', () => {
   /*
-   * ── 확인된 물리 오류 ①: Deal-Grove 선형 영역이 사라졌다 ──
-   *
-   * 코드: A = 165 * exp(-2.0/kT)  (dry), 226 * exp(-2.0/kT) (wet)
-   *
-   * A 는 B 와 B/A 의 비이므로 지수는 (E_B − E_B/A) = 1.23 − 2.0 = −0.77 eV,
-   * 즉 A ∝ exp(+0.77/kT) 여야 한다. 지금처럼 exp(−2.0/kT) 를 곱하면
-   * 1000°C 에서 A ≈ 2.0e-6 nm 로 사실상 0이 되고, 두께식이
-   *   x = (−A + √(A² + 4Bt))/2  →  √(Bt)
-   * 즉 **모든 시간에서 순수 포물선**이 된다. 실제 열산화는 초기에 계면 반응이
-   * 律速이라 x ∝ t (선형) 로 시작해 나중에 x ∝ √t 로 넘어간다.
-   *
-   * 아래 두 테스트가 그 증거다. 계산식을 고치면 사용자에게 보이는 두께가
-   * 전부 달라지므로 임의로 고치지 않고 it.fails 로 올바른 기댓값만 남긴다.
+   * Deal-Grove 는 초기에 계면 반응이 律速이라 x ∝ t (선형) 로 시작해
+   * 산화막이 두꺼워지면 확산 律速이 되어 x ∝ √t (포물선) 로 넘어간다.
+   * 두 영역이 다 살아 있는지가 이 모델이 제대로 섰는지를 가르는 지점이다.
    */
 
-  it('현재 동작: 시간을 4배 하면 두께가 정확히 2배 — 즉 항상 포물선', () => {
-    for (const t of [1, 5, 30, 120]) {
-      const ratio = calculateOxideGrowth(1000, 4 * t, 'dry') / calculateOxideGrowth(1000, t, 'dry');
-      expect(ratio).toBeCloseTo(2.0, 6);
+  it('초기 산화는 선형이다: 시간 4배면 두께가 거의 4배', () => {
+    const ratio = calculateOxideGrowth(900, 4, 'dry') / calculateOxideGrowth(900, 1, 'dry');
+    expect(ratio).toBeGreaterThan(3.8);
+    expect(ratio).toBeLessThanOrEqual(4.0);
+  });
+
+  it('충분히 두꺼워지면 포물선으로 넘어간다: 시간 4배에 두께 2배 쪽으로 수렴', () => {
+    // 상한 clamp 에 걸리지 않는 조건에서 본다 (dry 1000°C, 1000 → 4000분).
+    const ratio = calculateOxideGrowth(1000, 4000, 'dry') / calculateOxideGrowth(1000, 1000, 'dry');
+    expect(ratio).toBeLessThan(2.3);
+    expect(ratio).toBeGreaterThan(1.9);
+  });
+
+  it('시간이 길어질수록 선형 → 포물선으로 단조롭게 이행한다', () => {
+    let prev = Infinity;
+    for (const t of [1, 10, 60, 240, 1000]) {
+      const ratio = calculateOxideGrowth(1100, 4 * t, 'dry') / calculateOxideGrowth(1100, t, 'dry');
+      expect(ratio).toBeLessThan(prev);
+      prev = ratio;
+    }
+    expect(prev).toBeLessThan(2.5);
+  });
+
+  it('dry 두께가 Deal-Grove 문헌값의 ±5% 안에 든다', () => {
+    for (const T of [900, 1000, 1100, 1200]) {
+      for (const t of [10, 60, 180]) {
+        const actual = calculateOxideGrowth(T, t, 'dry');
+        const expected = literatureThicknessNm(T, t, 'dry');
+        expect(Math.abs(actual / expected - 1)).toBeLessThan(0.05);
+      }
     }
   });
 
-  it.fails('초기 산화는 선형이어야 한다: 시간 4배면 두께가 2배보다 뚜렷이 커야 함', () => {
-    // 측정값: 1분→4분 두께비 = 2.000 (순수 포물선)
-    // 문헌값: 같은 조건에서 3.899 (거의 선형, x ∝ t)
-    const ratio = calculateOxideGrowth(1000, 4, 'dry') / calculateOxideGrowth(1000, 1, 'dry');
-    expect(ratio).toBeGreaterThan(3.0);
+  it('wet 두께가 Deal-Grove 문헌값의 ±5% 안에 든다', () => {
+    for (const T of [900, 1000, 1100, 1200]) {
+      for (const t of [10, 60, 180]) {
+        const actual = calculateOxideGrowth(T, t, 'wet');
+        const expected = literatureThicknessNm(T, t, 'wet');
+        expect(Math.abs(actual / expected - 1)).toBeLessThan(0.05);
+      }
+    }
   });
 
-  it.fails('dry 1000°C 60분 두께가 Deal-Grove 문헌값의 ±30% 안에 들어야 한다', () => {
-    // 측정값 20.1 nm / 문헌값 54.2 nm (비율 0.37)
-    const actual = calculateOxideGrowth(1000, 60, 'dry');
-    const expected = literatureThicknessNm(1000, 60, 'dry');
-    expect(Math.abs(actual / expected - 1)).toBeLessThan(0.3);
-  });
-
-  it.fails('wet 1000°C 60분 두께가 Deal-Grove 문헌값의 ±30% 안에 들어야 한다', () => {
-    // 측정값 250.8 nm / 문헌값 449.4 nm (비율 0.56)
-    const actual = calculateOxideGrowth(1000, 60, 'wet');
-    const expected = literatureThicknessNm(1000, 60, 'wet');
-    expect(Math.abs(actual / expected - 1)).toBeLessThan(0.3);
+  it('대표 조건의 절대값이 문헌과 맞는다', () => {
+    // dry 1000°C 60분 ≈ 54 nm, wet 1000°C 60분 ≈ 449 nm
+    expect(calculateOxideGrowth(1000, 60, 'dry')).toBeCloseTo(54.2, 0);
+    expect(calculateOxideGrowth(1000, 60, 'wet')).toBeCloseTo(449.4, 0);
   });
 });
 
@@ -174,6 +214,11 @@ describe('상대 속도 인자들', () => {
     expect(calculateInitialOxideRate(0)).toBe(1.0);
     expect(calculateInitialOxideRate(200)).toBeLessThan(calculateInitialOxideRate(50));
     expect(calculateInitialOxideRate(50)).toBeGreaterThan(0);
+  });
+
+  it('음수 두께는 0 으로 막힌다 (−100 nm 면 분모가 0 이라 발산한다)', () => {
+    expect(calculateInitialOxideRate(-100)).toBe(1.0);
+    expect(calculateInitialOxideRate(-1000)).toBe(1.0);
   });
 
   it('1000°C, 1 atm 이 기준점이라 상대 속도가 정확히 1.0', () => {

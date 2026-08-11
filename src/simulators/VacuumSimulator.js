@@ -484,17 +484,27 @@ const VacuumSimulator = ({ initialTab }) => {
   const calculatePumpingSpeed = (pressure, modelNumber = selectedModel) =>
     computePumpingSpeed(pressure, pumpModels, modelNumber);
 
+  // 배기 시간은 대개 1분 미만이라 "0.0분" 으로 뭉개진다. 1분 미만은 초로 보여 준다.
+  const formatPumpingTime = (minutes) => {
+    if (!Number.isFinite(minutes)) return '—';
+    if (minutes >= 1) return `${minutes.toFixed(1)}분`;
+    return `${(minutes * 60).toFixed(1)}초`;
+  };
+
+  // 임계값은 760 → 1 Torr 러프 펌핑 시간 기준이다. 배기 시간이 1000배로 계산되던
+  // 시절의 10분/20분 임계값은 이제 어떤 조합으로도 닿지 않아 실제 분포에 맞춰 다시 잡았다.
+  // (10~1000 L 챔버 × 50~7200 L/s 펌프 → 0.003 ~ 2.2분)
   const getPumpEfficiencyAssessment = () => {
     const pumpingTimeTo1Torr = calculatePumpingTime(chamberVolume, 760, 1, pumpingSpeed);
-    
-    if (pumpingTimeTo1Torr > 20) {
+
+    if (pumpingTimeTo1Torr > 1.5) {
       return {
         status: 'very-slow',
         message: '매우 느림 - 펌프 용량 부족',
         color: 'text-red-600 bg-red-50 border-red-200',
         time: pumpingTimeTo1Torr
       };
-    } else if (pumpingTimeTo1Torr > 10) {
+    } else if (pumpingTimeTo1Torr > 0.5) {
       return {
         status: 'somewhat-slow',
         message: '다소 느림 - 펌핑 시간 과다',
@@ -2324,8 +2334,8 @@ const VacuumSimulator = ({ initialTab }) => {
                         <div className={`mt-4 p-3 rounded border ${assessment.color}`}>
                           <h5 className="font-semibold mb-1">{assessment.message}</h5>
                           <div className="text-sm space-y-1">
-                            <p>760 Torr → 1 Torr 도달시간: <strong>{assessment.time.toFixed(1)}분</strong></p>
-                            <p>760 Torr → 20 mTorr 도달시간: <strong>{calculatePumpingTime(chamberVolume, 760, 0.02, pumpingSpeed).toFixed(1)}분</strong></p>
+                            <p>760 Torr → 1 Torr 도달시간: <strong>{formatPumpingTime(assessment.time)}</strong></p>
+                            <p>760 Torr → 20 mTorr 도달시간: <strong>{formatPumpingTime(calculatePumpingTime(chamberVolume, 760, 0.02, pumpingSpeed))}</strong></p>
                             {assessment.status === 'very-slow' && (
                               <p className="text-xs">💡 더 큰 펌프나 다단계 펌핑 시스템 필요</p>
                             )}

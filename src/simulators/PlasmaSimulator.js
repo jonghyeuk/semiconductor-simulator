@@ -6,8 +6,10 @@ import {
   calculateBreakdownVoltage as computeBreakdownVoltage,
   getTownsendInfo as computeTownsendInfo,
   calculateInputImpedance as computeInputImpedance,
+  calculateInputImpedanceComplex,
   calculateOptimalLC as computeOptimalLC,
   calculateReflectedPower as computeReflectedPower,
+  calculateVSWR as computeVSWR,
   PASCHEN_MINIMA,
 } from '../physics/plasma';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
@@ -255,11 +257,19 @@ const PlasmaSimulator = ({ initialTab }) => {
   const calculateInputImpedance = () =>
     computeInputImpedance(frequency, inductance, capacitance, loadImpedance).toFixed(1);
 
+  // 반사계수는 크기만으로는 못 구한다. 복소 임피던스를 그대로 넘긴다.
+  const inputImpedanceComplex = () =>
+    calculateInputImpedanceComplex(frequency, inductance, capacitance, loadImpedance);
+
   const calculateOptimalLC = () => computeOptimalLC(frequency, loadImpedance);
 
-  // 원본과 동일하게, 소수 첫째 자리로 반올림된 Z_in 을 반사 전력 계산에 넣는다.
   const calculateReflectedPower = () =>
-    computeReflectedPower(parseFloat(calculateInputImpedance()), rfPower).toFixed(1);
+    computeReflectedPower(inputImpedanceComplex(), rfPower).toFixed(1);
+
+  const calculateVSWR = () => {
+    const v = computeVSWR(inputImpedanceComplex());
+    return Number.isFinite(v) ? v.toFixed(2) : '∞';
+  };
 
   const applyAutoMatching = () => {
     const optimal = calculateOptimalLC();
@@ -1800,7 +1810,7 @@ const PlasmaSimulator = ({ initialTab }) => {
                     <div><span className="text-gray-600">입력 임피던스:</span><div className="font-semibold text-green-900">{calculateInputImpedance()} Ω</div></div>
                     <div><span className="text-gray-600">반사 전력:</span><div className="font-semibold text-green-900">{calculateReflectedPower()} W</div></div>
                     <div><span className="text-gray-600">전달 효율:</span><div className="font-semibold text-green-900">{(100 - (parseFloat(calculateReflectedPower()) / rfPower * 100)).toFixed(1)}%</div></div>
-                    <div><span className="text-gray-600">VSWR:</span><div className="font-semibold text-green-900">{(1 + Math.sqrt(parseFloat(calculateReflectedPower()) / rfPower) / (1 - Math.sqrt(parseFloat(calculateReflectedPower()) / rfPower))).toFixed(2)}</div></div>
+                    <div><span className="text-gray-600">VSWR:</span><div className="font-semibold text-green-900">{calculateVSWR()}</div></div>
                   </div>
                   <div className={`mt-3 p-2 rounded text-center font-bold ${Math.abs(parseFloat(calculateInputImpedance()) - 50) < 5 ? 'bg-green-200 text-green-900' : 'bg-yellow-200 text-yellow-900'}`}>
                     {Math.abs(parseFloat(calculateInputImpedance()) - 50) < 5 ? '✓ 최적 매칭!' : '⚠ 매칭 필요'}

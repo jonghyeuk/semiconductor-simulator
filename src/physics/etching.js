@@ -16,6 +16,9 @@
  * @param {() => number} rng 0~1 난수원
  */
 export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math.random) {
+  // 압력과 파워는 음수가 될 수 없다. 가드가 없으면 음압에서도 식각률이 나온다.
+  pressure = Math.max(0, pressure);
+  power = Math.max(0, power);
   let baseRate = 0;
 
   switch (material) {
@@ -58,7 +61,9 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
   const powerSaturation = power > 600 ? Math.max(0.7, 1 - (power - 600) / 800) : 1;
 
   baseRate = baseRate * pressureFactor * powerSaturation;
-  return Math.max(5, baseRate * (0.9 + rng() * 0.2));
+  // 파워나 반응 가스가 없으면 식각도 없다. 예전에는 Math.max(5, …) 하한 때문에
+  // 플라즈마 파워 0 에서도 5 nm/min 이 나왔다.
+  return Math.max(0, baseRate * (0.9 + rng() * 0.2));
 }
 
 /**

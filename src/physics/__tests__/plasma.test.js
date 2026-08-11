@@ -7,6 +7,8 @@ import {
   calculateInputImpedance,
   calculateOptimalLC,
   calculateReflectedPower,
+  calculateVSWR,
+  calculateInputImpedanceComplex,
   PASCHEN_TABLE,
   PASCHEN_MINIMA,
 } from '../plasma.js';
@@ -56,8 +58,11 @@ describe('이온화도 / 생성 확률', () => {
     expect(calculateBasicIonizationDegree(3.0, 0)).toBe(0);
   });
 
-  it('경계값: 에너지 −50 이면 0 으로 나눠 무한대가 된다 (가드 없음)', () => {
-    expect(Number.isFinite(calculateBasicIonizationDegree(3.0, -50))).toBe(false);
+  it('경계값: 음수 에너지에서는 이온화가 없다 (발산하지 않는다)', () => {
+    for (const E of [-1000, -50, -1, 0]) {
+      expect(calculateBasicIonizationDegree(3.0, E)).toBe(0);
+      expect(calculateBasicPlasmaGenerationProbability(3.0, E)).toBe(0);
+    }
   });
 });
 
@@ -148,34 +153,33 @@ describe('RF 매칭', () => {
   });
 
   /*
-   * ── 확인된 물리 오류 ⑥: 자동 매칭이 50 Ω 이하 부하에서 동작하지 않는다 ──
-   *
-   * calculateOptimalLC 는 Z_load < 50 일 때 회로를 뒤집어(입력 쪽 병렬 C, 부하 쪽 직렬 L)
-   * L·C 를 계산하는데, calculateInputImpedance 는 언제나 한 가지 토폴로지
-   * (부하와 병렬인 C + 입력 직렬 L)만 모델링한다. 두 함수가 서로 다른 회로를 가정한다.
-   *
-   * 그래서 "자동 매칭" 버튼을 누른 뒤 표시되는 입력 임피던스가 50 Ω 에서 크게 벗어난다:
-   *   Z_load = 10 Ω → Z_in 18.7 Ω (−63%)
-   *   Z_load = 25 Ω → Z_in 25.0 Ω (−50%)
-   *   Z_load = 40 Ω → Z_in 35.1 Ω (−30%)
-   *
-   * 슬라이더 범위가 10~200 Ω 이므로 절반 구간이 여기 해당한다.
-   * 실제 플라즈마 부하는 대개 50 Ω 이하라 학습상 중요한 구간이기도 하다.
+   * 매칭망 토폴로지는 부하에 따라 달라진다:
+   *   승압 (R_L > 50): 부하와 병렬인 C + 입력 직렬 L
+   *   강압 (R_L < 50): 부하 직렬 L + 입력 병렬 C
+   * 예전에는 calculateInputImpedance 가 승압 하나만 모델링해서, 강압 구간에서는
+   * calculateOptimalLC 가 준 L·C 를 넣어도 50 Ω 이 되지 않았다.
    */
-  it('현재 동작: 50 Ω 이하 부하에서는 자동 매칭 후에도 50 Ω 에 못 맞춘다', () => {
-    for (const Zload of [10, 25, 40]) {
-      const { L, C } = calculateOptimalLC(13.56, Zload);
-      const Zin = calculateInputImpedance(13.56, Number(L), Number(C), Zload);
-      expect(Math.abs(Zin / 50 - 1)).toBeGreaterThan(0.25);
-    }
-  });
-
-  it.fails('슬라이더 전 범위(10~200 Ω)에서 자동 매칭이 50 Ω 으로 수렴해야 한다', () => {
-    // 측정값: 10 Ω → 18.7 Ω, 25 Ω → 25.0 Ω, 40 Ω → 35.1 Ω, 50 Ω → NaN
+  it('슬라이더 전 범위(10~200 Ω)에서 자동 매칭이 50 Ω 으로 수렴한다', () => {
     for (let Zload = 10; Zload <= 200; Zload += 10) {
       const { L, C } = calculateOptimalLC(13.56, Zload);
       const Zin = calculateInputImpedance(13.56, Number(L), Number(C), Zload);
       expect(Math.abs(Zin / 50 - 1)).toBeLessThan(0.05);
+    }
+  });
+
+  it('자동 매칭 후 반사 전력이 입력의 1% 미만이다', () => {
+    for (let Zload = 10; Zload <= 200; Zload += 10) {
+      const { L, C } = calculateOptimalLC(13.56, Zload);
+      const z = calculateInputImpedanceComplex(13.56, Number(L), Number(C), Zload);
+      expect(calculateReflectedPower(z, 1000)).toBeLessThan(10);
+    }
+  });
+
+  it('자동 매칭 후 VSWR 이 1.2 미만이다', () => {
+    for (let Zload = 10; Zload <= 200; Zload += 10) {
+      const { L, C } = calculateOptimalLC(13.56, Zload);
+      const z = calculateInputImpedanceComplex(13.56, Number(L), Number(C), Zload);
+      expect(calculateVSWR(z)).toBeLessThan(1.2);
     }
   });
 
@@ -197,24 +201,28 @@ describe('RF 매칭', () => {
     expect(calculateInputImpedance(13.56, 100, 100, 50)).toBe(calculateInputImpedance(13.56, 100, 100, 50));
   });
 
-  it('경계값: C = 0 이면 XC 가 무한대라 NaN 이 된다 (가드 없음)', () => {
-    expect(Number.isNaN(calculateInputImpedance(13.56, 100, 0, 50))).toBe(true);
+  it('경계값: C = 0 은 개방으로 취급되어 NaN 이 안 나온다', () => {
+    const z = calculateInputImpedance(13.56, 100, 0, 50);
+    expect(Number.isFinite(z)).toBe(true);
+    expect(z).toBeGreaterThan(0);
   });
 
   /*
-   * 슬라이더 기본값이 정확히 50 Ω 이라, 화면에 처음 들어와서 "자동 매칭" 을 누르면
-   * 바로 이 경로를 탄다: Q = √(50/50 − 1) = 0 → L = 0 nH, C = 0 pF 가 설정되고,
-   * C = 0 이면 X_C = 1/0 = ∞ 라 입력 임피던스가 NaN 으로 표시된다.
+   * 슬라이더 기본값이 정확히 50 Ω 이다. 이때는 정합망 자체가 필요 없다 (Q = 0).
+   * 예전에는 여기서 L = C = 0 이 설정되고 C = 0 이 입력 임피던스를 NaN 으로 만들어,
+   * 화면에 들어와 "자동 매칭" 만 눌러도 바로 NaN 이 떴다.
    */
-  it('경계값: 부하가 정확히 50 Ω 이면 자동 매칭이 L = C = 0 을 내놓는다', () => {
-    const { L, C } = calculateOptimalLC(13.56, 50);
+  it('경계값: 부하가 정확히 50 Ω 이면 정합망이 불필요하다고 알려 준다', () => {
+    const { L, C, type } = calculateOptimalLC(13.56, 50);
     expect(Number(L)).toBe(0);
     expect(Number(C)).toBe(0);
+    expect(type).toContain('불필요');
   });
 
-  it('경계값: 그 L = C = 0 을 되먹이면 입력 임피던스가 NaN 이 된다', () => {
+  it('경계값: 부하 50 Ω 에서 입력 임피던스가 그대로 50 Ω 이다 (NaN 아님)', () => {
     const { L, C } = calculateOptimalLC(13.56, 50);
-    expect(Number.isNaN(calculateInputImpedance(13.56, Number(L), Number(C), 50))).toBe(true);
+    expect(calculateInputImpedance(13.56, Number(L), Number(C), 50)).toBeCloseTo(50, 9);
+    expect(calculateReflectedPower(calculateInputImpedanceComplex(13.56, 0, 0, 50), 1000)).toBeCloseTo(0, 9);
   });
 });
 
@@ -259,21 +267,36 @@ describe('calculateReflectedPower — 에너지 보존', () => {
     expect(calculateReflectedPower(100, 2000)).toBeCloseTo(2 * calculateReflectedPower(100, 1000), 9);
   });
 
-  it('현재 동작: Z_in = 150 Ω 에서 입력의 4배가 반사된다', () => {
-    expect(calculateReflectedPower(150, 1000)).toBeCloseTo(4000, 6);
-  });
-
-  it.fails('반사 전력은 절대로 입력 전력을 넘을 수 없다', () => {
-    // 측정값: Z=100 → 1000 W, Z=150 → 4000 W, Z=200 → 9000 W (입력 1000 W)
-    for (const Z of [75, 100, 150, 200, 300]) {
+  it('반사 전력은 절대로 입력 전력을 넘지 않는다', () => {
+    for (const Z of [0, 1, 75, 100, 150, 200, 300, 1000, 1e6]) {
       expect(calculateReflectedPower(Z, 1000)).toBeLessThanOrEqual(1000);
     }
   });
 
-  it.fails('반사계수 Γ = (Z−Z₀)/(Z+Z₀) 정의를 따라야 한다', () => {
-    // 측정값 (Z=150, P=1000): 4000 W / 이론값 250 W
-    for (const Z of [75, 100, 150, 200, 300]) {
-      expect(calculateReflectedPower(Z, 1000)).toBeCloseTo(correct(Z, 1000), 6);
+  it('반사계수 Γ = (Z−Z₀)/(Z+Z₀) 정의를 따른다', () => {
+    for (const Z of [10, 75, 100, 150, 200, 300]) {
+      expect(calculateReflectedPower(Z, 1000)).toBeCloseTo(correct(Z, 1000), 9);
     }
+  });
+
+  it('완전 반사(개방/단락)에서 입력 전력 전부가 반사된다', () => {
+    expect(calculateReflectedPower(0, 1000)).toBeCloseTo(1000, 6);
+    expect(calculateReflectedPower(1e12, 1000)).toBeCloseTo(1000, 0);
+  });
+
+  it('VSWR 은 정합에서 1 이고 부정합이 커질수록 증가한다', () => {
+    expect(calculateVSWR(50)).toBeCloseTo(1, 9);
+    let prev = 0;
+    for (const Z of [50, 75, 100, 150, 200]) {
+      const v = calculateVSWR(Z);
+      expect(v).toBeGreaterThan(prev);
+      prev = v;
+    }
+    // Z = 2·Z₀ 면 VSWR = 2
+    expect(calculateVSWR(100)).toBeCloseTo(2, 9);
+  });
+
+  it('VSWR 은 완전 반사에서 무한대다', () => {
+    expect(calculateVSWR(0)).toBe(Infinity);
   });
 });

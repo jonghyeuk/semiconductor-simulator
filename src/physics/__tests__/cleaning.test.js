@@ -108,17 +108,30 @@ describe('제거 효율의 하한', () => {
     }
   });
 
-  it('현재 동작: 건식 압력이 UI 범위를 넘으면 음수 효율이 나온다', () => {
-    expect(calculateOxideRemovalEfficiency('dry', { power: 0, pressure: 2.0 })).toBeLessThan(0);
+  it('제거 효율은 어떤 입력에서도 0~100% 범위 안이다', () => {
+    for (const p of [-5, 0, 0.5, 2.0, 100]) {
+      for (const power of [-100, 0, 500, 1e6]) {
+        const v = calculateOxideRemovalEfficiency('dry', { power, pressure: p });
+        expect(v).toBeGreaterThanOrEqual(0);
+        expect(v).toBeLessThanOrEqual(100);
+      }
+    }
+    for (const T of [-200, 0, 25, 100, 500]) {
+      for (const conc of [-10, 0, 10, 100]) {
+        const v = calculateOxideRemovalEfficiency('wet', wet({ temperature: T, concentration: conc, time: 0, solution: 'SC2' }));
+        expect(v).toBeGreaterThanOrEqual(0);
+        expect(v).toBeLessThanOrEqual(100);
+      }
+    }
   });
 
-  it.fails('제거 효율은 어떤 입력에서도 음수가 될 수 없다', () => {
-    // 측정값: 건식 pressure = 2.0 Torr, power = 0 → −40%
-    expect(calculateOxideRemovalEfficiency('dry', { power: 0, pressure: 2.0 })).toBeGreaterThanOrEqual(0);
+  it('건식 압력이 UI 범위를 넘어도 0% 로 막힌다', () => {
+    expect(calculateOxideRemovalEfficiency('dry', { power: 0, pressure: 2.0 })).toBe(0);
   });
 
-  it('현재 동작: 습식 온도가 빙점 아래면 효율이 깎인다 (하한 없음)', () => {
-    const cold = calculateOxideRemovalEfficiency('wet', wet({ temperature: -200, concentration: 0, time: 0, solution: 'SC2' }));
-    expect(cold).toBeLessThan(0);
+  it('습식 온도가 빙점 아래여도 0% 아래로 안 간다', () => {
+    expect(
+      calculateOxideRemovalEfficiency('wet', wet({ temperature: -200, concentration: 0, time: 0, solution: 'SC2' }))
+    ).toBe(0);
   });
 });

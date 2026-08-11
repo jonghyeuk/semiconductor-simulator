@@ -14,17 +14,19 @@
 export function calculateSpinCoatResults(processParams, rng = Math.random) {
   const { step1_rpm, step1_time, step2_rpm, step2_time, step3_rpm, step3_time } = processParams;
 
-  // 두께 계산 (2단계 RPM에 주로 의존, 기본 1000nm 목표)
-  let thickness = 1000;
-
-  if (step2_rpm < 2000) {
-    thickness = 1000 + (2000 - step2_rpm) * 0.1; // 저속일 때 두꺼워짐 (최대 +100nm)
-  } else if (step2_rpm > 4000) {
-    thickness = 1000 - (step2_rpm - 4000) * 0.05; // 고속일 때 얇아짐 (최대 -100nm)
-  } else {
-    // 최적 범위(2000-4000)에서는 목표 두께 근처
-    thickness = 1000 + (rng() - 0.5) * 20; // ±10nm 내외
-  }
+  // 두께: 스핀 코팅의 기본 관계는 Emslie–Bonner–Peck 해에서 나오는 t ∝ ω^(−1/2) 다.
+  // 회전수를 4배로 올리면 두께가 절반이 된다.
+  //
+  // 예전 구현은 구간별 1차식이었고, 2000~4000 rpm 구간은 아예 난수만 돌려
+  // 회전수와 무관했다 (2000 rpm 과 4000 rpm 의 두께가 같았다).
+  //
+  // REFERENCE_RPM 에서 REFERENCE_THICKNESS 가 나오도록 정규화한다.
+  const REFERENCE_RPM = 3000;
+  const REFERENCE_THICKNESS = 1000; // nm
+  const rpm = Math.max(step2_rpm, 1); // 0 rpm 은 발산하므로 막는다
+  const nominalThickness = REFERENCE_THICKNESS * Math.sqrt(REFERENCE_RPM / rpm);
+  // 실제 코팅의 런투런 산포 (±1%)
+  const thickness = Math.max(0, nominalThickness * (1 + (rng() - 0.5) * 0.02));
 
   // 균일도 계산 (기본 99%, 조건에 따라 감소)
   let uniformity = 99;

@@ -9,10 +9,16 @@
  * ratio 5 → n ≈ 1.55 (Si-rich), 14 → 1.46 (stoichiometric), 25 → 1.44 (O-rich)
  */
 export function calculateRefractiveIndex(ratio) {
-  if (ratio < 10) return 1.55 - (ratio - 5) * 0.012;
-  if (ratio < 14) return 1.49 - (ratio - 10) * 0.0075;
-  if (ratio <= 18) return 1.46 - (ratio - 14) * 0.003;
-  return 1.448 - (ratio - 18) * 0.001;
+  // O-rich 쪽 하한 1.4. 화학량론 SiO2 가 1.46 이고 O 과잉·다공성으로 갈수록
+  // 낮아지지만 산화막 굴절률이 1.4 아래로 내려가지는 않는다.
+  // (하한이 없으면 비율이 커질수록 1 미만, 결국 음수까지 내려간다.)
+  const SIO2_O_RICH_FLOOR = 1.4;
+  let n;
+  if (ratio < 10) n = 1.55 - (ratio - 5) * 0.012;
+  else if (ratio < 14) n = 1.49 - (ratio - 10) * 0.0075;
+  else if (ratio <= 18) n = 1.46 - (ratio - 14) * 0.003;
+  else n = 1.448 - (ratio - 18) * 0.001;
+  return Math.max(SIO2_O_RICH_FLOOR, n);
 }
 
 /** 기판 온도에 따른 H 함량 (at%). */
@@ -40,14 +46,23 @@ export function calculateaSiHContent(dilution) {
   return Math.max(8, 11 - (dilution - 15) * 0.1);
 }
 
-/** SiNx 굴절률 (NH3/SiH4 비율 기준). */
+/**
+ * SiNx 굴절률 (NH3/SiH4 비율 기준).
+ *
+ * N-rich 쪽 하한은 1.8 이다. 화학량론 Si3N4 가 2.0 이고, N 과잉으로 갈수록
+ * 낮아지지만 질화막의 굴절률이 1.8 아래로 내려가지는 않는다.
+ * (예전에는 하한이 없어 비율 43 을 넘으면 n < 1 이라는 물리적으로 불가능한 값이 나왔다.)
+ */
 export function calculateSiNxRefractiveIndex(ratio) {
-  if (ratio < 5) return 2.3 - (ratio - 2) * 0.06;
-  if (ratio < 10) return 2.12 - (ratio - 5) * 0.024;
-  return 2.0 - (ratio - 10) * 0.03;
+  const SI_NITRIDE_N_RICH_FLOOR = 1.8;
+  let n;
+  if (ratio < 5) n = 2.3 - (ratio - 2) * 0.06;
+  else if (ratio < 10) n = 2.12 - (ratio - 5) * 0.024;
+  else n = 2.0 - (ratio - 10) * 0.03;
+  return Math.max(SI_NITRIDE_N_RICH_FLOOR, n);
 }
 
-/** SiNx N/Si 원자비. */
+/** SiNx N/Si 원자비. 원자비는 음수가 될 수 없다. */
 export function calculateNSiRatio(ratio) {
-  return Math.min(1.6, 0.6 + ratio * 0.07);
+  return Math.max(0, Math.min(1.6, 0.6 + ratio * 0.07));
 }

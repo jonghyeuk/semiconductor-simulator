@@ -43,16 +43,23 @@ describe('calculateTempProfile — 정상 경로', () => {
   });
 
   /*
-   * 냉각식이 (t/τ)^0.7 이라 t = 0 에서 도함수가 무한대다. 즉 soak 이 끝나는 순간
-   * 냉각 속도가 무한대로 시작한다. 실제 RTA 냉각은 뉴턴 냉각(지수 감쇠)이라
-   * 초기 냉각 속도가 유한하다. 값 자체는 연속이므로 그래프가 끊기지는 않지만,
-   * "냉각 초기 기울기" 를 읽는 학습에는 맞지 않는다.
+   * 냉각은 뉴턴 냉각(지수 감쇠)이다. 예전의 (t/τ)^0.7 은 t = 0 에서 도함수가
+   * 무한대라 soak 이 끝나는 순간 냉각 속도가 발산했다.
    */
-  it('현재 동작: 냉각 시작 순간의 냉각 속도가 발산한다', () => {
+  it('냉각 시작 순간의 냉각 속도가 유한하다', () => {
     const soakEnd = 10 + (recipe.targetTemp - 25) / recipe.rampRate + recipe.processTime;
     const slope = (dt) => (calculateTempProfile(soakEnd, recipe) - calculateTempProfile(soakEnd + dt, recipe)) / dt;
-    // 기울기 ∝ dt^(0.7−1) = dt^(−0.3) 이므로 dt 를 100배 줄이면 약 4배(100^0.3)로 커진다.
-    expect(slope(1e-4) / slope(1e-2)).toBeCloseTo(Math.pow(100, 0.3), 1);
+    // dt 를 100배 줄여도 기울기가 같은 값에 수렴한다 (도함수가 존재한다).
+    expect(slope(1e-4) / slope(1e-2)).toBeCloseTo(1, 1);
+    expect(Number.isFinite(slope(1e-6))).toBe(true);
+  });
+
+  it('냉각 초기 속도가 램프업 속도와 같은 자릿수다', () => {
+    const soakEnd = 10 + (recipe.targetTemp - 25) / recipe.rampRate + recipe.processTime;
+    const coolRate =
+      (calculateTempProfile(soakEnd, recipe) - calculateTempProfile(soakEnd + 0.01, recipe)) / 0.01;
+    expect(coolRate).toBeGreaterThan(0);
+    expect(coolRate).toBeLessThan(recipe.rampRate * 2);
   });
 
   it('램프 속도가 빠를수록 목표 온도에 빨리 도달한다', () => {
@@ -174,22 +181,37 @@ describe('stepZoneTemperatures — 1차 지연계 적분', () => {
   });
 
   /*
-   * explicit Euler 는 dt > 2τ 에서 발산한다. 가장 작은 시정수가 0.5 초이므로
-   * dt ≥ 1.0 초면 첫 번째 존부터 진동·발산한다. 앱은 dt = 0.1 로 고정해 부르므로
-   * 지금은 안전하지만, 인터벌 주기를 늘리면 바로 깨지는 구조다. 그 경계를 고정해 둔다.
+   * 해석해 T(t+Δt) = T_sp + (T − T_sp)·e^(−Δt/τ) 를 쓰므로 어떤 Δt 에서도
+   * 설정 온도를 지나치지 않는다. 예전의 explicit Euler 는 Δt > 2τ 에서 발산했고,
+   * 가장 작은 시정수가 0.5 초라 Δt ≥ 1.0 이면 바로 진동했다.
    */
-  it('dt = 1.0 초(= 2τ)면 첫 존이 설정 온도를 그대로 지나쳐 진동한다', () => {
-    const after = stepZoneTemperatures([25, 25, 25, 25, 25, 25], setpoints, 1.0);
-    expect(after[0]).toBeGreaterThan(1000); // 2배 오버슈트
+  it('어떤 시간 간격에서도 설정 온도를 지나치지 않는다', () => {
+    for (const dt of [0.1, 0.5, 1.0, 2.0, 10, 1000]) {
+      const after = stepZoneTemperatures([25, 25, 25, 25, 25, 25], setpoints, dt);
+      for (const t of after) {
+        expect(t).toBeGreaterThanOrEqual(25);
+        expect(t).toBeLessThanOrEqual(1000);
+      }
+    }
   });
 
-  it('dt = 2.0 초면 발산한다', () => {
+  it('큰 시간 간격에서도 발산하지 않고 설정 온도로 수렴한다', () => {
     let temps = [25, 25, 25, 25, 25, 25];
     for (let i = 0; i < 20; i++) temps = stepZoneTemperatures(temps, setpoints, 2.0);
-    expect(Math.abs(temps[0])).toBeGreaterThan(1e6);
+    for (const t of temps) expect(t).toBeCloseTo(1000, 3);
   });
 
-  it('가장 작은 시정수가 0.5 라 안정 조건은 dt < 1.0 이다', () => {
-    expect(Math.min(...ZONE_TIME_CONSTANTS)).toBe(0.5);
+  it('한 스텝이 지수 감쇠 해석해와 일치한다', () => {
+    const dt = 0.3;
+    const after = stepZoneTemperatures([25, 25, 25, 25, 25, 25], setpoints, dt);
+    after.forEach((t, i) => {
+      const expected = 1000 + (25 - 1000) * Math.exp(-dt / ZONE_TIME_CONSTANTS[i]);
+      expect(t).toBeCloseTo(expected, 9);
+    });
+  });
+
+  it('시간 간격 0 이면 온도가 그대로다', () => {
+    const before = [25, 30, 28, 26, 27, 25];
+    expect(stepZoneTemperatures(before, setpoints, 0)).toEqual(before);
   });
 });
