@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
+import { calculateSpinCoatResults } from '../physics/lithography';
 
 // Icon components
 const PlayIcon = () => (
@@ -353,79 +354,9 @@ const PhotolithographySimulator = ({ initialTab }) => {
   };
 
   // 결과 계산 함수
+  // 계산식은 src/physics/lithography.js 로 옮겼다.
   const calculateResults = () => {
-    const { step1_rpm, step1_time, step2_rpm, step2_time, step3_rpm, step3_time } = processParams;
-    
-    // 두께 계산 (2단계 RPM에 주로 의존, 기본 1000nm 목표)
-    let thickness = 1000; // 기본 목표 두께
-    
-    // RPM에 따른 두께 변화 (편차를 100nm 수준으로 조정)
-    if (step2_rpm < 2000) {
-      thickness = 1000 + (2000 - step2_rpm) * 0.1; // 저속일 때 두꺼워짐 (최대 +100nm)
-    } else if (step2_rpm > 4000) {
-      thickness = 1000 - (step2_rpm - 4000) * 0.05; // 고속일 때 얇아짐 (최대 -100nm)
-    } else {
-      // 최적 범위(2000-4000)에서는 목표 두께 근처
-      thickness = 1000 + (Math.random() - 0.5) * 20; // ±10nm 내외
-    }
-    
-    // 균일도 계산 (기본 99%, 조건에 따라 감소)
-    let uniformity = 99; // 기본 우수한 균일도
-    
-    // 1단계 영향: PR 분산 효과
-    if (step1_rpm >= 400 && step1_rpm <= 600 && step1_time >= 4) {
-      uniformity += 0; // 최적 조건 유지
-    } else {
-      if (step1_rpm < 300) uniformity -= 8; // 너무 낮음
-      else if (step1_rpm > 800) uniformity -= 6; // 너무 높음
-      else uniformity -= 3; // 약간 벗어남
-      
-      if (step1_time < 4) uniformity -= 4; // 시간 부족
-    }
-    
-    // 2단계 영향: 가장 중요한 단계
-    if (step2_rpm >= 2500 && step2_rpm <= 3500 && step2_time >= 20) {
-      uniformity += 0; // 최적 조건
-    } else {
-      // RPM 영향
-      if (step2_rpm < 1500) uniformity -= 15; // 매우 낮음
-      else if (step2_rpm < 2000) uniformity -= 8; // 낮음
-      else if (step2_rpm > 5000) uniformity -= 12; // 매우 높음
-      else if (step2_rpm > 4500) uniformity -= 6; // 높음
-      else uniformity -= 2; // 약간 벗어남
-      
-      // 시간 영향
-      if (step2_time < 15) uniformity -= 5; // 시간 부족
-      else if (step2_time > 50) uniformity -= 3; // 과도한 시간
-    }
-    
-    // 3단계 영향: 안정화
-    if (step3_rpm === 0 && step3_time >= 2) {
-      uniformity += 0; // 최적 조건
-    } else {
-      if (step3_rpm > 0) uniformity -= 2; // 완전 정지 아님
-      if (step3_time < 2) uniformity -= 1; // 안정화 시간 부족
-    }
-    
-    // 최종 균일도 범위 제한
-    uniformity = Math.min(99.5, Math.max(70, uniformity));
-    
-    // 해상도 (PR 코팅과 직접 관련 없으므로 고정값)
-    const resolution = 88 + Math.random() * 4; // 88-92% 범위
-    
-    // 결함 밀도 (균일도와 반비례)
-    const defectDensity = Math.max(0.1, (100 - uniformity) * 0.15);
-    
-    // CD 균일도
-    const cdUniformity = Math.min(100, (uniformity + resolution) / 2);
-
-    setProcessResults({
-      prThickness: thickness,
-      resolution,
-      uniformity,
-      defectDensity,
-      cdUniformity
-    });
+    setProcessResults(calculateSpinCoatResults(processParams));
   };
 
   const submitAnswer = () => {

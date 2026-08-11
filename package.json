@@ -21,13 +21,22 @@
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.31",
     "react-scripts": "5.0.1",
-    "tailwindcss": "^3.3.0"
+    "tailwindcss": "^3.3.0",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "build-guides": "node scripts/build-guides.js",
-    "test": "react-scripts test --passWithNoTests",
+    "lint": "eslint src --ext .js,.jsx --max-warnings 200",
+    "lint:physics": "eslint src/physics scripts --ext .js,.mjs --max-warnings 0",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:cra": "react-scripts test --passWithNoTests",
+    "verify:extraction": "node scripts/verify-extraction.mjs",
+    "verify:guides:snapshot": "node scripts/verify-guides.mjs snapshot",
+    "verify:guides": "node scripts/verify-guides.mjs compare",
+    "verify": "npm run lint && npm run lint:physics && npm run verify:extraction && npm run test && npm run build",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

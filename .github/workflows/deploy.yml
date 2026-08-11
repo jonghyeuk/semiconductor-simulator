@@ -20,11 +20,10 @@ jobs:
     - name: Install dependencies
       run: npm install
       
-    - name: Run tests
-      run: npm test -- --coverage --ci --runInBand --watchAll=false --passWithNoTests
-         
-    - name: Build project
-      run: npm run build
+    # 배포 관문. lint(에러 0) → physics/scripts lint(경고 0) →
+    # 추출 동등성 대조 → 물리 계산 테스트 → 빌드 순으로 돌고, 하나라도 실패하면 배포하지 않는다.
+    - name: Verify
+      run: npm run verify
       env:
         CI: false
         REACT_APP_ADMIN_PASSWORD: ${{ secrets.REACT_APP_ADMIN_PASSWORD }}

@@ -140,3 +140,6 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+# 가이드 산출물 대조용 스냅샷 (로컬 전용)
+scripts/.guide-snapshot.json

@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  calculateTurboSpeed,
+  convertSccmToTorrLs,
+  calculatePumpingSpeed as computePumpingSpeed,
+  calculatePumpingTime,
+  calculateConductance,
+  calculateEffectivePumpingSpeed,
+  pressureToSliderValue,
+  getVacuumStage,
+} from '../physics/vacuum';
 
 // Icon components
 const PlayIcon = () => (
@@ -470,55 +480,10 @@ const VacuumSimulator = ({ initialTab }) => {
   }, []);
   
   // 헬퍼 함수들
-  const calculateTurboSpeed = (pressure) => {
-    if (pressure <= 1e-6) return 300;
-    if (pressure <= 1e-5) return 300;
-    if (pressure <= 1e-4) return 295;
-    if (pressure <= 1e-3) return 280;
-    if (pressure <= 1e-2) return 250;
-    if (pressure <= 1e-1) return 180;
-    if (pressure <= 1) return 80;
-    return 20;
-  };
-  
-  const convertSccmToTorrLs = (sccm) => sccm * 0.00950;
-  
-  const calculatePumpingSpeed = (pressure, modelNumber = selectedModel) => {
-    const model = pumpModels[Math.round(modelNumber)];
-    if (!model) return 250;
-    
-    if (pressure <= 0.02) return model.data[0].speed;
-    if (pressure >= 760) return model.data[model.data.length - 1].speed;
-    
-    const logPressure = Math.log10(pressure);
-    
-    for (let i = 0; i < model.data.length - 1; i++) {
-      const current = model.data[i];
-      const next = model.data[i + 1];
-      
-      if (logPressure >= Math.log10(current.pressure) && logPressure <= Math.log10(next.pressure)) {
-        const ratio = (logPressure - Math.log10(current.pressure)) / (Math.log10(next.pressure) - Math.log10(current.pressure));
-        return current.speed + (next.speed - current.speed) * ratio;
-      }
-    }
-    
-    return model.maxSpeed / 2;
-  };
-  
-  const pressureToSliderValue = (pressure) => {
-    const minLog = Math.log10(0.02);
-    const maxLog = Math.log10(760);
-    const currentLog = Math.log10(pressure);
-    return ((currentLog - minLog) / (maxLog - minLog)) * 100;
-  };
-  
-  const calculatePumpingTime = (volume, initialPressure, finalPressure, pumpSpeed) => {
-    if (finalPressure <= 0.02) finalPressure = 0.02;
-    if (initialPressure <= finalPressure) return 0;
-    const timeInMinutes = (volume * Math.log(initialPressure / finalPressure)) / (pumpSpeed * 60 / 1000);
-    return timeInMinutes;
-  };
-  
+  // 계산식은 src/physics/vacuum.js 로 옮겼다. 여기서는 컴포넌트 state 만 묶어 준다.
+  const calculatePumpingSpeed = (pressure, modelNumber = selectedModel) =>
+    computePumpingSpeed(pressure, pumpModels, modelNumber);
+
   const getPumpEfficiencyAssessment = () => {
     const pumpingTimeTo1Torr = calculatePumpingTime(chamberVolume, 760, 1, pumpingSpeed);
     
@@ -546,14 +511,6 @@ const VacuumSimulator = ({ initialTab }) => {
     }
   };
   
-  const getVacuumStage = (pressure) => {
-    if (pressure > 100) return '대기압/초기배기';
-    if (pressure > 1) return '저진공';
-    if (pressure > 1e-3) return '중진공';
-    if (pressure > 1e-6) return '고진공';
-    return '초고진공';
-  };
-  
   const getVacuumLevel = () => {
     if (targetPressure >= 100) return '대기압/고압 (Atmospheric)';
     if (targetPressure >= 1) return '저진공 (Rough Vacuum)';
@@ -574,31 +531,6 @@ const VacuumSimulator = ({ initialTab }) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-  
-  // Conductance 계산 함수들
-  const calculateConductance = (diameter, length, pipeType) => {
-    // 기본 원통형 배관의 conductance (L/s)
-    const D = diameter; // cm
-    const L = length; // cm
-    let baseConductance = 3.27e-2 * Math.pow(D, 4) / L;
-    
-    // 배관 타입별 보정 계수
-    switch(pipeType) {
-      case 'straight':
-        return baseConductance * 1000; // L/s로 변환
-      case 'elbow':
-        return baseConductance * 0.7 * 1000; // 엘보로 인한 손실
-      case 'spiral':
-        return baseConductance * 0.4 * 1000; // 스파이럴로 인한 큰 손실
-      default:
-        return baseConductance * 1000;
-    }
-  };
-  
-  const calculateEffectivePumpingSpeed = (pumpSpeed, conductance) => {
-    // 1/S_eff = 1/S_pump + 1/C
-    return (pumpSpeed * conductance) / (pumpSpeed + conductance);
   };
   
   const getPipeTypeDescription = (type) => {

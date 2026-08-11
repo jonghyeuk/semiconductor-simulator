@@ -1,4 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
+import {
+  calculateRefractiveIndex,
+  calculateHydrogenContent,
+  calculateFilmDensity,
+  calculateDanglingBondDensity,
+  calculateaSiHContent,
+  calculateSiNxRefractiveIndex,
+  calculateNSiRatio,
+} from '../physics/pecvd';
 
 const PECVDSimulator = () => {
   const [depositionThickness, setDepositionThickness] = useState(0);
@@ -57,72 +66,7 @@ const PECVDSimulator = () => {
     }
   };
 
-  // 계산된 굴절률 (N2O/SiH4 비율에 따라)
-  const calculateRefractiveIndex = (ratio) => {
-    // 실제 데이터 기반 근사:
-    // ratio 5 → n ≈ 1.55 (Si-rich)
-    // ratio 14 → n ≈ 1.46 (stoichiometric)
-    // ratio 25 → n ≈ 1.44 (O-rich, 하지만 증착률 급감)
-    if (ratio < 10) return 1.55 - (ratio - 5) * 0.012;
-    if (ratio < 14) return 1.49 - (ratio - 10) * 0.0075;
-    if (ratio <= 18) return 1.46 - (ratio - 14) * 0.003;
-    return 1.448 - (ratio - 18) * 0.001;
-  };
-
-  // 온도에 따른 H 함량 계산
-  const calculateHydrogenContent = (temp) => {
-    // 200°C → ~25%, 350°C → ~12%, 450°C → ~5%
-    return Math.max(5, 35 - temp * 0.07);
-  };
-
-  // 온도에 따른 막 밀도 (상대값)
-  const calculateFilmDensity = (temp) => {
-    // 200°C → 80%, 350°C → 95%, 450°C → 100%
-    return Math.min(100, 60 + temp * 0.1);
-  };
-
-  // a-Si: H2 희석에 따른 댕글링 본드 밀도 계산
-  const calculateDanglingBondDensity = (dilution) => {
-    // H2/SiH4 비율에 따른 댕글링 본드 밀도 (×10^15 cm^-3)
-    // 디바이스급 a-Si:H 목표: ~10^15 cm^-3
-    // dilution 0-3 → ~50 (5×10^16, 결함 많음)
-    // dilution 5-10 → ~15-20 (1.5-2×10^16, 중간)
-    // dilution 15-30 → ~3-8 (3-8×10^15, 디바이스급)
-    if (dilution < 3) return 50 - dilution * 5;
-    if (dilution < 10) return 35 - (dilution - 3) * 2.5;
-    if (dilution < 20) return 17.5 - (dilution - 10) * 1.0;
-    return Math.max(3, 7.5 - (dilution - 20) * 0.3);
-  };
-
-  // a-Si: H2 희석에 따른 H 함량 계산
-  const calculateaSiHContent = (dilution) => {
-    // 실제 PECVD a-Si:H: 기판온도 200-300°C에서 H 함량 10-15 at%
-    // H2 희석↑ → etching 효과로 H 함량 오히려 감소하는 경향
-    // dilution 0 → ~15% (SiH4에서 오는 H)
-    // dilution 5-10 → ~12% (최적)
-    // dilution 20+ → ~9-10% (etching으로 감소)
-    if (dilution < 5) return 15 - dilution * 0.4;
-    if (dilution < 15) return 13 - (dilution - 5) * 0.2;
-    return Math.max(8, 11 - (dilution - 15) * 0.1);
-  };
-
-  // SiNx: NH3/SiH4 비율에 따른 굴절률 계산
-  const calculateSiNxRefractiveIndex = (ratio) => {
-    // ratio 2 → n ≈ 2.3 (Si-rich, 태양전지 ARC용)
-    // ratio 8 → n ≈ 2.0 (stoichiometric Si3N4)
-    // ratio 15 → n ≈ 1.85 (N-rich, 패시베이션용)
-    if (ratio < 5) return 2.3 - (ratio - 2) * 0.06;
-    if (ratio < 10) return 2.12 - (ratio - 5) * 0.024;
-    return 2.0 - (ratio - 10) * 0.03;
-  };
-
-  // SiNx: 비율에 따른 N/Si 원자비 계산
-  const calculateNSiRatio = (ratio) => {
-    // ratio 2 → N/Si ≈ 0.8 (Si-rich)
-    // ratio 8 → N/Si ≈ 1.33 (stoichiometric)
-    // ratio 15 → N/Si ≈ 1.5 (N-rich)
-    return Math.min(1.6, 0.6 + ratio * 0.07);
-  };
+  // 계산식은 src/physics/pecvd.js 로 옮겼다.
 
   const [gasFlows, setGasFlows] = useState({ silane: 50, hydrogen: 0, ammonia: 0, nitrousoxide: 710 });
   const [processPressure, setProcessPressure] = useState(1000);

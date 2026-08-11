@@ -1,4 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
+import {
+  calculateTempProfile as computeTempProfile,
+  computeZoneSetpoints,
+  stepZoneTemperatures,
+} from '../physics/rta';
 
 // Icon components (inline SVG)
 const Play = () => (
@@ -76,45 +81,16 @@ const RTASimulator = () => {
   };
 
   // Temperature profile calculation
-  const calculateTempProfile = (time) => {
-    const gasStabilizationTime = 10;
-    const totalRampUpTime = (targetTemp - 25) / rampRate;
-    const rampDownTime = (targetTemp - 25) / (rampRate * 0.3);
-
-    if (time <= gasStabilizationTime) {
-      return 25;
-    } else if (time <= gasStabilizationTime + totalRampUpTime) {
-      const rampTime = time - gasStabilizationTime;
-      return 25 + (rampRate * rampTime);
-    } else if (time <= gasStabilizationTime + totalRampUpTime + processTime) {
-      return targetTemp;
-    } else if (time <= gasStabilizationTime + totalRampUpTime + processTime + rampDownTime) {
-      const coolTime = time - (gasStabilizationTime + totalRampUpTime + processTime);
-      const coolProgress = coolTime / rampDownTime;
-      return targetTemp - (targetTemp - 25) * Math.pow(coolProgress, 0.7);
-    } else {
-      return 25;
-    }
-  };
+  // 계산식은 src/physics/rta.js 로 옮겼다. 여기서는 컴포넌트 state 만 묶어 준다.
+  const calculateTempProfile = (time) =>
+    computeTempProfile(time, { targetTemp, rampRate, processTime });
 
   // Zone thermal lag simulation
   const updateZoneTemperatures = (globalSetpoint, deltaTime) => {
-    const timeConstants = [0.5, 0.75, 0.75, 1.0, 1.0, 1.25];
-
-    const newSetpoints = zoneSetpoints.map((_, idx) => {
-      const powerFactor = lampPower[idx] / 100;
-      const positionOffset = idx === 0 ? 0 : (idx < 3 ? 2 : idx < 5 ? 5 : 8);
-      return Math.max(25, globalSetpoint - positionOffset + (powerFactor * 10));
-    });
-
+    const newSetpoints = computeZoneSetpoints(globalSetpoint, lampPower);
     setZoneSetpoints(newSetpoints);
 
-    const newZoneTemps = zoneTemps.map((currentTemp, idx) => {
-      const setpoint = newSetpoints[idx];
-      const timeConstant = timeConstants[idx];
-      const tempChange = (setpoint - currentTemp) / timeConstant * deltaTime;
-      return currentTemp + tempChange;
-    });
+    const newZoneTemps = stepZoneTemperatures(zoneTemps, newSetpoints, deltaTime);
 
     setZoneTemps(newZoneTemps);
     return newZoneTemps.reduce((sum, temp) => sum + temp, 0) / newZoneTemps.length;

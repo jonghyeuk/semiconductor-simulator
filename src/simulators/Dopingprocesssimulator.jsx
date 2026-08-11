@@ -1,6 +1,12 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { LineChart, Line, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from 'recharts';
 import RTASimulator from './RTASimulator';
+import {
+  calculateImplantParams as computeImplantParams,
+  calculateDiffusionProfile as computeDiffusionProfile,
+  calculateImplantationProfile as computeImplantationProfile,
+  dopantProperties,
+} from '../physics/doping';
 
 // Icon components (inline SVG to avoid lucide-react dependency)
 const PlayIcon = () => (
@@ -830,54 +836,6 @@ const DopingProcessSimulator = ({ initialTab }) => {
   const [showQuizResults, setShowQuizResults] = useState(false);
 
   // Dopant properties
-  const dopantProperties = {
-    B: {
-      name: 'Boron',
-      nameKo: '붕소',
-      type: 'p-type',
-      Qd: 3.69,
-      D0: 0.76,
-      color: '#3b82f6',
-      mass: 10.8
-    },
-    P: {
-      name: 'Phosphorus',
-      nameKo: '인',
-      type: 'n-type',
-      Qd: 3.66,
-      D0: 3.85,
-      color: '#ef4444',
-      mass: 31.0
-    },
-    As: {
-      name: 'Arsenic',
-      nameKo: '비소',
-      type: 'n-type',
-      Qd: 4.08,
-      D0: 0.32,
-      color: '#8b5cf6',
-      mass: 74.9
-    },
-    In: {
-      name: 'Indium',
-      nameKo: '인듐',
-      type: 'p-type',
-      Qd: 3.9,
-      D0: 0.5,
-      color: '#10b981',
-      mass: 114.8
-    },
-    Sb: {
-      name: 'Antimony',
-      nameKo: '안티몬',
-      type: 'n-type',
-      Qd: 4.0,
-      D0: 0.4,
-      color: '#f59e0b',
-      mass: 121.8
-    }
-  };
-
   // CMOS device presets for ion implantation
   const devicePresets = {
     custom: { name: '사용자 설정', energy: 50, dose: 1e15, ion: 'B', description: '직접 설정' },
@@ -1206,131 +1164,30 @@ const DopingProcessSimulator = ({ initialTab }) => {
   };
 
   // Calculate diffusion coefficient
-  const calculateDiffusionCoefficient = (temp, dopant) => {
-    const k = 8.617e-5;
-    const T = temp + 273.15;
-    const { Qd, D0 } = dopantProperties[dopant];
-    return D0 * Math.exp(-Qd / (k * T));
-  };
+  // 계산식은 src/physics/doping.js 로 옮겼다. 여기서는 컴포넌트 state 만 묶어 준다.
+  const calculateImplantParams = (energy, dopant, tilt = implTilt) =>
+    computeImplantParams(energy, dopant, tilt);
 
-  // Complementary error function
-  const erfc = (x) => {
-    const t = 1 / (1 + 0.3275911 * Math.abs(x));
-    const a1 = 0.254829592;
-    const a2 = -0.284496736;
-    const a3 = 1.421413741;
-    const a4 = -1.453152027;
-    const a5 = 1.061405429;
-    const erf = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-    return x >= 0 ? 1 - erf : 1 + erf;
-  };
+  const calculateDiffusionProfile = (currentTime) =>
+    computeDiffusionProfile({
+      currentTime,
+      temperature: diffTemperature,
+      dopant: diffDopantType,
+      processType: diffProcessType,
+      surfaceConc: diffSurfaceConc,
+      backgroundConc: diffBackgroundConc,
+    });
 
-  // Calculate Rp and DeltaRp for implantation (LSS theory)
-  const calculateImplantParams = (energy, dopant, tilt = implTilt) => {
-    const mass = dopantProperties[dopant].mass;
-    const A_target = 28.1; // Si atomic mass
-    const Z_target = 14; // Si atomic number
-    const Z_ion = dopant === 'B' ? 5 : dopant === 'P' ? 15 : dopant === 'As' ? 33 :
-                  dopant === 'In' ? 49 : 51;
-
-    // LSS theory: reduced energy
-    const epsilon = 32.5 * mass * energy / (Z_ion * Z_target * (mass + A_target) *
-                    (Math.pow(Z_ion, 0.23) + Math.pow(Z_target, 0.23)));
-
-    // Projected range in nm
-    let Rp = (mass / A_target) * Math.pow(epsilon, 0.8) * 100;
-
-    // Apply tilt angle correction
-    if (tilt > 0) {
-      Rp = Rp / Math.cos(tilt * Math.PI / 180);
-    }
-
-    // Straggle (standard deviation)
-    const deltaRp = Rp * 0.5;
-
-    // Ensure minimum values
-    Rp = Math.max(Rp, 1);
-
-    return { Rp: Rp * 1e-3, deltaRp: deltaRp * 1e-3 }; // Convert to μm
-  };
-
-  // Calculate diffusion profile
-  const calculateDiffusionProfile = (currentTime) => {
-    const D = calculateDiffusionCoefficient(diffTemperature, diffDopantType);
-    const t = currentTime * 60;
-    const profile = [];
-    const maxDepth = 3;
-    const points = 100;
-
-    for (let i = 0; i <= points; i++) {
-      const x = (i / points) * maxDepth * 1e-4;
-      let concentration;
-
-      if (diffProcessType === 'predeposition') {
-        const erfcArg = x / (2 * Math.sqrt(D * t));
-        concentration = diffSurfaceConc * erfc(erfcArg);
-      } else {
-        // Drive-in: Use predeposition conditions to calculate total dopant dose Q
-        // Typical predeposition is done at lower temperature (900-1000°C) for 30 min
-        const T_predep = 1000; // °C
-        const t_predep = 30 * 60; // seconds
-        const D_predep = calculateDiffusionCoefficient(T_predep, diffDopantType);
-        // Correct formula: Q = 2*C0*sqrt(D_predep*t_predep/π)
-        const Q = 2 * diffSurfaceConc * Math.sqrt(D_predep * t_predep / Math.PI);
-        // Drive-in profile: C(x,t) = (Q/sqrt(π*D*t)) * exp(-x²/(4*D*t))
-        // This always has maximum at surface (x=0) and decreases monotonically with depth
-        concentration = (Q / Math.sqrt(Math.PI * D * t)) * Math.exp(-x * x / (4 * D * t));
-      }
-
-      concentration = Math.max(concentration, diffBackgroundConc);
-
-      profile.push({
-        depth: (i / points) * maxDepth,
-        concentration: concentration,
-        logConcentration: Math.log10(concentration)
-      });
-    }
-
-    return profile;
-  };
-
-  // Calculate implantation profile
-  const calculateImplantationProfile = () => {
-    const { Rp, deltaRp } = calculateImplantParams(implEnergy, implDopantType);
-    const profile = [];
-    // Dynamic x-axis range based on Rp and deltaRp
-    // Most of the concentration is within Rp ± 3*deltaRp
-    const maxDepth = Math.max((Rp + 4 * deltaRp), 0.05); // At least 0.05 μm
-    const points = 100;
-
-    for (let i = 0; i <= points; i++) {
-      const x = (i / points) * maxDepth;
-
-      // Gaussian profile
-      let concentration = (implDose / (Math.sqrt(2 * Math.PI) * deltaRp * 1e-4)) *
-                         Math.exp(-Math.pow(x * 1e-4 - Rp * 1e-4, 2) / (2 * Math.pow(deltaRp * 1e-4, 2)));
-
-      // If annealing is enabled, add diffusion
-      if (implAnnealing) {
-        const D = calculateDiffusionCoefficient(annealTemp, implDopantType);
-        const t = annealTime * 60;
-        const diffusionBroadening = Math.sqrt(deltaRp * deltaRp * 1e-8 + 2 * D * t) * 1e4;
-
-        concentration = (implDose / (Math.sqrt(2 * Math.PI) * diffusionBroadening * 1e-4)) *
-                       Math.exp(-Math.pow(x * 1e-4 - Rp * 1e-4, 2) / (2 * Math.pow(diffusionBroadening * 1e-4, 2)));
-      }
-
-      concentration = Math.max(concentration, 1e14);
-
-      profile.push({
-        depth: x,
-        concentration: concentration,
-        logConcentration: Math.log10(concentration)
-      });
-    }
-
-    return profile;
-  };
+  const calculateImplantationProfile = () =>
+    computeImplantationProfile({
+      energy: implEnergy,
+      dopant: implDopantType,
+      dose: implDose,
+      tilt: implTilt,
+      annealing: implAnnealing,
+      annealTemp,
+      annealTime,
+    });
 
   // Wafer Cross Section Component for Ion Implantation
   const WaferCrossSection = ({ Rp, deltaRp }) => {

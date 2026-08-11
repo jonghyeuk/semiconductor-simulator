@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
+import {
+  calculateBasicIonizationDegree as computeIonizationDegree,
+  calculateBasicPlasmaGenerationProbability as computeGenerationProbability,
+  calculateBreakdownVoltage as computeBreakdownVoltage,
+  getTownsendInfo as computeTownsendInfo,
+  calculateInputImpedance as computeInputImpedance,
+  calculateOptimalLC as computeOptimalLC,
+  calculateReflectedPower as computeReflectedPower,
+  PASCHEN_MINIMA,
+} from '../physics/plasma';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
 
 // Icon components
@@ -195,19 +205,13 @@ const PlasmaSimulator = ({ initialTab }) => {
   // 참고: 태양의 핵 이온화율 = 100%
   // 반도체 공정용 플라즈마 이온화율 = <0.001% (매우 낮은 편)
   // Strong Plasma (고밀도 플라즈마) = ~0.001% 수준
-  const calculateBasicIonizationDegree = () => {
-    const optimalPressure = 3.0;
-    const pressureFactor = Math.exp(-Math.pow((basicGasPressure - optimalPressure) / 2, 2));
-    const energyFactor = basicPlasmaEnergy / (basicPlasmaEnergy + 50);
-    return (pressureFactor * energyFactor * 0.0018).toFixed(4);
-  };
+  // 계산식은 src/physics/plasma.js 로 옮겼다. 여기서는 컴포넌트 state 를 묶고
+  // 원래 화면에 찍히던 자릿수(toFixed) 를 그대로 유지한다.
+  const calculateBasicIonizationDegree = () =>
+    computeIonizationDegree(basicGasPressure, basicPlasmaEnergy).toFixed(4);
 
-  const calculateBasicPlasmaGenerationProbability = () => {
-    const optimalPressure = 3.0;
-    const pressureFactor = Math.exp(-Math.pow((basicGasPressure - optimalPressure) / 2, 2));
-    const energyFactor = basicPlasmaEnergy / (basicPlasmaEnergy + 50);
-    return (pressureFactor * energyFactor * 100).toFixed(1);
-  };
+  const calculateBasicPlasmaGenerationProbability = () =>
+    computeGenerationProbability(basicGasPressure, basicPlasmaEnergy).toFixed(1);
 
   const getBasicPlasmaState = () => {
     const probability = parseFloat(calculateBasicPlasmaGenerationProbability());
@@ -229,30 +233,9 @@ const PlasmaSimulator = ({ initialTab }) => {
     return data;
   };
 
-  const calculateBreakdownVoltage = (p, d) => {
-    const pd = p * d;
-    if (pd < 0.1 || pd > 100) return null;
-    const gasData = {
-      argon: [{ pd: 0.1, voltage: 4000 }, { pd: 0.3, voltage: 500 }, { pd: 0.5, voltage: 300 }, { pd: 1.0, voltage: 200 }, { pd: 2.0, voltage: 280 }, { pd: 5.0, voltage: 400 }, { pd: 10, voltage: 500 }, { pd: 20, voltage: 1200 }, { pd: 50, voltage: 3000 }, { pd: 100, voltage: 4000 }],
-      air: [{ pd: 0.1, voltage: 5000 }, { pd: 0.3, voltage: 700 }, { pd: 0.5, voltage: 400 }, { pd: 1.0, voltage: 350 }, { pd: 2.0, voltage: 450 }, { pd: 5.0, voltage: 700 }, { pd: 10, voltage: 800 }, { pd: 20, voltage: 1800 }, { pd: 50, voltage: 4500 }, { pd: 100, voltage: 5000 }],
-      helium: [{ pd: 0.1, voltage: 6000 }, { pd: 0.3, voltage: 1000 }, { pd: 0.5, voltage: 600 }, { pd: 1.0, voltage: 400 }, { pd: 2.0, voltage: 500 }, { pd: 5.0, voltage: 800 }, { pd: 10, voltage: 1000 }, { pd: 20, voltage: 2000 }, { pd: 50, voltage: 4800 }, { pd: 100, voltage: 6000 }],
-      nitrogen: [{ pd: 0.1, voltage: 4500 }, { pd: 0.3, voltage: 600 }, { pd: 0.5, voltage: 350 }, { pd: 1.0, voltage: 250 }, { pd: 2.0, voltage: 320 }, { pd: 5.0, voltage: 500 }, { pd: 10, voltage: 650 }, { pd: 20, voltage: 1400 }, { pd: 50, voltage: 3500 }, { pd: 100, voltage: 4500 }],
-      neon: [{ pd: 0.1, voltage: 5500 }, { pd: 0.3, voltage: 800 }, { pd: 0.5, voltage: 450 }, { pd: 1.0, voltage: 300 }, { pd: 2.0, voltage: 380 }, { pd: 5.0, voltage: 600 }, { pd: 10, voltage: 750 }, { pd: 20, voltage: 1600 }, { pd: 50, voltage: 4000 }, { pd: 100, voltage: 5500 }]
-    };
-    const data = gasData[gasType] || gasData.argon;
-    for (let i = 0; i < data.length - 1; i++) {
-      if (pd >= data[i].pd && pd <= data[i + 1].pd) {
-        const ratio = (pd - data[i].pd) / (data[i + 1].pd - data[i].pd);
-        return data[i].voltage + ratio * (data[i + 1].voltage - data[i].voltage);
-      }
-    }
-    return data[data.length - 1].voltage;
-  };
+  const calculateBreakdownVoltage = (p, d) => computeBreakdownVoltage(p, d, gasType);
 
-  const findMinimumBreakdownPoint = () => {
-    const minPoints = { argon: { pd: 1.0, voltage: 200 }, air: { pd: 1.0, voltage: 350 }, helium: { pd: 1.0, voltage: 400 }, nitrogen: { pd: 1.0, voltage: 250 }, neon: { pd: 1.0, voltage: 300 } };
-    return minPoints[gasType] || minPoints.argon;
-  };
+  const findMinimumBreakdownPoint = () => PASCHEN_MINIMA[gasType] || PASCHEN_MINIMA.argon;
 
   const generatePaschenData = () => {
     const data = [];
@@ -265,74 +248,18 @@ const PlasmaSimulator = ({ initialTab }) => {
   };
 
   const getTownsendInfo = (pd) => {
-    let alpha;
-    if (pd < 0.5) alpha = pd * 20;
-    else if (pd <= 2.0) alpha = 10 + (pd - 0.5) * 20;
-    else alpha = 40 * Math.exp(-(pd-2)/3);
-    const isOptimal = pd >= 0.7 && pd <= 1.5;
-    return { alpha: alpha.toFixed(1), isOptimal: isOptimal, efficiency: isOptimal ? "최적" : pd < 0.7 ? "부족" : "과다" };
+    const info = computeTownsendInfo(pd);
+    return { ...info, alpha: info.alpha.toFixed(1) };
   };
 
-  const calculateInputImpedance = () => {
-    const omega = 2 * Math.PI * frequency * 1e6;
-    const L = inductance * 1e-9;
-    const C = capacitance * 1e-12;
-    const XL = omega * L; // 인덕터 리액턴스
-    const XC = 1 / (omega * C); // 캐패시터 리액턴스
-    
-    // L-type 매칭: 직렬 L, 병렬 C 가정
-    // Z_parallel = (loadImpedance * (-jXC)) / (loadImpedance - jXC)
-    const Z_load = loadImpedance;
-    
-    // 병렬 C와 부하의 합성 임피던스 (간단화)
-    const Z_parallel_real = (Z_load * XC * XC) / (Z_load * Z_load + XC * XC);
-    const Z_parallel_imag = -(Z_load * Z_load * XC) / (Z_load * Z_load + XC * XC);
-    
-    // 직렬 L 추가
-    const Z_in_imag = XL + Z_parallel_imag;
-    
-    // 입력 임피던스 크기
-    const Z_in = Math.sqrt(Z_parallel_real * Z_parallel_real + Z_in_imag * Z_in_imag);
-    
-    return Z_in.toFixed(1);
-  };
+  const calculateInputImpedance = () =>
+    computeInputImpedance(frequency, inductance, capacitance, loadImpedance).toFixed(1);
 
-  const calculateOptimalLC = () => {
-    const f = frequency * 1e6;
-    const omega = 2 * Math.PI * f;
-    const Z_load = loadImpedance;
-    const Z_source = 50;
-    
-    if (Z_load > Z_source) {
-      // 직렬 L, 병렬 C 구조
-      const Q = Math.sqrt(Z_load / Z_source - 1);
-      const X_L = Q * Z_source;
-      const X_C = Z_load / Q;
-      
-      return {
-        L: ((X_L / omega) * 1e9).toFixed(0), // nH
-        C: ((1 / (omega * X_C)) * 1e12).toFixed(0), // pF
-        type: 'L-type (직렬L-병렬C)'
-      };
-    } else {
-      // 병렬 C, 직렬 L 구조 (역순)
-      const Q = Math.sqrt(Z_source / Z_load - 1);
-      const X_C = Z_source / Q;
-      const X_L = Q * Z_load;
-      
-      return {
-        L: ((X_L / omega) * 1e9).toFixed(0), // nH
-        C: ((1 / (omega * X_C)) * 1e12).toFixed(0), // pF
-        type: 'L-type (병렬C-직렬L)'
-      };
-    }
-  };
+  const calculateOptimalLC = () => computeOptimalLC(frequency, loadImpedance);
 
-  const calculateReflectedPower = () => {
-    const Z_in = parseFloat(calculateInputImpedance());
-    const impedanceMismatch = Math.abs(Z_in - 50) / 50;
-    return (rfPower * Math.pow(impedanceMismatch, 2)).toFixed(1);
-  };
+  // 원본과 동일하게, 소수 첫째 자리로 반올림된 Z_in 을 반사 전력 계산에 넣는다.
+  const calculateReflectedPower = () =>
+    computeReflectedPower(parseFloat(calculateInputImpedance()), rfPower).toFixed(1);
 
   const applyAutoMatching = () => {
     const optimal = calculateOptimalLC();
