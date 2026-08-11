@@ -106,6 +106,12 @@ export function calculatePumpingTime(volume, initialPressure, finalPressure, pum
  * 760 Torr 에서 250 m³/h, 10 Torr 에서 1720 m³/h — 7배 차이). 한 점의 속도를
  * 전 구간에 상수로 쓰면 시간이 2배 이상 어긋난다.
  *
+ * ── 정확도 (교육용) ──
+ * 적분 자체는 512 분할에서 0.001% 이내로 수렴한다. 다만 **아웃가싱과 가스 부하가
+ * 없는 이상적 배기**다. 실제로는 1e-3 Torr 아래에서 아웃가싱이 지배해 훨씬 오래
+ * 걸리고 결국 도달 압력이 한계에 걸린다. 등온을 가정했고 챔버-펌프 사이 배관
+ * conductance 제약도 반영하지 않았다. 실제 장비의 배기 시간은 이보다 길다.
+ *
  * @param {number} volume 챔버 부피 (L)
  * @param {number} initialPressure Torr
  * @param {number} finalPressure Torr
@@ -151,6 +157,15 @@ export function calculatePumpingTimeFromCurve(
  *
  * 예전 구현은 D⁴ (점성류 형태) 이면서 압력 항이 없었다. 이 시뮬레이터는
  * 터보펌프로 1e-6 Torr 까지 내려가는 분자류 영역을 다루므로 D³ 가 맞다.
+ *
+ * ── 정확도 (교육용) ──
+ * 입구 보정 때문에 교과서의 긴 관 근사(12.1·D³/L)보다 1~35% 낮게 나온다.
+ * 짧고 굵은 관일수록 차이가 크다 (D=20cm·L=50cm 에서 −35%). 이건 오차가 아니라
+ * 짧은 관에서 더 맞는 값이다.
+ *
+ * 담지 않은 물리: 점성류·전이류 구간(이 시뮬레이터가 훑는 대기압~1 Torr 영역)은
+ * 식이 다르다. 엘보 0.7, 스파이럴 0.4 계수는 실측이 아니라 교육용으로 잡은 값이라
+ * 실제 배관과 다를 수 있다.
  *
  * @param {number} diameter 관 안지름 (cm)
  * @param {number} length 관 길이 (cm)

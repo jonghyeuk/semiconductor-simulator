@@ -20,6 +20,12 @@ export function calculateSpinCoatResults(processParams, rng = Math.random) {
   // 예전 구현은 구간별 1차식이었고, 2000~4000 rpm 구간은 아예 난수만 돌려
   // 회전수와 무관했다 (2000 rpm 과 4000 rpm 의 두께가 같았다).
   //
+  //
+  // ── 정확도 (교육용) ──
+  // 회전수만 반영한다. 실제 두께는 PR 점도·고형분·용매 증발 속도·스핀 시간에
+  // 함께 좌우되므로 실제 장비 값과 다를 수 있다. 아래 정규화(3000 rpm = 1000 nm)도
+  // 특정 PR 하나를 가정한 것이다. 회전수-두께의 지배 관계를 보는 용도다.
+  //
   // REFERENCE_RPM 에서 REFERENCE_THICKNESS 가 나오도록 정규화한다.
   const REFERENCE_RPM = 3000;
   const REFERENCE_THICKNESS = 1000; // nm
