@@ -17,7 +17,7 @@ npm run verify
 | `npm run lint` | 에러 0 유지 (case 블록 변수 누출, `==` 등). 기존 경고 187건은 상한으로 묶어 둠 |
 | `npm run lint:physics` | `src/physics`, `scripts` 는 경고 0 |
 | `npm run verify:physics` | 회귀 대조 58,874개 + 물리 수정으로 값이 얼마나 바뀌었는지 보고 |
-| `npm run test` | 물리 성질 검증 279개 |
+| `npm run test` | 물리 성질 검증 314개 |
 | `npm run verify:guides` | 리팩터링이 정적 가이드 HTML을 바꿨는지 (55페이지) |
 
 가이드 대조는 리팩터링할 때만 쓴다:
@@ -38,6 +38,7 @@ src/physics/
   oxidation.js    doping.js     vacuum.js
   plasma.js       etching.js    lithography.js
   pecvd.js        rta.js        cleaning.js
+  metallization.js  plasmaII.js
   __tests__/      # 모듈별 성질 테스트
 ```
 
@@ -51,7 +52,7 @@ src/physics/
 `verify:physics` 의 회귀 대조는 **물리 수정 대상이 아니었던** 함수만 본다.
 그 함수들은 컴포넌트에서 모듈로 옮기기 이전 코드와 값이 한 자리도 달라지면 안 된다.
 
-## 고친 물리 오류 7건
+## 고친 물리 오류 9건
 
 ### ① 열산화: Deal-Grove 선형 영역이 사라져 있었음
 
@@ -159,6 +160,42 @@ src/physics/
 
 **수정**: `t ∝ ω^(−1/2)` (Emslie–Bonner–Peck). 3000 rpm = 1000 nm 로 정규화하고
 ±1% 런투런 산포를 남긴다. 회전수 4배면 두께가 정확히 절반이 된다.
+
+### ⑧ 배선: 일렉트로마이그레이션 활성화 에너지가 금속별로 구분되지 않았음
+
+`src/physics/metallization.js` — `calcElectromigrationMTTF`
+
+`Ea = metalType === 'copper' ? 0.9 : 0.7` 이라 W 와 Co 가 Al 의 활성화 에너지를
+그대로 받았다. 그 결과 시뮬레이터 자체 표에는 W 가 "Very High" 내성으로 적혀
+있는데 계산은 Cu 를 W 보다 168배 좋게 내놓았다. 게다가 절대값이 Cu 기준
+**145만 년**으로 표시돼 신뢰성 지표로 읽히지 않았다.
+
+**수정**: 금속별 활성화 에너지를 내화성 순서에 맞게 두고(Al 0.7 < Cu 0.9 <
+Co 1.2 < W 1.5 eV), 절대 전인자 대신 기준 조건(1 MA/cm², 100°C) 수명으로
+정규화한 Black 식을 쓴다.
+
+```
+MTTF = MTTF_ref · (j_ref/j)² · exp[(Ea/k)·(1/T − 1/T_ref)]
+```
+
+J⁻² 의존성과 Arrhenius 온도 의존성은 그대로 살아 있고, 수명 순서가
+시뮬레이터 자체 EM 등급(W > Co > Cu > Al)과 일치한다.
+
+| j (MA/cm²) | Al | Cu | Co | W |
+|---|---|---|---|---|
+| 0.5 | 20년 | 200년 | 400년 | 800년 |
+| 1 | 5년 | 50년 | 100년 | 200년 |
+| 3 | 0.6년 | 5.6년 | 11년 | 22년 |
+
+선 저항 표시 단위도 mΩ → Ω 로 바꿨다 (45 nm Al 배선이 13,086 mΩ 으로 찍혔다).
+
+### ⑨ ICP 식각: 극저온에서 식각률이 음수
+
+`src/physics/plasmaII.js` — `calculateEtchRate`
+
+`tempFactor = 1 + (T − 20)·0.01` 에 하한이 없어 −100°C 에서 식각률이
+−24 nm/min 이 나왔다. UI 슬라이더 범위(0~300°C)로는 닿지 않지만 막아 뒀다.
+파워·압력·패턴 밀도에도 같은 가드를 넣었다.
 
 ## 화면 숫자가 얼마나 바뀌었나
 

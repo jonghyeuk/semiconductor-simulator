@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ReferenceLine } from 'recharts';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
+import { calculateEtchRate as computeEtchRate, calculateSelectivity as computeSelectivity } from '../physics/plasmaII';
 
 // Icon components
 const PlayIcon = () => (
@@ -886,21 +887,11 @@ const PlasmaSimulatorII = ({ initialTab }) => {
     }
   }, [icpStep]);
 
-  const calculateEtchRate = () => {
-    const gasFactors = { 'CF4': 1.0, 'Cl2': 1.2, 'Ar': 0.3, 'O2': 0.8 };
-    const gasFactor = gasFactors[etchGasType] || 1.0;
-    const tempFactor = 1 + (substrateTemp - 20) * 0.01;
-    const densityFactor = 1 - (patternDensity / 100) * 0.3;
-    const baseRate = Math.pow(etchPower / 100, 0.5) * Math.pow(etchPressure / 10, 0.3);
-    return (baseRate * gasFactor * tempFactor * densityFactor * 100).toFixed(0);
-  };
+  // 계산식은 src/physics/plasmaII.js 로 옮겼다. 여기서는 state 만 묶어 준다.
+  const calculateEtchRate = () =>
+    computeEtchRate({ gasType: etchGasType, power: etchPower, pressure: etchPressure, substrateTemp, patternDensity }).toFixed(0);
 
-  const calculateSelectivity = () => {
-    const gasSelectivity = { 'CF4': 15, 'Cl2': 8, 'Ar': 2, 'O2': 25 };
-    const baseSelectivity = gasSelectivity[etchGasType] || 10;
-    const powerEffect = 1 - (etchPower - 100) / 1000;
-    return (baseSelectivity * Math.max(0.2, powerEffect)).toFixed(1);
-  };
+  const calculateSelectivity = () => computeSelectivity(etchGasType, etchPower).toFixed(1);
 
   const generatePlasmaDistribution = () => {
     return Array.from({ length: 20 }, (_, i) => {

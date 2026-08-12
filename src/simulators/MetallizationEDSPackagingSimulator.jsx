@@ -1,5 +1,6 @@
 import React, { useState, useEffect, Fragment } from 'react';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
+import { calcLineResistance, calcElectromigrationMTTF } from '../physics/metallization';
 
 const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
   const [activeTab, setActiveTab] = useState(initialTab || 'overview');
@@ -328,22 +329,12 @@ const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
     setAnswers([]);
   };
 
-  // 계산 함수들
-  const calcResistance = () => {
-    const rho = metalProperties[metalType].resistivity;
-    const length = 1000; // nm
-    const area = lineWidth * lineWidth;
-    return ((rho * 1e-8 * length * 1e-9) / (area * 1e-18) * 1000).toFixed(2);
-  };
+  // 계산식은 src/physics/metallization.js 로 옮겼다. 여기서는 state 만 묶어 준다.
+  const LINE_LENGTH_NM = 1000;
 
-  const calcMTF = () => {
-    const A = metalProperties[metalType].mtf;
-    const Ea = metalType === 'copper' ? 0.9 : 0.7;
-    const T = 373; // 100°C in K
-    const k = 8.617e-5;
-    const j = currentDensity;
-    return (A * Math.exp(Ea / (k * T)) / (j * j) * 1e-6).toFixed(1);
-  };
+  const calcResistance = () => calcLineResistance(metalType, lineWidth, LINE_LENGTH_NM).toFixed(2);
+
+  const calcMTF = () => calcElectromigrationMTTF(metalType, currentDensity).toFixed(1);
 
   // 개요 탭 렌더링
   const renderOverviewTab = () => (
@@ -615,7 +606,7 @@ const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
             </div>
             <div className="flex justify-between">
               <span>Line Resistance</span>
-              <span className="font-bold text-amber-600">{calcResistance()} mΩ</span>
+              <span className="font-bold text-amber-600">{calcResistance()} Ω</span>
             </div>
           </div>
         </div>
