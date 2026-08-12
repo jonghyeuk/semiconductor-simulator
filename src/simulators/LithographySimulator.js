@@ -189,10 +189,10 @@ const PhotolithographySimulator = ({ initialTab }) => {
     {
       title: "🚀 포토리소 기술은 어떻게 발전했을까?",
       content: "**1970년대: Contact 방식**\n" +
-               "• 파장: 365nm (g-line), 해상도: 2~5 μm\n" +
+               "• 파장: 436nm (g-line), 해상도: 2~5 μm\n" +
                "• 마스크-웨이퍼 직접 접촉 → 불량률 높음\n\n" +
                "**1990년대: Stepper + i-line**\n" +
-               "• 파장: 365nm → 248nm (KrF), 해상도: 0.35~0.18 μm\n" +
+               "• 파장: 365nm (i-line) → 248nm (KrF), 해상도: 0.35~0.18 μm\n" +
                "• Step & Repeat 방식으로 수율 향상\n\n" +
                "**2000년대: ArF 액침 리소그라피**\n" +
                "• 파장: 193nm (ArF), 해상도: 45~10nm\n" +
@@ -2864,16 +2864,16 @@ const PhotolithographySimulator = ({ initialTab }) => {
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                  <div className="w-24 text-sm font-medium text-indigo-700">2000년대</div>
+                  <div className="w-24 text-sm font-medium text-indigo-700">1990년대 후반</div>
                   <div className="flex-1 p-3 bg-white rounded-lg border border-indigo-200">
                     <span className="font-medium">KrF (248nm)</span> → 250nm~130nm 공정
                   </div>
                 </div>
                 
                 <div className="flex items-center space-x-4">
-                  <div className="w-24 text-sm font-medium text-indigo-700">2010년대</div>
+                  <div className="w-24 text-sm font-medium text-indigo-700">2000년대~</div>
                   <div className="flex-1 p-3 bg-white rounded-lg border border-indigo-200">
-                    <span className="font-medium">ArF (193nm)</span> → 90nm~7nm 공정 (다중패터닝)
+                    <span className="font-medium">ArF (193nm)</span> → 90nm 공정, 액침·다중패터닝으로 7nm 까지 연장
                   </div>
                 </div>
                 
@@ -3200,7 +3200,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
           <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">리소그라피 발전사</text>
           <line x1="45" y1="36" x2="45" y2="248" stroke="#94a3b8" strokeWidth="2" strokeDasharray="3"/>
           {[
-            { y: 38, era: '1970s', label: 'Contact 방식', desc: '365nm, 2~5μm', color: '#CBD5E1' },
+            { y: 38, era: '1970s', label: 'Contact 방식', desc: '436nm, 2~5μm', color: '#CBD5E1' },
             { y: 80, era: '1990s', label: 'KrF Stepper', desc: '248nm, 0.35~0.18μm', color: '#93C5FD' },
             { y: 122, era: '2000s', label: 'ArF 액침', desc: '193nm, 45~10nm', color: '#C4B5FD' },
             { y: 164, era: '2010s', label: 'Multi Patterning', desc: '193nm로 7nm', color: '#F9A8D4' },

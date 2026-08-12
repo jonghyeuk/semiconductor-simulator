@@ -8,13 +8,20 @@
 /** 볼츠만 상수 (eV/K) */
 export const K_EV = 8.617e-5;
 
-/** 도펀트 물성. Qd = 확산 활성화 에너지(eV), D0 = 전인자(cm²/s), mass = 원자량. */
+/**
+ * 도펀트 물성. Qd = 확산 활성화 에너지(eV), D0 = 전인자(cm²/s), mass = 원자량.
+ *
+ * D0-Qd 는 반드시 **같은 출처의 짝**이어야 한다. 예전 표는 D0 는 Sze/Jaeger 의
+ * 진성 확산 표를 쓰면서 Qd 만 다른 출처 값을 섞어 놓아서, 1000°C 확산 계수가
+ * B 약 1/10, As 약 1/100 로 나왔다 (As 가 P 보다 500배 느린 비현실적 거동).
+ * Sze, "Physics of Semiconductor Devices" / Jaeger 의 짝으로 맞췄다.
+ */
 export const dopantProperties = {
-  B: { name: 'Boron', nameKo: '붕소', type: 'p-type', Qd: 3.69, D0: 0.76, color: '#3b82f6', mass: 10.8 },
+  B: { name: 'Boron', nameKo: '붕소', type: 'p-type', Qd: 3.46, D0: 0.76, color: '#3b82f6', mass: 10.8 },
   P: { name: 'Phosphorus', nameKo: '인', type: 'n-type', Qd: 3.66, D0: 3.85, color: '#ef4444', mass: 31.0 },
-  As: { name: 'Arsenic', nameKo: '비소', type: 'n-type', Qd: 4.08, D0: 0.32, color: '#8b5cf6', mass: 74.9 },
-  In: { name: 'Indium', nameKo: '인듐', type: 'p-type', Qd: 3.9, D0: 0.5, color: '#10b981', mass: 114.8 },
-  Sb: { name: 'Antimony', nameKo: '안티몬', type: 'n-type', Qd: 4.0, D0: 0.4, color: '#f59e0b', mass: 121.8 },
+  As: { name: 'Arsenic', nameKo: '비소', type: 'n-type', Qd: 3.56, D0: 0.32, color: '#8b5cf6', mass: 74.9 },
+  In: { name: 'Indium', nameKo: '인듐', type: 'p-type', Qd: 3.5, D0: 1.2, color: '#10b981', mass: 114.8 },
+  Sb: { name: 'Antimony', nameKo: '안티몬', type: 'n-type', Qd: 3.65, D0: 0.214, color: '#f59e0b', mass: 121.8 },
 };
 
 /** 이온별 원자번호. */

@@ -16,9 +16,17 @@ export function calculateTurboSpeed(pressure) {
   return 20;
 }
 
-/** sccm → Torr·L/s 환산. */
+/**
+ * sccm → Torr·L/s 환산.
+ *
+ * 1 sccm = 표준 상태(760 Torr, 0°C)의 1 cm³ 를 1분에 흘리는 유량이므로
+ * Q = 760 Torr × 0.001 L / 60 s = 0.01267 Torr·L/s.
+ * 예전 값 0.0095 는 어느 표준에도 해당하지 않아 화면 sccm 이 33% 부풀려졌다.
+ */
+export const SCCM_TO_TORR_LS = 0.01267;
+
 export function convertSccmToTorrLs(sccm) {
-  return sccm * 0.0095;
+  return sccm * SCCM_TO_TORR_LS;
 }
 
 /**
@@ -202,6 +210,6 @@ export function getVacuumStage(pressure) {
   if (pressure > 100) return '대기압/초기배기';
   if (pressure > 1) return '저진공';
   if (pressure > 1e-3) return '중진공';
-  if (pressure > 1e-6) return '고진공';
+  if (pressure > 1e-9) return '고진공';
   return '초고진공';
 }

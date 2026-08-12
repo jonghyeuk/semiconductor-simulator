@@ -366,6 +366,8 @@ describe('pressureToSliderValue / getVacuumStage', () => {
     expect(getVacuumStage(10)).toBe('저진공');
     expect(getVacuumStage(1e-2)).toBe('중진공');
     expect(getVacuumStage(1e-5)).toBe('고진공');
-    expect(getVacuumStage(1e-8)).toBe('초고진공');
+    // 고진공/초고진공 경계는 10⁻⁹ Torr. 시뮬레이터의 이론 설명과 같은 기준이다.
+    expect(getVacuumStage(1e-8)).toBe('고진공');
+    expect(getVacuumStage(1e-10)).toBe('초고진공');
   });
 });

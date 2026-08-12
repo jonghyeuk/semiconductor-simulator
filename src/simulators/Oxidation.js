@@ -231,7 +231,7 @@ const OxidationSimulator = ({ initialTab }) => {
                "💡 **놀라운 특성**: SiO₂는 자연계에서 가장 안정적인 절연체 중 하나!\n" +
                "   • 절연파괴 전압: **1,000만 V/cm** 이상\n" +
                "   • Si와의 계면 결함 밀도: **10¹⁰ /cm²** 수준\n" +
-               "   • 열팽창 계수가 Si와 거의 동일 → 열적 스트레스 최소화\n\n" +
+               "   • Si와 열팽창 계수가 달라(SiO₂ 0.5, Si 2.6 ×10⁻⁶/K) 냉각 시 압축 응력 발생\n\n" +
                "산화막은 트랜지스터의 게이트 절연막, 소자 간 격리, 확산 마스크, 패시베이션층 등 반도체 공정 전반에 사용됩니다.",
       highlight: "반도체 산업의 근간! SiO₂ 없이는 현대 전자기기가 불가능합니다.",
       icon: "🎯"
@@ -242,7 +242,7 @@ const OxidationSimulator = ({ initialTab }) => {
                "**1️⃣ 건식 산화(Dry Oxidation)**\n" +
                "   • 반응식: Si + O₂ → SiO₂\n" +
                "   • 온도: **900~1,200°C**\n" +
-               "   • 성장 속도: **느림** (10~100 nm/hr)\n" +
+               "   • 성장 속도: **느림** (900°C 약 15, 1100°C 약 120 nm/hr)\n" +
                "   • 막질: **치밀하고 높은 품질** → 게이트 산화막에 사용\n" +
                "   • 특징: 결함 밀도가 낮고 절연 특성 우수\n\n" +
                "**2️⃣ 습식 산화(Wet Oxidation)**\n" +
@@ -1190,9 +1190,9 @@ const OxidationSimulator = ({ initialTab }) => {
                 <div className="bg-white p-4 rounded-lg">
                   <h5 className="font-semibold text-gray-800 mb-2">2. 확산 제한 (Diffusion Limited)</h5>
                   <p className="text-sm text-gray-700">
-                    O₂나 H₂O가 SiO₂를 통과해 Si 표면에 도달해야 하는데, 이 확산이 성장률을 결정합니다. 
-                    <strong>습식 산화(B/A ≈ 100)</strong>가 <strong>건식 산화(B/A ≈ 10)</strong>보다 빠른 이유도 
-                    H₂O의 더 나은 확산 특성 때문입니다.
+                    O₂나 H₂O가 SiO₂를 통과해 Si 표면에 도달해야 하는데, 산화막이 두꺼워지면 이 확산이 성장률을 결정합니다(포물선 상수 B).
+                    습식 산화가 건식보다 훨씬 빠른 주된 이유는 확산 속도가 아니라 <strong>H₂O가 SiO₂에 녹아드는 양(용해도)이 O₂보다 약 1000배 크기</strong> 때문입니다.
+                    1000°C 기준 B는 습식 0.32, 건식 0.010 μm²/hr 로 약 30배 차이가 납니다.
                   </p>
                 </div>
 

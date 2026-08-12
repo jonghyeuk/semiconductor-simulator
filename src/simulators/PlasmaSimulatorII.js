@@ -2337,7 +2337,7 @@ const PlasmaSimulatorII = ({ initialTab }) => {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <span className="text-gray-600">식각률:</span>
-                      <div className="font-semibold text-orange-900">{calculateEtchRate()} Å/min</div>
+                      <div className="font-semibold text-orange-900">{calculateEtchRate()} nm/min</div>
                     </div>
                     <div>
                       <span className="text-gray-600">선택비:</span>
@@ -2782,9 +2782,9 @@ const PlasmaSimulatorII = ({ initialTab }) => {
                     반도체 공정
                   </h4>
                   <div className="space-y-2 text-green-700 text-sm">
-                    <div><strong>SiO₂:</strong> 게이트 절연막, IMD</div>
+                    <div><strong>SiO₂:</strong> IMD(층간 절연), 패시베이션 (게이트 산화막은 PECVD 가 아니라 열산화로 만든다)</div>
                     <div><strong>SiNₓ:</strong> 패시베이션, 하드마스크</div>
-                    <div><strong>SiON:</strong> 저유전 절연막</div>
+                    <div><strong>SiON:</strong> ARC(반사방지막), 패시베이션 (저유전막이 아니다 — k 는 SiO₂ 와 비슷하거나 높다)</div>
                     <div><strong>특징:</strong> 저온으로 열 손상 방지</div>
                   </div>
                 </div>

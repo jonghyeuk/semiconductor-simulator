@@ -3771,7 +3771,7 @@ const EtchSimulator = ({ initialTab }) => {
                           Si + 2Cl₂ → SiCl₄ ↑
                         </div>
                         <div className="bg-gray-100 p-2 rounded font-mono text-center mt-1">
-                          Si + Ar⁺ → Si⁺ (물리적 스퍼터링)
+                          Si(s) + Ar⁺ → Si(g) + Ar (물리적 스퍼터링)
                         </div>
                         <p><strong>메커니즘:</strong> Cl 라디칼이 Si 표면과 화학적으로 결합하여 휘발성 SiCl₄ 형성</p>
                         <p><strong>생성물:</strong> SiCl₄ (사염화규소) - 상온에서 기체상으로 쉽게 배출</p>
@@ -3794,10 +3794,10 @@ const EtchSimulator = ({ initialTab }) => {
                       <div className="text-sm space-y-2">
                         <p><strong>화학 반응식:</strong></p>
                         <div className="bg-gray-100 p-2 rounded font-mono text-center">
-                          SiO₂ + 4CF₄ → SiF₄ ↑ + 2CO₂ ↑ + 2CF₂
+                          SiO₂ + CF₄ → SiF₄ ↑ + CO₂ ↑
                         </div>
                         <div className="bg-gray-100 p-2 rounded font-mono text-center mt-1">
-                          SiO₂ + CHF₃ → SiF₄ ↑ + CO ↑ + HF
+                          3SiO₂ + 4CHF₃ → 3SiF₄ ↑ + 4CO ↑ + 2H₂O ↑
                         </div>
                         <p><strong>메커니즘:</strong> F 라디칼이 Si-O 결합을 끊고 Si와 강한 Si-F 결합 형성</p>
                         <p><strong>생성물:</strong> SiF₄ (사불화규소) - 매우 안정한 휘발성 기체</p>
@@ -3820,7 +3820,7 @@ const EtchSimulator = ({ initialTab }) => {
                       <div className="text-sm space-y-2">
                         <p><strong>화학 반응식:</strong></p>
                         <div className="bg-gray-100 p-2 rounded font-mono text-center">
-                          Si₃N₄ + 12CHF₃ → 3SiF₄ ↑ + 2N₂ ↑ + 12CO ↑ + 12HF
+                          Si₃N₄ + 12F* → 3SiF₄ ↑ + 2N₂ ↑   (F* 는 CHF₃ 분해로 생긴 F 라디칼)
                         </div>
                         <div className="bg-gray-100 p-2 rounded font-mono text-center mt-1">
                           C + O₂ → CO₂ ↑ (탄소 부산물 제거)
@@ -3846,7 +3846,7 @@ const EtchSimulator = ({ initialTab }) => {
                       <div className="text-sm space-y-2">
                         <p><strong>화학 반응식:</strong></p>
                         <div className="bg-gray-100 p-2 rounded font-mono text-center">
-                          (CH₂-CHR)ₙ + O₂ → CO₂ ↑ + H₂O ↑
+                          (C₃H₄O)ₙ + 3n O₂ → 3n CO₂ ↑ + 2n H₂O ↑   (PR 을 노볼락 반복단위로 잡은 개략식)
                         </div>
                         <p><strong>메커니즘:</strong> O 라디칼이 C-C, C-H 결합을 무작위로 절단</p>
                         <p><strong>생성물:</strong> CO₂, H₂O (완전 산화 생성물)</p>
@@ -4284,12 +4284,12 @@ const EtchSimulator = ({ initialTab }) => {
                     </ul>
                     <p><strong>주요 응용:</strong></p>
                     <ul className="list-disc list-inside space-y-1 text-gray-700">
-                      <li>Metal 식각 (Al, Cu 등)</li>
+                      <li>Metal 식각 (Al, W 등 — Cu 는 휘발성 할로겐화물이 없어 건식 식각이 안 되고, 그래서 Damascene 공법을 쓴다)</li>
                       <li>PR Ashing</li>
                       <li>Chamber Cleaning</li>
                       <li>Oxide 거친 식각</li>
                     </ul>
-                    <p><strong>대표 업체:</strong> Applied Materials (DPS), Lam Research (2300)</p>
+                    <p><strong>대표 업체:</strong> Lam Research (Exelan/Flex), TEL (Tactras), Applied Materials (Producer Etch)</p>
                   </div>
                 </div>
 
@@ -4310,7 +4310,7 @@ const EtchSimulator = ({ initialTab }) => {
                       <li>Poly-Si Gate 식각</li>
                       <li>고선택비 요구 공정</li>
                     </ul>
-                    <p><strong>대표 업체:</strong> Lam Research (Kiyo, Versys), TEL (Tactras)</p>
+                    <p><strong>대표 업체:</strong> Lam Research (Kiyo, Versys), Applied Materials (DPS/Centura), Hitachi High-Tech</p>
                   </div>
                 </div>
               </div>
@@ -4395,7 +4395,7 @@ const EtchSimulator = ({ initialTab }) => {
                       <h6 className="font-semibold text-orange-700 mb-2">시장 규모</h6>
                       <p className="text-xs text-gray-600 mb-2">반도체 미세화로 지속 성장 중</p>
                       <ul className="space-y-1 text-gray-700">
-                        <li>• <strong>2024년:</strong> 약 150억 달러 (약 20조원) 이상</li>
+                        <li>• <strong>2024년:</strong> 약 200억 달러 (약 27조원) 규모</li>
                         <li>• <strong>성장률:</strong> 연평균 8-10% - 안정적 성장</li>
                         <li>• <strong>용도별:</strong> Logic(로직) &gt; Memory(메모리) &gt; 기타 순</li>
                         <li>• <strong>지역별:</strong> 아시아(한국/대만/중국) 시장이 주도</li>

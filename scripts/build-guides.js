@@ -288,7 +288,7 @@ function buildIndexPage() {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>반도체 공정 시뮬레이터 가이드 - 반도체 8대 공정 학습 | SemiFabAI</title>
-  <meta name="description" content="반도체 8대 공정(진공, 세정, 산화, 리소그래피, 플라즈마, 식각, 증착, 이온주입, 배선·패키징)을 인터랙티브 시뮬레이터로 학습하세요. 입문부터 고급까지, 실무 중심 반도체 교육 플랫폼.">
+  <meta name="description" content="반도체 8대 공정(산화, 리소그래피, 식각, 증착, 이온주입, 금속배선, EDS, 패키징)과 이를 뒷받침하는 진공·세정·플라즈마 기반 기술을 인터랙티브 시뮬레이터로 학습하세요. 입문부터 고급까지, 실무 중심 반도체 교육 플랫폼.">
   <meta name="keywords" content="반도체 공정, 반도체 시뮬레이터, 반도체 교육, 8대 공정, semiconductor process, fab simulation, SemiFabAI">
   <meta property="og:title" content="반도체 공정 시뮬레이터 가이드 | SemiFabAI">
   <meta property="og:description" content="반도체 8대 공정을 인터랙티브 시뮬레이터로 학습하세요.">
@@ -300,7 +300,7 @@ function buildIndexPage() {
     "@context": "https://schema.org",
     "@type": "Course",
     "name": "반도체 공정 시뮬레이터",
-    "description": "반도체 8대 공정(진공, 세정, 산화, 리소그래피, 플라즈마, 식각, 증착, 이온주입, 배선·패키징)을 인터랙티브 시뮬레이터로 학습하는 교육 플랫폼",
+    "description": "반도체 8대 공정(산화, 리소그래피, 식각, 증착, 이온주입, 금속배선, EDS, 패키징)과 이를 뒷받침하는 진공·세정·플라즈마 기반 기술을 인터랙티브 시뮬레이터로 학습하는 교육 플랫폼",
     "provider": {
       "@type": "Organization",
       "name": "SemiFabAI",

@@ -871,7 +871,7 @@ const simulators = [
         name: 'EDS 검사 시뮬레이션',
         icon: '🔍',
         summary: 'EDS(Electrical Die Sorting) 5단계 검사 프로세스와 웨이퍼 맵 수율 분석을 체험합니다.',
-        description: 'EDS는 웨이퍼 상태에서 각 다이(Die)의 전기적 특성을 검사하여 양품/불량을 판별하는 공정입니다. 프로브 카드로 각 다이의 패드에 접촉하여 Open/Short, 누설전류, 동작 속도 등을 테스트합니다. 이 시뮬레이터에서는 EDS 5단계(Contact Test → Leakage → Function → Speed → Burn-in)를 순차 수행하고 웨이퍼 맵으로 수율을 분석합니다.',
+        description: 'EDS는 웨이퍼 상태에서 각 다이(Die)의 전기적 특성을 검사하여 양품/불량을 판별하는 공정입니다. 프로브 카드로 각 다이의 패드에 접촉하여 Open/Short, 누설전류, 동작 속도 등을 테스트합니다. 이 시뮬레이터에서는 EDS 5단계(ET Test → WBI(Wafer Burn-In) → Hot/Cold Test → Repair → Inking)를 순차 수행하고 웨이퍼 맵으로 수율을 분석합니다.',
         learningPoints: [
           'EDS 5단계 검사 항목과 각 단계의 목적',
           '프로브 카드(Probe Card)의 구조와 접촉 메커니즘',

@@ -3,6 +3,7 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import {
   calculateTurboSpeed,
   convertSccmToTorrLs,
+  SCCM_TO_TORR_LS,
   calculatePumpingSpeed as computePumpingSpeed,
   calculatePumpingTimeFromCurve,
   calculateConductance,
@@ -191,7 +192,7 @@ const VacuumSimulator = ({ initialTab }) => {
         "전기적 소비 전력이 최소화됨"
       ],
       correct: 1,
-      explanation: "중진공 영역에서 가스 분자의 평균 자유 행정이 펌프 구조에 최적화되어 최대 성능을 발휘합니다."
+      explanation: "5 Torr 는 저진공(760~1 Torr) 구간입니다. 이 부근에서 가스 분자의 평균 자유 행정이 펌프 구조에 맞아 최대 배기속도를 냅니다."
     },
     {
       id: 4,
@@ -297,7 +298,7 @@ const VacuumSimulator = ({ initialTab }) => {
                "• 저진공: 760~1 Torr\n" +
                "• 중진공: 1~10⁻³ Torr\n" +
                "• 고진공: 10⁻³~10⁻⁹ Torr\n" +
-               "• 초고진공: < 10⁻⁻⁹ Torr\n\n" +
+               "• 초고진공: < 10⁻⁹ Torr\n\n" +
                "💡 **핵심**: 진공도가 높을수록 불순물 농도가 낮아져 고품질 반도체 제조가 가능합니다!",
       highlight: "진공 없이는 7nm 이하 초미세 반도체를 만들 수 없습니다. 단 1개의 불순물 원자도 치명적입니다!",
       icon: "🎯"
@@ -307,15 +308,15 @@ const VacuumSimulator = ({ initialTab }) => {
       content: "**1단계: Roughing Pump (조진공 펌프)**\n" +
                "대기압(760 Torr) → 10⁻³ Torr까지 빠르게 배기\n" +
                "• 회전식 베인 펌프 (Rotary Vane Pump)\n" +
-               "• 기계적 피스톤 방식으로 가스 압축 배출\n\n" +
+               "• 편심 로터의 베인(날개)이 체적을 줄여 가스를 압축·배출\n\n" +
                "**2단계: High Vacuum Pump (고진공 펌프)**\n" +
                "10⁻³ Torr → 10⁻⁹ Torr까지 극한 진공 달성\n" +
                "• Turbo Molecular Pump (TMP): 초고속 회전 블레이드로 분자 운동량 전달\n" +
-               "• Cryo Pump: 극저온(-200°C)에서 기체 분자를 직접 응축 포집\n\n" +
+               "• Cryo Pump: 1단 65~80 K, 2단 10~20 K 극저온에서 기체 분자를 응축·흡착 포집\n\n" +
                "**3단계: 압력 제어**\n" +
                "• APC (Auto Pressure Controller): 공정 압력 정밀 유지\n" +
                "• Gate Valve: 컨덕턴스 조절로 펌핑 속도 제어\n\n" +
-               "🔬 **실제 공정**: 에칭 공정은 수십 mTorr, 증착 공정은 10⁻⁶ Torr 수준의 초고진공 필요!",
+               "🔬 **실제 공정**: 에칭은 수십 mTorr, PVD 금속 증착은 10⁻⁶ Torr 급 고진공, EUV 노광은 10⁻⁹ Torr 급 초고진공이 필요합니다!",
       highlight: "TMP는 분당 60,000회 회전하며 분자 하나하나를 밀어내는 기계의 극한입니다!",
       icon: "⚙️"
     },
@@ -340,14 +341,14 @@ const VacuumSimulator = ({ initialTab }) => {
     {
       title: "🏭 진공은 어디에 쓰일까?",
       content: "**1. 박막 증착 (Thin Film Deposition)**\n" +
-               "• CVD (Chemical Vapor Deposition): 수십 mTorr에서 화학 반응\n" +
+               "• CVD (Chemical Vapor Deposition): LPCVD 0.1~1 Torr, PECVD 1~10 Torr 에서 화학 반응\n" +
                "• PVD (Physical Vapor Deposition): 10⁻⁶ Torr에서 금속 증착\n" +
                "• ALD (Atomic Layer Deposition): 초정밀 단원자층 증착\n\n" +
                "**2. 플라즈마 에칭 (Plasma Etching)**\n" +
                "• RIE (Reactive Ion Etching): 10~100 mTorr에서 이온 충격\n" +
                "• ICP (Inductively Coupled Plasma): 수 mTorr 고밀도 플라즈마\n\n" +
                "**3. 이온 주입 (Ion Implantation)**\n" +
-               "• 10⁻⁶ Torr 초고진공에서 불순물 이온을 정확히 주입\n" +
+               "• 10⁻⁶ Torr 급 고진공에서 불순물 이온을 정확히 주입\n" +
                "• 무충돌 환경으로 정밀한 도핑 깊이 제어\n\n" +
                "**4. EUV 노광 (EUV Lithography)**\n" +
                "• 13.5nm 극자외선은 공기 중에서 흡수 → 완전 진공 필수\n" +
@@ -531,7 +532,7 @@ const VacuumSimulator = ({ initialTab }) => {
     if (targetPressure >= 100) return '대기압/고압 (Atmospheric)';
     if (targetPressure >= 1) return '저진공 (Rough Vacuum)';
     if (targetPressure >= 1e-3) return '중진공 (Medium Vacuum)';
-    if (targetPressure >= 1e-6) return '고진공 (High Vacuum)';
+    if (targetPressure >= 1e-9) return '고진공 (High Vacuum)';
     return '초고진공 (Ultra High Vacuum)';
   };
   
@@ -539,7 +540,7 @@ const VacuumSimulator = ({ initialTab }) => {
     if (fixedPressure >= 100) return '대기압/고압';
     if (fixedPressure >= 1) return '저진공';
     if (fixedPressure >= 1e-3) return '중진공';
-    if (fixedPressure >= 1e-6) return '고진공';
+    if (fixedPressure >= 1e-9) return '고진공';
     return '초고진공';
   };
   
@@ -2821,7 +2822,7 @@ const VacuumSimulator = ({ initialTab }) => {
                         <rect x="50" y="80" width="120" height="80" fill="#e8f5e8" stroke="#4caf50" strokeWidth="3" rx="10"/>
                         <text x="110" y="100" textAnchor="middle" className="text-sm font-semibold">Gas Flow</text>
                         <text x="110" y="115" textAnchor="middle" className="text-lg font-bold text-green-600">Q</text>
-                        <text x="110" y="135" textAnchor="middle" className="text-sm">{Math.round(gasLoad / 0.00950)} sccm</text>
+                        <text x="110" y="135" textAnchor="middle" className="text-sm">{Math.round(gasLoad / SCCM_TO_TORR_LS)} sccm</text>
                         <text x="110" y="150" textAnchor="middle" className="text-xs">({gasLoad.toFixed(1)} Torr·L/s)</text>
                         
                         {/* Q 값 표시 바 */}
@@ -2908,7 +2909,7 @@ const VacuumSimulator = ({ initialTab }) => {
                       <div className="text-sm text-blue-700 space-y-1">
                         <p><strong>Q (가스 로드)</strong> = 시스템에 들어오는 총 가스량</p>
                         <p>• <strong>가스 유량 (sccm)</strong>: MFC로 주입하는 가스량</p>
-                        <p>• <strong>변환:</strong> 1 sccm = 0.0095 Torr·L/s</p>
+                        <p>• <strong>변환:</strong> 1 sccm = 0.0127 Torr·L/s (760 Torr × 1 cm³ / 60 s)</p>
                         <p>• 가스 유량이 클수록 → Q 증가 → 압력 상승</p>
                       </div>
                     </div>
@@ -2921,11 +2922,11 @@ const VacuumSimulator = ({ initialTab }) => {
                           min="100"
                           max="8000"
                           step="50"
-                          value={Math.round(gasLoad / 0.00950)}
-                          onChange={(e) => setGasLoad(parseFloat(e.target.value) * 0.00950)}
+                          value={Math.round(gasLoad / SCCM_TO_TORR_LS)}
+                          onChange={(e) => setGasLoad(parseFloat(e.target.value) * SCCM_TO_TORR_LS)}
                           className="w-full h-2 bg-gray-200 rounded-lg cursor-pointer"
                           style={{
-                            background: `linear-gradient(to right, #4caf50 0%, #4caf50 ${(Math.round(gasLoad / 0.00950) - 100) / (8000 - 100) * 100}%, #e5e7eb ${(Math.round(gasLoad / 0.00950) - 100) / (8000 - 100) * 100}%, #e5e7eb 100%)`
+                            background: `linear-gradient(to right, #4caf50 0%, #4caf50 ${(Math.round(gasLoad / SCCM_TO_TORR_LS) - 100) / (8000 - 100) * 100}%, #e5e7eb ${(Math.round(gasLoad / SCCM_TO_TORR_LS) - 100) / (8000 - 100) * 100}%, #e5e7eb 100%)`
                           }}
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -2934,7 +2935,7 @@ const VacuumSimulator = ({ initialTab }) => {
                           <span>8000</span>
                         </div>
                         <div className="text-center mt-2">
-                          <span className="font-bold text-green-600">{Math.round(gasLoad / 0.00950)} sccm</span>
+                          <span className="font-bold text-green-600">{Math.round(gasLoad / SCCM_TO_TORR_LS)} sccm</span>
                           <span className="text-xs text-gray-500 ml-2">({gasLoad.toFixed(1)} Torr·L/s)</span>
                         </div>
                       </div>
@@ -2989,7 +2990,7 @@ const VacuumSimulator = ({ initialTab }) => {
                     <h4 className="font-semibold mb-3 text-blue-800">계산 결과</h4>
                     <div className="space-y-2 text-sm">
                       <p><span className="font-medium">가스 유량 (Q):</span> 
-                        <span className="ml-2 font-bold text-green-600">{Math.round(gasLoad / 0.00950)} sccm</span>
+                        <span className="ml-2 font-bold text-green-600">{Math.round(gasLoad / SCCM_TO_TORR_LS)} sccm</span>
                         <span className="text-xs text-gray-500 ml-1">({gasLoad.toFixed(1)} Torr·L/s)</span></p>
                       <p><span className="font-medium">펌핑 속도 (S):</span> 
                         <span className="ml-2 font-bold text-orange-600">{systemPumpingSpeed} L/s</span></p>

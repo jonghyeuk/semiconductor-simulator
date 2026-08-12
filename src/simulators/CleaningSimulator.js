@@ -168,7 +168,7 @@ const CleaningSimulator = ({ initialTab }) => {
           <h5 className="font-semibold text-gray-700">웨이퍼 단면도 - {targetInfo.layerName} 제거 과정</h5>
           <div className="text-sm text-gray-600">
             {solution === 'BOE' ? (
-              <>자연산화막 두께: ~500Å → 현재: ~{Math.round(500 * (1 - removalEfficiency / 100))}Å</>
+              <>자연산화막 두께: ~20Å → 현재: ~{(20 * (1 - removalEfficiency / 100)).toFixed(1)}Å</>
             ) : (
               <>초기 오염도: 100% → 현재: {(100 - removalEfficiency).toFixed(1)}%</>
             )}
@@ -269,7 +269,7 @@ const CleaningSimulator = ({ initialTab }) => {
             {/* 수치 요약 (한 줄) */}
             <text x="70" y="93" textAnchor="middle" fontSize="10.5" fontWeight="700" fill="#15803d">
               {solution === 'BOE'
-                ? `제거 ${Math.round(500 * removalEfficiency / 100)}Å  ·  남음 ${Math.round(500 * (1 - removalEfficiency / 100))}Å`
+                ? `제거 ${(20 * removalEfficiency / 100).toFixed(1)}Å  ·  남음 ${(20 * (1 - removalEfficiency / 100)).toFixed(1)}Å`
                 : `제거 ${removalEfficiency.toFixed(1)}%  ·  남음 ${(100 - removalEfficiency).toFixed(1)}%`}
             </text>
           </g>
@@ -670,7 +670,7 @@ const CleaningSimulator = ({ initialTab }) => {
                 </div>
                 <div className="text-sm text-green-600 mt-1">
                   {getCurrentSolution()?.targetType === 'oxide' ? (
-                    <>제거량: {Math.round(500 * finalRemovalEfficiency / 100)}Å / 남은 두께: {Math.round(500 * (1 - finalRemovalEfficiency / 100))}Å</>
+                    <>제거량: {(20 * finalRemovalEfficiency / 100).toFixed(1)}Å / 남은 두께: {(20 * (1 - finalRemovalEfficiency / 100)).toFixed(1)}Å</>
                   ) : (
                     <>제거된 {getCurrentSolution()?.targetName}: {finalRemovalEfficiency.toFixed(1)}% / 남은 오염: {(100 - finalRemovalEfficiency).toFixed(1)}%</>
                   )}
@@ -1124,7 +1124,7 @@ const CleaningSimulator = ({ initialTab }) => {
                 <h5 className="font-semibold text-cyan-700 mb-2">물리적 메커니즘</h5>
                 <ul className="text-sm text-gray-700 space-y-1">
                   <li>• 화학적 반응이 아닌 순수 물리적 힘 사용</li>
-                  <li>• 웨이퍼 손상 없이 미세 파티클까지 제거</li>
+                  <li>• 미세 파티클 제거에 강함 (다만 40 kHz 급 초음파는 캐비테이션 붕괴 에너지가 커서 미세 패턴에 손상을 줄 수 있어, 실제 웨이퍼 세정은 메가소닉 0.8~2 MHz 를 쓴다)</li>
                   <li>• 복잡한 형상의 틈새까지 세정 가능</li>
                 </ul>
               </div>
@@ -1240,7 +1240,7 @@ const CleaningSimulator = ({ initialTab }) => {
         question: "초음파 세정 시 주파수를 40kHz로 설정하는 이유는?",
         options: ["웨이퍼 공진 주파수와 일치", "캐비테이션 효과 최적화", "전력 소모 최소화", "화학 반응 촉진"],
         correct: 1,
-        explanation: "40kHz는 액체에서 캐비테이션 버블의 생성과 붕괴가 가장 활발하게 일어나는 최적 주파수입니다."
+        explanation: "40kHz 는 캐비테이션 버블의 생성·붕괴가 가장 활발한 대역이라 세정력이 큽니다. 다만 그만큼 충격도 커서 미세 패턴 웨이퍼에는 메가소닉(0.8~2 MHz)을 씁니다."
       },
       {
         question: "UV/오존 세정과 단순 오존 세정의 주요 차이점은?",
@@ -1361,7 +1361,7 @@ const CleaningSimulator = ({ initialTab }) => {
                "⚠️ **왜 중요한가?**\n" +
                "   • 단 **1개의 먼지**도 칩 전체를 불량으로 만들 수 있음\n" +
                "   • 금속 오염은 **누설 전류**와 **수명 감소** 유발\n" +
-               "   • 클린룸 Class 1 (1ft³당 0.1μm 입자 1개 미만) 필수",
+               "   • 클린룸 Class 1 (0.5μm 이상 입자가 1ft³당 1개 이하) 필수",
       highlight: "세정이 없으면 반도체 제조는 불가능! 수율의 핵심입니다.",
       icon: "🎯"
     },
@@ -1381,7 +1381,7 @@ const CleaningSimulator = ({ initialTab }) => {
                "   • 희석 HF (1~2%) 사용\n\n" +
                "3️⃣ **SPM** (Sulfuric Peroxide Mixture)\n" +
                "   • H₂SO₄ + H₂O₂ (Piranha solution)\n" +
-               "   • 강력한 유기물 제거 (150°C 이상)\n\n" +
+               "   • 강력한 유기물 제거 (120~140°C 운전)\n\n" +
                "**⚡ 건식 세정(Dry Cleaning)**\n" +
                "   • **플라즈마 세정**: O₂, Ar, N₂, H₂ 플라즈마\n" +
                "   • **UV/오존 세정**: UV 조사로 유기물 분해\n" +
@@ -1413,7 +1413,7 @@ const CleaningSimulator = ({ initialTab }) => {
                "   • 금속 오염 기준: **10¹⁰ atoms/cm²** 이하\n" +
                "   • **Cryogenic 세정**, **초임계 유체** 도입\n\n" +
                "📊 **시장 규모**: 세정 장비 시장 약 **60억 달러**(2024)\n" +
-               "💎 **핵심 기업**: SCREEN, Tokyo Electron, LAM Research, Veeco",
+               "💎 **핵심 기업**: SCREEN, Tokyo Electron, Lam Research, SEMES, ACM Research",
       highlight: "청정도 요구사항은 계속 엄격해집니다!",
       icon: "📈"
     },

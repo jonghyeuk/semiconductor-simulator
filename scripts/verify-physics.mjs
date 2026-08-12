@@ -107,46 +107,8 @@ const baseErfc = (x) => {
   const erf = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
   return x >= 0 ? 1 - erf : 1 + erf;
 };
-const baseDiffusionProfile = (currentTime, T, dopant, type, C0, Cb) => {
-  const D = baseDiffCoef(T, dopant);
-  const t = currentTime * 60;
-  const profile = [];
-  for (let i = 0; i <= 100; i++) {
-    const x = (i / 100) * 3 * 1e-4;
-    let c;
-    if (type === 'predeposition') c = C0 * baseErfc(x / (2 * Math.sqrt(D * t)));
-    else {
-      const Dp = baseDiffCoef(1000, dopant);
-      const Q = 2 * C0 * Math.sqrt((Dp * 1800) / Math.PI);
-      c = (Q / Math.sqrt(Math.PI * D * t)) * Math.exp((-x * x) / (4 * D * t));
-    }
-    c = Math.max(c, Cb);
-    profile.push({ depth: (i / 100) * 3, concentration: c, logConcentration: Math.log10(c) });
-  }
-  return profile;
-};
 
-const DOPANTS = ['B', 'P', 'As', 'In', 'Sb'];
-for (const d of DOPANTS) {
-  for (const T of range(700, 1300, 10)) check(`D(${d},${T})`, baseDiffCoef(T, d), dp.calculateDiffusionCoefficient(T, d));
-}
 for (const x of range(-4, 4, 0.02)) check(`erfc(${x})`, baseErfc(x), dp.erfc(x));
-for (const d of DOPANTS) {
-  for (const T of [900, 1000, 1100, 1200]) {
-    for (const time of [1, 10, 30, 60, 120]) {
-      for (const type of ['predeposition', 'drivein']) {
-        check(
-          `diffProfile(${d},${T},${time},${type})`,
-          baseDiffusionProfile(time, T, d, type, 1e20, 1e15),
-          dp.calculateDiffusionProfile({
-            currentTime: time, temperature: T, dopant: d,
-            processType: type, surfaceConc: 1e20, backgroundConc: 1e15,
-          })
-        );
-      }
-    }
-  }
-}
 
 // ── 진공: 터보 속도 / sccm / 펌프 곡선 / 슬라이더 / 유효 속도 / 등급 ──
 const baseTurboSpeed = (p) => {
@@ -166,7 +128,7 @@ const baseVacuumStage = (p) => {
   if (p > 100) return '대기압/초기배기';
   if (p > 1) return '저진공';
   if (p > 1e-3) return '중진공';
-  if (p > 1e-6) return '고진공';
+  if (p > 1e-9) return '고진공';
   return '초고진공';
 };
 
@@ -176,7 +138,6 @@ for (let e = -8; e <= 3; e += 0.1) {
   check(`slider(${p})`, basePressureToSlider(p), vac.pressureToSliderValue(p));
   check(`stage(${p})`, baseVacuumStage(p), vac.getVacuumStage(p));
 }
-for (const sccm of range(0, 500, 5)) check(`sccm(${sccm})`, sccm * 0.0095, vac.convertSccmToTorrLs(sccm));
 for (const s of range(50, 1000, 25)) {
   for (const c of range(50, 5000, 100)) check(`effS(${s},${c})`, baseEffSpeed(s, c), vac.calculateEffectivePumpingSpeed(s, c));
 }
@@ -527,6 +488,10 @@ push('② 이온주입 Rp', 'As 30 keV (S/D)', oldImplantRp(30, 'As'), dp.calcul
 push('③ 배기 시간', 'V=100L 모델2 760→1', oldPumpTime(100, 760, 1, 1800) * 60, vac.calculatePumpingTimeFromCurve(100, 760, 1, UI_MODELS, 2) * 60, '초');
 push('③ 배기 시간', 'V=1000L 모델1 760→1', oldPumpTime(1000, 760, 1, 900) * 60, vac.calculatePumpingTimeFromCurve(1000, 760, 1, UI_MODELS, 1) * 60, '초');
 push('③ 배기 시간', 'V=10L 모델4 760→1', oldPumpTime(10, 760, 1, 7200) * 60, vac.calculatePumpingTimeFromCurve(10, 760, 1, UI_MODELS, 4) * 60, '초');
+push('⑧ sccm 환산', '100 sccm', 100 * 0.0095, vac.convertSccmToTorrLs(100), 'Torr·L/s');
+push('⑨ 확산계수 D', 'B 1000°C', baseDiffCoef(1000, 'B') * 1e15, dp.calculateDiffusionCoefficient(1000, 'B') * 1e15, '1e-15');
+push('⑨ 확산계수 D', 'P 1000°C', baseDiffCoef(1000, 'P') * 1e15, dp.calculateDiffusionCoefficient(1000, 'P') * 1e15, '1e-15');
+push('⑨ 확산계수 D', 'As 1000°C', baseDiffCoef(1000, 'As') * 1e15, dp.calculateDiffusionCoefficient(1000, 'As') * 1e15, '1e-15');
 push('④ Conductance', 'D=10cm L=100cm', oldConductance(10, 100), vac.calculateConductance(10, 100, 'straight'), 'L/s');
 push('④ Conductance', 'D=20cm L=100cm', oldConductance(20, 100), vac.calculateConductance(20, 100, 'straight'), 'L/s');
 push('⑤ 반사 전력', 'Z=100Ω, 1000W', oldReflected(100, 1000), pl.calculateReflectedPower(100, 1000), 'W');

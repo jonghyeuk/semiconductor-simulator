@@ -78,7 +78,7 @@ const DepositionSimulator = ({ initialTab }) => {
     {
       icon: '🔥',
       title: 'PVD Evaporation: 열의 힘',
-      content: '열 증발법은 마치 물을 끓여서 수증기를 만드는 것과 같은 원리입니다.\n\n🔥 전자빔이나 저항 가열로 알루미늄 소스를 1200-1500°C로 가열합니다\n⚛️ 열에너지를 받은 Al 원자들이 증발하여 기화됩니다\n📏 진공 중에서 직선으로 날아가 기판에 도달합니다\n❄️ 차가운 기판에서 응축되어 막을 형성합니다',
+      content: '열 증발법은 마치 물을 끓여서 수증기를 만드는 것과 같은 원리입니다.\n\n🔥 전자빔이나 저항 가열로 알루미늄 소스를 1100-1250°C로 가열합니다 (융점 660°C, 증기압이 증착에 쓸 만해지는 온도)\n⚛️ 열에너지를 받은 Al 원자들이 증발하여 기화됩니다\n📏 진공 중에서 직선으로 날아가 기판에 도달합니다\n❄️ 차가운 기판에서 응축되어 막을 형성합니다',
       highlight: '증발 원자는 직선으로만 이동 → Line-of-sight 특성',
     },
     {
@@ -90,7 +90,7 @@ const DepositionSimulator = ({ initialTab }) => {
     {
       icon: '🌡️',
       title: 'Thermal CVD: 순수 열의 화학반응',
-      content: '열 CVD는 전통적인 요리와 비슷합니다. 고온에서 재료를 "익혀서" 새로운 물질을 만듭니다.\n\n🔥 챔버를 600-1000°C 고온으로 가열합니다\n🧪 SiH₄ 가스가 열에너지만으로 분해됩니다\n⚛️ 분해된 실리콘 원자가 웨이퍼 표면에서 막을 형성합니다',
+      content: '열 CVD는 전통적인 요리와 비슷합니다. 고온에서 재료를 "익혀서" 새로운 물질을 만듭니다.\n\n🔥 챔버를 400-800°C 고온으로 가열합니다 (막 종류별: LPCVD SiO₂ 400~500°C, PolySi 580~650°C, Si₃N₄ 700~780°C)\n🧪 SiH₄ 가스가 열에너지만으로 분해됩니다\n⚛️ 분해된 실리콘 원자가 웨이퍼 표면에서 막을 형성합니다',
       highlight: '고온 필수 → 매우 높은 막질, 하지만 열 손상 위험',
     },
     {
@@ -708,7 +708,7 @@ const DepositionSimulator = ({ initialTab }) => {
                 <h4 className="font-bold text-blue-700 mb-1">이온 에너지 조절</h4>
                 <p className="text-gray-700">
                   <strong>⚡ Ion Energy 슬라이더</strong>를 조절하여 Ar⁺ 이온의 충돌 에너지를 변경해보세요.
-                  에너지가 높을수록 이온 속도가 빨라지고 스퍼터링 수율(yield)이 증가합니다.
+                  에너지가 높을수록 이온 속도가 빨라지고 스퍼터링 수율(yield)이 증가합니다. (단 수백 eV~수 keV 에서 최대점을 지나면 이온이 타겟 속 깊이 박혀 표면으로 에너지가 덜 전달되므로 수율은 다시 떨어집니다.)
                   타겟에서 더 많은 파란색 원자들이 튀어나오는 것을 관찰하세요.
                 </p>
               </div>
@@ -797,7 +797,7 @@ const DepositionSimulator = ({ initialTab }) => {
                 <ul className="text-gray-800 space-y-1 text-sm">
                   <li>• <strong>N극(빨강, 중앙)</strong>과 <strong>S극(진한 파랑, 8개 원형 배치)</strong>가 만드는 폐쇄 자기장</li>
                   <li>• <strong>Ar⁺ 이온(주황색 구)</strong>이 타겟 표면에 충돌하는 순간</li>
-                  <li>• <strong>스퍼터된 타겟 원자(파란 구)</strong>가 중력으로 웨이퍼에 낙하</li>
+                  <li>• <strong>스퍼터된 타겟 원자(파란 구)</strong>가 수 eV 의 운동에너지로 튀어나와 웨이퍼로 직진 (중력이 아니라 자체 운동량이다 — 그래서 타겟이 아래에 있는 sputter-up 장비도 똑같이 동작한다)</li>
                   <li>• <strong>웨이퍼 표면</strong>에 작은 파란 점들이 쌓여서 막이 형성되는 과정</li>
                   <li>• <strong>Erosion track</strong>: S극 원을 따라 도넛 형태로 타겟이 집중 깎임</li>
                   <li>• 파라미터 변화에 따른 증착 속도(Deposited 카운트) 차이</li>
