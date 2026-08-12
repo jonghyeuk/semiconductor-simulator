@@ -13,7 +13,8 @@ export const K_EV = 8.617e-5;
  *
  * D0-Qd 는 반드시 **같은 출처의 짝**이어야 한다. 예전 표는 D0 는 Sze/Jaeger 의
  * 진성 확산 표를 쓰면서 Qd 만 다른 출처 값을 섞어 놓아서, 1000°C 확산 계수가
- * B 약 1/10, As 약 1/100 로 나왔다 (As 가 P 보다 500배 느린 비현실적 거동).
+ * B 는 1/8, As 는 1/114 로 나왔다 (As 가 P 보다 553배 느린 비현실적 거동 — 문헌
+ * 짝으로는 4.8배 차이).
  * Sze, "Physics of Semiconductor Devices" / Jaeger 의 짝으로 맞췄다.
  */
 export const dopantProperties = {

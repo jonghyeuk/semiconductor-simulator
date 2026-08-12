@@ -242,13 +242,13 @@ const OxidationSimulator = ({ initialTab }) => {
                "**1️⃣ 건식 산화(Dry Oxidation)**\n" +
                "   • 반응식: Si + O₂ → SiO₂\n" +
                "   • 온도: **900~1,200°C**\n" +
-               "   • 성장 속도: **느림** (900°C 약 15, 1100°C 약 120 nm/hr)\n" +
+               "   • 성장 속도: **느림** (1시간 성장량 900°C 15 nm, 1100°C 118 nm)\n" +
                "   • 막질: **치밀하고 높은 품질** → 게이트 산화막에 사용\n" +
                "   • 특징: 결함 밀도가 낮고 절연 특성 우수\n\n" +
                "**2️⃣ 습식 산화(Wet Oxidation)**\n" +
                "   • 반응식: Si + 2H₂O → SiO₂ + 2H₂\n" +
                "   • 온도: **900~1,100°C**\n" +
-               "   • 성장 속도: **빠름** (100~500 nm/hr, 건식의 **5~10배**)\n" +
+               "   • 성장 속도: **빠름** (1시간 성장량 900°C 197 nm, 1100°C 675 nm — 건식의 **6~13배**)\n" +
                "   • 막질: 다소 성김 → 필드 산화막, 두꺼운 절연막에 사용\n" +
                "   • 특징: 빠른 성장이 필요한 경우 사용\n\n" +
                "💧 **Pyrogenic 산화**: H₂ + O₂ → H₂O (고순도 수증기 생성)",
@@ -798,7 +798,7 @@ const OxidationSimulator = ({ initialTab }) => {
           <text x="140" y="162" textAnchor="middle" fill="#fde68a" fontSize="12" fontWeight="bold">SiO₂ 특성</text>
           <text x="25" y="184" fill="#fef3c7" fontSize="10">⚡ 절연파괴 전압: 1,000만 V/cm↑</text>
           <text x="25" y="204" fill="#fef3c7" fontSize="10">🔗 계면 결함 밀도: 10¹⁰/cm²</text>
-          <text x="25" y="224" fill="#fef3c7" fontSize="10">🌡️ 열팽창 계수 Si와 유사</text>
+          <text x="25" y="224" fill="#fef3c7" fontSize="10">🌡️ 열팽창 계수 Si의 1/5 → 압축 응력</text>
           <text x="25" y="244" fill="#fef3c7" fontSize="10">🛡️ 게이트 절연막, 소자 격리</text>
           <text x="25" y="264" fill="#fef3c7" fontSize="10">✨ 반도체 산업의 근간</text>
         </svg>
@@ -811,7 +811,7 @@ const OxidationSimulator = ({ initialTab }) => {
           <text x="72" y="55" textAnchor="middle" fill="#dbeafe" fontSize="12" fontWeight="bold">🔵 건식 산화</text>
           <text x="72" y="72" textAnchor="middle" fill="#fef3c7" fontSize="9">Si + O₂ → SiO₂</text>
           <text x="18" y="92" fill="#e2e8f0" fontSize="9">🌡️ 900~1200°C</text>
-          <text x="18" y="108" fill="#e2e8f0" fontSize="9">⏱️ 느림 (10~100 nm/hr)</text>
+          <text x="18" y="108" fill="#e2e8f0" fontSize="9">⏱️ 느림 (900°C 15, 1100°C 118 nm/hr)</text>
           <text x="18" y="124" fill="#e2e8f0" fontSize="9">✨ 치밀·고품질</text>
           <text x="18" y="140" fill="#dbeafe" fontSize="9" fontWeight="bold">→ 게이트 산화막</text>
           <rect x="18" y="150" width="109" height="12" rx="2" fill="#93c5fd" opacity="0.3"/>
@@ -1191,7 +1191,7 @@ const OxidationSimulator = ({ initialTab }) => {
                   <h5 className="font-semibold text-gray-800 mb-2">2. 확산 제한 (Diffusion Limited)</h5>
                   <p className="text-sm text-gray-700">
                     O₂나 H₂O가 SiO₂를 통과해 Si 표면에 도달해야 하는데, 산화막이 두꺼워지면 이 확산이 성장률을 결정합니다(포물선 상수 B).
-                    습식 산화가 건식보다 훨씬 빠른 주된 이유는 확산 속도가 아니라 <strong>H₂O가 SiO₂에 녹아드는 양(용해도)이 O₂보다 약 1000배 크기</strong> 때문입니다.
+                    습식 산화가 건식보다 훨씬 빠른 주된 이유는 확산 속도가 아니라 <strong>H₂O가 SiO₂에 녹아드는 양(용해도)이 O₂보다 약 600배(3×10¹⁹ vs 5×10¹⁶ cm⁻³) 크기</strong> 때문입니다.
                     1000°C 기준 B는 습식 0.32, 건식 0.010 μm²/hr 로 약 30배 차이가 납니다.
                   </p>
                 </div>

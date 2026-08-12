@@ -839,7 +839,7 @@ const DopingProcessSimulator = ({ initialTab }) => {
   // CMOS device presets for ion implantation
   const devicePresets = {
     custom: { name: '사용자 설정', energy: 50, dose: 1e15, ion: 'B', description: '직접 설정' },
-    source_drain: { name: 'Source/Drain', energy: 30, dose: 1e15, ion: 'As', description: 'Rp 약 25nm, 고농도 (어닐 후 접합 50~100nm)' },
+    source_drain: { name: 'Source/Drain', energy: 30, dose: 1e15, ion: 'As', description: 'Rp 약 26nm, 고농도 (어닐 후 접합 50~100nm)' },
     ldd: { name: 'LDD (Lightly Doped Drain)', energy: 15, dose: 5e14, ion: 'P', description: 'Rp 약 25nm 얕은 깊이, 저농도' },
     channel: { name: 'Channel 도핑', energy: 15, dose: 1e13, ion: 'B', description: 'Rp 약 60nm 표면 근처, 문턱전압 조절' },
     well: { name: 'Well 도핑', energy: 300, dose: 1e13, ion: 'B', description: 'Rp 약 0.6μm 깊은 도핑, 소자 분리' },
@@ -2420,7 +2420,7 @@ const DopingProcessSimulator = ({ initialTab }) => {
                         </ul>
                       </div>
                       <p className="text-green-800">💡 <em>쉽게 말하면:</em> 온도를 올리면 원자들이 활발해져서 확산이 훨씬 빨라집니다!</p>
-                      <p className="font-semibold text-green-900">🔥 예: 900°C → 1000°C로 올리면 확산 계수가 약 15~20배 증가! (B 약 18배, As 약 24배 — 지수 함수라 100°C 차이가 이렇게 큽니다)</p>
+                      <p className="font-semibold text-green-900">🔥 예: 900°C → 1000°C로 올리면 확산 계수가 약 15배 증가! (이 시뮬레이터 값으로 B 14.7배, P 17.2배, As 15.9배 — 지수 함수라 100°C 차이가 이렇게 큽니다)</p>
                     </div>
                   </div>
                 </div>
@@ -3346,7 +3346,7 @@ const DopingProcessSimulator = ({ initialTab }) => {
                 <div className="space-y-3 text-sm text-green-800">
                   <div>
                     <h4 className="font-medium text-green-900">Source/Drain:</h4>
-                    <p>As 30 keV → Rp 약 25nm, 고농도 (1e15+ ions/cm²). 어닐 확산까지 더해 접합 깊이는 50~100nm</p>
+                    <p>As 30 keV → Rp 약 26nm, 고농도 (1e15+ ions/cm²). 어닐 확산까지 더해 접합 깊이는 50~100nm</p>
                   </div>
                   <div>
                     <h4 className="font-medium text-green-900">LDD:</h4>
