@@ -196,15 +196,15 @@ const VacuumSimulator = ({ initialTab }) => {
     {
       id: 4,
       category: "성능 분석",
-      question: "1000L 챔버에 모델 2(중형) 펌프 사용 시 760→1 Torr 도달시간이 20분을 초과한다면?",
+      question: "챔버 체적을 100L에서 1000L로 10배 늘리면 760→1 Torr 러프 펌핑 시간은?",
       options: [
-        "정상 범위이므로 그대로 사용",
-        "더 큰 용량의 펌프로 교체 필요",
-        "펌프를 2대 병렬 연결",
-        "챔버 체적을 줄임"
+        "변화 없음",
+        "약 3배 증가",
+        "약 10배 증가",
+        "약 100배 증가"
       ],
-      correct: 1,
-      explanation: "20분 초과는 펌프 용량 부족을 의미하므로 더 큰 모델로 교체가 필요합니다."
+      correct: 2,
+      explanation: "t = (V/S)·ln(Pi/Pf) 이므로 배기 시간은 체적에 비례합니다. 체적이 10배면 시간도 약 10배입니다. (같은 펌프 기준)"
     },
     {
       id: 5,
@@ -248,15 +248,15 @@ const VacuumSimulator = ({ initialTab }) => {
     {
       id: 8,
       category: "Conductance",
-      question: "배관 직경을 10cm에서 20cm로 증가시켰을 때 Conductance는 약 몇 배 증가하는가?",
+      question: "고진공(분자류) 영역에서 배관 직경을 10cm에서 20cm로 늘리면 Conductance는 약 몇 배가 되는가?",
       options: [
         "2배",
         "4배",
-        "8배", 
+        "8배",
         "16배"
       ],
-      correct: 3,
-      explanation: "Conductance는 직경의 4제곱에 비례하므로 직경이 2배가 되면 2⁴ = 16배 증가합니다."
+      correct: 2,
+      explanation: "분자류 영역의 긴 원통관 Conductance 는 C ≈ 12.1·D³/L 로 직경의 3제곱에 비례합니다. 따라서 직경이 2배면 2³ = 8배입니다. (직경의 4제곱에 비례하는 것은 대기압 근처의 점성류 영역이며, 이때는 평균 압력에도 비례합니다.)"
     },
     {
       id: 9,
@@ -3340,7 +3340,7 @@ const VacuumSimulator = ({ initialTab }) => {
                   <div className="bg-green-50 p-4 rounded border border-green-200">
                     <h4 className="font-semibold text-green-800 mb-2">설계 가이드라인</h4>
                     <div className="text-sm text-green-700 space-y-1">
-                      <p>• 직경 2배 → Conductance 16배↑</p>
+                      <p>• 직경 2배 → Conductance 8배↑ (분자류, C ∝ D³)</p>
                       <p>• 길이 2배 → Conductance 2배↓</p>
                       <p>• 직관 > 엘보 > 스파이럴</p>
                       <p>• 짧고 굵게 설계하자!</p>

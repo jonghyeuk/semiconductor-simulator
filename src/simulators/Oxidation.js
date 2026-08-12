@@ -426,11 +426,12 @@ const OxidationSimulator = ({ initialTab }) => {
     {
       question: "1100°C 건식 산화 1시간 후 예상되는 산화막 두께는?",
       options: ["약 5nm", "약 30nm", "약 100nm", "약 300nm"],
-      correct: 1
+      correct: 2,
+      explanation: "Deal-Grove 모델로 계산하면 약 118 nm 입니다. '열산화 실험' 탭에서 같은 조건을 넣어 확인해 보세요."
     },
     {
       question: "습식 산화가 건식 산화보다 빠른 주된 이유는?",
-      options: ["온도가 더 높아서", "H₂O의 확산 계수가 O₂보다 커서", "압력이 더 높아서", "촉매 효과 때문에"],
+      options: ["온도가 더 높아서", "H₂O가 SiO₂에 훨씬 많이 녹아들어(용해도가 커서)", "압력이 더 높아서", "촉매 효과 때문에"],
       correct: 1
     },
     {

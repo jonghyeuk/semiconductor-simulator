@@ -58,7 +58,7 @@ const ComprehensiveAssessmentSimulator = ({ initialTab }) => {
     // 산화 (Oxidation) - 3문제
     {
       q: "습식 산화(Wet Oxidation)가 건식 산화보다 빠른 이유는?",
-      opts: ["온도가 더 높아서", "H₂O 분자의 확산 속도가 O₂보다 빨라서", "압력이 더 높아서", "촉매를 사용해서"],
+      opts: ["온도가 더 높아서", "H₂O가 SiO₂에 훨씬 많이 녹아들어(용해도가 커서)", "압력이 더 높아서", "촉매를 사용해서"],
       ans: 1,
       exp: "H₂O 분자가 O₂보다 SiO₂ 막 내에서 확산 속도가 빨라 산화 속도가 더 빠릅니다.",
       topic: "산화"

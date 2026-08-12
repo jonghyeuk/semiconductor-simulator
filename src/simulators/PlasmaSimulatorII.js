@@ -357,7 +357,7 @@ const PlasmaSimulatorII = ({ initialTab }) => {
       {
         id: 9,
         category: "공정",
-        question: "실리콘 에칭에 주로 사용되는 가스는?",
+        question: "불소 라디칼로 실리콘을 화학적으로 식각할 때 대표적으로 쓰는 가스는?",
         options: [
           "O₂",
           "N₂",
@@ -365,7 +365,7 @@ const PlasmaSimulatorII = ({ initialTab }) => {
           "Ar"
         ],
         correct: 2,
-        explanation: "CF₄는 실리콘 에칭에 가장 널리 사용되는 가스입니다. F 라디칼이 실리콘과 반응하여 휘발성인 SiF₄를 만듭니다."
+        explanation: "CF₄ 는 F 라디칼을 공급해 Si 와 반응시켜 휘발성 SiF₄ 를 만듭니다. 다만 게이트 폴리실리콘처럼 산화막 선택비와 수직 프로파일이 중요한 식각에는 Cl₂·HBr 계열을 씁니다 (Etching 시뮬레이터 참조)."
       },
       {
         id: 10,

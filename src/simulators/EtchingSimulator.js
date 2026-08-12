@@ -1883,10 +1883,10 @@ const EtchSimulator = ({ initialTab }) => {
   // 식각 관련 퀴즈 문제들
   const quizQuestions = [
     {
-      question: "실리콘(Si) 식각에 주로 사용되는 가스는?",
+      question: "게이트 폴리실리콘 식각처럼 산화막과의 높은 선택비와 수직 프로파일이 필요할 때 주로 쓰는 가스는?",
       options: ["Cl2 (염소)", "CF4 (사불화탄소)", "CHF3 (삼불화메탄)", "O2 (산소)"],
       correct: 0,
-      explanation: "실리콘 식각에는 Cl2 가스가 주로 사용되며, 화학적 반응을 통해 SiCl4를 형성하여 식각됩니다."
+      explanation: "Cl2 는 Si 와 반응해 휘발성 SiCl4 를 만들며, 하부 산화막과의 선택비가 높고 측벽 프로파일 제어가 쉬워 게이트 식각에 쓰입니다. (등방성 Si 제거에는 CF4·SF6 같은 불소계 가스를 씁니다 — Plasma II 참조)"
     },
     {
       question: "HBr 가스를 첨가하는 주된 목적은?",
