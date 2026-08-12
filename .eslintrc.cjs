@@ -5,7 +5,9 @@ module.exports = {
   root: true,
   env: { browser: true, es2020: true, node: true },
   extends: ['react-app', 'react-app/jest'],
-  ignorePatterns: ['build', 'node_modules', 'public', 'src/data', 'coverage'],
+  // src/data 의 *.data.js 는 수 MB 짜리 생성 데이터라 제외한다. 손으로 쓰는
+  // 나머지 파일(modelAccuracy.js 등)은 정상적으로 검사한다.
+  ignorePatterns: ['build', 'node_modules', 'public', 'src/data/*.data.js', 'coverage'],
   rules: {
     // Hook dependency mistakes silently produce stale physics inputs.
     'react-hooks/exhaustive-deps': 'warn',

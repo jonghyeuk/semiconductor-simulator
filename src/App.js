@@ -3,6 +3,7 @@ import MainPortal from './components/MainPortal';
 import MatrixDashboard from './components/MatrixDashboard';
 import EmailGate from './components/EmailGate';
 import AdminPage from './components/AdminPage';
+import ModelAccuracyBadge from './components/ModelAccuracyBadge';
 import { simulatorRegistry } from './utils/simulatorRegistry';
 import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from './utils/firebase';
@@ -124,10 +125,14 @@ const App = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="ml-2 text-sm font-bold text-gray-800 truncate">
+          {/* 모바일 헤더는 fixed right-0 이라 시뮬 내용이 가로로 넘치면 헤더 폭도 같이 넘친다.
+              그래서 flex-1 로 오른쪽 끝에 밀지 않고, 제목 폭을 묶어 왼쪽에 붙여 둔다. */}
+          <span className="ml-2 mr-2 max-w-[190px] truncate text-sm font-bold text-gray-800">
             {simulatorRegistry.getSimulatorInfo(activeSimulator)?.icon}{' '}
             {simulatorRegistry.getSimulatorInfo(activeSimulator)?.name}
           </span>
+          {/* 모바일: 헤더 안에 인라인으로 (일부 시뮬이 가로로 넘쳐서 우하단 고정은 화면 밖으로 밀림) */}
+          {CurrentSimulator && <ModelAccuracyBadge simulatorId={activeSimulator} variant="inline" />}
         </div>
 
         {/* 좌측 사이드바 */}
@@ -218,6 +223,11 @@ const App = () => {
           )}
         </div>
       </div>
+
+      {/* 데스크톱: 우하단에 떠 있는 배지.
+          시뮬레이터의 스크롤 컨테이너 밖에 두어야 내부 스크롤과 상호작용이 꼬이지 않는다.
+          여기 한 곳에 붙여 모든 시뮬레이터에 적용한다 (시뮬레이터 파일은 건드리지 않음). */}
+      {CurrentSimulator && <ModelAccuracyBadge simulatorId={activeSimulator} />}
     </>
   );
 };
