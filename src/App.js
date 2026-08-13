@@ -20,6 +20,7 @@ const TAB_OVERLAY = {
   'comprehensive-assessment': { top: 0, height: 0 },
   'field-english':            { top: 0, height: 0 }, // 자체 탭(Course Map/Chapters) 사용 — 덮개 없음
   'waferTransfer':            { top: 0, height: 0 }, // iframe 시뮬 — 내부 헤더/챕터바 사용, 덮개 없음
+  'etching-bay':              { top: 0, height: 0 }, // 탭이 없는 단일 장비 화면 — 덮을 탭 바가 없다
 };
 const DEFAULT_TAB_OVERLAY = { top: 0, height: 58 };
 
