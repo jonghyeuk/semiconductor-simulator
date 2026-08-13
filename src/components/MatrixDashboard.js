@@ -138,6 +138,26 @@ const matrixData = [
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
+  // ── 디자인 검토용 임시 카드 ──
+  // 위 Etching 과 같은 물리 모듈을 쓰고 화면 구조만 다른 대안안이다.
+  // 탭 6개 대신 장비 시퀀스 한 화면으로 묶었다. 결론이 나면 이 항목만 지우면 된다.
+  {
+    id: 'etching-bay',
+    name: '식각 (새 화면안)',
+    icon: '🎛️',
+    color: '#c9922e',
+    tabs: [
+      {
+        id: 'bay',
+        name: '식각 프로파일 · 장비 화면',
+        icon: '🎛️',
+        tier: 'core',
+        type: 'simulation',
+        best: true,
+        coreReason: '압력·파워를 바꾸면 프로파일이 어떻게 무너지는지 단면으로 확인',
+      },
+    ]
+  },
   {
     id: 'deposition',
     name: 'Deposition',
