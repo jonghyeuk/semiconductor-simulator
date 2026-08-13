@@ -666,7 +666,7 @@ export default function EtchingBay() {
       <header className="eb-top">
         <div className="eb-id">
           <span className="eb-id-name">RIE-2400</span>
-          <span className="eb-id-sub">Reactive Ion Etcher · Bay 3</span>
+          <span className="eb-id-sub">Capacitively Coupled (CCP) · Single RF · Bay 3</span>
         </div>
 
         <div className="eb-status" data-phase={phase}>
@@ -800,13 +800,13 @@ export default function EtchingBay() {
                 label="Chamber Pressure" unit="mTorr" value={setPressure_}
                 min={P_MIN} max={P_MAX} step={P_STEP}
                 onChange={(v) => { setSetPressure(v); setPressure(v); }}
-                hint="낮으면 시스에서 이온이 덜 충돌해 더 수직으로 내리꽂히고, 프로파일이 수직해진다. 80 mTorr 부근이 식각률 sweet spot이고 그보다 높으면 가스상 재결합으로 오히려 느려진다. 이 장비는 CCP 방식이라 30 mTorr 아래로는 방전이 유지되지 않는다."
+                hint="낮으면 시스에서 이온이 덜 충돌해 더 수직으로 내리꽂히고, 프로파일이 수직해진다. 80 mTorr 부근이 식각률 sweet spot이고 그보다 높으면 가스상 재결합으로 오히려 느려진다. 30 mTorr 를 하한으로 둔 것은 방전 한계가 아니라 모델의 유효 범위 때문이다 — 그 아래는 계산식이 평평해져 압력을 더 내려도 달라지는 게 없다."
               />
               <Knob
                 label="RF Power" unit="W" value={power}
                 min={W_MIN} max={W_MAX} step={W_STEP}
                 onChange={setPower}
-                hint="시스 전압을 올려 이온 에너지를 키운다. 다만 500 W를 넘으면 물리 충격이 우세해져 선택비가 깎이고, 600 W 위에서는 식각률도 포화된다."
+                hint="시스 전압을 올려 이온 에너지를 키운다. 다만 500 W를 넘으면 물리 충격이 우세해져 선택비가 깎이고, 600 W 위에서는 식각률도 포화된다. CCP 는 RF 하나로 플라즈마 밀도와 이온 에너지가 같이 움직인다 — 둘을 따로 돌리려면 ICP 처럼 Source/Bias 를 분리한 장비가 필요하다."
               />
 
               <p className="eb-sub-k">가스 유량 · {tgt.label} 식각</p>
