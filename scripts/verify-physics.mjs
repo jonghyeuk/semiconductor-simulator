@@ -317,6 +317,7 @@ const baseN = (r) => {
   if (r <= 18) return 1.46 - (r - 14) * 0.003;
   return 1.448 - (r - 18) * 0.001;
 };
+// SiO2 굴절률의 18:1 초과 구간은 기울기를 세워 값이 의도적으로 바뀌었다.
 const baseSiNxN = (r) => {
   if (r < 5) return 2.3 - (r - 2) * 0.06;
   if (r < 10) return 2.12 - (r - 5) * 0.024;
@@ -334,12 +335,14 @@ const baseASiH = (d) => {
   return Math.max(8, 11 - (d - 15) * 0.1);
 };
 for (const r of range(0, 40, 0.1)) {
-  check(`n(${r})`, baseN(r), pe.calculateRefractiveIndex(r));
+  // SiO2 굴절률은 18:1 이하 구간만 회귀 대조 대상이다. 그 위는 O-rich 끝에서
+  // 목표 톨러런스를 통과하던 문제 때문에 기울기를 세워 값이 의도적으로 바뀌었다.
+  if (r <= 18) check(`n(${r})`, baseN(r), pe.calculateRefractiveIndex(r));
   check(`nSi(${r})`, Math.min(1.6, 0.6 + r * 0.07), pe.calculateNSiRatio(r));
   check(`db(${r})`, baseDB(r), pe.calculateDanglingBondDensity(r));
   check(`aSiH(${r})`, baseASiH(r), pe.calculateaSiHContent(r));
-  // SiNx 는 하한 1.8 이 걸리기 전 구간(비율 ≤ 16.6)만 회귀 대조 대상이다.
-  if (baseSiNxN(r) >= 1.8) check(`siNxN(${r})`, baseSiNxN(r), pe.calculateSiNxRefractiveIndex(r));
+  // SiNx 굴절률은 물리 오류를 고쳐 값이 의도적으로 바뀌었다 (굴절률과 N/Si 가
+  // 서로 다른 화학량론 지점을 가리키던 문제). 회귀 대조에서 빼고 변경 보고로 옮겼다.
 }
 for (const T of range(100, 600, 2)) {
   check(`H(${T})`, Math.max(5, 35 - T * 0.07), pe.calculateHydrogenContent(T));
@@ -483,6 +486,18 @@ const push = (item, cond, o, n, unit) =>
 for (const [sol, T] of [['BOE', 25], ['SC1', 75], ['SC2', 75], ['SPM', 130]]) {
   const p = { temperature: T, concentration: 5, time: 10, solution: sol };
   push('⑪ 세정 제거율', `${sol} ${T}°C 농도5 10분`, oldCleaningWet(p), cl.calculateOxideRemovalEfficiency('wet', p), '%');
+}
+
+// ⑬ SiO2 굴절률 (O-rich 구간) — 슬라이더 최대 25:1 이 "성공" 으로 판정되던 문제.
+for (const r of [20, 22, 25]) {
+  push('⑬ SiO2 굴절률', `N2O/SiH4 ${r}`, baseN(r), pe.calculateRefractiveIndex(r), '');
+}
+
+// ⑫ SiNx 굴절률 — 굴절률을 N/Si 에서 직접 유도하도록 바꿨다.
+// 수정 전에는 n = 2.0 이 비율 10, N/Si = 1.333 이 비율 10.47 로 어긋나 있었고
+// UI 는 그와 무관하게 8:1 을 화학양론이라고 표시했다.
+for (const r of [2, 5, 8, 10.48, 12]) {
+  push('⑫ SiNx 굴절률', `NH3/SiH4 ${r}`, baseSiNxN(r), pe.calculateSiNxRefractiveIndex(r), '');
 }
 
 push('① 산화 두께', 'dry 1000°C 60분', oldOxide(1000, 60, 'dry'), ox.calculateOxideGrowth(1000, 60, 'dry'), 'nm');

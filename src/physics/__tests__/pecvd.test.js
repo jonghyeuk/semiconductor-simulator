@@ -7,6 +7,7 @@ import {
   calculateaSiHContent,
   calculateSiNxRefractiveIndex,
   calculateNSiRatio,
+  SINX_STOICHIOMETRIC_RATIO,
 } from '../pecvd.js';
 
 /** 구간별 정의 함수가 이음매에서 튀지 않는지 확인한다. */
@@ -39,7 +40,8 @@ describe('calculateRefractiveIndex (SiO2)', () => {
   it('전 구간에서 SiO2 물리 범위(1.4~1.7) 안이다', () => {
     for (let r = 2; r <= 40; r += 0.1) {
       const n = calculateRefractiveIndex(r);
-      expect(n).toBeGreaterThan(1.4);
+      // 하한 1.4 는 O-rich 쪽 clamp 값이라 도달 가능하다 (비율 34 부터).
+      expect(n).toBeGreaterThanOrEqual(1.4);
       expect(n).toBeLessThan(1.7);
     }
   });
@@ -73,8 +75,29 @@ describe('calculateSiNxRefractiveIndex', () => {
     }
   });
 
-  it('화학량론 Si3N4 (ratio 8) 굴절률이 문헌값 2.0 근처다', () => {
-    expect(calculateSiNxRefractiveIndex(8)).toBeCloseTo(2.0, 1);
+  it('화학량론 Si3N4 굴절률이 문헌값 2.00 ± 0.02 다', () => {
+    // 예전 테스트는 "ratio 8" 을 화학량론이라 단정하고 허용오차 ±0.05(정밀도 1)
+    // 로 검사했다. 실제 값 2.048 이 여유 0.002 로 간신히 통과해, 굴절률과 N/Si 가
+    // 서로 다른 화학량론을 가리키는 오류를 그대로 통과시켰다.
+    // 화학량론 지점은 N/Si = 4/3 에서 정의되며 ratio 10.48 이다.
+    expect(calculateSiNxRefractiveIndex(SINX_STOICHIOMETRIC_RATIO)).toBeCloseTo(2.0, 2);
+  });
+
+  it('굴절률과 N/Si 가 같은 화학량론 지점을 가리킨다', () => {
+    // 두 함수가 독립이면 이 단언이 깨진다. 실제로 예전에는 n=2.0 이 ratio 10,
+    // N/Si=1.333 이 ratio 10.47 로 서로 어긋나 있었다.
+    expect(calculateNSiRatio(SINX_STOICHIOMETRIC_RATIO)).toBeCloseTo(4 / 3, 6);
+    expect(calculateSiNxRefractiveIndex(SINX_STOICHIOMETRIC_RATIO)).toBeCloseTo(2.0, 6);
+  });
+
+  it('굴절률이 N/Si 에 대해 단조 감소한다 (N 함량이 늘면 n 이 내려간다)', () => {
+    // 하한 1.8 에 닿기 전 구간에서 본다 (비율 13.4 부터는 floor 에 걸려 평탄).
+    let prevN = Infinity;
+    for (let r = 1; r <= 13; r += 0.5) {
+      const n = calculateSiNxRefractiveIndex(r);
+      expect(n).toBeLessThan(prevN);
+      prevN = n;
+    }
   });
 
   it('N-rich 쪽 하한 1.8 로 clamp 된다 (질화막 굴절률의 물리적 하한)', () => {
@@ -82,11 +105,13 @@ describe('calculateSiNxRefractiveIndex', () => {
     expect(calculateSiNxRefractiveIndex(1000)).toBe(1.8);
   });
 
-  it('전 구간에서 SiNx 물리 범위(1.8~2.5) 안이다', () => {
+  it('전 구간에서 SiNx 물리 범위(1.8~2.9) 안이다', () => {
+    // Si-rich 쪽은 비정질 실리콘(n ≈ 3.3) 을 향해 올라간다. 슬라이더 최저
+    // 비율에서 2.6 근처까지 나오는 것이 정상이다.
     for (let r = 0; r <= 100; r += 0.5) {
       const n = calculateSiNxRefractiveIndex(r);
       expect(n).toBeGreaterThanOrEqual(1.8);
-      expect(n).toBeLessThan(2.5);
+      expect(n).toBeLessThan(2.9);
     }
   });
 });
@@ -103,9 +128,12 @@ describe('calculateNSiRatio', () => {
     }
   });
 
-  it('화학량론 Si3N4 의 N/Si = 1.33 을 ratio 8 부근에서 지난다', () => {
-    expect(calculateNSiRatio(8)).toBeCloseTo(1.16, 1);
-    expect(calculateNSiRatio(11)).toBeGreaterThan(1.33);
+  it('화학량론 Si3N4 의 N/Si = 1.33 을 ratio 10.5 부근에서 지난다', () => {
+    // 예전 테스트는 제목이 "ratio 8 에서 1.33" 인데 단언은 1.16 이었다.
+    // 1.16 은 문헌값이 아니라 구현식 0.6 + 0.07×8 을 다시 쓴 값이다.
+    expect(calculateNSiRatio(SINX_STOICHIOMETRIC_RATIO)).toBeCloseTo(4 / 3, 6);
+    expect(calculateNSiRatio(8)).toBeLessThan(4 / 3);
+    expect(calculateNSiRatio(12)).toBeGreaterThan(4 / 3);
   });
 });
 

@@ -21,7 +21,11 @@ export function calculateRefractiveIndex(ratio) {
   if (ratio < 10) n = 1.55 - (ratio - 5) * 0.012;
   else if (ratio < 14) n = 1.49 - (ratio - 10) * 0.0075;
   else if (ratio <= 18) n = 1.46 - (ratio - 14) * 0.003;
-  else n = 1.448 - (ratio - 18) * 0.001;
+  // 18:1 위에서 기울기가 0.001/step 이라 슬라이더 최대(25:1, 화면 라벨 "O-rich")
+  // 에서도 n=1.441 이 나와 목표 1.46±0.02 를 통과했다. 화면은 O-rich 라고 하면서
+  // "성공! 이상적인 화학량론적 SiO2 막" 팝업을 띄우고 있었다.
+  // 같은 화면 이론이 말하는 "n < 1.45 = O-rich" 와 맞도록 기울기를 세운다.
+  else n = 1.448 - (ratio - 18) * 0.003;
   return Math.max(SIO2_O_RICH_FLOOR, n);
 }
 
@@ -59,10 +63,18 @@ export function calculateaSiHContent(dilution) {
  */
 export function calculateSiNxRefractiveIndex(ratio) {
   const SI_NITRIDE_N_RICH_FLOOR = 1.8;
-  let n;
-  if (ratio < 5) n = 2.3 - (ratio - 2) * 0.06;
-  else if (ratio < 10) n = 2.12 - (ratio - 5) * 0.024;
-  else n = 2.0 - (ratio - 10) * 0.03;
+  // 굴절률을 조성(N/Si)에서 직접 유도한다. 예전에는 굴절률과 N/Si 가 서로
+  // 독립된 구간 함수라, 같은 화면에 띄우면서 **서로 다른 화학량론 지점**을
+  // 가리켰다. n = 2.0 은 비율 10 에서, N/Si = 1.333 은 비율 10.47 에서 지났고,
+  // UI 는 그와 무관하게 8:1 을 "화학양론"이라고 표시했다 (실제 N/Si 는 1.16).
+  //
+  // 문헌 앵커 두 개로 직선을 잡는다.
+  //   - 굴절률은 N 함량에 대해 선형으로 감소한다.
+  //   - 화학량론 조성 N/Si = 1.333 에서 n = 2.00 ± 0.02 (633 nm).
+  // 기울기는 비정질 실리콘 극한 n ≈ 3.3 (x = 0) 을 두 번째 점으로 잡아
+  // (3.3 − 2.0) / 1.333 ≈ 0.975 로 둔다. 이 기울기의 출처는 원문으로 확인하지
+  // 못했고, 선형성과 화학량론 지점만 확인했다.
+  const n = 3.3 - 0.975 * calculateNSiRatio(ratio);
   return Math.max(SI_NITRIDE_N_RICH_FLOOR, n);
 }
 
@@ -70,3 +82,6 @@ export function calculateSiNxRefractiveIndex(ratio) {
 export function calculateNSiRatio(ratio) {
   return Math.max(0, Math.min(1.6, 0.6 + ratio * 0.07));
 }
+
+/** 화학량론 Si3N4 (N/Si = 4/3) 가 되는 NH3/SiH4 비. */
+export const SINX_STOICHIOMETRIC_RATIO = (4 / 3 - 0.6) / 0.07;

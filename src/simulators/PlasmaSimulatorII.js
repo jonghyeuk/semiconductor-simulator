@@ -517,7 +517,7 @@ const PlasmaSimulatorII = ({ initialTab }) => {
       {
         id: 21,
         category: "하드웨어",
-        question: "ICP 시스템에서 Source RF를 450W에서 900W로 증가시켰을 때, 플라즈마 밀도는 4배 증가했지만 식각률은 2배만 증가했다. 이 현상의 가장 타당한 설명은?",
+        question: "ICP 시스템에서 Source RF를 450W에서 900W로 증가시켰을 때, 플라즈마 밀도는 2배로 늘었지만 식각률은 1.4배만 증가했다. 이 현상의 가장 타당한 설명은?",
         options: [
           "가스 해리율이 포화상태에 도달하여 추가적인 라디칼 생성이 제한됨",
           "높은 플라즈마 밀도로 인한 이온-전자 재결합률 증가와 Self-bias 전압 감소가 복합적으로 작용",
@@ -525,7 +525,7 @@ const PlasmaSimulatorII = ({ initialTab }) => {
           "챔버 벽면에서의 라디칼 손실이 증가하여 유효 라디칼 농도가 제한됨"
         ],
         correct: 1,
-        explanation: "플라즈마 밀도 증가로 인해 ①이온-전자 재결합률이 증가하여 유효 이온 농도가 감소하고, ②Self-bias 전압이 감소하여 이온 에너지가 낮아져 물리적 식각 효율이 떨어집니다. 이 두 효과가 복합적으로 작용하여 식각률 증가가 플라즈마 밀도 증가에 비해 제한적으로 나타납니다."
+        explanation: "플라즈마 밀도는 흡수 파워에 거의 **선형**입니다 (전역 모델 n₀ = P_abs /(e·u_B·A_eff·E_T)). 그래서 파워를 2배로 올리면 밀도도 약 2배가 됩니다. 그런데 식각률은 그만큼 오르지 않습니다. ①이온-전자 재결합률이 증가해 유효 이온 농도가 줄고, ②Self-bias 전압이 낮아져 이온 에너지가 떨어지기 때문입니다."
       },
       {
         id: 22,
@@ -1780,13 +1780,13 @@ const PlasmaSimulatorII = ({ initialTab }) => {
                     <div className="bg-green-50 p-3 rounded-lg">
                       <div className="text-sm text-gray-600">플라즈마 밀도</div>
                       <div className="text-xl font-bold text-green-700">
-                        {(5e9 * Math.pow(rfPower * 2 / 100, 2.0)).toExponential(1)} cm⁻³
+                        {(2e11 * (rfPower * 2) / 100).toExponential(1)} cm⁻³
                       </div>
                     </div>
                     <div className="bg-red-50 p-3 rounded-lg">
                       <div className="text-sm text-gray-600">이온 에너지</div>
                       <div className="text-xl font-bold text-red-700">
-                        {(etchPower * 0.3 + 10 - (rfPower * 2 - 200) * 0.05).toFixed(0)} eV
+                        {Math.max(10, 18 + etchPower * 0.3 - ((rfPower * 2) - 200) * 0.01).toFixed(0)} eV
                       </div>
                     </div>
                   </div>
@@ -1817,13 +1817,13 @@ const PlasmaSimulatorII = ({ initialTab }) => {
                     <h4 className="font-semibold text-gray-800 mb-2">실시간 공정 결과</h4>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>식각률: <span className="font-bold text-blue-600">
-                        {(Math.pow(rfPower * 2 / 100, 0.6) * Math.pow(etchPower / 100, 0.4) * 150).toFixed(0)} Å/min
+                        {calculateEtchRate()} nm/min
                       </span></div>
                       <div>이온화율: <span className="font-bold text-green-600">
                         {(Math.pow(rfPower * 2 / 500, 0.5) * 0.1).toFixed(3)}
                       </span></div>
                       <div>선택비: <span className="font-bold text-purple-600">
-                        {(15 - etchPower / 50).toFixed(1)}:1
+                        {calculateSelectivity()}:1
                       </span></div>
                       <div>균일도: <span className="font-bold text-orange-600">
                         {(98 - Math.abs(rfPower - 100) / 10).toFixed(1)}%

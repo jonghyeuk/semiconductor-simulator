@@ -35,7 +35,7 @@ const PECVDSimulator = () => {
   const [showDanglingBond, setShowDanglingBond] = useState(false);
 
   // SiNx: NH3/SiH4 비율
-  const [nh3Ratio, setNh3Ratio] = useState(8); // NH3/SiH4 ratio (2~15)
+  const [nh3Ratio, setNh3Ratio] = useState(10); // NH3/SiH4 ratio (2~15). 화학량론(N/Si=4/3)은 10.48
   const [showSiNxRI, setShowSiNxRI] = useState(false);
 
   // 공정별 프리셋
@@ -51,7 +51,7 @@ const PECVDSimulator = () => {
     'SiNx': {
       name: 'SiNx (질화규소)',
       color: '#4488ff',
-      gases: { silane: 10, hydrogen: 0, ammonia: 80, nitrousoxide: 0 },
+      gases: { silane: 10, hydrogen: 0, ammonia: 100, nitrousoxide: 0 },
       pressure: 300,
       temperature: 350,
       power: 20
@@ -1059,7 +1059,7 @@ const PECVDSimulator = () => {
                   ) : currentDanglingBond > 10 ? (
                     <div className="bg-red-900/50 border border-red-500 rounded-lg p-3 mb-4">
                       <div className="text-red-400 font-bold">⚠️ 댕글링 본드 과다</div>
-                      <div className="text-red-300 text-sm">H₂ 희석 비율을 높여보세요 (R≥10 권장).</div>
+                      <div className="text-red-300 text-sm">H₂ 희석 비율을 높여보세요 (R≥18 권장).</div>
                     </div>
                   ) : (
                     <div className="bg-yellow-900/50 border border-yellow-500 rounded-lg p-3 mb-4">
@@ -1174,7 +1174,7 @@ const PECVDSimulator = () => {
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-2">
                     <span>0 (결함↑)</span>
-                    <span className="text-green-400">10~20 (최적)</span>
+                    <span className="text-green-400">18~30 (최적)</span>
                     <span>30 (µc-Si)</span>
                   </div>
                 </div>
@@ -1225,20 +1225,20 @@ const PECVDSimulator = () => {
                 </div>
 
                 <div className={`rounded-lg p-3 border text-xs ${
-                  h2Dilution < 10 ? 'bg-red-900/30 border-red-500' :
-                  h2Dilution > 25 ? 'bg-yellow-900/30 border-yellow-500' :
+                  h2Dilution < 18 ? 'bg-red-900/30 border-red-500' :
+                  h2Dilution > 30 ? 'bg-yellow-900/30 border-yellow-500' :
                   'bg-green-900/30 border-green-500'
                 }`}>
-                  {h2Dilution < 10 ? (
+                  {h2Dilution < 18 ? (
                     <>
-                      <div className="font-bold text-red-400">⚠️ 낮은 H₂ 희석 (R{"<"}10)</div>
+                      <div className="font-bold text-red-400">⚠️ 낮은 H₂ 희석 (R{"<"}18)</div>
                       <div className="text-red-200 mt-1">
                         • 댕글링 본드 밀도 높음<br/>
                         • 전기적 특성 불량<br/>
                         • TFT/태양전지 효율↓
                       </div>
                     </>
-                  ) : h2Dilution > 25 ? (
+                  ) : h2Dilution > 30 ? (
                     <>
                       <div className="font-bold text-yellow-400">⚠️ 고희석 (µc-Si 영역)</div>
                       <div className="text-yellow-200 mt-1">
@@ -1251,7 +1251,7 @@ const PECVDSimulator = () => {
                     <>
                       <div className="font-bold text-green-400">✅ 디바이스급 a-Si:H 범위</div>
                       <div className="text-green-200 mt-1">
-                        • 댕글링 본드 ~10¹⁵ cm⁻³<br/>
+                        • 댕글링 본드 3~10 ×10¹⁵ cm⁻³<br/>
                         • 양호한 전기적 특성<br/>
                         • H 함량 10-12%
                       </div>
@@ -1288,7 +1288,7 @@ const PECVDSimulator = () => {
                   />
                   <div className="flex justify-between text-xs text-gray-500 mt-2">
                     <span>2:1 (Si-rich)</span>
-                    <span className="text-green-400">8:1</span>
+                    <span className="text-green-400">10:1</span>
                     <span>15:1 (N-rich)</span>
                   </div>
                 </div>
@@ -1339,11 +1339,11 @@ const PECVDSimulator = () => {
                 </div>
 
                 <div className={`rounded-lg p-3 border text-xs ${
-                  nh3Ratio < 5 ? 'bg-yellow-900/30 border-yellow-500' :
-                  nh3Ratio > 12 ? 'bg-blue-900/30 border-blue-500' :
+                  nh3Ratio < 10 ? 'bg-yellow-900/30 border-yellow-500' :
+                  nh3Ratio > 11 ? 'bg-blue-900/30 border-blue-500' :
                   'bg-green-900/30 border-green-500'
                 }`}>
-                  {nh3Ratio < 5 ? (
+                  {nh3Ratio < 10 ? (
                     <>
                       <div className="font-bold text-yellow-400">🔶 Si-rich SiNx</div>
                       <div className="text-yellow-200 mt-1">
@@ -1352,7 +1352,7 @@ const PECVDSimulator = () => {
                         • 절연 특성 낮음
                       </div>
                     </>
-                  ) : nh3Ratio > 12 ? (
+                  ) : nh3Ratio > 11 ? (
                     <>
                       <div className="font-bold text-blue-400">🔷 N-rich SiNx</div>
                       <div className="text-blue-200 mt-1">
@@ -1659,13 +1659,13 @@ const PECVDSimulator = () => {
                   <tbody className="text-white">
                     <tr>
                       <td className="text-blue-400">200°C</td>
-                      <td className="text-center text-red-400">~25%</td>
+                      <td className="text-center text-red-400">~21%</td>
                       <td className="text-center text-yellow-400">낮음</td>
                       <td className="text-right text-xs">버블 위험</td>
                     </tr>
                     <tr>
                       <td className="text-green-400">350°C</td>
-                      <td className="text-center text-green-400">~12%</td>
+                      <td className="text-center text-green-400">~10.5%</td>
                       <td className="text-center text-green-400">적정</td>
                       <td className="text-right text-xs">일반 공정</td>
                     </tr>
@@ -1681,6 +1681,12 @@ const PECVDSimulator = () => {
               <p>
                 <span className="text-red-400 font-bold">수소가 왜 문제인가요?</span><br/>
                 후속 고온 공정에서 H₂ 가스가 발생 → 버블(bubble) 형성 → 막 박리
+                <br/><br/>
+                <span className="text-gray-400 text-xs">
+                  ※ 위 H 함량은 <strong>온도 의존 경향</strong>을 보이기 위한 교육용 값입니다.
+                  실제 PECVD 산화막의 수소 함량은 이보다 낮은 수 at% 수준으로 보고되며,
+                  장비·전구체(SiH₄ vs TEOS)에 따라 크게 달라집니다.
+                </span>
               </p>
             </div>
           </div>
@@ -1770,7 +1776,7 @@ const PECVDSimulator = () => {
                       <td className="text-right text-xs">품질↓</td>
                     </tr>
                     <tr>
-                      <td className="text-green-400">10~20</td>
+                      <td className="text-green-400">18~30</td>
                       <td className="text-center text-green-400">적정</td>
                       <td className="text-center text-yellow-400">중간</td>
                       <td className="text-right text-xs">TFT/태양전지</td>
@@ -1909,20 +1915,20 @@ const PECVDSimulator = () => {
                   </thead>
                   <tbody className="text-white">
                     <tr>
-                      <td className="text-yellow-400">2~4</td>
-                      <td className="text-center">2.1~2.3</td>
+                      <td className="text-yellow-400">2~5</td>
+                      <td className="text-center">2.37~2.58</td>
                       <td className="text-center">Si-rich</td>
                       <td className="text-right text-xs">태양전지 ARC</td>
                     </tr>
                     <tr>
-                      <td className="text-green-400">6~10</td>
-                      <td className="text-center">1.95~2.05</td>
+                      <td className="text-green-400">10~11</td>
+                      <td className="text-center">1.96~2.03</td>
                       <td className="text-center">화학양론</td>
                       <td className="text-right text-xs">절연막</td>
                     </tr>
                     <tr>
                       <td className="text-blue-400">12~15</td>
-                      <td className="text-center">1.85~1.9</td>
+                      <td className="text-center">1.80~1.90</td>
                       <td className="text-center">N-rich</td>
                       <td className="text-right text-xs">패시베이션</td>
                     </tr>
