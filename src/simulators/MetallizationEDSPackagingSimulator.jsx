@@ -334,7 +334,15 @@ const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
 
   const calcResistance = () => calcLineResistance(metalType, lineWidth, LINE_LENGTH_NM).toFixed(2);
 
-  const calcMTF = () => calcElectromigrationMTTF(metalType, currentDensity).toFixed(1);
+  // 내화금속은 순수 Arrhenius 결과가 천문학적 수치가 된다 (W 는 10¹¹년 대).
+  // 절대 수명이 아니라 금속 간 상대 내성을 읽는 값이므로 큰 수는 지수로 쓴다.
+  const calcMTF = () => {
+    const y = calcElectromigrationMTTF(metalType, currentDensity);
+    if (!Number.isFinite(y)) return '∞';
+    if (y >= 1e4) return y.toExponential(1);
+    if (y >= 100) return y.toFixed(0);
+    return y.toFixed(1);
+  };
 
   // 개요 탭 렌더링
   const renderOverviewTab = () => (
@@ -634,6 +642,11 @@ const MetallizationEDSPackagingSimulator = ({ initialTab }) => {
           </div>
           <div className="text-xs bg-red-50 p-2 rounded border border-red-200">
             <strong>MTF:</strong> {calcMTF()} years
+            <div className="text-xs text-gray-500 mt-1">
+              ※ 절대 수명이 아니라 <strong>금속 간 상대 내성</strong>과 전류밀도 J⁻² 의존성을
+              보는 값입니다. 실제 전인자는 금속마다 다르고, W 는 EM 이 애초에 지배적
+              고장 모드가 아닙니다.
+            </div>
             <div className="text-gray-500 mt-1">※ MTF(Mean Time to Failure) = 배선이 끊어지기까지 평균 시간</div>
             <div className="text-gray-500">전류↑ → 금속원자 이동↑ → 수명↓ (J² 반비례)</div>
           </div>
