@@ -46,13 +46,20 @@ const TARGETS = [
   { id: 'PR',    label: 'PR',     desc: '포토레지스트 애싱',  under: 'Si' },
 ];
 
+/* 조작 범위는 전부 원본 EtchingSimulator.js 와 같다.
+   압력 30~200 mTorr / RF 100~800 W / 가스 0~100 sccm.
+   (원본의 10~300 은 압력이 아니라 시간(sec) 슬라이더 범위다.) */
+const P_MIN = 30,  P_MAX = 200,  P_STEP = 10;   // mTorr — CCP RIE 상용 운전 구간
+const W_MIN = 100, W_MAX = 800,  W_STEP = 50;   // W
+const G_MAX = 100, G_STEP = 5;                  // sccm
+
 const GASES = [
-  { id: 'Cl2',  label: 'Cl₂',  max: 100, role: 'Si 주 식각종. 늘리면 식각률이 오르지만 선택비가 깎인다.' },
-  { id: 'HBr',  label: 'HBr',  max: 100, role: '측벽 passivation. 이방성과 선택비를 올리지만 30 sccm을 넘으면 식각률을 되레 눌러버린다.' },
-  { id: 'CF4',  label: 'CF₄',  max: 100, role: '산화막 주 식각종. F 라디칼이 많아지면 선택비가 떨어진다.' },
-  { id: 'CHF3', label: 'CHF₃', max: 100, role: '폴리머 생성. 하부층을 덮어 선택비를 올리지만 과하면 etch stop.' },
-  { id: 'O2',   label: 'O₂',   max: 50,  role: 'PR 애싱. 폴리머를 태워 없앤다.' },
-  { id: 'Ar',   label: 'Ar',   max: 100, role: '물리 스퍼터. 이방성엔 도움, 선택비엔 손해.' },
+  { id: 'Cl2',  label: 'Cl₂',  role: 'Si 주 식각종. 늘리면 식각률이 오르지만 선택비가 깎인다.' },
+  { id: 'HBr',  label: 'HBr',  role: '측벽 passivation. 이방성과 선택비를 올리지만 30 sccm을 넘으면 식각률을 되레 눌러버린다.' },
+  { id: 'CF4',  label: 'CF₄',  role: '산화막 주 식각종. F 라디칼이 많아지면 선택비가 떨어진다.' },
+  { id: 'CHF3', label: 'CHF₃', role: '폴리머 생성. 하부층을 덮어 선택비를 올리지만 과하면 etch stop.' },
+  { id: 'O2',   label: 'O₂',   role: 'PR 애싱. 폴리머를 태워 없앤다.' },
+  { id: 'Ar',   label: 'Ar',   role: '물리 스퍼터. 이방성엔 도움, 선택비엔 손해.' },
 ];
 
 /** 펌핑 대기 중 보여줄 이론 — 원본의 '이론' 탭 내용을 이 구간으로 옮겨왔다. */
@@ -189,6 +196,62 @@ function ChamberView({ phase, pressure, power, depth, isotropy, target, glowSeed
     return out;
   }, [plasmaOn, power, glowSeed]);
 
+  /* 이온 궤적.
+     RIE 에서 이온은 플라즈마와 웨이퍼 사이 시스(sheath)의 전위차로 가속된다.
+     전기장이 웨이퍼 면에 수직이므로 이온도 수직으로 내리꽂힌다 — 이 수직성이
+     이방성 식각의 원인이다. 압력이 오르면 시스 안 충돌이 늘어 입사각이 조금
+     흐트러지지만 그래도 몇 도 수준이다.
+     한 점에서 부챗살로 퍼지게 그리면 기구 자체를 잘못 가르치게 된다. */
+  const ionTracks = useMemo(() => {
+    if (!plasmaOn) return [];
+    const maxTilt = (isotropy - 0.5) * 4.2;   // 200 mTorr 에서 약 6°
+    const hasMask = target !== 'PR';
+    // 시스 상단에서 출발시킨다. 마스크에 막히는 궤적도 눈에 보일 만큼 길어야 한다.
+    const yTop = 42;
+    const out = [];
+    for (let i = 0; i < 13; i++) {
+      const x = 44 + i * 19;
+      // 결정적 유사난수 — 프레임마다 궤적이 튀지 않게 한다
+      const j = (((i * 9301 + 49297) % 233280) / 233280) - 0.5;
+      const inOpening = x > openL && x < openR;
+      // 마스크에 막히면 거기서 멈춘다. 이온은 마스크도 때린다 (그래서 선택비가 필요하다).
+      const yEnd = hasMask && !inOpening ? trenchTop - 15 : trenchTop + d - 1;
+      out.push({
+        x,
+        y1: yTop,
+        x2: x + j * 2 * maxTilt * ((yEnd - yTop) / 70),
+        y2: yEnd,
+        blocked: hasMask && !inOpening,
+      });
+    }
+    return out;
+  }, [plasmaOn, isotropy, target, d, trenchTop, openL, openR]);
+
+  /* 라디칼.
+     측벽이 깎이는 건 이온이 옆으로 날아가서가 아니라, 방향성이 없는 중성 라디칼이
+     화학 반응을 일으키기 때문이다. 압력이 오를수록 이쪽 비중이 커지고 언더컷이 생긴다.
+     이온(수직·물리)과 라디칼(등방·화학)을 다른 기호로 구분해 둔다. */
+  const radicals = useMemo(() => {
+    if (!plasmaOn) return [];
+    const n = Math.round((isotropy - 0.5) * 13);
+    const dep = Math.max(4, d);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const s = ((i * 7717 + 3121) % 233280) / 233280;
+      const s2 = ((i * 4363 + 9871) % 233280) / 233280;
+      // 측벽 두 곳과 바닥에 나눠 붙인다. 언더컷을 만드는 건 측벽 쪽이다.
+      const where = i % 3;
+      if (where === 0) {
+        out.push({ x: openL - under - 2 + s * 4, y: trenchTop + 2 + s2 * dep, r: 1.1 });
+      } else if (where === 1) {
+        out.push({ x: openR + under - 2 + s * 4, y: trenchTop + 2 + s2 * dep, r: 1.1 });
+      } else {
+        out.push({ x: openL + 4 + s * (openR - openL - 8), y: trenchTop + dep - 1 - s2 * 3, r: 1.1 });
+      }
+    }
+    return out;
+  }, [plasmaOn, isotropy, d, trenchTop, openL, openR, under]);
+
   const t = TARGETS.find((x) => x.id === target) || TARGETS[0];
 
   return (
@@ -222,24 +285,30 @@ function ChamberView({ phase, pressure, power, depth, isotropy, target, glowSeed
           <circle key={i} cx={p.x} cy={p.y} r={p.r} fill="#F5D082" opacity="0.75" />
         ))}
 
-        {/* 이온 궤적 — 압력이 낮을수록 수직 */}
-        {plasmaOn &&
-          [0, 1, 2, 3, 4].map((i) => {
-            const x = openL + 8 + i * 12;
-            const spread = (isotropy - 0.5) * 7;
-            return (
-              <line
-                key={i}
-                x1={x}
-                y1="70"
-                x2={x + (i - 2) * spread}
-                y2={trenchTop + d - 2}
-                stroke="#F0C464"
-                strokeWidth="0.8"
-                opacity="0.5"
-              />
-            );
-          })}
+        {/* 이온 (수직 · 물리) — 시스 전기장이 웨이퍼 면에 수직이라 이온도 수직으로 내리꽂힌다.
+            마스크 위로 떨어진 이온은 마스크에 막힌다. */}
+        {ionTracks.map((k, i) => (
+          <line
+            key={`ion${i}`}
+            x1={k.x} y1={k.y1} x2={k.x2} y2={k.y2}
+            stroke="#F0C464"
+            strokeWidth="0.8"
+            opacity={k.blocked ? 0.3 : 0.6}
+          />
+        ))}
+        {ionTracks.filter((k) => !k.blocked).map((k, i) => (
+          <path
+            key={`tip${i}`}
+            d={`M${k.x2} ${k.y2} l-1.6 -3 h3.2 z`}
+            fill="#F0C464"
+            opacity="0.7"
+          />
+        ))}
+
+        {/* 라디칼 (등방 · 화학) — 방향성이 없다. 측벽이 깎이는 건 이쪽 때문이다. */}
+        {radicals.map((r, i) => (
+          <circle key={`rad${i}`} cx={r.x} cy={r.y} r={r.r} fill="#7FC8A9" opacity="0.7" />
+        ))}
 
         {/* 하부층 (기판) */}
         <rect x="34" y={trenchTop + filmH} width={W - 68} height="44" fill="url(#eb-si)" />
@@ -295,6 +364,17 @@ function ChamberView({ phase, pressure, power, depth, isotropy, target, glowSeed
               fontFamily="ui-monospace, Menlo, monospace">
           {pressure >= 1000 ? `${(pressure / 1000).toFixed(0)}k` : fmt(pressure, 0)} mTorr
         </text>
+
+        {/* 범례 — 이온과 라디칼은 다른 종이고 하는 일도 다르다. 기호를 나눠 둔다. */}
+        {plasmaOn && (
+          <g fontFamily="ui-monospace, Menlo, monospace" fontSize="7">
+            <line x1="26" y1="18" x2="26" y2="26" stroke="#F0C464" strokeWidth="0.9" />
+            <path d="M26 26 l-1.4 -2.6 h2.8 z" fill="#F0C464" />
+            <text x="32" y="25" fill="#9A9078">이온 · 수직 · 물리</text>
+            <circle cx="26" cy="37" r="1.4" fill="#7FC8A9" />
+            <text x="32" y="40" fill="#9A9078">라디칼 · 등방 · 화학</text>
+          </g>
+        )}
       </g>
     </svg>
   );
@@ -352,10 +432,11 @@ export default function EtchingBay() {
 
   // 레시피
   const [target, setTarget] = useState('Si');
-  const [setPressure_, setSetPressure] = useState(80);
+  // 초기 레시피도 원본과 동일하게 둔다.
+  const [setPressure_, setSetPressure] = useState(100);
   const [power, setPower] = useState(300);
   const [gasFlows, setGasFlows] = useState({
-    Cl2: 50, HBr: 30, CF4: 0, CHF3: 0, O2: 0, Ar: 20,
+    Cl2: 30, HBr: 15, CF4: 0, CHF3: 0, O2: 0, Ar: 90,
   });
 
   // 런 상태
@@ -717,15 +798,15 @@ export default function EtchingBay() {
 
               <Knob
                 label="Chamber Pressure" unit="mTorr" value={setPressure_}
-                min={10} max={300} step={5}
+                min={P_MIN} max={P_MAX} step={P_STEP}
                 onChange={(v) => { setSetPressure(v); setPressure(v); }}
-                hint="낮으면 이온이 직진해 프로파일이 수직해진다. 80 mTorr 부근이 식각률 sweet spot이고, 그보다 높으면 가스상 재결합으로 오히려 느려진다."
+                hint="낮으면 시스에서 이온이 덜 충돌해 더 수직으로 내리꽂히고, 프로파일이 수직해진다. 80 mTorr 부근이 식각률 sweet spot이고 그보다 높으면 가스상 재결합으로 오히려 느려진다. 이 장비는 CCP 방식이라 30 mTorr 아래로는 방전이 유지되지 않는다."
               />
               <Knob
                 label="RF Power" unit="W" value={power}
-                min={0} max={800} step={25}
+                min={W_MIN} max={W_MAX} step={W_STEP}
                 onChange={setPower}
-                hint="이온 에너지를 올려 식각률을 높인다. 다만 500 W를 넘으면 물리 충격이 우세해져 선택비가 깎이고, 600 W 위에서는 식각률도 포화된다."
+                hint="시스 전압을 올려 이온 에너지를 키운다. 다만 500 W를 넘으면 물리 충격이 우세해져 선택비가 깎이고, 600 W 위에서는 식각률도 포화된다."
               />
 
               <p className="eb-sub-k">가스 유량 · {tgt.label} 식각</p>
@@ -733,7 +814,7 @@ export default function EtchingBay() {
                 <Knob
                   key={g.id}
                   label={g.label} unit="sccm" value={gasFlows[g.id]}
-                  min={0} max={g.max} step={5}
+                  min={0} max={G_MAX} step={G_STEP}
                   onChange={(v) => setGasFlows((f) => ({ ...f, [g.id]: v }))}
                   hint={g.role}
                 />
@@ -828,8 +909,8 @@ export default function EtchingBay() {
             <span className="eb-foot-warn">
               인터락 미충족 — {!interlocks.gas ? '가스 유량이 0입니다' :
                              !interlocks.vacuum ? '목표 진공에 도달하지 않았습니다' :
-                             preview.rate <= 0 ? '현재 레시피의 식각률이 0입니다' :
-                             'RF 파워가 0입니다'}
+                             preview.rate <= 0 ? '이 가스 조합으로는 식각이 일어나지 않습니다' :
+                             '레시피를 확인하세요'}
             </span>
           )}
           {phase === 'READY' && canIgnite && (
