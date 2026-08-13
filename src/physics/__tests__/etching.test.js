@@ -200,3 +200,60 @@ describe('보조 인자들', () => {
     expect(calculateGasRatioEffect(0)).toBe(0.8);
   });
 });
+
+/*
+ * 아래는 문헌 앵커다. 기존 테스트는 단조성·경계만 보기 때문에 상수를 통째로
+ * 바꿔도 전부 통과한다 (실제로 계수를 4배로 바꿔 확인했다). 여기서는 값 자체와
+ * 재료 간 관계를 못박는다.
+ */
+describe('calculateEtchRate — 문헌 앵커', () => {
+  const R = () => 0.5; // 난수 고정
+  const G = (o = {}) => ({ Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 0, Ar: 0, ...o });
+
+  it('질화막은 CF4 에 반응하고, 불소계에서 산화막보다 빠르다', () => {
+    // 예전 Si3N4 분기에는 CF4 항이 아예 없어 CF4 100 sccm 에서도 0 이 나왔다.
+    for (const cf4 of [25, 50, 100]) {
+      const sin = calculateEtchRate('Si3N4', G({ CF4: cf4 }), 400, 80, R);
+      const sio = calculateEtchRate('SiO2', G({ CF4: cf4 }), 400, 80, R);
+      expect(sin).toBeGreaterThan(0);
+      expect(sin).toBeGreaterThan(sio);
+    }
+  });
+
+  it('파워가 실제로 포화한다 — 증분이 계속 줄어든다', () => {
+    // 예전 식은 1160 W 에서 하한 0.7 에 닿은 뒤 다시 완전한 선형이었다.
+    const rate = (p) => calculateEtchRate('Si', G({ Cl2: 30 }), p, 100, R);
+    let prevStep = Infinity;
+    for (const [a, b] of [[600, 1000], [1000, 1400], [1400, 2000], [2000, 3000]]) {
+      const step = (rate(b) - rate(a)) / (b - a); // W 당 증분
+      expect(step).toBeLessThan(prevStep);
+      expect(step).toBeGreaterThan(0);
+      prevStep = step;
+    }
+  });
+
+  it('압력이 0 이면 방전이 없으므로 식각도 없다', () => {
+    expect(calculateEtchRate('Si', G({ Cl2: 30 }), 300, 0, R)).toBe(0);
+  });
+
+  it('미지 재료도 파워·가스가 0 이면 식각이 없다', () => {
+    // 예전에는 default 분기가 상수 50 이라 파워 0 에서도 50 nm/min 이 나왔다.
+    expect(calculateEtchRate('W', G({ CF4: 50 }), 0, 80, R)).toBe(0);
+    expect(calculateEtchRate('W', G(), 400, 80, R)).toBe(0);
+  });
+
+  it('대표 프리셋 절대값이 시뮬레이터 이론표 범위 안에 있다', () => {
+    // EtchingSimulator 의 재료별 식각률 표와 대조한다.
+    const cases = [
+      ['Si', { Cl2: 30, HBr: 15, Ar: 90 }, 100, 300],
+      ['SiO2', { CF4: 5, CHF3: 30, Ar: 90 }, 50, 150],
+      ['Si3N4', { CHF3: 25, O2: 5, Ar: 70 }, 40, 120],
+      ['PR', { O2: 100 }, 200, 500],
+    ];
+    for (const [m, gas, lo, hi] of cases) {
+      const v = calculateEtchRate(m, G(gas), 300, 100, R);
+      expect(v).toBeGreaterThanOrEqual(lo);
+      expect(v).toBeLessThanOrEqual(hi);
+    }
+  });
+});

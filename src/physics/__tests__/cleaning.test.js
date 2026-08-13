@@ -42,10 +42,45 @@ describe('습식 세정', () => {
     expect(calculateOxideRemovalEfficiency('wet', wet())).toBe(calculateOxideRemovalEfficiency('wet', wet()));
   });
 
-  it('경계값: 알 수 없는 용액은 기본 계수 0.8 을 쓴다', () => {
+  it('경계값: 알 수 없는 용액은 SC1 계수로 떨어진다', () => {
+    // 예전에는 SPM 이 분기 없이 "알 수 없는 용액" 기본값 0.8 로 떨어졌고,
+    // 이 테스트가 `unknown === SPM` 을 단언해 그 버그를 사양으로 고정하고 있었다.
+    // SPM 은 UI 4개 선택지 중 하나지 미지 용액이 아니다.
     const unknown = calculateOxideRemovalEfficiency('wet', wet({ solution: 'HF' }));
+    const sc1 = calculateOxideRemovalEfficiency('wet', wet({ solution: 'SC1' }));
     const spm = calculateOxideRemovalEfficiency('wet', wet({ solution: 'SPM' }));
-    expect(unknown).toBe(spm);
+    expect(unknown).toBe(sc1);
+    expect(spm).not.toBe(unknown);
+  });
+
+  /*
+   * 문헌 앵커. 위 테스트들은 단조성만 보기 때문에 용액 계수를 통째로 바꿔도
+   * 통과한다. 아래는 용액 간 **순서**를 못박는다.
+   */
+  it('산화막 제거 순서가 문헌과 같다: BOE ≫ SC1 > SC2 > SPM', () => {
+    // BOE 6:1 은 SiO2 를 800 Å/min 대로 식각하고, SC1 은 1~2 Å/min,
+    // SPM 은 오히려 화학 산화막을 성장시킨다.
+    const at = (s, T) => calculateOxideRemovalEfficiency('wet', wet({ solution: s, temperature: T }));
+    // (a) 같은 온도에서
+    for (const T of [25, 50, 75]) {
+      expect(at('BOE', T)).toBeGreaterThan(at('SC1', T));
+      expect(at('SC1', T)).toBeGreaterThan(at('SC2', T));
+      expect(at('SC2', T)).toBeGreaterThan(at('SPM', T));
+    }
+    // (b) 각 용액을 **권장 온도**로 돌렸을 때. 예전 모델은 여기서 순서가
+    //     뒤집혔다 (SPM 95.3% > SC1 69.5% > SC2 68.0% > BOE 66.3%).
+    expect(at('BOE', 25)).toBeGreaterThan(at('SPM', 130));
+    expect(at('BOE', 25)).toBeGreaterThan(at('SC1', 75));
+    expect(at('SC1', 75)).toBeGreaterThan(at('SPM', 130));
+  });
+
+  it('BOE 는 산화막 전용 용액답게 높은 제거율에 도달할 수 있다', () => {
+    expect(calculateOxideRemovalEfficiency('wet', wet({ solution: 'BOE', concentration: 10, time: 15 }))).toBe(98);
+  });
+
+  it('SPM 의 산화막 제거율은 무시할 수준이다', () => {
+    // SPM 은 유기물 제거용이고 산화막은 오히려 성장시킨다.
+    expect(calculateOxideRemovalEfficiency('wet', wet({ solution: 'SPM', temperature: 130 }))).toBeLessThan(5);
   });
 });
 

@@ -25,19 +25,33 @@ export function calculateOxideRemovalEfficiency(method, params) {
 function rawOxideRemovalEfficiency(method, params) {
   switch (method) {
     case 'wet': {
-      // 습식 세정에서 산화막 제거는 주로 HF 기반 용액의 특성에 의존
-      const tempFactor = (params.temperature - 25) / 75;
-      const concFactor = params.concentration / 10;
-      const timeFactor = Math.min(params.time / 15, 1);
+      // 산화막을 실제로 벗기는 건 HF 계열(BOE)뿐이다. BOE 6:1 의 SiO2 식각률은
+      // 800 Å/min 대인 반면 SC1 은 1~2 Å/min 수준이고, SPM 은 오히려 10~15 Å 의
+      // 화학 산화막을 **성장**시켜 제거 능력이 사실상 없다.
+      //
+      // 예전 식에는 두 가지 오류가 있어서 이 순서가 통째로 뒤집혀 있었다.
+      //   1. SPM 에 분기가 없어 "알 수 없는 용액" 기본값 0.8 로 떨어졌다.
+      //      SC1(0.3)·SC2(0.2)보다 높은 값이다.
+      //   2. 온도항이 (T−25)/75 라는 **절대** 온도였다. 그래서 130°C 에서 쓰는
+      //      SPM 이 뜨겁다는 이유만으로 가산점을 받아, 상온에서 쓰는 BOE 를
+      //      앞질렀다. 각 용액을 권장 온도로 돌렸을 때 산화막 제거율이
+      //      SPM 95.3% > SC1 69.5% > SC2 68.0% > BOE 66.3% 로 나왔다.
+      //
+      // 온도는 용액별 권장 온도 기준의 **상대**값으로 바꾸고, 용액 계수는
+      // 가산이 아니라 곱셈으로 두어 용액 선택이 결과를 지배하게 한다.
+      const SOLUTIONS = {
+        BOE: { weight: 1.0, refTemp: 25 },
+        SC1: { weight: 0.12, refTemp: 75 },
+        SC2: { weight: 0.08, refTemp: 75 },
+        SPM: { weight: 0.02, refTemp: 130 },
+      };
+      const s = SOLUTIONS[params.solution] || SOLUTIONS.SC1;
 
-      // BOE의 경우 산화막 제거에 특화
-      const solutionFactor =
-        params.solution === 'BOE' ? 1.2 : params.solution === 'SC1' ? 0.3 : params.solution === 'SC2' ? 0.2 : 0.8;
+      const tempFactor = Math.max(0, 1 + (params.temperature - s.refTemp) / 100);
+      const concFactor = 0.4 + 0.6 * (params.concentration / 10);
+      const timeFactor = 0.3 + 0.7 * Math.min(params.time / 15, 1);
 
-      return Math.min(
-        98,
-        20 + tempFactor * 25 + concFactor * 30 + timeFactor * 20 + solutionFactor * 15
-      );
+      return Math.min(98, 100 * s.weight * tempFactor * concFactor * timeFactor);
     }
 
     case 'dry': {

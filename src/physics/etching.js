@@ -43,9 +43,14 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
       break;
     }
     case 'Si3N4': {
+      // 예전에는 CHF3 항만 있어서 CF4 를 100 sccm 넣어도 0 nm/min 이 나왔다.
+      // "질화막은 CF4 로 안 깎인다"는 정반대 개념을 가르치던 셈이다.
+      // 불소계 플라즈마에서 질화막은 산화막보다 **빠르게** 식각되므로
+      // CF4 계수를 SiO2 의 5.0 보다 크게 잡는다.
+      const cf4Effect = gasFlow.CF4 * 6.0;
       const chf3Effect = gasFlow.CHF3 * 4.0;
       const polymerStop = Math.max(0, (gasFlow.CHF3 - 50) * 2.5);
-      baseRate = (chf3Effect - polymerStop) * (power / 400);
+      baseRate = (cf4Effect + chf3Effect - polymerStop) * (power / 400);
       break;
     }
     case 'PR': {
@@ -53,17 +58,27 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
       break;
     }
     default:
-      baseRate = 50;
+      // 미지 재료도 파워·가스에 반응해야 한다. 상수 50 을 그대로 두면
+      // 파워 0·가스 0 에서도 50 nm/min 이 나와 바로 아래 가드 주석과 어긋난다.
+      baseRate =
+        (gasFlow.CF4 + gasFlow.CHF3 + gasFlow.Cl2 + gasFlow.HBr + gasFlow.O2) * 1.0 * (power / 400);
   }
 
   // 압력 sweet spot ~80mTorr — ICP 저압 운전(<30)에서도 rate 유지, 고압은 가스상 재결합으로 감소
+  // 다만 5 mTorr 아래에서는 방전 자체가 유지되지 않으므로 0 으로 떨어뜨린다.
+  // 예전에는 저압 하한이 0.75 로 잡혀 있어 pressure=0 에서도 식각률의 75% 가 나왔다.
+  const lowPressureCutoff = Math.min(1, pressure / 5);
   const pressureFactor =
-    pressure < 80
+    lowPressureCutoff *
+    (pressure < 80
       ? 0.75 + (Math.max(0, pressure - 30) / 50) * 0.25
-      : Math.max(0.5, 1 - (pressure - 80) / 240);
+      : Math.max(0.5, 1 - (pressure - 80) / 240));
 
-  // 파워 600W 초과 시 마스크/하부층 손상이 누적되며 유효 식각률 saturation
-  const powerSaturation = power > 600 ? Math.max(0.7, 1 - (power - 600) / 800) : 1;
+  // 파워 600W 초과 시 마스크/하부층 손상이 누적되며 유효 식각률 saturation.
+  // 예전 식 Math.max(0.7, 1 − (power−600)/800) 은 1160 W 에서 하한 0.7 에 닿은 뒤
+  // 그대로 고정돼, baseRate ∝ power 와 곱해지면 그 위로 다시 완전한 선형이 됐다.
+  // 30% 할인이었지 포화가 아니었다. 점근형으로 바꿔 실제로 포화하게 한다.
+  const powerSaturation = power > 600 ? 1 / (1 + (power - 600) / 800) : 1;
 
   baseRate = baseRate * pressureFactor * powerSaturation;
   // 파워나 반응 가스가 없으면 식각도 없다. 예전에는 Math.max(5, …) 하한 때문에

@@ -633,7 +633,12 @@ const CleaningSimulator = ({ initialTab }) => {
             </div>
             
             <div className="bg-gray-100 p-4 rounded">
-              <div className="text-lg font-semibold">예상 {getCurrentSolution()?.targetName} 제거 효율: {efficiency.toFixed(1)}%</div>
+              <div className="text-lg font-semibold">예상 <strong>산화막</strong> 제거 효율: {efficiency.toFixed(1)}%</div>
+              <div className="text-xs text-gray-500 mt-1">
+                ※ 이 값은 <strong>산화막(SiO₂)</strong> 제거율만 계산합니다. 용액의 본래 타겟
+                (SC1 입자 · SC2 금속이온 · SPM 유기물)의 제거율이 아닙니다.
+                산화막을 실제로 벗기는 건 HF 계열인 BOE 뿐이므로 다른 용액은 낮게 나오는 것이 정상입니다.
+              </div>
               <div className="text-sm text-gray-600 mt-1">
                 {efficiency > 90 ? '✅ 우수한 제거 효과' : 
                  efficiency > 70 ? '⚠️ 보통 제거 효과' : '❌ 조건 최적화 필요'}
@@ -666,13 +671,13 @@ const CleaningSimulator = ({ initialTab }) => {
               <div className="bg-green-50 p-4 rounded border-l-4 border-green-500">
                 <div className="font-semibold text-green-800">📊 세정 완료!</div>
                 <div className="text-green-700 mt-1">
-                  실제 {getCurrentSolution()?.targetName} 제거 효율: <strong>{finalRemovalEfficiency.toFixed(1)}%</strong>
+                  실제 <strong>산화막</strong> 제거 효율: <strong>{finalRemovalEfficiency.toFixed(1)}%</strong>
                 </div>
                 <div className="text-sm text-green-600 mt-1">
                   {getCurrentSolution()?.targetType === 'oxide' ? (
                     <>제거량: {(20 * finalRemovalEfficiency / 100).toFixed(1)}Å / 남은 두께: {(20 * (1 - finalRemovalEfficiency / 100)).toFixed(1)}Å</>
                   ) : (
-                    <>제거된 {getCurrentSolution()?.targetName}: {finalRemovalEfficiency.toFixed(1)}% / 남은 오염: {(100 - finalRemovalEfficiency).toFixed(1)}%</>
+                    <>제거된 산화막: {finalRemovalEfficiency.toFixed(1)}% / 남은 산화막: {(100 - finalRemovalEfficiency).toFixed(1)}%</>
                   )}
                 </div>
               </div>
@@ -1397,7 +1402,7 @@ const CleaningSimulator = ({ initialTab }) => {
                "   • Werner Kern이 개발한 표준 세정법\n" +
                "   • 현재까지도 기본 방법으로 사용\n\n" +
                "**🕑 1980~90년대: 메가소닉 세정**\n" +
-               "   • 900 kHz~1 MHz 초음파\n" +
+               "   • 0.8~2 MHz 메가소닉 초음파\n" +
                "   • 물리적 + 화학적 세정 결합\n" +
                "   • 입자 제거 효율 획기적 향상\n\n" +
                "**🕒 2000년대: Single Wafer 세정**\n" +
@@ -1610,7 +1615,7 @@ const CleaningSimulator = ({ initialTab }) => {
           <line x1="45" y1="40" x2="45" y2="250" stroke="#94a3b8" strokeWidth="2" strokeDasharray="3"/>
           {[
             { y: 42, era: '1970s', label: 'RCA 세정', desc: 'Werner Kern 표준법', color: '#CBD5E1' },
-            { y: 84, era: '1980~90s', label: '메가소닉', desc: '900 kHz~1 MHz 초음파', color: '#93C5FD' },
+            { y: 84, era: '1980~90s', label: '메가소닉', desc: '0.8~2 MHz 초음파', color: '#93C5FD' },
             { y: 126, era: '2000s', label: 'Single Wafer', desc: '매엽식 정밀 제어', color: '#C4B5FD' },
             { y: 168, era: '2010s', label: '환경 친화', desc: 'DIW, Ozonated water', color: '#86EFAC' },
             { y: 210, era: '현재', label: 'EUV 대응', desc: '원자층 청정도', color: '#FCD34D' },

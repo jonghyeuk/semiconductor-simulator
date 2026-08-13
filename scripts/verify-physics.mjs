@@ -399,16 +399,8 @@ const baseCleaning = (method, params) => {
     default: return 0;
   }
 };
-for (const sol of ['BOE', 'SC1', 'SC2', 'SPM']) {
-  for (const T of range(25, 100, 2)) {
-    for (const conc of range(0, 20, 1)) {
-      for (const time of [1, 10, 30]) {
-        const p = { temperature: T, concentration: conc, time, solution: sol };
-        check(`clean(wet,${sol},${T},${conc},${time})`, baseCleaning('wet', p), cl.calculateOxideRemovalEfficiency('wet', p));
-      }
-    }
-  }
-}
+// 습식 세정은 물리 오류를 고쳐 값이 의도적으로 바뀌었다 (용액 간 순서 반전).
+// 회귀 대조 대상에서 빼고 아래 '변경 보고' 로 옮겼다.
 for (const power of range(0, 1000, 25)) {
   for (const pressure of range(0, 0.5, 0.05)) {
     const p = { power, pressure };
@@ -471,10 +463,27 @@ const oldSpinThickness = (rpm) => {
   return 1000;
 };
 
+// 습식 세정 (수정 전): 용액 계수가 가산이고 온도가 절대값이었다.
+const oldCleaningWet = (params) => {
+  const tempFactor = (params.temperature - 25) / 75;
+  const concFactor = params.concentration / 10;
+  const timeFactor = Math.min(params.time / 15, 1);
+  const sf =
+    params.solution === 'BOE' ? 1.2 : params.solution === 'SC1' ? 0.3 : params.solution === 'SC2' ? 0.2 : 0.8;
+  return Math.max(0, Math.min(98, 20 + tempFactor * 25 + concFactor * 30 + timeFactor * 20 + sf * 15));
+};
+
 const rows = [];
 const pct = (o, n) => (o === 0 ? '—' : `${(((n - o) / o) * 100).toFixed(0)}%`);
 const push = (item, cond, o, n, unit) =>
   rows.push([item, cond, typeof o === 'number' ? o.toFixed(1) : o, typeof n === 'number' ? n.toFixed(1) : n, unit, pct(o, n)]);
+
+// ⑪ 습식 세정 — 각 용액을 권장 온도로 돌렸을 때의 산화막 제거율.
+// 수정 전에는 BOE 가 꼴찌였다 (SPM 95.3 > SC1 69.5 > SC2 68.0 > BOE 66.3).
+for (const [sol, T] of [['BOE', 25], ['SC1', 75], ['SC2', 75], ['SPM', 130]]) {
+  const p = { temperature: T, concentration: 5, time: 10, solution: sol };
+  push('⑪ 세정 제거율', `${sol} ${T}°C 농도5 10분`, oldCleaningWet(p), cl.calculateOxideRemovalEfficiency('wet', p), '%');
+}
 
 push('① 산화 두께', 'dry 1000°C 60분', oldOxide(1000, 60, 'dry'), ox.calculateOxideGrowth(1000, 60, 'dry'), 'nm');
 push('① 산화 두께', 'dry 1100°C 60분', oldOxide(1100, 60, 'dry'), ox.calculateOxideGrowth(1100, 60, 'dry'), 'nm');
