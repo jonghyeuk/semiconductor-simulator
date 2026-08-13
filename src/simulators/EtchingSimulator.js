@@ -1656,7 +1656,7 @@ const EtchSimulator = ({ initialTab }) => {
     },
     {
       name: '균일성 (Uniformity)',
-      description: '웨이퍼 전체 영역에서 식각 깊이와 프로파일이 얼마나 일관적인지를 나타내는 지표입니다. Uniformity(%) = ±[(Max-Min)/(2×Average)]×100 공식으로 계산하며, ±3% 이내를 목표로 합니다(선단 공정에서는 ±2% 이내). 불균일성은 플라즈마 밀도 분포, 가스 흐름, 웨이퍼 온도 분포, RF 전력 분포 등이 원인이 됩니다. 균일성이 좋지 않으면 웨이퍼의 어떤 부분은 과도하게 식각되고(over-etch) 다른 부분은 부족하게 식각되어(under-etch) 수율이 크게 감소합니다. 압력 최적화, 다중 가스 주입구, ESC 온도 제어, 웨이퍼 회전 등으로 균일성을 개선할 수 있습니다.',
+      description: '웨이퍼 전체 영역에서 식각 깊이와 프로파일이 얼마나 일관적인지를 나타내는 지표입니다. 표준 지표는 **비균일도**로, NU(%) = ±[(Max-Min)/(2×Average)]×100 이며 작을수록 좋습니다 (±3% 이내 목표, 선단 공정은 ±2% 이내). 반면 이 시뮬레이터 화면에 뜨는 「균일성」 수치는 100 이 최적인 **균일도 지수**입니다. 두 값은 방향이 반대이므로 혼동하지 마세요. 불균일성은 플라즈마 밀도 분포, 가스 흐름, 웨이퍼 온도 분포, RF 전력 분포 등이 원인이 됩니다. 균일성이 좋지 않으면 웨이퍼의 어떤 부분은 과도하게 식각되고(over-etch) 다른 부분은 부족하게 식각되어(under-etch) 수율이 크게 감소합니다. 압력 최적화, 다중 가스 주입구, ESC 온도 제어, 웨이퍼 회전 등으로 균일성을 개선할 수 있습니다.',
       position: { cx: 310, cy: 260 }
     },
     {
@@ -1722,7 +1722,7 @@ const EtchSimulator = ({ initialTab }) => {
 
     // Etch stop / 마스크 손상
     const etchStop = (etchTarget !== 'PR' && polymerFormers > 60 && radicalEtchers < 20) || er < 15;
-    const maskDamage = (gasFlows.Ar || 0) > 85 || power > 650;
+    const maskDamage = (gasFlows.Ar || 0) > 80 || power > 500;
     const isotropicWarn = pressure > 150 && (gasFlows.Ar || 0) < 40;
 
     // 깊이 (식각 진행에 따른 시각화 비율)
@@ -1778,7 +1778,9 @@ const EtchSimulator = ({ initialTab }) => {
     for (let i = 0; i <= 60; i += 5) {
       data.push({
         time: i,
-        etchRate: calculateEtchRate(etchTarget, gasFlows, power, pressure) * (0.9 + Math.random() * 0.2),
+        // calculateEtchRate 는 내부에서 이미 ±10% 산포를 적용한다. 여기서 다시
+        // 곱하면 0.81~1.21 (±21%) 이 되어 그래프 산포가 두 배가 된다.
+        etchRate: calculateEtchRate(etchTarget, gasFlows, power, pressure),
         pressure: pressure + (Math.random() - 0.5) * 5,
         power: power + (Math.random() - 0.5) * 10
       });
@@ -2205,10 +2207,13 @@ const EtchSimulator = ({ initialTab }) => {
 
   // 가스 조합 프리셋
   const gasPresets = {
-    'Si': { Cl2: 30, HBr: 15, CF4: 0, CHF3: 0, O2: 0, Ar: 90 },
-    'SiO2': { Cl2: 0, HBr: 0, CF4: 5, CHF3: 30, O2: 0, Ar: 90 },
-    'Si3N4': { Cl2: 0, HBr: 0, CF4: 0, CHF3: 25, O2: 5, Ar: 70 },
-    'PR': { Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 100, Ar: 0 }
+    // 프리셋은 각 재료의 "이상적 조건" 창 안에 있어야 한다. 예전에는 4종 전부
+    // 자기 창을 벗어나, 클릭하는 순간 "일부 파라미터가 최적 범위를 벗어났습니다"
+    // 경고가 떴다 (Si 는 Ar 90 으로 마스크 손상 플래그까지 켰다).
+    'Si': { Cl2: 30, HBr: 15, CF4: 0, CHF3: 0, O2: 0, Ar: 78 },
+    'SiO2': { Cl2: 0, HBr: 0, CF4: 25, CHF3: 30, O2: 0, Ar: 65 },
+    'Si3N4': { Cl2: 0, HBr: 0, CF4: 0, CHF3: 25, O2: 10, Ar: 70 },
+    'PR': { Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 90, Ar: 20 }
   };
 
   // 탭별 컨텐츠 렌더링
@@ -4167,18 +4172,18 @@ const EtchSimulator = ({ initialTab }) => {
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 85 ? '과도한 스퍼터링 → 마스크 손상 ⚠' : gasFlows.Ar >= 70 ? '수직 프로파일 향상 ✓' : gasFlows.Ar >= 40 ? '이방성 보통' : '등방성 경향 ⚠'}</span>
+                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 80 ? '과도한 스퍼터링 → 마스크 손상·선택비 저하 ⚠' : gasFlows.Ar >= 70 ? '수직 프로파일 향상 ✓' : gasFlows.Ar >= 40 ? '이방성 보통' : '등방성 경향 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>RF {power} W: {power > 600 ? '과전력 → 플라즈마 데미지/선택비 저하 ⚠' : power >= 250 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
+                                <span>RF {power} W: {power > 500 ? '과전력 → 플라즈마 데미지/선택비 저하 ⚠' : power >= 250 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>압력 {pressure} mTorr: {pressure > 150 ? '고압 → 가스 재결합/이방성 저하 ⚠' : pressure < 50 ? '저압 → sputter 우세, 선택비 저하 ⚠' : '적정 압력 ✓'}</span>
+                                <span>압력 {pressure} mTorr: {pressure > 150 ? '고압 → 가스 재결합/이방성 저하 ⚠' : pressure < 40 ? '저압 → sputter 우세, 선택비 저하 ⚠' : '적정 압력 ✓'}</span>
                               </div>
                               <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-                                → {(gasFlows.Cl2 >= 25 && gasFlows.Cl2 <= 50) && (gasFlows.HBr >= 12 && gasFlows.HBr <= 30) && (gasFlows.Ar >= 70 && gasFlows.Ar <= 85) && (power >= 250 && power <= 600) && (pressure >= 50 && pressure <= 150) ? '이상적인 Si 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
+                                → {(gasFlows.Cl2 >= 25 && gasFlows.Cl2 <= 50) && (gasFlows.HBr >= 12 && gasFlows.HBr <= 30) && (gasFlows.Ar >= 70 && gasFlows.Ar <= 80) && (power >= 250 && power <= 500) && (pressure >= 50 && pressure <= 150) ? '이상적인 Si 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
                               </div>
                             </>
                           )}
@@ -4186,7 +4191,7 @@ const EtchSimulator = ({ initialTab }) => {
                             <>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>CF₄ {gasFlows.CF4} sccm: {gasFlows.CF4 > 45 ? '과다 → F 라디칼 과잉, Si 선택비 저하 ⚠' : gasFlows.CF4 >= 20 ? 'SiO₂ 식각 활성화 ✓' : gasFlows.CF4 >= 10 ? '식각률 보통' : '식각률 부족 ⚠'}</span>
+                                <span>CF₄ {gasFlows.CF4} sccm: {gasFlows.CF4 > 30 ? '과다 → F 라디칼 과잉, Si 선택비 저하 ⚠' : gasFlows.CF4 >= 20 ? 'SiO₂ 식각 활성화 ✓' : gasFlows.CF4 >= 10 ? '식각률 보통' : '식각률 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
@@ -4194,18 +4199,18 @@ const EtchSimulator = ({ initialTab }) => {
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 75 ? '과도한 스퍼터링 → PR 마스크 손상 ⚠' : gasFlows.Ar >= 50 ? '물리적 충격 증가 ✓' : gasFlows.Ar >= 30 ? '적정 수준' : '스퍼터링 부족 ⚠'}</span>
+                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 70 ? '과도한 스퍼터링 → PR 마스크 손상·선택비 저하 ⚠' : gasFlows.Ar >= 50 ? '물리적 충격 증가 ✓' : gasFlows.Ar >= 30 ? '적정 수준' : '스퍼터링 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>RF {power} W: {power > 600 ? '과전력 → 하부층 손상 ⚠' : power >= 300 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
+                                <span>RF {power} W: {power > 500 ? '과전력 → 하부층 손상·선택비 저하 ⚠' : power >= 300 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
                                 <span>압력 {pressure} mTorr: {pressure > 150 ? '고압 → 폴리머 누적/etch stop ⚠' : pressure < 40 ? '저압 → 식각률 저하 ⚠' : '적정 압력 ✓'}</span>
                               </div>
                               <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-                                → {(gasFlows.CF4 >= 20 && gasFlows.CF4 <= 45) && (gasFlows.CHF3 >= 15 && gasFlows.CHF3 <= 45) && (gasFlows.Ar >= 50 && gasFlows.Ar <= 75) && (power >= 300 && power <= 600) && (pressure >= 40 && pressure <= 150) ? '이상적인 SiO₂ 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
+                                → {(gasFlows.CF4 >= 20 && gasFlows.CF4 <= 30) && (gasFlows.CHF3 >= 15 && gasFlows.CHF3 <= 45) && (gasFlows.Ar >= 50 && gasFlows.Ar <= 70) && (power >= 300 && power <= 500) && (pressure >= 40 && pressure <= 150) ? '이상적인 SiO₂ 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
                               </div>
                             </>
                           )}
@@ -4221,18 +4226,18 @@ const EtchSimulator = ({ initialTab }) => {
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 85 ? '과도한 스퍼터링 → 마스크 손상 ⚠' : gasFlows.Ar >= 60 ? '수직성 확보 ✓' : gasFlows.Ar >= 40 ? '적정 수준' : '이방성 부족 ⚠'}</span>
+                                <span>Ar {gasFlows.Ar} sccm: {gasFlows.Ar > 80 ? '과도한 스퍼터링 → 마스크 손상 ⚠' : gasFlows.Ar >= 60 ? '수직성 확보 ✓' : gasFlows.Ar >= 40 ? '적정 수준' : '이방성 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
-                                <span>RF {power} W: {power > 600 ? '과전력 → 플라즈마 데미지 ⚠' : power >= 300 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
+                                <span>RF {power} W: {power > 500 ? '과전력 → 플라즈마 데미지·선택비 저하 ⚠' : power >= 300 ? '적정 파워 ✓' : '파워 부족 ⚠'}</span>
                               </div>
                               <div className="flex items-start gap-1">
                                 <span>•</span>
                                 <span>압력 {pressure} mTorr: {pressure > 150 ? '고압 → 등방성 증가 ⚠' : pressure < 40 ? '저압 → 식각률 저하 ⚠' : '적정 압력 ✓'}</span>
                               </div>
                               <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
-                                → {(gasFlows.CHF3 >= 25 && gasFlows.CHF3 <= 50) && (gasFlows.O2 >= 8 && gasFlows.O2 <= 15) && (gasFlows.Ar >= 60 && gasFlows.Ar <= 85) && (power >= 300 && power <= 600) && (pressure >= 40 && pressure <= 150) ? '이상적인 Si₃N₄ 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
+                                → {(gasFlows.CHF3 >= 25 && gasFlows.CHF3 <= 50) && (gasFlows.O2 >= 8 && gasFlows.O2 <= 15) && (gasFlows.Ar >= 60 && gasFlows.Ar <= 80) && (power >= 300 && power <= 500) && (pressure >= 40 && pressure <= 150) ? '이상적인 Si₃N₄ 식각 조건입니다' : '일부 파라미터가 최적 범위를 벗어났습니다 — trade-off를 확인하세요'}
                               </div>
                             </>
                           )}

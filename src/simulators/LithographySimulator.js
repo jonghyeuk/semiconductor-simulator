@@ -158,7 +158,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
                "4️⃣ 식각 또는 이온주입 공정\n" +
                "5️⃣ PR 제거 (Strip)\n\n" +
                "💡 **핵심**: 빛의 파장이 짧을수록 더 미세한 패턴 가능!\n" +
-               "• DUV (Deep UV): 193nm → 45nm 공정\n" +
+               "• DUV (Deep UV): 193nm → 건식 90nm, 액침 45~38nm, 다중패터닝으로 7nm 까지\n" +
                "• EUV (Extreme UV): 13.5nm → 3nm 이하 공정",
       highlight: "반도체 집적도를 결정하는 가장 중요한 공정! 포토리소 없이는 트랜지스터 한 개도 만들 수 없습니다!",
       icon: "🎯"
@@ -166,7 +166,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
     {
       title: "⚙️ 포토리소는 어떻게 동작할까?",
       content: "**Step 1: PR Coating (감광막 도포)**\n" +
-               "• 스핀 코팅: 3000~5000 RPM으로 균일한 막 형성 (1~2 μm 두께)\n" +
+               "• 스핀 코팅: 2500~3500 RPM으로 균일한 막 형성 (약 0.9~1.1 μm 두께)\n" +
                "• Soft Bake: 90~110°C에서 용매 제거\n\n" +
                "**Step 2: Exposure (노광)**\n" +
                "• **Contact**: 마스크와 웨이퍼 직접 접촉 (저가, 해상도 낮음)\n" +
@@ -1908,9 +1908,9 @@ const PhotolithographySimulator = ({ initialTab }) => {
                           <div className="text-sm text-red-700 font-medium">✗ 불량한 코팅 품질</div>
                         )}
                         <div className="text-xs text-gray-600 pt-2 border-t border-gray-200 max-w-[160px]">
-                          {processParams.step2_rpm < 2000 && '저속 회전 → 불균일한 두께'}
-                          {processParams.step2_rpm >= 2000 && processParams.step2_rpm <= 4000 && '최적 RPM 구간'}
-                          {processParams.step2_rpm > 4000 && '고속 회전 → 과도하게 얇음'}
+                          {processParams.step2_rpm < 2500 && '저속 회전 → 불균일한 두께'}
+                          {processParams.step2_rpm >= 2500 && processParams.step2_rpm <= 3500 && '최적 RPM 구간'}
+                          {processParams.step2_rpm > 3500 && '고속 회전 → 과도하게 얇음'}
                         </div>
                       </div>
                     </div>
@@ -2365,7 +2365,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
                           </div>
                           <div className="flex items-center space-x-2">
                             <span className="text-green-600 font-bold">✓</span>
-                            <span>28nm~7nm 공정 적용</span>
+                            <span>액침 45~38nm 단일노광, 다중패터닝으로 7nm 까지</span>
                           </div>
                           <div className="flex items-center space-x-2">
                             <span className="text-red-600 font-bold">✗</span>
@@ -3177,7 +3177,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
           <rect width="280" height="280" fill="#0f172a" fillOpacity="0.9" rx="10"/>
           <text x="140" y="20" textAnchor="middle" fill="#fde047" fontSize="13" fontWeight="bold">포토리소 세부 공정 5단계</text>
           {[
-            { y: 36, label: 'Step 1: PR Coating', desc: '스핀 3000~5000 RPM', temp: 'Soft Bake 90~110°C', color: '#93C5FD' },
+            { y: 36, label: 'Step 1: PR Coating', desc: '스핀 2500~3500 RPM', temp: 'Soft Bake 90~110°C', color: '#93C5FD' },
             { y: 84, label: 'Step 2: Exposure', desc: 'Contact/Stepper/Scanner/EUV', temp: '13.5~365nm 파장', color: '#FCD34D' },
             { y: 132, label: 'Step 3: PEB', desc: 'Post Exposure Bake', temp: '110~130°C', color: '#C4B5FD' },
             { y: 180, label: 'Step 4: Develop', desc: 'Positive/Negative PR', temp: 'TMAH 2.38%', color: '#86EFAC' },
