@@ -11,17 +11,25 @@ export const K_EV = 8.617e-5;
 /**
  * 도펀트 물성. Qd = 확산 활성화 에너지(eV), D0 = 전인자(cm²/s), mass = 원자량.
  *
- * D0-Qd 는 반드시 **같은 출처의 짝**이어야 한다. 예전 표는 D0 는 Sze/Jaeger 의
- * 진성 확산 표를 쓰면서 Qd 만 다른 출처 값을 섞어 놓아서, 1000°C 확산 계수가
- * B 는 1/8, As 는 1/114 로 나왔다 (As 가 P 보다 553배 느린 비현실적 거동 — 문헌
- * 짝으로는 4.8배 차이).
- * Sze, "Physics of Semiconductor Devices" / Jaeger 의 짝으로 맞췄다.
+ * D0-Qd 는 반드시 **같은 출처의 짝**이어야 한다. 예전 표는 D0 와 Qd 를 서로 다른
+ * 출처에서 섞어 와서 1000°C 확산 계수가 B 는 1/8, As 는 1/114 로 나왔다
+ * (As 가 P 보다 553배 느린 비현실적 거동 — 문헌 짝으로는 4.8배 차이).
+ *
+ * 값은 Fuller/Fair 의 진성 확산 계수 표 (Phys. Rev. B 3, "Dopant Diffusion in
+ * Silicon" II. Donors / III. Acceptors, 1971) 계열의 표준 짝이다. Sb(0.214, 3.65)
+ * 와 In(0.785, 3.63) 은 원 문헌으로 직접 확인했고, B/P/As 는 900~1100°C 에서
+ * 계산한 D 가 문헌 실측 범위(1e-14~1e-15 cm²/s 대)와 확산 속도 순서
+ * B ≳ P > As > Sb 를 재현하는 것으로 검산했다.
+ *
+ * In 은 붕소보다 **느린** 확산체다. 그래서 halo/retrograde well 에 쓴다.
+ * 예전 값(D0 1.2, Qd 3.5)은 In 을 표에서 가장 빠른 확산체로 만들어
+ * 이 용도 자체를 뒤집어 놓았다.
  */
 export const dopantProperties = {
   B: { name: 'Boron', nameKo: '붕소', type: 'p-type', Qd: 3.46, D0: 0.76, color: '#3b82f6', mass: 10.8 },
   P: { name: 'Phosphorus', nameKo: '인', type: 'n-type', Qd: 3.66, D0: 3.85, color: '#ef4444', mass: 31.0 },
   As: { name: 'Arsenic', nameKo: '비소', type: 'n-type', Qd: 3.56, D0: 0.32, color: '#8b5cf6', mass: 74.9 },
-  In: { name: 'Indium', nameKo: '인듐', type: 'p-type', Qd: 3.5, D0: 1.2, color: '#10b981', mass: 114.8 },
+  In: { name: 'Indium', nameKo: '인듐', type: 'p-type', Qd: 3.63, D0: 0.785, color: '#10b981', mass: 114.8 },
   Sb: { name: 'Antimony', nameKo: '안티몬', type: 'n-type', Qd: 3.65, D0: 0.214, color: '#f59e0b', mass: 121.8 },
 };
 

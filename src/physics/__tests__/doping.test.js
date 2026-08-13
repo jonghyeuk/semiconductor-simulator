@@ -23,7 +23,7 @@ describe('calculateDiffusionCoefficient', () => {
   });
 
   it('활성화 에너지가 클수록 같은 온도에서 확산이 느리다', () => {
-    // As(Qd=4.08) > B(Qd=3.69) 이지만 D0 도 다르므로 지수항만 비교한다.
+    // As(Qd=3.56) > B(Qd=3.46) 이지만 D0 도 다르므로 지수항만 비교한다.
     const k = 8.617e-5;
     const T = 1273.15;
     const expAs = Math.exp(-dopantProperties.As.Qd / (k * T));
@@ -35,6 +35,35 @@ describe('calculateDiffusionCoefficient', () => {
     const D = calculateDiffusionCoefficient(1000, 'B');
     expect(D).toBeGreaterThan(1e-15);
     expect(D).toBeLessThan(1e-12);
+  });
+
+  // D0 와 Qd 를 서로 다른 출처에서 섞어 오면 개별 값은 그럴듯해 보여도
+  // 도펀트 간 상대 속도가 뒤집힌다. 아래 두 테스트가 그 짝 오류를 잡는다.
+  it('도펀트 확산 속도 순서가 문헌과 같다: B ≳ P > In > As > Sb', () => {
+    for (const T of [900, 1000, 1100]) {
+      const D = (d) => calculateDiffusionCoefficient(T, d);
+      expect(D('B')).toBeGreaterThan(D('P'));
+      expect(D('P')).toBeGreaterThan(D('In'));
+      expect(D('In')).toBeGreaterThan(D('As'));
+      expect(D('As')).toBeGreaterThan(D('Sb'));
+    }
+  });
+
+  it('인듐은 붕소보다 느리게 확산한다 (halo/retrograde well 용도의 근거)', () => {
+    // In 을 붕소보다 빠르게 만들어 놓으면 halo 주입 자체가 성립하지 않는다.
+    // Fuller/Fair (Phys. Rev. B 3, 1971): In D0=0.785 cm²/s, Qd=3.63 eV.
+    for (const T of [900, 1000, 1100]) {
+      expect(calculateDiffusionCoefficient(T, 'In'))
+        .toBeLessThan(calculateDiffusionCoefficient(T, 'B'));
+    }
+  });
+
+  it('1000°C 에서 도펀트 확산계수가 모두 문헌 범위(10⁻¹⁷ ~ 10⁻¹² cm²/s)에 있다', () => {
+    for (const d of DOPANTS) {
+      const D = calculateDiffusionCoefficient(1000, d);
+      expect(D).toBeGreaterThan(1e-17);
+      expect(D).toBeLessThan(1e-12);
+    }
   });
 
   it('결정적이다', () => {
