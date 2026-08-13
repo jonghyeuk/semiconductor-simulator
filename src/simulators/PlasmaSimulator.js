@@ -1573,8 +1573,10 @@ const PlasmaSimulator = ({ initialTab }) => {
               <div className="bg-white rounded-xl shadow-lg p-6 border">
                 <h3 className="text-lg font-semibold text-violet-800 mb-4">파션 법칙</h3>
                 <div className="space-y-4 text-sm text-gray-700">
-                  <div className="bg-violet-50 p-4 rounded-lg"><div className="font-mono text-center text-lg font-bold text-violet-800 mb-2">실제 파션커브 데이터</div><div className="text-xs text-violet-600 text-center">{gasType === 'argon' && 'Argon: pd=1에서 최소 200V (이온화: 15.8eV)'}{gasType === 'air' && 'Air: pd=1에서 최소 350V (혼합가스)'}{gasType === 'helium' && 'Helium: pd=1에서 최소 400V (이온화: 24.6eV)'}{gasType === 'nitrogen' && 'Nitrogen: pd=1에서 최소 250V (이온화: 15.6eV)'}{gasType === 'neon' && 'Neon: pd=1에서 최소 300V (이온화: 21.6eV)'}</div></div>
+                  <div className="bg-violet-50 p-4 rounded-lg"><div className="font-mono text-center text-lg font-bold text-violet-800 mb-2">파션커브 참고값 (예시 조건)</div><div className="text-xs text-violet-600 text-center">{gasType === 'argon' && 'Argon: pd=1에서 최소 200V (이온화: 15.8eV)'}{gasType === 'air' && 'Air: pd=1에서 최소 350V (혼합가스)'}{gasType === 'helium' && 'Helium: pd=1에서 최소 400V (이온화: 24.6eV)'}{gasType === 'nitrogen' && 'Nitrogen: pd=1에서 최소 250V (이온화: 15.6eV)'}{gasType === 'neon' && 'Neon: pd=1에서 최소 300V (이온화: 21.6eV)'}</div></div>
                   <div><strong>이온화 에너지와 항복전압:</strong> 각 가스의 이온화 에너지가 다르므로 같은 조건에서도 방전을 시작하는데 필요한 전압이 다릅니다. He(24.6eV), Ne(21.6eV) 가 높고, N₂(15.6eV)·Ar(15.8eV) 가 낮습니다.</div>
+                  <div className="text-xs text-gray-500 mt-2">※ 위 항복전압은 <strong>예시 조건의 참고값</strong>입니다. 파셴 최소 전압은 음극 재질과 전극 형상에 크게 좌우돼 문헌마다 편차가 큽니다 (헬륨만 해도 음극에 따라 127~152V 로 보고된 값과 360V 대로 보고된 값이 함께 있습니다).</div>
+                  <div className="text-xs text-gray-500 mt-1">※ 또한 <strong>이온화 에너지가 높다고 항복전압이 반드시 높지는 않습니다.</strong> 헬륨은 이온화 에너지가 가장 높지만 파셴 최소값은 오히려 낮은 편입니다. 항복은 이온화 에너지뿐 아니라 타운센드 이온화 계수와 음극의 이차전자 방출 계수까지 함께 결정하기 때문입니다.</div>
                   <div><strong>가스 선택의 실제 고려사항:</strong> 공정 목적에 따라 가스를 선택합니다. Ar은 범용적이고 안정적이며, He는 청정 공정에, N₂는 질화공정에 주로 사용됩니다.</div>
                   <div><strong>U자 곡선 비교:</strong> 모든 가스가 비슷한 U자 형태를 보이지만, 최소값의 위치와 전압이 다릅니다. 이는 각 가스의 물리적 특성 차이 때문입니다.</div>
                 </div>
