@@ -299,6 +299,8 @@ const VacuumSimulator = ({ initialTab }) => {
                "• 중진공: 1~10⁻³ Torr\n" +
                "• 고진공: 10⁻³~10⁻⁹ Torr\n" +
                "• 초고진공: < 10⁻⁹ Torr\n\n" +
+               "※ 고진공/초고진공 경계는 규격에 따라 다릅니다. 본 시뮬레이터는 반도체 업계에서 통용되는 10⁻⁹ Torr 기준을 씁니다. " +
+               "DIN 28400/ISO 3529(유럽 진공 규격)는 10⁻⁷ mbar(≈10⁻⁷ Torr)를 경계로 정의합니다.\n\n" +
                "💡 **핵심**: 진공도가 높을수록 불순물 농도가 낮아져 고품질 반도체 제조가 가능합니다!",
       highlight: "진공 없이는 7nm 이하 초미세 반도체를 만들 수 없습니다. 단 1개의 불순물 원자도 치명적입니다!",
       icon: "🎯"
@@ -326,7 +328,7 @@ const VacuumSimulator = ({ initialTab }) => {
                "마이크로미터(μm) 공정 → 10⁻⁵ Torr 수준의 진공\n" +
                "간단한 회전 펌프만으로 충분\n\n" +
                "**2000년대: 나노 공정 진입**\n" +
-               "90nm → 32nm 공정 → 10⁻⁷ Torr 초고진공 필수\n" +
+               "90nm → 32nm 공정 → 10⁻⁷ Torr급 고진공 필수\n" +
                "TMP + Cryo Pump 조합, Load Lock 시스템 도입\n\n" +
                "**2020년대: 극한 진공의 시대**\n" +
                "3nm EUV 공정 → **10⁻⁹ Torr 이하 극한 진공**\n" +
@@ -3000,9 +3002,7 @@ const VacuumSimulator = ({ initialTab }) => {
                         </span></p>
                       <p><span className="font-medium">진공도:</span> 
                         <span className="ml-2 font-semibold text-purple-600">
-                          {resultPressure > 0.075 ? '저진공' : 
-                           resultPressure > 0.0075 ? '중진공' : 
-                           resultPressure > 0.00075 ? '고진공' : '초고진공'}
+                          {getVacuumStage(resultPressure)}
                         </span></p>
                     </div>
                   </div>
