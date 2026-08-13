@@ -58,7 +58,7 @@ const RTASimulator = () => {
   const [rampRate, setRampRate] = useState(50);
   const [processTime, setProcessTime] = useState(30);
   const [gasFlow, setGasFlow] = useState('N2');
-  const [pressure, setPressure] = useState(1013);
+  const [pressure, setPressure] = useState(760000); // 1 atm = 760 Torr = 760,000 mTorr
   const [lampPower, setLampPower] = useState([0, 0, 0, 0, 0, 0]);
   const [zoneSetpoints, setZoneSetpoints] = useState([25, 25, 25, 25, 25, 25]);
   const [zoneTemps, setZoneTemps] = useState([25, 25, 25, 25, 25, 25]);
@@ -77,7 +77,7 @@ const RTASimulator = () => {
     'silicide_formation': { temp: 450, time: 60, ramp: 30, gas: 'Ar' },
     'implant_anneal': { temp: 1100, time: 5, ramp: 200, gas: 'N2' },
     'thermal_oxidation': { temp: 900, time: 120, ramp: 25, gas: 'O2' },
-    'spike_anneal': { temp: 1100, time: 0.1, ramp: 300, gas: 'N2' }
+    'spike_anneal': { temp: 1100, time: 1, ramp: 300, gas: 'N2' }
   };
 
   // Temperature profile calculation
@@ -114,13 +114,16 @@ const RTASimulator = () => {
       basePower = 0;
     }
 
+    // 웨이퍼 가장자리는 측면 복사로 열을 더 잃는다. 다구역 RTP 는 최외곽 램프
+    // 링의 출력 밀도를 가장 크게 잡아 이를 보상한다. 예전에는 정반대로 가장자리
+    // 출력을 0.85 까지 낮춰, 본문의 "존 독립 제어로 균일성 확보" 설명과 어긋났다.
     const newPowers = [
       basePower * 1.0,
-      basePower * 0.95,
-      basePower * 0.95,
-      basePower * 0.90,
-      basePower * 0.90,
-      basePower * 0.85
+      basePower * 1.03,
+      basePower * 1.03,
+      basePower * 1.07,
+      basePower * 1.07,
+      basePower * 1.12
     ];
 
     setLampPower(newPowers);
@@ -161,7 +164,16 @@ const RTASimulator = () => {
             if (newStage === 'Rapid Ramp Up') {
               setProcessLog(prev => [...prev, `🔥 급속 승온 시작! ${rampRate}°C/s로 가열 중...`]);
             } else if (newStage === 'Process Hold') {
-              setProcessLog(prev => [...prev, `🎯 목표온도 도달! ${targetTemp}°C 유지 시작`]);
+              // 설정값이 hold 로 넘어간 것과 웨이퍼가 실제로 목표에 도달한 것은
+              // 다르다. 램프율이 빠르면 1차 지연계 추종 지연 때문에 웨이퍼가
+              // 목표보다 한참 아래에 있다 (300 °C/s × τ 1.25 s = 375°C 지연).
+              // 예전에는 설정값 기준으로 "도달!" 을 찍어 스파이크 어닐링에서
+              // 938°C 인데도 1100°C 도달이라고 표시했다.
+              const wafer = zoneTemps.reduce((a, b) => a + b, 0) / zoneTemps.length;
+              setProcessLog(prev => [...prev,
+                wafer >= targetTemp - 15
+                  ? `🎯 목표온도 도달! ${targetTemp}°C 유지 시작`
+                  : `⏱️ 설정값 hold 진입 (웨이퍼 ${wafer.toFixed(0)}°C — 램프 추종 지연으로 목표 미달)`]);
             } else if (newStage === 'Cool Down') {
               setProcessLog(prev => [...prev, `❄️ 냉각 시작 - 열충격 방지 제어냉각`]);
             }
@@ -457,7 +469,7 @@ const RTASimulator = () => {
                   className="w-full p-2 border rounded-lg"
                   disabled={isRunning}
                 />
-                <div className="text-xs text-gray-500 mt-1">1 mTorr - 760 Torr</div>
+                <div className="text-xs text-gray-500 mt-1">1 mTorr ~ 760 Torr (760,000 mTorr = 1 atm)</div>
               </div>
             </div>
 

@@ -356,11 +356,8 @@ const baseZoneSetpoints = (gsp, lampPower) =>
     const offset = idx === 0 ? 0 : idx < 3 ? 2 : idx < 5 ? 5 : 8;
     return Math.max(25, gsp - offset + pf * 10);
   });
-for (const gsp of range(100, 1200, 50)) {
-  for (const lp of [[100, 100, 100, 100, 100, 100], [80, 90, 100, 70, 60, 50], [0, 0, 0, 0, 0, 0]]) {
-    check(`zoneSp(${gsp})`, baseZoneSetpoints(gsp, lp), rta.computeZoneSetpoints(gsp, lp));
-  }
-}
+// 존 설정 온도는 물리 오류를 고쳐 값이 의도적으로 바뀌었다 (가장자리 보상 방향
+// 반전 + 램프 출력이 설정값을 밀어 올리던 순환 구조 제거). 변경 보고로 옮겼다.
 const baseRampAndSoak = (time, targetTemp, rampRate, processTime) => {
   const gas = 10;
   const up = (targetTemp - 25) / rampRate;
@@ -486,6 +483,22 @@ const push = (item, cond, o, n, unit) =>
 for (const [sol, T] of [['BOE', 25], ['SC1', 75], ['SC2', 75], ['SPM', 130]]) {
   const p = { temperature: T, concentration: 5, time: 10, solution: sol };
   push('⑪ 세정 제거율', `${sol} ${T}°C 농도5 10분`, oldCleaningWet(p), cl.calculateOxideRemovalEfficiency('wet', p), '%');
+}
+
+// ⑭ RTA 존 설정 온도 — 가장자리 보상 방향이 반대였고, 출력이 설정값을 밀어 올렸다.
+{
+  const lp = [100, 95, 95, 90, 90, 85];
+  const before = baseZoneSetpoints(1000, lp);
+  const after = rta.computeZoneSetpoints(1000, lp);
+  for (const idx of [0, 2, 5]) {
+    push('⑭ 존 설정온도', `목표1000 Zone${idx + 1}`, before[idx], after[idx], '°C');
+  }
+}
+
+// ⑮ RTA 냉각 — 램프업 속도에 비례시키던 것을 복사 방열 기준 고정값으로.
+for (const rr of [25, 100, 300]) {
+  const oldDown = (1000 - 25) / (rr * 0.3);
+  push('⑮ 냉각 소요', `1000°C 램프${rr}`, oldDown, 975 / 40, 's');
 }
 
 // ⑬ SiO2 굴절률 (O-rich 구간) — 슬라이더 최대 25:1 이 "성공" 으로 판정되던 문제.

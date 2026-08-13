@@ -15,6 +15,21 @@ export const ZONE_TIME_CONSTANTS = [0.5, 0.75, 0.75, 1.0, 1.0, 1.25];
 
 /** 냉각 지수 감쇠 상수 (램프다운 구간에서 e^-3 ≈ 5% 까지 떨어진다). */
 const COOLING_DECAY = 3;
+
+/**
+ * 램프다운 구간의 **평균** 냉각률 (°C/s).
+ *
+ * 냉각은 램프를 끈 뒤의 복사 방열이라 사용자가 고른 램프업 속도와 무관하다.
+ * 예전에는 rampDownTime = (T−25)/(rampRate × 0.3) 이라 램프업 속도에 비례시켰고,
+ * 같은 1000°C 웨이퍼인데도 25 °C/s 를 고르면 7.5 °C/s, 300 °C/s 를 고르면
+ * 90 °C/s 로 12배가 달라졌다.
+ *
+ * 아래 지수 감쇠 형상에서 초기 냉각률은 평균의 약 3.16배(= 3/(1−e⁻³))가 된다.
+ * 문헌 RTP 램프다운 실측이 80~150 °C/s 대이므로 평균 40 을 잡으면 초기 ≈126 °C/s
+ * 가 되어 그 대역에 들어온다. 양면 복사 웨이퍼(775 µm, ε≈0.7)의 1000°C 방열
+ * 계산값 ≈125 °C/s 와도 맞는다.
+ */
+const COOLING_RATE_AVG = 40;
 const COOLING_END_VALUE = Math.exp(-COOLING_DECAY);
 
 /**
@@ -26,7 +41,7 @@ const COOLING_END_VALUE = Math.exp(-COOLING_DECAY);
 export function calculateTempProfile(time, { targetTemp, rampRate, processTime }) {
   const gasStabilizationTime = 10;
   const totalRampUpTime = (targetTemp - 25) / rampRate;
-  const rampDownTime = (targetTemp - 25) / (rampRate * 0.3);
+  const rampDownTime = (targetTemp - 25) / COOLING_RATE_AVG;
 
   if (time <= gasStabilizationTime) {
     return 25;
@@ -48,12 +63,28 @@ export function calculateTempProfile(time, { targetTemp, rampRate, processTime }
   return 25;
 }
 
-/** 램프 출력에 따른 존별 설정 온도. */
+/**
+ * 존별 설정 온도 (제어 목표값).
+ *
+ * 웨이퍼 가장자리는 측면 복사 손실 때문에 온도가 떨어진다. 그래서 다구역 RTP 는
+ * 최외곽 존의 설정 온도와 램프 출력을 **더 높게** 잡아 이를 보상한다.
+ *
+ * 예전 구현은 정반대였다. 중앙(idx 0)을 기준으로 가장자리로 갈수록 설정 온도를
+ * 8°C 까지 **빼고** 있었다. 시뮬레이터 본문이 "각 Zone 을 독립 제어해 온도
+ * 균일성을 확보한다" 고 설명하는데 코드는 보상이 아니라 편차를 만들고 있었다.
+ *
+ * 램프 출력 항도 뺐다. 설정값은 제어의 **입력**이고 램프 출력은 그 **결과**인데,
+ * 예전 식은 출력이 설정값을 밀어 올려 순환 구조였다. 그 결과 hold 구간에서
+ * 모든 존의 설정 온도가 목표보다 항상 2°C 이상 높았다.
+ *
+ * @param {number} globalSetpoint 전체 목표 온도 (°C)
+ * @param {number[]} lampPower 존별 램프 출력 (%). 길이만 쓴다.
+ */
 export function computeZoneSetpoints(globalSetpoint, lampPower) {
-  return lampPower.map((power, idx) => {
-    const powerFactor = power / 100;
-    const positionOffset = idx === 0 ? 0 : idx < 3 ? 2 : idx < 5 ? 5 : 8;
-    return Math.max(25, globalSetpoint - positionOffset + powerFactor * 10);
+  return lampPower.map((_power, idx) => {
+    // 가장자리로 갈수록 손실 보상분을 **더한다**.
+    const edgeCompensation = idx === 0 ? 0 : idx < 3 ? 2 : idx < 5 ? 5 : 8;
+    return Math.max(25, globalSetpoint + edgeCompensation);
   });
 }
 

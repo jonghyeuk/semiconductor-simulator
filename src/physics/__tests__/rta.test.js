@@ -58,8 +58,10 @@ describe('calculateTempProfile — 정상 경로', () => {
     const soakEnd = 10 + (recipe.targetTemp - 25) / recipe.rampRate + recipe.processTime;
     const coolRate =
       (calculateTempProfile(soakEnd, recipe) - calculateTempProfile(soakEnd + 0.01, recipe)) / 0.01;
-    expect(coolRate).toBeGreaterThan(0);
-    expect(coolRate).toBeLessThan(recipe.rampRate * 2);
+    // 냉각률을 램프업 속도에 묶어 검사하면 안 된다. 복사 방열은 사용자가 고른
+    // 램프업 속도와 무관하다. 문헌 RTP 램프다운 실측 대역(80~150 °C/s)으로 본다.
+    expect(coolRate).toBeGreaterThan(80);
+    expect(coolRate).toBeLessThan(150);
   });
 
   it('램프 속도가 빠를수록 목표 온도에 빨리 도달한다', () => {
@@ -68,10 +70,25 @@ describe('calculateTempProfile — 정상 경로', () => {
     expect(calculateTempProfile(reachTime(100), { ...recipe, rampRate: 100 })).toBeCloseTo(1000, 6);
   });
 
-  it('냉각은 램프업보다 느리다 (rampRate × 0.3)', () => {
-    const rampUpTime = (recipe.targetTemp - 25) / recipe.rampRate;
-    const rampDownTime = (recipe.targetTemp - 25) / (recipe.rampRate * 0.3);
-    expect(rampDownTime).toBeGreaterThan(rampUpTime);
+  it('냉각 소요 시간이 램프업 속도와 무관하다', () => {
+    // 예전 테스트는 calculateTempProfile 을 아예 호출하지 않고, 구현 상수 0.3 을
+    // 다시 쓴 뒤 1/0.3 > 1 이라는 산술 항등식만 확인했다. 냉각 모델이 통째로
+    // 바뀌어도 통과했다.
+    //
+    // 냉각은 램프를 끈 뒤의 복사 방열이라 램프업 속도와 무관해야 한다.
+    // 예전 모델은 램프율에 비례시켜 25 °C/s 를 고르면 7.5, 300 을 고르면
+    // 90 °C/s 로 12배가 달라졌다.
+    const coolDuration = (rampRate) => {
+      const r = { ...recipe, rampRate };
+      const soakEnd = 10 + (r.targetTemp - 25) / rampRate + r.processTime;
+      let t = soakEnd;
+      while (calculateTempProfile(t, r) > 26 && t < soakEnd + 500) t += 0.1;
+      return t - soakEnd;
+    };
+    const base = coolDuration(50);
+    for (const rr of [25, 100, 200, 300]) {
+      expect(coolDuration(rr)).toBeCloseTo(base, 1);
+    }
   });
 
   it('냉각 구간은 단조 감소한다', () => {
@@ -116,17 +133,26 @@ describe('calculateTempProfile — 경계값', () => {
 });
 
 describe('computeZoneSetpoints', () => {
-  it('가장자리 존일수록 설정 온도가 낮다 (position offset)', () => {
+  it('가장자리 존일수록 설정 온도가 높다 (에지 복사 손실 보상)', () => {
+    // 웨이퍼 가장자리는 측면 복사로 온도가 떨어지므로 다구역 RTP 는 최외곽
+    // 존을 더 뜨겁게 잡아 보상한다. 예전 구현은 정반대로 가장자리를 8°C 까지
+    // 낮춰, 시뮬레이터 본문의 "존 독립 제어로 균일성 확보" 설명과 어긋났다.
     const sp = computeZoneSetpoints(1000, [100, 100, 100, 100, 100, 100]);
-    expect(sp[0]).toBeGreaterThan(sp[2]);
-    expect(sp[2]).toBeGreaterThan(sp[4]);
-    expect(sp[4]).toBeGreaterThan(sp[5]);
+    expect(sp[5]).toBeGreaterThan(sp[4]);
+    expect(sp[4]).toBeGreaterThan(sp[2]);
+    expect(sp[2]).toBeGreaterThan(sp[0]);
   });
 
-  it('램프 출력이 높을수록 설정 온도가 높다', () => {
+  it('설정 온도가 램프 출력의 함수가 아니다', () => {
+    // 설정값은 제어의 입력이고 램프 출력은 그 결과다. 예전 식은 출력이 설정값을
+    // 밀어 올리는 순환 구조라 hold 구간에서 모든 존이 목표보다 높았다.
     const low = computeZoneSetpoints(1000, [0, 0, 0, 0, 0, 0]);
     const high = computeZoneSetpoints(1000, [100, 100, 100, 100, 100, 100]);
-    for (let i = 0; i < 6; i++) expect(high[i]).toBeGreaterThan(low[i]);
+    expect(high).toEqual(low);
+  });
+
+  it('중앙 존 설정 온도가 목표 온도와 같다', () => {
+    expect(computeZoneSetpoints(1000, [100, 100, 100, 100, 100, 100])[0]).toBe(1000);
   });
 
   it('상온 아래로 내려가지 않는다', () => {
