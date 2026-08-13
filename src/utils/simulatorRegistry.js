@@ -7,6 +7,7 @@ import LithographySimulator from '../simulators/LithographySimulator'; // ← �
 import PlasmaSimulator from '../simulators/PlasmaSimulator';
 import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII';
 import EtchingSimulator from '../simulators/EtchingSimulator';
+import EtchingBay from '../simulators/EtchingBay';
 import DopingProcessSimulator from '../simulators/Dopingprocesssimulator';
 import DepositionSimulator from '../simulators/DepositionSimulator';
 import MetallizationEDSPackagingSimulator from '../simulators/MetallizationEDSPackagingSimulator';
@@ -196,6 +197,36 @@ class SimulatorRegistry {
       }
     });
 
+    // 식각 베이 — 단일 장비 화면 프로토타입 (디자인 검토용)
+    //
+    // Etching 과 같은 물리 모듈(src/physics/etching.js)을 쓰고 화면 구조만 다르다.
+    // 탭 6개로 나누던 내용을 장비 시퀀스 위에 재배치했다.
+    // 사이드바에는 노출하지 않고 ?sim=etching-bay 로만 연다 (available: false).
+    this.register({
+      id: 'etching-bay',
+      name: '식각 베이 (프로토타입)',
+      icon: '🎛️',
+      description: '단일 장비 화면 · 공정 시퀀스 기반',
+      component: EtchingBay,
+      available: true,
+      hidden: true, // 목록에는 안 뜨고 ?sim=etching-bay 로만 열린다
+      category: 'prototype',
+      order: 7.5,
+      metadata: {
+        version: '0.1.0',
+        lastUpdated: '2026-08-13',
+        author: 'Semiconductor Simulator Team',
+        features: [
+          '탭 없는 단일 장비 화면 (IDLE → 로드 → 펌핑 → 레시피 → 식각 → 검출 → 벤팅 → 리포트)',
+          '인터락 4종(WAFER/DOOR/VACUUM/GAS) — 충족 전에는 점화 불가',
+          '실시간 챔버 단면: 식각 깊이·언더컷·이온 궤적',
+          'OES 엔드포인트 검출 신호',
+          '이론은 펌핑 대기 구간에, 평가는 런 리포트의 "왜 이렇게 나왔나"로 재배치',
+          'Etching 과 동일한 물리 모듈 사용 (숫자 변경 없음)',
+        ],
+      },
+    });
+
     // Deposition 시뮬레이터 (완성됨)
     this.register({
       id: 'deposition',
@@ -376,15 +407,17 @@ class SimulatorRegistry {
   }
 
   // 모든 시뮬레이터 목록 (정렬됨)
+  // hidden 은 목록에서 빼되 getSimulator(id) 로는 열린다 (프로토타입 화면용).
   getAllSimulators() {
     return Array.from(this.simulators.values())
+      .filter(sim => !sim.hidden)
       .sort((a, b) => a.order - b.order);
   }
 
   // 사용 가능한 시뮬레이터만
   getAvailableSimulators() {
     return Array.from(this.simulators.values())
-      .filter(sim => sim.available)
+      .filter(sim => sim.available && !sim.hidden)
       .sort((a, b) => a.order - b.order);
   }
 
