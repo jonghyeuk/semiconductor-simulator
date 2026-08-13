@@ -9,12 +9,20 @@ import {
   evaluateOxideQuality,
 } from '../oxidation.js';
 
-/** Deal-Grove 문헌 상수 (Plummer, "Silicon VLSI Technology", <100> Si). */
+/**
+ * Deal-Grove 문헌 상수 — <100> Si.
+ *
+ * Plummer Table 6.2 는 <111> 값이라 선형 상수 전인자를 1.68 로 나눠 <100> 으로
+ * 맞췄다 (dry 6.23e6→3.71e6, wet 1.63e8→9.70e7). 포물선 상수는 방위 무관.
+ *
+ * 주의: 이 헬퍼는 구현과 같은 식·같은 상수를 쓰므로 "문헌 대조"가 아니라
+ * 자기 자신과의 대조다. 실제 문헌값 검증은 아래 '절대 두께' 테스트가 한다.
+ */
 const K = 8.617e-5;
 function literatureThicknessNm(tempC, timeMin, atm) {
   const kT = K * (tempC + 273.15);
   const B = atm === 'dry' ? 7.72e2 * Math.exp(-1.23 / kT) : 3.86e2 * Math.exp(-0.78 / kT);
-  const BA = atm === 'dry' ? 6.23e6 * Math.exp(-2.0 / kT) : 1.63e8 * Math.exp(-2.05 / kT);
+  const BA = atm === 'dry' ? 3.71e6 * Math.exp(-2.0 / kT) : 9.7e7 * Math.exp(-2.05 / kT);
   const A = B / BA; // μm
   const t = timeMin / 60; // hr
   return ((-A + Math.sqrt(A * A + 4 * B * t)) / 2) * 1000;
@@ -78,7 +86,7 @@ describe('calculateOxideGrowth — 경계값', () => {
     // 두께를 사후에 곱해 버리면 이 관계가 깨진다.
     const kT = 8.617e-5 * (1000 + 273.15);
     const B = 7.72e2 * Math.exp(-1.23 / kT);
-    const BA = 6.23e6 * Math.exp(-2.0 / kT);
+    const BA = 3.71e6 * Math.exp(-2.0 / kT); // <100> (Table 6.2 <111> 값 ÷ 1.68)
     const A = B / BA;
     for (const flow of [0, 50, 100, 200]) {
       const f = 0.5 + (flow / 100) * 0.5;
@@ -144,6 +152,37 @@ describe('calculateOxideGrowth — 문헌값 대조', () => {
    * 두 영역이 다 살아 있는지가 이 모델이 제대로 섰는지를 가르는 지점이다.
    */
 
+  /*
+   * 아래 두 테스트는 상수를 다시 쓰지 않고 **절대 두께**를 공개된 <100> 산화
+   * 곡선과 비교한다. 기존 '문헌 대조' 테스트는 구현과 같은 상수를 복사해 쓰는
+   * 자기 대조라서, 상수가 통째로 <111> 값이어도 통과했다.
+   */
+  it('절대 두께가 공개된 <100> 산화 곡선과 맞는다', () => {
+    // dry 는 30 nm 이하에서 Deal-Grove 가 실제보다 얇게 나오는 것으로 알려져 있어
+    // (초기 산화 이상) 범위를 넓게 잡는다. wet 은 그 영향이 없어 좁게 잡을 수 있다.
+    const cases = [
+      // [온도, 분, 분위기, 하한 nm, 상한 nm]
+      [1000, 60, 'dry', 30, 60],
+      [1100, 60, 'dry', 80, 130],
+      [1000, 60, 'wet', 350, 430],
+      [1100, 60, 'wet', 550, 680],
+    ];
+    for (const [T, t, atm, lo, hi] of cases) {
+      const x = calculateOxideGrowth(T, t, atm);
+      expect(x).toBeGreaterThan(lo);
+      expect(x).toBeLessThan(hi);
+    }
+  });
+
+  it('선형 영역 성장률이 <111> 이 아니라 <100> 값이다', () => {
+    // 짧은 시간에는 x ≈ (B/A)·t 이므로 선형 상수가 그대로 드러난다.
+    // 1000°C dry: <100> B/A ≈ 0.0449 μm/hr → 6분에 ≈ 4.5 nm.
+    // <111> 이면 1.68 배인 ≈ 7.5 nm 가 되어 이 범위를 벗어난다.
+    const x6 = calculateOxideGrowth(1000, 6, 'dry');
+    expect(x6).toBeGreaterThan(3.8);
+    expect(x6).toBeLessThan(5.2);
+  });
+
   it('초기 산화는 선형이다: 시간 4배면 두께가 거의 4배', () => {
     const ratio = calculateOxideGrowth(900, 4, 'dry') / calculateOxideGrowth(900, 1, 'dry');
     expect(ratio).toBeGreaterThan(3.8);
@@ -187,10 +226,11 @@ describe('calculateOxideGrowth — 문헌값 대조', () => {
     }
   });
 
-  it('대표 조건의 절대값이 문헌과 맞는다', () => {
-    // dry 1000°C 60분 ≈ 54 nm, wet 1000°C 60분 ≈ 449 nm
-    expect(calculateOxideGrowth(1000, 60, 'dry')).toBeCloseTo(54.2, 0);
-    expect(calculateOxideGrowth(1000, 60, 'wet')).toBeCloseTo(449.4, 0);
+  it('대표 조건의 출력이 고정돼 있다 (상수 변경 감지용)', () => {
+    // <100> 기준. 예전에는 54.2 / 449.4 로 박아 두었는데, 그건 Table 6.2 의
+    // <111> 상수를 그대로 쓴 값이었다. 문헌 대조는 위 '절대 두께' 테스트가 한다.
+    expect(calculateOxideGrowth(1000, 60, 'dry')).toBeCloseTo(38.5, 0);
+    expect(calculateOxideGrowth(1000, 60, 'wet')).toBeCloseTo(388.3, 0);
   });
 });
 
