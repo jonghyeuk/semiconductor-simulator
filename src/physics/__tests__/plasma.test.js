@@ -96,14 +96,31 @@ describe('calculateBreakdownVoltage (Paschen)', () => {
     }
   });
 
-  it('희가스(Ar, Ne, He)는 같은 pd 에서 공기보다 낮은 전압에서 방전된다', () => {
-    // Penning/준안정 준위 때문에 희가스 절연 파괴 전압이 낮다는 것이 요점.
-    expect(calculateBreakdownVoltage(1.0, 1.0, 'argon')).toBeLessThan(
-      calculateBreakdownVoltage(1.0, 1.0, 'air')
-    );
-    expect(calculateBreakdownVoltage(1.0, 1.0, 'neon')).toBeLessThan(
-      calculateBreakdownVoltage(1.0, 1.0, 'air')
-    );
+  it('희가스(Ar, He, Ne)의 파셴 최소 전압이 공기보다 낮다', () => {
+    // 준안정 준위 때문에 희가스 절연 파괴 전압이 낮다는 것이 요점.
+    //
+    // 예전 테스트는 이것을 "같은 pd 에서 항상 공기보다 낮다" 로 적었는데 그건 과장이다.
+    // 최소점 위치가 가스마다 달라서, 자기 최소점보다 한참 왼쪽에 있는 pd 에서는
+    // 희가스가 오히려 더 높다 (네온 최소점은 pd=3 이라 pd=1 에서는 왼쪽 가지다).
+    // 비교가 성립하는 건 각 가스의 최소점끼리다.
+    for (const gas of ['argon', 'helium', 'neon']) {
+      expect(PASCHEN_MINIMA[gas].voltage).toBeLessThan(PASCHEN_MINIMA.air.voltage);
+    }
+  });
+
+  it('헬륨은 이온화 에너지가 가장 높지만 파셴 최소값은 공기·질소보다 낮다', () => {
+    // 항복전압이 이온화 에너지에 단순 비례한다는 오해를 막는 앵커.
+    // 예전 표는 헬륨을 400V 로 가장 높게 두어 정확히 그 오해를 가르쳤다.
+    expect(PASCHEN_MINIMA.helium.voltage).toBeLessThan(PASCHEN_MINIMA.air.voltage);
+    expect(PASCHEN_MINIMA.helium.voltage).toBeLessThan(PASCHEN_MINIMA.nitrogen.voltage);
+  });
+
+  it('최소점 위치(pd)가 가스마다 다르다 — 전부 같은 pd 면 곡선족이 틀린 것', () => {
+    const pds = Object.values(PASCHEN_MINIMA).map((m) => m.pd);
+    expect(new Set(pds).size).toBeGreaterThan(1);
+    // 헬륨·네온은 공기·질소보다 최소점이 뚜렷하게 오른쪽에 있다.
+    expect(PASCHEN_MINIMA.helium.pd).toBeGreaterThan(PASCHEN_MINIMA.air.pd);
+    expect(PASCHEN_MINIMA.neon.pd).toBeGreaterThan(PASCHEN_MINIMA.nitrogen.pd);
   });
 
   it('압력과 간격의 곱(pd)만으로 결정된다 — Paschen 법칙', () => {

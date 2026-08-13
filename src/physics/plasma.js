@@ -1,56 +1,83 @@
 /**
  * 플라즈마 발생 / Paschen / RF 매칭 계산.
  *
- * PlasmaSimulator.js 에서 그대로 옮겨온 것으로, 값은 한 자리도 바꾸지 않았다.
- * 컴포넌트 state (gasType 등) 로 읽던 값은 인자로 바꿨을 뿐 식은 동일하다.
+ * PlasmaSimulator.js 에서 옮겨온 것이고, 컴포넌트 state (gasType 등) 로 읽던 값은
+ * 인자로 바꿨을 뿐 식은 동일하다.
+ *
+ * 예외: PASCHEN_TABLE / PASCHEN_MINIMA 는 물리 오류라 값을 고쳤다. 사유는 해당
+ * 상수 주석에 적었다. 나머지는 추출 당시 값 그대로다.
  */
 
 /**
  * 가스별 Paschen 곡선 테이블 (pd: Torr·cm, voltage: V).
  *
- * Townsend 이론식이 아니라 가스별 실측값을 찍어 둔 표다. 표 사이는 선형 보간한다.
- * 전극 재질·표면 상태·가스 순도에 따라 실제 방전 전압은 달라진다.
+ * 예전 표는 다섯 가스의 최소점을 **전부 pd = 1.0** 에 두고, 헬륨을 400 V 로
+ * 가장 높게 잡고 있었다. 둘 다 틀렸다.
+ *   - 최소점 위치는 가스마다 다르다. 그 차이가 파셴 곡선 학습의 핵심이다.
+ *   - 헬륨은 이온화 에너지가 가장 높지만 파셴 최소값은 낮은 축이다.
+ *     예전 표는 이 점을 정반대로 가르쳤고, 같은 시뮬레이터의 설명문과도 어긋났다.
+ *
+ * 지금 값은 널리 인용되는 최소점을 기준으로 파셴 법칙에서 생성했다.
+ *   argon 137 V @ 0.9 · helium 156 V @ 4.0 · neon 245 V @ 3.0
+ *   nitrogen 251 V @ 0.67 · air 327 V @ 0.567   (Torr·cm)
+ *
+ * 최소점 하나만 알면 곡선 전체가 정해진다. 파셴 법칙
+ *   V = B·pd / (ln(A·pd) − ln L)
+ * 은 최소점에서 ln(A·pd_min/L) = 1 이므로 환산형이 된다.
+ *   V(pd) = V_min · (pd/pd_min) / (1 + ln(pd/pd_min))
+ * 이 식은 pd = pd_min/e 에서 발산한다(왼쪽 점근선). 그 아래로는 방전이 서지
+ * 않는 영역이라 파셴 법칙에 해가 없다. 다만 이 시뮬레이터는 pd 0.1~100 을
+ * 계약으로 쓰므로, 점근선 왼쪽은 1/pd 로 매끄럽게 이어 8000 V 에서 끊었다.
+ * 그 구간의 절대값은 물리값이 아니라 "여기서는 안 터진다"는 표시로 읽어야 한다.
+ *
+ * 표 사이는 선형 보간한다. 파셴 최소 전압은 전극 재질·표면 상태·가스 순도에
+ * 크게 좌우돼 문헌 편차가 크다 (헬륨만 해도 음극에 따라 127~152 V 와 360 V 대가
+ * 함께 보고된다). 위 값은 그중 한 세트다.
  */
 export const PASCHEN_TABLE = {
   argon: [
-    { pd: 0.1, voltage: 4000 }, { pd: 0.3, voltage: 500 }, { pd: 0.5, voltage: 300 },
-    { pd: 1.0, voltage: 200 }, { pd: 2.0, voltage: 280 }, { pd: 5.0, voltage: 400 },
-    { pd: 10, voltage: 500 }, { pd: 20, voltage: 1200 }, { pd: 50, voltage: 3000 },
-    { pd: 100, voltage: 4000 },
+    { pd: 0.1, voltage: 3771 }, { pd: 0.3, voltage: 1257 }, { pd: 0.5, voltage: 185 },
+    { pd: 0.68, voltage: 144 }, { pd: 0.9, voltage: 137 }, { pd: 1, voltage: 138 },
+    { pd: 1.35, voltage: 146 }, { pd: 2, voltage: 169 }, { pd: 5, voltage: 280 },
+    { pd: 10, voltage: 447 }, { pd: 20, voltage: 742 }, { pd: 50, voltage: 1517 },
+    { pd: 100, voltage: 2666 },
   ],
   air: [
-    { pd: 0.1, voltage: 5000 }, { pd: 0.3, voltage: 700 }, { pd: 0.5, voltage: 400 },
-    { pd: 1.0, voltage: 350 }, { pd: 2.0, voltage: 450 }, { pd: 5.0, voltage: 700 },
-    { pd: 10, voltage: 800 }, { pd: 20, voltage: 1800 }, { pd: 50, voltage: 4500 },
-    { pd: 100, voltage: 5000 },
+    { pd: 0.1, voltage: 5670 }, { pd: 0.3, voltage: 476 }, { pd: 0.43, voltage: 343 },
+    { pd: 0.5, voltage: 330 }, { pd: 0.567, voltage: 327 }, { pd: 0.85, voltage: 349 },
+    { pd: 1, voltage: 368 }, { pd: 2, voltage: 510 }, { pd: 5, voltage: 908 },
+    { pd: 10, voltage: 1490 }, { pd: 20, voltage: 2528 }, { pd: 50, voltage: 5263 },
+    { pd: 100, voltage: 8000 },
   ],
   helium: [
-    { pd: 0.1, voltage: 6000 }, { pd: 0.3, voltage: 1000 }, { pd: 0.5, voltage: 600 },
-    { pd: 1.0, voltage: 400 }, { pd: 2.0, voltage: 500 }, { pd: 5.0, voltage: 800 },
-    { pd: 10, voltage: 1000 }, { pd: 20, voltage: 2000 }, { pd: 50, voltage: 4800 },
-    { pd: 100, voltage: 6000 },
+    { pd: 0.1, voltage: 8000 }, { pd: 0.3, voltage: 6361 }, { pd: 0.5, voltage: 3817 },
+    { pd: 1, voltage: 1908 }, { pd: 2, voltage: 254 }, { pd: 3, voltage: 164 },
+    { pd: 4, voltage: 156 }, { pd: 5, voltage: 159 }, { pd: 6, voltage: 166 },
+    { pd: 10, voltage: 204 }, { pd: 20, voltage: 299 }, { pd: 50, voltage: 553 },
+    { pd: 100, voltage: 924 },
   ],
   nitrogen: [
-    { pd: 0.1, voltage: 4500 }, { pd: 0.3, voltage: 600 }, { pd: 0.5, voltage: 350 },
-    { pd: 1.0, voltage: 250 }, { pd: 2.0, voltage: 320 }, { pd: 5.0, voltage: 500 },
-    { pd: 10, voltage: 650 }, { pd: 20, voltage: 1400 }, { pd: 50, voltage: 3500 },
-    { pd: 100, voltage: 4500 },
+    { pd: 0.1, voltage: 5143 }, { pd: 0.3, voltage: 572 }, { pd: 0.5, voltage: 265 },
+    { pd: 0.67, voltage: 251 }, { pd: 1, voltage: 267 }, { pd: 1.35, voltage: 292 },
+    { pd: 2, voltage: 358 }, { pd: 5, voltage: 622 }, { pd: 10, voltage: 1012 },
+    { pd: 20, voltage: 1704 }, { pd: 50, voltage: 3526 }, { pd: 100, voltage: 6238 },
   ],
   neon: [
-    { pd: 0.1, voltage: 5500 }, { pd: 0.3, voltage: 800 }, { pd: 0.5, voltage: 450 },
-    { pd: 1.0, voltage: 300 }, { pd: 2.0, voltage: 380 }, { pd: 5.0, voltage: 600 },
-    { pd: 10, voltage: 750 }, { pd: 20, voltage: 1600 }, { pd: 50, voltage: 4000 },
-    { pd: 100, voltage: 5500 },
+    { pd: 0.1, voltage: 8000 }, { pd: 0.3, voltage: 7492 }, { pd: 0.5, voltage: 4495 },
+    { pd: 1, voltage: 2248 }, { pd: 2, voltage: 275 }, { pd: 2.25, voltage: 258 },
+    { pd: 3, voltage: 245 }, { pd: 4.5, voltage: 261 }, { pd: 5, voltage: 270 },
+    { pd: 10, voltage: 371 }, { pd: 20, voltage: 564 }, { pd: 50, voltage: 1071 },
+    { pd: 100, voltage: 1812 },
   ],
 };
 
-/** 가스별 Paschen 최소점. */
+/** 가스별 Paschen 최소점 (위 표와 같은 출처 세트). */
 export const PASCHEN_MINIMA = {
-  argon: { pd: 1.0, voltage: 200 },
-  air: { pd: 1.0, voltage: 350 },
-  helium: { pd: 1.0, voltage: 400 },
-  nitrogen: { pd: 1.0, voltage: 250 },
-  neon: { pd: 1.0, voltage: 300 },
+  argon: { pd: 0.9, voltage: 137 },
+  air: { pd: 0.567, voltage: 327 },
+  helium: { pd: 4.0, voltage: 156 },
+  nitrogen: { pd: 0.67, voltage: 251 },
+  neon: { pd: 3.0, voltage: 245 },
 };
 
 /**
