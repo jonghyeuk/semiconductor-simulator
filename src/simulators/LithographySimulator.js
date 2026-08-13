@@ -195,7 +195,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
                "• 파장: 365nm (i-line) → 248nm (KrF), 해상도: 0.35~0.18 μm\n" +
                "• Step & Repeat 방식으로 수율 향상\n\n" +
                "**2000년대: ArF 액침 리소그라피**\n" +
-               "• 파장: 193nm (ArF), 해상도: 45~10nm\n" +
+               "• 파장: 193nm (ArF), 해상도: 단일 노광 약 38~45nm\n" +
                "• Immersion (액침): 물을 렌즈와 웨이퍼 사이에 삽입 → NA 향상\n" +
                "• OPC (Optical Proximity Correction): 회절 보정\n\n" +
                "**2010년대: 다중 패터닝 시대**\n" +
@@ -206,8 +206,8 @@ const PhotolithographySimulator = ({ initialTab }) => {
                "• 파장: 13.5nm (극자외선), 해상도: 3nm 이하\n" +
                "• **Single Patterning**으로 공정 단순화!\n" +
                "• 반사형 미러 시스템 (진공 환경 필수)\n" +
-               "• High-NA EUV: 0.55 → 1nm 공정 목표\n\n" +
-               "📈 **놀라운 발전**: 50년간 해상도 **5000배** 향상! (5μm → 1nm)\n\n" +
+               "• High-NA EUV: NA 0.55 → 해상도 약 8nm, 2nm 이하 노드 목표\n\n" +
+               "📈 **놀라운 발전**: 50년간 해상도 **약 400배** 향상! (5μm → 13nm)\n\n" +
                "💰 **EUV 장비 가격**: 대당 **2000억 원** (ASML 독점)",
       highlight: "무어의 법칙의 핵심 엔진! 파장을 1/27로 줄이며 반도체 미세화를 이끌었습니다!",
       icon: "🚀"
@@ -3202,7 +3202,7 @@ const PhotolithographySimulator = ({ initialTab }) => {
           {[
             { y: 38, era: '1970s', label: 'Contact 방식', desc: '436nm, 2~5μm', color: '#CBD5E1' },
             { y: 80, era: '1990s', label: 'KrF Stepper', desc: '248nm, 0.35~0.18μm', color: '#93C5FD' },
-            { y: 122, era: '2000s', label: 'ArF 액침', desc: '193nm, 45~10nm', color: '#C4B5FD' },
+            { y: 122, era: '2000s', label: 'ArF 액침', desc: '193nm, 단일노광 38~45nm', color: '#C4B5FD' },
             { y: 164, era: '2010s', label: 'Multi Patterning', desc: '193nm로 7nm', color: '#F9A8D4' },
             { y: 206, era: '2020s', label: 'EUV 혁명', desc: '13.5nm, 3nm 이하', color: '#FCD34D' },
           ].map((item, i) => (

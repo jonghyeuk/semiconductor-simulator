@@ -466,11 +466,11 @@ const CleaningSimulator = ({ initialTab }) => {
         layerName: '입자 오염층'
       },
       { 
-        name: 'SC2', 
-        desc: 'HCl + H₂O₂ + H₂O', 
-        target: '금속 이온 제거', 
-        temp: '70-80°C', 
-        conc: '1:1:5-10',
+        name: 'SC2',
+        desc: 'HCl + H₂O₂ + H₂O',
+        target: '금속 이온 제거',
+        temp: '70-80°C',
+        conc: '1:1:6',
         targetType: 'metals',
         targetName: '금속이온',
         layerName: '금속이온막'
@@ -1214,9 +1214,9 @@ const CleaningSimulator = ({ initialTab }) => {
       },
       {
         question: "반도체 공정에서 RCA 세정의 정확한 순서는?",
-        options: ["SC1 → SC2 → HF dip", "SPM → SC1 → SC2", "SC2 → SC1 → BOE", "HF dip → SC1 → SC2"],
+        options: ["SC1 → HF dip → SC2", "SPM → SC1 → SC2", "SC2 → SC1 → BOE", "HF dip → SC1 → SC2"],
         correct: 0,
-        explanation: "표준 RCA 세정은 SC1(입자 제거) → SC2(금속 제거) → HF dip(자연산화막 제거) 순서로 진행됩니다."
+        explanation: "Kern 의 표준 RCA 는 SC1(입자·유기물 제거) → HF dip → SC2(금속이온 제거) 순서입니다. HF dip 이 가운데 오는 이유가 핵심입니다. SC1 이 표면에 화학 산화막을 성장시키는데 이 막이 불순물을 가두므로, SC2 로 넘어가기 전에 벗겨내야 합니다. (게이트 산화 직전 공정에서 쓰는 'HF-last' 는 이와 별개의 관행입니다.)"
       },
       {
         question: "건식 세정에서 플라즈마 방식과 오존 방식의 주요 차이점은?",
