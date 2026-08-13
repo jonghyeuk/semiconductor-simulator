@@ -241,3 +241,70 @@ describe('stepZoneTemperatures — 1차 지연계 적분', () => {
     expect(stepZoneTemperatures(before, setpoints, 0)).toEqual(before);
   });
 });
+
+/*
+ * 물리 앵커.
+ *
+ * 기존 존 시정수 테스트는 ZONE_TIME_CONSTANTS 를 구현에서 임포트해 같은 해석해를
+ * 다시 쓴다. 적분기가 해석해와 맞는지는 검증하지만 **시정수 값 자체는 어떤
+ * 값이어도 통과**한다. 실제로 시정수를 전부 2배로 키워도 전 테스트가 통과했다.
+ *
+ * 아래는 상수를 다시 쓰지 않고, 램프 추종 지연이라는 관측 가능한 결과를 리터럴로
+ * 못박는다. 1차 지연계의 정상상태 지연은 rampRate × τ 이므로 시정수가 바뀌면
+ * 이 값이 바로 움직인다.
+ */
+describe('RTA — 물리 앵커', () => {
+  /** rampRate 로 승온할 때 설정 targetSp 시점의 존별 추종 지연 (°C). */
+  const trackingLag = (rampRate, targetSp) => {
+    let temps = [25, 25, 25, 25, 25, 25];
+    const dt = 0.01;
+    const fullPower = [100, 100, 100, 100, 100, 100];
+    for (let i = 0; i < 200000; i += 1) {
+      const sp = 25 + rampRate * i * dt;
+      const setpoints = computeZoneSetpoints(sp, fullPower);
+      if (sp >= targetSp) {
+        const reached = temps;
+        return setpoints.map((s, z) => s - reached[z]);
+      }
+      temps = stepZoneTemperatures(temps, setpoints, dt);
+    }
+    throw new Error('설정값이 목표에 도달하지 못했다');
+  };
+
+  it('100 °C/s 램프에서 존별 추종 지연이 rampRate × τ 다', () => {
+    // τ = [0.5, 0.75, 0.75, 1.0, 1.0, 1.25] s → 지연 [50, 75, 75, 100, 100, 125] °C
+    const lag = trackingLag(100, 800);
+    const expected = [50, 75, 75, 100, 100, 125];
+    for (let z = 0; z < 6; z += 1) {
+      expect(lag[z]).toBeGreaterThan(expected[z] - 3);
+      expect(lag[z]).toBeLessThan(expected[z] + 3);
+    }
+  });
+
+  it('추종 지연이 램프 속도에 비례한다', () => {
+    const slow = trackingLag(50, 800);
+    const fast = trackingLag(200, 800);
+    for (let z = 0; z < 6; z += 1) {
+      expect(fast[z] / slow[z]).toBeGreaterThan(3.5);
+      expect(fast[z] / slow[z]).toBeLessThan(4.5);
+    }
+  });
+
+  it('중앙 존이 가장자리 존보다 빠르게 따라온다', () => {
+    const lag = trackingLag(100, 800);
+    expect(lag[0]).toBeLessThan(lag[2]);
+    expect(lag[2]).toBeLessThan(lag[4]);
+    expect(lag[4]).toBeLessThan(lag[5]);
+  });
+
+  it('냉각 초기 속도가 문헌 RTP 램프다운 대역(80~150 °C/s)이다', () => {
+    // 복사 방열이라 램프업 속도와 무관해야 한다.
+    for (const rampRate of [25, 100, 300]) {
+      const r = { targetTemp: 1000, rampRate, processTime: 10 };
+      const soakEnd = 10 + (1000 - 25) / rampRate + 10;
+      const rate = (calculateTempProfile(soakEnd, r) - calculateTempProfile(soakEnd + 0.01, r)) / 0.01;
+      expect(rate).toBeGreaterThan(80);
+      expect(rate).toBeLessThan(150);
+    }
+  });
+});

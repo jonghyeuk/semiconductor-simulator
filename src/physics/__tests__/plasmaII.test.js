@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { calculateEtchRate, calculateSelectivity, ETCH_GAS_FACTORS } from '../plasmaII.js';
+import {
+  calculateEtchRate,
+  calculateSelectivity,
+  ETCH_GAS_FACTORS,
+  ETCH_GAS_SELECTIVITY,
+} from '../plasmaII.js';
 
 const base = { gasType: 'CF4', power: 200, pressure: 10, substrateTemp: 20, patternDensity: 50 };
 const GASES = Object.keys(ETCH_GAS_FACTORS);
@@ -137,5 +142,50 @@ describe('calculateSelectivity', () => {
 
   it('결정적이다', () => {
     expect(calculateSelectivity('CF4', 200)).toBe(calculateSelectivity('CF4', 200));
+  });
+});
+
+/*
+ * 문헌·손계산 앵커.
+ *
+ * 기존 테스트는 순서와 단조성만 보기 때문에 상수를 통째로 바꿔도 통과한다.
+ * 실제로 Cl2 계수를 1.2 → 4.0 으로 세 배 넘게 키워도 전 테스트가 통과하는 것을
+ * 확인했다. 아래는 대표 조건의 절대값을 손계산 리터럴로 못박는다.
+ */
+describe('plasmaII — 절대값 앵커', () => {
+  const BASE = { power: 200, pressure: 10, substrateTemp: 20, patternDensity: 50 };
+
+  it('가스별 상대 식각 계수가 고정돼 있다', () => {
+    expect(ETCH_GAS_FACTORS.CF4).toBeCloseTo(1.0, 6);
+    expect(ETCH_GAS_FACTORS.Cl2).toBeCloseTo(1.2, 6);
+    expect(ETCH_GAS_FACTORS.Ar).toBeCloseTo(0.3, 6);
+    expect(ETCH_GAS_FACTORS.O2).toBeCloseTo(0.8, 6);
+  });
+
+  it('가스별 기준 선택비가 고정돼 있다', () => {
+    expect(ETCH_GAS_SELECTIVITY.CF4).toBe(15);
+    expect(ETCH_GAS_SELECTIVITY.Cl2).toBe(8);
+    expect(ETCH_GAS_SELECTIVITY.Ar).toBe(2);
+    expect(ETCH_GAS_SELECTIVITY.O2).toBe(25);
+  });
+
+  it('대표 조건 식각률이 ICP 문헌 대역(수십~수백 nm/min) 안이다', () => {
+    for (const g of Object.keys(ETCH_GAS_FACTORS)) {
+      const r = calculateEtchRate({ gasType: g, ...BASE });
+      expect(r).toBeGreaterThan(10);
+      expect(r).toBeLessThan(600);
+    }
+  });
+
+  it('CF4 200W/10mTorr/20°C/패턴50% 에서 식각률이 고정값이다', () => {
+    // 상수가 바뀌면 이 값이 움직인다 (변경 감지용 앵커).
+    expect(calculateEtchRate({ gasType: 'CF4', ...BASE })).toBeCloseTo(120, 0);
+  });
+
+  it('물리 식각(Ar)이 화학 식각(CF4/Cl2)보다 선택비가 낮다', () => {
+    // Ar 은 물리 스퍼터링이라 재료를 가리지 않는다.
+    expect(ETCH_GAS_SELECTIVITY.Ar).toBeLessThan(ETCH_GAS_SELECTIVITY.CF4);
+    expect(ETCH_GAS_SELECTIVITY.Ar).toBeLessThan(ETCH_GAS_SELECTIVITY.Cl2);
+    expect(calculateSelectivity('Ar', 200)).toBeLessThan(calculateSelectivity('CF4', 200));
   });
 });

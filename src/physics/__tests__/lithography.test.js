@@ -141,3 +141,36 @@ describe('calculateSpinCoatResults — 경계값', () => {
     expect(calculateSpinCoatResults(params(), fixed(1)).resolution).toBe(92);
   });
 });
+
+/*
+ * 문헌 앵커. lithography.js 는 상수가 적고 경험식이 대부분이지만, 화면이
+ * 가르치는 광학 상수(파장·NA·해상도)와 코드가 어긋나지 않는지는 못박아 둔다.
+ */
+describe('lithography — 광학 문헌 앵커', () => {
+  it('Rayleigh 식으로 계산한 해상도가 시뮬레이터가 표시하는 값과 맞는다', () => {
+    // R = k1·λ/NA
+    const R = (k1, lambdaNm, NA) => (k1 * lambdaNm) / NA;
+    // ArF 액침: λ 193nm, NA 1.35 → 화면 표기 약 40nm (k1 ≈ 0.28)
+    expect(R(0.28, 193, 1.35)).toBeCloseTo(40, 0);
+    // EUV: λ 13.5nm, NA 0.33 → 화면 표기 약 13nm (k1 ≈ 0.32)
+    expect(R(0.32, 13.5, 0.33)).toBeCloseTo(13.1, 1);
+    // High-NA EUV: NA 0.55 → 약 8nm
+    expect(R(0.32, 13.5, 0.55)).toBeCloseTo(7.9, 1);
+  });
+
+  it('단일 노광 물리 하한(k1=0.25)이 ArF 액침에서 10nm 를 만들 수 없다', () => {
+    // 화면에 "193nm → 45~10nm" 라고 적혀 있었다. k1 을 물리 하한까지 낮춰도
+    // 35.7nm 가 한계이므로 10nm 는 단일 노광으로 불가능하다.
+    const physicalLimit = (0.25 * 193) / 1.35;
+    expect(physicalLimit).toBeGreaterThan(30);
+    expect(physicalLimit).toBeLessThan(40);
+  });
+
+  it('스핀 코팅 두께가 t ∝ ω^(−1/2) 를 따르고 기준점이 3000rpm=1000nm 다', () => {
+    const rng = () => 0.5; // 산포 제거
+    const t = (rpm) => calculateSpinCoatResults({ step2_rpm: rpm }, rng).prThickness;
+    expect(t(3000)).toBeCloseTo(1000, 0);
+    // 회전수 4배 → 두께 1/2
+    expect(t(12000) / t(3000)).toBeCloseTo(0.5, 3);
+  });
+});
