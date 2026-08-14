@@ -202,6 +202,10 @@ const baseTownsend = (pd) => {
 const basePaschen = (p, d, gasType) => {
   const pd = p * d;
   if (pd < 0.1 || pd > 100) return null;
+  // 왼쪽 점근선 아래는 파셴 법칙에 해가 없어 null 이다. 이 baseline 은 보간 로직을
+  // 검증하는 용도이므로 같은 규칙을 그대로 반영한다 (상수 검증은 문헌 앵커 테스트 몫).
+  const leftLimit = pl.PASCHEN_LEFT_LIMIT[gasType] ?? pl.PASCHEN_LEFT_LIMIT.argon;
+  if (pd < leftLimit) return null;
   const data = pl.PASCHEN_TABLE[gasType] || pl.PASCHEN_TABLE.argon;
   for (let i = 0; i < data.length - 1; i++) {
     if (pd >= data[i].pd && pd <= data[i + 1].pd) {

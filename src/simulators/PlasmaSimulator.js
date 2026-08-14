@@ -11,6 +11,7 @@ import {
   calculateReflectedPower as computeReflectedPower,
   calculateVSWR as computeVSWR,
   PASCHEN_MINIMA,
+  PASCHEN_LEFT_LIMIT,
 } from '../physics/plasma';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
 
@@ -671,8 +672,24 @@ const PlasmaSimulator = ({ initialTab }) => {
                 </div>
               ) : (
                 <div className="text-center">
-                  <div className="text-xl font-bold text-red-600 mb-2">범위 초과!</div>
-                  <div className="text-red-600 text-sm">pd: 0.1~100 범위로 조정</div>
+                  {(pressure * distance) < (PASCHEN_LEFT_LIMIT[gasType] ?? PASCHEN_LEFT_LIMIT.argon) ? (
+                    <>
+                      <div className="text-xl font-bold text-red-600 mb-2">방전이 서지 않습니다</div>
+                      <div className="text-red-600 text-sm">
+                        pd = {(pressure * distance).toFixed(2)} Torr·cm 는 이 가스의 파셴 곡선
+                        왼쪽 점근선({(PASCHEN_LEFT_LIMIT[gasType] ?? PASCHEN_LEFT_LIMIT.argon).toFixed(2)}) 아래입니다.
+                      </div>
+                      <div className="text-gray-500 text-xs mt-2">
+                        전자가 이온화 충돌을 충분히 일으키지 못해 아무리 전압을 올려도 방전이 시작되지
+                        않는 영역이라, 파셴 법칙에 해가 없습니다. pd 를 올리세요.
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="text-xl font-bold text-red-600 mb-2">범위 초과!</div>
+                      <div className="text-red-600 text-sm">pd: 0.1~100 범위로 조정</div>
+                    </>
+                  )}
                 </div>
               )}
             </div>

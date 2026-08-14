@@ -11,6 +11,7 @@ import {
   calculateInputImpedanceComplex,
   PASCHEN_TABLE,
   PASCHEN_MINIMA,
+  PASCHEN_LEFT_LIMIT,
 } from '../plasma.js';
 
 const GASES = Object.keys(PASCHEN_TABLE);
@@ -72,18 +73,38 @@ describe('calculateBreakdownVoltage (Paschen)', () => {
       const min = PASCHEN_MINIMA[gas];
       const atMin = calculateBreakdownVoltage(min.pd, 1.0, gas);
       expect(atMin).toBe(min.voltage);
+      // 왼쪽 점근선 아래는 해가 없어 null 이 나온다. 그 위에서만 비교한다.
       for (const pd of [0.2, 0.5, 2.0, 5.0, 20, 50]) {
-        expect(calculateBreakdownVoltage(pd, 1.0, gas)).toBeGreaterThanOrEqual(atMin);
+        const v = calculateBreakdownVoltage(pd, 1.0, gas);
+        if (v === null) continue;
+        expect(v).toBeGreaterThanOrEqual(atMin);
       }
     }
   });
 
   it('최소점 왼쪽에서는 pd 가 줄수록 전압이 급등한다', () => {
+    // 아르곤 왼쪽 점근선은 pd = 0.331 이다. 그 위에서만 곡선이 정의된다.
     let prev = -Infinity;
-    for (const pd of [0.9, 0.7, 0.5, 0.3, 0.1]) {
+    for (const pd of [0.9, 0.7, 0.5, 0.4, 0.35]) {
       const v = calculateBreakdownVoltage(pd, 1.0, 'argon');
       expect(v).toBeGreaterThan(prev);
       prev = v;
+    }
+  });
+
+  it('왼쪽 점근선 아래에서는 방전이 서지 않아 null 을 낸다', () => {
+    // 예전에는 이 구간까지 1/pd 로 이어 붙여 8000 V 에서 끊어 그렸다.
+    // 그래프에 헬륨 pd=0.5 → 3817 V 같은 만들어낸 숫자가 진짜 항복전압처럼 찍혔다.
+    for (const gas of GASES) {
+      const limit = PASCHEN_LEFT_LIMIT[gas];
+      expect(calculateBreakdownVoltage(limit * 0.9, 1.0, gas)).toBeNull();
+      expect(calculateBreakdownVoltage(limit * 1.05, 1.0, gas)).not.toBeNull();
+    }
+  });
+
+  it('점근선 위치가 최소점의 1/e 다', () => {
+    for (const gas of GASES) {
+      expect(PASCHEN_LEFT_LIMIT[gas]).toBeCloseTo(PASCHEN_MINIMA[gas].pd / Math.E, 2);
     }
   });
 

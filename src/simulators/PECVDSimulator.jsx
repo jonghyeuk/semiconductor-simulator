@@ -1463,9 +1463,9 @@ const PECVDSimulator = () => {
                   <div className="space-y-2">
                     <div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-gray-400">수소 함량 (H%)</span>
+                        <span className="text-gray-400">수소 함량 (상대 지표)</span>
                         <span className={`font-bold ${currentH > 15 ? 'text-red-400' : 'text-green-400'}`}>
-                          {currentH.toFixed(1)}%
+                          {currentH.toFixed(1)}
                         </span>
                       </div>
                       <div className="w-full bg-gray-700 rounded-full h-2 mt-1">
@@ -1473,6 +1473,12 @@ const PECVDSimulator = () => {
                           className={`h-2 rounded-full ${currentH > 15 ? 'bg-red-500' : 'bg-green-500'}`}
                           style={{ width: `${currentH * 3}%` }}
                         />
+                      </div>
+                      <div className="text-[10px] text-amber-300/80 mt-1 leading-snug">
+                        ※ at% 가 아니라 <strong>온도 의존 경향을 보는 상대 지표</strong>입니다.
+                        실제 PECVD 산화막의 수소 함량은 이보다 훨씬 낮은 수 at% 수준으로
+                        보고되며, 온도보다 N₂O/SiH₄ 비에 더 좌우된다는 보고도 있습니다.
+                        <strong>절대값을 그대로 인용하지 마세요.</strong>
                       </div>
                     </div>
                     <div>
@@ -1651,7 +1657,7 @@ const PECVDSimulator = () => {
                   <thead>
                     <tr className="text-gray-400">
                       <th className="text-left">온도</th>
-                      <th className="text-center">H 함량</th>
+                      <th className="text-center">H 함량 (상대)</th>
                       <th className="text-center">막 밀도</th>
                       <th className="text-right">특징</th>
                     </tr>
@@ -1683,9 +1689,10 @@ const PECVDSimulator = () => {
                 후속 고온 공정에서 H₂ 가스가 발생 → 버블(bubble) 형성 → 막 박리
                 <br/><br/>
                 <span className="text-gray-400 text-xs">
-                  ※ 위 H 함량은 <strong>온도 의존 경향</strong>을 보이기 위한 교육용 값입니다.
-                  실제 PECVD 산화막의 수소 함량은 이보다 낮은 수 at% 수준으로 보고되며,
-                  장비·전구체(SiH₄ vs TEOS)에 따라 크게 달라집니다.
+                  ※ 위 H 함량은 <strong>at% 가 아니라 온도 의존 경향을 보는 상대 지표</strong>입니다.
+                  실제 PECVD 산화막의 수소 함량은 이보다 훨씬 낮은 수 at% 수준으로 보고되고,
+                  온도보다 N₂O/SiH₄ 비에 더 좌우된다는 보고도 있으며, 전구체(SiH₄ vs TEOS)와
+                  장비에 따라 크게 달라집니다. <strong>절대값을 그대로 인용하지 마세요.</strong>
                 </span>
               </p>
             </div>

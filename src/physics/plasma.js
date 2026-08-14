@@ -26,9 +26,8 @@
  * 은 최소점에서 ln(A·pd_min/L) = 1 이므로 환산형이 된다.
  *   V(pd) = V_min · (pd/pd_min) / (1 + ln(pd/pd_min))
  * 이 식은 pd = pd_min/e 에서 발산한다(왼쪽 점근선). 그 아래로는 방전이 서지
- * 않는 영역이라 파셴 법칙에 해가 없다. 다만 이 시뮬레이터는 pd 0.1~100 을
- * 계약으로 쓰므로, 점근선 왼쪽은 1/pd 로 매끄럽게 이어 8000 V 에서 끊었다.
- * 그 구간의 절대값은 물리값이 아니라 "여기서는 안 터진다"는 표시로 읽어야 한다.
+ * 않는 영역이라 파셴 법칙에 해가 없으므로, 표도 그 위에서만 만들고
+ * calculateBreakdownVoltage 는 그 아래에서 null 을 돌려준다 (PASCHEN_LEFT_LIMIT).
  *
  * 표 사이는 선형 보간한다. 파셴 최소 전압은 전극 재질·표면 상태·가스 순도에
  * 크게 좌우돼 문헌 편차가 크다 (헬륨만 해도 음극에 따라 127~152 V 와 360 V 대가
@@ -36,39 +35,54 @@
  */
 export const PASCHEN_TABLE = {
   argon: [
-    { pd: 0.1, voltage: 3771 }, { pd: 0.3, voltage: 1257 }, { pd: 0.5, voltage: 185 },
-    { pd: 0.68, voltage: 144 }, { pd: 0.9, voltage: 137 }, { pd: 1, voltage: 138 },
-    { pd: 1.35, voltage: 146 }, { pd: 2, voltage: 169 }, { pd: 5, voltage: 280 },
-    { pd: 10, voltage: 447 }, { pd: 20, voltage: 742 }, { pd: 50, voltage: 1517 },
-    { pd: 100, voltage: 2666 },
+    { pd: 0.338, voltage: 2491 }, { pd: 0.381, voltage: 413 }, { pd: 0.497, voltage: 186 },
+    { pd: 0.72, voltage: 141 }, { pd: 0.9, voltage: 137 }, { pd: 1.26, voltage: 144 },
+    { pd: 2.25, voltage: 179 }, { pd: 4.5, voltage: 263 }, { pd: 10.8, voltage: 472 },
+    { pd: 27, voltage: 934 }, { pd: 72, voltage: 2036 }, { pd: 100, voltage: 2666 },
   ],
   air: [
-    { pd: 0.1, voltage: 5670 }, { pd: 0.3, voltage: 476 }, { pd: 0.43, voltage: 343 },
-    { pd: 0.5, voltage: 330 }, { pd: 0.567, voltage: 327 }, { pd: 0.85, voltage: 349 },
-    { pd: 1, voltage: 368 }, { pd: 2, voltage: 510 }, { pd: 5, voltage: 908 },
-    { pd: 10, voltage: 1490 }, { pd: 20, voltage: 2528 }, { pd: 50, voltage: 5263 },
-    { pd: 100, voltage: 8000 },
+    { pd: 0.213, voltage: 5868 }, { pd: 0.24, voltage: 987 }, { pd: 0.313, voltage: 445 },
+    { pd: 0.454, voltage: 337 }, { pd: 0.567, voltage: 327 }, { pd: 0.794, voltage: 343 },
+    { pd: 1.42, voltage: 427 }, { pd: 2.83, voltage: 626 }, { pd: 6.8, voltage: 1126 },
+    { pd: 17.01, voltage: 2229 }, { pd: 45.36, voltage: 4861 }, { pd: 100, voltage: 9343 },
   ],
   helium: [
-    { pd: 0.1, voltage: 8000 }, { pd: 0.3, voltage: 6361 }, { pd: 0.5, voltage: 3817 },
-    { pd: 1, voltage: 1908 }, { pd: 2, voltage: 254 }, { pd: 3, voltage: 164 },
-    { pd: 4, voltage: 156 }, { pd: 5, voltage: 159 }, { pd: 6, voltage: 166 },
-    { pd: 10, voltage: 204 }, { pd: 20, voltage: 299 }, { pd: 50, voltage: 553 },
+    { pd: 1.5, voltage: 3052 }, { pd: 1.69, voltage: 476 }, { pd: 2.21, voltage: 212 },
+    { pd: 3.2, voltage: 161 }, { pd: 4, voltage: 156 }, { pd: 5.6, voltage: 163 },
+    { pd: 10, voltage: 204 }, { pd: 20, voltage: 299 }, { pd: 48, voltage: 537 },
     { pd: 100, voltage: 924 },
   ],
   nitrogen: [
-    { pd: 0.1, voltage: 5143 }, { pd: 0.3, voltage: 572 }, { pd: 0.5, voltage: 265 },
-    { pd: 0.67, voltage: 251 }, { pd: 1, voltage: 267 }, { pd: 1.35, voltage: 292 },
-    { pd: 2, voltage: 358 }, { pd: 5, voltage: 622 }, { pd: 10, voltage: 1012 },
-    { pd: 20, voltage: 1704 }, { pd: 50, voltage: 3526 }, { pd: 100, voltage: 6238 },
+    { pd: 0.251, voltage: 5174 }, { pd: 0.283, voltage: 767 }, { pd: 0.37, voltage: 341 },
+    { pd: 0.536, voltage: 258 }, { pd: 0.67, voltage: 251 }, { pd: 0.938, voltage: 263 },
+    { pd: 1.68, voltage: 328 }, { pd: 3.35, voltage: 481 }, { pd: 8.04, voltage: 864 },
+    { pd: 20.1, voltage: 1711 }, { pd: 53.6, voltage: 3731 }, { pd: 100, voltage: 6238 },
   ],
   neon: [
-    { pd: 0.1, voltage: 8000 }, { pd: 0.3, voltage: 7492 }, { pd: 0.5, voltage: 4495 },
-    { pd: 1, voltage: 2248 }, { pd: 2, voltage: 275 }, { pd: 2.25, voltage: 258 },
-    { pd: 3, voltage: 245 }, { pd: 4.5, voltage: 261 }, { pd: 5, voltage: 270 },
-    { pd: 10, voltage: 371 }, { pd: 20, voltage: 564 }, { pd: 50, voltage: 1071 },
-    { pd: 100, voltage: 1812 },
+    { pd: 1.13, voltage: 3909 }, { pd: 1.27, voltage: 739 }, { pd: 1.66, voltage: 332 },
+    { pd: 2.4, voltage: 252 }, { pd: 3, voltage: 245 }, { pd: 4.2, voltage: 257 },
+    { pd: 7.5, voltage: 320 }, { pd: 15, voltage: 469 }, { pd: 36, voltage: 844 },
+    { pd: 90, voltage: 1670 }, { pd: 100, voltage: 1812 },
   ],
+};
+
+/**
+ * 가스별 왼쪽 점근선 (pd = pd_min / e, Torr·cm).
+ *
+ * 이보다 낮은 pd 에서는 파셴 법칙에 해가 없다. 전자가 이온화 충돌을 충분히
+ * 일으키지 못해 방전이 서지 않는 영역이다.
+ *
+ * 예전에는 이 구간까지 1/pd 로 이어 붙여 8000 V 에서 끊어 그렸다. 코드 주석에는
+ * "물리값이 아니다" 라고 적었지만 학생은 주석을 보지 못하고, 그래프에는 헬륨
+ * pd=0.5 에서 3817 V 같은 **만들어낸 숫자**가 진짜 항복전압처럼 찍혔다.
+ * 지금은 이 구간에서 null 을 돌려 그래프에 아예 그리지 않는다.
+ */
+export const PASCHEN_LEFT_LIMIT = {
+  argon: 0.331,
+  air: 0.209,
+  helium: 1.472,
+  nitrogen: 0.246,
+  neon: 1.104,
 };
 
 /** 가스별 Paschen 최소점 (위 표와 같은 출처 세트). */
@@ -114,6 +128,9 @@ export function calculateBasicPlasmaGenerationProbability(gasPressure, plasmaEne
 export function calculateBreakdownVoltage(p, d, gasType = 'argon') {
   const pd = p * d;
   if (pd < 0.1 || pd > 100) return null;
+  // 왼쪽 점근선 아래는 방전이 서지 않는 영역이라 파셴 법칙에 해가 없다.
+  const leftLimit = PASCHEN_LEFT_LIMIT[gasType] ?? PASCHEN_LEFT_LIMIT.argon;
+  if (pd < leftLimit) return null;
   const data = PASCHEN_TABLE[gasType] || PASCHEN_TABLE.argon;
   for (let i = 0; i < data.length - 1; i++) {
     if (pd >= data[i].pd && pd <= data[i + 1].pd) {
