@@ -8,6 +8,7 @@ import PlasmaSimulator from '../simulators/PlasmaSimulator';
 import PlasmaSimulatorII from '../simulators/PlasmaSimulatorII';
 import EtchingSimulator from '../simulators/EtchingSimulator';
 import EtchingBay from '../simulators/EtchingBay';
+import EtchingBasics from '../simulators/EtchingBasics';
 import DopingProcessSimulator from '../simulators/Dopingprocesssimulator';
 import DepositionSimulator from '../simulators/DepositionSimulator';
 import MetallizationEDSPackagingSimulator from '../simulators/MetallizationEDSPackagingSimulator';
@@ -201,6 +202,30 @@ class SimulatorRegistry {
     //
     // Etching 과 같은 물리 모듈(src/physics/etching.js)을 쓰고 화면 구조만 다르다.
     // 탭 6개로 나누던 내용을 장비 시퀀스 위에 재배치했다.
+    // 식각 기초 — 원자 스케일 표면 반응 (이온·라디칼 시너지)
+    this.register({
+      id: 'etching-basics',
+      name: '식각 기초',
+      icon: '⚛️',
+      description: '이온·라디칼 시너지 · 원자 스케일 표면 반응',
+      component: EtchingBasics,
+      available: true,
+      category: 'basic',
+      order: 7.2,
+      metadata: {
+        version: '1.0.0',
+        lastUpdated: '2026-08-18',
+        author: 'Semiconductor Simulator Team',
+        features: [
+          '라디칼만 / 이온만 / 동시 세 모드를 직접 돌려 비교',
+          '표면 염소화 → 이온 충격 → SiCl₄ 휘발을 원자 단위로 관찰',
+          '제거 속도를 실시간으로 세어 시너지 배수를 산출',
+          'Coburn–Winters(1979) 실험 상대비 재현 — 테스트로 고정',
+          '식각 깊이를 원자층·nm 로 동시 표시 (챔버 단면과 스케일 연결)',
+        ],
+      },
+    });
+
     // 사이드바에는 노출하지 않고 ?sim=etching-bay 로만 연다 (available: false).
     this.register({
       id: 'etching-bay',

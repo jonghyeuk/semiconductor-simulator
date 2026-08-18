@@ -124,6 +124,25 @@ const matrixData = [
       { id: 'quiz', name: '퀴즈', icon: '📝', tier: 'basic', type: 'quiz' },
     ]
   },
+  // 식각 기초 — 원자 스케일. 챔버 단면(500 nm)의 1000 배 아래에서
+  // 이온과 라디칼이 실제로 무슨 일을 하는지 본다.
+  {
+    id: 'etching-basics',
+    name: '식각 기초',
+    icon: '⚛️',
+    color: '#4a7a66',
+    tabs: [
+      {
+        id: 'synergy',
+        name: '이온·라디칼 시너지',
+        icon: '⚛️',
+        tier: 'core',
+        type: 'simulation',
+        best: true,
+        coreReason: '라디칼만·이온만·동시를 직접 돌려 시너지 배수를 눈으로 확인',
+      },
+    ]
+  },
   {
     id: 'etching',
     name: 'Etching',
