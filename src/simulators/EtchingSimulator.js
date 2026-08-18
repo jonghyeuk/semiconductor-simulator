@@ -4,6 +4,7 @@ import {
   calculateEtchRate,
   calculateSelectivity,
   calculateUniformity,
+  calculateProfile,
 } from '../physics/etching';
 import * as THREE from 'three';
 import MobileDesktopNotice from '../components/MobileDesktopNotice';
@@ -1699,44 +1700,24 @@ const EtchSimulator = ({ initialTab }) => {
     // 결정적 균일성
     const uni = calculateUniformity(pressure, power, gasFlows);
 
-    // 단면 프로파일 메트릭
-    const polymerFormers = (gasFlows.CHF3 || 0) + (gasFlows.HBr || 0) * 0.5;
-    const radicalEtchers = (gasFlows.Cl2 || 0) + (gasFlows.CF4 || 0) + (etchTarget === 'PR' ? gasFlows.O2 : 0);
-    const ionBombardment = (gasFlows.Ar || 0) + power / 25;
+    // 단면 프로파일 메트릭 — 예전에는 여기 인라인으로 있었다. 식각 베이 화면이 같은
+    // 형상을 그려야 해서 physics/etching.js 로 옮겼고, 식은 한 자리도 바꾸지 않았다.
+    const prof = calculateProfile(etchTarget, gasFlows, power, pressure);
+    const { anisotropy, undercut, polymerThickness, maskDamage } = prof;
 
-    // 이방성 (0=등방, 1=완전 수직) — 슬라이더 전 구간이 반영되도록 선형 조합
-    let anisotropy = 0.25
-      + 0.0050 * ionBombardment            // Ar/RF↑ → 수직 ↑
-      + 0.0030 * polymerFormers            // CHF₃/HBr passivation → 수직 ↑
-      - 0.0050 * Math.max(0, pressure - 30); // 고압 → 등방 ↑
-    anisotropy = Math.max(0.05, Math.min(1, anisotropy));
-
-    // 측벽 폴리머 두께 (px)
-    const polymerThickness = Math.min(8, polymerFormers / 12);
-
-    // 언더컷 양 — 폴리머가 강하게 억제
-    const undercut = Math.max(0,
-      (1 - anisotropy) * 22
-      + Math.max(0, radicalEtchers * 0.25 - polymerFormers * 0.30)
-    );
-
-    // Etch stop / 마스크 손상
-    const etchStop = (etchTarget !== 'PR' && polymerFormers > 60 && radicalEtchers < 20) || er < 15;
-    const maskDamage = (gasFlows.Ar || 0) > 80 || power > 500;
+    // etchStop 은 가스 조건(모듈) 과 식각률 조건(여기) 의 OR 이다.
+    // 식각률은 난수를 물고 있어 모듈이 다시 계산하면 화면 값과 어긋난다.
+    const etchStop = prof.etchStop || er < 15;
     const isotropicWarn = pressure > 150 && (gasFlows.Ar || 0) < 40;
 
     // 깊이 (식각 진행에 따른 시각화 비율)
     const depthRatio = Math.min(1, (er * (time || 60) / 60) / 250);
 
-    // 프로파일 분류 — 시각 측벽 변위(undercut - polymer*1.6)와 일관
+    // 프로파일 분류 — etchStop 이 식각률까지 보므로 모듈 값을 그대로 못 쓴다.
     const visualOffset = undercut - polymerThickness * 1.0;
     let profileType;
     if (etchStop) profileType = 'etch-stop';
-    else if (visualOffset > 6) profileType = 'undercut';
-    else if (anisotropy < 0.40 && visualOffset > 2) profileType = 'isotropic';
-    else if (visualOffset < -4) profileType = 'tapered';
-    else if (anisotropy > 0.75) profileType = 'vertical';
-    else profileType = 'tapered';
+    else profileType = prof.profileType;
 
     return { er, sel, uni, anisotropy, undercut, polymerThickness, etchStop, maskDamage, isotropicWarn, depthRatio, profileType };
   }, [etchTarget, gasFlows, power, pressure, time]);
@@ -4034,24 +4015,33 @@ const EtchSimulator = ({ initialTab }) => {
                             ? Math.min(12, maxDepth * 0.08)
                             : maxDepth * Math.max(0.08, liveResults.depthRatio);
 
-                          // 측벽 횡 변위 = 언더컷 - 폴리머 테이퍼
-                          // 양수면 언더컷(아래가 더 넓음), 음수면 테이퍼(아래가 더 좁음)
+                          /* 측벽 횡 변위 = 언더컷 − 폴리머 테이퍼.
+                             예전에는 이 값이 양수일 때 **아래를 넓게** 그렸다. 방향이 거꾸로였다.
+                             등방 성분으로 파인 캐비티는 개구부에서 거리 d 안의 점들의 집합이라,
+                             마스크 밑으로 파고드는 폭은 깊이 z 에서 √(d²−z²) 이다. z=0, 즉
+                             **표면 바로 아래가 가장 넓고** 아래로 갈수록 좁아진다. 그래서 마스크가
+                             처마처럼 남는 것이고, 그게 언더컷이라는 이름의 유래다.
+                             반대로 폴리머가 이기면 진행 중인 식각면이 계속 좁아져 아래가 가늘어진다. */
                           const lateralOffset = Math.min(40, liveResults.undercut)
                             - liveResults.polymerThickness * 1.0;
+                          const under = Math.max(0, lateralOffset);   // 위가 넓어진다
+                          const taper = Math.max(0, -lateralOffset);  // 아래가 좁아진다
 
-                          const bottomLeft = holeLeft - lateralOffset;
-                          const bottomRight = holeRight + lateralOffset;
+                          const topLeft = holeLeft - under;
+                          const topRight = holeRight + under;
+                          const bottomLeft = holeLeft + taper;
+                          const bottomRight = holeRight - taper;
 
-                          // 언더컷일 때 곡선, 테이퍼/수직일 때 직선
+                          // 언더컷일 때는 측벽이 활처럼 부풀고, 테이퍼/수직일 때는 직선이다
                           let cavityPath;
-                          if (lateralOffset > 1) {
-                            const midY = targetTop + depth * 0.5;
-                            cavityPath = `M ${holeLeft},${targetTop} L ${holeRight},${targetTop} `
-                              + `Q ${bottomRight + 6},${midY} ${bottomRight},${targetTop + depth} `
+                          if (under > 1) {
+                            const midY = targetTop + depth * 0.45;
+                            cavityPath = `M ${topLeft},${targetTop} L ${topRight},${targetTop} `
+                              + `Q ${topRight - under * 0.25},${midY} ${bottomRight},${targetTop + depth} `
                               + `L ${bottomLeft},${targetTop + depth} `
-                              + `Q ${bottomLeft - 6},${midY} ${holeLeft},${targetTop} Z`;
+                              + `Q ${topLeft + under * 0.25},${midY} ${topLeft},${targetTop} Z`;
                           } else {
-                            cavityPath = `M ${holeLeft},${targetTop} L ${holeRight},${targetTop} `
+                            cavityPath = `M ${topLeft},${targetTop} L ${topRight},${targetTop} `
                               + `L ${bottomRight},${targetTop + depth} L ${bottomLeft},${targetTop + depth} Z`;
                           }
 
@@ -4081,8 +4071,8 @@ const EtchSimulator = ({ initialTab }) => {
                               {/* 측벽 폴리머 (CHF₃/HBr) */}
                               {polyT > 0.5 && !liveResults.etchStop && (
                                 <g opacity="0.75">
-                                  <line x1={holeLeft + polyT / 2} y1={targetTop + 2} x2={bottomLeft + polyT / 2} y2={targetTop + depth - 1} stroke="#fbbf24" strokeWidth={polyT} strokeLinecap="round" />
-                                  <line x1={holeRight - polyT / 2} y1={targetTop + 2} x2={bottomRight - polyT / 2} y2={targetTop + depth - 1} stroke="#fbbf24" strokeWidth={polyT} strokeLinecap="round" />
+                                  <line x1={topLeft + polyT / 2} y1={targetTop + 2} x2={bottomLeft + polyT / 2} y2={targetTop + depth - 1} stroke="#fbbf24" strokeWidth={polyT} strokeLinecap="round" />
+                                  <line x1={topRight - polyT / 2} y1={targetTop + 2} x2={bottomRight - polyT / 2} y2={targetTop + depth - 1} stroke="#fbbf24" strokeWidth={polyT} strokeLinecap="round" />
                                 </g>
                               )}
 

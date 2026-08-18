@@ -6,6 +6,9 @@ import {
   calculatePressureEffect,
   calculatePowerEffect,
   calculateGasRatioEffect,
+  calculateProfile,
+  calculateArdeFactor,
+  simulateEtchRun,
 } from '../etching.js';
 
 /** 난수를 고정해 결정적으로 검증한다 (원본은 Math.random 을 직접 불렀다). */
@@ -255,5 +258,211 @@ describe('calculateEtchRate — 문헌 앵커', () => {
       expect(v).toBeGreaterThanOrEqual(lo);
       expect(v).toBeLessThanOrEqual(hi);
     }
+  });
+});
+
+
+/* ────────────────────────── 단면 프로파일 ────────────────────────── */
+
+describe('calculateProfile — 형상', () => {
+  const G = (o = {}) => ({ Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 0, Ar: 0, ...o });
+
+  it('이방도는 0~1 을 벗어나지 않는다', () => {
+    for (const p of [0, 30, 100, 200, 1000]) {
+      for (const w of [0, 300, 800, 5000]) {
+        const a = calculateProfile('Si', G({ Cl2: 30, HBr: 50, Ar: 100 }), w, p).anisotropy;
+        expect(a).toBeGreaterThanOrEqual(0.05);
+        expect(a).toBeLessThanOrEqual(1);
+      }
+    }
+  });
+
+  it('압력이 오르면 이방도가 떨어진다 (시스 내 이온 산란)', () => {
+    let prev = Infinity;
+    for (const p of [30, 60, 100, 150, 200]) {
+      const a = calculateProfile('Si', G({ Cl2: 30, Ar: 80 }), 300, p).anisotropy;
+      expect(a).toBeLessThan(prev);
+      prev = a;
+    }
+  });
+
+  it('측벽 passivation 가스가 이방도를 올린다 — 예전 베이 화면은 이걸 무시했다', () => {
+    // 식각 베이는 압력만 보고 프로파일을 그렸다. HBr 을 0 → 100 으로 올려도
+    // 그림이 한 픽셀도 바뀌지 않았고, 같은 화면의 설명문과 정면으로 어긋났다.
+    const none = calculateProfile('Si', G({ Cl2: 30, Ar: 80 }), 300, 100);
+    const heavy = calculateProfile('Si', G({ Cl2: 30, HBr: 100, Ar: 80 }), 300, 100);
+    expect(heavy.anisotropy).toBeGreaterThan(none.anisotropy);
+    expect(heavy.lateralRatio).toBeLessThan(none.lateralRatio);
+  });
+
+  it('이온 충격(Ar·RF)이 이방도를 올린다', () => {
+    const low = calculateProfile('Si', G({ Cl2: 30, Ar: 10 }), 150, 100).anisotropy;
+    const high = calculateProfile('Si', G({ Cl2: 30, Ar: 100 }), 700, 100).anisotropy;
+    expect(high).toBeGreaterThan(low);
+  });
+
+  it('lateralRatio 는 이방도의 교과서 정의와 맞물린다: A = 1 − 수평/수직', () => {
+    const r = calculateProfile('Si', G({ Cl2: 30, HBr: 20, Ar: 80 }), 300, 80);
+    expect(r.lateralRatio).toBeCloseTo(1 - r.anisotropy, 12);
+  });
+
+  it('측벽 각은 깊이당 순 변위의 아크탄젠트다', () => {
+    const r = calculateProfile('Si', G({ Cl2: 30, HBr: 20, Ar: 80 }), 300, 80);
+    const net = r.lateralRatio - r.taperRatio;
+    expect(r.sidewallAngle).toBeCloseTo(90 - (Math.atan(Math.abs(net)) * 180) / Math.PI, 10);
+    expect(r.sidewallAngle).toBeLessThanOrEqual(90);
+  });
+
+  it('권장 프리셋 3 종이 등방성으로 판정되지 않는다', () => {
+    // 예전 이방도 식에서는 셋 다 A ≈ 0.4 (측면이 수직의 60% 속도) 였다.
+    // 화면은 "이상적인 조건" 이라 말하면서 그림은 뭉개진 그릇을 보여 줬다.
+    const presets = [
+      ['Si', { Cl2: 30, HBr: 15, Ar: 78 }, 300],
+      ['SiO2', { CF4: 25, CHF3: 30, Ar: 65 }, 400],
+      ['Si3N4', { CHF3: 25, O2: 10, Ar: 70 }, 400],
+    ];
+    for (const [t, gas, w] of presets) {
+      const r = calculateProfile(t, G(gas), w, 100);
+      expect(r.anisotropy).toBeGreaterThan(0.6);
+      expect(r.profileType).not.toBe('isotropic');
+    }
+  });
+
+  it('이방도 앵커 — 이온 포화 반값점이 60 이다', () => {
+    // Ar 48 + 300W/25 = 60 → directional = 0.5, 폴리머 0, 30 mTorr → scatter = 1
+    // A = 0.30 + 0.70 × 0.5 = 0.65. 포화 반값점을 바꾸면 이 값이 움직인다.
+    const r = calculateProfile('Si', G({ Cl2: 30, Ar: 48 }), 300, 30);
+    expect(r.anisotropy).toBeCloseTo(0.65, 10);
+  });
+
+  it('이방도 앵커 — 산란 항의 압력 스케일이 250 mTorr 다', () => {
+    // 같은 조건에서 압력만 280 mTorr 로 올리면 scatter = 1/(1 + 250/250) = 0.5.
+    // A = 0.5 × (0.30 + 0.70 × 0.5) = 0.325.
+    const r = calculateProfile('Si', G({ Cl2: 30, Ar: 48 }), 300, 280);
+    expect(r.anisotropy).toBeCloseTo(0.325, 10);
+  });
+
+  it('언더컷 판정 경계는 측벽 80° 다', () => {
+    // 이름과 각도가 따로 놀면 안 된다. 등방·테이퍼·etch stop 이 아닌 한
+    // 'undercut' 은 80° 미만, 'vertical' 은 80° 이상이어야 한다.
+    const undercutAngles = [];
+    const verticalAngles = [];
+    for (let p = 30; p <= 200; p += 10) {
+      for (const ar of [20, 50, 80, 100]) {
+        for (const hbr of [0, 20, 60]) {
+          const r = calculateProfile('Si', G({ Cl2: 30, HBr: hbr, Ar: ar }), 400, p);
+          if (r.profileType === 'undercut') undercutAngles.push(r.sidewallAngle);
+          if (r.profileType === 'vertical') verticalAngles.push(r.sidewallAngle);
+        }
+      }
+    }
+    expect(undercutAngles.length).toBeGreaterThan(0);
+    expect(verticalAngles.length).toBeGreaterThan(0);
+    expect(Math.max(...undercutAngles)).toBeLessThan(80);
+    expect(Math.min(...verticalAngles)).toBeGreaterThanOrEqual(80);
+  });
+
+  it('Ar 없이 고압이면 등방성으로 무너진다', () => {
+    const r = calculateProfile('Si', G({ Cl2: 30 }), 300, 200);
+    expect(r.profileType).toBe('isotropic');
+    expect(r.lateralRatio).toBeGreaterThan(0.5);
+  });
+
+  it('폴리머가 식각종을 압도하면 etch stop', () => {
+    expect(calculateProfile('SiO2', G({ CHF3: 70, CF4: 5 }), 400, 60).etchStop).toBe(true);
+    // PR 애싱에는 폴리머 etch stop 개념이 없다
+    expect(calculateProfile('PR', G({ CHF3: 70, O2: 100 }), 400, 60).etchStop).toBe(false);
+  });
+
+  it('마스크 손상 문턱은 화면 경고문과 같다 (Ar>80 · RF>500)', () => {
+    expect(calculateProfile('Si', G({ Ar: 80 }), 500, 100).maskDamage).toBe(false);
+    expect(calculateProfile('Si', G({ Ar: 85 }), 500, 100).maskDamage).toBe(true);
+    expect(calculateProfile('Si', G({ Ar: 50 }), 550, 100).maskDamage).toBe(true);
+  });
+});
+
+describe('calculateArdeFactor — 종횡비 의존 식각', () => {
+  it('종횡비 0 에서는 감속이 없다', () => {
+    for (const a of [0, 0.5, 1]) expect(calculateArdeFactor(0, a)).toBe(1);
+  });
+
+  it('깊어질수록 단조 감소한다', () => {
+    let prev = Infinity;
+    for (const ar of [0, 1, 2, 5, 10, 20]) {
+      const f = calculateArdeFactor(ar, 0.6);
+      expect(f).toBeLessThan(prev);
+      prev = f;
+    }
+  });
+
+  it('이온 주도(이방성 高) 식각일수록 RIE lag 이 작다', () => {
+    // 이온은 수직으로 가속돼 들어가므로 깊이의 영향을 덜 받는다.
+    expect(calculateArdeFactor(5, 0.95)).toBeGreaterThan(calculateArdeFactor(5, 0.3));
+  });
+
+  it('완전 이온 주도면 감속이 없고, 완전 중성 주도면 도관 투과확률 그대로다', () => {
+    expect(calculateArdeFactor(8, 1)).toBe(1);
+    expect(calculateArdeFactor(4, 0)).toBeCloseTo(1 / (1 + 0.75 * 4), 12);
+  });
+});
+
+describe('simulateEtchRun — 시간이 깊이를 정한다', () => {
+  const base = {
+    rate: 120, filmThickness: 500, trenchWidth: 500, anisotropy: 0.8, selectivity: 20,
+  };
+
+  it('시간이 길수록 깊어진다', () => {
+    let prev = -1;
+    for (const s of [10, 60, 120, 300, 600]) {
+      const d = simulateEtchRun({ ...base, seconds: s }).depth;
+      expect(d).toBeGreaterThan(prev);
+      prev = d;
+    }
+  });
+
+  it('시간이 모자라면 막이 남는다 (언더에치)', () => {
+    const r = simulateEtchRun({ ...base, seconds: 60 });
+    expect(r.remainingFilm).toBeGreaterThan(0);
+    expect(r.underlayerLoss).toBe(0);
+    expect(r.punchThroughTime).toBeNull();
+  });
+
+  it('막을 뚫은 뒤에는 하부층이 선택비만큼 느리게 깎인다', () => {
+    const hi = simulateEtchRun({ ...base, seconds: 600, selectivity: 50 });
+    const lo = simulateEtchRun({ ...base, seconds: 600, selectivity: 5 });
+    expect(hi.remainingFilm).toBe(0);
+    expect(lo.underlayerLoss).toBeGreaterThan(hi.underlayerLoss);
+  });
+
+  it('관통 시각 전후로 시간이 새지 않는다', () => {
+    // 틱 경계에서 남은 시간을 버리면 오버에치가 과소평가된다.
+    const r = simulateEtchRun({ ...base, seconds: 400, dt: 0.25 });
+    const coarse = simulateEtchRun({ ...base, seconds: 400, dt: 4 });
+    expect(r.punchThroughTime).toBeGreaterThan(0);
+    expect(coarse.depth).toBeCloseTo(r.depth, 0);
+  });
+
+  it('ARDE 때문에 깊이는 시간에 대해 선형이 아니다 — 뒤로 갈수록 느려진다', () => {
+    const t1 = simulateEtchRun({ ...base, seconds: 60, trenchWidth: 100 }).depth;
+    const t2 = simulateEtchRun({ ...base, seconds: 120, trenchWidth: 100 }).depth;
+    expect(t2).toBeLessThan(2 * t1);
+  });
+
+  it('좁은 패턴이 넓은 패턴보다 얕게 파인다 (RIE lag)', () => {
+    const wide = simulateEtchRun({ ...base, seconds: 150, trenchWidth: 1000 }).depth;
+    const narrow = simulateEtchRun({ ...base, seconds: 150, trenchWidth: 100 }).depth;
+    expect(narrow).toBeLessThan(wide);
+  });
+
+  it('식각률 0 이면 아무것도 깎이지 않는다', () => {
+    const r = simulateEtchRun({ ...base, rate: 0, seconds: 600 });
+    expect(r.depth).toBe(0);
+    expect(r.remainingFilm).toBe(500);
+  });
+
+  it('선택비 1 미만은 1 로 눌러 하부층이 막보다 빨리 깎이는 일이 없게 한다', () => {
+    const a = simulateEtchRun({ ...base, seconds: 600, selectivity: 0 });
+    const b = simulateEtchRun({ ...base, seconds: 600, selectivity: 1 });
+    expect(a.underlayerLoss).toBe(b.underlayerLoss);
   });
 });

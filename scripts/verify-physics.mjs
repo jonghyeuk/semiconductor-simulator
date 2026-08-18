@@ -495,8 +495,10 @@ const oldCleaningWet = (params) => {
 
 const rows = [];
 const pct = (o, n) => (o === 0 ? '—' : `${(((n - o) / o) * 100).toFixed(0)}%`);
+// 이방도처럼 0~1 스케일인 값은 소수 첫째 자리로 끊으면 변화가 안 보인다.
+const fx = (v) => (typeof v !== 'number' ? v : Math.abs(v) < 10 ? v.toFixed(3) : v.toFixed(1));
 const push = (item, cond, o, n, unit) =>
-  rows.push([item, cond, typeof o === 'number' ? o.toFixed(1) : o, typeof n === 'number' ? n.toFixed(1) : n, unit, pct(o, n)]);
+  rows.push([item, cond, fx(o), fx(n), unit, pct(o, n)]);
 
 // ⑪ 습식 세정 — 각 용액을 권장 온도로 돌렸을 때의 산화막 제거율.
 // 수정 전에는 BOE 가 꼴찌였다 (SPM 95.3 > SC1 69.5 > SC2 68.0 > BOE 66.3).
@@ -531,6 +533,31 @@ for (const r of [20, 22, 25]) {
 // UI 는 그와 무관하게 8:1 을 화학양론이라고 표시했다.
 for (const r of [2, 5, 8, 10.48, 12]) {
   push('⑫ SiNx 굴절률', `NH3/SiH4 ${r}`, baseSiNxN(r), pe.calculateSiNxRefractiveIndex(r), '');
+}
+
+/* ⑯ 이방도 — 단면 프로파일 형상.
+   예전 식은 EtchingSimulator.js 안에 인라인으로 있던 선형 합이다.
+     A = 0.25 + 0.005·(Ar + W/25) + 0.003·(CHF3 + HBr/2) − 0.005·max(0, p−30)
+   압력 항의 계수가 커서, 이 시뮬레이터가 스스로 "이상적인 조건" 이라고 알려 주는
+   프리셋 3 종이 전부 A ≈ 0.4 (측면이 수직의 60% 속도) 로 나왔다. 그림을 개구부 대비
+   픽셀로만 그리던 동안에는 이 모순이 드러나지 않았는데, 프로파일을 A 의 정의
+   (A = 1 − 수평/수직) 대로 그리기 시작하니 "이상적" 이라 적힌 조건이 뭉개진 그릇으로
+   그려졌다. 이 값은 이제 두 화면이 공유한다. */
+const oldAnisotropy = (gas, w, p) => {
+  const ion = (gas.Ar || 0) + w / 25;
+  const poly = (gas.CHF3 || 0) + (gas.HBr || 0) * 0.5;
+  const a = 0.25 + 0.005 * ion + 0.003 * poly - 0.005 * Math.max(0, p - 30);
+  return Math.max(0.05, Math.min(1, a));
+};
+const G16 = (o) => ({ Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 0, Ar: 0, ...o });
+for (const [name, tgt, gas, w, p] of [
+  ['Si 프리셋 100mT', 'Si', { Cl2: 30, HBr: 15, Ar: 78 }, 300, 100],
+  ['SiO2 프리셋 100mT', 'SiO2', { CF4: 25, CHF3: 30, Ar: 65 }, 400, 100],
+  ['Si3N4 프리셋 100mT', 'Si3N4', { CHF3: 25, O2: 10, Ar: 70 }, 400, 100],
+  ['저압 30mT HBr30', 'Si', { Cl2: 30, HBr: 30, Ar: 75 }, 300, 30],
+  ['고압 200mT Ar0', 'Si', { Cl2: 30 }, 300, 200],
+]) {
+  push('⑯ 이방도', name, oldAnisotropy(G16(gas), w, p), et.calculateProfile(tgt, G16(gas), w, p).anisotropy, '');
 }
 
 push('① 산화 두께', 'dry 1000°C 60분', oldOxide(1000, 60, 'dry'), ox.calculateOxideGrowth(1000, 60, 'dry'), 'nm');
