@@ -112,7 +112,7 @@ const fmt = (v, d = 0) => (Number.isFinite(v) ? v.toFixed(d) : '—');
 function estimatePunchTime(pv) {
   const run = simulateEtchRun({
     rate: pv.rate, seconds: 36000, filmThickness: FILM_NM, trenchWidth: pv.trench,
-    anisotropy: pv.prof.anisotropy, selectivity: pv.sel, dt: 2,
+    profile: pv.prof, selectivity: pv.sel, dt: 2,
   });
   return run.punchThroughTime;
 }
@@ -1199,7 +1199,7 @@ export default function EtchingBay() {
     // 예상 결과는 실행 루프와 **같은 모델**로 뽑는다. 따로 계산하면 언젠가 갈라진다.
     const run = simulateEtchRun({
       rate, seconds: etchTime, filmThickness: FILM_NM, trenchWidth: trench,
-      anisotropy: prof.anisotropy, selectivity: sel,
+      profile: prof, selectivity: sel,
     });
     return {
       rate, sel, prof, run, trench,
@@ -1278,7 +1278,7 @@ export default function EtchingBay() {
       const rate0 = calculateEtchRate(target, gasFlows, power, setPressure_);
       const depth = r.film + r.under;
       const ar = preview.trench === Infinity ? 0 : depth / preview.trench;
-      const rate = rate0 * calculateArdeFactor(ar, preview.prof.anisotropy);
+      const rate = rate0 * calculateArdeFactor(ar, preview.prof.ionShare);
       const perSec = rate / 60;
 
       r.rateSum += rate;
@@ -1448,7 +1448,11 @@ export default function EtchingBay() {
       lines.push({
         bad: true,
         t: `프로파일 ${PROFILE_LABEL[prof.profileType]} · 측벽 ${fmt(prof.sidewallAngle, 0)}° · 이방도 ${fmt(prof.anisotropy, 2)}`,
-        d: `방향성 없는 라디칼이 측벽을 먹어 마스크 아래가 ${fmt(lateral, 0)} nm 파였다. 패턴 폭이 그만큼 벌어졌다는 뜻이다. 압력을 낮추거나(이온 산란↓) HBr·CHF₃ 로 측벽을 덮으면 줄어든다.`,
+        d: `방향성 없는 라디칼이 측벽을 먹어 마스크 아래가 ${fmt(lateral, 0)} nm 파였다. 패턴 폭이 그만큼 벌어졌다는 뜻이다. ${
+          target === 'Si' && gasFlows.CF4 > 0
+            ? '가장 큰 원인은 가스다 — 불소는 실리콘을 이온 없이도 깎아서 측벽이 그대로 파인다. 실리콘을 수직으로 세우려면 Cl₂·HBr 로 바꿔야 한다.'
+            : '압력을 낮추거나(이온 산란↓) HBr·CHF₃ 로 측벽을 덮으면 줄어든다.'
+        }`,
       });
     } else if (prof.profileType === 'tapered') {
       lines.push({
@@ -1466,7 +1470,7 @@ export default function EtchingBay() {
 
     if (result.cd) {
       const ardeEnd = calculateArdeFactor(
-        (result.filmEtched + result.underlayerLoss) / result.cd, prof.anisotropy
+        (result.filmEtched + result.underlayerLoss) / result.cd, prof.ionShare
       );
       lines.push({
         bad: ardeEnd < 0.7,
@@ -1782,7 +1786,7 @@ export default function EtchingBay() {
                 {target !== 'PR' && (
                   <p className="eb-note-line">
                     ARDE — 관통 시점 종횡비 {fmt(FILM_NM / cd, 1)} 에서 식각률이 초기의
-                    {' '}{fmt(calculateArdeFactor(FILM_NM / cd, preview.prof.anisotropy) * 100, 0)}% 로 떨어집니다.
+                    {' '}{fmt(calculateArdeFactor(FILM_NM / cd, preview.prof.ionShare) * 100, 0)}% 로 떨어집니다.
                   </p>
                 )}
 

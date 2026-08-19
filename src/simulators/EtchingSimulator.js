@@ -1719,7 +1719,12 @@ const EtchSimulator = ({ initialTab }) => {
     if (etchStop) profileType = 'etch-stop';
     else profileType = prof.profileType;
 
-    return { er, sel, uni, anisotropy, undercut, polymerThickness, etchStop, maskDamage, isotropicWarn, depthRatio, profileType };
+    return {
+      er, sel, uni, anisotropy, undercut, polymerThickness, etchStop, maskDamage,
+      isotropicWarn, depthRatio, profileType,
+      // 단면을 그리는 데 쓰는 무차원 비율. px 로 굳어 있던 undercut 을 대신한다.
+      lateralRatio: prof.lateralRatio, taperRatio: prof.taperRatio,
+    };
   }, [etchTarget, gasFlows, power, pressure, time]);
 
   const runEtchSimulation = () => {
@@ -4015,17 +4020,21 @@ const EtchSimulator = ({ initialTab }) => {
                             ? Math.min(12, maxDepth * 0.08)
                             : maxDepth * Math.max(0.08, liveResults.depthRatio);
 
-                          /* 측벽 횡 변위 = 언더컷 − 폴리머 테이퍼.
-                             예전에는 이 값이 양수일 때 **아래를 넓게** 그렸다. 방향이 거꾸로였다.
+                          /* 측벽 횡 변위.
                              등방 성분으로 파인 캐비티는 개구부에서 거리 d 안의 점들의 집합이라,
                              마스크 밑으로 파고드는 폭은 깊이 z 에서 √(d²−z²) 이다. z=0, 즉
                              **표면 바로 아래가 가장 넓고** 아래로 갈수록 좁아진다. 그래서 마스크가
                              처마처럼 남는 것이고, 그게 언더컷이라는 이름의 유래다.
-                             반대로 폴리머가 이기면 진행 중인 식각면이 계속 좁아져 아래가 가늘어진다. */
-                          const lateralOffset = Math.min(40, liveResults.undercut)
-                            - liveResults.polymerThickness * 1.0;
-                          const under = Math.max(0, lateralOffset);   // 위가 넓어진다
-                          const taper = Math.max(0, -lateralOffset);  // 아래가 좁아진다
+                             반대로 폴리머가 이기면 진행 중인 식각면이 계속 좁아져 아래가 가늘어진다.
+
+                             길이는 물리 모듈의 **무차원 비율**에서 직접 만든다.
+                             언더컷 = lateralRatio × 깊이, 테이퍼 = taperRatio × 깊이.
+                             예전에는 px 로 굳어 있던 undercut 값을 그대로 썼는데, 그 숫자는
+                             원본 화면의 개구부 크기에 맞춰 고른 것이라 이방도가 바뀌어도
+                             따라오지 않았다. 실제로 CF₄ 로 실리콘을 깎는 조건에서 물리는
+                             깊이의 99.5% 를 옆으로 파라고 하는데 그림은 그 40% 만 그렸다. */
+                          const under = liveResults.lateralRatio * depth;   // 위가 넓어진다
+                          const taper = liveResults.taperRatio * depth;     // 아래가 좁아진다
 
                           const topLeft = holeLeft - under;
                           const topRight = holeRight + under;

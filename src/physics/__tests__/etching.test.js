@@ -463,9 +463,19 @@ describe('calculateArdeFactor — 종횡비 의존 식각', () => {
 });
 
 describe('simulateEtchRun — 시간이 깊이를 정한다', () => {
+  // ARDE 에 쓰이는 것은 이방도가 아니라 이온 비중이다. 그래서 profile 객체를 받는다.
+  const prof = (ionShare) => ({ ionShare });
   const base = {
-    rate: 120, filmThickness: 500, trenchWidth: 500, anisotropy: 0.8, selectivity: 20,
+    rate: 120, filmThickness: 500, trenchWidth: 500, profile: prof(0.8), selectivity: 20,
   };
+
+  it('profile 을 빠뜨리면 조용히 넘어가지 않고 터진다', () => {
+    /* 예전에는 anisotropy 를 이름으로 받아서, 호출부가 옛 이름을 계속 넘기면
+       기본값 1 이 적용돼 ARDE 가 통째로 꺼진 채 조용히 돌았다. 실제로 이름을 바꾼 뒤
+       화면 호출부 5 곳이 그대로 남아 있었고, 아무 데서도 티가 나지 않았다. */
+    expect(() => simulateEtchRun({ ...base, profile: undefined, seconds: 10 })).toThrow();
+    expect(() => simulateEtchRun({ ...base, profile: { anisotropy: 0.8 }, seconds: 10 })).toThrow();
+  });
 
   it('시간이 길수록 깊어진다', () => {
     let prev = -1;

@@ -257,19 +257,24 @@ export function calculateProfile(target, gasFlow, power, pressure) {
        ionShare    시스에서 가속된 이온이 식각에 기여하는 비중. Ar·RF 로 올라가되
                    포화하고, 압력이 오르면 시스 안 충돌로 입사각이 흐트러져 깎인다.
        passivation 측벽 폴리머가 측면 반응을 막는 정도.
+       S           자발 반응성 — 라디칼이 이온 없이 그 재료를 깎는 정도 (SPONTANEITY).
+
+     ── 식 ──
+       바닥 ∝ ionShare + (1 − ionShare)·S     이온이 때려 주는 몫 + 라디칼 혼자 깎는 몫
+       측벽 ∝ (1 − passivation)·S             이온이 안 닿으니 라디칼뿐, 폴리머가 막는다
+       측면/수직 = 측벽 ÷ 바닥,  A = 1 − 그 값
+
+     S 가 낮으면(Cl+Si, F+SiO₂) 측벽은 손댈 수단이 없어 프로파일이 저절로 서고,
+     S 가 높으면(F+Si, O+PR) 폴리머 없이는 등방으로 무너진다.
 
      ⚠ 예전 식은 `A = passivation + (1−passivation)·(…)` 였다. 폴리머만 잔뜩 넣으면
-       **이온이 하나도 없어도 A 가 0.86 까지 올라갔다.** 폴리머는 이온이 바닥을 열어
-       줄 때만 프로파일에 기여한다 — 이온이 없으면 폴리머가 바닥도 같이 덮어 식각
-       자체가 서지 않는다(etch stop). 그래서 폴리머의 효과를 ionShare 로 곱해
-       **이온이 없으면 방향성도 0** 이 되게 했다.
+       **이온이 하나도 없어도 A 가 0.86 까지 올라갔다.** 폴리머는 스스로 방향을 만들지
+       못한다 — 이온이 바닥을 열어 줄 때만 프로파일에 기여한다. 지금은 ionShare 가 0 이면
+       바닥과 측벽이 모두 S 에만 의존해 방향성이 사라진다.
 
-       측면 식각률/수직 식각률 = (1 − ionShare) × (1 − ionShare·passivation)
-       A = 1 − 그 값
-
-     계수는 문헌 값이 아니라 경계 조건을 맞춘 것이다: 권장 프리셋이 0.70~0.76,
-     Ar 없이 200 mTorr 가 0.20(등방), Ar·HBr·파워를 다 올리면 0.92 이상,
-     이온이 전혀 없으면 0. */
+     계수는 문헌 값이 아니라 경계 조건을 맞춘 것이다: Cl₂/HBr 게이트 프리셋 0.92,
+     저압 HBr 리치 0.95, F 계로 실리콘을 깎으면 0.005(등방), 산화막 0.97,
+     Ar 없이 200 mTorr 0.64. */
   const directional = ionBombardment / (ionBombardment + 30);
   const passivation = polymerFormers / (polymerFormers + 20);
   const scatter = 1 / (1 + Math.max(0, p - 30) / 400);
@@ -371,6 +376,11 @@ export function calculateArdeFactor(aspectRatio, share) {
  *
  * ARDE 때문에 식각률이 깊이의 함수라서 해석해가 없다. 잘게 잘라 적분한다.
  *
+ * @param {object} opts
+ * @param {object} opts.profile calculateProfile 의 반환값. ARDE 에 필요한 ionShare 를
+ *        여기서 꺼낸다. **숫자 하나를 받지 않는다** — 예전에는 anisotropy 를 이름으로
+ *        받았는데, 호출부가 옛 이름을 계속 넘겨도 기본값으로 조용히 넘어가
+ *        ARDE 가 통째로 꺼져 버렸다. 객체를 요구하면 빠뜨렸을 때 바로 드러난다.
  * @returns {{depth, filmEtched, remainingFilm, underlayerLoss, punchThroughTime, endRate}}
  *          depth 는 표면 기준 총 깊이(nm) = filmEtched + underlayerLoss.
  *          punchThroughTime 은 막을 뚫은 시각(s), 못 뚫었으면 null.
@@ -380,10 +390,14 @@ export function simulateEtchRun({
   seconds,
   filmThickness,
   trenchWidth,
-  anisotropy = 1,
+  profile,
   selectivity = 1,
   dt = 0.25,
 }) {
+  if (!profile || typeof profile.ionShare !== 'number') {
+    throw new TypeError('simulateEtchRun: calculateProfile 의 반환값을 profile 로 넘겨야 한다');
+  }
+  const ionShare = profile.ionShare;
   const r0 = Math.max(0, rate);
   const total = Math.max(0, seconds);
   const film = Math.max(0, filmThickness);
@@ -407,7 +421,7 @@ export function simulateEtchRun({
   while (t < total) {
     const step = Math.min(dt, total - t);
     const depth = filmEtched + underlayerLoss;
-    const vertical = r0 * calculateArdeFactor(depth / cd, anisotropy); // nm/min
+    const vertical = r0 * calculateArdeFactor(depth / cd, ionShare); // nm/min
     endRate = vertical;
     const perSec = vertical / 60;
 
