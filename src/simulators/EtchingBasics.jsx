@@ -518,48 +518,75 @@ export default function EtchingBasics() {
 
       {/* ── 시너지 ── */}
       <section className="sr-sec">
-        <p className="sr-eyebrow">관측 결과</p>
-        <h3 className="sr-h3">합보다 크다</h3>
-        <p className="sr-dim">
-          아래 막대는 <i>지금 이 화면에서 실제로 세고 있는</i> 값이다. 모드별로 따로 누적되므로
-          세 모드를 모두 돌려야 세 막대가 다 찬다.
-        </p>
+        <p className="sr-eyebrow">직접 재 보기</p>
+        <h3 className="sr-h3">세 조건 중 어느 쪽이 빠른가</h3>
+
+        {/* 무엇을 하는 실험이고 무엇을 재는지 먼저 말한다.
+            예전에는 결론("합보다 크다")을 제목으로 걸어 놓고 막대는 비어 있어서,
+            무엇을 보는 화면인지도, 무엇을 해야 채워지는지도 알 수 없었다. */}
+        <ol className="sr-howto">
+          <li>위 관측창 오른쪽 위 버튼으로 <b>라디칼만</b>을 고르고 {SETTLE}초 기다립니다.</li>
+          <li><b>이온만</b>, <b>동시</b>도 같은 방식으로 {SETTLE}초씩 돌립니다.</li>
+          <li>아래 막대에 <b>1초에 떨어져 나간 Si 원자 수</b>가 조건별로 쌓입니다.</li>
+        </ol>
 
         <div className="sr-bars">
-          {MODE_LIST.map((m) => (
-            <div className="sr-bar-row" data-m={m} data-pending={rates[m] === null} key={m}>
-              <span className="sr-bar-l">{MODE_INFO[m].name}</span>
-              <div className="sr-track">
-                <div
-                  className="sr-fill"
-                  style={{ width: rates[m] === null ? '0%' : `${Math.max(1.5, (rates[m] / maxRate) * 100)}%` }}
-                />
+          <div className="sr-bar-head">
+            <span />
+            <span>1초에 떨어져 나간 Si 원자 수 — 길수록 빠르다</span>
+            <span />
+          </div>
+          {MODE_LIST.map((m) => {
+            const done = rates[m] !== null;
+            const t = Math.min(tally[m].time, SETTLE);
+            const started = tally[m].time > 0.3;
+            return (
+              <div className="sr-bar-row" data-m={m} data-pending={!done} key={m}>
+                <span className="sr-bar-l">{MODE_INFO[m].name}</span>
+                <div className="sr-track">
+                  {done ? (
+                    <div className="sr-fill" style={{ width: `${Math.max(1.5, (rates[m] / maxRate) * 100)}%` }} />
+                  ) : (
+                    /* 아직 못 잰 조건은 빈 막대 대신 "얼마나 더 돌려야 하나" 를 보여 준다.
+                       빈 칸에 대시만 있으면 고장으로 읽힌다. */
+                    <>
+                      <div className="sr-wait" style={{ width: `${(t / SETTLE) * 100}%` }} />
+                      <span className="sr-wait-txt">
+                        {started
+                          ? `재는 중 ${t.toFixed(0)} / ${SETTLE}초`
+                          : `아직 안 돌렸습니다 — 위 「${MODE_INFO[m].name}」 버튼을 누르세요`}
+                      </span>
+                    </>
+                  )}
+                </div>
+                <span className="sr-bar-v">
+                  {done ? <>{rates[m].toFixed(1)} <em>개/s</em></> : <em>—</em>}
+                </span>
               </div>
-              <span className="sr-bar-v">
-                {rates[m] === null ? '—' : <>{rates[m].toFixed(1)} <em>원자/s</em></>}
-              </span>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <p className="sr-verdict">
           {allDone ? (
             <>
-              동시 조건의 제거 속도가 <b>라디칼만 + 이온만 을 합친 것의 {synergy.toFixed(1)} 배</b>다.
-              두 종을 따로 넣으면 각각 느리고, 같이 넣으면 갑자기 빨라진다. 라디칼이 Si–Si 결합을
-              Si–Cl 로 바꿔 약하게 만들어 두면 같은 에너지의 이온이 훨씬 쉽게 떼어내기 때문이다.
-              식각이 “화학 + 물리”가 아니라 <b>화학 × 물리</b>인 이유다.
+              <b>따로 넣으면 둘 다 느린데, 같이 넣으니 {synergy.toFixed(1)} 배로 빨라졌습니다.</b>
+              {' '}라디칼만으로는 표면에 염소가 잔뜩 붙어도 떼어낼 것이 없고, 이온만으로는 때릴 뿐
+              결합을 약하게 만들지 못합니다. 라디칼이 Si–Si 결합을 Si–Cl 로 바꿔 놓아야 같은
+              에너지의 이온이 훨씬 쉽게 떼어냅니다. 식각이 “화학 <b>+</b> 물리”가 아니라
+              {' '}“화학 <b>×</b> 물리”인 이유입니다.
             </>
           ) : (
             <>
-              느린 조건은 오래 세야 값이 안정됩니다. 각 모드를 {SETTLE} 초씩 채우면 배수가 여기 나옵니다 —
-              남은 시간:{' '}
-              <b>
+              아직 {MODE_LIST.filter((m) => rates[m] === null).length}개 조건이 남았습니다.
+              {' '}느린 조건은 원자가 드문드문 떨어져서 짧게 재면 값이 크게 튑니다 — 그래서
+              {' '}{SETTLE}초를 채우기 전에는 숫자를 내놓지 않습니다.
+              {' '}<b>
                 {MODE_LIST
                   .filter((m) => rates[m] === null)
-                  .map((m) => `${MODE_INFO[m].name} ${Math.max(0, SETTLE - tally[m].time).toFixed(0)}초`)
+                  .map((m) => `${MODE_INFO[m].name} ${Math.max(0, SETTLE - tally[m].time).toFixed(0)}초 남음`)
                   .join(' · ')}
-              </b>.
+              </b>
             </>
           )}
         </p>
@@ -726,11 +753,24 @@ const SR_CSS = `
 /* 값 칸이 화면 밖으로 밀려 "12.6 원자/s" 가 잘려 보였다.
    1fr 는 내용에 따라 최소 너비를 갖기 때문에 셋을 합친 폭이 컨테이너를 넘길 수 있다.
    가운데를 minmax(0,1fr) 로 눌러 줄이 넘치지 않게 한다. */
+.sr-howto { margin:14px 0 0; padding-left:1.4em; color:var(--ink-mid); font-size:0.92rem;
+  list-style:decimal; }
+.sr-howto li::marker { color:var(--ink-dim); font-family:var(--mono); font-size:0.85em; }
+.sr-howto li { margin-bottom:3px; }
+.sr-howto b { color:var(--ink); font-weight:600; }
+
+.sr-bar-head { display:grid; grid-template-columns:76px minmax(0,1fr) 96px; gap:12px;
+  font-family:var(--mono); font-size:0.64rem; letter-spacing:0.06em; color:var(--ink-dim); }
+
 .sr-bars { margin-top:18px; display:grid; gap:11px; max-width:760px; }
 .sr-bar-row { display:grid; grid-template-columns:76px minmax(0,1fr) 96px; align-items:center; gap:12px; }
 .sr-bar-l { font-size:0.85rem; color:var(--ink-mid); }
-.sr-track { height:20px; min-width:0; background:var(--panel); border:1px solid var(--rule-soft);
-  border-radius:2px; overflow:hidden; }
+.sr-track { position:relative; height:22px; min-width:0; background:var(--panel);
+  border:1px solid var(--rule-soft); border-radius:2px; overflow:hidden; }
+/* 아직 못 잰 조건 — 채워지는 정도로 "얼마나 더 기다려야 하나" 를 보여 준다 */
+.sr-wait { height:100%; background:var(--panel-hi); transition:width 200ms linear; }
+.sr-wait-txt { position:absolute; inset:0; display:flex; align-items:center; padding-left:9px;
+  font-size:0.72rem; color:var(--ink-dim); white-space:nowrap; overflow:hidden; }
 .sr-fill { height:100%; width:0; transition:width 320ms cubic-bezier(.2,.7,.3,1);
   border-right:1px solid rgba(255,255,255,0.14); }
 /* 아직 15 초를 못 채운 모드는 빈 검은 띠로 보여 "고장" 처럼 읽힌다.
