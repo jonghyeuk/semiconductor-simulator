@@ -269,7 +269,7 @@ const PRODUCTS = {
 };
 
 function ChamberView({
-  phase, pressure, power, filmEtched, underlayerLoss, cd, profile, target, glowSeed,
+  phase, pressure, power, filmEtched, underlayerLoss, cd, profile, target, glowSeed, callouts,
 }) {
   const plasmaOn = phase === 'PROCESSING' || phase === 'ENDPOINT';
   const glow = plasmaOn ? clamp(0.25 + power / 900, 0.25, 0.95) : 0;
@@ -525,6 +525,24 @@ function ChamberView({
           </text>
         )}
 
+        {/* 확대 지점 표시.
+            아래 원자 스케일 인셋이 **어디를** 확대한 것인지 그림으로 잇는다.
+            이 표시가 없으면 인셋이 뜬금없는 그림으로 읽힌다. */}
+        {callouts && !blanket && dFilm > 6 && (
+          <g fontFamily="ui-monospace, Menlo, monospace" fontSize="6.5" fontWeight="600">
+            {/* Ⓐ 바닥 — 이온이 쏟아지는 곳 */}
+            <circle cx={CX + hBottom * 0.55} cy={TRENCH_TOP + dFilm - 5.5} r="5"
+                    fill="#141209" stroke="#F0C464" strokeWidth="0.9" />
+            <text x={CX + hBottom * 0.55} y={TRENCH_TOP + dFilm - 3.4} fill="#F0C464"
+                  textAnchor="middle">A</text>
+            {/* Ⓑ 측벽 — 라디칼만 닿는 곳 */}
+            <circle cx={CX - halfWidthAt(0.5, half, U, T, B) - 7} cy={TRENCH_TOP + dFilm * 0.5} r="5"
+                    fill="#141209" stroke="#7FC8A9" strokeWidth="0.9" />
+            <text x={CX - halfWidthAt(0.5, half, U, T, B) - 7} y={TRENCH_TOP + dFilm * 0.5 + 2.1}
+                  fill="#7FC8A9" textAnchor="middle">B</text>
+          </g>
+        )}
+
         {/* 라벨 */}
         {!blanket && (
           <text x="38" y={TRENCH_TOP - 20} fontSize="7.5" fill="#8A8069"
@@ -574,115 +592,156 @@ function ChamberView({
 }
 
 /* ────────────────────── 원자 스케일 인셋 ──────────────────────
-   챔버 단면은 500 nm 스케일이라 "왜" 가 안 보인다. 프로파일이 왜 그 모양인지는
-   1000 배 아래에서 결정된다.
+   챔버 단면은 500 nm 스케일이라 프로파일의 **결과**만 보인다. 왜 그 모양인지는
+   1000 배 아래에서 정해진다.
 
-   바닥과 측벽은 **같은 표면인데 도달하는 종이 다르다.**
-     바닥 — 시스 전기장에 가속된 이온이 수직으로 쏟아진다. 라디칼도 온다.
-            염소화된 결합을 이온이 때려 SiCl₄ 로 날린다 (시너지).
-     측벽 — 이온은 수직으로 내려가므로 거의 닿지 않는다. 방향성 없는 라디칼만
-            도달하고, 폴리머가 있으면 그마저 막힌다.
-   그래서 측벽이 바닥보다 느리게 깎이고, 그 비가 곧 이방도다.
-     이방도 A = 1 − (수평 식각률 / 수직 식각률)
+   바닥과 측벽은 같은 표면인데 도달하는 종이 다르다.
+     Ⓐ 바닥 — 시스 전기장에 가속된 이온이 수직으로 쏟아진다. 라디칼도 온다.
+              염소화로 약해진 결합을 이온이 때려 SiCl₄ 로 날린다. 빠르다.
+     Ⓑ 측벽 — 이온은 수직으로 내려가므로 벽을 지나친다. 방향성 없는 라디칼만 닿고,
+              폴리머가 있으면 그마저 막힌다. 느리다.
+   그 비가 곧 이방도다. A = 1 − (수평 식각률 / 수직 식각률).
 
-   ⚠ 이 인셋은 **설명용 그림**이다. 여기서 따로 식각률을 재지 않는다. 재서 숫자를
-     내놓으면 화면에 진실이 둘이 되고, 언젠가 서로 어긋난다. 숫자는 프로파일을
-     그리는 그 A 하나에서만 나온다. 직접 세어 보는 화면은 「식각 기초」 카드다. */
+   ── 왜 움직여야 하나 ──
+   처음에는 점만 흔들리는 그림이었다. "모션으로 원리를 설명하는 것 같은데 뭔지
+   모르겠다" 는 소리를 들었고, 맞는 지적이었다. 흔들리는 것 말고는 아무 일도 일어나지
+   않았기 때문이다. 지금은 **두 면이 실제로 물러난다.** 바닥이 깊이만큼 내려가는 동안
+   측벽은 그 lateralRatio 배만큼만 파인다. 처음 위치를 점선으로 남겨 두어 둘이 얼마나
+   다르게 물러났는지 눈으로 재게 했다. 그 차이가 이방도의 정의 그대로다.
 
-function SurfaceInset({ profile, filmEtched, glowSeed }) {
-  const W = 320, H = 104;
-  const midX = W / 2;
+   ⚠ 여기서 식각률을 따로 재지 않는다. 두 면이 물러나는 거리는 프로파일을 그리는
+     그 값(filmEtched, lateralRatio)에서 바로 나온다. 재서 숫자를 또 만들면 화면에
+     진실이 둘이 되고 언젠가 어긋난다. 직접 세어 보는 화면은 「식각 기초」 카드다. */
 
-  /* 결정적 유사난수 — 프레임마다 점이 튀지 않게 한다.
-     선형합동식(i*9301+…)%233280 은 i 를 1 씩 올리면 결과도 일정하게 움직여서,
-     점 대여섯 개를 찍으면 가지런한 대각선으로 늘어선다. 흩뿌린 것처럼 보이려면
-     비선형 해시가 필요하다. */
+const INSET_W = 320, INSET_H = 96;
+const INSET_SPAN_PX = 40;          // 막을 다 뚫었을 때 면이 물러나는 픽셀
+
+function SurfaceInset({ profile, filmEtched }) {
+  const midX = 160;
+  const lateralNm = profile.lateralRatio * filmEtched;
+  const polymer = profile.polymerThickness > 0.5;
+
+  // 물러난 거리. 두 면 모두 프로파일 값에서 그대로 나온다.
+  const advA = clamp(filmEtched / FILM_NM, 0, 1) * INSET_SPAN_PX;
+  const advB = advA * profile.lateralRatio;
+
+  // 흩뿌린 것처럼 보이게 하는 비선형 해시 (선형합동식은 가지런한 대각선이 된다)
   const rnd = (i, salt) => {
-    const v = Math.sin(i * 12.9898 + salt * 78.233 + glowSeed * 0.37) * 43758.5453;
+    const v = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
     return v - Math.floor(v);
   };
 
-  const polymer = profile.polymerThickness > 0.5;
-  const lateralNm = profile.lateralRatio * filmEtched;
+  const AY0 = 32;                       // Ⓐ 처음 표면 y
+  const ayNow = AY0 + advA;
+  const BX0 = 268;                      // Ⓑ 처음 측벽 x (오른쪽이 트렌치 안)
+  const bxNow = BX0 - advB;
 
-  // 바닥: 이온이 쏟아진다. 측벽: 이온이 스쳐 지나간다.
-  const bottomIons = [0, 1, 2, 3].map((i) => 22 + i * 26);
-  const sideRadicals = [0, 1, 2, 3, 4, 5].map((i) => ({
-    x: 182 + rnd(i, 7) * 88,
-    y: 30 + rnd(i, 13) * 52,
-  }));
-  const bottomRadicals = [0, 1, 2, 3, 4].map((i) => ({
-    x: 18 + rnd(i, 3) * 116,
-    y: 26 + rnd(i, 11) * 40,
-  }));
+  const label = (n) => `${Math.round(n)}nm`;
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="eb-inset" role="img"
-         aria-label={`원자 스케일 설명. 바닥에는 이온과 라디칼이 모두 도달하고 측벽에는 라디칼만 도달한다. 이방도 ${profile.anisotropy.toFixed(2)}`}>
-      <rect x="0" y="0" width={W} height={H} fill="#141209" />
-      <line x1={midX} y1="6" x2={midX} y2={H - 6} stroke="#2A261C" strokeWidth="1" />
+    <svg viewBox={`0 0 ${INSET_W} ${INSET_H}`} className="eb-inset" role="img"
+         aria-label={`원자 스케일. 바닥은 ${Math.round(filmEtched)} 나노미터 내려갔고 측벽은 ${Math.round(lateralNm)} 나노미터 파였다. 이방도 ${profile.anisotropy.toFixed(2)}`}>
+      <rect x="0" y="0" width={INSET_W} height={INSET_H} fill="#141209" />
+      <line x1={midX} y1="6" x2={midX} y2={INSET_H - 6} stroke="#2A261C" strokeWidth="1" />
 
-      {/* ── 왼쪽: 트렌치 바닥 ── */}
-      <text x="12" y="15" fontSize="7" fill="#F0C464"
+      {/* ══ Ⓐ 트렌치 바닥 — 이온이 쏟아진다 ══ */}
+      <circle cx="14" cy="12" r="5" fill="#141209" stroke="#F0C464" strokeWidth="0.9" />
+      <text x="14" y="14.2" fontSize="6.5" fontWeight="600" fill="#F0C464" textAnchor="middle"
+            fontFamily="ui-monospace, Menlo, monospace">A</text>
+      <text x="24" y="14.5" fontSize="7" fill="#F0C464"
             fontFamily="ui-monospace, Menlo, monospace">바닥 · 이온 + 라디칼</text>
 
-      {bottomIons.map((x, i) => (
-        <g key={`bi${i}`}>
-          <line x1={x} y1="22" x2={x} y2="68" stroke="#F0C464" strokeWidth="0.9" opacity="0.6" />
-          <path d={`M${x} 70.5 l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.85" />
+      {/* 처음 표면 */}
+      <line x1="10" y1={AY0} x2="132" y2={AY0} stroke="#5A5344" strokeWidth="0.7" strokeDasharray="3 3" />
+      <text x="10" y={AY0 - 3} fontSize="5.5" fill="#6B6353"
+            fontFamily="ui-monospace, Menlo, monospace">처음 표면</text>
+
+      {/* 이온 궤적 — 지금 표면까지 내려온다 */}
+      {[26, 56, 86, 116].map((x, i) => (
+        <g key={`ia${i}`}>
+          <line x1={x} y1="20" x2={x} y2={ayNow - 1} stroke="#F0C464" strokeWidth="0.9" opacity="0.6" />
+          <path d={`M${x} ${ayNow + 1.5} l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.85" />
         </g>
       ))}
-      {bottomRadicals.map((r, i) => (
-        <circle key={`br${i}`} cx={r.x} cy={r.y} r="1.5" fill="#7FC8A9" opacity="0.75" />
+      {/* 라디칼 */}
+      {[0, 1, 2, 3].map((i) => (
+        <circle key={`ra${i}`} cx={16 + rnd(i, 3) * 116} cy={20 + rnd(i, 11) * (advA + 8)}
+                r="1.5" fill="#7FC8A9" opacity="0.75" />
       ))}
-      {/* 바닥 원자열 — 염소화돼 초록빛이 돈다 */}
-      {[0, 1, 2, 3, 4, 5].map((i) => {
-        const cx = 16 + i * 22;
+      {/* 지금 표면의 원자열 — 염소화 껍질을 두르고 있다 */}
+      {[0, 1, 2, 3, 4].map((i) => {
+        const cx = 20 + i * 24;
         return (
-          <g key={`ba${i}`}>
-            <circle cx={cx} cy="76" r="5.4" fill="#6E9E88" />
-            {/* 흡착한 Cl 은 껍질로 그린다. 점을 위에 얹으면 이 크기에서는
-                눈·귀처럼 보여 원자가 아니라 얼굴로 읽힌다. */}
-            <circle cx={cx} cy="76" r="7.4" fill="none" stroke="#7FC8A9"
-                    strokeWidth="1.3" opacity="0.85" />
+          <g key={`aa${i}`}>
+            <circle cx={cx} cy={ayNow + 5.5} r="5.4" fill="#6E9E88" />
+            <circle cx={cx} cy={ayNow + 5.5} r="7.4" fill="none" stroke="#7FC8A9"
+                    strokeWidth="1.2" opacity="0.85" />
           </g>
         );
       })}
-      <text x={16 + 2.2 * 22} y="60" fontSize="6.5" fill="#9FD8C0" textAnchor="middle"
+      <text x={20 + 2 * 24} y={ayNow - 3} fontSize="6.5" fill="#9FD8C0" textAnchor="middle"
             fontFamily="ui-monospace, Menlo, monospace">SiCl₄↑</text>
-      <text x="12" y="97" fontSize="6.5" fill="#8A8069"
-            fontFamily="ui-monospace, Menlo, monospace">빠르다 — 결합이 약해진 자리를 이온이 때린다</text>
 
-      {/* ── 오른쪽: 측벽 ── */}
-      <text x={midX + 12} y="15" fontSize="7" fill="#7FC8A9"
+      {/* 얼마나 내려갔나 */}
+      <line x1="140" y1={AY0} x2="140" y2={ayNow + 5.5} stroke="#F0C464" strokeWidth="0.8" />
+      <line x1="137" y1={AY0} x2="143" y2={AY0} stroke="#F0C464" strokeWidth="0.8" />
+      <line x1="137" y1={ayNow + 5.5} x2="143" y2={ayNow + 5.5} stroke="#F0C464" strokeWidth="0.8" />
+      <text x="146" y={AY0 + (advA + 5.5) / 2 + 2} fontSize="7" fill="#F0C464"
+            fontFamily="ui-monospace, Menlo, monospace">{label(filmEtched)}</text>
+
+      <text x="10" y={INSET_H - 5} fontSize="6.5" fill="#8A8069"
+            fontFamily="ui-monospace, Menlo, monospace">빠르다 — 약해진 결합을 이온이 때린다</text>
+
+      {/* ══ Ⓑ 측벽 — 이온이 지나친다 ══ */}
+      <circle cx={midX + 14} cy="12" r="5" fill="#141209" stroke="#7FC8A9" strokeWidth="0.9" />
+      <text x={midX + 14} y="14.2" fontSize="6.5" fontWeight="600" fill="#7FC8A9" textAnchor="middle"
+            fontFamily="ui-monospace, Menlo, monospace">B</text>
+      <text x={midX + 24} y="14.5" fontSize="7" fill="#7FC8A9"
             fontFamily="ui-monospace, Menlo, monospace">측벽 · 라디칼만</text>
 
-      {/* 이온은 측벽을 스쳐 내려간다 — 수직 입사라 벽에 닿지 않는다 */}
-      <line x1={midX + 26} y1="22" x2={midX + 26} y2="84" stroke="#F0C464"
-            strokeWidth="0.9" opacity="0.35" strokeDasharray="2 2" />
-      <path d={`M${midX + 26} 86 l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.35" />
-      <text x={midX + 32} y="30" fontSize="6" fill="#8A8069"
-            fontFamily="ui-monospace, Menlo, monospace">이온은 지나친다</text>
+      {/* 처음 측벽 */}
+      <line x1={BX0} y1="26" x2={BX0} y2="74" stroke="#5A5344" strokeWidth="0.7" strokeDasharray="3 3" />
+      <text x={BX0 + 2} y="24" fontSize="5.5" fill="#6B6353"
+            fontFamily="ui-monospace, Menlo, monospace">처음 측벽</text>
 
-      {/* 측벽 원자기둥 */}
-      {[0, 1, 2, 3, 4].map((i) => (
-        <circle key={`sa${i}`} cx={midX + 14} cy={26 + i * 13} r="5.4"
+      {/* 지금 측벽의 원자기둥 */}
+      {[0, 1, 2, 3].map((i) => (
+        <circle key={`ab${i}`} cx={bxNow - 5.5} cy={28 + i * 13} r="5.4"
                 fill={polymer ? '#7FA394' : '#8FA39C'} />
       ))}
       {polymer && (
-        <line x1={midX + 20.5} y1="22" x2={midX + 20.5} y2="82"
-              stroke="#E2B45C" strokeWidth="2.4" strokeLinecap="round" opacity="0.85" />
+        <line x1={bxNow + 0.6} y1="24" x2={bxNow + 0.6} y2="72"
+              stroke="#E2B45C" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
       )}
-      {/* 라디칼은 방향이 제멋대로라 벽에도 닿는다. 짧은 꼬리를 달아
-          "옆에서 들어온다" 는 것이 보이게 한다. */}
-      {sideRadicals.map((r, i) => (
-        <g key={`sr${i}`}>
-          <line x1={r.x + 7} y1={r.y + (i % 2 ? 3 : -3)} x2={r.x} y2={r.y}
-                stroke="#7FC8A9" strokeWidth="0.7" opacity="0.35" />
-          <circle cx={r.x} cy={r.y} r="1.5" fill="#7FC8A9" opacity="0.8" />
-        </g>
-      ))}
-      <text x={midX + 12} y="97" fontSize="6.5" fill="#8A8069"
+
+      {/* 이온은 벽을 지나쳐 내려간다 */}
+      <line x1={BX0 + 24} y1="20" x2={BX0 + 24} y2="74" stroke="#F0C464"
+            strokeWidth="0.9" opacity="0.32" strokeDasharray="2 2" />
+      <path d={`M${BX0 + 24} 76.5 l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.32" />
+      <text x={BX0 + 19} y="40" fontSize="5.5" fill="#6B6353" textAnchor="end"
+            fontFamily="ui-monospace, Menlo, monospace">이온은 지나친다</text>
+
+      {/* 라디칼이 옆에서 들어온다 */}
+      {[0, 1, 2, 3].map((i) => {
+        const x = bxNow + 8 + rnd(i, 7) * 26;
+        const y = 28 + rnd(i, 13) * 40;
+        return (
+          <g key={`rb${i}`}>
+            <line x1={x + 7} y1={y + (i % 2 ? 3 : -3)} x2={x} y2={y}
+                  stroke="#7FC8A9" strokeWidth="0.7" opacity="0.35" />
+            <circle cx={x} cy={y} r="1.5" fill="#7FC8A9" opacity="0.8" />
+          </g>
+        );
+      })}
+
+      {/* 얼마나 파였나 */}
+      <line x1={bxNow - 5.5} y1="80" x2={BX0} y2="80" stroke="#7FC8A9" strokeWidth="0.8" />
+      <line x1={bxNow - 5.5} y1="77" x2={bxNow - 5.5} y2="83" stroke="#7FC8A9" strokeWidth="0.8" />
+      <line x1={BX0} y1="77" x2={BX0} y2="83" stroke="#7FC8A9" strokeWidth="0.8" />
+      <text x={BX0 + 6} y="82.5" fontSize="7" fill="#7FC8A9"
+            fontFamily="ui-monospace, Menlo, monospace">{label(lateralNm)}</text>
+
+      <text x={midX + 10} y={INSET_H - 5} fontSize="6.5" fill="#8A8069"
             fontFamily="ui-monospace, Menlo, monospace">
         {polymer ? '느리다 — 폴리머가 라디칼마저 막는다' : '느리다 — 때려 줄 이온이 없다'}
       </text>
@@ -1146,6 +1205,7 @@ export default function EtchingBay() {
             profile={preview.prof}
             target={target}
             glowSeed={tickCount}
+            callouts={phase === 'PROCESSING' || phase === 'ENDPOINT' || phase === 'REPORT'}
           />
 
           <div className="eb-gauges">
@@ -1178,20 +1238,19 @@ export default function EtchingBay() {
           {(phase === 'PROCESSING' || phase === 'ENDPOINT' || phase === 'REPORT') && target !== 'PR' && (
             <div className="eb-inset-wrap">
               <div className="eb-inset-head">
-                <span>원자 스케일 · 왜 측벽은 덜 깎이나</span>
+                <span>위 단면의 Ⓐ 바닥 · Ⓑ 측벽 확대 (약 100만 배)</span>
                 {/* space-between 이 띄우므로 margin-left:auto 는 쓰지 않는다 */}
                 <span className="eb-inset-a">
                   이방도 A {fmt(preview.prof.anisotropy, 2)} · 측면 손실 {fmt(preview.prof.lateralRatio * filmEtched, 0)} nm
                 </span>
               </div>
-              <SurfaceInset
-                profile={preview.prof}
-                filmEtched={filmEtched}
-                glowSeed={tickCount}
-              />
+              <SurfaceInset profile={preview.prof} filmEtched={filmEtched} />
               <p className="eb-inset-note">
+                두 면이 물러나는 속도를 비교해 보세요. 바닥에는 이온이 수직으로 쏟아져
+                빠르게 내려가고, 측벽은 이온이 지나쳐 라디칼만 닿아 거의 제자리입니다.
+                점선이 처음 위치입니다. 이 두 거리의 비가 곧 이방도입니다 —
                 A = 1 − (수평 식각률 / 수직 식각률). 위 단면에서 마스크 아래가 파인 폭이
-                (1 − A) × 깊이인 이유가 이것이다. 직접 세어 보려면 「식각 기초」 카드로.
+                (1 − A) × 깊이인 이유가 이것입니다. 직접 세어 보려면 「식각 기초」 카드로.
               </p>
             </div>
           )}
@@ -1528,6 +1587,10 @@ const EB_CSS = `
 @media (max-width:900px){.eb-main{grid-template-columns:1fr; overflow-y:auto;}}
 
 .eb-view{padding:20px; border-right:1px solid var(--line); display:flex; flex-direction:column; gap:14px; min-height:0; overflow-y:auto;}
+/* 이 열은 플렉스다. 기본 flex-shrink 를 두면 넘치는 높이를 **줄어들 수 있는 항목**이
+   혼자 뒤집어쓴다. 원자 인셋을 추가한 뒤 챔버 단면(.eb-chamber)만 보호가 없어서
+   공정 중에 썸네일만큼 눌렸다. 아무것도 줄이지 않고 열이 스크롤되게 한다. */
+.eb-view > *{flex:0 0 auto;}
 .eb-chamber{width:100%; height:auto; max-height:44vh; display:block;}
 
 .eb-gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
@@ -1539,7 +1602,7 @@ const EB_CSS = `
 .eb-inset-wrap{flex:0 0 auto; border:1px solid var(--line); background:var(--panel); border-radius:2px; overflow:hidden;}
 .eb-inset-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 14px; padding:7px 10px; border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.06em; color:var(--txt-dim);}
 .eb-inset-a{color:var(--txt); letter-spacing:0; white-space:nowrap;}
-.eb-inset{display:block; width:100%; height:auto; aspect-ratio:320/104;}
+.eb-inset{display:block; width:100%; height:auto; aspect-ratio:320/96;}
 .eb-inset-note{margin:0; padding:7px 10px 9px; border-top:1px solid var(--line); font-size:11px; line-height:1.65; color:var(--txt-dim);}
 .eb-oes{border:1px solid var(--line); background:var(--panel); padding:8px 10px;}
 .eb-oes svg{width:100%; height:auto; display:block;}
