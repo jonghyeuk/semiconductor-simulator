@@ -573,6 +573,123 @@ function ChamberView({
   );
 }
 
+/* ────────────────────── 원자 스케일 인셋 ──────────────────────
+   챔버 단면은 500 nm 스케일이라 "왜" 가 안 보인다. 프로파일이 왜 그 모양인지는
+   1000 배 아래에서 결정된다.
+
+   바닥과 측벽은 **같은 표면인데 도달하는 종이 다르다.**
+     바닥 — 시스 전기장에 가속된 이온이 수직으로 쏟아진다. 라디칼도 온다.
+            염소화된 결합을 이온이 때려 SiCl₄ 로 날린다 (시너지).
+     측벽 — 이온은 수직으로 내려가므로 거의 닿지 않는다. 방향성 없는 라디칼만
+            도달하고, 폴리머가 있으면 그마저 막힌다.
+   그래서 측벽이 바닥보다 느리게 깎이고, 그 비가 곧 이방도다.
+     이방도 A = 1 − (수평 식각률 / 수직 식각률)
+
+   ⚠ 이 인셋은 **설명용 그림**이다. 여기서 따로 식각률을 재지 않는다. 재서 숫자를
+     내놓으면 화면에 진실이 둘이 되고, 언젠가 서로 어긋난다. 숫자는 프로파일을
+     그리는 그 A 하나에서만 나온다. 직접 세어 보는 화면은 「식각 기초」 카드다. */
+
+function SurfaceInset({ profile, filmEtched, glowSeed }) {
+  const W = 320, H = 104;
+  const midX = W / 2;
+
+  /* 결정적 유사난수 — 프레임마다 점이 튀지 않게 한다.
+     선형합동식(i*9301+…)%233280 은 i 를 1 씩 올리면 결과도 일정하게 움직여서,
+     점 대여섯 개를 찍으면 가지런한 대각선으로 늘어선다. 흩뿌린 것처럼 보이려면
+     비선형 해시가 필요하다. */
+  const rnd = (i, salt) => {
+    const v = Math.sin(i * 12.9898 + salt * 78.233 + glowSeed * 0.37) * 43758.5453;
+    return v - Math.floor(v);
+  };
+
+  const polymer = profile.polymerThickness > 0.5;
+  const lateralNm = profile.lateralRatio * filmEtched;
+
+  // 바닥: 이온이 쏟아진다. 측벽: 이온이 스쳐 지나간다.
+  const bottomIons = [0, 1, 2, 3].map((i) => 22 + i * 26);
+  const sideRadicals = [0, 1, 2, 3, 4, 5].map((i) => ({
+    x: 182 + rnd(i, 7) * 88,
+    y: 30 + rnd(i, 13) * 52,
+  }));
+  const bottomRadicals = [0, 1, 2, 3, 4].map((i) => ({
+    x: 18 + rnd(i, 3) * 116,
+    y: 26 + rnd(i, 11) * 40,
+  }));
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="eb-inset" role="img"
+         aria-label={`원자 스케일 설명. 바닥에는 이온과 라디칼이 모두 도달하고 측벽에는 라디칼만 도달한다. 이방도 ${profile.anisotropy.toFixed(2)}`}>
+      <rect x="0" y="0" width={W} height={H} fill="#141209" />
+      <line x1={midX} y1="6" x2={midX} y2={H - 6} stroke="#2A261C" strokeWidth="1" />
+
+      {/* ── 왼쪽: 트렌치 바닥 ── */}
+      <text x="12" y="15" fontSize="7" fill="#F0C464"
+            fontFamily="ui-monospace, Menlo, monospace">바닥 · 이온 + 라디칼</text>
+
+      {bottomIons.map((x, i) => (
+        <g key={`bi${i}`}>
+          <line x1={x} y1="22" x2={x} y2="68" stroke="#F0C464" strokeWidth="0.9" opacity="0.6" />
+          <path d={`M${x} 70.5 l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.85" />
+        </g>
+      ))}
+      {bottomRadicals.map((r, i) => (
+        <circle key={`br${i}`} cx={r.x} cy={r.y} r="1.5" fill="#7FC8A9" opacity="0.75" />
+      ))}
+      {/* 바닥 원자열 — 염소화돼 초록빛이 돈다 */}
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const cx = 16 + i * 22;
+        return (
+          <g key={`ba${i}`}>
+            <circle cx={cx} cy="76" r="5.4" fill="#6E9E88" />
+            {/* 흡착한 Cl 은 껍질로 그린다. 점을 위에 얹으면 이 크기에서는
+                눈·귀처럼 보여 원자가 아니라 얼굴로 읽힌다. */}
+            <circle cx={cx} cy="76" r="7.4" fill="none" stroke="#7FC8A9"
+                    strokeWidth="1.3" opacity="0.85" />
+          </g>
+        );
+      })}
+      <text x={16 + 2.2 * 22} y="60" fontSize="6.5" fill="#9FD8C0" textAnchor="middle"
+            fontFamily="ui-monospace, Menlo, monospace">SiCl₄↑</text>
+      <text x="12" y="97" fontSize="6.5" fill="#8A8069"
+            fontFamily="ui-monospace, Menlo, monospace">빠르다 — 결합이 약해진 자리를 이온이 때린다</text>
+
+      {/* ── 오른쪽: 측벽 ── */}
+      <text x={midX + 12} y="15" fontSize="7" fill="#7FC8A9"
+            fontFamily="ui-monospace, Menlo, monospace">측벽 · 라디칼만</text>
+
+      {/* 이온은 측벽을 스쳐 내려간다 — 수직 입사라 벽에 닿지 않는다 */}
+      <line x1={midX + 26} y1="22" x2={midX + 26} y2="84" stroke="#F0C464"
+            strokeWidth="0.9" opacity="0.35" strokeDasharray="2 2" />
+      <path d={`M${midX + 26} 86 l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.35" />
+      <text x={midX + 32} y="30" fontSize="6" fill="#8A8069"
+            fontFamily="ui-monospace, Menlo, monospace">이온은 지나친다</text>
+
+      {/* 측벽 원자기둥 */}
+      {[0, 1, 2, 3, 4].map((i) => (
+        <circle key={`sa${i}`} cx={midX + 14} cy={26 + i * 13} r="5.4"
+                fill={polymer ? '#7FA394' : '#8FA39C'} />
+      ))}
+      {polymer && (
+        <line x1={midX + 20.5} y1="22" x2={midX + 20.5} y2="82"
+              stroke="#E2B45C" strokeWidth="2.4" strokeLinecap="round" opacity="0.85" />
+      )}
+      {/* 라디칼은 방향이 제멋대로라 벽에도 닿는다. 짧은 꼬리를 달아
+          "옆에서 들어온다" 는 것이 보이게 한다. */}
+      {sideRadicals.map((r, i) => (
+        <g key={`sr${i}`}>
+          <line x1={r.x + 7} y1={r.y + (i % 2 ? 3 : -3)} x2={r.x} y2={r.y}
+                stroke="#7FC8A9" strokeWidth="0.7" opacity="0.35" />
+          <circle cx={r.x} cy={r.y} r="1.5" fill="#7FC8A9" opacity="0.8" />
+        </g>
+      ))}
+      <text x={midX + 12} y="97" fontSize="6.5" fill="#8A8069"
+            fontFamily="ui-monospace, Menlo, monospace">
+        {polymer ? '느리다 — 폴리머가 라디칼마저 막는다' : '느리다 — 때려 줄 이온이 없다'}
+      </text>
+    </svg>
+  );
+}
+
 /* ────────────────────────── OES 엔드포인트 신호 ────────────────────────── */
 
 function OesTrace({ samples, detected }) {
@@ -1056,6 +1173,29 @@ export default function EtchingBay() {
             </div>
           </div>
 
+          {/* 프로파일이 왜 그 모양인지는 1000 배 아래에서 정해진다.
+              바닥과 측벽에 도달하는 종이 다르다는 것 하나가 이방도를 만든다. */}
+          {(phase === 'PROCESSING' || phase === 'ENDPOINT' || phase === 'REPORT') && target !== 'PR' && (
+            <div className="eb-inset-wrap">
+              <div className="eb-inset-head">
+                <span>원자 스케일 · 왜 측벽은 덜 깎이나</span>
+                {/* space-between 이 띄우므로 margin-left:auto 는 쓰지 않는다 */}
+                <span className="eb-inset-a">
+                  이방도 A {fmt(preview.prof.anisotropy, 2)} · 측면 손실 {fmt(preview.prof.lateralRatio * filmEtched, 0)} nm
+                </span>
+              </div>
+              <SurfaceInset
+                profile={preview.prof}
+                filmEtched={filmEtched}
+                glowSeed={tickCount}
+              />
+              <p className="eb-inset-note">
+                A = 1 − (수평 식각률 / 수직 식각률). 위 단면에서 마스크 아래가 파인 폭이
+                (1 − A) × 깊이인 이유가 이것이다. 직접 세어 보려면 「식각 기초」 카드로.
+              </p>
+            </div>
+          )}
+
           {(phase === 'PROCESSING' || phase === 'ENDPOINT' || phase === 'VENTING') && (
             <OesTrace samples={oes} detected={punched} />
           )}
@@ -1396,6 +1536,11 @@ const EB_CSS = `
 .eb-g-v{font-size:17px; color:var(--amber); text-shadow:0 0 12px rgba(240,196,100,.3); white-space:nowrap;}
 .eb-g-v small{font-size:10px; color:var(--txt-dim); margin-left:3px; text-shadow:none;}
 
+.eb-inset-wrap{flex:0 0 auto; border:1px solid var(--line); background:var(--panel); border-radius:2px; overflow:hidden;}
+.eb-inset-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 14px; padding:7px 10px; border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.06em; color:var(--txt-dim);}
+.eb-inset-a{color:var(--txt); letter-spacing:0; white-space:nowrap;}
+.eb-inset{display:block; width:100%; height:auto; aspect-ratio:320/104;}
+.eb-inset-note{margin:0; padding:7px 10px 9px; border-top:1px solid var(--line); font-size:11px; line-height:1.65; color:var(--txt-dim);}
 .eb-oes{border:1px solid var(--line); background:var(--panel); padding:8px 10px;}
 .eb-oes svg{width:100%; height:auto; display:block;}
 .eb-oes-cap{display:block; margin-top:5px; font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.08em; color:var(--txt-dim);}
