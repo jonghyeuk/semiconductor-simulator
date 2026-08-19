@@ -167,6 +167,45 @@ export function calculateGasRatioEffect(ratio) {
 
 const clamp01 = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
 
+/**
+ * 라디칼이 **이온 없이 스스로** 그 재료를 깎아내는 정도 (0~1).
+ *
+ * 이것이 측벽의 운명을 정한다. 측벽에는 이온이 거의 닿지 않으므로, 측벽이 깎이려면
+ * 라디칼이 혼자 반응해야 한다. 혼자 못 깎는 조합이면 측벽은 그대로 남고 프로파일이
+ * 저절로 수직해진다.
+ *
+ *   F + Si     자발적으로 빠르게 반응한다. SF₆·CF₄ 플라즈마에서 실리콘이 등방으로
+ *              파이는 이유이고, 그래서 F 계로 게이트를 깎으면 CD 가 무너진다.
+ *   Cl + Si    상온에서 자발 반응이 거의 없다. 이온이 때려 줘야 SiCl₄ 가 떨어진다.
+ *              게이트 식각이 Cl₂/HBr 를 쓰는 첫 번째 이유가 이것이다.
+ *   Br + Si    Cl 보다도 낮다. HBr 를 섞으면 프로파일이 더 서는 이유.
+ *   F + SiO₂   자발 반응이 사실상 없다. 산화막 식각은 통째로 이온 주도이고,
+ *              그래서 고압 CCP 에서도 수직이 나온다.
+ *   F + Si₃N₄  산화막보다는 높고 실리콘보다는 낮다.
+ *   O + PR     자발적으로 탄다. 애싱이 등방인 이유 (다만 전면 식각이라 측벽이 없다).
+ *
+ * ⚠ 문헌 값을 그대로 옮긴 것이 아니라 **순서와 자릿수**를 맞춘 경험 계수다.
+ *   절대값을 인용하면 안 된다.
+ */
+const SPONTANEITY = {
+  Si:    { CF4: 1.00, Cl2: 0.10, HBr: 0.03 },
+  SiO2:  { CF4: 0.05, CHF3: 0.05 },
+  Si3N4: { CF4: 0.25, CHF3: 0.25 },
+  PR:    { O2: 1.00 },
+};
+
+/** 지금 가스 조합에서 그 재료의 자발 반응성 (유량 가중 평균). */
+function spontaneityOf(target, g) {
+  const table = SPONTANEITY[target] || SPONTANEITY.Si;
+  let flow = 0, weighted = 0;
+  for (const k of Object.keys(table)) {
+    const f = g(k);
+    flow += f;
+    weighted += f * table[k];
+  }
+  return flow > 0 ? weighted / flow : 0;
+}
+
 /** 언더컷이라 부르기 시작하는 측벽 기울기 = 수직에서 10° 누운 것 (측벽 각 80°). */
 const UNDERCUT_SLOPE = Math.tan((10 * Math.PI) / 180);
 
@@ -210,29 +249,46 @@ export function calculateProfile(target, gasFlow, power, pressure) {
   const ionBombardment = g('Ar') + w / 25;
 
   /* 이방성 (0=등방, 1=완전 수직).
-     ── 왜 식을 바꿨나 ──
-     예전 식은 선형 합 A = 0.25 + 0.005·이온 + 0.003·폴리머 − 0.005·(p−30) 이었다.
-     압력 항의 계수가 커서, 이 시뮬레이터가 스스로 "이상적인 조건" 이라고 알려 주는
-     프리셋 3 종이 전부 A ≈ 0.4 로 나왔다 — 측면이 수직의 60% 속도로 깎인다는 뜻이고,
-     그림으로 그리면 패턴이 뭉개진 그릇 모양이다. 화면은 "이상적" 이라 말하면서 그림은
-     불량을 보여 주는 상태였다. (예전 그림은 언더컷을 개구부 대비 픽셀로만 그려서 이
-     모순이 눈에 띄지 않았다.)
 
-     구조를 물리에 맞춰 다시 세웠다. 세 항을 곱으로 엮는다.
-       passivation — 측벽 폴리머는 이온 각도와 무관하게 측면 반응을 막는다. 그래서
-                     **먼저** 이방성의 바닥을 깔고, 나머지 부분만 다른 항이 좌우한다.
-                     고압 CCP 산화막 식각이 수직 프로파일을 내는 실제 이유다.
-       directional — 시스에서 가속된 이온의 비중. Ar·RF 로 올라가되 포화한다.
-       scatter     — 시스 안 충돌로 입사각이 흐트러지는 정도. 압력이 올라갈수록 나빠진다.
-     계수는 문헌 값이 아니라 경계 조건을 맞춘 것이다: 프리셋 조건이 0.7~0.8(수직),
-     Ar 없이 200 mTorr 가 0.25(등방), Ar·HBr·파워를 다 올리면 0.9 이상. */
-  const directional = ionBombardment / (ionBombardment + 60);
-  const passivation = polymerFormers / (polymerFormers + 25);
-  const scatter = 1 / (1 + Math.max(0, p - 30) / 250);
-  const anisotropy = clamp01(
-    passivation + (1 - passivation) * scatter * (0.30 + 0.70 * directional),
-    0.05, 1
-  );
+     ── 구조 ──
+     방향성은 **이온에서만 나온다.** 시스 전위로 가속된 이온만이 웨이퍼 면에 수직으로
+     들어오기 때문이다. 라디칼은 방향이 없고, 폴리머는 스스로 방향을 만들지 못한다.
+
+       ionShare    시스에서 가속된 이온이 식각에 기여하는 비중. Ar·RF 로 올라가되
+                   포화하고, 압력이 오르면 시스 안 충돌로 입사각이 흐트러져 깎인다.
+       passivation 측벽 폴리머가 측면 반응을 막는 정도.
+
+     ⚠ 예전 식은 `A = passivation + (1−passivation)·(…)` 였다. 폴리머만 잔뜩 넣으면
+       **이온이 하나도 없어도 A 가 0.86 까지 올라갔다.** 폴리머는 이온이 바닥을 열어
+       줄 때만 프로파일에 기여한다 — 이온이 없으면 폴리머가 바닥도 같이 덮어 식각
+       자체가 서지 않는다(etch stop). 그래서 폴리머의 효과를 ionShare 로 곱해
+       **이온이 없으면 방향성도 0** 이 되게 했다.
+
+       측면 식각률/수직 식각률 = (1 − ionShare) × (1 − ionShare·passivation)
+       A = 1 − 그 값
+
+     계수는 문헌 값이 아니라 경계 조건을 맞춘 것이다: 권장 프리셋이 0.70~0.76,
+     Ar 없이 200 mTorr 가 0.20(등방), Ar·HBr·파워를 다 올리면 0.92 이상,
+     이온이 전혀 없으면 0. */
+  const directional = ionBombardment / (ionBombardment + 30);
+  const passivation = polymerFormers / (polymerFormers + 20);
+  const scatter = 1 / (1 + Math.max(0, p - 30) / 400);
+  const ionShare = clamp01(directional * scatter, 0, 1);
+
+  /* 측면 식각률 / 수직 식각률.
+       바닥 — 이온이 때려 주는 몫 + 라디칼이 스스로 깎는 몫
+       측벽 — 이온이 안 닿으므로 라디칼이 스스로 깎는 몫뿐이고, 폴리머가 그마저 막는다
+     자발 반응성 S 가 낮으면 측벽은 손댈 수단이 없어 프로파일이 저절로 선다.
+
+     ⚠ 앞선 판에는 이 S 가 없었다. 그래서 Cl₂/HBr 게이트 식각 프리셋이 A=0.70,
+       즉 500 nm 를 파면 한쪽에 150 nm 언더컷이 나는 것으로 계산됐다. 실제 폴리실리콘
+       게이트 식각의 CD 손실은 수 nm 수준이다. 염소가 실리콘을 저절로 깎지 못한다는
+       사실이 빠져 있었던 것이다. */
+  const spontaneity = spontaneityOf(target, g);
+  const vertical = ionShare + (1 - ionShare) * spontaneity;
+  const lateral = (1 - passivation) * spontaneity;
+  const lateralRatio = vertical > 1e-6 ? clamp01(lateral / vertical, 0, 0.995) : 0;
+  const anisotropy = 1 - lateralRatio;
 
   const polymerThickness = Math.min(8, polymerFormers / 12);
 
@@ -245,7 +301,7 @@ export function calculateProfile(target, gasFlow, power, pressure) {
   const maskDamage = g('Ar') > 80 || w > 500;
 
   // ── 무차원 형상 비율 ──
-  const lateralRatio = 1 - anisotropy;
+  // lateralRatio 는 이방도와 함께 위에서 정해진다 (A = 1 − lateralRatio).
   const taperRatio = Math.min(0.40, Math.max(0,
     polymerFormers * 0.0040 - radicalEtchers * 0.0015
   ));
@@ -272,6 +328,8 @@ export function calculateProfile(target, gasFlow, power, pressure) {
   return {
     anisotropy, undercut, polymerThickness, etchStop, maskDamage, profileType,
     lateralRatio, taperRatio, bowRatio, sidewallAngle,
+    // ARDE 는 이방도가 아니라 이 값을 써야 한다. 아래 calculateArdeFactor 주석 참고.
+    ionShare,
   };
 }
 
@@ -283,18 +341,23 @@ export function calculateProfile(target, gasFlow, power, pressure) {
  *   - 이온: 시스 전기장으로 가속돼 수직으로 내리꽂히므로 깊어져도 거의 그대로 닿는다.
  *   - 중성 라디칼: 방향성이 없어 벽에 부딪히며 들어가야 한다. 좁고 깊을수록 못 들어간다.
  * 라디칼 쪽은 원통 도관의 투과 확률 근사 K = 1/(1 + 0.75·AR) 를 쓴다 (Clausing 형).
- * 이온이 담당하는 비중은 이방도를 대리 지표로 쓴다 — 이방성이 높다는 것은 곧 이온
- * 주도 식각이라는 뜻이다.
+ *
+ * ⚠ 이온 비중으로 **이방도를 쓰면 안 된다.** 이방도에는 측벽 폴리머의 몫이 섞여 있어서,
+ *   폴리머로 이방성을 얻은 저이온 공정(예: 고 CHF₃ 산화막 식각)이 이온 주도 공정과
+ *   같은 감속을 받는 것으로 계산된다. 폴리머는 측벽을 덮을 뿐 라디칼을 트렌치 바닥까지
+ *   실어 나르지 못한다. calculateProfile 이 돌려주는 ionShare 를 써야 한다.
+ *   (실제로 그렇게 두었을 때 폴리머 주도 0.89 · 이온 주도 0.83 으로 거의 구분되지
+ *    않았다. 지금은 AR 5 에서 0.43 대 0.85 로 갈린다.)
  *
  * ⚠ 한계: 고종횡비에서 실제로 문제가 되는 전하 축적(notching)·이온 각도 분포는
  *   넣지 않았다. AR 5 를 넘는 구간의 절대값을 믿으면 안 된다.
  *
  * @param {number} aspectRatio 깊이 / 패턴 폭
- * @param {number} anisotropy  0~1 (calculateProfile 의 반환값)
+ * @param {number} share       0~1 — calculateProfile 의 ionShare
  */
-export function calculateArdeFactor(aspectRatio, anisotropy) {
+export function calculateArdeFactor(aspectRatio, share) {
   const ar = Math.max(0, aspectRatio);
-  const ionShare = clamp01(anisotropy, 0, 1);
+  const ionShare = clamp01(share, 0, 1);
   const conductance = 1 / (1 + 0.75 * ar);
   return ionShare + (1 - ionShare) * conductance;
 }

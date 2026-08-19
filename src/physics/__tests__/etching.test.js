@@ -328,18 +328,55 @@ describe('calculateProfile — 형상', () => {
     }
   });
 
-  it('이방도 앵커 — 이온 포화 반값점이 60 이다', () => {
-    // Ar 48 + 300W/25 = 60 → directional = 0.5, 폴리머 0, 30 mTorr → scatter = 1
-    // A = 0.30 + 0.70 × 0.5 = 0.65. 포화 반값점을 바꾸면 이 값이 움직인다.
-    const r = calculateProfile('Si', G({ Cl2: 30, Ar: 48 }), 300, 30);
-    expect(r.anisotropy).toBeCloseTo(0.65, 10);
+  it('이방도 앵커 — 이온 포화 반값점이 30 이다', () => {
+    // Ar 18 + 300W/25 = 30 → directional = 0.5, 폴리머 0, 30 mTorr → scatter = 1
+    // ionShare = 0.5. Cl2 단독이므로 자발 반응성 S = 0.10.
+    //   vertical = 0.5 + 0.5×0.10 = 0.55,  lateral = 1×0.10 = 0.10
+    //   lateralRatio = 0.10/0.55 = 0.1818…  → A = 0.8181…
+    const r = calculateProfile('Si', G({ Cl2: 30, Ar: 18 }), 300, 30);
+    expect(r.ionShare).toBeCloseTo(0.5, 10);
+    expect(r.lateralRatio).toBeCloseTo(0.1 / 0.55, 10);
+    expect(r.anisotropy).toBeCloseTo(1 - 0.1 / 0.55, 10);
   });
 
-  it('이방도 앵커 — 산란 항의 압력 스케일이 250 mTorr 다', () => {
-    // 같은 조건에서 압력만 280 mTorr 로 올리면 scatter = 1/(1 + 250/250) = 0.5.
-    // A = 0.5 × (0.30 + 0.70 × 0.5) = 0.325.
-    const r = calculateProfile('Si', G({ Cl2: 30, Ar: 48 }), 300, 280);
-    expect(r.anisotropy).toBeCloseTo(0.325, 10);
+  it('이방도 앵커 — 산란 항의 압력 스케일이 400 mTorr 다', () => {
+    // 같은 조건에서 압력만 430 mTorr → scatter = 1/(1 + 400/400) = 0.5
+    // ionShare = 0.5 × 0.5 = 0.25
+    const r = calculateProfile('Si', G({ Cl2: 30, Ar: 18 }), 300, 430);
+    expect(r.ionShare).toBeCloseTo(0.25, 10);
+  });
+
+  it('자발 반응성 — 염소는 실리콘을 저절로 못 깎고, 불소는 깎는다', () => {
+    /* 이것이 프로파일의 운명을 정한다. 측벽에는 이온이 안 닿으므로 측벽이 깎이려면
+       라디칼이 혼자 반응해야 한다. 게이트 식각이 Cl2/HBr 를 쓰는 첫 번째 이유다.
+       앞선 판에는 이 물리가 없어서 Cl2/HBr 프리셋이 500 nm 당 한쪽 150 nm 언더컷으로
+       계산됐다 — 실제 CD 손실은 수 nm 수준이다. */
+    const ion = { Ar: 78 };
+    const cl = calculateProfile('Si', G({ Cl2: 50, ...ion }), 300, 50);
+    const f = calculateProfile('Si', G({ CF4: 50, ...ion }), 300, 50);
+    expect(f.lateralRatio).toBeGreaterThan(cl.lateralRatio * 5);
+    expect(f.profileType).toBe('isotropic');
+    expect(cl.anisotropy).toBeGreaterThan(0.85);
+  });
+
+  it('HBr 는 Cl2 보다도 자발 반응성이 낮아 프로파일을 더 세운다', () => {
+    const cl = calculateProfile('Si', G({ Cl2: 60, Ar: 78 }), 300, 50);
+    const br = calculateProfile('Si', G({ HBr: 60, Ar: 78 }), 300, 50);
+    expect(br.lateralRatio).toBeLessThan(cl.lateralRatio);
+  });
+
+  it('산화막은 자발 반응이 거의 없어 고압에서도 수직에 가깝다', () => {
+    // F + SiO2 는 이온 주도다. 그래서 CCP 산화막 식각이 100 mTorr 에서도 선다.
+    const r = calculateProfile('SiO2', G({ CF4: 25, CHF3: 30, Ar: 65 }), 400, 100);
+    expect(r.anisotropy).toBeGreaterThan(0.9);
+  });
+
+  it('이온이 전혀 없으면 방향성도 없다', () => {
+    // 폴리머만 잔뜩 넣어도 이온이 없으면 프로파일이 서지 않는다.
+    // (앞선 판은 여기서 A=0.86 이 나왔다 — 폴리머가 방향을 만들어 낸 셈이었다.)
+    const r = calculateProfile('Si', G({ Cl2: 30, HBr: 90 }), 0, 30);
+    expect(r.ionShare).toBe(0);
+    expect(r.anisotropy).toBeLessThan(0.75);
   });
 
   it('언더컷 판정 경계는 측벽 80° 다', () => {
@@ -362,10 +399,14 @@ describe('calculateProfile — 형상', () => {
     expect(Math.min(...verticalAngles)).toBeGreaterThanOrEqual(80);
   });
 
-  it('Ar 없이 고압이면 등방성으로 무너진다', () => {
+  it('Ar 없이 고압이면 프로파일이 무너진다', () => {
+    // Cl 계는 자발 반응성이 낮아 완전한 등방까지는 안 가지만, 이온 비중이 떨어져
+    // 측벽이 눈에 띄게 파인다. 완전 등방은 불소계에서 나온다 (위 자발 반응성 테스트).
     const r = calculateProfile('Si', G({ Cl2: 30 }), 300, 200);
-    expect(r.profileType).toBe('isotropic');
-    expect(r.lateralRatio).toBeGreaterThan(0.5);
+    expect(r.profileType).toBe('undercut');
+    expect(r.lateralRatio).toBeGreaterThan(0.25);
+    const f = calculateProfile('Si', G({ CF4: 30 }), 300, 200);
+    expect(f.profileType).toBe('isotropic');
   });
 
   it('폴리머가 식각종을 압도하면 etch stop', () => {
@@ -382,6 +423,9 @@ describe('calculateProfile — 형상', () => {
 });
 
 describe('calculateArdeFactor — 종횡비 의존 식각', () => {
+  // G 는 위 describe 안에 있어서 여기서는 안 보인다
+  const G = (o = {}) => ({ Cl2: 0, HBr: 0, CF4: 0, CHF3: 0, O2: 0, Ar: 0, ...o });
+
   it('종횡비 0 에서는 감속이 없다', () => {
     for (const a of [0, 0.5, 1]) expect(calculateArdeFactor(0, a)).toBe(1);
   });
@@ -395,9 +439,21 @@ describe('calculateArdeFactor — 종횡비 의존 식각', () => {
     }
   });
 
-  it('이온 주도(이방성 高) 식각일수록 RIE lag 이 작다', () => {
+  it('이온 주도 식각일수록 RIE lag 이 작다', () => {
     // 이온은 수직으로 가속돼 들어가므로 깊이의 영향을 덜 받는다.
     expect(calculateArdeFactor(5, 0.95)).toBeGreaterThan(calculateArdeFactor(5, 0.3));
+  });
+
+  it('이방도가 아니라 이온 비중을 받아야 한다', () => {
+    /* 이방도에는 측벽 폴리머의 몫이 섞여 있다. 폴리머로 이방성을 얻은 저이온 공정과
+       이온 주도 공정이 이방도로는 구분되지 않아, ARDE 를 이방도로 근사했을 때
+       둘 다 0.8 대가 나왔다. 폴리머는 라디칼을 트렌치 바닥까지 실어 나르지 못한다. */
+    const poly = calculateProfile('SiO2', G({ CF4: 10, CHF3: 90, Ar: 5 }), 200, 60);
+    const ionic = calculateProfile('Si', G({ Cl2: 30, Ar: 100 }), 800, 30);
+    expect(poly.ionShare).toBeLessThan(ionic.ionShare * 0.6);
+    // 실측 0.43 대 0.85 — 이방도로 근사했을 때는 0.89 대 0.83 으로 거의 같았다.
+    expect(calculateArdeFactor(5, poly.ionShare))
+      .toBeLessThan(calculateArdeFactor(5, ionic.ionShare) * 0.6);
   });
 
   it('완전 이온 주도면 감속이 없고, 완전 중성 주도면 도관 투과확률 그대로다', () => {
