@@ -415,6 +415,33 @@ describe('calculateProfile — 형상', () => {
     expect(calculateProfile('PR', G({ CHF3: 70, O2: 100 }), 400, 60).etchStop).toBe(false);
   });
 
+  it('식각종이 없으면 이방도를 판정하지 않는다', () => {
+    /* 이방도는 수평/수직 식각률의 비다. 둘 다 0 이면 정의되지 않는다.
+       예전에는 lateralRatio 가 0 이 되어 A=1.00 · 판정 "수직" 이 떴다 — 아무것도
+       안 깎이는 레시피를 화면이 "완벽히 수직" 이라고 칭찬하던 셈이다.
+       무작위 4 만 건 검사에서 "HBr 을 늘렸는데 이방도가 떨어진다" 로 잡혔다. */
+    const none = calculateProfile('Si', G({ Ar: 60, CHF3: 30 }), 400, 100);
+    expect(none.hasEtchant).toBe(false);
+    expect(none.profileType).toBe('none');
+    expect(calculateEtchRate('Si', G({ Ar: 60, CHF3: 30 }), 400, 100, mid)).toBe(0);
+
+    // 약한 식각종이라도 들어오면 그때부터 정의된다
+    const weak = calculateProfile('Si', G({ Ar: 60, CHF3: 30, HBr: 20 }), 400, 100);
+    expect(weak.hasEtchant).toBe(true);
+    expect(weak.profileType).not.toBe('none');
+  });
+
+  it('식각종이 있는 조건에서는 폴리머 가스가 이방도를 단조 증가시킨다', () => {
+    // 위 케이스를 제외하면 단조성이 성립해야 한다 (무작위 검사와 같은 기준).
+    let prev = -Infinity;
+    for (const HBr of [0, 20, 50, 90]) {
+      const r = calculateProfile('Si', G({ Cl2: 40, Ar: 60, HBr }), 400, 100);
+      expect(r.hasEtchant).toBe(true);
+      expect(r.anisotropy).toBeGreaterThanOrEqual(prev);
+      prev = r.anisotropy;
+    }
+  });
+
   it('마스크 손상 문턱은 화면 경고문과 같다 (Ar>80 · RF>500)', () => {
     expect(calculateProfile('Si', G({ Ar: 80 }), 500, 100).maskDamage).toBe(false);
     expect(calculateProfile('Si', G({ Ar: 85 }), 500, 100).maskDamage).toBe(true);

@@ -268,6 +268,7 @@ const PROFILE_LABEL = {
   undercut: '언더컷',
   isotropic: '등방성',
   'etch-stop': 'Etch Stop',
+  none: '식각 없음',
 };
 
 const PRODUCTS = {
@@ -573,7 +574,8 @@ function ChamberView({
         <text x={VIEW_W - 34} y="36" fontSize="7.5" textAnchor="end"
               fill={profile.profileType === 'vertical' ? '#7FC8A9' : profile.profileType === 'etch-stop' ? '#E06C5A' : '#E0A24A'}
               fontFamily="ui-monospace, Menlo, monospace">
-          {PROFILE_LABEL[profile.profileType]} · 측벽 {profile.sidewallAngle.toFixed(0)}°
+          {PROFILE_LABEL[profile.profileType]}
+          {profile.hasEtchant ? ` · 측벽 ${profile.sidewallAngle.toFixed(0)}°` : ''}
         </text>
         {!blanket && (
           <text x={VIEW_W - 34} y="47" fontSize="7" fill="#8A8069" textAnchor="end"
@@ -1613,7 +1615,7 @@ export default function EtchingBay() {
               <div className="eb-inset-head">
                 <span>위 단면의 Ⓐ 바닥 · Ⓑ 측벽 확대 (약 100만 배)</span>
                 <span className="eb-inset-a">
-                  이방도 A {fmt(preview.prof.anisotropy, 2)}
+                  {preview.prof.hasEtchant ? `이방도 A ${fmt(preview.prof.anisotropy, 2)}` : '이 가스로는 식각되지 않음'}
                 </span>
               </div>
 

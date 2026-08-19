@@ -194,7 +194,13 @@ const SPONTANEITY = {
   PR:    { O2: 1.00 },
 };
 
-/** 지금 가스 조합에서 그 재료의 자발 반응성 (유량 가중 평균). */
+/**
+ * 지금 가스 조합에서 그 재료의 자발 반응성 (유량 가중 평균)과, 애초에 그 재료를
+ * 깎을 수 있는 식각종이 들어 있는지.
+ *
+ * 식각종이 없으면 수직도 수평도 0 이라 이방도가 정의되지 않는다. 그 경우를
+ * 구분하지 않으면 0/0 을 1(완벽히 수직)로 답하게 된다.
+ */
 function spontaneityOf(target, g) {
   const table = SPONTANEITY[target] || SPONTANEITY.Si;
   let flow = 0, weighted = 0;
@@ -203,7 +209,7 @@ function spontaneityOf(target, g) {
     flow += f;
     weighted += f * table[k];
   }
-  return flow > 0 ? weighted / flow : 0;
+  return { spontaneity: flow > 0 ? weighted / flow : 0, hasEtchant: flow > 0 };
 }
 
 /** 언더컷이라 부르기 시작하는 측벽 기울기 = 수직에서 10° 누운 것 (측벽 각 80°). */
@@ -289,7 +295,7 @@ export function calculateProfile(target, gasFlow, power, pressure) {
        즉 500 nm 를 파면 한쪽에 150 nm 언더컷이 나는 것으로 계산됐다. 실제 폴리실리콘
        게이트 식각의 CD 손실은 수 nm 수준이다. 염소가 실리콘을 저절로 깎지 못한다는
        사실이 빠져 있었던 것이다. */
-  const spontaneity = spontaneityOf(target, g);
+  const { spontaneity, hasEtchant } = spontaneityOf(target, g);
   const vertical = ionShare + (1 - ionShare) * spontaneity;
   const lateral = (1 - passivation) * spontaneity;
   const lateralRatio = vertical > 1e-6 ? clamp01(lateral / vertical, 0, 0.995) : 0;
@@ -324,7 +330,13 @@ export function calculateProfile(target, gasFlow, power, pressure) {
      슬라이더를 움직이는 대로 따라온다. 화면에는 둘 다 띄운다. */
   const sidewallAngle = 90 - (Math.atan(Math.abs(net)) * 180) / Math.PI;
   let profileType;
-  if (etchStop) profileType = 'etch-stop';
+  /* 그 재료를 깎을 수 있는 식각종이 아예 없으면 프로파일이라는 것이 없다.
+     예전에는 이 경우 lateralRatio 가 0 이 되어 A=1.00, 판정 "수직" 이 떴다.
+     아무것도 안 깎이는 레시피를 화면이 "완벽히 수직" 이라고 칭찬하던 셈이다.
+     (무작위 검사에서 "HBr 을 늘렸는데 이방도가 떨어진다" 로 잡혔다 — 식각종이
+      없던 상태의 A=1 에서 약한 식각종을 넣으니 1 아래로 내려온 것이었다.) */
+  if (!hasEtchant) profileType = 'none';
+  else if (etchStop) profileType = 'etch-stop';
   else if (lateralRatio >= 0.5) profileType = 'isotropic';   // 측면이 수직의 절반 이상
   else if (net <= -0.02) profileType = 'tapered';            // 폴리머가 이겨 아래가 좁다
   else if (net >= UNDERCUT_SLOPE) profileType = 'undercut';  // 측벽이 80° 아래로 눕는다
@@ -335,6 +347,9 @@ export function calculateProfile(target, gasFlow, power, pressure) {
     lateralRatio, taperRatio, bowRatio, sidewallAngle,
     // ARDE 는 이방도가 아니라 이 값을 써야 한다. 아래 calculateArdeFactor 주석 참고.
     ionShare,
+    /* 이 가스 조합으로 그 재료를 깎을 수 있는가. false 면 이방도는 정의되지 않으므로
+       화면이 A 를 수직도로 읽어서는 안 된다. */
+    hasEtchant,
   };
 }
 
