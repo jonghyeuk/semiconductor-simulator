@@ -956,11 +956,15 @@ function SurfaceDetail({ profile, filmEtched, live }) {
 
 const MAX_RUNS = 3;
 
+/* 저장된 단면을 펼쳤을 때의 폭. 열 폭에 맞춰 늘리면 한 개만 저장했을 때 패널 전체를
+   덮어 버려서 "형상" 이 아니라 벽화가 된다. 화면에서 보던 크기 그대로 고정하고,
+   개수가 늘면 옆으로 붙인다 — 나란히 놓여야 비교가 된다. */
+const THUMB_W = 232;
+
 /** 저장된 런의 단면. 챔버 그림에서 플라즈마·이온·계기를 뺀 형상만 그린다. */
-function ProfileThumb({ run, w = 150 }) {
+function ProfileThumb({ run, w = 150, label = true }) {
   const h = Math.round((w * 118) / 200);
-  const S = w / 200;                    // 200×118 로 그리고 배율만 준다
-  const cx = 100;
+  const cx = 100;                       // 200×118 로 그리고 배율만 준다
   const top = 28, filmH = 44, subH = 30;
   const pxPerNm = filmH / FILM_NM;
 
@@ -1015,12 +1019,17 @@ function ProfileThumb({ run, w = 150 }) {
           <rect x={cx + half} y={top - 9} width={192 - cx - half} height="9" fill="#B98A4E" />
         </>
       )}
-      <text x="10" y={top + filmH - 3} fontSize="7" fill="#C9BFA5"
-            fontFamily="ui-monospace, Menlo, monospace">{t.label}</text>
-      <text x={S ? 192 : 192} y="14" fontSize="7.5" fill="#F0C464" textAnchor="end"
-            fontFamily="ui-monospace, Menlo, monospace">
-        측벽 {Math.round(run.prof.sidewallAngle)}°
-      </text>
+      {/* 탭의 미리보기(52px)에서는 글자가 뭉개진다. 형상만 보이면 된다. */}
+      {label && (
+        <>
+          <text x="10" y={top + filmH - 4} fontSize="9" fill="#C9BFA5"
+                fontFamily="ui-monospace, Menlo, monospace">{t.label}</text>
+          <text x="192" y="15" fontSize="9.5" fill="#F0C464" textAnchor="end"
+                fontFamily="ui-monospace, Menlo, monospace">
+            측벽 {Math.round(run.prof.sidewallAngle)}°
+          </text>
+        </>
+      )}
     </svg>
   );
 }
@@ -1045,18 +1054,21 @@ function RunCompare({ runs, open, onToggle, onClear }) {
   return (
     <div className={`eb-cmp ${open ? 'is-open' : ''}`}>
       <button type="button" className="eb-cmp-tab" onClick={onToggle} aria-expanded={open}>
+        <span className="eb-cmp-tag">이전 공정</span>
         <span className="eb-cmp-dots">
-          {runs.map((r) => <ProfileThumb key={r.id} run={r} w={38} />)}
+          {runs.map((r) => <ProfileThumb key={r.id} run={r} w={52} label={false} />)}
         </span>
         <span className="eb-cmp-lbl">
-          지난 런 {runs.length}개 {open ? '닫기' : '비교'}
+          {open
+            ? '닫기'
+            : `${runs.length}개 저장됨 — 눌러서 나란히 비교`}
         </span>
       </button>
 
       {open && (
-        <div className="eb-cmp-panel" role="dialog" aria-label="지난 런 비교">
+        <div className="eb-cmp-panel" role="dialog" aria-label="이전 공정 형상 비교">
           <div className="eb-cmp-head">
-            <span>지난 런 비교 — 최근 {MAX_RUNS}개까지 남습니다 (새로고침하면 사라집니다)</span>
+            <span>이전 공정 형상 — 최근 {MAX_RUNS}개까지 남습니다 (새로고침하면 사라집니다)</span>
             <button type="button" className="eb-cmp-x" onClick={onClear}>모두 지우기</button>
           </div>
           <div className="eb-cmp-grid" data-n={runs.length}>
@@ -1065,10 +1077,10 @@ function RunCompare({ runs, open, onToggle, onClear }) {
               return (
                 <article className="eb-cmp-card" key={r.id}>
                   <header>
-                    <b>{r.n}번</b>
+                    <b>{r.n}번 공정</b>
                     <span>{TARGETS.find((t) => t.id === r.target)?.label} · {r.pressure} mTorr · {r.power} W · {r.etchTime}s</span>
                   </header>
-                  <ProfileThumb run={r} w={190} />
+                  <ProfileThumb run={r} w={THUMB_W} />
                   <dl>
                     <div><dt>측벽</dt><dd>{Math.round(r.prof.sidewallAngle)}°</dd></div>
                     <div><dt>깊이</dt><dd>{Math.round(r.filmEtched + r.underlayerLoss)} nm</dd></div>
@@ -1956,7 +1968,7 @@ const EB_CSS = `
 }
 .eb-id{display:flex; flex-direction:column; line-height:1.25;}
 .eb-id-name{font-family:ui-monospace,Menlo,monospace; font-size:15px; font-weight:700; letter-spacing:.06em; color:var(--amber);}
-.eb-id-sub{font-size:11px; color:var(--txt-dim); letter-spacing:.05em;}
+.eb-id-sub{font-size:12.5px; color:var(--txt-dim); letter-spacing:.05em;}
 .eb-status{
   display:inline-flex; align-items:center; gap:8px;
   font-size:12px; font-weight:700; letter-spacing:.12em;
@@ -1974,7 +1986,7 @@ const EB_CSS = `
 .eb-lamps{display:flex; gap:14px; margin-left:auto; flex-wrap:wrap;}
 .eb-lamp{display:flex; align-items:center; gap:6px;}
 .eb-lamp-dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto;}
-.eb-lamp-txt{font-family:ui-monospace,Menlo,monospace; font-size:10px; letter-spacing:.1em;}
+.eb-lamp-txt{font-family:ui-monospace,Menlo,monospace; font-size:11.5px; letter-spacing:.08em;}
 
 /* 스텝퍼 */
 .eb-steps{display:flex; gap:3px; padding:10px 20px; background:var(--panel); border-bottom:1px solid var(--line);}
@@ -1982,7 +1994,7 @@ const EB_CSS = `
 .eb-step-bar{display:block; height:3px; border-radius:2px; background:#2A261F;}
 .eb-step.is-done .eb-step-bar{background:var(--amber-dim);}
 .eb-step.is-now .eb-step-bar{background:var(--amber); box-shadow:0 0 8px rgba(240,196,100,.5);}
-.eb-step-txt{display:block; margin-top:5px; font-size:10px; letter-spacing:.04em; color:#5F594B; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.eb-step-txt{display:block; margin-top:5px; font-size:11.5px; letter-spacing:.03em; color:#6B6455; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .eb-step.is-now .eb-step-txt{color:var(--amber);}
 .eb-step.is-done .eb-step-txt{color:var(--txt-dim);}
 
@@ -1999,69 +2011,68 @@ const EB_CSS = `
 
 .eb-gauges{display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line); border:1px solid var(--line);}
 .eb-gauge{background:var(--panel); padding:9px 11px; display:flex; flex-direction:column; gap:3px; min-width:0;}
-.eb-g-k{font-size:9.5px; letter-spacing:.13em; text-transform:uppercase; color:var(--txt-dim);}
+.eb-g-k{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--txt-dim);}
 .eb-g-v{font-size:17px; color:var(--amber); text-shadow:0 0 12px rgba(240,196,100,.3); white-space:nowrap;}
-.eb-g-v small{font-size:10px; color:var(--txt-dim); margin-left:3px; text-shadow:none;}
+.eb-g-v small{font-size:11.5px; color:var(--txt-dim); margin-left:3px; text-shadow:none;}
 
 
 /* ── 지난 런 비교 ── */
 .eb-cmp{position:relative; flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel);}
-.eb-cmp-tab{display:flex; align-items:center; gap:10px; width:100%; padding:6px 14px;
+.eb-cmp-tab{display:flex; align-items:center; gap:12px; width:100%; padding:9px 14px;
   background:none; border:0; cursor:pointer; color:var(--txt-dim);
-  font-family:ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em;}
+  font-family:ui-monospace,Menlo,monospace; font-size:12.5px; letter-spacing:.04em;}
 .eb-cmp-tab:hover{color:var(--txt); background:var(--panel2);}
 .eb-cmp-tab:focus{outline:none;}
 .eb-cmp-tab:focus-visible{outline:2px solid var(--amber); outline-offset:-2px;}
-.eb-cmp-dots{display:flex; gap:5px;}
+.eb-cmp-tag{flex:0 0 auto; color:var(--amber); font-weight:700; letter-spacing:.1em;}
+.eb-cmp-dots{display:flex; gap:6px;}
 .eb-cmp-dots .eb-thumb{border:1px solid var(--line); border-radius:2px; display:block;}
-.eb-cmp-lbl{margin-left:auto;}
+.eb-cmp-lbl{margin-left:auto; text-align:right;}
 
 .eb-cmp-panel{position:absolute; left:0; right:0; bottom:100%; z-index:40;
   background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
   box-shadow:0 -14px 34px rgba(0,0,0,.55); max-height:70vh; overflow-y:auto;}
 .eb-cmp-head{display:flex; align-items:center; gap:12px; padding:8px 14px;
   border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace;
-  font-size:10px; letter-spacing:.05em; color:var(--txt-dim);}
+  font-size:12px; letter-spacing:.04em; color:var(--txt-dim);}
 .eb-cmp-x{margin-left:auto; background:none; border:1px solid var(--line); border-radius:2px;
-  color:var(--txt-dim); font:inherit; padding:3px 9px; cursor:pointer;}
+  color:var(--txt-dim); font:inherit; padding:4px 10px; cursor:pointer;}
 .eb-cmp-x:hover{color:var(--txt); border-color:var(--txt-dim);}
 
-.eb-cmp-grid{display:grid; gap:1px; background:var(--line); padding:1px;}
-.eb-cmp-grid[data-n="1"]{grid-template-columns:1fr;}
-.eb-cmp-grid[data-n="2"]{grid-template-columns:1fr 1fr;}
-.eb-cmp-grid[data-n="3"]{grid-template-columns:1fr 1fr 1fr;}
-@media (max-width:820px){ .eb-cmp-grid[data-n]{grid-template-columns:1fr;} }
-
-.eb-cmp-card{background:var(--panel); padding:12px 14px;}
+/* 카드 폭을 형상 폭에 고정한다. 열을 1fr 로 나누면 저장된 개수에 따라 같은 트렌치가
+   커졌다 작아졌다 해서 개수가 다른 두 화면을 눈으로 비교할 수 없다. */
+.eb-cmp-grid{display:flex; flex-wrap:wrap; align-items:flex-start; gap:10px; padding:12px 14px;}
+.eb-cmp-card{flex:0 0 auto; width:266px; background:var(--panel2);
+  border:1px solid var(--line); border-radius:2px; padding:12px 16px;}
 .eb-cmp-card header{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; margin-bottom:8px;}
-.eb-cmp-card header b{color:var(--amber); font-family:ui-monospace,Menlo,monospace; font-size:12px;}
-.eb-cmp-card header span{font-family:ui-monospace,Menlo,monospace; font-size:10px; color:var(--txt-dim);}
-.eb-cmp-card .eb-thumb{width:100%; height:auto; border:1px solid var(--line); border-radius:2px; display:block;}
-.eb-cmp-card dl{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:9px 0 0;}
-.eb-cmp-card dt{font-family:ui-monospace,Menlo,monospace; font-size:9px; letter-spacing:.06em; color:var(--txt-dim);}
-.eb-cmp-card dd{margin:1px 0 0; font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--txt);}
-.eb-cmp-diff{margin:9px 0 0; font-size:11px; line-height:1.55; color:var(--txt-dim);}
+.eb-cmp-card header b{color:var(--amber); font-family:ui-monospace,Menlo,monospace; font-size:14px;}
+.eb-cmp-card header span{font-family:ui-monospace,Menlo,monospace; font-size:11.5px; color:var(--txt-dim);}
+.eb-cmp-card .eb-thumb{max-width:100%; height:auto; border:1px solid var(--line); border-radius:2px; display:block;}
+.eb-cmp-card dl{display:grid; grid-template-columns:repeat(2,1fr); gap:7px 12px; margin:10px 0 0;}
+.eb-cmp-card dt{font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.03em; color:var(--txt-dim);}
+.eb-cmp-card dd{margin:2px 0 0; font-family:ui-monospace,Menlo,monospace; font-size:13.5px; color:var(--txt);}
+.eb-cmp-diff{margin:10px 0 0; font-size:12.5px; line-height:1.6; color:var(--txt-dim);}
 .eb-cmp-diff b{color:var(--amber); font-weight:600;}
 .eb-cmp-diff .is-dim{opacity:.7;}
 .eb-inset-wrap{flex:0 0 auto; border:1px solid var(--line); background:var(--panel); border-radius:2px; overflow:hidden;}
-.eb-inset-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 14px; padding:7px 10px; border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.06em; color:var(--txt-dim);}
+.eb-inset-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 14px; padding:7px 10px; border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace; font-size:11.5px; letter-spacing:.04em; color:var(--txt-dim);}
 .eb-inset-a{color:var(--txt); letter-spacing:0; white-space:nowrap;}
 .eb-inset{display:block; width:100%; height:auto; aspect-ratio:640/168; background:#141209;}
-.eb-inset-cols{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:7px 10px 5px; font-size:11px; color:var(--txt);}
+.eb-inset-cols{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:8px 10px 6px; font-size:12.5px; color:var(--txt);}
 .eb-inset-cols .is-a{color:#F0C464;}
 .eb-inset-cols .is-b{color:#7FC8A9;}
-.eb-inset-cols.is-foot{padding:6px 10px 8px; font-size:10.5px; color:var(--txt-dim); line-height:1.5;}
+.eb-inset-cols.is-foot{padding:7px 10px 9px; font-size:12px; color:var(--txt-dim); line-height:1.5;}
 .eb-inset-cols.is-foot b{color:var(--txt); font-weight:600;}
-.eb-inset-note{margin:0; padding:7px 10px 9px; border-top:1px solid var(--line); font-size:11px; line-height:1.65; color:var(--txt-dim);}
+.eb-inset-note{margin:0; padding:8px 10px 10px; border-top:1px solid var(--line); font-size:12.5px; line-height:1.65; color:var(--txt-dim);}
 .eb-oes{border:1px solid var(--line); background:var(--panel); padding:8px 10px;}
 .eb-oes svg{width:100%; height:auto; display:block;}
-.eb-oes-cap{display:block; margin-top:5px; font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.08em; color:var(--txt-dim);}
-.eb-oes--idle{color:var(--txt-dim); font-family:ui-monospace,Menlo,monospace; font-size:10px; padding:16px 10px; text-align:center;}
+.eb-oes-cap{display:block; margin-top:5px; font-family:ui-monospace,Menlo,monospace; font-size:11px; letter-spacing:.06em; color:var(--txt-dim);}
+.eb-oes--idle{color:var(--txt-dim); font-family:ui-monospace,Menlo,monospace; font-size:12px; padding:16px 10px; text-align:center;}
 
 /* 우측 패널 */
 .eb-panel{padding:20px; overflow-y:auto; min-height:0; display:flex; flex-direction:column; gap:14px;}
-.eb-panel-k{margin:0; font-size:10px; letter-spacing:.16em; text-transform:uppercase; color:var(--txt-dim); font-weight:600;}
-.eb-sub-k{margin:6px 0 0; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--amber-dim); font-weight:600;}
+.eb-panel-k{margin:0; font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--txt-dim); font-weight:600;}
+.eb-sub-k{margin:6px 0 0; font-size:11.5px; letter-spacing:.11em; text-transform:uppercase; color:var(--amber-dim); font-weight:600;}
 
 .eb-blank{margin:auto; text-align:center; max-width:34ch;}
 .eb-blank-h{margin:0 0 8px; font-size:16px; font-weight:700; color:var(--txt);}
@@ -2074,7 +2085,7 @@ const EB_CSS = `
 .eb-pump-track{height:4px; background:#2A261F; border-radius:2px; overflow:hidden;}
 .eb-pump-fill{height:100%; background:var(--amber); box-shadow:0 0 10px rgba(240,196,100,.55); transition:width .12s linear;}
 .eb-note{border-left:2px solid var(--amber-dim); padding:2px 0 2px 14px; margin-top:10px;}
-.eb-note-k{margin:0 0 8px; font-size:9.5px; letter-spacing:.15em; text-transform:uppercase; color:var(--amber-dim);}
+.eb-note-k{margin:0 0 8px; font-size:11px; letter-spacing:.11em; text-transform:uppercase; color:var(--amber-dim);}
 .eb-note h4{margin:0 0 7px; font-size:15px; font-weight:700; color:var(--txt);}
 .eb-note p{margin:0; font-size:13.5px; line-height:1.75; color:var(--txt-dim);}
 
@@ -2088,7 +2099,7 @@ const EB_CSS = `
 .eb-target:hover{border-color:var(--amber-dim);}
 .eb-target.is-on{border-color:var(--amber); color:var(--amber); background:var(--panel2);}
 .eb-target-l{display:block; font-family:ui-monospace,Menlo,monospace; font-size:13px; font-weight:700;}
-.eb-target-d{display:block; font-size:10.5px; margin-top:2px; color:var(--txt-dim);}
+.eb-target-d{display:block; font-size:12px; margin-top:2px; color:var(--txt-dim);}
 
 .eb-knob-row{display:flex; gap:13px; align-items:flex-start;}
 .eb-knob-row.is-off{opacity:.4;}
@@ -2106,9 +2117,9 @@ const EB_CSS = `
 }
 .eb-knob-main{flex:1; min-width:0;}
 .eb-knob-head{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px;}
-.eb-knob-label{font-size:11.5px; letter-spacing:.06em; color:var(--txt-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.eb-knob-label{font-size:12.5px; letter-spacing:.04em; color:var(--txt-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
 .eb-knob-val{font-size:15px; color:var(--amber); white-space:nowrap;}
-.eb-knob-val small{font-size:10px; color:var(--txt-dim); margin-left:3px;}
+.eb-knob-val small{font-size:11.5px; color:var(--txt-dim); margin-left:3px;}
 
 .eb-root input[type=range]{-webkit-appearance:none; appearance:none; width:100%; background:transparent; display:block; margin:0;}
 .eb-root input[type=range]:focus{outline:none;}
@@ -2127,7 +2138,7 @@ const EB_CSS = `
 
 .eb-why{
   margin-top:7px; background:none; border:none; padding:0; cursor:pointer;
-  font-size:10.5px; letter-spacing:.05em; color:var(--amber-dim); text-decoration:underline; text-underline-offset:2px;
+  font-size:12px; letter-spacing:.04em; color:var(--amber-dim); text-decoration:underline; text-underline-offset:2px;
 }
 .eb-why:hover{color:var(--amber);}
 .eb-hint{margin:7px 0 0; font-size:12.5px; line-height:1.7; color:var(--txt-dim); border-left:1px solid var(--line); padding-left:10px;}
@@ -2135,12 +2146,12 @@ const EB_CSS = `
 .eb-preview{border:1px solid var(--line); background:var(--panel); padding:13px; display:flex; flex-direction:column; gap:10px;}
 .eb-preview-grid,.eb-run-grid,.eb-report-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
 .eb-preview-grid div,.eb-run-grid div,.eb-report-grid div{display:flex; flex-direction:column; gap:2px; min-width:0;}
-.eb-preview-grid span,.eb-run-grid span,.eb-report-grid span{font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:var(--txt-dim);}
+.eb-preview-grid span,.eb-run-grid span,.eb-report-grid span{font-size:11.5px; letter-spacing:.07em; text-transform:uppercase; color:var(--txt-dim);}
 .eb-preview-grid b,.eb-run-grid b,.eb-report-grid b{
   font-family:ui-monospace,Menlo,monospace; font-variant-numeric:tabular-nums;
   font-size:15px; color:var(--amber); font-weight:600; white-space:nowrap;
 }
-.eb-report-grid b small{font-size:10px; color:var(--txt-dim); margin-left:3px; font-weight:400;}
+.eb-report-grid b small{font-size:11.5px; color:var(--txt-dim); margin-left:3px; font-weight:400;}
 .eb-alarm{margin:0; font-size:12px; color:var(--bad); line-height:1.6;}
 
 /* 런 */
