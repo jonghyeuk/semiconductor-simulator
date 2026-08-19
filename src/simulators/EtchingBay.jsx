@@ -392,8 +392,11 @@ function ChamberView({
   const productY = TRENCH_TOP - 6 - (glowSeed % 10) * 1.6;
 
   const t = TARGETS.find((x) => x.id === target) || TARGETS[0];
-  // 파세팅은 식각이 시작된 뒤의 결과다. 레시피 화면에서 마스크가 미리 깎여 보이면 안 된다.
-  const facet = profile.maskDamage && dFilm > 0.5 ? 5 : 0;
+  /* 마스크 파세팅.
+     예전에는 조건만 맞으면 5 px 짜리 모따기가 통째로 튀어나와, 식각이 시작되는 순간
+     마스크 모양이 갑자기 달라 보였다. 침식은 서서히 진행되는 일이므로 깊이에 따라
+     자라게 한다 (0 → 5 px). 침식 속도 자체는 모델에 없고 표시는 여전히 정성적이다. */
+  const facet = profile.maskDamage ? clamp(dFilm / FILM_PX, 0, 1) * 5 : 0;
   const polyW = plasmaOn || dFilm > 1 ? Math.min(2.6, profile.polymerThickness * 0.6) : 0;
 
   /* 측벽 폴리머 띠 — 왜 HBr/CHF₃ 가 프로파일을 세우는지 눈에 보여야 한다. */
@@ -715,6 +718,13 @@ function SurfaceDetail({ profile, filmEtched, live }) {
       const st = stRef.current;
       const { profile: prof, filmEtched: film, live: on } = propsRef.current;
 
+      /* 런이 끝나거나 멈추면 **아무것도 하지 않는다.**
+         예전에는 입자 생성만 끊고 제거·소멸은 계속 돌았다. 제거될 때마다 그 자리의
+         염소화가 0 으로 초기화되는데 새 라디칼은 오지 않으니, 끝난 뒤에 붙어 있던
+         염소가 하나씩 사라져 표면이 저절로 깨끗해졌다. 공정이 끝났는데 화면이
+         계속 변하는 것 자체가 어색하다. 마지막 장면 그대로 세운다. */
+      if (!on) return;
+
       /* 제거 허용량. 프로파일 값에서 그대로 나온다 — 여기서 새로 재지 않는다. */
       const targetA = film / NM_PER_ATOM;
       const targetB = (prof.lateralRatio * film) / NM_PER_ATOM;
@@ -934,6 +944,157 @@ function SurfaceDetail({ profile, filmEtched, live }) {
   );
 }
 
+/* ────────────────────── 런 비교 (최근 3개) ──────────────────────
+   조건을 바꿔 가며 돌리다 보면 "2번은 뭘 바꿨더라" 가 된다. 앞 런의 최종 형상이
+   화면에서 사라지기 때문이다. 런이 끝날 때마다 단면과 레시피를 한 장씩 남겨
+   나란히 놓고 비교할 수 있게 한다.
+
+   새로고침하면 사라진다. 저장소에 남기지 않는다 — 교육용 실습 기록이지 데이터가
+   아니고, 브라우저에 쌓아 둘 이유가 없다. */
+
+const MAX_RUNS = 3;
+
+/** 저장된 런의 단면. 챔버 그림에서 플라즈마·이온·계기를 뺀 형상만 그린다. */
+function ProfileThumb({ run, w = 150 }) {
+  const h = Math.round((w * 118) / 200);
+  const S = w / 200;                    // 200×118 로 그리고 배율만 준다
+  const cx = 100;
+  const top = 28, filmH = 44, subH = 30;
+  const pxPerNm = filmH / FILM_NM;
+
+  const blanket = run.target === 'PR';
+  const half = blanket ? 84 : clamp((run.cd * pxPerNm) / 2, 3, 78);
+  const d = clamp(run.filmEtched * pxPerNm, 0, filmH);
+  const u = clamp(run.underlayerLoss * pxPerNm, 0, subH - 3);
+
+  const U = blanket ? 0 : run.prof.lateralRatio * d;
+  const T = blanket ? 0 : run.prof.taperRatio * d;
+  const B = blanket ? 0 : run.prof.bowRatio * d;
+  const cr = blanket ? 0 : run.prof.lateralRatio * d * 0.6;
+
+  const hb = halfWidthAt(1, half, U, T, B);
+  const t = TARGETS.find((x) => x.id === run.target) || TARGETS[0];
+
+  /* 같은 곡선 함수를 쓰되 좌표계가 다르므로 여기서 직접 만든다.
+     cavityPath 는 챔버 좌표(CX/TRENCH_TOP)에 묶여 있다. */
+  const cavity = (() => {
+    if (d <= 0.4) return '';
+    const N = 12;
+    const r = Math.max(0, Math.min(cr, d * 0.5, hb * 0.9));
+    const uEnd = 1 - r / d;
+    const yb = top + d;
+    const pts = [];
+    for (let i = 0; i <= N; i++) {
+      const uu = (uEnd * i) / N;
+      pts.push([halfWidthAt(uu, half, U, T, B), top + uu * d]);
+    }
+    const seg = pts.map(([ww, y], i) => `${i === 0 ? 'M' : 'L'}${(cx - ww).toFixed(1)} ${y.toFixed(1)}`);
+    const [wEnd, yEnd] = pts[N];
+    seg.push(`Q${(cx - hb).toFixed(1)} ${yb.toFixed(1)} ${(cx - hb + r).toFixed(1)} ${yb.toFixed(1)}`);
+    seg.push(`L${(cx + hb - r).toFixed(1)} ${yb.toFixed(1)}`);
+    seg.push(`Q${(cx + hb).toFixed(1)} ${yb.toFixed(1)} ${(cx + wEnd).toFixed(1)} ${yEnd.toFixed(1)}`);
+    for (let i = N; i >= 0; i--) seg.push(`L${(cx + pts[i][0]).toFixed(1)} ${pts[i][1].toFixed(1)}`);
+    return `${seg.join(' ')} Z`;
+  })();
+
+  return (
+    <svg viewBox="0 0 200 118" width={w} height={h} className="eb-thumb" aria-hidden="true">
+      <rect x="0" y="0" width="200" height="118" fill="#100E09" />
+      <rect x="8" y={top + filmH} width="184" height={subH} fill="#4A505E" />
+      <rect x="8" y={top} width="184" height={filmH}
+            fill={run.target === 'PR' ? '#7A5A9E' : run.target === 'Si' ? '#8A8F9E' : '#6E8FA8'} />
+      {u > 0.3 && (
+        <rect x={cx - hb} y={top + filmH} width={hb * 2} height={u} fill="#141209" stroke="#E06C5A" strokeWidth="0.6" />
+      )}
+      {cavity && <path d={cavity} fill="#141209" stroke="#2A2620" strokeWidth="0.5" />}
+      {!blanket && (
+        <>
+          <rect x="8" y={top - 9} width={cx - half - 8} height="9" fill="#B98A4E" />
+          <rect x={cx + half} y={top - 9} width={192 - cx - half} height="9" fill="#B98A4E" />
+        </>
+      )}
+      <text x="10" y={top + filmH - 3} fontSize="7" fill="#C9BFA5"
+            fontFamily="ui-monospace, Menlo, monospace">{t.label}</text>
+      <text x={S ? 192 : 192} y="14" fontSize="7.5" fill="#F0C464" textAnchor="end"
+            fontFamily="ui-monospace, Menlo, monospace">
+        측벽 {Math.round(run.prof.sidewallAngle)}°
+      </text>
+    </svg>
+  );
+}
+
+/** 두 런의 레시피에서 달라진 항목만 골라 낸다. "뭘 바꿨더라" 에 답하는 부분이다. */
+function recipeDiff(a, b) {
+  if (!a) return [];
+  const out = [];
+  const push = (k, x, y, unit = '') => { if (x !== y) out.push(`${k} ${x}${unit} → ${y}${unit}`); };
+  push('재료', a.target, b.target);
+  push('압력', a.pressure, b.pressure, ' mTorr');
+  push('파워', a.power, b.power, ' W');
+  push('시간', a.etchTime, b.etchTime, ' s');
+  if (a.target !== 'PR' || b.target !== 'PR') push('CD', a.cd, b.cd, ' nm');
+  GASES.forEach((g) => push(g.label, a.gas[g.id], b.gas[g.id], ' sccm'));
+  return out;
+}
+
+function RunCompare({ runs, open, onToggle, onClear }) {
+  if (runs.length === 0) return null;
+
+  return (
+    <div className={`eb-cmp ${open ? 'is-open' : ''}`}>
+      <button type="button" className="eb-cmp-tab" onClick={onToggle} aria-expanded={open}>
+        <span className="eb-cmp-dots">
+          {runs.map((r) => <ProfileThumb key={r.id} run={r} w={38} />)}
+        </span>
+        <span className="eb-cmp-lbl">
+          지난 런 {runs.length}개 {open ? '닫기' : '비교'}
+        </span>
+      </button>
+
+      {open && (
+        <div className="eb-cmp-panel" role="dialog" aria-label="지난 런 비교">
+          <div className="eb-cmp-head">
+            <span>지난 런 비교 — 최근 {MAX_RUNS}개까지 남습니다 (새로고침하면 사라집니다)</span>
+            <button type="button" className="eb-cmp-x" onClick={onClear}>모두 지우기</button>
+          </div>
+          <div className="eb-cmp-grid" data-n={runs.length}>
+            {runs.map((r, i) => {
+              const diff = recipeDiff(runs[i - 1], r);
+              return (
+                <article className="eb-cmp-card" key={r.id}>
+                  <header>
+                    <b>{r.n}번</b>
+                    <span>{TARGETS.find((t) => t.id === r.target)?.label} · {r.pressure} mTorr · {r.power} W · {r.etchTime}s</span>
+                  </header>
+                  <ProfileThumb run={r} w={190} />
+                  <dl>
+                    <div><dt>측벽</dt><dd>{Math.round(r.prof.sidewallAngle)}°</dd></div>
+                    <div><dt>깊이</dt><dd>{Math.round(r.filmEtched + r.underlayerLoss)} nm</dd></div>
+                    <div>
+                      <dt>{r.remainingFilm > 0.5 ? '잔막' : '하부층'}</dt>
+                      <dd>{r.remainingFilm > 0.5
+                        ? `${Math.round(r.remainingFilm)} nm`
+                        : `−${Math.round(r.underlayerLoss)} nm`}</dd>
+                    </div>
+                    <div><dt>선택비</dt><dd>{r.sel.toFixed(1)}:1</dd></div>
+                  </dl>
+                  <p className="eb-cmp-diff">
+                    {i === 0
+                      ? <span className="is-dim">첫 런</span>
+                      : diff.length === 0
+                        ? <span className="is-dim">앞 런과 조건이 같습니다</span>
+                        : <>앞 런에서 바꾼 것: <b>{diff.join(' · ')}</b></>}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ────────────────────────── OES 엔드포인트 신호 ────────────────────────── */
 
 function OesTrace({ samples, detected }) {
@@ -1005,6 +1166,10 @@ export default function EtchingBay() {
   const [punched, setPunched] = useState(false);
   const [oes, setOes] = useState([]);
   const [result, setResult] = useState(null);
+  // 지난 런 보관 (최근 MAX_RUNS 개). 새로고침하면 사라진다 — 실습 기록이지 데이터가 아니다.
+  const [runs, setRuns] = useState([]);
+  const [cmpOpen, setCmpOpen] = useState(false);
+  const runSeq = useRef(0);
   const [tickCount, setTickCount] = useState(0);
 
   const timer = useRef(null);
@@ -1177,10 +1342,29 @@ export default function EtchingBay() {
         punchThroughTime: r.punchAt,
         cd: preview.trench === Infinity ? null : cd,
       });
+      /* 이 런의 최종 형상을 한 장 남긴다. 조건을 바꿔 가며 돌릴 때
+         "2번은 뭘 바꿨더라" 에 답할 수 있어야 비교가 된다. */
+      runSeq.current += 1;
+      setRuns((prev) => [...prev, {
+        id: `run-${runSeq.current}`,
+        n: runSeq.current,
+        target,
+        pressure: setPressure_,
+        power,
+        etchTime,
+        cd,
+        gas: { ...gasFlows },
+        prof: preview.prof,
+        filmEtched: r.film,
+        remainingFilm: Math.max(0, FILM_NM - r.film),
+        underlayerLoss: r.under,
+        sel: preview.sel,
+      }].slice(-MAX_RUNS));
+
       setPhase('VENTING');
     }, 1600);
     return () => clearTimeout(id);
-  }, [phase, preview, cd]);
+  }, [phase, preview, cd, target, setPressure_, power, etchTime, gasFlows]);
 
   useEffect(() => {
     if (phase !== 'VENTING') return;
@@ -1698,6 +1882,13 @@ export default function EtchingBay() {
         </section>
       </main>
 
+      <RunCompare
+        runs={runs}
+        open={cmpOpen}
+        onToggle={() => setCmpOpen((v) => !v)}
+        onClear={() => { setRuns([]); setCmpOpen(false); }}
+      />
+
       {/* 하단 : 주 액션 하나 */}
       <footer className="eb-foot">
         <div className="eb-foot-info">
@@ -1806,6 +1997,46 @@ const EB_CSS = `
 .eb-g-v{font-size:17px; color:var(--amber); text-shadow:0 0 12px rgba(240,196,100,.3); white-space:nowrap;}
 .eb-g-v small{font-size:10px; color:var(--txt-dim); margin-left:3px; text-shadow:none;}
 
+
+/* ── 지난 런 비교 ── */
+.eb-cmp{position:relative; flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel);}
+.eb-cmp-tab{display:flex; align-items:center; gap:10px; width:100%; padding:6px 14px;
+  background:none; border:0; cursor:pointer; color:var(--txt-dim);
+  font-family:ui-monospace,Menlo,monospace; font-size:10.5px; letter-spacing:.06em;}
+.eb-cmp-tab:hover{color:var(--txt); background:var(--panel2);}
+.eb-cmp-tab:focus{outline:none;}
+.eb-cmp-tab:focus-visible{outline:2px solid var(--amber); outline-offset:-2px;}
+.eb-cmp-dots{display:flex; gap:5px;}
+.eb-cmp-dots .eb-thumb{border:1px solid var(--line); border-radius:2px; display:block;}
+.eb-cmp-lbl{margin-left:auto;}
+
+.eb-cmp-panel{position:absolute; left:0; right:0; bottom:100%; z-index:40;
+  background:var(--panel); border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+  box-shadow:0 -14px 34px rgba(0,0,0,.55); max-height:70vh; overflow-y:auto;}
+.eb-cmp-head{display:flex; align-items:center; gap:12px; padding:8px 14px;
+  border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace;
+  font-size:10px; letter-spacing:.05em; color:var(--txt-dim);}
+.eb-cmp-x{margin-left:auto; background:none; border:1px solid var(--line); border-radius:2px;
+  color:var(--txt-dim); font:inherit; padding:3px 9px; cursor:pointer;}
+.eb-cmp-x:hover{color:var(--txt); border-color:var(--txt-dim);}
+
+.eb-cmp-grid{display:grid; gap:1px; background:var(--line); padding:1px;}
+.eb-cmp-grid[data-n="1"]{grid-template-columns:1fr;}
+.eb-cmp-grid[data-n="2"]{grid-template-columns:1fr 1fr;}
+.eb-cmp-grid[data-n="3"]{grid-template-columns:1fr 1fr 1fr;}
+@media (max-width:820px){ .eb-cmp-grid[data-n]{grid-template-columns:1fr;} }
+
+.eb-cmp-card{background:var(--panel); padding:12px 14px;}
+.eb-cmp-card header{display:flex; flex-wrap:wrap; align-items:baseline; gap:8px; margin-bottom:8px;}
+.eb-cmp-card header b{color:var(--amber); font-family:ui-monospace,Menlo,monospace; font-size:12px;}
+.eb-cmp-card header span{font-family:ui-monospace,Menlo,monospace; font-size:10px; color:var(--txt-dim);}
+.eb-cmp-card .eb-thumb{width:100%; height:auto; border:1px solid var(--line); border-radius:2px; display:block;}
+.eb-cmp-card dl{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin:9px 0 0;}
+.eb-cmp-card dt{font-family:ui-monospace,Menlo,monospace; font-size:9px; letter-spacing:.06em; color:var(--txt-dim);}
+.eb-cmp-card dd{margin:1px 0 0; font-family:ui-monospace,Menlo,monospace; font-size:12px; color:var(--txt);}
+.eb-cmp-diff{margin:9px 0 0; font-size:11px; line-height:1.55; color:var(--txt-dim);}
+.eb-cmp-diff b{color:var(--amber); font-weight:600;}
+.eb-cmp-diff .is-dim{opacity:.7;}
 .eb-inset-wrap{flex:0 0 auto; border:1px solid var(--line); background:var(--panel); border-radius:2px; overflow:hidden;}
 .eb-inset-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 14px; padding:7px 10px; border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.06em; color:var(--txt-dim);}
 .eb-inset-a{color:var(--txt); letter-spacing:0; white-space:nowrap;}
