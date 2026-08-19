@@ -72,7 +72,15 @@ function mix(a, b, t) {
 
 /* ────────────────────────── 본체 ────────────────────────── */
 
-export default function EtchingBasics() {
+/**
+ * @param {'page'|'embed'} variant
+ *   page  — 식각 기초 카드 본체. 머리말·대조군 표·한계까지 전부 보인다.
+ *   embed — 다른 화면 안에 끼워 넣는 관측창. 관측창과 시너지 막대만 남긴다.
+ *           (Si식각메커니즘 탭이 이 형태로 쓴다. 그 탭에는 이미 가스 분해 설명이
+ *            따로 있어서 머리말을 두 번 쓰면 같은 말이 겹친다.)
+ */
+export default function EtchingBasics({ variant = 'page' }) {
+  const embed = variant === 'embed';
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
 
@@ -423,9 +431,10 @@ export default function EtchingBasics() {
   const synergy = allDone ? rates.both / Math.max(0.0001, rates.radical + rates.ion) : null;
 
   return (
-    <div className="sr-root">
+    <div className={`sr-root ${embed ? 'is-embed' : ''}`}>
       <style>{SR_CSS}</style>
 
+      {!embed && (
       <header className="sr-top">
         <div>
           <h2 className="sr-h">식각 시너지 관측창</h2>
@@ -435,12 +444,15 @@ export default function EtchingBasics() {
         </div>
         <span className="sr-scale">시야 6 nm · 격자 0.15 nm · 배율 1:10⁶</span>
       </header>
+      )}
 
+      {!embed && (
       <p className="sr-lede">
         <b>Cl 라디칼이 Si 표면을 염소화하고, 수직으로 내리꽂힌 이온이 그 약해진 결합을 때려
         SiCl₄ 를 떼어낸다.</b> 아래 세 버튼으로 라디칼만·이온만·둘 다를 각각 돌려 보면
         왜 식각이 “화학 + 물리”가 아니라 <b>화학 × 물리</b>인지 숫자로 나온다.
       </p>
+      )}
 
       <div className="sr-viewport">
         <div className="sr-bar">
@@ -564,6 +576,7 @@ export default function EtchingBasics() {
       </section>
 
       {/* ── 대조군 ── */}
+      {!embed && (
       <section className="sr-sec">
         <p className="sr-eyebrow">대조군</p>
         <h3 className="sr-h3">Coburn–Winters 실험</h3>
@@ -610,7 +623,17 @@ export default function EtchingBasics() {
           값은 논문 그래프에서 읽은 근사치다. 문헌 시너지는 {COBURN_WINTERS.synergy.toFixed(1)} 배다.
         </p>
       </section>
+      )}
 
+      {/* 한계는 embed 에서도 남긴다. 정확도 고지는 접을 대상이 아니다.
+         다만 끼워 넣는 화면에서는 한 줄로 줄인다. */}
+      {embed ? (
+        <p className="sr-cite" style={{ marginTop: 26 }}>
+          분자동역학이 아니라 <b>확률 모사</b>다. 흡착·스퍼터링 확률을 Coburn–Winters(1979)의
+          상대비에 맞춰 잡았고 그 재현은 테스트가 지킨다. 화면의 “원자/s”는 이 모사 안에서만
+          의미가 있는 상대 지표이며, 실제 식각률(nm/min)로 환산해 인용하면 안 된다.
+        </p>
+      ) : (
       <div className="sr-caveat">
         <b>이 모사가 하지 않는 것</b>
         <ul>
@@ -620,6 +643,7 @@ export default function EtchingBasics() {
           <li>화면의 “원자/s”는 이 모사 안에서만 의미가 있는 상대 지표다. 실제 식각률(nm/min)로 환산해 인용하면 안 된다.</li>
         </ul>
       </div>
+      )}
     </div>
   );
 }
@@ -644,6 +668,9 @@ const SR_CSS = `
   min-height: 100%;
 }
 .sr-root * { box-sizing: border-box; }
+.sr-root.is-embed { padding:18px; border-radius:8px; }
+.sr-root.is-embed .sr-viewport { margin-top:0; }
+.sr-root.is-embed .sr-sec { margin-top:30px; }
 
 .sr-top { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 20px;
   padding-bottom:12px; border-bottom:1px solid var(--rule); }
