@@ -33,11 +33,14 @@ import {
 
 /* ────────────────────────── 상수 ────────────────────────── */
 
-const VIEW_W = 960, VIEW_H = 540;
+/* 캔버스 비율. 16:9 로 두면 넓은 화면에서 캔버스 하나가 화면을 다 먹고
+   모드 버튼·계기판이 스크롤 아래로 밀려난다. 조작부가 안 보이면 관측창이 아니다.
+   기체 공간을 줄여 가로로 눕혔다. */
+const VIEW_W = 960, VIEW_H = 400;
 const A = 24;                                  // 원자 간격 (px)
 const R = 7.2;                                 // 원자 반지름
 const COLS = Math.floor(VIEW_W / A);           // 40 열
-const SURF_Y = 268;                            // 초기 표면 y
+const SURF_Y = 176;                            // 초기 표면 y
 const DEPTH = Math.floor((VIEW_H - SURF_Y) / A) - 1;
 const NM_PER_LAYER = 0.15;                     // 격자 간격 ≈ Si 원자층 두께 규모
 const SETTLE = 15;                             // 이 시간을 채워야 그 모드의 값을 인정한다 (s)
@@ -72,15 +75,7 @@ function mix(a, b, t) {
 
 /* ────────────────────────── 본체 ────────────────────────── */
 
-/**
- * @param {'page'|'embed'} variant
- *   page  — 식각 기초 카드 본체. 머리말·대조군 표·한계까지 전부 보인다.
- *   embed — 다른 화면 안에 끼워 넣는 관측창. 관측창과 시너지 막대만 남긴다.
- *           (Si식각메커니즘 탭이 이 형태로 쓴다. 그 탭에는 이미 가스 분해 설명이
- *            따로 있어서 머리말을 두 번 쓰면 같은 말이 겹친다.)
- */
-export default function EtchingBasics({ variant = 'page' }) {
-  const embed = variant === 'embed';
+export default function EtchingBasics() {
   const canvasRef = useRef(null);
   const rafRef = useRef(null);
 
@@ -161,7 +156,7 @@ export default function EtchingBasics({ variant = 'page' }) {
         st.particles.push({
           k: 0,
           x: Math.random() * VIEW_W,
-          y: -8 - Math.random() * 40,
+          y: -6 - Math.random() * 26,
           vx: Math.cos(ang) * sp,
           vy: Math.abs(Math.sin(ang)) * sp,
         });
@@ -173,7 +168,7 @@ export default function EtchingBasics({ variant = 'page' }) {
         st.particles.push({
           k: 1,
           x: Math.random() * VIEW_W,
-          y: -8 - Math.random() * 60,
+          y: -6 - Math.random() * 40,
           vx: (Math.random() - 0.5) * 0.18,
           vy: 5.4 + Math.random() * 1.6,
         });
@@ -294,11 +289,11 @@ export default function EtchingBasics({ variant = 'page' }) {
     }
 
     // 아래쪽은 관심 대상이 아니다. 어둠으로 녹여 시선을 표면에 묶는다.
-    const fade = ctx.createLinearGradient(0, VIEW_H - 190, 0, VIEW_H);
+    const fade = ctx.createLinearGradient(0, VIEW_H - 140, 0, VIEW_H);
     fade.addColorStop(0, 'rgba(16,14,9,0)');
     fade.addColorStop(1, 'rgba(16,14,9,1)');
     ctx.fillStyle = fade;
-    ctx.fillRect(0, VIEW_H - 190, VIEW_W, 190);
+    ctx.fillRect(0, VIEW_H - 140, VIEW_W, 140);
 
     // 표면선
     ctx.beginPath();
@@ -431,10 +426,9 @@ export default function EtchingBasics({ variant = 'page' }) {
   const synergy = allDone ? rates.both / Math.max(0.0001, rates.radical + rates.ion) : null;
 
   return (
-    <div className={`sr-root ${embed ? 'is-embed' : ''}`}>
+    <div className="sr-root">
       <style>{SR_CSS}</style>
 
-      {!embed && (
       <header className="sr-top">
         <div>
           <h2 className="sr-h">식각 시너지 관측창</h2>
@@ -444,21 +438,34 @@ export default function EtchingBasics({ variant = 'page' }) {
         </div>
         <span className="sr-scale">시야 6 nm · 격자 0.15 nm · 배율 1:10⁶</span>
       </header>
-      )}
 
-      {!embed && (
       <p className="sr-lede">
         <b>Cl 라디칼이 Si 표면을 염소화하고, 수직으로 내리꽂힌 이온이 그 약해진 결합을 때려
         SiCl₄ 를 떼어낸다.</b> 아래 세 버튼으로 라디칼만·이온만·둘 다를 각각 돌려 보면
         왜 식각이 “화학 + 물리”가 아니라 <b>화학 × 물리</b>인지 숫자로 나온다.
       </p>
-      )}
 
       <div className="sr-viewport">
+        {/* 조작부는 관측창과 같은 시야 안에 있어야 한다. 캔버스 아래에 두면
+            넓은 화면에서 스크롤 밑으로 내려가 "버튼이 없는 화면" 이 된다. */}
         <div className="sr-bar">
           <span className={`sr-live ${paused ? 'is-off' : ''}`} aria-hidden="true" />
-          <span>{MODE_INFO[mode].label}</span>
-          <span className="sr-bar-r">{readout.clock.toFixed(1)} s</span>
+          <span className="sr-bar-clock">{readout.clock.toFixed(1)} s</span>
+          <div className="sr-seg" role="group" aria-label="반응 모드 선택">
+            {MODE_LIST.map((m) => (
+              <button
+                key={m}
+                type="button"
+                className="sr-seg-btn"
+                data-m={m}
+                aria-pressed={mode === m}
+                onClick={() => changeMode(m)}
+                title={MODE_INFO[m].sub}
+              >
+                {MODE_INFO[m].name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <canvas
@@ -476,23 +483,6 @@ export default function EtchingBasics({ variant = 'page' }) {
           <span><i className="sq" style={{ background: C.ion }} />이온 (수직 입사)</span>
           <span><i style={{ background: C.siCl[4] }} />염소화된 표면 SiClₓ</span>
           <span><i style={{ background: C.product }} />SiCl₄ 휘발</span>
-        </div>
-
-        <div className="sr-modes" role="group" aria-label="반응 모드 선택">
-          {MODE_LIST.map((m) => (
-            <button
-              key={m}
-              type="button"
-              className="sr-mode"
-              data-m={m}
-              aria-pressed={mode === m}
-              onClick={() => changeMode(m)}
-            >
-              <span className="sr-mode-k">{MODE_INFO[m].key}</span>
-              <span className="sr-mode-n">{MODE_INFO[m].name}</span>
-              <span className="sr-mode-s">{MODE_INFO[m].sub}</span>
-            </button>
-          ))}
         </div>
 
         <dl className="sr-gauges">
@@ -537,7 +527,7 @@ export default function EtchingBasics({ variant = 'page' }) {
 
         <div className="sr-bars">
           {MODE_LIST.map((m) => (
-            <div className="sr-bar-row" data-m={m} key={m}>
+            <div className="sr-bar-row" data-m={m} data-pending={rates[m] === null} key={m}>
               <span className="sr-bar-l">{MODE_INFO[m].name}</span>
               <div className="sr-track">
                 <div
@@ -576,7 +566,6 @@ export default function EtchingBasics({ variant = 'page' }) {
       </section>
 
       {/* ── 대조군 ── */}
-      {!embed && (
       <section className="sr-sec">
         <p className="sr-eyebrow">대조군</p>
         <h3 className="sr-h3">Coburn–Winters 실험</h3>
@@ -623,17 +612,7 @@ export default function EtchingBasics({ variant = 'page' }) {
           값은 논문 그래프에서 읽은 근사치다. 문헌 시너지는 {COBURN_WINTERS.synergy.toFixed(1)} 배다.
         </p>
       </section>
-      )}
 
-      {/* 한계는 embed 에서도 남긴다. 정확도 고지는 접을 대상이 아니다.
-         다만 끼워 넣는 화면에서는 한 줄로 줄인다. */}
-      {embed ? (
-        <p className="sr-cite" style={{ marginTop: 26 }}>
-          분자동역학이 아니라 <b>확률 모사</b>다. 흡착·스퍼터링 확률을 Coburn–Winters(1979)의
-          상대비에 맞춰 잡았고 그 재현은 테스트가 지킨다. 화면의 “원자/s”는 이 모사 안에서만
-          의미가 있는 상대 지표이며, 실제 식각률(nm/min)로 환산해 인용하면 안 된다.
-        </p>
-      ) : (
       <div className="sr-caveat">
         <b>이 모사가 하지 않는 것</b>
         <ul>
@@ -643,7 +622,6 @@ export default function EtchingBasics({ variant = 'page' }) {
           <li>화면의 “원자/s”는 이 모사 안에서만 의미가 있는 상대 지표다. 실제 식각률(nm/min)로 환산해 인용하면 안 된다.</li>
         </ul>
       </div>
-      )}
     </div>
   );
 }
@@ -666,11 +644,13 @@ const SR_CSS = `
   line-height: 1.7;
   padding: 28px 22px 64px;
   min-height: 100%;
+  /* 이 카드는 h-screen 플렉스 컨테이너(App.js) 안의 플렉스 아이템이다.
+     기본 flex-shrink 를 두면 높이가 뷰포트(900px)로 눌리는데 내용은 그보다 길어서,
+     어두운 배경이 눌린 높이까지만 칠해지고 그 아래는 앱의 밝은 배경이 드러났다.
+     밝은 글씨가 흰 바탕 위에 올라가 거의 안 보였다. 내용 높이를 지키게 한다. */
+  flex: 0 0 auto;
 }
 .sr-root * { box-sizing: border-box; }
-.sr-root.is-embed { padding:18px; border-radius:8px; }
-.sr-root.is-embed .sr-viewport { margin-top:0; }
-.sr-root.is-embed .sr-sec { margin-top:30px; }
 
 .sr-top { display:flex; flex-wrap:wrap; align-items:baseline; gap:10px 20px;
   padding-bottom:12px; border-bottom:1px solid var(--rule); }
@@ -689,7 +669,11 @@ const SR_CSS = `
   box-shadow:0 0 6px var(--radical); flex:0 0 auto; }
 .sr-live.is-off { background:var(--ink-dim); box-shadow:none; }
 .sr-bar-r { margin-left:auto; }
-.sr-canvas { display:block; width:100%; height:auto; aspect-ratio:960/540; background:#100E09; }
+.sr-canvas {
+  display:block; width:100%; height:auto; aspect-ratio:960/400; background:#100E09;
+  /* 넓은 화면에서 캔버스만 커져 계기판이 밀려나는 것을 막는다 */
+  max-height:46vh; margin:0 auto;
+}
 
 .sr-legend { display:flex; flex-wrap:wrap; gap:10px 20px; padding:10px 16px;
   border-top:1px solid var(--rule-soft); background:var(--panel);
@@ -698,22 +682,23 @@ const SR_CSS = `
 .sr-legend i { width:9px; height:9px; border-radius:50%; display:inline-block; flex:0 0 auto; }
 .sr-legend i.sq { border-radius:1px; width:10px; height:10px; }
 
-.sr-modes { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px;
-  background:var(--rule-soft); border-top:1px solid var(--rule); }
-.sr-mode { appearance:none; border:0; border-top:2px solid transparent; background:var(--panel);
-  color:var(--ink-mid); font:inherit; font-size:0.9rem; text-align:left; padding:11px 18px;
-  cursor:pointer; transition:background 140ms ease, color 140ms ease; }
-.sr-mode:hover { background:var(--panel-hi); color:var(--ink); }
-.sr-mode:focus { outline:none; }   /* 앱 전역 포커스 링이 파랗게 튀어나온다 */
-.sr-mode:focus-visible { outline:2px solid var(--ion); outline-offset:-2px; }
-.sr-mode[aria-pressed="true"] { background:var(--panel-hi); color:var(--ink); }
-.sr-mode[data-m="radical"][aria-pressed="true"] { border-top-color:var(--radical); }
-.sr-mode[data-m="ion"][aria-pressed="true"] { border-top-color:var(--ion); }
-.sr-mode[data-m="both"][aria-pressed="true"] { border-top-color:var(--product); }
-.sr-mode-k { display:block; font-family:var(--mono); font-size:0.64rem; letter-spacing:0.09em;
-  color:var(--ink-dim); }
-.sr-mode-n { font-weight:600; margin-right:7px; }
-.sr-mode-s { font-size:0.78rem; color:var(--ink-dim); }
+.sr-bar-clock { font-variant-numeric:tabular-nums; }
+
+/* 모드 선택 — 관측창 상단 바 오른쪽에 붙인 세그먼트 컨트롤 */
+.sr-seg { display:flex; margin-left:auto; gap:1px; background:var(--rule); border:1px solid var(--rule); border-radius:3px; overflow:hidden; }
+.sr-seg-btn {
+  appearance:none; border:0; background:var(--panel); color:var(--ink-mid);
+  font-family:inherit; font-size:0.78rem; font-weight:600; letter-spacing:0;
+  text-transform:none; padding:5px 13px; cursor:pointer; white-space:nowrap;
+  transition:background 140ms ease, color 140ms ease;
+}
+.sr-seg-btn:hover { background:var(--panel-hi); color:var(--ink); }
+.sr-seg-btn:focus { outline:none; }   /* 앱 전역 포커스 링이 파랗게 튀어나온다 */
+.sr-seg-btn:focus-visible { outline:2px solid var(--ion); outline-offset:-2px; }
+.sr-seg-btn[aria-pressed="true"] { color:#14120C; }
+.sr-seg-btn[data-m="radical"][aria-pressed="true"] { background:var(--radical); }
+.sr-seg-btn[data-m="ion"][aria-pressed="true"] { background:var(--ion); }
+.sr-seg-btn[data-m="both"][aria-pressed="true"] { background:var(--product); }
 
 .sr-gauges { display:grid; grid-template-columns:repeat(auto-fit,minmax(148px,1fr)); gap:1px;
   background:var(--rule-soft); border-top:1px solid var(--rule-soft); margin:0; }
@@ -738,18 +723,26 @@ const SR_CSS = `
 .sr-h3 { margin:0 0 10px; font-size:1.1rem; font-weight:600; color:var(--ink); }
 .sr-dim { margin:0; color:var(--ink-mid); font-size:0.92rem; max-width:66ch; }
 
-.sr-bars { margin-top:18px; display:grid; gap:11px; }
-.sr-bar-row { display:grid; grid-template-columns:96px 1fr 104px; align-items:center; gap:12px; }
+/* 값 칸이 화면 밖으로 밀려 "12.6 원자/s" 가 잘려 보였다.
+   1fr 는 내용에 따라 최소 너비를 갖기 때문에 셋을 합친 폭이 컨테이너를 넘길 수 있다.
+   가운데를 minmax(0,1fr) 로 눌러 줄이 넘치지 않게 한다. */
+.sr-bars { margin-top:18px; display:grid; gap:11px; max-width:760px; }
+.sr-bar-row { display:grid; grid-template-columns:76px minmax(0,1fr) 96px; align-items:center; gap:12px; }
 .sr-bar-l { font-size:0.85rem; color:var(--ink-mid); }
-.sr-track { height:22px; background:var(--panel); border:1px solid var(--rule-soft);
+.sr-track { height:20px; min-width:0; background:var(--panel); border:1px solid var(--rule-soft);
   border-radius:2px; overflow:hidden; }
 .sr-fill { height:100%; width:0; transition:width 320ms cubic-bezier(.2,.7,.3,1);
   border-right:1px solid rgba(255,255,255,0.14); }
+/* 아직 15 초를 못 채운 모드는 빈 검은 띠로 보여 "고장" 처럼 읽힌다.
+   빗금을 깔아 "측정 전" 임을 표시한다. */
+.sr-bar-row[data-pending="true"] .sr-track {
+  background:repeating-linear-gradient(135deg,var(--panel),var(--panel) 5px,var(--panel-hi) 5px,var(--panel-hi) 10px);
+}
 .sr-bar-row[data-m="radical"] .sr-fill { background:#4A7A66; }
 .sr-bar-row[data-m="ion"] .sr-fill { background:#8A7238; }
 .sr-bar-row[data-m="both"] .sr-fill { background:#6BA790; }
-.sr-bar-v { font-family:var(--mono); font-size:0.85rem; font-variant-numeric:tabular-nums;
-  text-align:right; color:var(--ink); }
+.sr-bar-v { font-family:var(--mono); font-size:0.82rem; font-variant-numeric:tabular-nums;
+  text-align:right; color:var(--ink); white-space:nowrap; }
 .sr-bar-v em { font-style:normal; color:var(--ink-dim); font-size:0.72rem; }
 
 .sr-verdict { margin:18px 0 0; padding:12px 18px; border-left:2px solid var(--product);
