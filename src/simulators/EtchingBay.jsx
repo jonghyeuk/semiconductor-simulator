@@ -96,6 +96,15 @@ const PUMPDOWN_NOTES = [
 /* ────────────────────────── 유틸 ────────────────────────── */
 
 const clamp = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
+
+/** 두 색을 섞는다. 단면에서 깊이에 따라 어두워지는 데 쓴다. */
+function mix(a, b, t) {
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const r = Math.round(((pa >> 16) & 255) * (1 - t) + ((pb >> 16) & 255) * t);
+  const g = Math.round(((pa >> 8) & 255) * (1 - t) + ((pb >> 8) & 255) * t);
+  const bl = Math.round((pa & 255) * (1 - t) + (pb & 255) * t);
+  return `rgb(${r},${g},${bl})`;
+}
 const fmt = (v, d = 0) => (Number.isFinite(v) ? v.toFixed(d) : '—');
 
 /** 막을 관통하는 데 걸리는 시간(s). ARDE 때문에 깊이의 함수라 해석해가 없어
@@ -591,161 +600,337 @@ function ChamberView({
   );
 }
 
-/* ────────────────────── 원자 스케일 인셋 ──────────────────────
+/* ────────────────────── 원자 스케일 상세 ──────────────────────
    챔버 단면은 500 nm 스케일이라 프로파일의 **결과**만 보인다. 왜 그 모양인지는
-   1000 배 아래에서 정해진다.
+   1000 배 아래에서 정해진다. 여기서는 그 자리를 두 군데 확대해 나란히 돌린다.
 
-   바닥과 측벽은 같은 표면인데 도달하는 종이 다르다.
-     Ⓐ 바닥 — 시스 전기장에 가속된 이온이 수직으로 쏟아진다. 라디칼도 온다.
-              염소화로 약해진 결합을 이온이 때려 SiCl₄ 로 날린다. 빠르다.
-     Ⓑ 측벽 — 이온은 수직으로 내려가므로 벽을 지나친다. 방향성 없는 라디칼만 닿고,
-              폴리머가 있으면 그마저 막힌다. 느리다.
-   그 비가 곧 이방도다. A = 1 − (수평 식각률 / 수직 식각률).
+     Ⓐ 트렌치 바닥 — 시스 전기장에 가속된 이온이 수직으로 쏟아진다. 라디칼도 온다.
+                     라디칼이 표면 Si 를 염소화해 결합을 약하게 만들어 두면
+                     이온이 때려 SiCl₄ 로 떼어낸다. 빠르다.
+     Ⓑ 측벽        — 이온은 수직으로 내려가므로 벽을 지나친다. 방향성 없는 라디칼만
+                     닿고, 폴리머가 있으면 그마저 막힌다. 느리다.
 
-   ── 왜 움직여야 하나 ──
-   처음에는 점만 흔들리는 그림이었다. "모션으로 원리를 설명하는 것 같은데 뭔지
-   모르겠다" 는 소리를 들었고, 맞는 지적이었다. 흔들리는 것 말고는 아무 일도 일어나지
-   않았기 때문이다. 지금은 **두 면이 실제로 물러난다.** 바닥이 깊이만큼 내려가는 동안
-   측벽은 그 lateralRatio 배만큼만 파인다. 처음 위치를 점선으로 남겨 두어 둘이 얼마나
-   다르게 물러났는지 눈으로 재게 했다. 그 차이가 이방도의 정의 그대로다.
+   두 면이 물러나는 속도의 비가 곧 이방도다. A = 1 − (수평 식각률 / 수직 식각률).
 
-   ⚠ 여기서 식각률을 따로 재지 않는다. 두 면이 물러나는 거리는 프로파일을 그리는
-     그 값(filmEtched, lateralRatio)에서 바로 나온다. 재서 숫자를 또 만들면 화면에
-     진실이 둘이 되고 언젠가 어긋난다. 직접 세어 보는 화면은 「식각 기초」 카드다. */
+   ── 왜 이렇게까지 그리나 ──
+   처음에는 점만 흔들리는 그림이었고 "모션으로 뭔가 설명하는 것 같은데 뭔지 모르겠다"
+   는 말을 들었다. 다음에는 면이 통째로 미끄러져 내려가게 했는데, 그것도 원자가 그냥
+   이동할 뿐이어서 **들러붙고 떨어져 나가는 장면**이 없었다.
+   지금은 「식각 기초」 카드와 같은 반응을 그대로 돌린다. 라디칼이 날아와 표면 원자에
+   달라붙어 염소화가 쌓이고(껍질이 짙어진다), 이온이 때리면 그 원자가 SiCl₄ 로
+   빠져나가면서 면이 한 칸 물러난다. 같은 장면을 두 지점에서 동시에 보여 준다.
 
-const INSET_W = 320, INSET_H = 96;
-const INSET_SPAN_PX = 40;          // 막을 다 뚫었을 때 면이 물러나는 픽셀
+   ⚠ 여기서 식각률을 따로 재지 않는다. 제거를 허용하는 총량은 프로파일을 그리는 그 값
+     (바닥 = filmEtched, 측벽 = lateralRatio × filmEtched)에서 그대로 나온다. 반응은
+     진짜로 돌지만 누적은 프로파일과 어긋날 수 없다. 재서 숫자를 또 만들면 화면에
+     진실이 둘이 되고 언젠가 갈라진다. 직접 세어 보는 화면은 「식각 기초」 카드다. */
 
-function SurfaceInset({ profile, filmEtched }) {
-  const midX = 160;
-  const lateralNm = profile.lateralRatio * filmEtched;
-  const polymer = profile.polymerThickness > 0.5;
+const DET_W = 640, DET_H = 168;
+const DET_R = 8.4;                 // 원자 반지름
+const NM_PER_ATOM = 2;             // 원자 하나가 나타내는 식각량 (그림 단위)
+/* 패널 A(바닥)는 수평면이라 가로를 다 쓰고, B(측벽)는 수직면이라 세로를 다 쓴다.
+   처음에는 A 를 좁게 잡아 오른쪽 절반이 비어 보였다. */
+const A_COLS = 6, A_PITCH = 46, A_X0 = 36, A_Y0 = 52, A_DEPTH = 4;
+const B_ROWS = 5, B_PITCH = 27, B_Y0 = 34, B_X0 = 486, B_DEPTH = 4;
 
-  // 물러난 거리. 두 면 모두 프로파일 값에서 그대로 나온다.
-  const advA = clamp(filmEtched / FILM_NM, 0, 1) * INSET_SPAN_PX;
-  const advB = advA * profile.lateralRatio;
+const DET_C = {
+  void: '#141209',
+  si: '#8FA39C',
+  siDeep: '#3A4048',
+  siCl: ['#8FA39C', '#84A096', '#79A08E', '#6E9E88', '#5C7A6E'],
+  radical: '#7FC8A9',
+  ion: '#F0C464',
+  product: '#9FD8C0',
+  polymer: '#E2B45C',
+};
 
-  // 흩뿌린 것처럼 보이게 하는 비선형 해시 (선형합동식은 가지런한 대각선이 된다)
-  const rnd = (i, salt) => {
-    const v = Math.sin(i * 12.9898 + salt * 78.233) * 43758.5453;
-    return v - Math.floor(v);
-  };
+/** 한 지점의 표면 상태. 열(또는 행)마다 원자가 쌓여 있고 최상단이 표면이다. */
+function makeSite(n) {
+  return { n, back: new Int16Array(n), cl: new Uint8Array(n), removed: 0, scrolled: 0 };
+}
 
-  const AY0 = 32;                       // Ⓐ 처음 표면 y
-  const ayNow = AY0 + advA;
-  const BX0 = 268;                      // Ⓑ 처음 측벽 x (오른쪽이 트렌치 안)
-  const bxNow = BX0 - advB;
+/**
+ * 한 자리를 떼어낸다.
+ *
+ * **가장 덜 물러난 면들 중에서** 가장 염소화된 곳을 고른다. 염소화만 보고 고르면
+ * 라디칼이 우연히 몰린 한 열만 계속 파여 표면이 계단처럼 무너지고, 모든 열이
+ * 내려가야 걸리는 스크롤도 영영 안 걸려 격자가 화면 밖으로 행진한다.
+ * 실제 평탄한 면의 식각도 대체로 층 단위로 진행된다.
+ */
+function detachOne(site) {
+  let front = Infinity;
+  for (let i = 0; i < site.n; i++) if (site.back[i] < front) front = site.back[i];
+  let best = -1;
+  for (let i = 0; i < site.n; i++) {
+    if (site.back[i] !== front) continue;
+    if (best < 0 || site.cl[i] > site.cl[best]) best = i;
+  }
+  const at = best;
+  site.back[at] += 1;
+  site.cl[at] = 0;                      // 새로 드러난 원자는 아직 깨끗하다
+  site.removed += 1;
+  let min = Infinity;
+  for (let i = 0; i < site.n; i++) if (site.back[i] < min) min = site.back[i];
+  if (min >= 1) {
+    for (let i = 0; i < site.n; i++) site.back[i] -= 1;
+    site.scrolled += 1;
+  }
+  return at;
+}
 
-  const label = (n) => `${Math.round(n)}nm`;
+function SurfaceDetail({ profile, filmEtched, live }) {
+  const canvasRef = useRef(null);
+  const rafRef = useRef(null);
+  const stRef = useRef(null);
+  const propsRef = useRef({ profile, filmEtched, live });
+
+  useEffect(() => { propsRef.current = { profile, filmEtched, live }; }, [profile, filmEtched, live]);
+
+  if (stRef.current === null) {
+    stRef.current = {
+      a: makeSite(A_COLS),
+      b: makeSite(B_ROWS),
+      parts: [],      // 날아다니는 종
+      prods: [],      // 빠져나가는 생성물
+      hits: [],       // 충돌 섬광
+    };
+  }
+
+  // 런이 새로 시작하면(깊이가 되감기면) 표면도 새로 깐다
+  useEffect(() => {
+    if (filmEtched < 1) {
+      stRef.current = { a: makeSite(A_COLS), b: makeSite(B_ROWS), parts: [], prods: [], hits: [] };
+    }
+  }, [filmEtched]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return undefined;
+    const ctx = canvas.getContext('2d', { alpha: false });
+    let last = performance.now();
+
+    const rnd = () => Math.random();
+
+    const step = (dt) => {
+      const st = stRef.current;
+      const { profile: prof, filmEtched: film, live: on } = propsRef.current;
+
+      /* 제거 허용량. 프로파일 값에서 그대로 나온다 — 여기서 새로 재지 않는다. */
+      const targetA = film / NM_PER_ATOM;
+      const targetB = (prof.lateralRatio * film) / NM_PER_ATOM;
+
+      if (on) {
+        // 라디칼은 양쪽 모두에 온다. 방향이 제멋대로라 측벽에도 닿는다.
+        if (rnd() < 0.34) {
+          st.parts.push({ k: 0, site: 'a', x: A_X0 - 14 + rnd() * (A_COLS * A_PITCH), y: -6,
+                          vx: (rnd() - 0.5) * 1.6, vy: 1.8 + rnd() * 1.2 });
+        }
+        if (rnd() < 0.26) {
+          st.parts.push({ k: 0, site: 'b', x: DET_W - 8, y: 16 + rnd() * 132,
+                          vx: -(1.6 + rnd() * 1.2), vy: (rnd() - 0.5) * 1.4 });
+        }
+        // 이온은 바닥에만 꽂힌다. 측벽 쪽은 벽을 지나쳐 내려간다.
+        if (rnd() < 0.30) {
+          st.parts.push({ k: 1, site: 'a', x: A_X0 - 8 + rnd() * (A_COLS * A_PITCH), y: -6,
+                          vx: 0, vy: 3.4 + rnd() * 1.0 });
+        }
+        if (rnd() < 0.12) {
+          st.parts.push({ k: 1, site: 'pass', x: B_X0 + 26 + rnd() * 118, y: -6, vx: 0, vy: 3.4 });
+        }
+      }
+
+      // 진행 · 도달 처리
+      for (let i = st.parts.length - 1; i >= 0; i--) {
+        const p = st.parts[i];
+        p.x += p.vx; p.y += p.vy;
+        if (p.x < -20 || p.x > DET_W + 20 || p.y > DET_H + 20) { st.parts.splice(i, 1); continue; }
+        // 자기 패널을 벗어난 종은 버린다. 놔두면 반대쪽 그림 위로 날아가 지저분해진다.
+        if (p.site === 'a' && p.x > DET_W / 2) { st.parts.splice(i, 1); continue; }
+        if (p.site !== 'a' && p.x < DET_W / 2 + 12) { st.parts.splice(i, 1); continue; }
+
+        if (p.site === 'a') {
+          const c = Math.floor((p.x - A_X0 + A_PITCH / 2) / A_PITCH);
+          if (c < 0 || c >= A_COLS) continue;
+          const sy = A_Y0 + st.a.back[c] * A_PITCH;
+          if (p.y < sy - DET_R) continue;
+          if (p.k === 0 && st.a.cl[c] < 4) st.a.cl[c] += 1;   // 흡착
+          st.hits.push({ x: p.x, y: sy - DET_R, life: 1, ion: p.k === 1 });
+          st.parts.splice(i, 1);
+        } else if (p.site === 'b') {
+          const r = Math.floor((p.y - B_Y0 + B_PITCH / 2) / B_PITCH);
+          if (r < 0 || r >= B_ROWS) continue;
+          const sx = B_X0 - st.b.back[r] * B_PITCH;
+          if (p.x > sx + DET_R) continue;
+          if (st.b.cl[r] < 4) st.b.cl[r] += 1;
+          st.hits.push({ x: sx + DET_R, y: p.y, life: 1, ion: false });
+          st.parts.splice(i, 1);
+        }
+      }
+
+      /* 떼어내기. 허용량을 넘지 않는 선에서 한 프레임에 하나씩.
+         가장 염소화된 자리가 먼저 나가므로, 라디칼이 붙는 것과 원자가 사라지는 것이
+         눈으로 이어진다 — 이것이 시너지의 장면이다. */
+      if (st.a.removed < Math.floor(targetA)) {
+        const at = detachOne(st.a);
+        st.prods.push({ x: A_X0 + at * A_PITCH, y: A_Y0 + st.a.back[at] * A_PITCH - A_PITCH,
+                        vx: (rnd() - 0.5) * 0.6, vy: -1.4, life: 1, tag: rnd() < 0.4 });
+      }
+      if (st.b.removed < Math.floor(targetB)) {
+        const at = detachOne(st.b);
+        st.prods.push({ x: B_X0 - st.b.back[at] * B_PITCH + B_PITCH, y: B_Y0 + at * B_PITCH,
+                        vx: 1.3, vy: -(0.3 + rnd() * 0.5), life: 1, tag: false });
+      }
+
+      for (let i = st.prods.length - 1; i >= 0; i--) {
+        const q = st.prods[i];
+        q.x += q.vx; q.y += q.vy; q.life -= 0.02;
+        if (q.life <= 0) st.prods.splice(i, 1);
+      }
+      for (let i = st.hits.length - 1; i >= 0; i--) {
+        st.hits[i].life -= 0.10;
+        if (st.hits[i].life <= 0) st.hits.splice(i, 1);
+      }
+    };
+
+    const draw = () => {
+      const st = stRef.current;
+      const { profile: prof } = propsRef.current;
+      const polymer = prof.polymerThickness > 0.5;
+
+      ctx.fillStyle = DET_C.void;
+      ctx.fillRect(0, 0, DET_W, DET_H);
+
+      // 가운데 칸막이
+      ctx.strokeStyle = '#2A261C';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(DET_W / 2 + 8, 8); ctx.lineTo(DET_W / 2 + 8, DET_H - 8); ctx.stroke();
+
+      // ── Ⓐ 바닥 : 수평면이 아래로 물러난다 ──
+      for (let c = 0; c < A_COLS; c++) {
+        const cx = A_X0 + c * A_PITCH;
+        for (let d = 0; d <= A_DEPTH; d++) {
+          const y = A_Y0 + (st.a.back[c] + d) * A_PITCH;
+          if (y > DET_H + A_PITCH) break;
+          const shade = Math.pow(Math.max(0, 1 - d / 3.2), 1.4);
+          ctx.beginPath();
+          ctx.arc(cx, y, DET_R, 0, Math.PI * 2);
+          ctx.fillStyle = d === 0 ? DET_C.siCl[st.a.cl[c]] : mix(DET_C.siDeep, DET_C.si, shade);
+          ctx.fill();
+          if (d === 0 && st.a.cl[c] > 0) {
+            // 흡착한 Cl — 껍질이 짙어질수록 많이 붙은 것이다
+            ctx.beginPath();
+            ctx.arc(cx, y, DET_R + 2.4, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(127,200,169,${0.25 + st.a.cl[c] * 0.18})`;
+            ctx.lineWidth = 1.3;
+            ctx.stroke();
+          }
+        }
+      }
+
+      // ── Ⓑ 측벽 : 수직면이 왼쪽으로 물러난다 ──
+      for (let r = 0; r < B_ROWS; r++) {
+        const cy = B_Y0 + r * B_PITCH;
+        for (let d = 0; d <= B_DEPTH; d++) {
+          const x = B_X0 - (st.b.back[r] + d) * B_PITCH;
+          if (x < DET_W / 2 + 4) break;
+          const shade = Math.pow(Math.max(0, 1 - d / 3.2), 1.4);
+          ctx.beginPath();
+          ctx.arc(x, cy, DET_R, 0, Math.PI * 2);
+          ctx.fillStyle = d === 0 ? DET_C.siCl[st.b.cl[r]] : mix(DET_C.siDeep, DET_C.si, shade);
+          ctx.fill();
+          if (d === 0 && st.b.cl[r] > 0) {
+            ctx.beginPath();
+            ctx.arc(x, cy, DET_R + 2.4, 0, Math.PI * 2);
+            ctx.strokeStyle = `rgba(127,200,169,${0.25 + st.b.cl[r] * 0.18})`;
+            ctx.lineWidth = 1.3;
+            ctx.stroke();
+          }
+        }
+      }
+      // 측벽 폴리머 — 라디칼이 닿는 것마저 막는다
+      if (polymer) {
+        // 행마다 끊어 그린다. 이어 그리면 행 사이를 가로지르는 지그재그가 된다.
+        ctx.strokeStyle = 'rgba(226,180,92,0.85)';
+        ctx.lineWidth = 2.6;
+        ctx.lineCap = 'round';
+        for (let r = 0; r < B_ROWS; r++) {
+          const x = B_X0 - st.b.back[r] * B_PITCH + DET_R + 2.8;
+          const y = B_Y0 + r * B_PITCH;
+          ctx.beginPath();
+          ctx.moveTo(x, y - B_PITCH / 2 + 2);
+          ctx.lineTo(x, y + B_PITCH / 2 - 2);
+          ctx.stroke();
+        }
+      }
+
+      // ── 날아다니는 종 ──
+      for (const p of st.parts) {
+        if (p.k === 1) {
+          ctx.beginPath();
+          ctx.moveTo(p.x - p.vx * 6, p.y - p.vy * 6);
+          ctx.lineTo(p.x, p.y);
+          ctx.strokeStyle = p.site === 'pass' ? 'rgba(240,196,100,0.30)' : 'rgba(240,196,100,0.55)';
+          ctx.lineWidth = 1.1;
+          ctx.stroke();
+          ctx.fillStyle = DET_C.ion;
+          ctx.globalAlpha = p.site === 'pass' ? 0.4 : 1;
+          ctx.fillRect(p.x - 2.4, p.y - 2.4, 4.8, 4.8);
+          ctx.globalAlpha = 1;
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 2.4, 0, Math.PI * 2);
+          ctx.fillStyle = DET_C.radical;
+          ctx.fill();
+        }
+      }
+
+      for (const h of st.hits) {
+        ctx.beginPath();
+        ctx.arc(h.x, h.y, (h.ion ? 6 : 4) * (2 - h.life), 0, Math.PI * 2);
+        ctx.strokeStyle = h.ion
+          ? `rgba(240,196,100,${h.life * 0.8})`
+          : `rgba(127,200,169,${h.life * 0.5})`;
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+      }
+
+      ctx.font = "500 10px ui-monospace, Menlo, monospace";
+      ctx.textAlign = 'center';
+      for (const q of st.prods) {
+        ctx.globalAlpha = Math.max(0, q.life);
+        ctx.fillStyle = DET_C.product;
+        ctx.beginPath();
+        ctx.arc(q.x, q.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+        if (q.tag && q.life > 0.4) {
+          ctx.fillStyle = `rgba(159,216,192,${(q.life - 0.4) * 1.5})`;
+          ctx.fillText('SiCl₄↑', q.x, q.y - 8);
+        }
+        ctx.globalAlpha = 1;
+      }
+      ctx.textAlign = 'left';
+    };
+
+    const loop = (now) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      step(dt);
+      draw();
+      rafRef.current = requestAnimationFrame(loop);
+    };
+    rafRef.current = requestAnimationFrame(loop);
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current); };
+  }, []);
 
   return (
-    <svg viewBox={`0 0 ${INSET_W} ${INSET_H}`} className="eb-inset" role="img"
-         aria-label={`원자 스케일. 바닥은 ${Math.round(filmEtched)} 나노미터 내려갔고 측벽은 ${Math.round(lateralNm)} 나노미터 파였다. 이방도 ${profile.anisotropy.toFixed(2)}`}>
-      <rect x="0" y="0" width={INSET_W} height={INSET_H} fill="#141209" />
-      <line x1={midX} y1="6" x2={midX} y2={INSET_H - 6} stroke="#2A261C" strokeWidth="1" />
-
-      {/* ══ Ⓐ 트렌치 바닥 — 이온이 쏟아진다 ══ */}
-      <circle cx="14" cy="12" r="5" fill="#141209" stroke="#F0C464" strokeWidth="0.9" />
-      <text x="14" y="14.2" fontSize="6.5" fontWeight="600" fill="#F0C464" textAnchor="middle"
-            fontFamily="ui-monospace, Menlo, monospace">A</text>
-      <text x="24" y="14.5" fontSize="7" fill="#F0C464"
-            fontFamily="ui-monospace, Menlo, monospace">바닥 · 이온 + 라디칼</text>
-
-      {/* 처음 표면 */}
-      <line x1="10" y1={AY0} x2="132" y2={AY0} stroke="#5A5344" strokeWidth="0.7" strokeDasharray="3 3" />
-      <text x="10" y={AY0 - 3} fontSize="5.5" fill="#6B6353"
-            fontFamily="ui-monospace, Menlo, monospace">처음 표면</text>
-
-      {/* 이온 궤적 — 지금 표면까지 내려온다 */}
-      {[26, 56, 86, 116].map((x, i) => (
-        <g key={`ia${i}`}>
-          <line x1={x} y1="20" x2={x} y2={ayNow - 1} stroke="#F0C464" strokeWidth="0.9" opacity="0.6" />
-          <path d={`M${x} ${ayNow + 1.5} l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.85" />
-        </g>
-      ))}
-      {/* 라디칼 */}
-      {[0, 1, 2, 3].map((i) => (
-        <circle key={`ra${i}`} cx={16 + rnd(i, 3) * 116} cy={20 + rnd(i, 11) * (advA + 8)}
-                r="1.5" fill="#7FC8A9" opacity="0.75" />
-      ))}
-      {/* 지금 표면의 원자열 — 염소화 껍질을 두르고 있다 */}
-      {[0, 1, 2, 3, 4].map((i) => {
-        const cx = 20 + i * 24;
-        return (
-          <g key={`aa${i}`}>
-            <circle cx={cx} cy={ayNow + 5.5} r="5.4" fill="#6E9E88" />
-            <circle cx={cx} cy={ayNow + 5.5} r="7.4" fill="none" stroke="#7FC8A9"
-                    strokeWidth="1.2" opacity="0.85" />
-          </g>
-        );
-      })}
-      <text x={20 + 2 * 24} y={ayNow - 3} fontSize="6.5" fill="#9FD8C0" textAnchor="middle"
-            fontFamily="ui-monospace, Menlo, monospace">SiCl₄↑</text>
-
-      {/* 얼마나 내려갔나 */}
-      <line x1="140" y1={AY0} x2="140" y2={ayNow + 5.5} stroke="#F0C464" strokeWidth="0.8" />
-      <line x1="137" y1={AY0} x2="143" y2={AY0} stroke="#F0C464" strokeWidth="0.8" />
-      <line x1="137" y1={ayNow + 5.5} x2="143" y2={ayNow + 5.5} stroke="#F0C464" strokeWidth="0.8" />
-      <text x="146" y={AY0 + (advA + 5.5) / 2 + 2} fontSize="7" fill="#F0C464"
-            fontFamily="ui-monospace, Menlo, monospace">{label(filmEtched)}</text>
-
-      <text x="10" y={INSET_H - 5} fontSize="6.5" fill="#8A8069"
-            fontFamily="ui-monospace, Menlo, monospace">빠르다 — 약해진 결합을 이온이 때린다</text>
-
-      {/* ══ Ⓑ 측벽 — 이온이 지나친다 ══ */}
-      <circle cx={midX + 14} cy="12" r="5" fill="#141209" stroke="#7FC8A9" strokeWidth="0.9" />
-      <text x={midX + 14} y="14.2" fontSize="6.5" fontWeight="600" fill="#7FC8A9" textAnchor="middle"
-            fontFamily="ui-monospace, Menlo, monospace">B</text>
-      <text x={midX + 24} y="14.5" fontSize="7" fill="#7FC8A9"
-            fontFamily="ui-monospace, Menlo, monospace">측벽 · 라디칼만</text>
-
-      {/* 처음 측벽 */}
-      <line x1={BX0} y1="26" x2={BX0} y2="74" stroke="#5A5344" strokeWidth="0.7" strokeDasharray="3 3" />
-      <text x={BX0 + 2} y="24" fontSize="5.5" fill="#6B6353"
-            fontFamily="ui-monospace, Menlo, monospace">처음 측벽</text>
-
-      {/* 지금 측벽의 원자기둥 */}
-      {[0, 1, 2, 3].map((i) => (
-        <circle key={`ab${i}`} cx={bxNow - 5.5} cy={28 + i * 13} r="5.4"
-                fill={polymer ? '#7FA394' : '#8FA39C'} />
-      ))}
-      {polymer && (
-        <line x1={bxNow + 0.6} y1="24" x2={bxNow + 0.6} y2="72"
-              stroke="#E2B45C" strokeWidth="2.2" strokeLinecap="round" opacity="0.85" />
-      )}
-
-      {/* 이온은 벽을 지나쳐 내려간다 */}
-      <line x1={BX0 + 24} y1="20" x2={BX0 + 24} y2="74" stroke="#F0C464"
-            strokeWidth="0.9" opacity="0.32" strokeDasharray="2 2" />
-      <path d={`M${BX0 + 24} 76.5 l-1.6 -3.4 h3.2 z`} fill="#F0C464" opacity="0.32" />
-      <text x={BX0 + 19} y="40" fontSize="5.5" fill="#6B6353" textAnchor="end"
-            fontFamily="ui-monospace, Menlo, monospace">이온은 지나친다</text>
-
-      {/* 라디칼이 옆에서 들어온다 */}
-      {[0, 1, 2, 3].map((i) => {
-        const x = bxNow + 8 + rnd(i, 7) * 26;
-        const y = 28 + rnd(i, 13) * 40;
-        return (
-          <g key={`rb${i}`}>
-            <line x1={x + 7} y1={y + (i % 2 ? 3 : -3)} x2={x} y2={y}
-                  stroke="#7FC8A9" strokeWidth="0.7" opacity="0.35" />
-            <circle cx={x} cy={y} r="1.5" fill="#7FC8A9" opacity="0.8" />
-          </g>
-        );
-      })}
-
-      {/* 얼마나 파였나 */}
-      <line x1={bxNow - 5.5} y1="80" x2={BX0} y2="80" stroke="#7FC8A9" strokeWidth="0.8" />
-      <line x1={bxNow - 5.5} y1="77" x2={bxNow - 5.5} y2="83" stroke="#7FC8A9" strokeWidth="0.8" />
-      <line x1={BX0} y1="77" x2={BX0} y2="83" stroke="#7FC8A9" strokeWidth="0.8" />
-      <text x={BX0 + 6} y="82.5" fontSize="7" fill="#7FC8A9"
-            fontFamily="ui-monospace, Menlo, monospace">{label(lateralNm)}</text>
-
-      <text x={midX + 10} y={INSET_H - 5} fontSize="6.5" fill="#8A8069"
-            fontFamily="ui-monospace, Menlo, monospace">
-        {polymer ? '느리다 — 폴리머가 라디칼마저 막는다' : '느리다 — 때려 줄 이온이 없다'}
-      </text>
-    </svg>
+    <canvas
+      ref={canvasRef}
+      width={DET_W}
+      height={DET_H}
+      className="eb-inset"
+      role="img"
+      aria-label={`원자 스케일 상세. 바닥은 이온과 라디칼이 함께 작용해 빠르게 물러나고, 측벽은 라디칼만 닿아 느리게 파인다. 이방도 ${profile.anisotropy.toFixed(2)}`}
+    />
   );
 }
 
@@ -1239,18 +1424,40 @@ export default function EtchingBay() {
             <div className="eb-inset-wrap">
               <div className="eb-inset-head">
                 <span>위 단면의 Ⓐ 바닥 · Ⓑ 측벽 확대 (약 100만 배)</span>
-                {/* space-between 이 띄우므로 margin-left:auto 는 쓰지 않는다 */}
                 <span className="eb-inset-a">
-                  이방도 A {fmt(preview.prof.anisotropy, 2)} · 측면 손실 {fmt(preview.prof.lateralRatio * filmEtched, 0)} nm
+                  이방도 A {fmt(preview.prof.anisotropy, 2)}
                 </span>
               </div>
-              <SurfaceInset profile={preview.prof} filmEtched={filmEtched} />
+
+              <div className="eb-inset-cols">
+                <span className="is-a">Ⓐ 트렌치 바닥 · 이온 + 라디칼</span>
+                <span className="is-b">Ⓑ 측벽 · 라디칼만</span>
+              </div>
+
+              <SurfaceDetail
+                profile={preview.prof}
+                filmEtched={filmEtched}
+                live={phase === 'PROCESSING'}
+              />
+
+              <div className="eb-inset-cols is-foot">
+                <span>
+                  라디칼이 붙어 결합이 약해진 자리를 이온이 때려 낸다 —
+                  <b> −{fmt(filmEtched, 0)} nm</b>
+                </span>
+                <span>
+                  {preview.prof.polymerThickness > 0.5
+                    ? '폴리머가 라디칼마저 막는다 — '
+                    : '때려 줄 이온이 없다 — '}
+                  <b>−{fmt(preview.prof.lateralRatio * filmEtched, 0)} nm</b>
+                </span>
+              </div>
+
               <p className="eb-inset-note">
-                두 면이 물러나는 속도를 비교해 보세요. 바닥에는 이온이 수직으로 쏟아져
-                빠르게 내려가고, 측벽은 이온이 지나쳐 라디칼만 닿아 거의 제자리입니다.
-                점선이 처음 위치입니다. 이 두 거리의 비가 곧 이방도입니다 —
+                같은 반응인데 두 자리의 속도가 다르다. 바닥에는 이온이 수직으로 쏟아지고,
+                측벽은 이온이 지나쳐 라디칼만 닿는다. 이 두 속도의 비가 곧 이방도다 —
                 A = 1 − (수평 식각률 / 수직 식각률). 위 단면에서 마스크 아래가 파인 폭이
-                (1 − A) × 깊이인 이유가 이것입니다. 직접 세어 보려면 「식각 기초」 카드로.
+                (1 − A) × 깊이인 이유가 이것이다. 직접 세어 보려면 「식각 기초」 카드로.
               </p>
             </div>
           )}
@@ -1602,7 +1809,12 @@ const EB_CSS = `
 .eb-inset-wrap{flex:0 0 auto; border:1px solid var(--line); background:var(--panel); border-radius:2px; overflow:hidden;}
 .eb-inset-head{display:flex; flex-wrap:wrap; justify-content:space-between; align-items:baseline; gap:4px 14px; padding:7px 10px; border-bottom:1px solid var(--line); font-family:ui-monospace,Menlo,monospace; font-size:9.5px; letter-spacing:.06em; color:var(--txt-dim);}
 .eb-inset-a{color:var(--txt); letter-spacing:0; white-space:nowrap;}
-.eb-inset{display:block; width:100%; height:auto; aspect-ratio:320/96;}
+.eb-inset{display:block; width:100%; height:auto; aspect-ratio:640/168; background:#141209;}
+.eb-inset-cols{display:grid; grid-template-columns:1fr 1fr; gap:10px; padding:7px 10px 5px; font-size:11px; color:var(--txt);}
+.eb-inset-cols .is-a{color:#F0C464;}
+.eb-inset-cols .is-b{color:#7FC8A9;}
+.eb-inset-cols.is-foot{padding:6px 10px 8px; font-size:10.5px; color:var(--txt-dim); line-height:1.5;}
+.eb-inset-cols.is-foot b{color:var(--txt); font-weight:600;}
 .eb-inset-note{margin:0; padding:7px 10px 9px; border-top:1px solid var(--line); font-size:11px; line-height:1.65; color:var(--txt-dim);}
 .eb-oes{border:1px solid var(--line); background:var(--panel); padding:8px 10px;}
 .eb-oes svg{width:100%; height:auto; display:block;}
