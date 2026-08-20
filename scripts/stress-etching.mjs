@@ -19,7 +19,11 @@ import * as et from '../src/physics/etching.js';
 const TARGETS = ['Si', 'SiO2', 'Si3N4', 'PR'];
 const GASES = ['Cl2', 'HBr', 'CF4', 'C4F8', 'CHF3', 'O2', 'Ar'];
 
-let seed = 20260819;
+/* 기본 시드는 고정이다 — CI 에서 같은 결과가 나와야 하기 때문이다.
+   `npm run stress:etching -- --seed 7` 처럼 주면 다른 표본으로 다시 돌릴 수 있다. */
+const seedArg = process.argv.indexOf('--seed');
+let seed = seedArg > 0 ? Number(process.argv[seedArg + 1]) >>> 0 : 20260819;
+const SEED0 = seed;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 const pick = (a) => a[Math.floor(rnd() * a.length)];
 
@@ -57,12 +61,12 @@ const fail = (rule, c, extra = '') => {
   }
 };
 const finite = (v) => Number.isFinite(v);
+const half = () => 0.5;   // 난수를 고정해 결정적으로 본다
 
 const N = 40000;
 for (let i = 0; i < N; i++) {
   const c = randomCase(i % 5 === 0);
   const { target, gas, power, pressure } = c;
-  const half = () => 0.5;
 
   const rate = et.calculateEtchRate(target, gas, power, pressure, half);
   const sel = et.calculateSelectivity(target, gas, power, pressure, half);
@@ -178,7 +182,7 @@ for (let i = 0; i < N; i++) {
 }
 
 // ── 파라미터별 단조성 (다른 값 고정) ──
-console.log('■ 무작위', N.toLocaleString(), '건 불변식 검사');
+console.log('■ 무작위', N.toLocaleString(), '건 불변식 검사  (시드', SEED0 + ')');
 const mono = [];
 for (let k = 0; k < 3000; k++) {
   const c = randomCase();
@@ -255,6 +259,109 @@ for (let k = 0; k < 5000; k++) {
   }
 }
 
+
+/* ─────────── 화면에서 실제로 만질 수 있는 공간 ───────────
+   위 검사는 예전 파라미터 공간(압력 30~200, 파워 100~800)을 뽑는다. 그런데 지금
+   화면의 두 모드는 4~80 mTorr 에서 소스와 바이어스를 따로 돌린다. 학생이 실제로
+   만들 수 있는 레시피를 뽑아서, **화면에 뜨는 값 전부**가 성립하는지 본다. */
+const MODE_SPACE = {
+  게이트: {
+    type: 'icp', target: 'Si', film: 200, under: 2,
+    r: { source: [250, 1500], bias: [20, 250], pressure: [4, 60], cd: [30, 250], time: [10, 300] },
+    g: { Cl2: [0, 200], HBr: [0, 200], O2: [0, 200] },
+  },
+  콘택: {
+    type: 'dfccp', target: 'SiO2', film: 500, under: 60,
+    r: { source: [300, 1500], bias: [300, 3000], pressure: [20, 80], cd: [40, 200], time: [30, 600] },
+    g: { C4F8: [0, 200], CHF3: [0, 200], Ar: [0, 200], O2: [0, 200] },
+  },
+};
+const between = ([lo, hi]) => lo + rnd() * (hi - lo);
+const modeFails = new Map();
+const mfail = (rule, tag) => {
+  if (!modeFails.has(rule)) modeFails.set(rule, []);
+  if (modeFails.get(rule).length < 3) modeFails.get(rule).push(tag);
+};
+
+let modeCases = 0;
+for (const [mname, M] of Object.entries(MODE_SPACE)) {
+  for (let k = 0; k < 10000; k++) {
+    modeCases += 1;
+    const b = {};
+    for (const key of Object.keys(M.r)) b[key] = between(M.r[key]);
+    const gas = { Cl2: 0, HBr: 0, CF4: 0, C4F8: 0, CHF3: 0, O2: 0, Ar: 0 };
+    for (const key of Object.keys(M.g)) gas[key] = between(M.g[key]);
+    const d = { source: b.source, bias: b.bias, type: M.type };
+    const tag = `${mname} P=${b.pressure.toFixed(0)} src=${b.source.toFixed(0)} bias=${b.bias.toFixed(0)} `
+      + Object.keys(M.g).map((x) => `${x}${gas[x].toFixed(0)}`).join(',');
+
+    const prof = et.calculateProfile(M.target, gas, d, b.pressure);
+    const rate = et.calculateEtchRate(M.target, gas, d, b.pressure, half);
+    const sel = et.calculateSelectivity(M.target, gas, d, b.pressure, half);
+    const uni = et.calculateUniformity(b.pressure, d, gas);
+    const plasma = et.sheathCollisionality(b.pressure, d);
+    const run = et.simulateEtchRun({
+      rate, seconds: b.time, filmThickness: M.film, trenchWidth: b.cd,
+      profile: prof, selectivity: sel,
+    });
+
+    // 화면에 그대로 뜨는 값들 — 하나라도 NaN 이면 칸이 비거나 "NaN" 이 보인다
+    const shown = {
+      식각률: rate, 선택비: sel, 균일도: uni, 측벽각: prof.sidewallAngle,
+      이방도: prof.anisotropy, 플럭스: plasma.density, 이온에너지: plasma.energy,
+      시스비: plasma.ratio, 자유행로: plasma.mfp, 시스두께: plasma.sheath,
+      깊이: run.depth, 잔막: run.remainingFilm, 하부층손실: run.underlayerLoss,
+      종료식각률: run.endRate,
+    };
+    for (const [key, v] of Object.entries(shown)) {
+      if (!finite(v)) mfail(`화면 값 ${key} 가 유한하지 않다`, tag);
+      if (v < 0) mfail(`화면 값 ${key} 가 음수`, tag);
+    }
+
+    // 지도 좌표 — log10 이 들어가므로 밀도가 0 이면 -Infinity 가 된다
+    if (!(plasma.density > 0) || !finite(Math.log10(plasma.density))) {
+      mfail('이온 지도 x 좌표가 정의되지 않는다', tag);
+    }
+
+    // 측벽각은 0~90° 안이어야 그림이 그려진다
+    if (prof.sidewallAngle <= 0 || prof.sidewallAngle > 90) mfail('측벽각이 0~90° 밖', tag);
+
+    // 판정 이름은 화면이 아는 다섯 중 하나여야 한다
+    if (!['none', 'etch-stop', 'isotropic', 'tapered', 'undercut', 'vertical'].includes(prof.profileType)) {
+      mfail(`알 수 없는 판정 이름 ${prof.profileType}`, tag);
+    }
+
+    // 하부층 예산 — 관통 전에는 하부층이 깎이지 않는다
+    if (run.punchThroughTime === null && run.underlayerLoss > 1e-9) mfail('관통 전 하부층 손실', tag);
+
+    // 깊이는 막 + 하부층
+    if (Math.abs(run.depth - (run.filmEtched + run.underlayerLoss)) > 1e-9) mfail('깊이 ≠ 막 + 하부층', tag);
+
+    // 식각종이 없으면 식각률도 0 이고 판정도 none
+    if (!prof.hasEtchant && (rate > 0 || prof.profileType !== 'none')) {
+      mfail('식각종 없는데 식각률/판정이 있음', tag);
+    }
+    // 식각종이 있는데 식각률이 0 이면 두 함수가 어긋난 것이다 (HBr 이 그랬다)
+    if (prof.hasEtchant && rate === 0 && !prof.etchStop) {
+      mfail('식각종 있는데 식각률 0 (함수 간 불일치)', tag);
+    }
+
+    // 한 노브만 흔들었을 때의 방향 — 교과서 관계가 국소적으로도 성립하는가
+    const aBase = prof.anisotropy;
+    const aSrc = et.calculateProfile(M.target, gas, { ...d, source: b.source + 200 }, b.pressure).anisotropy;
+    if (Math.abs(aSrc - aBase) > 1e-12) mfail('소스가 이방도를 바꿈', tag);
+    const sBase = sel;
+    const sSrc = et.calculateSelectivity(M.target, gas, { ...d, source: b.source + 200 }, b.pressure, half);
+    if (Math.abs(sSrc - sBase) > 1e-12) mfail('소스가 선택비를 바꿈', tag);
+    if (prof.hasEtchant) {
+      const aBias = et.calculateProfile(M.target, gas, { ...d, bias: b.bias + 100 }, b.pressure).anisotropy;
+      if (aBias < aBase - 1e-9) mfail('바이어스↑ 인데 이방도↓', tag);
+    }
+    const rSrc = et.calculateEtchRate(M.target, gas, { ...d, source: b.source + 200 }, b.pressure, half);
+    if (rate > 0 && rSrc < rate - 1e-9) mfail('소스↑ 인데 식각률↓', tag);
+  }
+}
+
 console.log('\n════ 결과 ════');
 if (fails.size === 0) console.log('  불변식 위배: 없음');
 for (const [rule, ex] of fails) { console.log(`  ⚠ ${rule} (${ex.length}+ 건)`); ex.forEach((e) => console.log(`      ${e}`)); }
@@ -264,3 +371,13 @@ console.log('\n  화학 상식 위배:', chem.length ? '' : '없음');
 [...new Set(chem)].slice(0, 6).forEach((m) => console.log('   ⚠', m));
 console.log('\n  형상 자기모순:', geom.length ? '' : '없음');
 [...new Set(geom)].slice(0, 4).forEach((m) => console.log('   ⚠', m));
+
+console.log(`\n  모드 공간 ${modeCases.toLocaleString()} 건 (화면에서 만질 수 있는 범위):`,
+  modeFails.size === 0 ? '위배 없음' : '');
+for (const [rule, ex] of modeFails) {
+  console.log(`   ⚠ ${rule}`);
+  ex.forEach((e) => console.log(`       ${e}`));
+}
+
+const totalFail = fails.size + mono.length + chem.length + geom.length + modeFails.size;
+process.exit(totalFail === 0 ? 0 : 1);

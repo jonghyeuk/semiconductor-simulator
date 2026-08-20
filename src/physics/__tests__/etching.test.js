@@ -862,3 +862,51 @@ describe('프로파일 이름 — 대표 조건이 제 이름으로 불리는가
     expect(edge.sidewallAngle).toBeLessThan(85.5);
   });
 });
+
+describe('식각률과 프로파일이 서로 다른 말을 하지 않는가', () => {
+  const half = () => 0.5;
+  const G = (o) => ({ Cl2: 0, HBr: 0, CF4: 0, C4F8: 0, CHF3: 0, O2: 0, Ar: 0, ...o });
+
+  /* 무작위 검사가 잡아낸 결함들이다. 두 함수가 같은 사실을 각자 따로 판단하면
+     언젠가 어긋난다 — 실제로 세 번 어긋났다 (HBr · C₄F₈ 과다 · CF₄/Si). */
+
+  it('불소는 실리콘을 깎는다 — 자발 반응성 표가 그렇게 적고 있다', () => {
+    /* SPONTANEITY 는 Si/CF₄ = 1.00 으로 가장 높은데, 식각률 식의 Si 분기는
+       불소계를 한 항도 세지 않았다. SF₆/CF₄ 실리콘 등방 식각은 교과서의 대표 예다. */
+    const g = G({ CF4: 40, Ar: 20 });
+    expect(calculateEtchRate('Si', g, 300, 80, half)).toBeGreaterThan(0);
+    expect(calculateProfile('Si', g, 300, 80).profileType).toBe('isotropic');
+  });
+
+  it('폴리머 과다는 판정도 etch stop 이다 (한 가스가 두 몫을 해도)', () => {
+    /* 예전 규칙은 "폴리머>60 이고 식각종<20" 이라는 두 절대 문턱이었다. C₄F₈ 처럼
+       한 가스가 폴리머이자 식각종이면 둘째 조건에 안 걸려서, 식각률은 0 인데
+       판정은 "테이퍼" 가 나왔다. */
+    const g = G({ C4F8: 180, CHF3: 13, Ar: 91, O2: 49 });
+    const d = { source: 1144, bias: 1157, type: 'dfccp' };
+    expect(calculateEtchRate('SiO2', g, d, 70, half)).toBe(0);
+    const p = calculateProfile('SiO2', g, d, 70);
+    expect(p.etchStop).toBe(true);
+    expect(p.profileType).toBe('etch-stop');
+  });
+
+  it('식각종이 있는 어떤 조합에서도 두 함수가 어긋나지 않는다', () => {
+    /* 가스를 하나씩, 그리고 둘씩 섞어 훑는다. 프로파일이 "식각된다" 는데
+       식각률이 0 이면서 etch stop 도 아니면 모순이다. */
+    const keys = ['Cl2', 'HBr', 'CF4', 'C4F8', 'CHF3', 'O2'];
+    const bad = [];
+    for (const t of ['Si', 'SiO2', 'Si3N4', 'PR']) {
+      for (const a of keys) {
+        for (const b of ['', ...keys]) {
+          for (const v of [20, 100, 180]) {
+            const g = G(b ? { [a]: v, [b]: v } : { [a]: v });
+            const prof = calculateProfile(t, g, 400, 60);
+            const rate = calculateEtchRate(t, g, 400, 60, half);
+            if (prof.hasEtchant && rate === 0 && !prof.etchStop) bad.push(`${t} ${a}${b ? '+' + b : ''} ${v}`);
+          }
+        }
+      }
+    }
+    expect(bad).toEqual([]);
+  });
+});

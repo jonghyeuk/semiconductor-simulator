@@ -97,12 +97,18 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
          계수는 Cl₂ 의 약 1/4 — 느리지만 깎이고, 그래서 선택비를 번다. */
       const cl2Effect = gasFlow.Cl2 * 4.5;
       const hbrEffect = gasFlow.HBr * 1.2;
+      /* 불소도 실리콘을 깎는다 — 그것도 아주 잘 깎는다. 자발 반응성 표는 이미
+         Si/CF₄ = 1.00 (가장 높다) 이라고 적고 있었는데, 식각률 식의 Si 분기는
+         불소계를 한 항도 세지 않았다. 그래서 **CF₄ 로 실리콘을 깎으면 프로파일은
+         "등방으로 무너진다" 는데 식각률은 0** 이었다. SF₆/CF₄ 실리콘 등방 식각은
+         교과서의 대표 예다. C₄F₈ 은 탄소가 표면을 덮어 그보다 훨씬 느리다. */
+      const fEffect = gasFlow.CF4 * 5.0 + (gasFlow.C4F8 || 0) * 1.5;
       /* 패시베이션은 식각을 **늦추는** 것이지 되돌리는 것이 아니다. 예전처럼 빼기로
          두면 HBr 을 충분히 올렸을 때 HBr 자신의 식각까지 지워 식각률이 0 이 됐다 —
          HBr 단독으로도 폴리실리콘은 깎인다(SiBr₄). 표면을 덮어 반응 자리를 줄이는
          것이므로 곱셈으로 누른다. 아무리 덮어도 0 밑으로 가지 않는다. */
       const hbrSuppress = 1 / (1 + Math.max(0, gasFlow.HBr - 30) / 90);
-      baseRate = (cl2Effect + hbrEffect) * hbrSuppress * (power / 300);
+      baseRate = (cl2Effect + hbrEffect) * hbrSuppress * (power / 300) + fEffect * (power / 300);
       break;
     }
     case 'SiO2': {
@@ -414,7 +420,18 @@ export function calculateProfile(target, gasFlow, power, pressure) {
     + Math.max(0, radicalEtchers * 0.25 - polymerFormers * 0.30)
   );
 
-  const etchStop = target !== 'PR' && polymerFormers > 60 && radicalEtchers < 20;
+  /* 식각이 멈췄는가.
+     예전 규칙은 "폴리머 > 60 이고 식각종 < 20" 이라는 **두 절대 문턱**이었다.
+     폴리머 가스와 식각 가스가 서로 다른 가스일 때(CHF₃ 대 CF₄)는 맞는 규칙이지만,
+     C₄F₈ 처럼 **한 가스가 두 몫을 다 하면** 무너진다 — C₄F₈ 을 180 sccm 넣으면
+     식각종이 180 이라 둘째 조건에 안 걸려서, 식각률 식은 0 을 내는데 판정은
+     "테이퍼" 라고 답했다.
+
+     판정의 근거를 식각률 자신으로 옮긴다. 깎이는 양이 0 이면 그것이 etch stop 이다.
+     문턱을 두 군데 두지 않으므로 앞으로 가스를 더해도 어긋날 수 없다. */
+  const rateHere = calculateEtchRate(target, gasFlow, power, pressure, () => 0.5);
+  const etchStop = target !== 'PR'
+    && (rateHere <= 0 || (polymerFormers > 60 && radicalEtchers < 20));
   const maskDamage = g('Ar') > 80 || w > 500;
 
   // ── 무차원 형상 비율 ──
