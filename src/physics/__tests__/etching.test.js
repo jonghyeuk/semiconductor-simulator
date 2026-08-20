@@ -9,6 +9,8 @@ import {
   calculateProfile,
   calculateArdeFactor,
   simulateEtchRun,
+  sheathCollisionality,
+  CCP_CONDUCTOR_CD_FLOOR,
 } from '../etching.js';
 
 /** 난수를 고정해 결정적으로 검증한다 (원본은 Math.random 을 직접 불렀다). */
@@ -557,5 +559,71 @@ describe('simulateEtchRun — 시간이 깊이를 정한다', () => {
     const a = simulateEtchRun({ ...base, seconds: 600, selectivity: 0 });
     const b = simulateEtchRun({ ...base, seconds: 600, selectivity: 1 });
     expect(a.underlayerLoss).toBe(b.underlayerLoss);
+  });
+});
+
+describe('sheathCollisionality — CCP 시스는 왜 항상 충돌 영역인가', () => {
+  it('자유행로는 압력에 반비례한다', () => {
+    const a = sheathCollisionality(50, 300);
+    const b = sheathCollisionality(100, 300);
+    /* n_g ∝ P 이므로 λ = 1/(n_g σ) ∝ 1/P. 압력을 두 배로 하면 절반이 된다. */
+    expect(b.mfp).toBeCloseTo(a.mfp / 2, 3);
+  });
+
+  it('100 mTorr 300 W 에서 자유행로가 밀리미터 이하로 떨어진다', () => {
+    const s = sheathCollisionality(100, 300);
+    /* 300 K · σ_cx 1e-14 cm² 로 계산하면 0.3 mm 대다. 자릿수를 고정해 둔다. */
+    expect(s.mfp).toBeGreaterThan(0.2);
+    expect(s.mfp).toBeLessThan(0.5);
+  });
+
+  it('압력이 오르면 시스는 얇아지는데 충돌도는 오히려 올라간다', () => {
+    /* 밀도가 오르니 시스는 얇아진다. 그런데 자유행로가 더 빨리 줄어서
+       s/λ 는 커진다 — 두 경향이 반대로 가는 것을 고정해 둔다. */
+    let prevSheath = Infinity;
+    let prevRatio = 0;
+    for (const p of [30, 60, 100, 150, 200]) {
+      const s = sheathCollisionality(p, 300);
+      expect(s.sheath).toBeLessThan(prevSheath);
+      expect(s.ratio).toBeGreaterThan(prevRatio);
+      prevSheath = s.sheath;
+      prevRatio = s.ratio;
+    }
+  });
+
+  it('운전 구간 어디에서도 무충돌 시스가 되지 않는다', () => {
+    /* 이 카드의 핵심 주장이다. 압력을 최저로 내리고 파워를 어떻게 흔들어도
+       s/λ 가 5 아래로 내려가지 않는다 — 그래서 도전막 식각이 ICP 로 갔다. */
+    for (const p of [30, 50, 80, 100, 150, 200]) {
+      for (const w of [100, 300, 500, 800]) {
+        const s = sheathCollisionality(p, w);
+        expect(s.collisional).toBe(true);
+        expect(s.ratio).toBeGreaterThan(4.5);
+      }
+    }
+  });
+
+  it('파워로는 충돌도를 거의 바꾸지 못한다', () => {
+    /* 파워를 올리면 밀도가 올라 시스가 얇아지지만 시스 전압도 같이 올라
+       다시 두꺼워진다. 두 효과가 거의 상쇄된다. */
+    const lo = sheathCollisionality(100, 100);
+    const hi = sheathCollisionality(100, 800);
+    expect(Math.abs(hi.ratio - lo.ratio) / lo.ratio).toBeLessThan(0.15);
+  });
+
+  it('값이 전부 유한하고 양수다', () => {
+    for (const p of [1, 30, 100, 200, 2000]) {
+      for (const w of [1, 300, 3000]) {
+        const s = sheathCollisionality(p, w);
+        for (const v of [s.mfp, s.sheath, s.ratio]) {
+          expect(Number.isFinite(v)).toBe(true);
+          expect(v).toBeGreaterThan(0);
+        }
+      }
+    }
+  });
+
+  it('CCP 도전막 CD 하한이 0.25 µm 세대 전환점에 있다', () => {
+    expect(CCP_CONDUCTOR_CD_FLOOR).toBe(250);
   });
 });

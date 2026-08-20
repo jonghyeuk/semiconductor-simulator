@@ -469,3 +469,66 @@ export function simulateEtchRun({
     endRate,
   };
 }
+
+/* ────────────────────────── 시스 충돌도 ──────────────────────────
+   이온이 시스를 건너오는 동안 배경 가스와 전하교환 충돌을 몇 번 겪는지를 나타내는
+   무차원 수 s/λ 다. 1 보다 훨씬 작으면 이온이 시스 전압을 그대로 받아 수직으로
+   내리꽂히고(무충돌 시스), 1 보다 크면 에너지가 낮은 쪽으로 길게 끌리고 입사각이
+   벌어진다.
+
+   이 값은 프로파일 계산에 들어가지 않는다 — 프로파일 쪽 압력 의존은 calculateProfile
+   의 scatter 항이 이미 담고 있다. 따로 계산하는 이유는 다른 질문에 답하기 위해서다:
+   "이 장비로 이 압력에서 이 CD 를 잡을 수 있나."
+
+   CCP 에서 중요한 성질이 하나 있다. 압력을 낮추면 자유행로 λ 는 길어지지만 플라즈마
+   밀도도 같이 떨어져 시스 s 가 두꺼워진다. 두 효과가 상쇄돼서 **운전 구간 어디서도
+   s/λ 가 5 아래로 내려가지 않는다.** 도전막 식각이 ICP 로 넘어간 이유가 이것이다 —
+   소스와 바이어스를 분리해야 고밀도(얇은 시스)와 저압(긴 λ)을 동시에 얻는다. */
+
+const K_B = 1.380649e-23;        // J/K
+const T_GAS = 300;               // K — 중성 가스 온도
+const SIGMA_CX = 1e-14;          // cm² — 전하교환 단면적, 수백 eV 이하 자릿수 근사
+const TE_EV = 3;                 // eV — 전자 온도
+
+/**
+ * 시스 충돌도와 그 재료가 되는 길이들.
+ *
+ * 근사식 — 자릿수 비교용이고 특정 장비의 실측값이 아니다.
+ *   중성 밀도   n_g  = P / kT                                   (T = 300 K)
+ *   자유행로    λ    = 1 / (n_g · σ_cx)
+ *   플라즈마    n_e ≈ 1e10 · (W/300)^0.8 · (P/100)^0.4 cm⁻³     CCP 다이오드 스케일링
+ *   시스 전압   V_sh ≈ 300 · (W/300)^0.5 · (100/P)^0.25 V
+ *   Child 시스  s    = (√2/3)·λ_De·(2V/Te)^0.75, λ_De = 743√(Te/n_e) cm
+ *
+ * @param {number} pressure mTorr
+ * @param {number} power    W
+ * @returns {{mfp:number, sheath:number, ratio:number, collisional:boolean}} 길이는 mm
+ */
+export function sheathCollisionality(pressure, power) {
+  const p = Math.max(1, pressure);
+  const w = Math.max(1, power);
+
+  const pascal = (p * 133.322) / 1000;
+  const nGas = pascal / (K_B * T_GAS) / 1e6;          // cm⁻³
+  const mfpCm = 1 / (nGas * SIGMA_CX);
+
+  const nE = 1e10 * (w / 300) ** 0.8 * (p / 100) ** 0.4;
+  const vSheath = 300 * (w / 300) ** 0.5 * (100 / p) ** 0.25;
+
+  const debyeCm = 743 * Math.sqrt(TE_EV / nE);
+  const sheathCm = (Math.SQRT2 / 3) * debyeCm * ((2 * vSheath) / TE_EV) ** 0.75;
+
+  return {
+    mfp: mfpCm * 10,                                   // mm
+    sheath: sheathCm * 10,                             // mm
+    ratio: sheathCm / mfpCm,
+    collisional: sheathCm / mfpCm > 1,
+  };
+}
+
+/* 도전막(게이트·금속) 식각에서 CCP 가 감당하지 못하는 CD 의 경계.
+   계산으로 나온 값이 아니라 산업의 전환점이다 — 0.25 µm 세대에 게이트 식각이
+   ICP/TCP/DPS 로 넘어갔고, 그 뒤로 CCP 단일 RF 로 게이트를 잡는 공정은 없다.
+   유전막(산화막 콘택·비아, 3D NAND 채널홀)은 지금도 CCP 가 한다 — 그쪽은 높은
+   이온 에너지와 폴리머가 필요해서 CCP 가 오히려 맞다. */
+export const CCP_CONDUCTOR_CD_FLOOR = 250;             // nm

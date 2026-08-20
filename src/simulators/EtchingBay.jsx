@@ -31,6 +31,8 @@ import {
   calculateProfile,
   calculateArdeFactor,
   simulateEtchRun,
+  sheathCollisionality,
+  CCP_CONDUCTOR_CD_FLOOR,
 } from '../physics/etching';
 
 /* ────────────────────────── 상수 ────────────────────────── */
@@ -1034,6 +1036,56 @@ function ProfileThumb({ run, w = 150, label = true }) {
   );
 }
 
+/* ──────────────────── 장비 한계 (CCP · 단일 RF) ────────────────────
+   이 화면의 명판은 CCP 다. 그런데 기본 시나리오는 폴리실리콘 게이트고 CD 슬라이더는
+   100 nm 까지 내려간다. 100 mTorr CCP 로 100 nm 게이트를 잡는 공정은 존재한 적이
+   없다 — 명판과 CD 범위가 서로 다른 시대다.
+
+   압력을 "낮추면 수직해진다" 는 설명도 CCP 에서는 절반만 맞다. 압력을 내리면 자유
+   행로는 길어지지만 플라즈마 밀도가 같이 떨어져 시스가 두꺼워져서, 운전 구간 전체에서
+   s/λ 가 5 아래로 안 내려간다. 그래서 숫자를 계산해서 보여 준다. */
+function RegimeNote({ target, pressure, power, cd }) {
+  const s = sheathCollisionality(pressure, power);
+  const floor = sheathCollisionality(P_MIN, power);
+  /* 도전막(폴리실리콘 게이트)만 해당한다. 유전막은 지금도 CCP 가 하는 일이다. */
+  const tooFine = target === 'Si' && cd < CCP_CONDUCTOR_CD_FLOOR;
+
+  return (
+    <div className={`eb-regime ${tooFine ? 'is-warn' : ''}`}>
+      <p className="eb-panel-k">장비 한계 · CCP 단일 RF</p>
+      <div className="eb-regime-row">
+        <div><span>이온 자유행로 λ</span><b>{s.mfp.toFixed(2)} mm</b></div>
+        <div><span>시스 두께 s</span><b>{s.sheath.toFixed(1)} mm</b></div>
+        <div>
+          <span>시스 충돌도 s/λ</span>
+          <b className={s.collisional ? 'is-hot' : ''}>{s.ratio.toFixed(1)}</b>
+        </div>
+      </div>
+      <p className="eb-regime-txt">
+        이온이 시스를 건너며 전하교환 충돌을 {Math.round(s.ratio)}번쯤 겪습니다 — 충돌 시스입니다.
+        입사 에너지가 낮은 쪽으로 퍼지고 입사각이 벌어집니다.
+        CCP 는 압력을 낮춰도 밀도가 같이 떨어져 시스가 두꺼워지므로, 하한 {P_MIN} mTorr 에서도
+        s/λ 가 {floor.ratio.toFixed(1)} 입니다 — <b>이 장비로는 무충돌 시스를 만들 수 없습니다.</b>
+        {' '}도전막 식각이 ICP/TCP 로 넘어간 이유입니다. 소스와 바이어스를 분리해야
+        고밀도(얇은 시스)와 저압(긴 자유행로)을 동시에 얻습니다.
+      </p>
+      {tooFine && (
+        <p className="eb-regime-warn">
+          CD {cd} nm 게이트는 이 장비의 영역이 아닙니다. 0.25 µm 세대에 게이트 식각은
+          ICP/TCP/DPS · 2~20 mTorr 로 넘어갔습니다. 이 화면은 그대로 계산하지만,
+          실제 팹에서 {cd} nm 를 100 mTorr CCP 로 잡지는 않습니다.
+        </p>
+      )}
+      <p className="eb-regime-foot">
+        ※ CCP 가 낡은 것은 아닙니다 — 산화막 콘택·비아와 3D NAND 채널홀 같은 유전막
+        식각은 지금도 CCP(다중 주파수)가 20~80 mTorr 에서 합니다. 높은 이온 에너지와
+        폴리머가 필요한 쪽이라 CCP 가 오히려 맞습니다. 낡은 것은 압력이 아니라
+        <b> 100 mTorr CCP 로 도전막을 잡는다</b>는 조합입니다.
+      </p>
+    </div>
+  );
+}
+
 /** 두 런의 레시피에서 달라진 항목만 골라 낸다. "뭘 바꿨더라" 에 답하는 부분이다. */
 function recipeDiff(a, b) {
   if (!a) return [];
@@ -1355,6 +1407,11 @@ export default function EtchingBay() {
         underlayerLoss: r.under,
         punchThroughTime: r.punchAt,
         cd: preview.trench === Infinity ? null : cd,
+        /* 리포트는 끝난 런을 설명한다. 현재 상태(벤팅 중이라 압력이 이미 올라가는
+           중이다)가 아니라 이 런이 돌던 설정값을 실어야 한다. */
+        pressure: setPressure_,
+        power,
+        target,
       });
       /* 이 런의 최종 형상을 한 장 남긴다. 조건을 바꿔 가며 돌릴 때
          "2번은 뭘 바꿨더라" 에 답할 수 있어야 비교가 된다. */
@@ -1493,6 +1550,17 @@ export default function EtchingBay() {
       });
     }
 
+    /* 물리가 아니라 장비 선택의 문제다. 계산 결과는 멀쩡해 보여도 실제 팹에서는
+       이 조합으로 이 CD 를 잡지 않는다 — 그걸 말해 주지 않으면 잘못 배운다. */
+    if (result.target === 'Si' && result.cd && result.cd < CCP_CONDUCTOR_CD_FLOOR) {
+      const sh = sheathCollisionality(result.pressure, result.power);
+      lines.push({
+        bad: true,
+        t: `장비 영역 밖 — CD ${result.cd} nm 를 CCP 로 잡고 있다`,
+        d: `${result.pressure} mTorr 에서 시스 충돌도 s/λ 가 ${sh.ratio.toFixed(1)} 이다. 이온이 시스를 건너며 그만큼 충돌해 입사각이 벌어진다. CCP 는 압력을 낮춰도 밀도가 같이 떨어져 시스가 두꺼워지므로 이 값을 못 내린다. 0.25 µm 세대에 게이트 식각이 ICP/TCP·2~20 mTorr 로 넘어간 이유다. ※ 이 화면의 프로파일 계산은 그대로 유효하다 — 장비 선택이 어긋났다는 뜻이다.`,
+      });
+    }
+
     if (prof.maskDamage) {
       lines.push({
         bad: true,
@@ -1528,7 +1596,7 @@ export default function EtchingBay() {
       });
     }
     return lines;
-  }, [result, activeGasTotal, gasFlows.Ar, power]);
+  }, [result, activeGasTotal, gasFlows.Ar, power, target]);
 
   const tgt = TARGETS.find((t) => t.id === target);
   const relevantGases = GASES.filter((g) => {
@@ -1729,7 +1797,7 @@ export default function EtchingBay() {
                 label="Chamber Pressure" unit="mTorr" value={setPressure_}
                 min={P_MIN} max={P_MAX} step={P_STEP}
                 onChange={(v) => { setSetPressure(v); setPressure(v); }}
-                hint="낮으면 시스에서 이온이 덜 충돌해 더 수직으로 내리꽂히고, 프로파일이 수직해진다. 80 mTorr 부근이 식각률 sweet spot이고 그보다 높으면 가스상 재결합으로 오히려 느려진다. 30 mTorr 를 하한으로 둔 것은 방전 한계가 아니라 모델의 유효 범위 때문이다 — 그 아래는 계산식이 평평해져 압력을 더 내려도 달라지는 게 없다."
+                hint="낮으면 시스에서 이온이 덜 충돌해 더 수직으로 내리꽂힌다. 다만 CCP 에서는 절반만 맞는 말이다 — 압력을 내리면 자유행로는 길어지지만 플라즈마 밀도가 같이 떨어져 시스가 두꺼워진다. 두 효과가 상쇄돼 30 mTorr 에서도 시스 충돌도 s/λ 가 5 아래로 안 내려간다(아래 장비 한계 참고). 파워로도 못 바꾼다 — 파워를 올리면 밀도가 오르는 만큼 시스 전압도 올라 시스가 다시 두꺼워진다. 80 mTorr 부근이 식각률 sweet spot이고 그보다 높으면 가스상 재결합으로 오히려 느려진다. 30 mTorr 를 하한으로 둔 것은 방전 한계가 아니라 모델의 유효 범위 때문이다."
               />
               <Knob
                 label="RF Power" unit="W" value={power}
@@ -1752,6 +1820,8 @@ export default function EtchingBay() {
                   hint="패턴이 좁을수록 종횡비(깊이/폭)가 커지고, 방향성 없는 라디칼이 바닥까지 들어가기 어려워져 식각이 느려진다 — ARDE(RIE lag). 같은 레시피·같은 시간이라도 좁은 패턴이 얕게 파이는 이유다. 이온은 수직으로 가속돼 들어가므로 영향이 훨씬 작다."
                 />
               )}
+
+              <RegimeNote target={target} pressure={pressure} power={power} cd={cd} />
 
               <p className="eb-sub-k">가스 유량 · {tgt.label} 식각</p>
               {relevantGases.map((g) => (
@@ -2015,6 +2085,24 @@ const EB_CSS = `
 .eb-g-v{font-size:17px; color:var(--amber); text-shadow:0 0 12px rgba(240,196,100,.3); white-space:nowrap;}
 .eb-g-v small{font-size:11.5px; color:var(--txt-dim); margin-left:3px; text-shadow:none;}
 
+
+/* ── 장비 한계 ── */
+.eb-regime{border:1px solid var(--line); border-radius:2px; background:var(--panel2);
+  padding:11px 13px; display:flex; flex-direction:column; gap:8px;}
+.eb-regime.is-warn{border-color:var(--bad);}
+.eb-regime-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.eb-regime-row > div{display:flex; flex-direction:column; gap:2px; min-width:0;}
+.eb-regime-row span{font-size:11px; letter-spacing:.05em; color:var(--txt-dim);}
+.eb-regime-row b{font-family:ui-monospace,Menlo,monospace; font-size:15px; color:var(--amber);
+  font-weight:600; white-space:nowrap;}
+.eb-regime-row b.is-hot{color:var(--bad);}
+.eb-regime-txt{margin:0; font-size:12.5px; line-height:1.7; color:var(--txt-dim);}
+.eb-regime-txt b{color:var(--txt); font-weight:600;}
+.eb-regime-warn{margin:0; padding:8px 10px; border-left:2px solid var(--bad);
+  background:rgba(224,108,90,.08); font-size:12.5px; line-height:1.65; color:var(--bad);}
+.eb-regime-foot{margin:0; padding-top:8px; border-top:1px solid var(--line);
+  font-size:12px; line-height:1.65; color:#6B6353;}
+.eb-regime-foot b{color:var(--txt-dim); font-weight:600;}
 
 /* ── 지난 런 비교 ── */
 .eb-cmp{position:relative; flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel);}
