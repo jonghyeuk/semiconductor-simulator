@@ -39,7 +39,9 @@ import {
 
 const ATM_MTORR = 760000;      // 대기압
 const BASE_MTORR = 5;          // 도달 진공
-const FILM_NM = 500;           // 식각할 막 두께
+/* 막 두께는 이제 모드가 정한다 (게이트 200 nm, 콘택 800 nm). 그림에서 막은 항상
+   FILM_PX 픽셀로 그리므로, 나노미터당 배율은 모드마다 달라진다 — 같은 그림이지만
+   눈금이 다르다. */
 const TICK_MS = 100;           // 시뮬레이션 틱
 const SIM_SPEED = 10;          // 실시간 대비 배속 (틱당 1초)
 
@@ -50,22 +52,13 @@ const TARGETS = [
   { id: 'PR',    label: 'PR',     desc: '포토레지스트 애싱',  under: 'Si' },
 ];
 
-/* 조작 범위는 전부 원본 EtchingSimulator.js 와 같다.
-   압력 30~200 mTorr / RF 100~800 W / 가스 0~100 sccm.
-   (원본의 10~300 은 압력이 아니라 시간(sec) 슬라이더 범위다.) */
-const P_MIN = 30,  P_MAX = 200,  P_STEP = 10;   // mTorr — CCP RIE 상용 운전 구간
-const W_MIN = 100, W_MAX = 800,  W_STEP = 50;   // W
-const G_MAX = 100, G_STEP = 5;                  // sccm
+/* 압력·파워·CD·시간의 조절 범위는 이제 상수가 아니라 **모드가 정한다** (MODES).
+   ICP 게이트 식각의 바이어스 20~250 W 와 이중 주파수 CCP 콘택 식각의 300~3000 W 는
+   겹치지도 않는 구간이라, 하나의 범위로 묶으면 어느 쪽도 제대로 못 돌린다.
+   가스 스텝만 모든 모드가 공유한다. */
+const G_STEP = 5;                               // sccm
 
-/* 예전 이 화면은 시간을 아예 받지 않고 막을 뚫으면 무조건 멈췄다 — 언더에치도
-   오버에치도 만들 수 없었고, "시간을 정하면 깊이가 나온다" 는 식각의 기본을 보여줄
-   수가 없었다.
-   범위는 원본 슬라이더(10~300 s)보다 넓게 잡았다. 이 화면은 500 nm 막을 끝까지
-   뚫는 것이 기본 시나리오인데, 대표 레시피의 관통 시간이 이미 285 초라 300 초가
-   상한이면 오버에치를 만들 여지가 거의 없다. */
-const T_MIN = 10,  T_MAX = 600,  T_STEP = 10;   // s
-/* 패턴 폭(CD). 종횡비가 깊이/폭이므로 CD 없이는 ARDE 를 말할 수 없다. */
-const CD_MIN = 100, CD_MAX = 1000, CD_STEP = 50; // nm
+
 
 const GASES = [
   { id: 'Cl2',  label: 'Cl₂',  role: 'Si 주 식각종. 늘리면 식각률이 오르지만 선택비가 깎인다.' },
@@ -75,6 +68,84 @@ const GASES = [
   { id: 'O2',   label: 'O₂',   role: 'PR 애싱. 폴리머를 태워 없앤다.' },
   { id: 'Ar',   label: 'Ar',   role: '물리 스퍼터. 이방성엔 도움, 선택비엔 손해.' },
 ];
+
+/* ────────────────────────── 공정 모드 ──────────────────────────
+   장비가 하나인데 타깃만 넷이었다. 그래서 "CCP 100 mTorr 로 100 nm 게이트" 처럼
+   실제로는 존재하지 않는 조합을 만들 수 있었다. 공정마다 쓰는 장비가 다르므로
+   모드가 장비를 고르고, 장비가 조절 범위를 고르게 한다.
+
+   ① 도전막 게이트 — ICP/TCP. 소스와 바이어스가 분리된 고밀도 플라즈마.
+      게이트 산화막이 2 nm 밖에 안 되므로 선택비가 전부다. 이온은 많이·약하게.
+   ② 유전막 콘택 — 이중 주파수 CCP. 상부 60 MHz 가 밀도를, 하부 2 MHz 가 이온
+      에너지를 맡는다. Si–O 결합을 끊어야 하니 수백 eV 가 필요하다. 이온은 적게·세게.
+
+   범위는 리서치한 실제 레시피 구간이다. win 은 그 모드의 표준 공정 창으로,
+   슬라이더 위에 띠로 표시된다 — 밖으로 나가도 계산은 되지만 표준이 아님을 알린다.
+
+   ※ 실제 콘택 식각의 주 식각종은 C₄F₈·C₄F₆ 인데 이 물리 모델의 가스 목록에는
+     없다. 있는 것 중 가장 가까운 CF₄/CHF₃ 로 대신하고 화면에 그렇게 적는다.
+     없는 가스를 있는 척하는 것보다 낫다. */
+const MODES = [
+  {
+    id: 'gate',
+    name: '도전막 게이트',
+    sub: '폴리실리콘 · Cl₂/HBr',
+    equip: 'ICP / TCP',
+    equipSub: '소스와 바이어스가 분리된 고밀도 플라즈마',
+    model: 'TCP-9400',
+    plate: 'Inductively Coupled (TCP) · Source + Bias · Bay 1',
+    type: 'icp',
+    targets: ['Si'],
+    filmNm: 200,                       // 폴리실리콘 게이트 두께
+    source: { label: '소스 (TCP 13.56 MHz)', min: 250, max: 1500, step: 50, def: 850, win: [500, 1150] },
+    bias: { label: '바이어스 (13.56 MHz)', min: 20, max: 250, step: 10, def: 120, win: [60, 170] },
+    pressure: { min: 4, max: 60, step: 2, def: 8, win: [4, 12], note: '메인 4~12 · 오버에치 55~65' },
+    time: { min: 10, max: 300, step: 10, def: 60, win: [40, 90] },
+    cd: { min: 30, max: 250, step: 10, def: 90, win: [30, 150] },
+    gases: ['Cl2', 'HBr', 'O2'],
+    gasMax: 200,
+    gasDef: { Cl2: 70, HBr: 120, CF4: 0, CHF3: 0, O2: 5, Ar: 0 },
+    gasWin: { Cl2: [50, 100], HBr: [100, 140], O2: [2, 10] },
+    note: '게이트 산화막이 2 nm 라 선택비가 전부다. 이온을 많이·약하게 보낸다.',
+  },
+  {
+    id: 'contact',
+    name: '유전막 콘택',
+    sub: '산화막 · 불소계 폴리머',
+    equip: '이중 주파수 CCP',
+    equipSub: '상부 60 MHz 로 밀도, 하부 2 MHz 로 이온 에너지',
+    model: 'DFC-2300',
+    plate: 'Dual-Frequency CCP · 60 MHz + 2 MHz · Bay 3',
+    type: 'dfccp',
+    targets: ['SiO2', 'Si3N4', 'PR'],
+    filmNm: 800,                       // 층간 절연막 두께
+    source: { label: '소스 HF (상부 60 MHz)', min: 300, max: 1500, step: 50, def: 300, win: [300, 720] },
+    bias: { label: '바이어스 LF (하부 2 MHz)', min: 300, max: 3000, step: 100, def: 500, win: [440, 1500] },
+    pressure: { min: 20, max: 80, step: 5, def: 20, win: [20, 47], note: '홀이 깊을수록 낮게' },
+    time: { min: 30, max: 600, step: 10, def: 180, win: [140, 280] },
+    cd: { min: 40, max: 200, step: 10, def: 60, win: [40, 120] },
+    gases: ['CF4', 'CHF3', 'Ar', 'O2'],
+    gasMax: 200,
+    gasDef: { Cl2: 0, HBr: 0, CF4: 30, CHF3: 25, O2: 5, Ar: 140 },
+    gasWin: { CF4: [20, 45], CHF3: [15, 35], Ar: [110, 170], O2: [2, 12] },
+    note: 'Si–O 결합을 끊어야 하니 수백 eV 가 필요하다. 이온을 적게·세게 보낸다.',
+  },
+];
+
+const modeOf = (id) => MODES.find((m) => m.id === id) || MODES[0];
+
+/** 그 모드의 기본 레시피. 모드를 바꾸면 조절값이 통째로 이 값으로 돌아간다. */
+function modeDefaults(m) {
+  return {
+    target: m.targets[0],
+    source: m.source.def,
+    bias: m.bias.def,
+    pressure: m.pressure.def,
+    etchTime: m.time.def,
+    cd: m.cd.def,
+    gasFlows: { ...m.gasDef },
+  };
+}
 
 /** 펌핑 대기 중 보여줄 이론 — 원본의 '이론' 탭 내용을 이 구간으로 옮겨왔다. */
 const PUMPDOWN_NOTES = [
@@ -113,7 +184,7 @@ const fmt = (v, d = 0) => (Number.isFinite(v) ? v.toFixed(d) : '—');
     충분히 긴 시간을 돌려 보고 관통 시각을 읽는다. 못 뚫으면 null. */
 function estimatePunchTime(pv) {
   const run = simulateEtchRun({
-    rate: pv.rate, seconds: 36000, filmThickness: FILM_NM, trenchWidth: pv.trench,
+    rate: pv.rate, seconds: 36000, filmThickness: pv.filmNm, trenchWidth: pv.trench,
     profile: pv.prof, selectivity: pv.sel, dt: 2,
   });
   return run.punchThroughTime;
@@ -146,60 +217,11 @@ function Lamp({ on, label, warn }) {
   );
 }
 
-/** 노브형 컨트롤. 값 조절은 슬라이더로 하되, 시각은 장비 노브를 따른다. */
-function Knob({ label, unit, value, min, max, step, onChange, disabled, hint }) {
-  const pct = (value - min) / (max - min);
-  const sweep = Math.round(pct * 270);
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className={`eb-knob-row ${disabled ? 'is-off' : ''}`}>
-      <div
-        className="eb-knob"
-        style={{ '--sweep': `${sweep}deg` }}
-        aria-hidden="true"
-      >
-        <span className="eb-knob-cap" />
-      </div>
-
-      <div className="eb-knob-main">
-        <div className="eb-knob-head">
-          <span className="eb-knob-label">{label}</span>
-          <span className="eb-knob-val">
-            {value}
-            <small>{unit}</small>
-          </span>
-        </div>
-        <input
-          type="range"
-          min={min}
-          max={max}
-          step={step}
-          value={value}
-          disabled={disabled}
-          onChange={(e) => onChange(Number(e.target.value))}
-          aria-label={`${label} (${unit})`}
-        />
-        {hint && (
-          <button
-            type="button"
-            className="eb-why"
-            onClick={() => setOpen((v) => !v)}
-            aria-expanded={open}
-          >
-            {open ? '닫기' : '이 값이 하는 일'}
-          </button>
-        )}
-        {open && hint && <p className="eb-hint">{hint}</p>}
-      </div>
-    </div>
-  );
-}
 
 /* ────────────────────────── 챔버 단면도 ────────────────────────── */
 
 /* 단면 좌표계.
-   막 두께 FILM_NM 이 FILM_PX 픽셀이므로 나노미터당 배율이 하나로 정해진다.
+   막 두께(모드마다 다르다)가 FILM_PX 픽셀이므로 나노미터당 배율이 정해진다.
    패턴 폭(CD)도 **같은 배율**로 그린다. 예전에는 개구부가 64 px 로 고정이라
    화면에서 잰 종횡비와 계산에 쓰는 종횡비가 서로 달랐다. */
 const VIEW_W = 320, VIEW_H = 210;
@@ -208,7 +230,7 @@ const FILM_PX = 62;             // 막 두께
 const SUB_PX = 44;              // 그릴 수 있는 하부층 두께
 const MASK_PX = 15;             // 마스크 두께
 const CX = VIEW_W / 2;
-const PX_PER_NM = FILM_PX / FILM_NM;
+const pxPerNmOf = (filmNm) => FILM_PX / Math.max(1, filmNm);
 
 /**
  * 측벽의 반폭(px). u = 0 (막 상면) ~ 1 (식각 바닥).
@@ -281,15 +303,19 @@ const PRODUCTS = {
 };
 
 function ChamberView({
-  phase, pressure, power, filmEtched, underlayerLoss, cd, profile, target, glowSeed, callouts,
+  phase, pressure, source, bias, filmNm, filmEtched, underlayerLoss, cd, profile, target,
+  glowSeed, callouts,
 }) {
   const plasmaOn = phase === 'PROCESSING' || phase === 'ENDPOINT';
-  const glow = plasmaOn ? clamp(0.25 + power / 900, 0.25, 0.95) : 0;
+  /* 플라즈마의 밝기는 밀도, 즉 소스 파워가 정한다. 바이어스를 올려도 더 밝아지지
+     않는다 — 이온이 세게 때릴 뿐 많아지지 않는다. */
+  const glow = plasmaOn ? clamp(0.25 + source / 900, 0.25, 0.95) : 0;
 
   const blanket = target === 'PR';                  // 애싱은 마스크 없이 전면이 깎인다
-  const half = blanket ? (VIEW_W - 68) / 2 : clamp((cd * PX_PER_NM) / 2, 4, 110);
-  const dFilm = clamp(filmEtched * PX_PER_NM, 0, FILM_PX);
-  const dUnder = clamp(underlayerLoss * PX_PER_NM, 0, SUB_PX - 4);
+  const pxPerNm = pxPerNmOf(filmNm);
+  const half = blanket ? (VIEW_W - 68) / 2 : clamp((cd * pxPerNm) / 2, 4, 110);
+  const dFilm = clamp(filmEtched * pxPerNm, 0, FILM_PX);
+  const dUnder = clamp(underlayerLoss * pxPerNm, 0, SUB_PX - 4);
   const depth = filmEtched + underlayerLoss;
 
   /* 형상 인자를 픽셀로 환산한다. 전면 식각(애싱)에는 측벽이 없으므로 전부 0 이다. */
@@ -309,7 +335,7 @@ function ChamberView({
 
   // 플라즈마 입자 (렌더 시드로 고정 — 매 프레임 튀지 않게)
   const parts = useMemo(() => {
-    const n = plasmaOn ? Math.round(10 + (power / 800) * 26) : 0;
+    const n = plasmaOn ? Math.round(10 + (source / 800) * 26) : 0;
     const out = [];
     for (let i = 0; i < n; i++) {
       const s = (i * 9301 + glowSeed * 49297) % 233280;
@@ -320,7 +346,7 @@ function ChamberView({
       });
     }
     return out;
-  }, [plasmaOn, power, glowSeed]);
+  }, [plasmaOn, source, glowSeed]);
 
   /* 이온 궤적.
      RIE 에서 이온은 플라즈마와 웨이퍼 사이 시스(sheath)의 전위차로 가속된다.
@@ -530,7 +556,7 @@ function ChamberView({
         {dFilm < FILM_PX - 0.5 && filmEtched > 0 && (
           <text x="38" y={TRENCH_TOP + FILM_PX - 16} fontSize="7" fill="#F0C464"
                 fontFamily="ui-monospace, Menlo, monospace">
-            잔막 {Math.round(FILM_NM - filmEtched)}nm
+            잔막 {Math.round(filmNm - filmEtched)}nm
           </text>
         )}
         {underlayerLoss > 0.5 && (
@@ -968,7 +994,7 @@ function ProfileThumb({ run, w = 150, label = true }) {
   const h = Math.round((w * 118) / 200);
   const cx = 100;                       // 200×118 로 그리고 배율만 준다
   const top = 28, filmH = 44, subH = 30;
-  const pxPerNm = filmH / FILM_NM;
+  const pxPerNm = filmH / Math.max(1, run.filmNm);
 
   const blanket = run.target === 'PR';
   const half = blanket ? 84 : clamp((run.cd * pxPerNm) / 2, 3, 78);
@@ -1036,52 +1062,201 @@ function ProfileThumb({ run, w = 150, label = true }) {
   );
 }
 
-/* ──────────────────── 장비 한계 (CCP · 단일 RF) ────────────────────
-   이 화면의 명판은 CCP 다. 그런데 기본 시나리오는 폴리실리콘 게이트고 CD 슬라이더는
-   100 nm 까지 내려간다. 100 mTorr CCP 로 100 nm 게이트를 잡는 공정은 존재한 적이
-   없다 — 명판과 CD 범위가 서로 다른 시대다.
-
-   압력을 "낮추면 수직해진다" 는 설명도 CCP 에서는 절반만 맞다. 압력을 내리면 자유
-   행로는 길어지지만 플라즈마 밀도가 같이 떨어져 시스가 두꺼워져서, 운전 구간 전체에서
-   s/λ 가 5 아래로 안 내려간다. 그래서 숫자를 계산해서 보여 준다. */
-function RegimeNote({ target, pressure, power, cd }) {
-  const s = sheathCollisionality(pressure, power);
-  const floor = sheathCollisionality(P_MIN, power);
-  /* 도전막(폴리실리콘 게이트)만 해당한다. 유전막은 지금도 CCP 가 하는 일이다. */
-  const tooFine = target === 'Si' && cd < CCP_CONDUCTOR_CD_FLOOR;
+/* ──────────────────── 조절값 한 줄 ────────────────────
+   다이얼을 버렸다. 42px 짜리 원판은 값을 읽어 주지도 않으면서 자리만 차지했고,
+   무엇보다 파워가 하나뿐이라 소스와 바이어스를 나눠 놓을 자리가 없었다.
+   대신 트랙 위에 그 모드의 **공정 창**을 띠로 깔았다 — 밖으로 나가도 계산은
+   되지만, 표준이 어디인지는 보인다. */
+function Slider({ label, unit, value, min, max, step, win, note, onChange, hint, disabled }) {
+  const [open, setOpen] = useState(false);
+  const at = (v) => `${clamp(((v - min) / (max - min)) * 100, 0, 100)}%`;
 
   return (
-    <div className={`eb-regime ${tooFine ? 'is-warn' : ''}`}>
-      <p className="eb-panel-k">장비 한계 · CCP 단일 RF</p>
-      <div className="eb-regime-row">
-        <div><span>이온 자유행로 λ</span><b>{s.mfp.toFixed(2)} mm</b></div>
-        <div><span>시스 두께 s</span><b>{s.sheath.toFixed(1)} mm</b></div>
-        <div>
-          <span>시스 충돌도 s/λ</span>
-          <b className={s.collisional ? 'is-hot' : ''}>{s.ratio.toFixed(1)}</b>
-        </div>
+    <div className={`eb-p-row ${disabled ? 'is-off' : ''}`}>
+      <div className="eb-p-head">
+        <span className="eb-p-label">
+          {label}
+          {hint && (
+            <button
+              type="button"
+              className="eb-p-why"
+              onClick={() => setOpen((v) => !v)}
+              aria-expanded={open}
+              aria-label={`${label} 설명`}
+            >?</button>
+          )}
+        </span>
+        <span className="eb-p-val">{value}<small>{unit}</small></span>
       </div>
-      <p className="eb-regime-txt">
-        이온이 시스를 건너며 전하교환 충돌을 {Math.round(s.ratio)}번쯤 겪습니다 — 충돌 시스입니다.
-        입사 에너지가 낮은 쪽으로 퍼지고 입사각이 벌어집니다.
-        CCP 는 압력을 낮춰도 밀도가 같이 떨어져 시스가 두꺼워지므로, 하한 {P_MIN} mTorr 에서도
-        s/λ 가 {floor.ratio.toFixed(1)} 입니다 — <b>이 장비로는 무충돌 시스를 만들 수 없습니다.</b>
-        {' '}도전막 식각이 ICP/TCP 로 넘어간 이유입니다. 소스와 바이어스를 분리해야
-        고밀도(얇은 시스)와 저압(긴 자유행로)을 동시에 얻습니다.
+
+      <div className="eb-p-track">
+        {win && (
+          <span
+            className="eb-p-win"
+            style={{ left: at(win[0]), width: `calc(${at(win[1])} - ${at(win[0])})` }}
+          />
+        )}
+        <span className="eb-p-fill" style={{ width: at(value) }} />
+        <input
+          type="range" min={min} max={max} step={step} value={value} disabled={disabled}
+          onChange={(e) => onChange(Number(e.target.value))} aria-label={label}
+        />
+      </div>
+
+      <div className="eb-p-scale">
+        <span>{min}</span>
+        {note && <span className="eb-p-note">{note}</span>}
+        <span>{max}</span>
+      </div>
+
+      {open && hint && <p className="eb-hint">{hint}</p>}
+    </div>
+  );
+}
+
+/** 공정 모드 — 모드가 장비를 고르고, 장비가 조절 범위를 고른다. */
+function ModeBar({ value, onPick }) {
+  const m = modeOf(value);
+  return (
+    <div className="eb-modes-wrap">
+      <p className="eb-panel-k">공정 모드</p>
+      <div className="eb-modes">
+        {MODES.map((x) => (
+          <button
+            key={x.id}
+            type="button"
+            className={`eb-mode ${x.id === value ? 'is-on' : ''}`}
+            onClick={() => onPick(x.id)}
+            aria-pressed={x.id === value}
+          >
+            <span className="eb-mode-n">{x.name}</span>
+            <span className="eb-mode-s">{x.sub}</span>
+          </button>
+        ))}
+      </div>
+      <p className="eb-equip">
+        <b>{m.equip}</b>
+        <span>{m.equipSub} · {m.pressure.min}~{m.pressure.max} mTorr</span>
       </p>
-      {tooFine && (
-        <p className="eb-regime-warn">
-          CD {cd} nm 게이트는 이 장비의 영역이 아닙니다. 0.25 µm 세대에 게이트 식각은
-          ICP/TCP/DPS · 2~20 mTorr 로 넘어갔습니다. 이 화면은 그대로 계산하지만,
-          실제 팹에서 {cd} nm 를 100 mTorr CCP 로 잡지는 않습니다.
-        </p>
-      )}
-      <p className="eb-regime-foot">
-        ※ CCP 가 낡은 것은 아닙니다 — 산화막 콘택·비아와 3D NAND 채널홀 같은 유전막
-        식각은 지금도 CCP(다중 주파수)가 20~80 mTorr 에서 합니다. 높은 이온 에너지와
-        폴리머가 필요한 쪽이라 CCP 가 오히려 맞습니다. 낡은 것은 압력이 아니라
-        <b> 100 mTorr CCP 로 도전막을 잡는다</b>는 조합입니다.
-      </p>
+    </div>
+  );
+}
+
+/* 10 의 거듭제곱을 위첨자로. 1.7×10¹¹ 처럼 읽히게 한다. */
+const SUP = '⁰¹²³⁴⁵⁶⁷⁸⁹';
+function sci(v) {
+  if (!(v > 0) || !Number.isFinite(v)) return '0';
+  const e = Math.floor(Math.log10(v));
+  const m = v / 10 ** e;
+  const exp = String(e).split('').map((c) => (c === '-' ? '⁻' : SUP[Number(c)])).join('');
+  return `${m.toFixed(1)}×10${exp}`;
+}
+
+/* ──────────────────── 계산 결과 ────────────────────
+   이온 플럭스와 이온 에너지는 **넣는 값이 아니다.** 파워와 압력에서 나오는 결과다.
+   그래서 이 구역에는 슬라이더가 하나도 없다 — 조절값 구역과 눈으로 갈라 놓는 것이
+   이 화면이 가르쳐야 할 첫 번째 사실이다.
+
+   지도는 두 축이 이온 플럭스(가로, 10¹⁰~10¹²)와 이온 에너지(세로, 0~1000 eV)다.
+   게이트 식각과 콘택 식각이 이 평면의 정반대 구석에 앉는다 — 게이트는 많이·약하게,
+   콘택은 적게·세게. 점은 지금 레시피의 운전점이고, 노브를 돌리면 점이 움직인다. */
+const MAP = { x0: 38, y0: 8, w: 200, h: 160 };
+const mapX = (density) => MAP.x0 + clamp((Math.log10(Math.max(1, density)) - 10) / 2, 0, 1) * MAP.w;
+const mapY = (energy) => MAP.y0 + (1 - clamp(energy / 1000, 0, 1)) * MAP.h;
+
+/** 지도 위 영역 상자. 두 공정의 표준 운전 구간을 옅게 깐다. */
+const MAP_ZONES = [
+  { id: 'contact', label: '콘택', color: '#E06C5A', d: [1e10, 8e10, 400, 900] },
+  { id: 'gate', label: '게이트', color: '#6FBF8E', d: [8e10, 3.2e11, 50, 250] },
+];
+
+function Readout({ plasma, modeId }) {
+  const px = mapX(plasma.density);
+  const py = mapY(plasma.energy);
+
+  const verdict = plasma.ratio < 1
+    ? { t: '무충돌 시스 — 이온이 곧게 내리꽂힙니다', c: '#6FBF8E' }
+    : plasma.ratio < 5
+      ? { t: '충돌 시스 — 입사각이 조금 벌어집니다', c: '#F0C464' }
+      : { t: '충돌 시스 — 입사각이 크게 벌어집니다', c: '#E06C5A' };
+
+  return (
+    <div className="eb-out">
+      <div className="eb-out-head">
+        <p className="eb-panel-k">계산 결과</p>
+        <span>직접 넣는 값이 아닙니다 — 위 조절값에서 나옵니다</span>
+      </div>
+
+      <div className="eb-out-body">
+        <svg className="eb-map" viewBox="0 0 252 212" role="img"
+             aria-label={`이온 플럭스 ${sci(plasma.density)} cm⁻³, 이온 에너지 ${Math.round(plasma.energy)} eV 운전점`}>
+          <rect x={MAP.x0} y={MAP.y0} width={MAP.w} height={MAP.h} fill="#141210" stroke="#332F27" />
+          <g stroke="#241F19">
+            {[0.25, 0.5, 0.75].map((f) => (
+              <line key={`v${f}`} x1={MAP.x0 + f * MAP.w} y1={MAP.y0}
+                    x2={MAP.x0 + f * MAP.w} y2={MAP.y0 + MAP.h} />
+            ))}
+            {[0.25, 0.5, 0.75].map((f) => (
+              <line key={`h${f}`} x1={MAP.x0} y1={MAP.y0 + f * MAP.h}
+                    x2={MAP.x0 + MAP.w} y2={MAP.y0 + f * MAP.h} />
+            ))}
+          </g>
+
+          {MAP_ZONES.map((z) => {
+            const [d0, d1, e0, e1] = z.d;
+            const x = mapX(d0), y = mapY(e1);
+            return (
+              <g key={z.id}>
+                <rect x={x} y={y} width={mapX(d1) - x} height={mapY(e0) - y}
+                      fill={z.color} opacity={z.id === modeId ? 0.18 : 0.08} />
+                <text x={x + 4} y={y + 13} fontSize="10" fill={z.color}
+                      fontFamily="ui-monospace, Menlo, monospace"
+                      opacity={z.id === modeId ? 0.95 : 0.5}>{z.label}</text>
+              </g>
+            );
+          })}
+
+          <line x1={px} y1={MAP.y0} x2={px} y2={MAP.y0 + MAP.h}
+                stroke="#F0C464" strokeDasharray="3 3" opacity="0.45" />
+          <line x1={MAP.x0} y1={py} x2={MAP.x0 + MAP.w} y2={py}
+                stroke="#F0C464" strokeDasharray="3 3" opacity="0.45" />
+          <circle cx={px} cy={py} r="9" fill="#F0C464" opacity="0.16" />
+          <circle cx={px} cy={py} r="4" fill="#F0C464" />
+
+          <text x={MAP.x0} y="184" fontSize="9.5" fill="#6B6353" fontFamily="ui-monospace, Menlo, monospace">10¹⁰</text>
+          <text x={MAP.x0 + MAP.w - 26} y="184" fontSize="9.5" fill="#6B6353" fontFamily="ui-monospace, Menlo, monospace">10¹²</text>
+          <text x={MAP.x0 + 50} y="200" fontSize="10.5" fill="#948A73" fontFamily="ui-monospace, Menlo, monospace">이온 플럭스</text>
+          <text x={MAP.x0 - 6} y={MAP.y0 + MAP.h} fontSize="9.5" fill="#6B6353" textAnchor="end" fontFamily="ui-monospace, Menlo, monospace">0</text>
+          <text x={MAP.x0 - 6} y={MAP.y0 + 8} fontSize="9.5" fill="#6B6353" textAnchor="end" fontFamily="ui-monospace, Menlo, monospace">1k</text>
+          <text x="12" y="120" fontSize="10.5" fill="#948A73" transform="rotate(-90 12 120)" fontFamily="ui-monospace, Menlo, monospace">이온 에너지</text>
+        </svg>
+
+        <dl className="eb-out-vals">
+          <div>
+            <dt>이온 플럭스</dt>
+            <dd>{sci(plasma.density)} cm⁻³</dd>
+            <dfn>소스 파워와 압력이 정합니다</dfn>
+          </div>
+          <div>
+            <dt>이온 에너지</dt>
+            <dd style={{ color: plasma.energy > 400 ? '#E06C5A' : '#6FBF8E' }}>
+              {Math.round(plasma.energy)} eV
+            </dd>
+            <dfn>바이어스 파워가 정합니다</dfn>
+          </div>
+          <div>
+            <dt>시스 충돌도 s/λ</dt>
+            <dd style={{ color: verdict.c }}>{plasma.ratio.toFixed(2)}</dd>
+            <dfn>자유행로 {plasma.mfp.toFixed(2)} mm · 시스 {plasma.sheath.toFixed(2)} mm</dfn>
+          </div>
+        </dl>
+      </div>
+
+      <p className="eb-out-foot" style={{ color: verdict.c }}>{verdict.t}</p>
+      <div className="eb-out-guide">
+        <span>소스↑ · 압력↑ → 점이 <b>오른쪽</b></span>
+        <span>바이어스↑ · 압력↓ → 점이 <b>위쪽</b></span>
+      </div>
     </div>
   );
 }
@@ -1093,7 +1268,9 @@ function recipeDiff(a, b) {
   const push = (k, x, y, unit = '') => { if (x !== y) out.push(`${k} ${x}${unit} → ${y}${unit}`); };
   push('재료', a.target, b.target);
   push('압력', a.pressure, b.pressure, ' mTorr');
-  push('파워', a.power, b.power, ' W');
+  push('소스', a.source, b.source, ' W');
+  push('바이어스', a.bias, b.bias, ' W');
+  push('모드', modeOf(a.modeId).name, modeOf(b.modeId).name);
   push('시간', a.etchTime, b.etchTime, ' s');
   if (a.target !== 'PR' || b.target !== 'PR') push('CD', a.cd, b.cd, ' nm');
   GASES.forEach((g) => push(g.label, a.gas[g.id], b.gas[g.id], ' sccm'));
@@ -1130,7 +1307,7 @@ function RunCompare({ runs, open, onToggle, onClear }) {
                 <article className="eb-cmp-card" key={r.id}>
                   <header>
                     <b>{r.n}번 공정</b>
-                    <span>{TARGETS.find((t) => t.id === r.target)?.label} · {r.pressure} mTorr · {r.power} W · {r.etchTime}s</span>
+                    <span>{TARGETS.find((t) => t.id === r.target)?.label} · {r.pressure} mTorr · {r.source}/{r.bias} W · {r.etchTime}s</span>
                   </header>
                   <ProfileThumb run={r} w={THUMB_W} />
                   <dl>
@@ -1211,17 +1388,43 @@ export default function EtchingBay() {
   const [pressure, setPressure] = useState(ATM_MTORR);
   const [pumpT, setPumpT] = useState(0);
 
-  // 레시피
-  const [target, setTarget] = useState('Si');
-  // 초기 레시피도 원본과 동일하게 둔다.
-  const [setPressure_, setSetPressure] = useState(100);
-  const [power, setPower] = useState(300);
-  const [gasFlows, setGasFlows] = useState({
-    Cl2: 30, HBr: 15, CF4: 0, CHF3: 0, O2: 0, Ar: 90,
-  });
-  // 기본 시간은 대표 레시피의 관통 시간(285 s)에 15% 오버에치를 더한 값이다.
-  const [etchTime, setEtchTime] = useState(330);  // s — 설정 시간이 깊이를 정한다
-  const [cd, setCd] = useState(500);               // nm — 패턴 폭
+  // 레시피 — 모드가 장비를 고르고, 장비가 조절 범위와 기본값을 고른다.
+  const [modeId, setModeId] = useState('gate');
+  const mode = modeOf(modeId);
+  const D0 = MODES[0];
+  const [target, setTarget] = useState(D0.targets[0]);
+  const [setPressure_, setSetPressure] = useState(D0.pressure.def);
+  const [source, setSource] = useState(D0.source.def);
+  const [bias, setBias] = useState(D0.bias.def);
+  const [gasFlows, setGasFlows] = useState({ ...D0.gasDef });
+  const [etchTime, setEtchTime] = useState(D0.time.def);   // s — 설정 시간이 깊이를 정한다
+  const [cd, setCd] = useState(D0.cd.def);                  // nm — 패턴 폭
+
+  const filmNm = mode.filmNm;
+  /* 물리 모듈에 넘기는 방전 조건. 숫자 하나가 아니라 소스·바이어스·장비형이다. */
+  const discharge = useMemo(
+    () => ({ source, bias, type: mode.type }),
+    [source, bias, mode.type],
+  );
+
+  /* 모드를 바꾸면 조절값이 그 모드의 기본 레시피로 통째로 돌아간다. 범위가 겹치지
+     않기 때문이다 — ICP 의 바이어스 120 W 를 CCP 의 300~3000 W 슬라이더에 그대로
+     남기면 범위 밖 값이 남는다. */
+  const pickMode = useCallback((id) => {
+    const m = modeOf(id);
+    const d = modeDefaults(m);
+    setModeId(id);
+    setTarget(d.target);
+    setSource(d.source);
+    setBias(d.bias);
+    setSetPressure(d.pressure);
+    /* 진공에 이미 도달해 있으면 챔버 압력도 같이 옮긴다. 설정만 바꾸고 실제
+       압력을 두면 챔버 배지가 옛 값을 계속 띄운다. */
+    setPressure((cur) => (cur <= ATM_MTORR / 2 ? d.pressure : cur));
+    setEtchTime(d.etchTime);
+    setCd(d.cd);
+    setGasFlows(d.gasFlows);
+  }, []);
 
   // 런 상태
   // 런 상태 — 막을 깎은 양과 하부층을 깎은 양은 다른 값이다. 하나로 묶으면
@@ -1257,23 +1460,25 @@ export default function EtchingBay() {
   const preview = useMemo(() => {
     // 미리보기는 난수 없이 (rng = 0.5 고정) 계산해야 슬라이더가 흔들리지 않는다.
     const rng = () => 0.5;
-    const rate = calculateEtchRate(target, gasFlows, power, setPressure_, rng);
-    const sel = calculateSelectivity(target, gasFlows, power, setPressure_, rng);
-    const prof = calculateProfile(target, gasFlows, power, setPressure_);
+    const rate = calculateEtchRate(target, gasFlows, discharge, setPressure_, rng);
+    const sel = calculateSelectivity(target, gasFlows, discharge, setPressure_, rng);
+    const prof = calculateProfile(target, gasFlows, discharge, setPressure_);
     // 애싱은 전면 식각이라 종횡비가 없다 — ARDE 를 걸면 안 된다.
     const trench = target === 'PR' ? Infinity : cd;
     // 예상 결과는 실행 루프와 **같은 모델**로 뽑는다. 따로 계산하면 언젠가 갈라진다.
     const run = simulateEtchRun({
-      rate, seconds: etchTime, filmThickness: FILM_NM, trenchWidth: trench,
+      rate, seconds: etchTime, filmThickness: filmNm, trenchWidth: trench,
       profile: prof, selectivity: sel,
     });
     return {
-      rate, sel, prof, run, trench,
-      uni: calculateUniformity(setPressure_, power, gasFlows),
+      rate, sel, prof, run, trench, filmNm,
+      uni: calculateUniformity(setPressure_, discharge, gasFlows),
+      /* 이온 플럭스와 이온 에너지는 넣는 값이 아니라 여기서 나오는 값이다. */
+      plasma: sheathCollisionality(setPressure_, discharge),
       // 가스 조건에 더해 식각률이 사실상 0 인 경우도 etch stop 으로 본다 (원본과 같은 규칙).
       etchStop: prof.etchStop || rate < 15,
     };
-  }, [target, gasFlows, power, setPressure_, etchTime, cd]);
+  }, [target, gasFlows, discharge, setPressure_, etchTime, cd, filmNm]);
 
   /* ── 인터락 ── */
   const interlocks = useMemo(() => {
@@ -1290,7 +1495,7 @@ export default function EtchingBay() {
   const canIgnite =
     phase === 'READY' &&
     interlocks.wafer && interlocks.door && interlocks.vacuum && interlocks.gas &&
-    power > 0 && preview.rate > 0;
+    source > 0 && bias > 0 && preview.rate > 0;
 
   /* ── 시퀀스 진행 ── */
   const stop = useCallback(() => {
@@ -1341,7 +1546,7 @@ export default function EtchingBay() {
       const r = runRef.current;
 
       // 산포가 붙은 식각률 (화면 계측값). ARDE 감속은 지금 깊이에서 건다.
-      const rate0 = calculateEtchRate(target, gasFlows, power, setPressure_);
+      const rate0 = calculateEtchRate(target, gasFlows, discharge, setPressure_);
       const depth = r.film + r.under;
       const ar = preview.trench === Infinity ? 0 : depth / preview.trench;
       const rate = rate0 * calculateArdeFactor(ar, preview.prof.ionShare);
@@ -1351,8 +1556,8 @@ export default function EtchingBay() {
       r.rateN += 1;
       r.t = Math.min(r.t + dtSec, etchTime);
 
-      if (r.film < FILM_NM) {
-        const need = FILM_NM - r.film;
+      if (r.film < filmNm) {
+        const need = filmNm - r.film;
         const canDo = perSec * dtSec;
         if (canDo < need) {
           r.film += canDo;
@@ -1360,7 +1565,7 @@ export default function EtchingBay() {
           // 이 틱 안에서 막을 뚫는다. 남은 시간은 하부층 쪽으로 넘긴다 —
           // 틱 경계에서 시간이 새면 오버에치가 과소평가된다.
           const left = dtSec - need / perSec;
-          r.film = FILM_NM;
+          r.film = filmNm;
           r.under += (perSec / Math.max(1, preview.sel)) * left;
           if (!r.punched) { r.punched = true; r.punchAt = r.t; }
         }
@@ -1369,7 +1574,7 @@ export default function EtchingBay() {
       }
 
       // OES: 막이 남아있는 동안 신호 유지, 뚫리면 급락
-      const frac = clamp(r.film / FILM_NM, 0, 1);
+      const frac = clamp(r.film / filmNm, 0, 1);
       const sig = frac < 0.92
         ? 0.72 + Math.sin(r.film / 9) * 0.05
         : clamp(0.72 - (frac - 0.92) * 8, 0.06, 0.72);
@@ -1388,7 +1593,7 @@ export default function EtchingBay() {
       }
     }, TICK_MS);
     return stop;
-  }, [phase, target, gasFlows, power, setPressure_, etchTime, preview, stop]);
+  }, [phase, target, gasFlows, discharge, setPressure_, etchTime, preview, stop, filmNm]);
 
   // 엔드포인트 → 벤팅 → 리포트
   useEffect(() => {
@@ -1403,14 +1608,14 @@ export default function EtchingBay() {
         prof: preview.prof,
         time: r.t,
         filmEtched: r.film,
-        remainingFilm: Math.max(0, FILM_NM - r.film),
+        remainingFilm: Math.max(0, filmNm - r.film),
         underlayerLoss: r.under,
         punchThroughTime: r.punchAt,
         cd: preview.trench === Infinity ? null : cd,
         /* 리포트는 끝난 런을 설명한다. 현재 상태(벤팅 중이라 압력이 이미 올라가는
            중이다)가 아니라 이 런이 돌던 설정값을 실어야 한다. */
         pressure: setPressure_,
-        power,
+        source, bias, type: mode.type, modeId, filmNm,
         target,
       });
       /* 이 런의 최종 형상을 한 장 남긴다. 조건을 바꿔 가며 돌릴 때
@@ -1421,13 +1626,13 @@ export default function EtchingBay() {
         n: runSeq.current,
         target,
         pressure: setPressure_,
-        power,
+        source, bias, type: mode.type, modeId, filmNm,
         etchTime,
         cd,
         gas: { ...gasFlows },
         prof: preview.prof,
         filmEtched: r.film,
-        remainingFilm: Math.max(0, FILM_NM - r.film),
+        remainingFilm: Math.max(0, filmNm - r.film),
         underlayerLoss: r.under,
         sel: preview.sel,
       }].slice(-MAX_RUNS));
@@ -1435,7 +1640,7 @@ export default function EtchingBay() {
       setPhase('VENTING');
     }, 1600);
     return () => clearTimeout(id);
-  }, [phase, preview, cd, target, setPressure_, power, etchTime, gasFlows]);
+  }, [phase, preview, cd, target, setPressure_, source, bias, mode.type, modeId, filmNm, etchTime, gasFlows]);
 
   useEffect(() => {
     if (phase !== 'VENTING') return;
@@ -1494,7 +1699,7 @@ export default function EtchingBay() {
       lines.push({
         bad: true,
         t: `언더에치 — 막이 ${fmt(result.remainingFilm, 0)} nm 남았다`,
-        d: `${fmt(result.time, 0)}초로는 ${FILM_NM} nm 를 다 뚫지 못했다. 시간을 늘리거나 식각률을 올려야 한다. 남은 막은 다음 공정에서 그대로 문제가 된다.`,
+        d: `${fmt(result.time, 0)}초로는 ${result.filmNm} nm 를 다 뚫지 못했다. 시간을 늘리거나 식각률을 올려야 한다. 남은 막은 다음 공정에서 그대로 문제가 된다.`,
       });
     } else {
       const over = result.time - (result.punchThroughTime || result.time);
@@ -1553,7 +1758,8 @@ export default function EtchingBay() {
     /* 물리가 아니라 장비 선택의 문제다. 계산 결과는 멀쩡해 보여도 실제 팹에서는
        이 조합으로 이 CD 를 잡지 않는다 — 그걸 말해 주지 않으면 잘못 배운다. */
     if (result.target === 'Si' && result.cd && result.cd < CCP_CONDUCTOR_CD_FLOOR) {
-      const sh = sheathCollisionality(result.pressure, result.power);
+      const sh = sheathCollisionality(result.pressure,
+        { source: result.source, bias: result.bias, type: result.type });
       lines.push({
         bad: true,
         t: `장비 영역 밖 — CD ${result.cd} nm 를 CCP 로 잡고 있다`,
@@ -1565,7 +1771,7 @@ export default function EtchingBay() {
       lines.push({
         bad: true,
         t: '마스크 스퍼터 손상',
-        d: `Ar ${gasFlows.Ar} sccm · RF ${power} W 조건에서 마스크 위 모서리가 깎인다(파세팅). 마스크가 물러나면 패턴 폭이 벌어진다. ※ 침식 속도는 모델에 없고 표시는 정성적이다.`,
+        d: `Ar ${gasFlows.Ar} sccm · 바이어스 ${bias} W 조건에서 마스크 위 모서리가 깎인다(파세팅). 마스크가 물러나면 패턴 폭이 벌어진다. ※ 침식 속도는 모델에 없고 표시는 정성적이다.`,
       });
     }
 
@@ -1596,15 +1802,11 @@ export default function EtchingBay() {
       });
     }
     return lines;
-  }, [result, activeGasTotal, gasFlows.Ar, power, target]);
+  }, [result, activeGasTotal, gasFlows.Ar, bias, target]);
 
-  const tgt = TARGETS.find((t) => t.id === target);
-  const relevantGases = GASES.filter((g) => {
-    if (target === 'Si') return ['Cl2', 'HBr', 'Ar'].includes(g.id);
-    if (target === 'SiO2') return ['CF4', 'CHF3', 'Ar'].includes(g.id);
-    if (target === 'Si3N4') return ['CHF3', 'CF4', 'O2'].includes(g.id);
-    return ['O2', 'Ar'].includes(g.id);
-  });
+  /* 쓸 수 있는 가스는 타깃이 아니라 **모드**가 정한다. 게이트 식각 장비에 불소계를
+     흘리지 않고, 콘택 식각 장비에 염소계를 흘리지 않는다 — 챔버가 오염된다. */
+  const relevantGases = GASES.filter((g) => mode.gases.includes(g.id));
 
   /* ────────────────────────── 렌더 ────────────────────────── */
 
@@ -1615,8 +1817,8 @@ export default function EtchingBay() {
       {/* 상단 : 장비 헤더 + 인터락 */}
       <header className="eb-top">
         <div className="eb-id">
-          <span className="eb-id-name">RIE-2400</span>
-          <span className="eb-id-sub">Capacitively Coupled (CCP) · Single RF · Bay 3</span>
+          <span className="eb-id-name">{mode.model}</span>
+          <span className="eb-id-sub">{mode.plate}</span>
         </div>
 
         <div className="eb-status" data-phase={phase}>
@@ -1653,7 +1855,9 @@ export default function EtchingBay() {
           <ChamberView
             phase={phase}
             pressure={pressure}
-            power={power}
+            source={source}
+            bias={bias}
+            filmNm={filmNm}
             filmEtched={filmEtched}
             underlayerLoss={underlayerLoss}
             cd={cd}
@@ -1672,9 +1876,9 @@ export default function EtchingBay() {
               </span>
             </div>
             <div className="eb-gauge">
-              <span className="eb-g-k">RF Power</span>
+              <span className="eb-g-k">Source / Bias</span>
               <span className="eb-g-v">
-                {phase === 'PROCESSING' || phase === 'ENDPOINT' ? power : 0}
+                {phase === 'PROCESSING' || phase === 'ENDPOINT' ? `${source}/${bias}` : '0/0'}
                 <small>W</small>
               </span>
             </div>
@@ -1777,62 +1981,94 @@ export default function EtchingBay() {
 
           {phase === 'READY' && (
             <div className="eb-recipe">
-              <p className="eb-panel-k">레시피 설정</p>
+              <ModeBar value={modeId} onPick={pickMode} />
 
-              <div className="eb-targets">
-                {TARGETS.map((t) => (
-                  <button
-                    key={t.id}
-                    type="button"
-                    className={`eb-target ${target === t.id ? 'is-on' : ''}`}
-                    onClick={() => setTarget(t.id)}
-                  >
-                    <span className="eb-target-l">{t.label}</span>
-                    <span className="eb-target-d">{t.desc}</span>
-                  </button>
-                ))}
+              {mode.targets.length > 1 && (
+                <div className="eb-targets">
+                  {mode.targets.map((id) => {
+                    const t = TARGETS.find((x) => x.id === id);
+                    return (
+                      <button
+                        key={id}
+                        type="button"
+                        className={`eb-target ${target === id ? 'is-on' : ''}`}
+                        onClick={() => setTarget(id)}
+                      >
+                        <span className="eb-target-l">{t.label}</span>
+                        <span className="eb-target-d">{t.desc}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              <div className="eb-sec-head">
+                <p className="eb-panel-k is-on">조절값</p>
+                <span>장비에서 직접 넣는 값</span>
               </div>
 
-              <Knob
-                label="Chamber Pressure" unit="mTorr" value={setPressure_}
-                min={P_MIN} max={P_MAX} step={P_STEP}
+              <Slider
+                label={mode.source.label} unit="W" value={source}
+                min={mode.source.min} max={mode.source.max} step={mode.source.step}
+                win={mode.source.win} note={`표준 ${mode.source.win[0]}~${mode.source.win[1]}`}
+                onChange={setSource}
+                hint="플라즈마를 만드는 파워다. 올리면 이온이 더 **많이** 온다 — 식각률이 오른다. 그런데 이온이 더 곧게 오지는 않으므로 이방도는 그대로고, 이온 에너지가 안 오르니 선택비도 깎이지 않는다. 소스와 바이어스를 나눠 놓은 장비에서만 이 조작이 가능하다. CCP 단일 RF 는 전극이 하나라 둘이 같이 움직인다."
+              />
+              <Slider
+                label={mode.bias.label} unit="W" value={bias}
+                min={mode.bias.min} max={mode.bias.max} step={mode.bias.step}
+                win={mode.bias.win} note={`표준 ${mode.bias.win[0]}~${mode.bias.win[1]}`}
+                onChange={setBias}
+                hint="웨이퍼에 걸리는 파워다. 시스 전압을 올려 이온이 더 **세게** 때리게 한다 — 이방도가 오르고 프로파일이 선다. 대가가 있다: 하부층과 마스크도 같이 깎이므로 선택비가 떨어지고, 500 W 를 넘으면 물리 스퍼터가 우세해진다. 산화막은 Si–O 결합을 끊어야 해서 수백 eV 가 필요하고, 폴리실리콘은 100 eV 대면 충분하다 — 두 모드의 바이어스 범위가 다른 이유다."
+              />
+              <Slider
+                label="챔버 압력" unit="mTorr" value={setPressure_}
+                min={mode.pressure.min} max={mode.pressure.max} step={mode.pressure.step}
+                win={mode.pressure.win} note={mode.pressure.note}
                 onChange={(v) => { setSetPressure(v); setPressure(v); }}
-                hint="낮으면 시스에서 이온이 덜 충돌해 더 수직으로 내리꽂힌다. 다만 CCP 에서는 절반만 맞는 말이다 — 압력을 내리면 자유행로는 길어지지만 플라즈마 밀도가 같이 떨어져 시스가 두꺼워진다. 두 효과가 상쇄돼 30 mTorr 에서도 시스 충돌도 s/λ 가 5 아래로 안 내려간다(아래 장비 한계 참고). 파워로도 못 바꾼다 — 파워를 올리면 밀도가 오르는 만큼 시스 전압도 올라 시스가 다시 두꺼워진다. 80 mTorr 부근이 식각률 sweet spot이고 그보다 높으면 가스상 재결합으로 오히려 느려진다. 30 mTorr 를 하한으로 둔 것은 방전 한계가 아니라 모델의 유효 범위 때문이다."
+                hint="낮추면 이온이 시스에서 덜 충돌해 더 수직으로 내리꽂힌다. 다만 압력은 양쪽에 다 걸린다 — 올리면 이온화가 늘어 플럭스는 오르지만, 시스가 충돌해져서 이온 에너지는 떨어진다. 그래서 지도의 점이 오른쪽 아래로 비스듬히 움직인다. CCP 단일 RF 에서는 압력을 낮춰도 밀도가 같이 떨어져 시스가 두꺼워지므로 무충돌 시스를 못 만든다. 그것이 도전막 식각이 ICP 로 넘어간 이유다."
               />
-              <Knob
-                label="RF Power" unit="W" value={power}
-                min={W_MIN} max={W_MAX} step={W_STEP}
-                onChange={setPower}
-                hint="시스 전압을 올려 이온 에너지를 키운다. 다만 500 W를 넘으면 물리 충격이 우세해져 선택비가 깎이고, 600 W 위에서는 식각률도 포화된다. CCP 는 RF 하나로 플라즈마 밀도와 이온 에너지가 같이 움직인다 — 둘을 따로 돌리려면 ICP 처럼 Source/Bias 를 분리한 장비가 필요하다."
-              />
-
-              <Knob
-                label="Etch Time" unit="s" value={etchTime}
-                min={T_MIN} max={T_MAX} step={T_STEP}
+              <Slider
+                label="식각 시간" unit="s" value={etchTime}
+                min={mode.time.min} max={mode.time.max} step={10}
+                win={mode.time.win} note={`관통 ${fmt(estimatePunchTime(preview), 0)}s + 오버에치`}
                 onChange={setEtchTime}
                 hint="식각은 깊이를 지정하는 공정이 아니라 시간을 지정하는 공정이다. 깊이는 식각률 × 시간의 결과다. 시간이 모자라면 막이 남고(언더에치), 남으면 하부층이 깎인다(오버에치). 실제로는 막을 뚫자마자 멈추지 않고 웨이퍼 전면이 확실히 뚫리도록 10~30% 를 더 준다 — 그 여유를 감당하는 게 선택비다."
               />
               {target !== 'PR' && (
-                <Knob
-                  label="Pattern CD" unit="nm" value={cd}
-                  min={CD_MIN} max={CD_MAX} step={CD_STEP}
+                <Slider
+                  label="패턴 CD" unit="nm" value={cd}
+                  min={mode.cd.min} max={mode.cd.max} step={mode.cd.step}
+                  win={mode.cd.win} note={`종횡비 ${fmt(filmNm / cd, 1)}`}
                   onChange={setCd}
                   hint="패턴이 좁을수록 종횡비(깊이/폭)가 커지고, 방향성 없는 라디칼이 바닥까지 들어가기 어려워져 식각이 느려진다 — ARDE(RIE lag). 같은 레시피·같은 시간이라도 좁은 패턴이 얕게 파이는 이유다. 이온은 수직으로 가속돼 들어가므로 영향이 훨씬 작다."
                 />
               )}
 
-              <RegimeNote target={target} pressure={pressure} power={power} cd={cd} />
-
-              <p className="eb-sub-k">가스 유량 · {tgt.label} 식각</p>
+              <div className="eb-gas-row">
+                <span className="eb-gas-k">가스</span>
+                <span className="eb-gas-tot">합 {activeGasTotal} sccm</span>
+              </div>
               {relevantGases.map((g) => (
-                <Knob
+                <Slider
                   key={g.id}
                   label={g.label} unit="sccm" value={gasFlows[g.id]}
-                  min={0} max={G_MAX} step={G_STEP}
+                  min={0} max={mode.gasMax} step={G_STEP}
+                  win={mode.gasWin[g.id]}
+                  note={mode.gasWin[g.id] ? `표준 ${mode.gasWin[g.id][0]}~${mode.gasWin[g.id][1]}` : null}
                   onChange={(v) => setGasFlows((f) => ({ ...f, [g.id]: v }))}
                   hint={g.role}
                 />
               ))}
+              {modeId === 'contact' && (
+                <p className="eb-gas-note">
+                  실제 콘택 식각의 주 식각종은 C₄F₈·C₄F₆ 입니다. 이 모델의 가스 목록에는
+                  없어서 가장 가까운 CF₄/CHF₃ 로 대신합니다 — 폴리머를 만드는 불소계라는
+                  성격은 같지만, 실제 C:F 비가 높은 가스만큼 폴리머가 두껍지는 않습니다.
+                </p>
+              )}
+
+              <Readout plasma={preview.plasma} modeId={modeId} />
 
               <div className="eb-preview">
                 <p className="eb-panel-k">예상 결과 · {etchTime}초 후</p>
@@ -1869,8 +2105,8 @@ export default function EtchingBay() {
 
                 {target !== 'PR' && (
                   <p className="eb-note-line">
-                    ARDE — 관통 시점 종횡비 {fmt(FILM_NM / cd, 1)} 에서 식각률이 초기의
-                    {' '}{fmt(calculateArdeFactor(FILM_NM / cd, preview.prof.ionShare) * 100, 0)}% 로 떨어집니다.
+                    ARDE — 관통 시점 종횡비 {fmt(filmNm / cd, 1)} 에서 식각률이 초기의
+                    {' '}{fmt(calculateArdeFactor(filmNm / cd, preview.prof.ionShare) * 100, 0)}% 로 떨어집니다.
                   </p>
                 )}
 
@@ -1907,7 +2143,7 @@ export default function EtchingBay() {
                 <div><span>식각률</span><b>{fmt(rateRef.current, 0)} nm/min</b></div>
                 <div><span>선택비</span><b>{fmt(preview.sel, 1)} : 1</b></div>
                 <div><span>{punched ? '하부층 손실' : '잔막'}</span>
-                  <b>{punched ? `−${fmt(underlayerLoss, 0)} nm` : `${fmt(FILM_NM - filmEtched, 0)} nm`}</b></div>
+                  <b>{punched ? `−${fmt(underlayerLoss, 0)} nm` : `${fmt(filmNm - filmEtched, 0)} nm`}</b></div>
                 <div><span>종횡비</span>
                   <b>{target === 'PR' ? '—' : fmt(depth / cd, 2)}</b></div>
               </div>
@@ -2086,23 +2322,78 @@ const EB_CSS = `
 .eb-g-v small{font-size:11.5px; color:var(--txt-dim); margin-left:3px; text-shadow:none;}
 
 
-/* ── 장비 한계 ── */
-.eb-regime{border:1px solid var(--line); border-radius:2px; background:var(--panel2);
-  padding:11px 13px; display:flex; flex-direction:column; gap:8px;}
-.eb-regime.is-warn{border-color:var(--bad);}
-.eb-regime-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
-.eb-regime-row > div{display:flex; flex-direction:column; gap:2px; min-width:0;}
-.eb-regime-row span{font-size:11px; letter-spacing:.05em; color:var(--txt-dim);}
-.eb-regime-row b{font-family:ui-monospace,Menlo,monospace; font-size:15px; color:var(--amber);
-  font-weight:600; white-space:nowrap;}
-.eb-regime-row b.is-hot{color:var(--bad);}
-.eb-regime-txt{margin:0; font-size:12.5px; line-height:1.7; color:var(--txt-dim);}
-.eb-regime-txt b{color:var(--txt); font-weight:600;}
-.eb-regime-warn{margin:0; padding:8px 10px; border-left:2px solid var(--bad);
-  background:rgba(224,108,90,.08); font-size:12.5px; line-height:1.65; color:var(--bad);}
-.eb-regime-foot{margin:0; padding-top:8px; border-top:1px solid var(--line);
-  font-size:12px; line-height:1.65; color:#6B6353;}
-.eb-regime-foot b{color:var(--txt-dim); font-weight:600;}
+/* ── 공정 모드 ── */
+.eb-modes-wrap{display:flex; flex-direction:column; gap:8px;}
+.eb-modes{display:flex; border:1px solid var(--line); border-radius:2px; overflow:hidden;}
+.eb-mode{flex:1; padding:11px 13px; text-align:left; background:none; border:0;
+  border-right:1px solid var(--line); cursor:pointer; color:var(--txt-dim);}
+.eb-mode:last-child{border-right:0;}
+.eb-mode:hover{background:var(--panel2);}
+.eb-mode:focus{outline:none;}
+.eb-mode:focus-visible{outline:2px solid var(--amber); outline-offset:-2px;}
+.eb-mode.is-on{background:var(--panel2);}
+.eb-mode-n{display:block; font-family:ui-monospace,Menlo,monospace; font-size:13.5px; font-weight:700;}
+.eb-mode.is-on .eb-mode-n{color:var(--amber);}
+.eb-mode-s{display:block; font-size:12px; margin-top:3px; color:var(--txt-dim);}
+.eb-equip{margin:0; padding:7px 11px; background:var(--panel); border-left:2px solid var(--amber-dim);
+  display:flex; flex-wrap:wrap; align-items:baseline; gap:4px 9px;}
+.eb-equip b{font-family:ui-monospace,Menlo,monospace; font-size:12.5px; letter-spacing:.04em;
+  color:var(--amber); font-weight:700;}
+.eb-equip span{font-size:12px; color:var(--txt-dim);}
+
+/* ── 조절값 한 줄 ── */
+.eb-sec-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  padding-bottom:8px; border-bottom:1px solid var(--line); margin-top:4px;}
+.eb-sec-head span{font-size:12px; color:#6B6353;}
+.eb-panel-k.is-on{color:var(--amber);}
+.eb-p-row{display:flex; flex-direction:column;}
+.eb-p-row.is-off{opacity:.4; pointer-events:none;}
+.eb-p-head{display:flex; justify-content:space-between; align-items:baseline; gap:10px;}
+.eb-p-label{font-size:12.5px; letter-spacing:.04em; color:var(--txt); display:flex;
+  align-items:center; gap:6px; min-width:0;}
+.eb-p-why{width:15px; height:15px; flex:0 0 auto; border-radius:50%; border:1px solid var(--line);
+  background:none; color:var(--txt-dim); font-size:10px; line-height:1; cursor:pointer; padding:0;}
+.eb-p-why:hover{color:var(--amber); border-color:var(--amber-dim);}
+.eb-p-why:focus{outline:none;}
+.eb-p-why:focus-visible{outline:2px solid var(--amber); outline-offset:1px;}
+.eb-p-val{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; font-variant-numeric:tabular-nums;
+  font-size:18px; color:var(--amber); white-space:nowrap; line-height:1;}
+.eb-p-val small{font-size:11.5px; color:var(--txt-dim); margin-left:4px;}
+.eb-p-track{position:relative; height:3px; background:#332E25; border-radius:2px; margin:14px 0 0;}
+.eb-p-win{position:absolute; top:-3px; height:9px; background:var(--ok); opacity:.14; border-radius:1px;}
+.eb-p-fill{position:absolute; left:0; top:0; height:3px; border-radius:2px; background:var(--amber-dim);}
+/* 실제 입력은 그 위에 겹친다. 트랙만 투명하게 해서 아래 띠와 채움이 비쳐 보이게 한다. */
+.eb-p-track input[type=range]{position:absolute; left:0; top:-10px; width:100%; height:23px; margin:0;}
+.eb-p-track input[type=range]::-webkit-slider-runnable-track{background:transparent;}
+.eb-p-track input[type=range]::-moz-range-track{background:transparent;}
+.eb-p-scale{display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+  margin-top:5px; font-family:ui-monospace,Menlo,monospace; font-size:11px; color:#6B6353;}
+.eb-p-note{color:var(--txt-dim); text-align:center; min-width:0;}
+.eb-gas-row{display:flex; align-items:baseline; justify-content:space-between; gap:10px; margin-top:4px;}
+.eb-gas-k{font-size:11.5px; letter-spacing:.12em; text-transform:uppercase; color:var(--txt-dim); font-weight:600;}
+.eb-gas-tot{font-family:ui-monospace,Menlo,monospace; font-size:12px; color:#6B6353;}
+.eb-gas-note{margin:0; font-size:12px; line-height:1.65; color:#6B6353;
+  border-left:1px solid var(--line); padding-left:10px;}
+
+/* ── 계산 결과 ── */
+.eb-out{border:1px dashed #3D3729; background:#191710; border-radius:2px;}
+.eb-out-head{display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  padding:10px 14px; border-bottom:1px dashed #3D3729;}
+.eb-out-head span{font-size:12px; color:#6B6353; text-align:right;}
+.eb-out-body{display:flex; align-items:stretch; gap:0; flex-wrap:wrap;}
+.eb-map{flex:0 0 auto; width:252px; height:auto; padding:12px 6px 4px 12px; display:block;}
+.eb-out-vals{flex:1; min-width:150px; margin:0; padding:14px 14px 12px 4px;
+  display:flex; flex-direction:column; gap:12px; justify-content:center;}
+.eb-out-vals > div{display:flex; flex-direction:column; gap:2px; min-width:0;}
+.eb-out-vals dt{font-size:11px; letter-spacing:.05em; color:var(--txt-dim);}
+.eb-out-vals dd{margin:0; font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  font-variant-numeric:tabular-nums; font-size:16px; color:var(--txt); line-height:1.15;}
+.eb-out-vals dfn{font-style:normal; font-size:10.5px; color:#6B6353;}
+.eb-out-foot{margin:0; padding:8px 14px; border-top:1px dashed #3D3729;
+  font-family:ui-monospace,Menlo,monospace; font-size:12px; letter-spacing:.03em;}
+.eb-out-guide{display:flex; flex-wrap:wrap; gap:5px 18px; padding:0 14px 10px;}
+.eb-out-guide span{font-size:11.5px; color:#6B6353;}
+.eb-out-guide b{color:var(--txt-dim); font-weight:600;}
 
 /* ── 지난 런 비교 ── */
 .eb-cmp{position:relative; flex:0 0 auto; border-top:1px solid var(--line); background:var(--panel);}
@@ -2189,26 +2480,6 @@ const EB_CSS = `
 .eb-target-l{display:block; font-family:ui-monospace,Menlo,monospace; font-size:13px; font-weight:700;}
 .eb-target-d{display:block; font-size:12px; margin-top:2px; color:var(--txt-dim);}
 
-.eb-knob-row{display:flex; gap:13px; align-items:flex-start;}
-.eb-knob-row.is-off{opacity:.4;}
-.eb-knob{
-  width:42px; height:42px; border-radius:50%; flex:0 0 auto; position:relative; margin-top:3px;
-  background:
-    conic-gradient(from 225deg, var(--amber) 0deg, var(--amber) var(--sweep,0deg),
-                   #2E2A23 var(--sweep,0deg), #2E2A23 270deg, transparent 270deg),
-    radial-gradient(circle, #383226 0 62%, transparent 63%);
-  box-shadow:inset 0 0 0 1px #423B2E;
-}
-.eb-knob-cap{
-  position:absolute; inset:7px; border-radius:50%;
-  background:linear-gradient(160deg,#4C4536,#26221A); box-shadow:0 2px 5px rgba(0,0,0,.6);
-}
-.eb-knob-main{flex:1; min-width:0;}
-.eb-knob-head{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px;}
-.eb-knob-label{font-size:12.5px; letter-spacing:.04em; color:var(--txt-dim); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-.eb-knob-val{font-size:15px; color:var(--amber); white-space:nowrap;}
-.eb-knob-val small{font-size:11.5px; color:var(--txt-dim); margin-left:3px;}
-
 .eb-root input[type=range]{-webkit-appearance:none; appearance:none; width:100%; background:transparent; display:block; margin:0;}
 .eb-root input[type=range]:focus{outline:none;}
 .eb-root input[type=range]::-webkit-slider-runnable-track{height:3px; background:#332E25; border-radius:2px;}
@@ -2224,11 +2495,6 @@ const EB_CSS = `
 .eb-root input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(240,196,100,.45);}
 .eb-root input[type=range]:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px rgba(240,196,100,.45);}
 
-.eb-why{
-  margin-top:7px; background:none; border:none; padding:0; cursor:pointer;
-  font-size:12px; letter-spacing:.04em; color:var(--amber-dim); text-decoration:underline; text-underline-offset:2px;
-}
-.eb-why:hover{color:var(--amber);}
 .eb-hint{margin:7px 0 0; font-size:12.5px; line-height:1.7; color:var(--txt-dim); border-left:1px solid var(--line); padding-left:10px;}
 
 .eb-preview{border:1px solid var(--line); background:var(--panel); padding:13px; display:flex; flex-direction:column; gap:10px;}

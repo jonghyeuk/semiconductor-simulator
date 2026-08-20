@@ -23,22 +23,36 @@ let seed = 20260819;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
 const pick = (a) => a[Math.floor(rnd() * a.length)];
 
+const TYPES = ['ccp', 'dfccp', 'icp'];
+
 function randomCase(extreme = false) {
   const g = {};
   for (const k of GASES) g[k] = rnd() < 0.45 ? 0 : Math.round(rnd() * (extreme ? 300 : 100));
+  /* 절반은 숫자(CCP 단일 RF), 절반은 소스/바이어스가 갈린 객체로 뽑는다.
+     불변식은 어느 쪽이든 똑같이 성립해야 한다. */
+  const scalar = extreme ? Math.round(rnd() * 3000) : 100 + Math.round(rnd() * 700);
+  const power = rnd() < 0.5 ? scalar : {
+    source: extreme ? Math.round(rnd() * 4000) : 200 + Math.round(rnd() * 1300),
+    bias: extreme ? Math.round(rnd() * 5000) : 20 + Math.round(rnd() * 1500),
+    type: pick(TYPES),
+  };
   return {
     target: pick(TARGETS),
     gas: g,
-    power: extreme ? Math.round(rnd() * 3000) : 100 + Math.round(rnd() * 700),
+    power,
     pressure: extreme ? Math.round(rnd() * 2000) : 30 + Math.round(rnd() * 170),
   };
 }
+
+/** 실패 보고에 파워를 사람이 읽을 수 있게 적는다. */
+const powerLabel = (w) =>
+  typeof w === 'number' ? `W=${w}` : `${w.type} src=${w.source} bias=${w.bias}`;
 
 const fails = new Map();
 const fail = (rule, c, extra = '') => {
   if (!fails.has(rule)) fails.set(rule, []);
   if (fails.get(rule).length < 3) {
-    fails.get(rule).push(`${c.target} P=${c.pressure} W=${c.power} ` +
+    fails.get(rule).push(`${c.target} P=${c.pressure} ${powerLabel(c.power)} ` +
       GASES.filter((k) => c.gas[k]).map((k) => `${k}${c.gas[k]}`).join(',') + (extra ? ` | ${extra}` : ''));
   }
 };
@@ -77,6 +91,45 @@ for (let i = 0; i < N; i++) {
   const net = p.lateralRatio - p.taperRatio;
   const ang = 90 - (Math.atan(Math.abs(net)) * 180) / Math.PI;
   if (Math.abs(p.sidewallAngle - ang) > 1e-9) fail('측벽각이 정의와 불일치', c);
+
+  // ── 시스 ──
+  const sh = et.sheathCollisionality(pressure, power);
+  for (const [k, v] of Object.entries(sh)) {
+    if (k === 'collisional') continue;
+    if (!finite(v) || v <= 0) fail(`시스 ${k} 비정상`, c, `${k}=${v}`);
+  }
+  if (sh.collisional !== (sh.ratio > 1)) fail('collisional 플래그가 비와 어긋남', c);
+  /* CCP 단일 RF 는 어떤 조건에서도 무충돌 시스를 못 만든다 — 이 화면의 핵심 주장이다.
+     압력이 모델 범위(30~200)를 벗어난 극단 입력은 제외한다. */
+  if (typeof power === 'number' && pressure >= 30 && pressure <= 200 && sh.ratio < 3) {
+    fail('CCP 인데 시스가 거의 무충돌', c, `s/λ=${sh.ratio.toFixed(2)}`);
+  }
+
+  // ── 소스/바이어스 분리 ──
+  if (typeof power === 'object') {
+    const onlySource = { ...power, source: power.source + 400 };
+    const onlyBias = { ...power, bias: power.bias + 400 };
+    // 소스를 올려도 이방도는 그대로여야 한다 (이온이 많아질 뿐 곧아지지 않는다)
+    const a0 = et.calculateProfile(target, gas, power, pressure).anisotropy;
+    const aS = et.calculateProfile(target, gas, onlySource, pressure).anisotropy;
+    if (Math.abs(aS - a0) > 1e-12) fail('소스가 이방도를 바꿈', c);
+    // 바이어스를 올리면 이방도는 오르거나 같아야 한다
+    const aB = et.calculateProfile(target, gas, onlyBias, pressure).anisotropy;
+    if (aB < a0 - 1e-9 && et.calculateProfile(target, gas, power, pressure).hasEtchant) {
+      fail('바이어스↑ 인데 이방도↓', c);
+    }
+    // 소스를 올려도 선택비는 그대로여야 한다
+    const s0 = et.calculateSelectivity(target, gas, power, pressure, half);
+    const sS = et.calculateSelectivity(target, gas, onlySource, pressure, half);
+    if (Math.abs(sS - s0) > 1e-12) fail('소스가 선택비를 바꿈', c);
+    // 소스=바이어스인 객체는 같은 숫자와 완전히 같아야 한다
+    const w = power.source;
+    const same = { source: w, bias: w, type: 'ccp' };
+    if (Math.abs(et.calculateEtchRate(target, gas, same, pressure, half)
+                 - et.calculateEtchRate(target, gas, w, pressure, half)) > 1e-9) {
+      fail('소스=바이어스 객체가 숫자와 다름', c);
+    }
+  }
 
   // ── ARDE ──
   if (et.calculateArdeFactor(0, p.ionShare) !== 1) fail('AR=0 에서 감속', c);
