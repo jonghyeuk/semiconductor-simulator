@@ -17,7 +17,7 @@
 import * as et from '../src/physics/etching.js';
 
 const TARGETS = ['Si', 'SiO2', 'Si3N4', 'PR'];
-const GASES = ['Cl2', 'HBr', 'CF4', 'CHF3', 'O2', 'Ar'];
+const GASES = ['Cl2', 'HBr', 'CF4', 'C4F8', 'CHF3', 'O2', 'Ar'];
 
 let seed = 20260819;
 const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };

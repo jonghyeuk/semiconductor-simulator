@@ -25,10 +25,15 @@ export const SOURCE_TYPES = {
                    식각률이 20 배가 되지는 않는다 (중성종 공급과 표면 반응에서 막힌다).
                    문헌의 실측 비 — CCP RIE 폴리실리콘 ~120 nm/min 대 ICP 게이트
                    식각 ~320 nm/min — 에 맞춘 값이다.
-     v0/wRef/pRef — 시스 전압 앵커. V_sh = v0·(바이어스/wRef)^0.5·(pRef/압력)^0.25 */
-  ccp:   { label: 'CCP 단일 RF',      densityGain: 1,  rateGain: 1,   v0: 300, wRef: 300, pRef: 100 },
-  dfccp: { label: '이중 주파수 CCP',   densityGain: 3,  rateGain: 1.3, v0: 300, wRef: 300, pRef: 100 },
-  icp:   { label: 'ICP / TCP',        densityGain: 20, rateGain: 2.6, v0: 110, wRef: 100, pRef: 10 },
+     v0/wRef/pRef — 시스 전압 앵커. V_sh = v0·(바이어스/wRef)^0.5·(pRef/압력)^0.25
+     uniW/uniP   — 균일도가 가장 좋은 운전점. 장비마다 다르다.
+                   예전에는 300 W / 100 mTorr 하나로 고정돼 있었는데, 그것은 CCP
+                   다이오드의 운전점이다. ICP 를 8 mTorr·850 W 로 돌리면 그 기준에서
+                   한참 벗어나 균일도가 바닥(40%)에 붙어 버렸다 — **잘 도는 조건인데
+                   화면은 계속 "균일도 부족" 이라고 말했다.** 기준점을 장비에 붙인다. */
+  ccp:   { label: 'CCP 단일 RF',      densityGain: 1,  rateGain: 1,   v0: 300, wRef: 300, pRef: 100, uniW: 300, uniP: 100 },
+  dfccp: { label: '이중 주파수 CCP',   densityGain: 3,  rateGain: 1.3, v0: 300, wRef: 300, pRef: 100, uniW: 400, uniP: 40 },
+  icp:   { label: 'ICP / TCP',        densityGain: 20, rateGain: 2.6, v0: 110, wRef: 100, pRef: 10,  uniW: 800, uniP: 10 },
 };
 
 /**
@@ -92,8 +97,15 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
       // CF4/CHF3가 식각률에 기여하지만, 과도한 CHF3는 폴리머 누적으로 etch stop
       const cf4Effect = gasFlow.CF4 * 5.0;
       const chf3Effect = gasFlow.CHF3 * 2.5;
-      const polymerStop = Math.max(0, (gasFlow.CHF3 - 45) * 3.0);
-      baseRate = (cf4Effect + chf3Effect - polymerStop) * (power / 400);
+      /* C₄F₈ 은 불소를 많이 내지만 폴리머도 같이 쌓는다. 순 식각률 기여는 CF₄ 보다
+         낮고, 과하면 CHF₃ 보다 빨리 etch stop 으로 간다. */
+      const c4f8 = gasFlow.C4F8 || 0;
+      const c4f8Effect = c4f8 * 4.0;
+      /* 폴리머 항의 기울기는 식각 기여(4.0)보다 가팔라야 한다. 같으면 아무리 넣어도
+         식각률이 줄지 않아 "과하면 멈춘다" 가 성립하지 않는다. */
+      const polymerStop = Math.max(0, (gasFlow.CHF3 - 45) * 3.0)
+        + Math.max(0, (c4f8 - 35) * 5.5);
+      baseRate = (cf4Effect + chf3Effect + c4f8Effect - polymerStop) * (power / 400);
       break;
     }
     case 'Si3N4': {
@@ -103,8 +115,10 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
       // CF4 계수를 SiO2 의 5.0 보다 크게 잡는다.
       const cf4Effect = gasFlow.CF4 * 6.0;
       const chf3Effect = gasFlow.CHF3 * 4.0;
-      const polymerStop = Math.max(0, (gasFlow.CHF3 - 50) * 2.5);
-      baseRate = (cf4Effect + chf3Effect - polymerStop) * (power / 400);
+      const c4f8 = gasFlow.C4F8 || 0;
+      const polymerStop = Math.max(0, (gasFlow.CHF3 - 50) * 2.5)
+        + Math.max(0, (c4f8 - 40) * 3.0);
+      baseRate = (cf4Effect + chf3Effect + c4f8 * 4.5 - polymerStop) * (power / 400);
       break;
     }
     case 'PR': {
@@ -115,7 +129,8 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
       // 미지 재료도 파워·가스에 반응해야 한다. 상수 50 을 그대로 두면
       // 파워 0·가스 0 에서도 50 nm/min 이 나와 바로 아래 가드 주석과 어긋난다.
       baseRate =
-        (gasFlow.CF4 + gasFlow.CHF3 + gasFlow.Cl2 + gasFlow.HBr + gasFlow.O2) * 1.0 * (power / 400);
+        (gasFlow.CF4 + gasFlow.CHF3 + (gasFlow.C4F8 || 0) + gasFlow.Cl2 + gasFlow.HBr + gasFlow.O2)
+        * 1.0 * (power / 400);
   }
 
   // 압력 sweet spot ~80mTorr — ICP 저압 운전(<30)에서도 rate 유지, 고압은 가스상 재결합으로 감소
@@ -159,7 +174,9 @@ export function calculateSelectivity(target, gasFlow, power, pressure, rng = Mat
     }
     case 'SiO2': {
       // CHF3 폴리머가 Si 표면 보호 → 선택비↑, CF4 과다는 F 라디칼 증가로 선택비↓
-      sel = 5 + (gasFlow.CHF3 / 10) * 4;
+      /* 폴리머가 하부 실리콘을 덮어 선택비를 만든다. C₄F₈ 이 CHF₃ 보다 효과가 크다 —
+         실제 콘택 식각이 C₄F₈ 계로 옮겨간 이유가 이것이다. */
+      sel = 5 + (gasFlow.CHF3 / 10) * 4 + ((gasFlow.C4F8 || 0) / 10) * 6;
       const cf4Penalty = Math.max(0, (gasFlow.CF4 - 30) * 0.3);
       const arPenalty = Math.max(0, (gasFlow.Ar - 70) * 0.25);
       sel -= cf4Penalty + arPenalty;
@@ -193,9 +210,11 @@ export function calculateSelectivity(target, gasFlow, power, pressure, rng = Mat
 
 /** 식각 균일도 (%). */
 export function calculateUniformity(pressure, power, gasFlow) {
-  const pressureEffect = Math.max(0, 100 - Math.abs(pressure - 100) / 1.5);
+  /* 기준점은 장비가 정한다. CCP 는 300 W / 100 mTorr 라 예전 값과 같다. */
+  const dis = normalizeDischarge(power);
+  const pressureEffect = Math.max(0, 100 - Math.abs(pressure - dis.spec.uniP) / 1.5);
   /* 균일도는 플라즈마 자체가 고른가의 문제이므로 소스로 잰다. */
-  const powerEffect = Math.max(0, 100 - Math.abs(normalizeDischarge(power).source - 300) / 5);
+  const powerEffect = Math.max(0, 100 - Math.abs(dis.source - dis.spec.uniW) / 5);
   let uniformity = (pressureEffect + powerEffect) / 2;
 
   // 총 가스 유량이 과도하면 흐름 분포가 어긋나 균일성 저하
@@ -247,9 +266,12 @@ const clamp01 = (v, lo, hi) => Math.min(hi, Math.max(lo, v));
  *   절대값을 인용하면 안 된다.
  */
 const SPONTANEITY = {
-  Si:    { CF4: 1.00, Cl2: 0.10, HBr: 0.03 },
-  SiO2:  { CF4: 0.05, CHF3: 0.05 },
-  Si3N4: { CF4: 0.25, CHF3: 0.25 },
+  Si:    { CF4: 1.00, Cl2: 0.10, HBr: 0.03, C4F8: 0.30 },
+  /* C₄F₈ 은 CF₄ 보다 C:F 비가 높아 같은 불소라도 폴리머를 훨씬 많이 만든다.
+     자발 반응성은 그만큼 낮다 — 이온이 때려 줘야 깎인다. 그래서 콘택 식각이
+     이 가스로 수직 프로파일을 얻는다. */
+  SiO2:  { CF4: 0.05, CHF3: 0.05, C4F8: 0.03 },
+  Si3N4: { CF4: 0.25, CHF3: 0.25, C4F8: 0.15 },
   PR:    { O2: 1.00 },
 };
 
@@ -312,8 +334,11 @@ export function calculateProfile(target, gasFlow, power, pressure) {
   const dis = normalizeDischarge(power);
   const w = dis.bias;
 
-  const polymerFormers = g('CHF3') + g('HBr') * 0.5;
-  const radicalEtchers = g('Cl2') + g('CF4') + (target === 'PR' ? g('O2') : 0);
+  /* C₄F₈ 은 두 몫을 동시에 한다 — 산화막의 **주 식각종**이면서 측벽 폴리머의 주 공급원이다.
+     CHF₃ 보다 폴리머를 많이 만들지만(C:F 비가 높다) 식각종이 아닌 것은 아니다.
+     한쪽으로만 세면 정상 레시피가 etch stop 으로 판정된다. */
+  const polymerFormers = g('CHF3') + g('C4F8') * 1.2 + g('HBr') * 0.5;
+  const radicalEtchers = g('Cl2') + g('CF4') + g('C4F8') + (target === 'PR' ? g('O2') : 0);
   const ionBombardment = g('Ar') + w / 25;
 
   /* 이방성 (0=등방, 1=완전 수직).

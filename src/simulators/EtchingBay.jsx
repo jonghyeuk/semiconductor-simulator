@@ -65,6 +65,7 @@ const GASES = [
   { id: 'HBr',  label: 'HBr',  role: '측벽 passivation. 이방성과 선택비를 올리지만 30 sccm을 넘으면 식각률을 되레 눌러버린다.' },
   { id: 'CF4',  label: 'CF₄',  role: '산화막 주 식각종. F 라디칼이 많아지면 선택비가 떨어진다.' },
   { id: 'CHF3', label: 'CHF₃', role: '폴리머 생성. 하부층을 덮어 선택비를 올리지만 과하면 etch stop.' },
+  { id: 'C4F8', label: 'C₄F₈', role: '산화막 콘택의 주 식각종이자 폴리머 공급원. 두 몫을 동시에 한다 — 불소가 Si–O 를 끊고, 남은 탄소가 측벽과 하부 실리콘을 덮어 선택비를 만든다. CF₄ 보다 C:F 비가 높아 폴리머가 두껍고, 과하면 etch stop 으로 간다.' },
   { id: 'O2',   label: 'O₂',   role: 'PR 애싱. 폴리머를 태워 없앤다.' },
   { id: 'Ar',   label: 'Ar',   role: '물리 스퍼터. 이방성엔 도움, 선택비엔 손해.' },
 ];
@@ -97,6 +98,12 @@ const MODES = [
     type: 'icp',
     targets: ['Si'],
     filmNm: 200,                       // 폴리실리콘 게이트 두께
+    /* 게이트 식각에서 선택비가 전부인 **이유**가 이 숫자다. 하부층이 게이트 산화막
+       2 nm 뿐이라, 뚫으면 그 아래 채널이 손상돼 소자가 죽는다. 선택비 112:1 이
+       왜 좋은 값인지는 이 두께를 옆에 놓아야 답이 된다. */
+    underNm: 2,
+    underLabel: '게이트 산화막',
+    breachMsg: '뚫렸습니다. 그 아래 채널이 손상되어 소자 불량입니다.',
     source: { label: '소스 (TCP 13.56 MHz)', min: 250, max: 1500, step: 50, def: 850, win: [500, 1150] },
     bias: { label: '바이어스 (13.56 MHz)', min: 20, max: 250, step: 10, def: 120, win: [60, 170] },
     pressure: { min: 4, max: 60, step: 2, def: 8, win: [4, 12], note: '메인 4~12 · 오버에치 55~65' },
@@ -104,7 +111,7 @@ const MODES = [
     cd: { min: 30, max: 250, step: 10, def: 90, win: [30, 150] },
     gases: ['Cl2', 'HBr', 'O2'],
     gasMax: 200,
-    gasDef: { Cl2: 70, HBr: 120, CF4: 0, CHF3: 0, O2: 5, Ar: 0 },
+    gasDef: { Cl2: 70, HBr: 120, CF4: 0, C4F8: 0, CHF3: 0, O2: 5, Ar: 0 },
     gasWin: { Cl2: [50, 100], HBr: [100, 140], O2: [2, 10] },
     note: '게이트 산화막이 2 nm 라 선택비가 전부다. 이온을 많이·약하게 보낸다.',
   },
@@ -118,16 +125,24 @@ const MODES = [
     plate: 'Dual-Frequency CCP · 60 MHz + 2 MHz · Bay 3',
     type: 'dfccp',
     targets: ['SiO2', 'Si3N4', 'PR'],
-    filmNm: 800,                       // 층간 절연막 두께
+    /* 층간 절연막 두께. 800 nm 로 잡았더니 이 모델의 식각률(약 125 nm/min)로는
+       관통에 486 초가 걸려 기본 레시피가 아예 안 뚫렸다. 500 nm 콘택도 실제 값이고
+       종횡비 8.3 이면 ARDE 를 보여주기에 충분하다. */
+    filmNm: 500,
+    /* 콘택은 실리콘 기판/실리사이드에 닿는다. 두꺼우므로 조금 파여도 죽지 않지만,
+       접합(junction) 깊이를 넘기면 누설이 난다. */
+    underNm: 60,
+    underLabel: '실리콘 기판',
+    breachMsg: '접합을 뚫어 누설 전류가 납니다.',
     source: { label: '소스 HF (상부 60 MHz)', min: 300, max: 1500, step: 50, def: 300, win: [300, 720] },
     bias: { label: '바이어스 LF (하부 2 MHz)', min: 300, max: 3000, step: 100, def: 500, win: [440, 1500] },
     pressure: { min: 20, max: 80, step: 5, def: 20, win: [20, 47], note: '홀이 깊을수록 낮게' },
-    time: { min: 30, max: 600, step: 10, def: 180, win: [140, 280] },
-    cd: { min: 40, max: 200, step: 10, def: 60, win: [40, 120] },
-    gases: ['CF4', 'CHF3', 'Ar', 'O2'],
+    time: { min: 30, max: 600, step: 10, def: 300, win: [240, 400] },
+    cd: { min: 40, max: 200, step: 10, def: 60, win: [40, 120] },   // 종횡비 8.3
+    gases: ['C4F8', 'CHF3', 'Ar', 'O2'],
     gasMax: 200,
-    gasDef: { Cl2: 0, HBr: 0, CF4: 30, CHF3: 25, O2: 5, Ar: 140 },
-    gasWin: { CF4: [20, 45], CHF3: [15, 35], Ar: [110, 170], O2: [2, 12] },
+    gasDef: { Cl2: 0, HBr: 0, CF4: 0, C4F8: 30, CHF3: 5, O2: 8, Ar: 60 },
+    gasWin: { C4F8: [20, 40], CHF3: [0, 15], Ar: [40, 90], O2: [4, 14] },
     note: 'Si–O 결합을 끊어야 하니 수백 eV 가 필요하다. 이온을 적게·세게 보낸다.',
   },
 ];
@@ -303,8 +318,8 @@ const PRODUCTS = {
 };
 
 function ChamberView({
-  phase, pressure, source, bias, filmNm, filmEtched, underlayerLoss, cd, profile, target,
-  glowSeed, callouts,
+  phase, pressure, source, bias, filmNm, underNm, underLabel, filmEtched, underlayerLoss,
+  cd, profile, target, glowSeed, callouts,
 }) {
   const plasmaOn = phase === 'PROCESSING' || phase === 'ENDPOINT';
   /* 플라즈마의 밝기는 밀도, 즉 소스 파워가 정한다. 바이어스를 올려도 더 밝아지지
@@ -540,6 +555,26 @@ function ChamberView({
         )}
 
         {/* 웨이퍼 척 */}
+        {/* 하부층 예산선. 게이트 산화막 2 nm 는 이 배율에서 0.6 px 라 그려도 안 보인다.
+            두께를 정직하게 그리는 대신 "여기를 넘으면 소자가 죽는다" 는 한계선을
+            긋고, 넘으면 빨갛게 바꾼다. 선택비가 지키는 것이 바로 이 선이다. */}
+        {!blanket && underNm > 0 && (() => {
+          const yLimit = TRENCH_TOP + FILM_PX + Math.max(2.5, underNm * pxPerNm);
+          const over = underlayerLoss > underNm;
+          return (
+            <g>
+              <line x1="34" y1={yLimit} x2={VIEW_W - 34} y2={yLimit}
+                    stroke={over ? '#E06C5A' : '#6FBF8E'} strokeWidth="1"
+                    strokeDasharray="4 3" opacity={over ? 0.95 : 0.65} />
+              <text x={VIEW_W - 36} y={yLimit - 3} fontSize="7" textAnchor="end"
+                    fill={over ? '#E06C5A' : '#6FBF8E'}
+                    fontFamily="ui-monospace, Menlo, monospace">
+                {underLabel} {underNm}nm {over ? '관통' : '한계'}
+              </text>
+            </g>
+          );
+        })()}
+
         <rect x="26" y={TRENCH_TOP + FILM_PX + SUB_PX} width={VIEW_W - 52} height="9" fill="#2E2A22" />
 
         {/* 깊이 눈금 */}
@@ -1460,6 +1495,7 @@ export default function EtchingBay() {
   const preview = useMemo(() => {
     // 미리보기는 난수 없이 (rng = 0.5 고정) 계산해야 슬라이더가 흔들리지 않는다.
     const rng = () => 0.5;
+    const underNm = mode.underNm;
     const rate = calculateEtchRate(target, gasFlows, discharge, setPressure_, rng);
     const sel = calculateSelectivity(target, gasFlows, discharge, setPressure_, rng);
     const prof = calculateProfile(target, gasFlows, discharge, setPressure_);
@@ -1475,10 +1511,13 @@ export default function EtchingBay() {
       uni: calculateUniformity(setPressure_, discharge, gasFlows),
       /* 이온 플럭스와 이온 에너지는 넣는 값이 아니라 여기서 나오는 값이다. */
       plasma: sheathCollisionality(setPressure_, discharge),
+      /* 하부층을 얼마나 남겼는가. 게이트 식각에서 이 한 줄이 선택비의 존재 이유다. */
+      underBreach: run.underlayerLoss > underNm,
+      underLeft: Math.max(0, underNm - run.underlayerLoss),
       // 가스 조건에 더해 식각률이 사실상 0 인 경우도 etch stop 으로 본다 (원본과 같은 규칙).
       etchStop: prof.etchStop || rate < 15,
     };
-  }, [target, gasFlows, discharge, setPressure_, etchTime, cd, filmNm]);
+  }, [target, gasFlows, discharge, setPressure_, etchTime, cd, filmNm, mode.underNm]);
 
   /* ── 인터락 ── */
   const interlocks = useMemo(() => {
@@ -1616,6 +1655,7 @@ export default function EtchingBay() {
            중이다)가 아니라 이 런이 돌던 설정값을 실어야 한다. */
         pressure: setPressure_,
         source, bias, type: mode.type, modeId, filmNm,
+        underNm: mode.underNm, underLabel: mode.underLabel, breachMsg: mode.breachMsg,
         target,
       });
       /* 이 런의 최종 형상을 한 장 남긴다. 조건을 바꿔 가며 돌릴 때
@@ -1626,7 +1666,7 @@ export default function EtchingBay() {
         n: runSeq.current,
         target,
         pressure: setPressure_,
-        source, bias, type: mode.type, modeId, filmNm,
+        source, bias, type: mode.type, modeId, filmNm, underNm: mode.underNm,
         etchTime,
         cd,
         gas: { ...gasFlows },
@@ -1640,7 +1680,7 @@ export default function EtchingBay() {
       setPhase('VENTING');
     }, 1600);
     return () => clearTimeout(id);
-  }, [phase, preview, cd, target, setPressure_, source, bias, mode.type, modeId, filmNm, etchTime, gasFlows]);
+  }, [phase, preview, cd, target, setPressure_, source, bias, mode, modeId, filmNm, etchTime, gasFlows]);
 
   useEffect(() => {
     if (phase !== 'VENTING') return;
@@ -1703,14 +1743,22 @@ export default function EtchingBay() {
       });
     } else {
       const over = result.time - (result.punchThroughTime || result.time);
+      const breach = result.underlayerLoss > result.underNm;
       lines.push({
-        bad: result.underlayerLoss > 30,
+        bad: breach,
         t: `관통 ${fmt(result.punchThroughTime, 0)}초 · 오버에치 ${fmt(over, 0)}초`,
-        d: `막을 뚫은 뒤 ${fmt(over, 0)}초 동안 하부층이 ${fmt(result.underlayerLoss, 0)} nm 깎였다. 선택비 ${fmt(result.sel, 1)}:1 이 이 손실을 결정했다. ${
-          result.underlayerLoss > 30
-            ? '하부층 손실이 크다 — 오버에치를 줄이거나 선택비를 올려야 한다.'
-            : '균일도 편차를 덮으려면 이 정도 오버에치는 필요하다.'
-        }`,
+        d: `막을 뚫은 뒤 ${fmt(over, 0)}초 동안 ${result.underLabel}이 ${fmt(result.underlayerLoss, 0)} nm 깎였다. 선택비 ${fmt(result.sel, 1)}:1 이 이 손실을 결정했다.`,
+      });
+      /* 선택비가 왜 중요한 값인지는 하부층 두께 옆에 놓아야 답이 된다.
+         "하부층 −7 nm" 만 적으면 좋은 건지 나쁜 건지 알 수가 없다. */
+      lines.push({
+        bad: breach,
+        t: breach
+          ? `${result.underLabel} 관통 — ${fmt(result.underlayerLoss - result.underNm, 0)} nm 초과`
+          : `${result.underLabel} ${fmt(result.underNm - result.underlayerLoss, 1)} nm 남음`,
+        d: breach
+          ? `${result.breachMsg} ${result.underLabel}은 ${result.underNm} nm 뿐이다. 오버에치를 줄이거나 선택비를 올려야 한다 — 지금 선택비 ${fmt(result.sel, 1)}:1 로는 ${fmt(result.underNm * result.sel, 0)} nm 만큼의 막을 더 파는 동안만 버틴다.`
+          : `${result.underLabel}은 ${result.underNm} nm 뿐인데 ${fmt(result.underlayerLoss, 1)} nm 만 깎였다. 선택비 ${fmt(result.sel, 1)}:1 이 이걸 지켜 준 것이다 — 선택비가 1:1 이었다면 오버에치 ${fmt(over, 0)}초에 ${fmt((result.rate / 60) * over, 0)} nm 가 깎여 진작에 뚫렸다.`,
       });
     }
 
@@ -1858,6 +1906,8 @@ export default function EtchingBay() {
             source={source}
             bias={bias}
             filmNm={filmNm}
+            underNm={mode.underNm}
+            underLabel={mode.underLabel}
             filmEtched={filmEtched}
             underlayerLoss={underlayerLoss}
             cd={cd}
@@ -1891,6 +1941,12 @@ export default function EtchingBay() {
               <span className="eb-g-v">{fmt(elapsed, 0)}<small>s</small></span>
             </div>
           </div>
+
+          {/* 레시피를 만지는 동안 그 결과가 **같이 보여야** 한다. 오른쪽 패널 맨 아래에
+              두었더니 1000px 높이의 화면에서 스크롤을 내려야 보였다 — 슬라이더를 잡고
+              있는 손과 움직이는 점이 한 화면에 없으면 "돌려 보고 결과를 본다" 가
+              성립하지 않는다. 조절값은 오른쪽, 그 결과는 왼쪽 챔버 아래다. */}
+          {phase === 'READY' && <Readout plasma={preview.plasma} modeId={modeId} />}
 
           {/* 프로파일이 왜 그 모양인지는 1000 배 아래에서 정해진다.
               바닥과 측벽에 도달하는 종이 다르다는 것 하나가 이방도를 만든다. */}
@@ -2060,15 +2116,6 @@ export default function EtchingBay() {
                   hint={g.role}
                 />
               ))}
-              {modeId === 'contact' && (
-                <p className="eb-gas-note">
-                  실제 콘택 식각의 주 식각종은 C₄F₈·C₄F₆ 입니다. 이 모델의 가스 목록에는
-                  없어서 가장 가까운 CF₄/CHF₃ 로 대신합니다 — 폴리머를 만드는 불소계라는
-                  성격은 같지만, 실제 C:F 비가 높은 가스만큼 폴리머가 두껍지는 않습니다.
-                </p>
-              )}
-
-              <Readout plasma={preview.plasma} modeId={modeId} />
 
               <div className="eb-preview">
                 <p className="eb-panel-k">예상 결과 · {etchTime}초 후</p>
@@ -2095,12 +2142,20 @@ export default function EtchingBay() {
                     관통에 필요한 시간은 약 {fmt(estimatePunchTime(preview), 0)}초입니다.
                   </p>
                 ) : (
-                  <p className="eb-note-line">
-                    {fmt(preview.run.punchThroughTime, 0)}초에 관통 →
-                    남은 {fmt(etchTime - preview.run.punchThroughTime, 0)}초 동안 하부층이
-                    {' '}{fmt(preview.run.underlayerLoss, 0)} nm 깎입니다 (오버에치
-                    {' '}{fmt(((etchTime - preview.run.punchThroughTime) / Math.max(1, preview.run.punchThroughTime)) * 100, 0)}%).
-                  </p>
+                  <>
+                    <p className="eb-note-line">
+                      {fmt(preview.run.punchThroughTime, 0)}초에 관통 →
+                      남은 {fmt(etchTime - preview.run.punchThroughTime, 0)}초 동안 {mode.underLabel}이
+                      {' '}{fmt(preview.run.underlayerLoss, 0)} nm 깎입니다 (오버에치
+                      {' '}{fmt(((etchTime - preview.run.punchThroughTime) / Math.max(1, preview.run.punchThroughTime)) * 100, 0)}%).
+                    </p>
+                    {/* 선택비가 왜 중요한지는 하부층 두께를 옆에 놓아야 답이 된다. */}
+                    <p className={preview.underBreach ? 'eb-alarm' : 'eb-note-line'}>
+                      {preview.underBreach
+                        ? `${mode.underLabel} ${mode.underNm} nm 를 ${fmt(preview.run.underlayerLoss - mode.underNm, 0)} nm 초과 — ${mode.breachMsg}`
+                        : `${mode.underLabel} ${mode.underNm} nm 중 ${fmt(preview.underLeft, 1)} nm 가 남습니다. 이 여유를 만드는 것이 선택비 ${fmt(preview.sel, 1)}:1 입니다.`}
+                    </p>
+                  </>
                 )}
 
                 {target !== 'PR' && (

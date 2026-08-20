@@ -732,3 +732,62 @@ describe('소스/바이어스 분리', () => {
     expect(normalizeDischarge(undefined).source).toBe(0);
   });
 });
+
+describe('C₄F₈ — 산화막 콘택의 주 식각종', () => {
+  const half = () => 0.5;
+  const G = (o) => ({ Cl2: 0, HBr: 0, CF4: 0, C4F8: 0, CHF3: 0, O2: 0, Ar: 0, ...o });
+  const DF = { source: 300, bias: 500, type: 'dfccp' };
+
+  /* 이 테스트가 가장 중요하다. 가스 하나를 모델에 더할 때 기존 레시피의 값이
+     한 자리라도 움직이면, 다른 두 카드가 조용히 달라진다. */
+  it('C₄F₈ 을 안 쓰는 레시피는 값이 하나도 안 바뀐다', () => {
+    const without = { Cl2: 30, HBr: 15, CF4: 40, CHF3: 20, O2: 0, Ar: 50 };
+    const withZero = { ...without, C4F8: 0 };
+    for (const t of ['Si', 'SiO2', 'Si3N4', 'PR']) {
+      expect(calculateEtchRate(t, withZero, 400, 60, half))
+        .toBe(calculateEtchRate(t, without, 400, 60, half));
+      expect(calculateSelectivity(t, withZero, 400, 60, half))
+        .toBe(calculateSelectivity(t, without, 400, 60, half));
+      expect(calculateProfile(t, withZero, 400, 60).anisotropy)
+        .toBe(calculateProfile(t, without, 400, 60).anisotropy);
+    }
+  });
+
+  it('산화막을 깎는다 — 넣으면 식각률이 오른다', () => {
+    const none = calculateEtchRate('SiO2', G({ CHF3: 5, Ar: 60, O2: 8 }), DF, 20, half);
+    const some = calculateEtchRate('SiO2', G({ C4F8: 30, CHF3: 5, Ar: 60, O2: 8 }), DF, 20, half);
+    expect(some).toBeGreaterThan(none);
+  });
+
+  it('폴리머로 선택비를 만든다 — CHF₃ 보다 효과가 크다', () => {
+    const base = G({ Ar: 60, O2: 8 });
+    const withC4F8 = calculateSelectivity('SiO2', { ...base, C4F8: 20 }, DF, 20, half);
+    const withCHF3 = calculateSelectivity('SiO2', { ...base, CHF3: 20 }, DF, 20, half);
+    expect(withC4F8).toBeGreaterThan(withCHF3);
+  });
+
+  it('정상 콘택 레시피가 etch stop 으로 판정되지 않는다', () => {
+    /* C₄F₈ 을 폴리머로만 세면 주 식각종인 레시피가 "식각이 멈췄다" 로 나온다.
+       두 몫을 동시에 한다는 것을 모델이 알아야 한다. */
+    const prof = calculateProfile('SiO2', G({ C4F8: 30, CHF3: 5, Ar: 60, O2: 8 }), DF, 20);
+    expect(prof.etchStop).toBe(false);
+    expect(prof.profileType).not.toBe('etch-stop');
+    expect(prof.anisotropy).toBeGreaterThan(0.9);
+  });
+
+  it('과하면 폴리머가 식각률을 눌러 결국 멈춘다', () => {
+    const g = (c4f8) => calculateEtchRate('SiO2', G({ C4F8: c4f8, Ar: 60 }), DF, 20, half);
+    /* 35 sccm 을 넘으면 폴리머 항이 붙기 시작한다. 충분히 넘기면 0 이 된다. */
+    expect(g(140)).toBe(0);
+    expect(g(90)).toBeLessThan(g(35));   // 정점을 지나면 내려온다
+    expect(g(30)).toBeGreaterThan(0);
+  });
+
+  it('실리콘에는 산화막만큼 잘 듣지 않는다', () => {
+    /* 불소가 실리콘을 자발적으로 깎기는 하지만, C₄F₈ 의 탄소가 표면을 덮는다.
+       CF₄(S=1.00) 보다 자발 반응성이 낮아야 한다. */
+    const cf4 = calculateProfile('Si', G({ CF4: 40, Ar: 60 }), DF, 20);
+    const c4f8 = calculateProfile('Si', G({ C4F8: 40, Ar: 60 }), DF, 20);
+    expect(c4f8.lateralRatio).toBeLessThan(cf4.lateralRatio);
+  });
+});

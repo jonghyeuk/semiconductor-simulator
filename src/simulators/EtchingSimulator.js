@@ -3655,7 +3655,7 @@ const EtchSimulator = ({ initialTab }) => {
               <p className="text-sm text-amber-900 font-semibold mb-1">📚 교육용 모델 — 정성적 트렌드 학습용</p>
               <ul className="text-xs text-amber-800 space-y-0.5 list-disc list-inside">
                 <li>식각률·선택비 등 절대 수치는 실제 fab 데이터 대비 ±2배 정도 오차가 있을 수 있습니다 (트렌드 방향은 정확).</li>
-                <li>실제 ICP 장비의 <strong>Source power(플라즈마 밀도)</strong>와 <strong>Bias power(이온 에너지)</strong>는 본 시뮬에서 단일 RF 파워로 단순화되어 있습니다.</li>
+                <li>실제 ICP 장비의 <strong>Source power(플라즈마 밀도)</strong>와 <strong>Bias power(이온 에너지)</strong>는 이 화면에서 단일 RF 파워로 단순화되어 있습니다 — CCP 단일 RF 와 같은 상태입니다. 둘을 따로 돌려 보려면 <strong>식각 프로파일</strong> 카드로 가세요. 거기서는 소스와 바이어스가 분리돼 있어, 소스만 올리면 이온이 많아지고 바이어스만 올리면 이온이 세지는 것을 따로 확인할 수 있습니다.</li>
                 <li>균일성 sweet spot은 ~100 mTorr·~300 W 기준(CCP 영역)으로 모델링되었습니다. 실제 ICP는 5-50 mTorr·500-1500W에서 운전됩니다.</li>
                 <li>SiO₂ 식각의 F/C 비율(Coburn-Winters) 모델은 단순화되어, CHF₃ 과다 시 폴리머 누적/Etch stop만 표현합니다.</li>
               </ul>
