@@ -791,3 +791,43 @@ describe('C₄F₈ — 산화막 콘택의 주 식각종', () => {
     expect(c4f8.lateralRatio).toBeLessThan(cf4.lateralRatio);
   });
 });
+
+describe('프로파일 이름 — 대표 조건이 제 이름으로 불리는가', () => {
+  const G = (o) => ({ Cl2: 0, HBr: 0, CF4: 0, C4F8: 0, CHF3: 0, O2: 0, Ar: 0, ...o });
+
+  /* 교육용 화면에서 이름은 숫자만큼 중요하다. 이방성 식각의 교과서적 대표 조건이
+     "테이퍼" 로 불리면 학생은 틀린 이름을 배운다. */
+  it('Cl₂/HBr 폴리실리콘 게이트 식각은 수직이다', () => {
+    const p = calculateProfile('Si', G({ Cl2: 70, HBr: 120, O2: 5 }),
+      { source: 850, bias: 120, type: 'icp' }, 8);
+    expect(p.profileType).toBe('vertical');
+    expect(p.sidewallAngle).toBeGreaterThan(85);
+  });
+
+  it('C₄F₈ 산화막 콘택홀은 테이퍼다 — 아래로 갈수록 좁아진다', () => {
+    const p = calculateProfile('SiO2', G({ C4F8: 30, CHF3: 5, Ar: 60, O2: 8 }),
+      { source: 300, bias: 500, type: 'dfccp' }, 20);
+    expect(p.profileType).toBe('tapered');
+    expect(p.sidewallAngle).toBeLessThan(85);
+  });
+
+  it('불소로 실리콘을 깎으면 등방이다', () => {
+    expect(calculateProfile('Si', G({ CF4: 40, Ar: 20 }), 300, 100).profileType)
+      .toBe('isotropic');
+  });
+
+  it('수직 판정 폭은 5° 다 — 그 밖은 이름이 갈린다', () => {
+    /* 문턱을 이분법으로 되찾는다. 구현식을 베끼지 않고 판정 함수만 통해 확인한다. */
+    let lo = 0, hi = 200;               // HBr sccm 을 올리면 폴리머가 늘어 테이퍼로 넘어간다
+    for (let i = 0; i < 40; i++) {
+      const mid = (lo + hi) / 2;
+      const t = calculateProfile('Si', G({ Cl2: 70, HBr: mid, O2: 5 }),
+        { source: 850, bias: 120, type: 'icp' }, 8).profileType;
+      if (t === 'vertical') lo = mid; else hi = mid;
+    }
+    const edge = calculateProfile('Si', G({ Cl2: 70, HBr: lo, O2: 5 }),
+      { source: 850, bias: 120, type: 'icp' }, 8);
+    expect(edge.sidewallAngle).toBeGreaterThan(84.5);
+    expect(edge.sidewallAngle).toBeLessThan(85.5);
+  });
+});

@@ -296,6 +296,13 @@ function spontaneityOf(target, g) {
 /** 언더컷이라 부르기 시작하는 측벽 기울기 = 수직에서 10° 누운 것 (측벽 각 80°). */
 const UNDERCUT_SLOPE = Math.tan((10 * Math.PI) / 180);
 
+/* "수직" 이라 부를 수 있는 폭 = 수직에서 5° 안쪽 (측벽 각 85~90°).
+   예전 문턱은 net <= -0.02, 즉 **1.1° 만 기울어도 "테이퍼"** 였다. 그래서 Cl₂/HBr
+   폴리실리콘 게이트 식각 — 이방성 식각의 교과서적 대표 조건 — 이 측벽 86.6° 로
+   잘 서 있으면서도 "테이퍼" 로 불렸다. 팹에서 85~90° 는 vertical 이라고 부른다.
+   실제로 아래가 좁아지는 콘택홀(84°)만 테이퍼로 남는다. */
+const VERTICAL_BAND = Math.tan((5 * Math.PI) / 180);
+
 /**
  * 단면 프로파일 형상 인자.
  *
@@ -425,7 +432,7 @@ export function calculateProfile(target, gasFlow, power, pressure) {
   if (!hasEtchant) profileType = 'none';
   else if (etchStop) profileType = 'etch-stop';
   else if (lateralRatio >= 0.5) profileType = 'isotropic';   // 측면이 수직의 절반 이상
-  else if (net <= -0.02) profileType = 'tapered';            // 폴리머가 이겨 아래가 좁다
+  else if (net <= -VERTICAL_BAND) profileType = 'tapered';   // 폴리머가 이겨 아래가 좁다
   else if (net >= UNDERCUT_SLOPE) profileType = 'undercut';  // 측벽이 80° 아래로 눕는다
   else profileType = 'vertical';
 
