@@ -1,3 +1,54 @@
+/* ────────────────────── 방전 조건 (소스 / 바이어스) ──────────────────────
+   지금까지 파워는 숫자 하나였다. CCP 단일 RF 라면 그것이 맞다 — 전극 하나에 RF 를
+   걸면 플라즈마 밀도와 이온 에너지가 같이 움직여서 나눌 수가 없다. 그런데 도전막
+   식각의 ICP/TCP 와 유전막 식각의 이중 주파수 CCP 는 **소스와 바이어스가 따로**다.
+
+     소스   플라즈마를 만드는 파워 → 이온이 **얼마나 많이** 오는가 (플럭스)
+     바이어스 웨이퍼에 걸리는 파워 → 이온이 **얼마나 세게** 때리는가 (에너지)
+
+   그래서 파워를 쓰던 자리마다 둘 중 물리적으로 맞는 쪽을 넣는다:
+
+     식각률     √(소스·바이어스)  — 이온 수 × 이온 에너지의 곱으로 가므로 기하평균
+     균일도     소스              — 플라즈마 자체가 고른가의 문제
+     선택비 손실 바이어스          — 하부층·마스크를 깎는 것은 물리 스퍼터, 즉 에너지
+     방향성     바이어스          — 시스 전압이 이온을 곧게 세운다
+     마스크 손상 바이어스          — 같은 이유
+     시스 전압   바이어스          — 정의상
+
+   **소스 = 바이어스 인 숫자 하나를 넣으면 위 다섯 개가 전부 그 숫자가 된다.**
+   즉 기존 호출부(파워 하나를 넘기던 세 카드와 테스트)는 값이 한 자리도 바뀌지 않고,
+   CCP 단일 RF 라는 물리적 의미까지 그대로다. */
+
+export const SOURCE_TYPES = {
+  /* densityGain — 같은 파워에서 만들어지는 플라즈마 밀도의 배수 (CCP 13.56 MHz = 1).
+     rateGain    — 그 밀도 차이가 식각률에 실제로 반영되는 배수. 밀도가 20 배라고
+                   식각률이 20 배가 되지는 않는다 (중성종 공급과 표면 반응에서 막힌다).
+                   문헌의 실측 비 — CCP RIE 폴리실리콘 ~120 nm/min 대 ICP 게이트
+                   식각 ~320 nm/min — 에 맞춘 값이다.
+     v0/wRef/pRef — 시스 전압 앵커. V_sh = v0·(바이어스/wRef)^0.5·(pRef/압력)^0.25 */
+  ccp:   { label: 'CCP 단일 RF',      densityGain: 1,  rateGain: 1,   v0: 300, wRef: 300, pRef: 100 },
+  dfccp: { label: '이중 주파수 CCP',   densityGain: 3,  rateGain: 1.3, v0: 300, wRef: 300, pRef: 100 },
+  icp:   { label: 'ICP / TCP',        densityGain: 20, rateGain: 2.6, v0: 110, wRef: 100, pRef: 10 },
+};
+
+/**
+ * 파워 인자를 방전 조건으로 정규화한다.
+ * 숫자를 주면 CCP 단일 RF (소스 = 바이어스) 로 본다 — 기존 호출부가 그대로 동작한다.
+ *
+ * @param {number|{source:number, bias?:number, type?:string}} power
+ * @returns {{source:number, bias:number, type:string, effective:number, spec:object}}
+ */
+export function normalizeDischarge(power) {
+  if (power && typeof power === 'object') {
+    const source = Math.max(0, power.source || 0);
+    const bias = Math.max(0, power.bias == null ? source : power.bias);
+    const type = SOURCE_TYPES[power.type] ? power.type : 'ccp';
+    return { source, bias, type, effective: Math.sqrt(source * bias), spec: SOURCE_TYPES[type] };
+  }
+  const w = Math.max(0, power || 0);
+  return { source: w, bias: w, type: 'ccp', effective: w, spec: SOURCE_TYPES.ccp };
+}
+
 /**
  * 건식 식각 계산.
  *
@@ -23,7 +74,10 @@
 export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math.random) {
   // 압력과 파워는 음수가 될 수 없다. 가드가 없으면 음압에서도 식각률이 나온다.
   pressure = Math.max(0, pressure);
-  power = Math.max(0, power);
+  /* 식각률은 이온 수 × 이온 에너지로 가므로 소스와 바이어스의 기하평균을 쓴다.
+     숫자 하나(소스=바이어스)를 넘기면 그 숫자 그대로다. */
+  const dis = normalizeDischarge(power);
+  power = dis.effective;
   let baseRate = 0;
 
   switch (material) {
@@ -80,7 +134,8 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
   // 30% 할인이었지 포화가 아니었다. 점근형으로 바꿔 실제로 포화하게 한다.
   const powerSaturation = power > 600 ? 1 / (1 + (power - 600) / 800) : 1;
 
-  baseRate = baseRate * pressureFactor * powerSaturation;
+  /* 같은 파워라도 ICP 는 밀도가 높아 실제로 더 빨리 깎인다. CCP 단일 RF 는 1 이다. */
+  baseRate = baseRate * pressureFactor * powerSaturation * dis.spec.rateGain;
   // 파워나 반응 가스가 없으면 식각도 없다. 예전에는 Math.max(5, …) 하한 때문에
   // 플라즈마 파워 0 에서도 5 nm/min 이 나왔다.
   return Math.max(0, baseRate * (0.9 + rng() * 0.2));
@@ -124,8 +179,11 @@ export function calculateSelectivity(target, gasFlow, power, pressure, rng = Mat
       sel = 5 + rng() * 5;
   }
 
-  // 고전력에서는 물리 충격이 우세해져 선택비 저하
-  const powerPenalty = power > 500 ? (power - 500) / 150 : 0;
+  /* 고전력에서는 물리 충격이 우세해져 선택비 저하.
+     깎아 내는 것은 이온 **에너지**이므로 바이어스로 잰다 — 소스를 아무리 올려도
+     이온이 약하면 하부층은 버틴다. 이것이 ICP 가 선택비를 벌 수 있는 이유다. */
+  const bias = normalizeDischarge(power).bias;
+  const powerPenalty = bias > 500 ? (bias - 500) / 150 : 0;
   // 저압은 이방성 좋지만 sputter 비중 증가 → 선택비 약간 저하
   const lowPressurePenalty = pressure < 40 ? (40 - pressure) / 20 : 0;
   sel = sel - powerPenalty - lowPressurePenalty;
@@ -136,7 +194,8 @@ export function calculateSelectivity(target, gasFlow, power, pressure, rng = Mat
 /** 식각 균일도 (%). */
 export function calculateUniformity(pressure, power, gasFlow) {
   const pressureEffect = Math.max(0, 100 - Math.abs(pressure - 100) / 1.5);
-  const powerEffect = Math.max(0, 100 - Math.abs(power - 300) / 5);
+  /* 균일도는 플라즈마 자체가 고른가의 문제이므로 소스로 잰다. */
+  const powerEffect = Math.max(0, 100 - Math.abs(normalizeDischarge(power).source - 300) / 5);
   let uniformity = (pressureEffect + powerEffect) / 2;
 
   // 총 가스 유량이 과도하면 흐름 분포가 어긋나 균일성 저하
@@ -248,7 +307,10 @@ const UNDERCUT_SLOPE = Math.tan((10 * Math.PI) / 180);
 export function calculateProfile(target, gasFlow, power, pressure) {
   const g = (k) => Math.max(0, (gasFlow && gasFlow[k]) || 0);
   const p = Math.max(0, pressure);
-  const w = Math.max(0, power);
+  /* 방향성도 마스크 스퍼터도 이온을 **세게** 때리는 데서 나오므로 바이어스로 잰다.
+     소스를 올리면 이온이 많아질 뿐 더 곧게 오지는 않는다. */
+  const dis = normalizeDischarge(power);
+  const w = dis.bias;
 
   const polymerFormers = g('CHF3') + g('HBr') * 0.5;
   const radicalEtchers = g('Cl2') + g('CF4') + (target === 'PR' ? g('O2') : 0);
@@ -496,24 +558,35 @@ const TE_EV = 3;                 // eV — 전자 온도
  * 근사식 — 자릿수 비교용이고 특정 장비의 실측값이 아니다.
  *   중성 밀도   n_g  = P / kT                                   (T = 300 K)
  *   자유행로    λ    = 1 / (n_g · σ_cx)
- *   플라즈마    n_e ≈ 1e10 · (W/300)^0.8 · (P/100)^0.4 cm⁻³     CCP 다이오드 스케일링
- *   시스 전압   V_sh ≈ 300 · (W/300)^0.5 · (100/P)^0.25 V
+ *   플라즈마    n_e ≈ 1e10 · G · (소스/300)^0.8 · (P/100)^0.4 cm⁻³
+ *   시스 전압   V_sh ≈ v0 · (바이어스/wRef)^0.5 · (pRef/P)^0.25 V
  *   Child 시스  s    = (√2/3)·λ_De·(2V/Te)^0.75, λ_De = 743√(Te/n_e) cm
  *
+ * G·v0·wRef·pRef 는 SOURCE_TYPES 의 장비별 값이다. CCP 단일 RF 는 G=1, v0=300,
+ * wRef=300, pRef=100 이라 파워 하나를 넘기던 예전 호출이 같은 값을 돌려준다.
+ *
+ * ICP 가 왜 다른지가 여기서 숫자로 갈린다. 밀도가 20 배면 λ_De 가 √20 배 작아져
+ * 시스가 얇아지고, 같은 압력에서도 s/λ 가 두 자릿수 아래로 내려간다 — 무충돌 시스다.
+ * CCP 는 이 값을 어떤 압력·파워로도 5 아래로 못 내린다.
+ *
  * @param {number} pressure mTorr
- * @param {number} power    W
- * @returns {{mfp:number, sheath:number, ratio:number, collisional:boolean}} 길이는 mm
+ * @param {number|{source:number,bias?:number,type?:string}} power
+ * @returns {{mfp:number, sheath:number, ratio:number, collisional:boolean, energy:number, density:number}}
+ *          길이는 mm, energy 는 eV, density 는 cm⁻³
  */
 export function sheathCollisionality(pressure, power) {
   const p = Math.max(1, pressure);
-  const w = Math.max(1, power);
+  const dis = normalizeDischarge(power);
+  const spec = dis.spec;
+  const src = Math.max(1, dis.source);
+  const bias = Math.max(1, dis.bias);
 
   const pascal = (p * 133.322) / 1000;
   const nGas = pascal / (K_B * T_GAS) / 1e6;          // cm⁻³
   const mfpCm = 1 / (nGas * SIGMA_CX);
 
-  const nE = 1e10 * (w / 300) ** 0.8 * (p / 100) ** 0.4;
-  const vSheath = 300 * (w / 300) ** 0.5 * (100 / p) ** 0.25;
+  const nE = 1e10 * spec.densityGain * (src / 300) ** 0.8 * (p / 100) ** 0.4;
+  const vSheath = spec.v0 * (bias / spec.wRef) ** 0.5 * (spec.pRef / p) ** 0.25;
 
   const debyeCm = 743 * Math.sqrt(TE_EV / nE);
   const sheathCm = (Math.SQRT2 / 3) * debyeCm * ((2 * vSheath) / TE_EV) ** 0.75;
@@ -523,6 +596,8 @@ export function sheathCollisionality(pressure, power) {
     sheath: sheathCm * 10,                             // mm
     ratio: sheathCm / mfpCm,
     collisional: sheathCm / mfpCm > 1,
+    energy: vSheath,                                   // eV — 시스를 건너온 이온 에너지
+    density: nE,                                       // cm⁻³ — 플라즈마 밀도 (이온 플럭스의 대리)
   };
 }
 

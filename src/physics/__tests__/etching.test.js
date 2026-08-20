@@ -11,6 +11,8 @@ import {
   simulateEtchRun,
   sheathCollisionality,
   CCP_CONDUCTOR_CD_FLOOR,
+  normalizeDischarge,
+  SOURCE_TYPES,
 } from '../etching.js';
 
 /** 난수를 고정해 결정적으로 검증한다 (원본은 Math.random 을 직접 불렀다). */
@@ -625,5 +627,108 @@ describe('sheathCollisionality — CCP 시스는 왜 항상 충돌 영역인가'
 
   it('CCP 도전막 CD 하한이 0.25 µm 세대 전환점에 있다', () => {
     expect(CCP_CONDUCTOR_CD_FLOOR).toBe(250);
+  });
+});
+
+describe('소스/바이어스 분리', () => {
+  const GAS = { Cl2: 30, HBr: 15, CF4: 0, CHF3: 0, O2: 0, Ar: 90 };
+  const half = () => 0.5;
+
+  it('숫자 하나는 CCP 단일 RF — 소스와 바이어스가 같다', () => {
+    const d = normalizeDischarge(300);
+    expect(d.source).toBe(300);
+    expect(d.bias).toBe(300);
+    expect(d.type).toBe('ccp');
+    expect(d.effective).toBe(300);
+  });
+
+  /* 이것이 이번 변경의 안전장치다. 소스=바이어스인 객체는 같은 숫자와 완전히
+     같은 답을 내야 한다 — 그래야 기존 세 카드가 흔들리지 않는다. */
+  it('소스 = 바이어스 = W 인 객체는 숫자 W 와 모든 결과가 같다', () => {
+    for (const w of [100, 300, 550, 800]) {
+      for (const p of [30, 100, 200]) {
+        const obj = { source: w, bias: w, type: 'ccp' };
+        expect(calculateEtchRate('Si', GAS, obj, p, half))
+          .toBeCloseTo(calculateEtchRate('Si', GAS, w, p, half), 12);
+        expect(calculateSelectivity('Si', GAS, obj, p, half))
+          .toBeCloseTo(calculateSelectivity('Si', GAS, w, p, half), 12);
+        expect(calculateUniformity(p, obj, GAS))
+          .toBeCloseTo(calculateUniformity(p, w, GAS), 12);
+        expect(calculateProfile('Si', GAS, obj, p).anisotropy)
+          .toBeCloseTo(calculateProfile('Si', GAS, w, p).anisotropy, 12);
+        expect(sheathCollisionality(p, obj).ratio)
+          .toBeCloseTo(sheathCollisionality(p, w).ratio, 12);
+      }
+    }
+  });
+
+  it('소스만 올리면 이방도가 그대로다 — 이온이 많아질 뿐 곧아지지 않는다', () => {
+    const lo = calculateProfile('Si', GAS, { source: 300, bias: 120, type: 'icp' }, 8);
+    const hi = calculateProfile('Si', GAS, { source: 1500, bias: 120, type: 'icp' }, 8);
+    expect(hi.anisotropy).toBeCloseTo(lo.anisotropy, 12);
+  });
+
+  it('바이어스를 올리면 이방도가 오른다', () => {
+    const lo = calculateProfile('Si', GAS, { source: 850, bias: 40, type: 'icp' }, 8);
+    const hi = calculateProfile('Si', GAS, { source: 850, bias: 240, type: 'icp' }, 8);
+    expect(hi.anisotropy).toBeGreaterThan(lo.anisotropy);
+  });
+
+  it('선택비는 소스가 아니라 바이어스로 깎인다 — ICP 가 선택비를 버는 이유', () => {
+    const base = { source: 400, bias: 400, type: 'icp' };
+    const moreSource = calculateSelectivity('Si', GAS, { ...base, source: 1400 }, 10, half);
+    const moreBias = calculateSelectivity('Si', GAS, { ...base, bias: 1400 }, 10, half);
+    expect(moreSource).toBeCloseTo(calculateSelectivity('Si', GAS, base, 10, half), 12);
+    expect(moreBias).toBeLessThan(moreSource);
+  });
+
+  it('식각률은 소스와 바이어스 어느 쪽을 올려도 오른다', () => {
+    const base = { source: 400, bias: 200, type: 'icp' };
+    const r0 = calculateEtchRate('Si', GAS, base, 10, half);
+    expect(calculateEtchRate('Si', GAS, { ...base, source: 900 }, 10, half)).toBeGreaterThan(r0);
+    expect(calculateEtchRate('Si', GAS, { ...base, bias: 400 }, 10, half)).toBeGreaterThan(r0);
+  });
+
+  it('같은 파워라면 ICP 가 CCP 보다 빠르다', () => {
+    const w = { source: 600, bias: 600 };
+    const ccp = calculateEtchRate('Si', GAS, { ...w, type: 'ccp' }, 20, half);
+    const icp = calculateEtchRate('Si', GAS, { ...w, type: 'icp' }, 20, half);
+    expect(icp).toBeGreaterThan(ccp);
+    expect(icp / ccp).toBeCloseTo(SOURCE_TYPES.icp.rateGain, 6);
+  });
+
+  it('ICP 는 무충돌 시스, CCP 는 같은 조건에서도 충돌 시스', () => {
+    const cond = { source: 850, bias: 120 };
+    const icp = sheathCollisionality(8, { ...cond, type: 'icp' });
+    const ccp = sheathCollisionality(8, { ...cond, type: 'ccp' });
+    expect(icp.collisional).toBe(false);
+    expect(icp.ratio).toBeLessThan(1);
+    expect(ccp.ratio).toBeGreaterThan(icp.ratio);
+  });
+
+  it('유전막 콘택 조건은 수백 eV 의 이온을 만든다', () => {
+    /* Si–O 결합을 끊으려면 수백 eV 가 필요하다. 게이트 식각의 100 eV 대와
+       자릿수가 다르다는 것이 두 모드를 가르는 핵심이다. */
+    const contact = sheathCollisionality(20, { source: 300, bias: 500, type: 'dfccp' });
+    const gate = sheathCollisionality(8, { source: 850, bias: 120, type: 'icp' });
+    expect(contact.energy).toBeGreaterThan(400);
+    expect(gate.energy).toBeLessThan(200);
+    expect(contact.energy / gate.energy).toBeGreaterThan(3);
+  });
+
+  it('알 수 없는 장비형은 CCP 로 떨어진다', () => {
+    const d = normalizeDischarge({ source: 400, bias: 200, type: '없는장비' });
+    expect(d.type).toBe('ccp');
+  });
+
+  it('바이어스를 안 주면 소스와 같다 (단일 RF)', () => {
+    expect(normalizeDischarge({ source: 500 }).bias).toBe(500);
+  });
+
+  it('음수와 빠진 값은 0 으로 막는다', () => {
+    const d = normalizeDischarge({ source: -100, bias: -50 });
+    expect(d.source).toBe(0);
+    expect(d.bias).toBe(0);
+    expect(normalizeDischarge(undefined).source).toBe(0);
   });
 });
