@@ -93,10 +93,41 @@ describe('calculateEtchRate — 경계값', () => {
     }
   });
 
-  it('식각률은 음수가 되지 않는다 (passivation 이 과할 때도 0 에서 멈춘다)', () => {
-    // Si 에서 HBr 과다는 측벽 passivation 으로 baseRate 를 음수로 만든다.
-    const heavyHBr = { ...GAS, Cl2: 5, HBr: 200 };
-    expect(calculateEtchRate('Si', heavyHBr, 300, 80, mid)).toBe(0);
+  /* 이 테스트는 예전에 "HBr 을 200 까지 올리면 식각률이 0 이 된다" 를 고정하고
+     있었다. 그런데 그것은 물리가 아니라 식의 모양이었다 — passivation 을 뺄셈으로
+     두어서 HBr **자신의 식각까지** 지워 버렸던 것이다. HBr 단독으로도 폴리실리콘은
+     깎인다(SiBr₄ 로 빠져나간다). 실제 팹의 HBr 오버에치 스텝이 그 증거다.
+     지금은 곱셈으로 누르므로 아무리 덮어도 0 밑으로 가지 않는다. */
+  it('과한 passivation 은 식각을 늦출 뿐 0 으로 만들지 않는다', () => {
+    /* 염소가 충분한 조건(실제 게이트 식각 화학)에서 HBr 을 올리면 패시베이션이
+       이겨 느려진다. 그래도 0 이 되지는 않는다. */
+    const r = (hbr) => calculateEtchRate('Si', { ...GAS, HBr: hbr }, 300, 80, mid);
+    expect(r(200)).toBeGreaterThan(0);
+    expect(r(200)).toBeLessThan(r(30));
+  });
+
+  it('염소가 적으면 HBr 이 주 식각종이 되어 오히려 빨라진다', () => {
+    /* 반대쪽 극단. HBr 은 보호막만 만드는 가스가 아니라 식각종이기도 하므로,
+       깎을 다른 수단이 없으면 HBr 을 늘릴수록 빨라진다. 두 영역이 다 있어야
+       "HBr 은 두 몫을 한다" 가 성립한다. */
+    const r = (hbr) => calculateEtchRate('Si', { ...GAS, Cl2: 5, HBr: hbr }, 300, 80, mid);
+    expect(r(200)).toBeGreaterThan(r(60));
+  });
+
+  it('HBr 단독으로도 실리콘이 깎인다 — 프로파일과 식각률이 어긋나지 않는다', () => {
+    const only = { Cl2: 0, HBr: 100, CF4: 0, C4F8: 0, CHF3: 0, O2: 0, Ar: 0 };
+    const rate = calculateEtchRate('Si', only, 300, 80, mid);
+    const prof = calculateProfile('Si', only, 300, 80);
+    expect(prof.hasEtchant).toBe(true);
+    expect(rate).toBeGreaterThan(0);   // 판정이 "식각된다" 면 식각률도 있어야 한다
+  });
+
+  it('식각률은 어떤 조건에서도 음수가 아니다', () => {
+    for (const m of ['Si', 'SiO2', 'Si3N4', 'PR']) {
+      for (const g of [{ ...GAS, HBr: 200 }, { ...GAS, CHF3: 200 }, { ...GAS, C4F8: 200 }]) {
+        expect(calculateEtchRate(m, g, 300, 80, mid)).toBeGreaterThanOrEqual(0);
+      }
+    }
   });
 
   it('알 수 없는 재료는 기본 baseRate 50 을 쓴다', () => {

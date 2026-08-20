@@ -23,8 +23,10 @@ export const SOURCE_TYPES = {
   /* densityGain — 같은 파워에서 만들어지는 플라즈마 밀도의 배수 (CCP 13.56 MHz = 1).
      rateGain    — 그 밀도 차이가 식각률에 실제로 반영되는 배수. 밀도가 20 배라고
                    식각률이 20 배가 되지는 않는다 (중성종 공급과 표면 반응에서 막힌다).
-                   문헌의 실측 비 — CCP RIE 폴리실리콘 ~120 nm/min 대 ICP 게이트
-                   식각 ~320 nm/min — 에 맞춘 값이다.
+                   이 카드가 스스로 적어 둔 범위(ICP 폴리실리콘 100~300 nm/min,
+                   산화막 50~150 nm/min)에 대표 레시피가 들어가도록 맞춘 값이다.
+                   HBr 을 식각종으로도 세기 시작하면서 2.6 은 이중계산이 됐다 —
+                   같은 레시피가 476 nm/min 으로 나와 자기 노트와 어긋났다.
      v0/wRef/pRef — 시스 전압 앵커. V_sh = v0·(바이어스/wRef)^0.5·(pRef/압력)^0.25
      uniW/uniP   — 균일도가 가장 좋은 운전점. 장비마다 다르다.
                    예전에는 300 W / 100 mTorr 하나로 고정돼 있었는데, 그것은 CCP
@@ -33,7 +35,7 @@ export const SOURCE_TYPES = {
                    화면은 계속 "균일도 부족" 이라고 말했다.** 기준점을 장비에 붙인다. */
   ccp:   { label: 'CCP 단일 RF',      densityGain: 1,  rateGain: 1,   v0: 300, wRef: 300, pRef: 100, uniW: 300, uniP: 100 },
   dfccp: { label: '이중 주파수 CCP',   densityGain: 3,  rateGain: 1.3, v0: 300, wRef: 300, pRef: 100, uniW: 400, uniP: 40 },
-  icp:   { label: 'ICP / TCP',        densityGain: 20, rateGain: 2.6, v0: 110, wRef: 100, pRef: 10,  uniW: 800, uniP: 10 },
+  icp:   { label: 'ICP / TCP',        densityGain: 20, rateGain: 1.6, v0: 110, wRef: 100, pRef: 10,  uniW: 800, uniP: 10 },
 };
 
 /**
@@ -87,10 +89,20 @@ export function calculateEtchRate(material, gasFlow, power, pressure, rng = Math
 
   switch (material) {
     case 'Si': {
-      // Cl2가 식각률을 올리지만, 과도한 HBr은 측벽 passivation으로 식각률 저하
+      /* Cl₂ 가 주 식각종이고, HBr 은 두 몫을 한다 — 실리콘을 깎기도 하고(SiBr₄ 로
+         빠져나간다) 측벽에 붙어 보호막도 만든다. 예전에는 보호막 몫만 세었다.
+         그래서 **HBr 만 흘리면 프로파일은 "식각된다" 는데 식각률은 0** 이었다.
+         자발 반응성 표에는 HBr 이 식각종으로 들어가 있으니 두 함수가 서로 어긋났다.
+         HBr 단독 오버에치 스텝이 실제로 동작하는 것이 교과서의 서술이다.
+         계수는 Cl₂ 의 약 1/4 — 느리지만 깎이고, 그래서 선택비를 번다. */
       const cl2Effect = gasFlow.Cl2 * 4.5;
-      const hbrPassivation = Math.max(0, (gasFlow.HBr - 30) * 1.8);
-      baseRate = (cl2Effect - hbrPassivation) * (power / 300);
+      const hbrEffect = gasFlow.HBr * 1.2;
+      /* 패시베이션은 식각을 **늦추는** 것이지 되돌리는 것이 아니다. 예전처럼 빼기로
+         두면 HBr 을 충분히 올렸을 때 HBr 자신의 식각까지 지워 식각률이 0 이 됐다 —
+         HBr 단독으로도 폴리실리콘은 깎인다(SiBr₄). 표면을 덮어 반응 자리를 줄이는
+         것이므로 곱셈으로 누른다. 아무리 덮어도 0 밑으로 가지 않는다. */
+      const hbrSuppress = 1 / (1 + Math.max(0, gasFlow.HBr - 30) / 90);
+      baseRate = (cl2Effect + hbrEffect) * hbrSuppress * (power / 300);
       break;
     }
     case 'SiO2': {
