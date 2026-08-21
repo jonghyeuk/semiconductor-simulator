@@ -107,7 +107,7 @@ const MODES = [
     source: { label: '소스 (TCP 13.56 MHz)', min: 250, max: 1500, step: 50, def: 850, win: [500, 1150] },
     bias: { label: '바이어스 (13.56 MHz)', min: 20, max: 250, step: 10, def: 120, win: [60, 170] },
     pressure: { min: 4, max: 60, step: 2, def: 8, win: [4, 12], note: '메인 4~12 · 오버에치 55~65' },
-    time: { min: 10, max: 300, step: 10, def: 60, win: [40, 90] },
+    time: { min: 10, max: 300, step: 10, def: 90, win: [70, 105] },   // 관통 66s + 36%
     cd: { min: 30, max: 250, step: 10, def: 90, win: [30, 150] },
     gases: ['Cl2', 'HBr', 'O2'],
     gasMax: 200,
@@ -137,7 +137,7 @@ const MODES = [
     source: { label: '소스 HF (상부 60 MHz)', min: 300, max: 1500, step: 50, def: 300, win: [300, 720] },
     bias: { label: '바이어스 LF (하부 2 MHz)', min: 300, max: 3000, step: 100, def: 500, win: [440, 1500] },
     pressure: { min: 20, max: 80, step: 5, def: 20, win: [20, 47], note: '홀이 깊을수록 낮게' },
-    time: { min: 30, max: 600, step: 10, def: 300, win: [240, 400] },
+    time: { min: 30, max: 600, step: 10, def: 380, win: [300, 500] },  // 관통 296s + 28%
     cd: { min: 40, max: 200, step: 10, def: 60, win: [40, 120] },   // 종횡비 8.3
     gases: ['C4F8', 'CHF3', 'Ar', 'O2'],
     gasMax: 200,
@@ -330,7 +330,15 @@ function ChamberView({
   const pxPerNm = pxPerNmOf(filmNm);
   const half = blanket ? (VIEW_W - 68) / 2 : clamp((cd * pxPerNm) / 2, 4, 110);
   const dFilm = clamp(filmEtched * pxPerNm, 0, FILM_PX);
-  const dUnder = clamp(underlayerLoss * pxPerNm, 0, SUB_PX - 4);
+  /* 하부층은 막과 **배율이 다르다.**
+     게이트 산화막은 2 nm 인데 막은 200 nm 다. 같은 배율로 그리면 예산선이 0.6 px,
+     5 nm 뚫린 것도 1.5 px — 그릴 수가 없다. 그런데 "그 선을 넘었는가" 가 이 카드가
+     가르치려는 전부다. 교과서 단면도가 쓰는 방법대로 하부층 구간만 배율을 키우고,
+     화면에 그렇게 적는다. 숫자(−36 nm)는 언제나 실제 값이다. */
+  const UNDER_LIMIT_PX = 14;                      // 예산선이 앉는 자리
+  const underPx = (nm) => (underNm > 0 ? (nm / underNm) * UNDER_LIMIT_PX : nm * pxPerNm);
+  const dUnder = clamp(underPx(underlayerLoss), 0, SUB_PX - 6);
+  const underMagnified = underNm > 0 && Math.abs(UNDER_LIMIT_PX / underNm - pxPerNm) > pxPerNm * 0.2;
   const depth = filmEtched + underlayerLoss;
 
   /* 형상 인자를 픽셀로 환산한다. 전면 식각(애싱)에는 측벽이 없으므로 전부 0 이다. */
@@ -343,10 +351,29 @@ function ChamberView({
   const hBottom = halfWidthAt(1, half, U, T, B);
 
   /* 오버에치 — 막을 뚫은 뒤 하부층이 선택비만큼 느리게 깎인다.
-     마스크도 폴리머도 하부층 표면에는 도움이 안 되므로 옆으로 더 퍼진다. */
-  const overPath = dUnder > 0.3
-    ? cavityPath(hBottom, dUnder + FILM_PX - dFilm, 0, 0, 0, Math.min(dUnder, hBottom) * 0.8)
-    : '';
+     마스크도 폴리머도 하부층 표면에는 도움이 안 되므로 옆으로 더 퍼진다.
+
+     ⚠ 예전에는 이 모양을 cavityPath(hBottom, dUnder + FILM_PX − dFilm, …) 으로
+       그렸다. cavityPath 는 **막 상면(TRENCH_TOP)에서** 깊이를 재므로, 막을 다 뚫은
+       뒤(dFilm = FILM_PX)에는 깊이가 dUnder 로 줄어 막 캐비티(62 px) 안에 통째로
+       묻혔다. 그 위에 막 캐비티를 덮어 그리니 **하부층이 아무리 깎여도 화면에는 한
+       픽셀도 안 보였다** — 숫자만 "하부층 −36 nm" 라고 적혀 있었다.
+       막/하부층 경계에서 시작하는 도형을 따로 만든다. */
+  const overPath = (() => {
+    if (dUnder <= 0.3) return '';
+    const yTop = TRENCH_TOP + FILM_PX;
+    const wT = hBottom;
+    const wB = hBottom + dUnder * 0.55;      // 보호막이 없어 옆으로 퍼진다
+    const yB = yTop + dUnder;
+    const r = Math.max(0, Math.min(dUnder * 0.5, wB * 0.5));
+    const f = (n) => n.toFixed(2);
+    return `M${f(CX - wT)} ${f(yTop)}`
+      + ` L${f(CX - wB)} ${f(yB - r)}`
+      + ` Q${f(CX - wB)} ${f(yB)} ${f(CX - wB + r)} ${f(yB)}`
+      + ` L${f(CX + wB - r)} ${f(yB)}`
+      + ` Q${f(CX + wB)} ${f(yB)} ${f(CX + wB)} ${f(yB - r)}`
+      + ` L${f(CX + wT)} ${f(yTop)} Z`;
+  })();
 
   // 플라즈마 입자 (렌더 시드로 고정 — 매 프레임 튀지 않게)
   const parts = useMemo(() => {
@@ -494,10 +521,11 @@ function ChamberView({
               stroke="#2A2620" strokeWidth="1" />
 
         {/* 오버에치로 파인 하부층 — 막을 뚫은 뒤에도 시간이 남으면 여기가 깎인다 */}
-        {overPath && <path d={overPath} fill="#141209" stroke="#E06C5A" strokeWidth="0.7" />}
-
         {/* 캐비티 (식각으로 없어진 부분) */}
         {cavity && <path d={cavity} fill="#141209" stroke="#2A2620" strokeWidth="0.6" />}
+
+        {/* 하부층 손실은 막 캐비티 **아래**에 있다. 나중에 그려야 붉은 테두리가 산다. */}
+        {overPath && <path d={overPath} fill="#141209" stroke="#E06C5A" strokeWidth="0.8" />}
 
         {/* 측벽 폴리머 (passivation) */}
         {polyW > 0.4 && dFilm > 2 && !blanket && (
@@ -559,18 +587,24 @@ function ChamberView({
             두께를 정직하게 그리는 대신 "여기를 넘으면 소자가 죽는다" 는 한계선을
             긋고, 넘으면 빨갛게 바꾼다. 선택비가 지키는 것이 바로 이 선이다. */}
         {!blanket && underNm > 0 && (() => {
-          const yLimit = TRENCH_TOP + FILM_PX + Math.max(2.5, underNm * pxPerNm);
+          const yLimit = TRENCH_TOP + FILM_PX + UNDER_LIMIT_PX;
           const over = underlayerLoss > underNm;
           return (
             <g>
               <line x1="34" y1={yLimit} x2={VIEW_W - 34} y2={yLimit}
                     stroke={over ? '#E06C5A' : '#6FBF8E'} strokeWidth="1"
                     strokeDasharray="4 3" opacity={over ? 0.95 : 0.65} />
-              <text x={VIEW_W - 36} y={yLimit - 3} fontSize="7" textAnchor="end"
+              <text x="120" y={yLimit - 3} fontSize="7" textAnchor="start"
                     fill={over ? '#E06C5A' : '#6FBF8E'}
                     fontFamily="ui-monospace, Menlo, monospace">
                 {underLabel} {underNm}nm {over ? '관통' : '한계'}
               </text>
+              {underMagnified && (
+                <text x="120" y={yLimit + 9} fontSize="6.5" fill="#6B6353"
+                      fontFamily="ui-monospace, Menlo, monospace">
+                  이 아래는 배율 확대 · 숫자는 실제 값
+                </text>
+              )}
             </g>
           );
         })()}
@@ -595,7 +629,7 @@ function ChamberView({
           </text>
         )}
         {underlayerLoss > 0.5 && (
-          <text x={CX} y={TRENCH_TOP + FILM_PX + dUnder + 9} fontSize="7" fill="#E06C5A" textAnchor="middle"
+          <text x={CX - 80} y={TRENCH_TOP + FILM_PX + Math.min(dUnder + 8, SUB_PX - 4)} fontSize="7" fill="#E06C5A" textAnchor="end"
                 fontFamily="ui-monospace, Menlo, monospace">
             하부층 −{Math.round(underlayerLoss)}nm
           </text>
@@ -626,7 +660,7 @@ function ChamberView({
         )}
         <text x="38" y={TRENCH_TOP + FILM_PX - 5} fontSize="7.5" fill="#C9BFA5"
               fontFamily="ui-monospace, Menlo, monospace">{t.label}</text>
-        <text x="38" y={TRENCH_TOP + FILM_PX + 16} fontSize="7.5" fill="#9AA0AE"
+        <text x="38" y={TRENCH_TOP + FILM_PX + 26} fontSize="7.5" fill="#9AA0AE"
               fontFamily="ui-monospace, Menlo, monospace">{t.under}</text>
 
         {/* 압력 · 프로파일 판정 */}
